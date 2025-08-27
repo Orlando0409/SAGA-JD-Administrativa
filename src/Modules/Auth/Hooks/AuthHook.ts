@@ -67,6 +67,7 @@ export const useAuth = () => {
         const isValid = await verifyUser()
         setIsAuthenticated(isValid)
       } catch (error) {
+        console.error("Error verifying user:", error)
         setIsAuthenticated(false)
       } finally {
         setIsLoading(false)
