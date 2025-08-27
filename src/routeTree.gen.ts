@@ -10,12 +10,18 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as HomeRouteImport } from './routes/Home'
+import { Route as AuthNewPasswordRouteImport } from './routes/(Auth)/NewPassword'
 import { Route as AuthLoginRouteImport } from './routes/(Auth)/Login'
 import { Route as AuthForgotPasswordRouteImport } from './routes/(Auth)/ForgotPassword'
 
 const HomeRoute = HomeRouteImport.update({
   id: '/Home',
   path: '/Home',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthNewPasswordRoute = AuthNewPasswordRouteImport.update({
+  id: '/(Auth)/NewPassword',
+  path: '/NewPassword',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthLoginRoute = AuthLoginRouteImport.update({
@@ -33,30 +39,39 @@ export interface FileRoutesByFullPath {
   '/Home': typeof HomeRoute
   '/ForgotPassword': typeof AuthForgotPasswordRoute
   '/Login': typeof AuthLoginRoute
+  '/NewPassword': typeof AuthNewPasswordRoute
 }
 export interface FileRoutesByTo {
   '/Home': typeof HomeRoute
   '/ForgotPassword': typeof AuthForgotPasswordRoute
   '/Login': typeof AuthLoginRoute
+  '/NewPassword': typeof AuthNewPasswordRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/Home': typeof HomeRoute
   '/(Auth)/ForgotPassword': typeof AuthForgotPasswordRoute
   '/(Auth)/Login': typeof AuthLoginRoute
+  '/(Auth)/NewPassword': typeof AuthNewPasswordRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/Home' | '/ForgotPassword' | '/Login'
+  fullPaths: '/Home' | '/ForgotPassword' | '/Login' | '/NewPassword'
   fileRoutesByTo: FileRoutesByTo
-  to: '/Home' | '/ForgotPassword' | '/Login'
-  id: '__root__' | '/Home' | '/(Auth)/ForgotPassword' | '/(Auth)/Login'
+  to: '/Home' | '/ForgotPassword' | '/Login' | '/NewPassword'
+  id:
+    | '__root__'
+    | '/Home'
+    | '/(Auth)/ForgotPassword'
+    | '/(Auth)/Login'
+    | '/(Auth)/NewPassword'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   HomeRoute: typeof HomeRoute
   AuthForgotPasswordRoute: typeof AuthForgotPasswordRoute
   AuthLoginRoute: typeof AuthLoginRoute
+  AuthNewPasswordRoute: typeof AuthNewPasswordRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -66,6 +81,13 @@ declare module '@tanstack/react-router' {
       path: '/Home'
       fullPath: '/Home'
       preLoaderRoute: typeof HomeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/(Auth)/NewPassword': {
+      id: '/(Auth)/NewPassword'
+      path: '/NewPassword'
+      fullPath: '/NewPassword'
+      preLoaderRoute: typeof AuthNewPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/(Auth)/Login': {
@@ -89,6 +111,7 @@ const rootRouteChildren: RootRouteChildren = {
   HomeRoute: HomeRoute,
   AuthForgotPasswordRoute: AuthForgotPasswordRoute,
   AuthLoginRoute: AuthLoginRoute,
+  AuthNewPasswordRoute: AuthNewPasswordRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

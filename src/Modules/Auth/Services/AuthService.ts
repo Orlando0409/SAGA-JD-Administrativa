@@ -12,6 +12,10 @@ export async function ForgotPassword(email: string): Promise<boolean> {
     const response = await axiosPrivate.post(`/auth/forgot-password`, { email });
     return response.data;
 }
+export async function ResetPassword(newPassword: string): Promise<boolean> {
+    const response = await axiosPrivate.post(`/auth/reset-password`, { newPassword });
+    return response.data;
+}
 
 export async function logoutUser(): Promise<void> {
     try {

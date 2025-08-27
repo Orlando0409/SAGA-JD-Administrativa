@@ -1,6 +1,6 @@
 import { useMutation } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
-import { ForgotPassword, getCurrentUser, loginUser, logoutUser, verifyUser } from '../Services/AuthService'
+import { ForgotPassword, getCurrentUser, loginUser, logoutUser, ResetPassword, verifyUser } from '../Services/AuthService'
 import type { LoginForm } from '../Models/LoginForm'
 import { useState, useEffect } from 'react'
 import { cookieUtils } from '../../../utils/CookieUtils'
@@ -23,6 +23,17 @@ export const useForgotPassword = () => {
 
   return useMutation({
     mutationFn: (email: string) => ForgotPassword(email),
+
+    onSuccess: (res) => {
+      return res
+    }
+  })
+}
+
+
+export const useResetPassword = () => {
+  return useMutation({
+    mutationFn: (newPassword: string) => ResetPassword(newPassword),
 
     onSuccess: (res) => {
       return res
