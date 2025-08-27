@@ -1,40 +1,25 @@
+import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarSeparator, useSidebar } from "./ui/sidebar"
 import {
-  Sidebar,
-  SidebarContent,
-  SidebarFooter,
-  SidebarHeader,
-  SidebarSeparator,
-  useSidebar,
-} from "./ui/sidebar"
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogFooter,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogAction,
+  AlertDialogCancel,
+} from "@/Modules/Global/components/Sidebar/ui/alert-dialog"
 import { Link, useLocation } from '@tanstack/react-router'
 import { useAuthUser, useLogout } from '../../../Auth/Hooks/AuthHook'
 import { Accordion, AccordionHeader, AccordionBody } from "@material-tailwind/react"
 import { useState } from "react"
 import { HiLogout } from 'react-icons/hi'
 import { FiChevronDown, FiChevronRight } from 'react-icons/fi'
+import { CUSTOM_ANIMATION, sections, type AppSidebarProps } from "../../types/Sections"
+import { Button } from "./ui/button"
 
-const sections = [
-  { id: 1, title: "Gestión", key: "Gestión" },
-  { id: 2, title: "Edición", key: "Edición" },
-  { id: 3, title: "Seguridad", key: "Seguridad" },
-  { id: 4, title: "Ayuda", key: "Ayuda" }
-]
 
-const CUSTOM_ANIMATION = {
-  mount: { scale: 1 },
-  unmount: { scale: 0.9 },
-}
-
-type Module = {
-  name: string
-  path: string
-  icon: React.ReactNode
-  section: string
-}
-
-interface AppSidebarProps {
-  allowedModules: Module[]
-}
 
 export function AppSidebar({allowedModules}: Readonly<AppSidebarProps>) {
   const [hovered, setHovered] = useState(false)
@@ -69,11 +54,15 @@ export function AppSidebar({allowedModules}: Readonly<AppSidebarProps>) {
           className="relative"
           onMouseEnter={() => {
             setHovered(true)
-            setSidebarOpen(true)
+            window.setTimeout(() => {
+              setSidebarOpen(true)
+            }, 200)
           }}
           onMouseLeave={() => {
             setHovered(false)
-            setSidebarOpen(false)
+            window.setTimeout(() => {
+              setSidebarOpen(false)
+            }, 200)
           }}
         >
       <Sidebar
@@ -112,13 +101,15 @@ export function AppSidebar({allowedModules}: Readonly<AppSidebarProps>) {
 
             <AccordionHeader
               onClick={() => handleAccordion(section.id)}
-              className="text-base font-semibold flex gap-10 p-3 items-center text-center py-1 group-data-[collapsible=icon]:hidden"
+              className="text-base font-semibold px-2 py-1 group-data-[collapsible=icon]:hidden"
               {...({} as any)}
             >
-              {section.title}
-              <span className="pl-4">
-                {isOpen ? <FiChevronDown size={20} /> : <FiChevronRight size={20} />}
-              </span>
+              <div className="flex items-center justify-between pl-2 w-full">
+                {section.title}
+                <span>
+                  {isOpen ? <FiChevronDown size={20} /> : <FiChevronRight size={20} />}
+                </span>
+              </div>
             </AccordionHeader>
             <AccordionBody className="p-0" placeholder="">
               <ul>
@@ -165,21 +156,42 @@ export function AppSidebar({allowedModules}: Readonly<AppSidebarProps>) {
           </div>
 
           <SidebarSeparator />
-          
-          <ul>
-            <li>
-              <button
-                onClick={handleLogout}
-                disabled={logoutMutation.isPending}
-                className="flex items-center w-full px-4 py-2 rounded-lg text-red-600 hover:text-red-700 hover:bg-red-50"
-              >
-                <HiLogout className="w-4 h-4" />
-                <span className="ml-2 group-data-[collapsible=icon]:hidden">
-                  {logoutMutation.isPending ? 'Cerrando...' : 'Cerrar Sesión'}
-                </span>
-              </button>
-            </li>
-          </ul>
+        <ul>
+          <li>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button
+                  variant="celeste"
+                  className="flex items-center w-full px-4 py-2 rounded-lg"
+                >
+                  <HiLogout className="w-4 h-4" />
+                  <span className="ml-2 group-data-[collapsible=icon]:hidden">
+                    {logoutMutation.isPending ? 'Cerrando...' : 'Cerrar Sesión'}
+                  </span>
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>
+                    <span>¿Cerrar sesión?</span>
+                  </AlertDialogTitle>
+                  <AlertDialogDescription>
+                <span>¿Estás seguro de que deseas cerrar sesión?</span>
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogAction
+                    onClick={handleLogout}
+                    disabled={logoutMutation.isPending}
+                  >
+                   <span>Cerrar sesión</span>
+                  </AlertDialogAction>
+                  <AlertDialogCancel><span>Cancelar</span></AlertDialogCancel>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </li>
+        </ul>
         </SidebarFooter>
       </Sidebar>
     </section>
