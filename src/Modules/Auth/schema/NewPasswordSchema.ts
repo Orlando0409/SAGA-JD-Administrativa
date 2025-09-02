@@ -2,15 +2,15 @@ import z from "zod";
 
 // Esquema de validación
 export const passwordSchema = z.object({
-  password: z
+  nuevaContraseña: z
     .string()
-    .min(8, "La contraseña debe tener al menos 8 caracteres")
+    .min(6, "La contraseña debe tener al menos 6 caracteres")
     .regex(/[A-Z]/, "Debe contener al menos una mayúscula")
     .regex(/\d/, "Debe contener al menos un número"),
-  confirmPassword: z.string(),
-}).refine((data) => data.password === data.confirmPassword, {
+  confirmarContraseña: z.string(),
+}).refine((data) => data.nuevaContraseña === data.confirmarContraseña, {
   message: "Las contraseñas no coinciden",
-  path: ["confirmPassword"],
+  path: ["confirmarContraseña"],
 });
 
 export type NewPasswordData = z.infer<typeof passwordSchema>;

@@ -25,32 +25,35 @@ axiosPrivate.interceptors.response.use(
   response => response,
   async error => {
     const originalRequest = error.config
+    const currentPath = window.location.pathname;
+    const publicRoutes = ['/Login', '/ForgotPassword', '/ResetPassword'];
 
-    // Si el error es 401 y no es el endpoint de refresh
-    if (error.response?.status === 401 && !originalRequest._retry && !originalRequest.url.includes('/auth/refresh')) {
+    // No manejar errores 401 en rutas públicas
+    if (publicRoutes.includes(currentPath)) {
+      return Promise.reject(error);
+    }
+
+    if (
+      error.response?.status === 401 &&
+      !originalRequest._retry &&
+      !originalRequest.url.includes('/auth/refresh')
+    ) {
       originalRequest._retry = true
 
       if (isRefreshing) {
-        // Espera a que el refresh termine
         return new Promise(function (resolve, reject) {
           failedQueue.push({ resolve, reject })
         })
-          .then(token => {
-            originalRequest.headers['Authorization'] = `Bearer ${token}`
-            return axiosPrivate(originalRequest)
-          })
+          .then(() => axiosPrivate(originalRequest))
           .catch(err => Promise.reject(err))
       }
 
       isRefreshing = true
 
       try {
-        // Llama al endpoint de refresh
-        const refreshResponse = await axiosPrivate.post('/auth/refresh')
-        const newAccessToken = refreshResponse.data.accessToken
-
-        processQueue(null, newAccessToken)
-        originalRequest.headers['Authorization'] = `Bearer ${newAccessToken}`
+        // Solo llama al refresh, las cookies se actualizan automáticamente
+        await axiosPrivate.post('/auth/refresh')
+        processQueue(null)
         return axiosPrivate(originalRequest)
       } catch (refreshError) {
         processQueue(refreshError, null)

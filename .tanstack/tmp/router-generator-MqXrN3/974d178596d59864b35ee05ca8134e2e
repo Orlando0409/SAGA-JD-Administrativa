@@ -17,11 +17,8 @@ import { Route as appGestionProveedoresRouteImport } from './routes/(app)/(Gesti
 import { Route as appGestionInventarioRouteImport } from './routes/(app)/(Gestion)/Inventario'
 import { Route as appGestionActasRouteImport } from './routes/(app)/(Gestion)/Actas'
 import { Route as appGestionAbonadosRouteImport } from './routes/(app)/(Gestion)/Abonados'
-import { Route as appEdicionProyectosRouteImport } from './routes/(app)/(Edicion)/Proyectos'
-import { Route as appEdicionImagenesRouteImport } from './routes/(app)/(Edicion)/Imagenes'
-import { Route as appEdicionFAQRouteImport } from './routes/(app)/(Edicion)/FAQ'
 import { Route as appAuthUnauthorizedRouteImport } from './routes/(app)/(Auth)/Unauthorized'
-import { Route as appAuthResetPasswordRouteImport } from './routes/(app)/(Auth)/ResetPassword'
+import { Route as appAuthNewPasswordRouteImport } from './routes/(app)/(Auth)/NewPassword'
 import { Route as appAuthLoginRouteImport } from './routes/(app)/(Auth)/Login'
 import { Route as appAuthForgotPasswordRouteImport } from './routes/(app)/(Auth)/ForgotPassword'
 
@@ -65,29 +62,14 @@ const appGestionAbonadosRoute = appGestionAbonadosRouteImport.update({
   path: '/Abonados',
   getParentRoute: () => rootRouteImport,
 } as any)
-const appEdicionProyectosRoute = appEdicionProyectosRouteImport.update({
-  id: '/(app)/(Edicion)/Proyectos',
-  path: '/Proyectos',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const appEdicionImagenesRoute = appEdicionImagenesRouteImport.update({
-  id: '/(app)/(Edicion)/Imagenes',
-  path: '/Imagenes',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const appEdicionFAQRoute = appEdicionFAQRouteImport.update({
-  id: '/(app)/(Edicion)/FAQ',
-  path: '/FAQ',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const appAuthUnauthorizedRoute = appAuthUnauthorizedRouteImport.update({
   id: '/(app)/(Auth)/Unauthorized',
   path: '/Unauthorized',
   getParentRoute: () => rootRouteImport,
 } as any)
-const appAuthResetPasswordRoute = appAuthResetPasswordRouteImport.update({
-  id: '/(app)/(Auth)/ResetPassword',
-  path: '/ResetPassword',
+const appAuthNewPasswordRoute = appAuthNewPasswordRouteImport.update({
+  id: '/(app)/(Auth)/NewPassword',
+  path: '/NewPassword',
   getParentRoute: () => rootRouteImport,
 } as any)
 const appAuthLoginRoute = appAuthLoginRouteImport.update({
@@ -105,11 +87,8 @@ export interface FileRoutesByFullPath {
   '/Home': typeof HomeRoute
   '/ForgotPassword': typeof appAuthForgotPasswordRoute
   '/Login': typeof appAuthLoginRoute
-  '/ResetPassword': typeof appAuthResetPasswordRoute
+  '/NewPassword': typeof appAuthNewPasswordRoute
   '/Unauthorized': typeof appAuthUnauthorizedRoute
-  '/FAQ': typeof appEdicionFAQRoute
-  '/Imagenes': typeof appEdicionImagenesRoute
-  '/Proyectos': typeof appEdicionProyectosRoute
   '/Abonados': typeof appGestionAbonadosRoute
   '/Actas': typeof appGestionActasRoute
   '/Inventario': typeof appGestionInventarioRoute
@@ -122,11 +101,8 @@ export interface FileRoutesByTo {
   '/Home': typeof HomeRoute
   '/ForgotPassword': typeof appAuthForgotPasswordRoute
   '/Login': typeof appAuthLoginRoute
-  '/ResetPassword': typeof appAuthResetPasswordRoute
+  '/NewPassword': typeof appAuthNewPasswordRoute
   '/Unauthorized': typeof appAuthUnauthorizedRoute
-  '/FAQ': typeof appEdicionFAQRoute
-  '/Imagenes': typeof appEdicionImagenesRoute
-  '/Proyectos': typeof appEdicionProyectosRoute
   '/Abonados': typeof appGestionAbonadosRoute
   '/Actas': typeof appGestionActasRoute
   '/Inventario': typeof appGestionInventarioRoute
@@ -140,11 +116,8 @@ export interface FileRoutesById {
   '/Home': typeof HomeRoute
   '/(app)/(Auth)/ForgotPassword': typeof appAuthForgotPasswordRoute
   '/(app)/(Auth)/Login': typeof appAuthLoginRoute
-  '/(app)/(Auth)/ResetPassword': typeof appAuthResetPasswordRoute
+  '/(app)/(Auth)/NewPassword': typeof appAuthNewPasswordRoute
   '/(app)/(Auth)/Unauthorized': typeof appAuthUnauthorizedRoute
-  '/(app)/(Edicion)/FAQ': typeof appEdicionFAQRoute
-  '/(app)/(Edicion)/Imagenes': typeof appEdicionImagenesRoute
-  '/(app)/(Edicion)/Proyectos': typeof appEdicionProyectosRoute
   '/(app)/(Gestion)/Abonados': typeof appGestionAbonadosRoute
   '/(app)/(Gestion)/Actas': typeof appGestionActasRoute
   '/(app)/(Gestion)/Inventario': typeof appGestionInventarioRoute
@@ -159,11 +132,8 @@ export interface FileRouteTypes {
     | '/Home'
     | '/ForgotPassword'
     | '/Login'
-    | '/ResetPassword'
+    | '/NewPassword'
     | '/Unauthorized'
-    | '/FAQ'
-    | '/Imagenes'
-    | '/Proyectos'
     | '/Abonados'
     | '/Actas'
     | '/Inventario'
@@ -176,11 +146,8 @@ export interface FileRouteTypes {
     | '/Home'
     | '/ForgotPassword'
     | '/Login'
-    | '/ResetPassword'
+    | '/NewPassword'
     | '/Unauthorized'
-    | '/FAQ'
-    | '/Imagenes'
-    | '/Proyectos'
     | '/Abonados'
     | '/Actas'
     | '/Inventario'
@@ -193,11 +160,8 @@ export interface FileRouteTypes {
     | '/Home'
     | '/(app)/(Auth)/ForgotPassword'
     | '/(app)/(Auth)/Login'
-    | '/(app)/(Auth)/ResetPassword'
+    | '/(app)/(Auth)/NewPassword'
     | '/(app)/(Auth)/Unauthorized'
-    | '/(app)/(Edicion)/FAQ'
-    | '/(app)/(Edicion)/Imagenes'
-    | '/(app)/(Edicion)/Proyectos'
     | '/(app)/(Gestion)/Abonados'
     | '/(app)/(Gestion)/Actas'
     | '/(app)/(Gestion)/Inventario'
@@ -211,11 +175,8 @@ export interface RootRouteChildren {
   HomeRoute: typeof HomeRoute
   appAuthForgotPasswordRoute: typeof appAuthForgotPasswordRoute
   appAuthLoginRoute: typeof appAuthLoginRoute
-  appAuthResetPasswordRoute: typeof appAuthResetPasswordRoute
+  appAuthNewPasswordRoute: typeof appAuthNewPasswordRoute
   appAuthUnauthorizedRoute: typeof appAuthUnauthorizedRoute
-  appEdicionFAQRoute: typeof appEdicionFAQRoute
-  appEdicionImagenesRoute: typeof appEdicionImagenesRoute
-  appEdicionProyectosRoute: typeof appEdicionProyectosRoute
   appGestionAbonadosRoute: typeof appGestionAbonadosRoute
   appGestionActasRoute: typeof appGestionActasRoute
   appGestionInventarioRoute: typeof appGestionInventarioRoute
@@ -283,27 +244,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof appGestionAbonadosRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/(app)/(Edicion)/Proyectos': {
-      id: '/(app)/(Edicion)/Proyectos'
-      path: '/Proyectos'
-      fullPath: '/Proyectos'
-      preLoaderRoute: typeof appEdicionProyectosRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/(app)/(Edicion)/Imagenes': {
-      id: '/(app)/(Edicion)/Imagenes'
-      path: '/Imagenes'
-      fullPath: '/Imagenes'
-      preLoaderRoute: typeof appEdicionImagenesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/(app)/(Edicion)/FAQ': {
-      id: '/(app)/(Edicion)/FAQ'
-      path: '/FAQ'
-      fullPath: '/FAQ'
-      preLoaderRoute: typeof appEdicionFAQRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/(app)/(Auth)/Unauthorized': {
       id: '/(app)/(Auth)/Unauthorized'
       path: '/Unauthorized'
@@ -311,11 +251,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof appAuthUnauthorizedRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/(app)/(Auth)/ResetPassword': {
-      id: '/(app)/(Auth)/ResetPassword'
-      path: '/ResetPassword'
-      fullPath: '/ResetPassword'
-      preLoaderRoute: typeof appAuthResetPasswordRouteImport
+    '/(app)/(Auth)/NewPassword': {
+      id: '/(app)/(Auth)/NewPassword'
+      path: '/NewPassword'
+      fullPath: '/NewPassword'
+      preLoaderRoute: typeof appAuthNewPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/(app)/(Auth)/Login': {
@@ -339,11 +279,8 @@ const rootRouteChildren: RootRouteChildren = {
   HomeRoute: HomeRoute,
   appAuthForgotPasswordRoute: appAuthForgotPasswordRoute,
   appAuthLoginRoute: appAuthLoginRoute,
-  appAuthResetPasswordRoute: appAuthResetPasswordRoute,
+  appAuthNewPasswordRoute: appAuthNewPasswordRoute,
   appAuthUnauthorizedRoute: appAuthUnauthorizedRoute,
-  appEdicionFAQRoute: appEdicionFAQRoute,
-  appEdicionImagenesRoute: appEdicionImagenesRoute,
-  appEdicionProyectosRoute: appEdicionProyectosRoute,
   appGestionAbonadosRoute: appGestionAbonadosRoute,
   appGestionActasRoute: appGestionActasRoute,
   appGestionInventarioRoute: appGestionInventarioRoute,

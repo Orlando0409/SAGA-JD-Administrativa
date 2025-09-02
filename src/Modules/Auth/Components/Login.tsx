@@ -3,10 +3,12 @@ import { LoginSchema, type LoginData } from '../schema/LoginSchema';
 import { Link } from '@tanstack/react-router';
 import { useState } from 'react';
 import { useLogin } from '../Hooks/AuthHook';
+import { useAlerts } from '@/Modules/Global/context/AlertContext';
 
 export default function LoginForm() {
   const mutation = useLogin();
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+  const { showSuccess, showError, isBlocked } = useAlerts(); 
 
   const form = useForm({
     defaultValues: {
@@ -34,8 +36,11 @@ export default function LoginForm() {
           Nombre_Usuario: value.Nombre_Usuario,
           Password: value.Password,
         });
+        showSuccess('Inicio de sesión exitoso');
+
       } catch (err: unknown) {
         console.error('Error de inicio de sesión:', err);
+        showError('Error de inicio de sesión');
         setFormErrors({
           general: 'Credenciales incorrectas o error en el servidor',
         });
@@ -43,10 +48,13 @@ export default function LoginForm() {
     },
   });
 
+  // Determinar si el botón debe estar deshabilitado
+  const isButtonDisabled = mutation.isPending || isBlocked;
+
   return (
     <div className="min-h-screen min-w-screen flex bg-gray-100">
 
-      {/* Imagen - Solo visible en tablet y desktop (osea md y superiores) */}
+      {/* Imagen - Solo visible en tablet y desktop */}
       <div className="hidden md:block md:w-[50vw] bg-cover bg-center">
         <img
           src="\ASADA_JUAN_D.png"
@@ -151,10 +159,24 @@ export default function LoginForm() {
               </Link>
               <button
                 type="submit"
-                disabled={mutation.isPending}
-                className="bg-blue-900 hover:bg-sky-700 text-white px-4 py-2 rounded-full text-sm"
+                disabled={isButtonDisabled}
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                  isButtonDisabled
+                    ? 'bg-gray-400 text-gray-600 cursor-not-allowed opacity-70'
+                    : 'bg-blue-900 hover:bg-sky-700 text-white hover:shadow-lg'
+                }`}
               >
-                {mutation.isPending ? 'Cargando...' : 'Iniciar Sesión'}
+                {mutation.isPending ? (
+                  <span className="flex items-center">
+                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-current" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Cargando...
+                  </span>
+                )  : (
+                  'Iniciar Sesión'
+                  )}
               </button>
             </div>
           </form>
