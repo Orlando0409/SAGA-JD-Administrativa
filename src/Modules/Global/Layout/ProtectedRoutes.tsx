@@ -1,6 +1,7 @@
+import { useAuth, useAuthUser } from '@/Modules/Auth/Hooks/AuthHook'
 import { Navigate, useLocation } from '@tanstack/react-router'
-import { useAuth, useAuthUser } from '../Modules/Auth/Hooks/AuthHook'
-import { modules } from '../Modules/Global/components/DashboardGlobal/ModulosData'
+import { modules } from '../components/DashboardGlobal/ModulosData'
+
 
 interface ProtectedRouteProps {
   children: (allowedModules: typeof modules) => React.ReactNode
