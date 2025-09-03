@@ -1,7 +1,7 @@
 import type { Usuario } from '../../Usuarios/Models/Usuario'
 import type { LoginForm } from '../Models/LoginForm';
 import axiosPrivate from '../../../Api/apiAuth'
-import { cookieUtils } from '../../../utils/CookieUtils';
+import { cookieUtils } from '../../Global/utils/CookieUtils';
 
 
 export async function loginUser(LoginForm: LoginForm): Promise<Usuario> {

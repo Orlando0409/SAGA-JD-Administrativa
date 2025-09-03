@@ -1,6 +1,6 @@
 // src/hooks/useCurrentUser.ts
 import { useState, useEffect } from 'react'
-import { cookieUtils } from '../../../utils/CookieUtils'
+import { cookieUtils } from '../../Global/utils/CookieUtils'
 
 interface User {
   name: string

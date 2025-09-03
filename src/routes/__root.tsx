@@ -1,5 +1,5 @@
-import { HomeLayout } from '@/Layout/HomeLayout';
 import { AlertProvider } from '@/Modules/Global/context/AlertContext';
+import { HomeLayout } from '@/Modules/Global/Layout/HomeLayout';
 import { createRootRoute, Outlet, redirect, useLocation } from '@tanstack/react-router';
 
 

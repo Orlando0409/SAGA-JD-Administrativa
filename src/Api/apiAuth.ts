@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { cookieUtils } from '../utils/CookieUtils'
+import { cookieUtils } from '../Modules/Global/utils/CookieUtils'
 
 const axiosPrivate = axios.create({
   baseURL: 'http://localhost:3000/api',

@@ -3,7 +3,7 @@ import { useNavigate } from '@tanstack/react-router'
 import { ForgotPassword, getCurrentUser, loginUser, logoutUser, ResetPassword, verifyUser } from '../Services/AuthService'
 import type { LoginForm } from '../Models/LoginForm'
 import { useState, useEffect } from 'react'
-import { cookieUtils } from '../../../utils/CookieUtils'
+import { cookieUtils } from '../../Global/utils/CookieUtils'
 import {  type Usuario } from '@/Modules/Usuarios/Models/Usuario'
 
 export const useLogin = () => {
