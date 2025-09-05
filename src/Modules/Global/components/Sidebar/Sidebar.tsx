@@ -18,6 +18,7 @@ import { HiLogout } from 'react-icons/hi'
 import { FiChevronDown, FiChevronRight } from 'react-icons/fi'
 import { CUSTOM_ANIMATION, sections, type AppSidebarProps } from "../../types/Sections"
 import { Button } from "./ui/button"
+import { useAlerts } from "../../context/AlertContext"
 
 
 
@@ -27,6 +28,7 @@ export function AppSidebar({allowedModules}: Readonly<AppSidebarProps>) {
   const location = useLocation()
   const logoutMutation = useLogout()
   const { state, setOpen: setSidebarOpen } = useSidebar()
+   const { showSuccess } = useAlerts();
   
 
   const { user, isLoading } = useAuthUser()
@@ -39,6 +41,7 @@ export function AppSidebar({allowedModules}: Readonly<AppSidebarProps>) {
 
   const handleLogout = () => {
     logoutMutation.mutate()
+    showSuccess('Sesión cerrada exitosamente');
   }
 
    const handleAccordion = (id: number) => {
@@ -71,14 +74,12 @@ export function AppSidebar({allowedModules}: Readonly<AppSidebarProps>) {
         className="transition-all duration-300 z-40"
       >
         <SidebarHeader className="border-b border-sidebar-border">
-          <div className="flex flex-col items-center p-2">
-            <div className="w-15 h-15 rounded-lg flex items-center justify-center text-white font-bold">
-              <img
-                src="/Logo_ASADA_Juan_Díaz.png"
-                alt="Logo"
-                className="w-15 h-15 rounded-full group-data-[collapsible=icon]:h-8 group-data-[collapsible=icon]:w-8"
-              />
-            </div>
+          
+          <div className="flex flex-col items-center p-2">    
+            <Link to={'/Home'} className='w-15 h-15 rounded-lg flex items-center justify-center text-white font-bold'>
+              <img src="/Logo_ASADA_Juan_Díaz.png" alt='logo' className='w-15 h-15 rounded-full group-data-[collapsible=icon]:h-8 group-data-[collapsible=icon]:w-8' />
+            </Link>
+
             <h2 className="font-bold text-2xl text-center text-sidebar-foreground mt-2 group-data-[collapsible=icon]:hidden">
               Panel Administrativo
             </h2>

@@ -11,7 +11,7 @@ export const modules = [
   { name: 'Gestión de Inventario', icon: <FaBoxes />, path: '/Inventario', section: 'Gestión', permiso: 'inventario' },
   { name: 'Gestión de Usuarios', icon: <FaUsers />, path: '/Usuarios', section: 'Gestión', permiso: 'usuarios' },
   { name: 'Gestión de Proveedores', icon: <FaTruck />, path: '/Proveedores', section: 'Gestión', permiso: 'proveedores' },
-  { name: 'Gestión de Quejas/Sugerencias/Reportes', icon: <MdOutlineReportGmailerrorred />, path: '/Contacto', section: 'Gestión', permiso: 'contacto' },
+  { name: 'Revisión de Quejas/Sugerencias/Reportes', icon: <MdOutlineReportGmailerrorred />, path: '/Contacto', section: 'Gestión', permiso: 'contacto' },
   { name: 'Edición de Preguntas Frecuentes(FAQ)', icon: <FaRegQuestionCircle />, path: '/FAQ', section: 'Edición', permiso: 'faq' },
   { name: 'Edición de Proyectos', icon: <FaEdit />, path: '/Proyectos', section: 'Edición', permiso: 'proyectos' },
   { name: 'Edición de Imágenes', icon: <FaImage />, path: '/Imagenes', section: 'Edición', permiso: 'imagenes' },

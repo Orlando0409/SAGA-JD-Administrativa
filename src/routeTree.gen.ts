@@ -10,68 +10,219 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as HomeRouteImport } from './routes/Home'
-import { Route as AuthNewPasswordRouteImport } from './routes/(Auth)/NewPassword'
-import { Route as AuthLoginRouteImport } from './routes/(Auth)/Login'
-import { Route as AuthForgotPasswordRouteImport } from './routes/(Auth)/ForgotPassword'
+import { Route as appSeguridadBitacoraRouteImport } from './routes/(app)/(Seguridad)/Bitacora'
+import { Route as appGestionUsuariosRouteImport } from './routes/(app)/(Gestion)/Usuarios'
+import { Route as appGestionSolicitudesRouteImport } from './routes/(app)/(Gestion)/Solicitudes'
+import { Route as appGestionProveedoresRouteImport } from './routes/(app)/(Gestion)/Proveedores'
+import { Route as appGestionInventarioRouteImport } from './routes/(app)/(Gestion)/Inventario'
+import { Route as appGestionActasRouteImport } from './routes/(app)/(Gestion)/Actas'
+import { Route as appGestionAbonadosRouteImport } from './routes/(app)/(Gestion)/Abonados'
+import { Route as appEdicionProyectosRouteImport } from './routes/(app)/(Edicion)/Proyectos'
+import { Route as appEdicionImagenesRouteImport } from './routes/(app)/(Edicion)/Imagenes'
+import { Route as appEdicionFAQRouteImport } from './routes/(app)/(Edicion)/FAQ'
+import { Route as appAuthUnauthorizedRouteImport } from './routes/(app)/(Auth)/Unauthorized'
+import { Route as appAuthResetPasswordRouteImport } from './routes/(app)/(Auth)/ResetPassword'
+import { Route as appAuthLoginRouteImport } from './routes/(app)/(Auth)/Login'
+import { Route as appAuthForgotPasswordRouteImport } from './routes/(app)/(Auth)/ForgotPassword'
 
 const HomeRoute = HomeRouteImport.update({
   id: '/Home',
   path: '/Home',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthNewPasswordRoute = AuthNewPasswordRouteImport.update({
-  id: '/(Auth)/NewPassword',
-  path: '/NewPassword',
+const appSeguridadBitacoraRoute = appSeguridadBitacoraRouteImport.update({
+  id: '/(app)/(Seguridad)/Bitacora',
+  path: '/Bitacora',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthLoginRoute = AuthLoginRouteImport.update({
-  id: '/(Auth)/Login',
+const appGestionUsuariosRoute = appGestionUsuariosRouteImport.update({
+  id: '/(app)/(Gestion)/Usuarios',
+  path: '/Usuarios',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const appGestionSolicitudesRoute = appGestionSolicitudesRouteImport.update({
+  id: '/(app)/(Gestion)/Solicitudes',
+  path: '/Solicitudes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const appGestionProveedoresRoute = appGestionProveedoresRouteImport.update({
+  id: '/(app)/(Gestion)/Proveedores',
+  path: '/Proveedores',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const appGestionInventarioRoute = appGestionInventarioRouteImport.update({
+  id: '/(app)/(Gestion)/Inventario',
+  path: '/Inventario',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const appGestionActasRoute = appGestionActasRouteImport.update({
+  id: '/(app)/(Gestion)/Actas',
+  path: '/Actas',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const appGestionAbonadosRoute = appGestionAbonadosRouteImport.update({
+  id: '/(app)/(Gestion)/Abonados',
+  path: '/Abonados',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const appEdicionProyectosRoute = appEdicionProyectosRouteImport.update({
+  id: '/(app)/(Edicion)/Proyectos',
+  path: '/Proyectos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const appEdicionImagenesRoute = appEdicionImagenesRouteImport.update({
+  id: '/(app)/(Edicion)/Imagenes',
+  path: '/Imagenes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const appEdicionFAQRoute = appEdicionFAQRouteImport.update({
+  id: '/(app)/(Edicion)/FAQ',
+  path: '/FAQ',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const appAuthUnauthorizedRoute = appAuthUnauthorizedRouteImport.update({
+  id: '/(app)/(Auth)/Unauthorized',
+  path: '/Unauthorized',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const appAuthResetPasswordRoute = appAuthResetPasswordRouteImport.update({
+  id: '/(app)/(Auth)/ResetPassword',
+  path: '/ResetPassword',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const appAuthLoginRoute = appAuthLoginRouteImport.update({
+  id: '/(app)/(Auth)/Login',
   path: '/Login',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthForgotPasswordRoute = AuthForgotPasswordRouteImport.update({
-  id: '/(Auth)/ForgotPassword',
+const appAuthForgotPasswordRoute = appAuthForgotPasswordRouteImport.update({
+  id: '/(app)/(Auth)/ForgotPassword',
   path: '/ForgotPassword',
   getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/Home': typeof HomeRoute
-  '/ForgotPassword': typeof AuthForgotPasswordRoute
-  '/Login': typeof AuthLoginRoute
-  '/NewPassword': typeof AuthNewPasswordRoute
+  '/ForgotPassword': typeof appAuthForgotPasswordRoute
+  '/Login': typeof appAuthLoginRoute
+  '/ResetPassword': typeof appAuthResetPasswordRoute
+  '/Unauthorized': typeof appAuthUnauthorizedRoute
+  '/FAQ': typeof appEdicionFAQRoute
+  '/Imagenes': typeof appEdicionImagenesRoute
+  '/Proyectos': typeof appEdicionProyectosRoute
+  '/Abonados': typeof appGestionAbonadosRoute
+  '/Actas': typeof appGestionActasRoute
+  '/Inventario': typeof appGestionInventarioRoute
+  '/Proveedores': typeof appGestionProveedoresRoute
+  '/Solicitudes': typeof appGestionSolicitudesRoute
+  '/Usuarios': typeof appGestionUsuariosRoute
+  '/Bitacora': typeof appSeguridadBitacoraRoute
 }
 export interface FileRoutesByTo {
   '/Home': typeof HomeRoute
-  '/ForgotPassword': typeof AuthForgotPasswordRoute
-  '/Login': typeof AuthLoginRoute
-  '/NewPassword': typeof AuthNewPasswordRoute
+  '/ForgotPassword': typeof appAuthForgotPasswordRoute
+  '/Login': typeof appAuthLoginRoute
+  '/ResetPassword': typeof appAuthResetPasswordRoute
+  '/Unauthorized': typeof appAuthUnauthorizedRoute
+  '/FAQ': typeof appEdicionFAQRoute
+  '/Imagenes': typeof appEdicionImagenesRoute
+  '/Proyectos': typeof appEdicionProyectosRoute
+  '/Abonados': typeof appGestionAbonadosRoute
+  '/Actas': typeof appGestionActasRoute
+  '/Inventario': typeof appGestionInventarioRoute
+  '/Proveedores': typeof appGestionProveedoresRoute
+  '/Solicitudes': typeof appGestionSolicitudesRoute
+  '/Usuarios': typeof appGestionUsuariosRoute
+  '/Bitacora': typeof appSeguridadBitacoraRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/Home': typeof HomeRoute
-  '/(Auth)/ForgotPassword': typeof AuthForgotPasswordRoute
-  '/(Auth)/Login': typeof AuthLoginRoute
-  '/(Auth)/NewPassword': typeof AuthNewPasswordRoute
+  '/(app)/(Auth)/ForgotPassword': typeof appAuthForgotPasswordRoute
+  '/(app)/(Auth)/Login': typeof appAuthLoginRoute
+  '/(app)/(Auth)/ResetPassword': typeof appAuthResetPasswordRoute
+  '/(app)/(Auth)/Unauthorized': typeof appAuthUnauthorizedRoute
+  '/(app)/(Edicion)/FAQ': typeof appEdicionFAQRoute
+  '/(app)/(Edicion)/Imagenes': typeof appEdicionImagenesRoute
+  '/(app)/(Edicion)/Proyectos': typeof appEdicionProyectosRoute
+  '/(app)/(Gestion)/Abonados': typeof appGestionAbonadosRoute
+  '/(app)/(Gestion)/Actas': typeof appGestionActasRoute
+  '/(app)/(Gestion)/Inventario': typeof appGestionInventarioRoute
+  '/(app)/(Gestion)/Proveedores': typeof appGestionProveedoresRoute
+  '/(app)/(Gestion)/Solicitudes': typeof appGestionSolicitudesRoute
+  '/(app)/(Gestion)/Usuarios': typeof appGestionUsuariosRoute
+  '/(app)/(Seguridad)/Bitacora': typeof appSeguridadBitacoraRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/Home' | '/ForgotPassword' | '/Login' | '/NewPassword'
+  fullPaths:
+    | '/Home'
+    | '/ForgotPassword'
+    | '/Login'
+    | '/ResetPassword'
+    | '/Unauthorized'
+    | '/FAQ'
+    | '/Imagenes'
+    | '/Proyectos'
+    | '/Abonados'
+    | '/Actas'
+    | '/Inventario'
+    | '/Proveedores'
+    | '/Solicitudes'
+    | '/Usuarios'
+    | '/Bitacora'
   fileRoutesByTo: FileRoutesByTo
-  to: '/Home' | '/ForgotPassword' | '/Login' | '/NewPassword'
+  to:
+    | '/Home'
+    | '/ForgotPassword'
+    | '/Login'
+    | '/ResetPassword'
+    | '/Unauthorized'
+    | '/FAQ'
+    | '/Imagenes'
+    | '/Proyectos'
+    | '/Abonados'
+    | '/Actas'
+    | '/Inventario'
+    | '/Proveedores'
+    | '/Solicitudes'
+    | '/Usuarios'
+    | '/Bitacora'
   id:
     | '__root__'
     | '/Home'
-    | '/(Auth)/ForgotPassword'
-    | '/(Auth)/Login'
-    | '/(Auth)/NewPassword'
+    | '/(app)/(Auth)/ForgotPassword'
+    | '/(app)/(Auth)/Login'
+    | '/(app)/(Auth)/ResetPassword'
+    | '/(app)/(Auth)/Unauthorized'
+    | '/(app)/(Edicion)/FAQ'
+    | '/(app)/(Edicion)/Imagenes'
+    | '/(app)/(Edicion)/Proyectos'
+    | '/(app)/(Gestion)/Abonados'
+    | '/(app)/(Gestion)/Actas'
+    | '/(app)/(Gestion)/Inventario'
+    | '/(app)/(Gestion)/Proveedores'
+    | '/(app)/(Gestion)/Solicitudes'
+    | '/(app)/(Gestion)/Usuarios'
+    | '/(app)/(Seguridad)/Bitacora'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   HomeRoute: typeof HomeRoute
-  AuthForgotPasswordRoute: typeof AuthForgotPasswordRoute
-  AuthLoginRoute: typeof AuthLoginRoute
-  AuthNewPasswordRoute: typeof AuthNewPasswordRoute
+  appAuthForgotPasswordRoute: typeof appAuthForgotPasswordRoute
+  appAuthLoginRoute: typeof appAuthLoginRoute
+  appAuthResetPasswordRoute: typeof appAuthResetPasswordRoute
+  appAuthUnauthorizedRoute: typeof appAuthUnauthorizedRoute
+  appEdicionFAQRoute: typeof appEdicionFAQRoute
+  appEdicionImagenesRoute: typeof appEdicionImagenesRoute
+  appEdicionProyectosRoute: typeof appEdicionProyectosRoute
+  appGestionAbonadosRoute: typeof appGestionAbonadosRoute
+  appGestionActasRoute: typeof appGestionActasRoute
+  appGestionInventarioRoute: typeof appGestionInventarioRoute
+  appGestionProveedoresRoute: typeof appGestionProveedoresRoute
+  appGestionSolicitudesRoute: typeof appGestionSolicitudesRoute
+  appGestionUsuariosRoute: typeof appGestionUsuariosRoute
+  appSeguridadBitacoraRoute: typeof appSeguridadBitacoraRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -83,25 +234,102 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HomeRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/(Auth)/NewPassword': {
-      id: '/(Auth)/NewPassword'
-      path: '/NewPassword'
-      fullPath: '/NewPassword'
-      preLoaderRoute: typeof AuthNewPasswordRouteImport
+    '/(app)/(Seguridad)/Bitacora': {
+      id: '/(app)/(Seguridad)/Bitacora'
+      path: '/Bitacora'
+      fullPath: '/Bitacora'
+      preLoaderRoute: typeof appSeguridadBitacoraRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/(Auth)/Login': {
-      id: '/(Auth)/Login'
+    '/(app)/(Gestion)/Usuarios': {
+      id: '/(app)/(Gestion)/Usuarios'
+      path: '/Usuarios'
+      fullPath: '/Usuarios'
+      preLoaderRoute: typeof appGestionUsuariosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/(app)/(Gestion)/Solicitudes': {
+      id: '/(app)/(Gestion)/Solicitudes'
+      path: '/Solicitudes'
+      fullPath: '/Solicitudes'
+      preLoaderRoute: typeof appGestionSolicitudesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/(app)/(Gestion)/Proveedores': {
+      id: '/(app)/(Gestion)/Proveedores'
+      path: '/Proveedores'
+      fullPath: '/Proveedores'
+      preLoaderRoute: typeof appGestionProveedoresRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/(app)/(Gestion)/Inventario': {
+      id: '/(app)/(Gestion)/Inventario'
+      path: '/Inventario'
+      fullPath: '/Inventario'
+      preLoaderRoute: typeof appGestionInventarioRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/(app)/(Gestion)/Actas': {
+      id: '/(app)/(Gestion)/Actas'
+      path: '/Actas'
+      fullPath: '/Actas'
+      preLoaderRoute: typeof appGestionActasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/(app)/(Gestion)/Abonados': {
+      id: '/(app)/(Gestion)/Abonados'
+      path: '/Abonados'
+      fullPath: '/Abonados'
+      preLoaderRoute: typeof appGestionAbonadosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/(app)/(Edicion)/Proyectos': {
+      id: '/(app)/(Edicion)/Proyectos'
+      path: '/Proyectos'
+      fullPath: '/Proyectos'
+      preLoaderRoute: typeof appEdicionProyectosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/(app)/(Edicion)/Imagenes': {
+      id: '/(app)/(Edicion)/Imagenes'
+      path: '/Imagenes'
+      fullPath: '/Imagenes'
+      preLoaderRoute: typeof appEdicionImagenesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/(app)/(Edicion)/FAQ': {
+      id: '/(app)/(Edicion)/FAQ'
+      path: '/FAQ'
+      fullPath: '/FAQ'
+      preLoaderRoute: typeof appEdicionFAQRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/(app)/(Auth)/Unauthorized': {
+      id: '/(app)/(Auth)/Unauthorized'
+      path: '/Unauthorized'
+      fullPath: '/Unauthorized'
+      preLoaderRoute: typeof appAuthUnauthorizedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/(app)/(Auth)/ResetPassword': {
+      id: '/(app)/(Auth)/ResetPassword'
+      path: '/ResetPassword'
+      fullPath: '/ResetPassword'
+      preLoaderRoute: typeof appAuthResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/(app)/(Auth)/Login': {
+      id: '/(app)/(Auth)/Login'
       path: '/Login'
       fullPath: '/Login'
-      preLoaderRoute: typeof AuthLoginRouteImport
+      preLoaderRoute: typeof appAuthLoginRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/(Auth)/ForgotPassword': {
-      id: '/(Auth)/ForgotPassword'
+    '/(app)/(Auth)/ForgotPassword': {
+      id: '/(app)/(Auth)/ForgotPassword'
       path: '/ForgotPassword'
       fullPath: '/ForgotPassword'
-      preLoaderRoute: typeof AuthForgotPasswordRouteImport
+      preLoaderRoute: typeof appAuthForgotPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -109,9 +337,20 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   HomeRoute: HomeRoute,
-  AuthForgotPasswordRoute: AuthForgotPasswordRoute,
-  AuthLoginRoute: AuthLoginRoute,
-  AuthNewPasswordRoute: AuthNewPasswordRoute,
+  appAuthForgotPasswordRoute: appAuthForgotPasswordRoute,
+  appAuthLoginRoute: appAuthLoginRoute,
+  appAuthResetPasswordRoute: appAuthResetPasswordRoute,
+  appAuthUnauthorizedRoute: appAuthUnauthorizedRoute,
+  appEdicionFAQRoute: appEdicionFAQRoute,
+  appEdicionImagenesRoute: appEdicionImagenesRoute,
+  appEdicionProyectosRoute: appEdicionProyectosRoute,
+  appGestionAbonadosRoute: appGestionAbonadosRoute,
+  appGestionActasRoute: appGestionActasRoute,
+  appGestionInventarioRoute: appGestionInventarioRoute,
+  appGestionProveedoresRoute: appGestionProveedoresRoute,
+  appGestionSolicitudesRoute: appGestionSolicitudesRoute,
+  appGestionUsuariosRoute: appGestionUsuariosRoute,
+  appSeguridadBitacoraRoute: appSeguridadBitacoraRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

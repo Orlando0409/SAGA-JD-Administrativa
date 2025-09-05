@@ -1,14 +1,10 @@
-import { ProtectedRoute } from './ProtectedRoutes'
-import { AllowedModulesProvider } from '../../Auth/provider/PermisoProvider'
-import { SidebarProvider, SidebarInset, SidebarTrigger } from '../components/Sidebar/ui/sidebar'
+import { AllowedModulesProvider } from '@/Modules/Auth/provider/PermisoProvider'
 import { AppSidebar } from '../components/Sidebar/Sidebar'
+import { SidebarProvider, SidebarInset, SidebarTrigger } from '../components/Sidebar/ui/sidebar'
+import { ProtectedRoute } from './ProtectedRoutes'
 
 
 export const HomeLayout = ({ children }: { children: (allowedModules: any) => React.ReactNode }) => {
-
-
-
-
   return (
     <ProtectedRoute>
       {(allowedModules) => (

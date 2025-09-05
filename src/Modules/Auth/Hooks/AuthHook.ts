@@ -3,7 +3,7 @@ import { useNavigate } from '@tanstack/react-router'
 import { ForgotPassword, getCurrentUser, loginUser, logoutUser, ResetPassword, verifyUser } from '../Services/AuthService'
 import type { LoginForm } from '../Models/LoginForm'
 import { useState, useEffect } from 'react'
-import { cookieUtils } from '../../../utils/CookieUtils'
+import { cookieUtils } from '../../Global/utils/CookieUtils'
 import {  type Usuario } from '@/Modules/Usuarios/Models/Usuario'
 
 export const useLogin = () => {
@@ -33,7 +33,8 @@ export const useForgotPassword = () => {
 
 export const useResetPassword = () => {
   return useMutation({
-    mutationFn: (newPassword: string) => ResetPassword(newPassword),
+    mutationFn: ({ nuevaContraseña }: { nuevaContraseña: string }) => 
+      ResetPassword(nuevaContraseña),
 
     onSuccess: (res) => {
       return res
@@ -62,6 +63,16 @@ export const useAuth = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true)
 
   useEffect(() => {
+    // No verificar autenticación en rutas públicas
+    const currentPath = window.location.pathname;
+    const publicRoutes = ['/Login', '/ForgotPassword', '/ResetPassword'];
+    
+    if (publicRoutes.includes(currentPath)) {
+      setIsLoading(false);
+      setIsAuthenticated(false);
+      return;
+    }
+
     const checkAuth = async () => {
       try{
         const isValid = await verifyUser()
@@ -85,6 +96,16 @@ export const useAuthUser = () => {
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
+    // No cargar usuario en rutas públicas
+    const currentPath = window.location.pathname;
+    const publicRoutes = ['/Login', '/ForgotPassword', '/ResetPassword'];
+    
+    if (publicRoutes.includes(currentPath)) {
+      setIsLoading(false);
+      setUser(null);
+      return;
+    }
+
     const fetchUser = async () => {
       try {
         const userData = await getCurrentUser()
