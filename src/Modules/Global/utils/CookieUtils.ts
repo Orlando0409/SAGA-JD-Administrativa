@@ -9,6 +9,7 @@ export const cookieUtils = {
   // Eliminar token (para logout)
   removeToken: () => {
     Cookies.remove('accessToken')
+    Cookies.remove('refreshToken')
   },
 
   // Verificar si existe token

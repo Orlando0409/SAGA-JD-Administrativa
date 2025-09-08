@@ -3,11 +3,12 @@ import { Link } from '@tanstack/react-router';
 import {  useState } from 'react';
 import { useForgotPassword } from '../Hooks/AuthHook';
 import { ForgotPasswordSchema, type ForgotPasswordData } from '../schema/ForgotPasswordSchema';
+import { useAlerts } from '@/Modules/Global/context/AlertContext';
 
 export default function ForgotPassword() {
   const mutation = useForgotPassword();
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
-
+  const { showSuccess, showError, isBlocked } = useAlerts(); 
   const form = useForm({
     defaultValues: {
         email: ''
@@ -30,8 +31,10 @@ export default function ForgotPassword() {
 
       try {
         await mutation.mutateAsync(value.email);
+        showSuccess('Correo enviado', 'Revisa tu correo para restablecer tu contraseña', 5000);
       } catch (err: unknown) {
         console.error('Error en el servidor o del correo:', err);
+        showError('Error en el servidor o del correo', 'Por favor, inténtelo de nuevo más tarde', 5000);
         setFormErrors({
           general: 'Ingrese un correo electrónico válido',
         });

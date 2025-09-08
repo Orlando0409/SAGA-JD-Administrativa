@@ -3,17 +3,18 @@ import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { passwordSchema, type NewPasswordData } from "../schema/NewPasswordSchema";
 import { useResetPassword } from "../Hooks/AuthHook";
+import { useAlerts } from "@/Modules/Global/context/AlertContext";
 
 
-export default function NewPasswordForm() {
+export default function ResetPassword() {
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
-
+  const { showSuccess, showError } = useAlerts();
   const resetPasswordMutation = useResetPassword();
 
   const form = useForm({
     defaultValues: {
-      password: "",
-      confirmPassword: "",
+      nuevaContraseña: "",
+      confirmarContraseña: "",
     },
     onSubmit: async ({ value }: { value: NewPasswordData }) => {
       setFormErrors({});
@@ -30,10 +31,21 @@ export default function NewPasswordForm() {
       }
 
       try {
-        await resetPasswordMutation.mutateAsync(value.password);
-        alert("Contraseña actualizada correctamente");
+        await resetPasswordMutation.mutateAsync({ nuevaContraseña: value.nuevaContraseña });
+        // Mostrar alerta de éxito
+        showSuccess(
+          "¡Contraseña actualizada!",
+          "Tu contraseña ha sido actualizada correctamente.",
+          3000
+        );
       } catch (err: unknown) {
         console.error("Error updating password:", err);
+                // Mostrar alerta de error
+        showError(
+          "Error al actualizar contraseña",
+          "No se pudo actualizar la contraseña. Por favor, intenta de nuevo.",
+          3000
+        );
         setFormErrors({
           general: "Error al actualizar la contraseña. Intenta de nuevo.",
         });
@@ -78,14 +90,14 @@ export default function NewPasswordForm() {
             }}
             className="space-y-4 w-full"
           >
-            <form.Field name="password">
+            <form.Field name="nuevaContraseña">
               {(field) => (
                 <div>
-                  <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="nuevaContraseña" className="block text-sm font-medium text-gray-700 mb-1">
                     Nueva contraseña <span className="text-red-500">*</span>
                   </label>
                   <input
-                    id="password"
+                    id="nuevaContraseña"
                     type="password"
                     value={field.state.value}
                     onBlur={field.handleBlur}
@@ -98,23 +110,23 @@ export default function NewPasswordForm() {
                       {err}
                     </p>
                   ))}
-                  {formErrors.password && (
+                  {formErrors.nuevaContraseña && (
                     <p className="text-red-500 text-sm">
-                      {formErrors.password}
+                      {formErrors.nuevaContraseña}
                     </p>
                   )}
                 </div>
               )}
             </form.Field>
 
-            <form.Field name="confirmPassword">
+            <form.Field name="confirmarContraseña">
               {(field) => (
                 <div>
-                  <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="confirmarContraseña" className="block text-sm font-medium text-gray-700 mb-1">
                     Confirmar contraseña <span className="text-red-500">*</span>
                   </label>
                   <input
-                    id="confirmPassword"
+                    id="confirmarContraseña"
                     type="password"
                     value={field.state.value}
                     onBlur={field.handleBlur}
@@ -127,9 +139,9 @@ export default function NewPasswordForm() {
                       {err}
                     </p>
                   ))}
-                  {formErrors.confirmPassword && (
+                  {formErrors.confirmarContraseña && (
                     <p className="text-red-500 text-sm">
-                      {formErrors.confirmPassword}
+                      {formErrors.confirmarContraseña}
                     </p>
                   )}
                 </div>

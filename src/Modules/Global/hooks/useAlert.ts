@@ -1,0 +1,111 @@
+import { useState, useCallback, useRef } from 'react';
+import type { AlertState, AlertType } from '../types/Alert';
+
+
+export const useAlert = () => {
+  const [alerts, setAlerts] = useState<AlertState[]>([]);
+  const [isBlocked, setIsBlocked] = useState(false);
+  const [remainingTime, setRemainingTime] = useState(0);
+
+  const alertTimestamps = useRef<number[]>([]);
+  const MAX_ALERTS = 3;
+  const ALERT_LIMIT_TIME = 5000;
+  const BLOCK_DURATION = 5000;
+
+  const showAlert = useCallback(
+    (type: AlertType, title: string, description?: string, duration: number = 4000) => {
+      // Si está bloqueado, no mostrar nuevas alertas normales
+      if (isBlocked && type !== 'warning') return;
+
+      // Detectar spam
+      const now = Date.now();
+      alertTimestamps.current.push(now);
+      alertTimestamps.current = alertTimestamps.current.filter(
+        timestamp => now - timestamp < ALERT_LIMIT_TIME
+      );
+
+      // Si hay spam, bloquear y mostrar advertencia
+      if (alertTimestamps.current.length >= MAX_ALERTS && !isBlocked) {
+        setIsBlocked(true);
+        setRemainingTime(BLOCK_DURATION / 1000);
+
+        const warningId = Date.now().toString();
+        const warningAlert: AlertState = {
+          id: warningId,
+          type: 'warning',
+          title: 'Demasiados intentos',
+          description: `Espera ${BLOCK_DURATION / 1000} segundos antes de intentar de nuevo.`,
+          duration: BLOCK_DURATION
+        };
+        setAlerts(prev => [...prev, warningAlert].slice(-MAX_ALERTS));
+
+        setTimeout(() => {
+          setAlerts(prev => prev.filter(alert => alert.id !== warningId));
+        }, BLOCK_DURATION);
+
+        setTimeout(() => {
+          setIsBlocked(false);
+          setRemainingTime(0);
+          alertTimestamps.current = [];
+        }, BLOCK_DURATION);
+
+        return warningId;
+      }
+
+      // Mostrar alerta normal
+      const id = Date.now().toString();
+      const newAlert: AlertState = { id, type, title, description, duration };
+      setAlerts(prev => [...prev, newAlert].slice(-MAX_ALERTS));
+
+      if (duration > 0) {
+        setTimeout(() => {
+          setAlerts(prev => prev.filter(alert => alert.id !== id));
+        }, duration);
+      }
+      return id;
+    },
+    [isBlocked]
+  );
+
+  const removeAlert = useCallback((id: string) => {
+    setAlerts(prev => prev.filter(alert => alert.id !== id));
+  }, []);
+
+  const clearAlerts = useCallback(() => {
+    setAlerts([]);
+  }, []);
+
+  const showSuccess = useCallback(
+    (title: string, description?: string, duration?: number) =>
+      showAlert('success', title, description, duration),
+    [showAlert]
+  );
+  const showError = useCallback(
+    (title: string, description?: string, duration?: number) =>
+      showAlert('error', title, description, duration),
+    [showAlert]
+  );
+  const showWarning = useCallback(
+    (title: string, description?: string, duration?: number) =>
+      showAlert('warning', title, description, duration),
+    [showAlert]
+  );
+  const showInfo = useCallback(
+    (title: string, description?: string, duration?: number) =>
+      showAlert('info', title, description, duration),
+    [showAlert]
+  );
+
+  return {
+    alerts,
+    showAlert,
+    showSuccess,
+    showError,
+    showWarning,
+    showInfo,
+    removeAlert,
+    clearAlerts,
+    isBlocked,
+    remainingTime,
+  };
+};
