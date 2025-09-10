@@ -8,87 +8,78 @@ import {
   getSortedRowModel,
   useReactTable,
 } from '@tanstack/react-table';
-import { LuSearch, LuFilter, LuPlus, LuChevronLeft, LuChevronRight } from 'react-icons/lu';
-import { useUsers } from '../Hooks/userHook';
-import type { Usuario } from '../Models/Usuario';
-import CreateUserModal from './CreateUserModal';
-import UserDetailModal from './UserDetailModal';
-import { NombreUsuarioCell, getStatusClass, getStatusDisplay } from '../Helper/utils';
-import RolesTable from './Roles/Components/RolesTable';
+import { LuSearch, LuPlus, LuChevronLeft, LuChevronRight } from 'react-icons/lu';
+import { useRoles } from '../Hooks/RoleHook';
+import RoleDetailModal from './RoleDetailModal';
+import CreateRoleModal from './CreateRoleModal';
+import { EditRoleModal } from './EditRolModal';
+import type { Role } from '../Models/Role';
 
 
-const Usuarios = () => {
-  const { data: users = [], isLoading } = useUsers();
+
+const Roles = () => {
+  const { data: roles = [], isLoading } = useRoles();
   const [globalFilter, setGlobalFilter] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
-  const [showUserDetail, setShowUserDetail] = useState(false);
-  const [showRolesTable, setShowRolesTable] = useState(false);
+  const [selectedRoleId, setSelectedRoleId] = useState<number | null>(null);
+  const [showRoleDetail, setShowRoleDetail] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
 
-  const columnHelper = createColumnHelper<Usuario>();
-
+  const columnHelper = createColumnHelper<Role>();
 
   const columns = useMemo(
     () => [
-      columnHelper.accessor('Id_Usuario', {
+      columnHelper.accessor('Id_Rol', {
         header: 'ID',
         size: 80,
       }),
-      columnHelper.accessor('Nombre_Usuario', {
-        header: 'Nombre de Usuario',
-        cell: info => <NombreUsuarioCell value={info.getValue()} />,
-      }),
-      columnHelper.accessor('Correo_Electronico', {
-        header: 'Correo Electrónico',
-      }),
-      columnHelper.accessor('rol.Nombre_Rol', {
-        header: 'Rol',
+      columnHelper.accessor('Nombre_Rol', {
+        header: 'Nombre del Rol',
         cell: info => (
-          <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
-            {info.getValue()}
-          </span>
+          <span className="font-semibold">{info.getValue()}</span>
         ),
       }),
-      columnHelper.accessor('Fecha_Eliminacion', { 
-        header: 'Estado',
+      columnHelper.accessor('permisos', {
+        header: 'Permisos',
         cell: info => (
-          <span className={`px-2 py-1 rounded-full text-xs ${getStatusClass(info.getValue())}`}>
-            {getStatusDisplay(info.getValue())}
+          <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
+            {info.getValue()?.length ?? 0} permisos
           </span>
         ),
       }),
     ],
     []
   );
+
   const pageSizeOptions = [5, 10, 20, 50];
-    const [pagination, setPagination] = useState({
-      pageSize: 5,
-      pageIndex: 0,
-    });
+  const [pagination, setPagination] = useState({
+    pageSize: 5,
+    pageIndex: 0,
+  });
 
-    const table = useReactTable({
-      data: users,
-      columns,
-      getCoreRowModel: getCoreRowModel(),
-      getFilteredRowModel: getFilteredRowModel(),
-      getSortedRowModel: getSortedRowModel(),
-      getPaginationRowModel: getPaginationRowModel(),
-      state: {
-        globalFilter,
-        pagination,
+  const table = useReactTable({
+    data: roles,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    state: {
+      globalFilter,
+      pagination,
+    },
+    onGlobalFilterChange: setGlobalFilter,
+    onPaginationChange: setPagination,
+    initialState: {
+      pagination: {
+        pageSize: 5,
       },
-      onGlobalFilterChange: setGlobalFilter,
-      onPaginationChange: setPagination,
-      initialState: {
-        pagination: {
-          pageSize: 5,
-        },
-      },
-    });
+    },
+  });
 
-  const handleRowClick = (user: Usuario) => {
-    setSelectedUserId(user.Id_Usuario);
-    setShowUserDetail(true);
+  const handleRowClick = (role: Role) => {
+    setSelectedRoleId(role.Id_Rol);
+    setShowRoleDetail(true);
   };
 
   if (isLoading) {
@@ -110,7 +101,7 @@ const Usuarios = () => {
               <LuSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
               <input
                 type="text"
-                placeholder="Buscar usuarios..."
+                placeholder="Buscar roles..."
                 value={globalFilter ?? ''}
                 onChange={(e) => setGlobalFilter(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -119,30 +110,12 @@ const Usuarios = () => {
 
             {/* Buttons */}
             <div className="flex gap-3">
-              {!showRolesTable && (
-                <>
-                  <button className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition flex items-center gap-2">
-                    <LuFilter className="w-4 h-4" />
-                    Filtros
-                  </button>
-                  <button
-                    onClick={() => setShowCreateModal(true)}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center gap-2"
-                  >
-                    <LuPlus className="w-4 h-4" />
-                    Nuevo
-                  </button>
-                </>
-              )}
               <button
-                onClick={() => setShowRolesTable((prev) => !prev)}
-                className={`px-4 py-2 rounded-lg transition flex items-center gap-2 ${
-                  showRolesTable
-                    ? "bg-blue-600 text-white hover:bg-blue-700"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                    }`}
-                  >
-                Roles
+                onClick={() => setShowCreateModal(true)}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center gap-2"
+              >
+                <LuPlus className="w-4 h-4" />
+                Nuevo Rol
               </button>
             </div>
           </div>
@@ -150,10 +123,7 @@ const Usuarios = () => {
 
         {/* Table */}
         <div className="overflow-x-auto">
-             {showRolesTable ? (
-            <RolesTable />
-          ) : (
-           <table className="w-full">
+          <table className="w-full">
             <thead className="bg-gray-100">
               {table.getHeaderGroups().map((headerGroup) => (
                 <tr key={headerGroup.id}>
@@ -187,19 +157,18 @@ const Usuarios = () => {
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </td>
                   ))}
+         
                 </tr>
               ))}
             </tbody>
           </table>
-          )}
         </div>
 
         {/* Pagination */}
-        {!showRolesTable && (
-          <div className="px-6 py-2 bg-white border-t flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <div className="text-sm text-gray-700">
-              Mostrando <span className="font-semibold">{table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1}</span> a{' '}
-              <span className="font-semibold">{Math.min((table.getState().pagination.pageIndex + 1) * table.getState().pagination.pageSize, table.getPrePaginationRowModel().rows.length)}</span> de{' '}
+        <div className="px-6 py-2 bg-white border-t flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div className="text-sm text-gray-700">
+            Mostrando <span className="font-semibold">{table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1}</span> a{' '}
+            <span className="font-semibold">{Math.min((table.getState().pagination.pageIndex + 1) * table.getState().pagination.pageSize, table.getPrePaginationRowModel().rows.length)}</span> de{' '}
             <span className="font-semibold">{table.getPrePaginationRowModel().rows.length}</span> resultados
           </div>
           <div className="flex items-center gap-2">
@@ -211,8 +180,7 @@ const Usuarios = () => {
                 className="px-2 py-1 border border-gray-400 rounded-lg bg-white shadow min-w-[70px] text-sm "
               >
                 {pageSizeOptions.map(size => (
-                  <option key={size} value={size} className="bg-white text-white-700 font-semibold hover:bg-blue-50 hover:border-blue-500 hover:shadow-lg hover:scale-105
-                  active:scale-10">
+                  <option key={size} value={size}>
                     {size}
                   </option>
                 ))}
@@ -239,20 +207,33 @@ const Usuarios = () => {
             </button>
           </div>
         </div>
-        )}
       </div>
 
-      {/* Modals */}
-      {!showRolesTable && showCreateModal && (
-        <CreateUserModal onClose={() => setShowCreateModal(false)} />
+      {/* Create Role Modal */}
+      {showCreateModal && (
+        <CreateRoleModal onClose={() => setShowCreateModal(false)} />
       )}
-      {!showRolesTable && showUserDetail && selectedUserId && (
-        <UserDetailModal
-          userId={selectedUserId}
-          isOpen={showUserDetail}
+
+      {/* Edit Role Modal */}
+      {showEditModal && selectedRoleId && (
+        <EditRoleModal
+          roleId={selectedRoleId}
+          isOpen={showEditModal}
           onClose={() => {
-            setShowUserDetail(false);
-            setSelectedUserId(null);
+            setShowEditModal(false);
+            setSelectedRoleId(null);
+          }}
+        />
+      )}
+
+      {/* Role Detail Modal */}
+      {showRoleDetail && selectedRoleId && (
+        <RoleDetailModal
+          roleId={selectedRoleId}
+          isOpen={showRoleDetail}
+          onClose={() => {
+            setShowRoleDetail(false);
+            setSelectedRoleId(null);
           }}
         />
       )}
@@ -260,4 +241,4 @@ const Usuarios = () => {
   );
 };
 
-export default Usuarios;
+export default Roles;

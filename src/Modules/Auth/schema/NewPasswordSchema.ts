@@ -5,7 +5,6 @@ export const passwordSchema = z.object({
   nuevaContraseña: z
     .string()
     .min(6, "La contraseña debe tener al menos 6 caracteres")
-    .regex(/[A-Z]/, "Debe contener al menos una mayúscula")
     .regex(/\d/, "Debe contener al menos un número"),
   confirmarContraseña: z.string(),
 }).refine((data) => data.nuevaContraseña === data.confirmarContraseña, {

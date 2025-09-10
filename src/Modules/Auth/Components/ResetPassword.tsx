@@ -4,12 +4,15 @@ import { Link } from "@tanstack/react-router";
 import { passwordSchema, type NewPasswordData } from "../schema/NewPasswordSchema";
 import { useResetPassword } from "../Hooks/AuthHook";
 import { useAlerts } from "@/Modules/Global/context/AlertContext";
+import { FiEye, FiEyeOff } from "react-icons/fi";
 
 
 export default function ResetPassword() {
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const { showSuccess, showError } = useAlerts();
   const resetPasswordMutation = useResetPassword();
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const form = useForm({
     defaultValues: {
@@ -92,19 +95,27 @@ export default function ResetPassword() {
           >
             <form.Field name="nuevaContraseña">
               {(field) => (
-                <div>
+                <div className="relative">
                   <label htmlFor="nuevaContraseña" className="block text-sm font-medium text-gray-700 mb-1">
                     Nueva contraseña <span className="text-red-500">*</span>
                   </label>
                   <input
                     id="nuevaContraseña"
-                    type="password"
+                    type={showPassword ? "text" : "password"}
                     value={field.state.value}
                     onBlur={field.handleBlur}
                     onChange={(e) => field.handleChange(e.target.value)}
-                    placeholder="••••••••"
-                    className="w-full text-black p-2 rounded-md border border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Contraseña"
+                    className="w-full text-black p-2 rounded-md border border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 pr-10"
                   />
+                  <button
+                    type="button"
+                    tabIndex={-1}
+                    className="absolute right-3 top-9 text-gray-500 hover:text-blue-600"
+                    onClick={() => setShowPassword((prev) => !prev)}
+                  >
+                    {showPassword ? <FiEyeOff size={20} /> : <FiEye size={20} />}
+                  </button>
                   {field.state.meta.errors?.map((err) => (
                     <p key={err} className="text-red-500 text-sm">
                       {err}
@@ -121,19 +132,27 @@ export default function ResetPassword() {
 
             <form.Field name="confirmarContraseña">
               {(field) => (
-                <div>
+                <div className="relative">
                   <label htmlFor="confirmarContraseña" className="block text-sm font-medium text-gray-700 mb-1">
                     Confirmar contraseña <span className="text-red-500">*</span>
                   </label>
                   <input
                     id="confirmarContraseña"
-                    type="password"
+                    type={showConfirmPassword ? "text" : "password"}
                     value={field.state.value}
                     onBlur={field.handleBlur}
                     onChange={(e) => field.handleChange(e.target.value)}
-                    placeholder="••••••••"
-                    className="w-full text-black p-2 rounded-md border border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Confirme la contraseña"
+                    className="w-full text-black p-2 rounded-md border border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 pr-10"
                   />
+                  <button
+                    type="button"
+                    tabIndex={-1}
+                    className="absolute right-3 top-9 text-gray-500 hover:text-blue-600"
+                    onClick={() => setShowConfirmPassword((prev) => !prev)}
+                  >
+                    {showConfirmPassword ? <FiEyeOff size={20} /> : <FiEye size={20} />}
+                  </button>
                   {field.state.meta.errors?.map((err) => (
                     <p key={err} className="text-red-500 text-sm">
                       {err}
