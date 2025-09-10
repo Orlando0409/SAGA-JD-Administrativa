@@ -1,41 +1,98 @@
-// src/hooks/useCurrentUser.ts
-import { useState, useEffect } from 'react'
-import { cookieUtils } from '../../Global/utils/CookieUtils'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { 
+  getAllUsers, 
+  getUserById, 
+  createUser, 
+  updateUser, 
+  deactivateUser, 
+  getRoles,
+  activateUser
+} from '../Services/userService';
+import { useAlerts } from '@/Modules/Global/context/AlertContext';
 
-interface User {
-  name: string
-  email: string
-  avatar?: string
-}
+export const useUsers = () => {
+  return useQuery({
+    queryKey: ['users'],
+    queryFn: getAllUsers,
+  });
+};
 
-export const useCurrentUser = () => {
-  const [user, setUser] = useState<User | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
+export const useUser = (id: number) => {
+  return useQuery({
+    queryKey: ['user', id],
+    queryFn: () => getUserById(id),
+    enabled: !!id,
+  });
+};
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        // Aquí harías una llamada a tu API para obtener los datos del usuario
-        // const response = await axiosPrivate.get('/auth/me')
-        // setUser(response.data)
-        
-        // Por ahora, datos de ejemplo
-        if (cookieUtils.hasToken()) {
-          setUser({
-            name: 'Orlando Baltodano',
-            email: 'orlando@asada.com'
-          })
-        }
-      } catch (error) {
-        console.error('Error fetching user:', error)
-        setUser(null)
-      } finally {
-        setIsLoading(false)
-      }
-    }
+export const useRoles = () => {
+  return useQuery({
+    queryKey: ['roles'],
+    queryFn: getRoles,
+  });
+};
 
-    fetchUser()
-  }, [])
+export const useCreateUser = () => {
+  const queryClient = useQueryClient();
+  const { showSuccess, showError } = useAlerts();
 
-  return { user, isLoading }
-}
+  return useMutation({
+    mutationFn: createUser,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['users'] });
+      showSuccess('Usuario creado', 'El usuario se ha creado exitosamente');
+    },
+    onError: () => {
+      showError('Error', 'No se pudo crear el usuario');
+    },
+  });
+};
+
+export const useUpdateUser = () => {
+  const queryClient = useQueryClient();
+  const { showSuccess, showError } = useAlerts();
+
+  return useMutation({
+    mutationFn: updateUser,
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['users'] });
+      queryClient.invalidateQueries({ queryKey: ['user', data.Id_Usuario] });
+      showSuccess('Usuario actualizado', 'Los datos se han actualizado exitosamente');
+    },
+    onError: () => {
+      showError('Error', 'No se pudo actualizar el usuario');
+    },
+  });
+};
+
+export const useDeactivateUser = () => {
+  const queryClient = useQueryClient();
+  const { showSuccess, showError } = useAlerts();
+
+  return useMutation({
+    mutationFn: deactivateUser,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['users'] });
+      showSuccess('Usuario desactivado', 'El usuario se ha desactivado exitosamente');
+    },
+    onError: () => {
+      showError('Error', 'No se pudo desactivar el usuario');
+    },
+  });
+};
+
+export const useActivateUser = () => {
+  const queryClient = useQueryClient();
+  const { showSuccess, showError } = useAlerts();
+
+  return useMutation({
+    mutationFn: activateUser,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['users'] });
+      showSuccess('Usuario activado', 'El usuario se ha activado exitosamente');
+    },
+    onError: () => {
+      showError('Error', 'No se pudo activar el usuario');
+    },
+  });
+};
