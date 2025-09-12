@@ -17,3 +17,5 @@ export const CreateUserSchema = z.object({
 });
 
 export type CreateUserSchemaData = z.infer<typeof CreateUserSchema>;
+
+

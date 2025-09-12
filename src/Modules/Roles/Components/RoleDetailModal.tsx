@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { useRoleById } from '../Hooks/RoleHook';
 import { LuShield, LuUser, LuX } from 'react-icons/lu';
-import { getLevelFromPermission } from '@/Modules/Usuarios/Helper/GroupPermiByModule';
 import type { Permiso } from '@/Modules/Usuarios/Models/Usuario';
+
+import { getPermissionLabel } from '@/Modules/Usuarios/Helper/GroupPermiByModule';
+import type { RoleDetailModalProps } from '../Types/RoleTypes';
 import { EditRoleModal } from './EditRolModal';
-import type { RoleDetailModalProps } from '@/Modules/Usuarios/Types/UserTypes';
 
 
 const RoleDetailModal: React.FC<RoleDetailModalProps> = ({ roleId, isOpen, onClose }) => {
@@ -13,24 +14,15 @@ const RoleDetailModal: React.FC<RoleDetailModalProps> = ({ roleId, isOpen, onClo
 
   if (!isOpen) return null;
 
-  const getPermissionLabel = (permiso: Permiso) => {
-    const level = getLevelFromPermission(permiso);
-    switch (level) {
-      case 'none': return { text: 'Sin acceso', className: 'bg-red-100 text-red-700' };
-      case 'view': return { text: 'Solo ver', className: 'bg-yellow-100 text-yellow-700' };
-      case 'edit': return { text: 'Ver y editar', className: 'bg-green-100 text-green-700' };
-      default: return { text: 'Sin acceso', className: 'bg-red-100 text-red-700' };
-    }
-  };
-
-  // Agrupar permisos por módulo
-  const groupedPermisos = role?.permisos?.reduce((acc: any, permiso: Permiso) => {
+    // Agrupar permisos por módulo
+   const groupedPermisos = role?.permisos?.reduce((acc: any, permiso: Permiso) => {
     if (!acc[permiso.modulo]) {
       acc[permiso.modulo] = [];
     }
     acc[permiso.modulo].push(permiso);
     return acc;
   }, {});
+
 
   return (
     <>
@@ -51,7 +43,7 @@ const RoleDetailModal: React.FC<RoleDetailModalProps> = ({ roleId, isOpen, onClo
           </div>
 
           {/* Body */}
-          <div className="p-6 overflow-y-auto max-h-[calc(90vh-140px)]">
+          <div className="p-6 overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100 max-h-[calc(90vh-140px)]">
             {isLoading ? (
               <div className="flex items-center justify-center h-64">
                 <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
@@ -111,7 +103,7 @@ const RoleDetailModal: React.FC<RoleDetailModalProps> = ({ roleId, isOpen, onClo
                                   <div className={`px-3 py-1 rounded-full text-xs font-medium ${label.className}`}>
                                     {label.text}
                                   </div>
-                                  <div className="text-xs text-gray-400 mt-1">ID: {permiso.id}</div>
+                                
                                 </div>
                               );
                             })}
@@ -126,10 +118,10 @@ const RoleDetailModal: React.FC<RoleDetailModalProps> = ({ roleId, isOpen, onClo
           </div>
 
           {/* Footer */}
-          <div className="flex justify-end gap-4 px-6 py-4 border-t border-gray-200">
+          <div className="flex justify-end px-6 py-4 items-center border-t border-gray-200">
             <button
               onClick={() => setShowEditModal(true)}
-              className="px-6 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors font-medium"
+              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
             >
               Editar
             </button>

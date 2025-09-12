@@ -12,12 +12,13 @@ import { LuSearch, LuPlus, LuChevronLeft, LuChevronRight } from 'react-icons/lu'
 import { useRoles } from '../Hooks/RoleHook';
 import RoleDetailModal from './RoleDetailModal';
 import CreateRoleModal from './CreateRoleModal';
-import { EditRoleModal } from './EditRolModal';
 import type { Role } from '../Models/Role';
+import { EditRoleModal } from './EditRolModal';
 
 
 
-const Roles = () => {
+
+const Roles = ({ onClose }: { onClose: () => void }) => {
   const { data: roles = [], isLoading } = useRoles();
   const [globalFilter, setGlobalFilter] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -29,10 +30,6 @@ const Roles = () => {
 
   const columns = useMemo(
     () => [
-      columnHelper.accessor('Id_Rol', {
-        header: 'ID',
-        size: 80,
-      }),
       columnHelper.accessor('Nombre_Rol', {
         header: 'Nombre del Rol',
         cell: info => (
@@ -116,6 +113,12 @@ const Roles = () => {
               >
                 <LuPlus className="w-4 h-4" />
                 Nuevo Rol
+              </button>
+              <button
+                onClick={() => onClose()}
+                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition"
+              >
+                Usuarios
               </button>
             </div>
           </div>
