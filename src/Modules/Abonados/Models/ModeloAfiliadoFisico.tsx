@@ -1,6 +1,5 @@
-
-export interface Abonado {
-    Id_Abonado: number
+export interface AfiliadoFisico {
+    Id_Afiliado: number
     Nombre: string
     Apellido1: string
     Apellido2?: string
@@ -13,14 +12,18 @@ export interface Abonado {
         Id_Estado_Afiliado: number
         Nombre_Estado: string
     }
+    Tipo_Afiliado: {
+        Id_Tipo_Afiliado: number
+        Nombre_Tipo_Afiliado: string
+    }
     Fecha_Creacion: string
     Fecha_Actualizacion: string
     Escritura_Terreno?: string
     Planos_Terreno?: string
 }
 
-export const AbonadoInicialState: Abonado = {
-    Id_Abonado: 0,
+export const AfiliadoFisicoInicialState: AfiliadoFisico = {
+    Id_Afiliado: 0,
     Nombre: '',
     Apellido1: '',
     Apellido2: '',
@@ -31,8 +34,12 @@ export const AbonadoInicialState: Abonado = {
     Edad: 0,
     Estado: {
         Id_Estado_Afiliado: 1,
-        Nombre_Estado: 'Activo'
+        Nombre_Estado: 'activo'
+    },
+    Tipo_Afiliado: {
+        Id_Tipo_Afiliado: 1,
+        Nombre_Tipo_Afiliado: 'Abonado'
     },
     Fecha_Creacion: new Date().toISOString(),
     Fecha_Actualizacion: new Date().toISOString(),
-};
+}
