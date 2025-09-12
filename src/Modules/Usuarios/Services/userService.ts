@@ -18,8 +18,8 @@ export const createUser = async (userData: CreateUserData): Promise<Usuario> => 
   return response.data;
 };
 
-export const updateUser = async (userData: UpdateUserData): Promise<Usuario> => {
-  const response = await axiosPrivate.put(`/usuarios/${userData.Id_Usuario}`, userData);
+export const updateUser = async (Id_Usuario:number, userData: UpdateUserData): Promise<Usuario> => {
+  const response = await axiosPrivate.put(`/usuarios/${Id_Usuario}`, userData);
   return response.data;
 };
 
@@ -29,10 +29,4 @@ export const deactivateUser = async (id: number): Promise<void> => {
 
 export const activateUser = async (id: number): Promise<void> => {
   await axiosPrivate.patch(`/usuarios/restaurar/${id}`);
-};
-
-
-export const getRoles = async () => {
-  const response = await axiosPrivate.get('/roles');
-  return response.data;
 };

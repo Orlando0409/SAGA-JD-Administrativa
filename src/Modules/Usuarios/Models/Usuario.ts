@@ -27,9 +27,14 @@ export interface CreateUserData {
 }
 
 export interface UpdateUserData {
-  Id_Usuario: number;
   Nombre_Usuario: string;
   Correo_Electronico: string;
-  Contraseña: string;
   Id_Rol: number;
+}
+
+
+export interface ChangePassword {
+  userid: number;
+  currentPassword: string;
+  newPassword: string;
 }

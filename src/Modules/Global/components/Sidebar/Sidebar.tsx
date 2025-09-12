@@ -19,6 +19,8 @@ import { FiChevronDown, FiChevronRight } from 'react-icons/fi'
 import { CUSTOM_ANIMATION, sections, type AppSidebarProps } from "../../types/Sections"
 import { Button } from "./ui/button"
 import { useAlerts } from "../../context/AlertContext"
+import { LuKey } from "react-icons/lu"
+import { ChangePasswordModal } from "@/Modules/Auth/Components/ChangePassword"
 
 
 
@@ -29,10 +31,11 @@ export function AppSidebar({allowedModules}: Readonly<AppSidebarProps>) {
   const logoutMutation = useLogout()
   const { state, setOpen: setSidebarOpen } = useSidebar()
    const { showSuccess } = useAlerts();
-  
+   const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
 
   const { user, isLoading } = useAuthUser()
   const currentUser = {
+    id: user?.Id_Usuario,
     name: user?.Nombre_Usuario,
     email: user?.Correo_Electronico
   }
@@ -86,7 +89,12 @@ export function AppSidebar({allowedModules}: Readonly<AppSidebarProps>) {
           </div>
         </SidebarHeader>
 
-     <SidebarContent>
+     <SidebarContent   className="
+    scrollbar-thin
+    scrollbar-thumb-blue-600
+    scrollbar-track-blue-100
+    max-h-[calc(100vh-180px)]
+  " >
           {/* Acordeón por sección */}
          {sections.map(section => {
            const isOpen = openSections.includes(section.id)
@@ -137,6 +145,9 @@ export function AppSidebar({allowedModules}: Readonly<AppSidebarProps>) {
           </Accordion>
         )
       })}
+        <div className="overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100 h-full">
+    {/* ...Acordeón por sección... */}
+  </div>
     </SidebarContent>
 
         <SidebarFooter className="border-t border-sidebar-border">
@@ -157,7 +168,19 @@ export function AppSidebar({allowedModules}: Readonly<AppSidebarProps>) {
           </div>
 
           <SidebarSeparator />
-        <ul>
+        <ul className="p-2 space-y-1">
+          <li>
+              <Button
+                  variant="outline"
+                  onClick={() => setShowChangePasswordModal(true)}
+                  className="flex items-center w-full px-4 py-2 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors"
+              >
+                  <LuKey className="w-4 h-4" />
+                  <span className="ml-2 group-data-[collapsible=icon]:hidden">
+                      Cambiar Contraseña
+                  </span>
+              </Button>
+          </li>
           <li>
             <AlertDialog>
               <AlertDialogTrigger asChild>
@@ -195,6 +218,11 @@ export function AppSidebar({allowedModules}: Readonly<AppSidebarProps>) {
         </ul>
         </SidebarFooter>
       </Sidebar>
+        <ChangePasswordModal
+          open={showChangePasswordModal}
+          onClose={() => setShowChangePasswordModal(false)}
+          userId={currentUser.id!}
+        />
     </section>
   )
 }

@@ -1,5 +1,14 @@
 import type { Permiso } from "../Models/Usuario";
-import type { ModulePermission, PermissionLevel } from "../Types/UserTypes";
+
+// Tipos para los radio buttons
+export type PermissionLevel = 'none' | 'view' | 'edit';
+
+export interface ModulePermission {
+  modulo: string;
+  level: PermissionLevel;
+  selectedId: number;
+}
+
 
 
 // Agrupa permisos por módulo y devuelve las opciones disponibles
@@ -67,3 +76,15 @@ export const convertRolePermissionsToModuleState = (
   
   return result;
 };
+
+
+  export const getPermissionLabel = (permiso: Permiso) => {
+    const level = getLevelFromPermission(permiso);
+    switch (level) {
+      case 'none': return { text: 'Sin acceso', className: 'bg-red-100 text-red-700' };
+      case 'view': return { text: 'Solo ver', className: 'bg-yellow-100 text-yellow-700' };
+      case 'edit': return { text: 'Ver y editar', className: 'bg-green-100 text-green-700' };
+      default: return { text: 'Sin acceso', className: 'bg-red-100 text-red-700' };
+    }
+  };
+

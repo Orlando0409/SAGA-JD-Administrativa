@@ -14,8 +14,8 @@ export const CreateRole = async (roleData: CreateRoleData): Promise<Role> => {
     const response = await axiosPrivate.post("/roles", roleData);
     return response.data;
 }
-export const UpdateRole = async (roleData: UpdateRoleData): Promise<Role> => {
-    const response = await axiosPrivate.put(`/roles/${roleData.Id_Rol}`, roleData);
+export const UpdateRole = async (Id_Rol:number, roleData: UpdateRoleData): Promise<Role> => {
+    const response = await axiosPrivate.put(`/roles/${Id_Rol}`, roleData);
     return response.data;
 }
 export const DeleteRole = async (id: number): Promise<void> => {
