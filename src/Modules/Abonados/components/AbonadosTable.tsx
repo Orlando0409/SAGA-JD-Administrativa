@@ -2,17 +2,13 @@
 import { useMemo, useState } from 'react';
 import { createColumnHelper, getCoreRowModel, getPaginationRowModel, useReactTable, flexRender, type ColumnDef } from '@tanstack/react-table';
 import { Eye, Edit, Trash } from 'lucide-react';
-import { useAbonados } from '../Hook/HookAbonadoFisico';
-import { useAbonadosJuridicos } from '../Hook/HookAbonadoJuridico';
-import { useAsociadosFisicos } from '../Hook/Asociado/HookAsociadoFisico';
-import { useAsociadosJuridicos } from '../Hook/Asociado/HookAsociadoJuridico';
-import type { Abonado } from '../Models/ModeloAbonadoFisico';
-import type { AbonadoJuridico } from '../Models/ModeloAbonadoJuridico';
-import type { AsociadoFisico } from '../Models/Asociado/ModeloAsociadoFisico';
-import type { AsociadoJuridico } from '../Models/Asociado/ModeloAsociadoJuridico';
+import { useAfiliadosFisicos } from '../Hook/HookAfiliadoFisico';
+import { useAfiliadosJuridicos } from '../Hook/HookAfiliadoJuridico';
+import type { AfiliadoFisico } from '../Models/ModeloAfiliadoFisico';
+import type { AfiliadoJuridico } from '../Models/ModeloAfiliadoJuridico';
 
 // Tipo unificado para la tabla
-type PersonaUnificada = {
+type AfiliadoUnificado = {
     Id: number;
     Nombre_Completo: string;
     Cedula_Documento: string;
@@ -23,113 +19,66 @@ type PersonaUnificada = {
     Tipo_Persona: 'Físico' | 'Jurídico';
     Tipo_Afiliado: 'Abonado' | 'Asociado';
     // Datos originales para acciones
-    datos_originales: Abonado | AbonadoJuridico | AsociadoFisico | AsociadoJuridico;
+    datos_originales: AfiliadoFisico | AfiliadoJuridico;
 };
 
 export default function AbonadosTable() {
-    // Hooks para ambos tipos de abonados
-    const { abonados: abonadosFisicos, isLoading: loadingFisicos, isError: errorFisicos, deleteAbonado } = useAbonados();
-    const { abonadosJuridicos, isLoading: loadingJuridicos, isError: errorJuridicos, deleteAbonadoJuridico } = useAbonadosJuridicos();
-
-    // Hooks para ambos tipos de asociados
-    const { asociadosFisicos, isLoading: loadingAsociadosFisicos, isError: errorAsociadosFisicos, deleteAsociadoFisico } = useAsociadosFisicos();
-    const { asociadosJuridicos, isLoading: loadingAsociadosJuridicos, isError: errorAsociadosJuridicos, deleteAsociadoJuridico } = useAsociadosJuridicos();
+    // Hooks para ambos tipos de afiliados
+    const { afiliadosFisicos, isLoading: loadingFisicos, isError: errorFisicos } = useAfiliadosFisicos();
+    const { afiliadosJuridicos, isLoading: loadingJuridicos, isError: errorJuridicos } = useAfiliadosJuridicos();
 
     const [globalFilter, setGlobalFilter] = useState('');
 
     // Estados combinados
-    const isLoading = loadingFisicos || loadingJuridicos || loadingAsociadosFisicos || loadingAsociadosJuridicos;
-    const isError = errorFisicos || errorJuridicos || errorAsociadosFisicos || errorAsociadosJuridicos;
+    const isLoading = loadingFisicos || loadingJuridicos;
+    const isError = errorFisicos || errorJuridicos;
 
     // Función para unificar los datos
-    const datosUnificados = useMemo((): PersonaUnificada[] => {
-        // Abonados Físicos
-        const abonadosFisicosUnificados: PersonaUnificada[] = abonadosFisicos.map(abonado => ({
-            Id: abonado.Id_Abonado,
-            Nombre_Completo: `${abonado.Nombre} ${abonado.Apellido1} ${abonado.Apellido2 || ''}`.trim(),
-            Cedula_Documento: abonado.Cedula,
+    const datosUnificados = useMemo((): AfiliadoUnificado[] => {
+        // Afiliados Físicos
+        const afiliadosFisicosUnificados: AfiliadoUnificado[] = afiliadosFisicos.map((afiliado: AfiliadoFisico) => ({
+            Id: afiliado.Id_Afiliado,
+            Nombre_Completo: `${afiliado.Nombre} ${afiliado.Apellido1} ${afiliado.Apellido2 || ''}`.trim(),
+            Cedula_Documento: afiliado.Cedula,
             Estado: {
-                Id_Estado: abonado.Estado.Id_Estado_Afiliado,
-                Nombre_Estado: abonado.Estado.Nombre_Estado
+                Id_Estado: afiliado.Estado.Id_Estado_Afiliado,
+                Nombre_Estado: afiliado.Estado.Nombre_Estado
             },
             Tipo_Persona: 'Físico' as const,
-            Tipo_Afiliado: 'Abonado' as const,
-            datos_originales: abonado
+            Tipo_Afiliado: afiliado.Tipo_Afiliado.Nombre_Tipo_Afiliado as 'Abonado' | 'Asociado',
+            datos_originales: afiliado
         }));
 
-        // Abonados Jurídicos
-        const abonadosJuridicosUnificados: PersonaUnificada[] = abonadosJuridicos.map(abonado => ({
-            Id: abonado.Id_Abonado,
-            Nombre_Completo: abonado.Razon_Social,
-            Cedula_Documento: abonado.Cedula_Juridica,
+        // Afiliados Jurídicos
+        const afiliadosJuridicosUnificados: AfiliadoUnificado[] = afiliadosJuridicos.map((afiliado: AfiliadoJuridico) => ({
+            Id: afiliado.Id_Afiliado,
+            Nombre_Completo: afiliado.Razon_Social,
+            Cedula_Documento: afiliado.Cedula_Juridica,
             Estado: {
-                Id_Estado: abonado.Estado.Id_Estado_Afiliado,
-                Nombre_Estado: abonado.Estado.Nombre_Estado
+                Id_Estado: afiliado.Estado.Id_Estado_Afiliado,
+                Nombre_Estado: afiliado.Estado.Nombre_Estado
             },
             Tipo_Persona: 'Jurídico' as const,
-            Tipo_Afiliado: 'Abonado' as const,
-            datos_originales: abonado
-        }));
-
-        // Asociados Físicos
-        const asociadosFisicosUnificados: PersonaUnificada[] = asociadosFisicos.map(asociado => ({
-            Id: asociado.Id_Asociado || 0,
-            Nombre_Completo: `${asociado.Nombre} ${asociado.Apellido1} ${asociado.Apellido2 || ''}`.trim(),
-            Cedula_Documento: asociado.Cedula,
-            Estado: {
-                Id_Estado: asociado.Estado?.Id_Estado_Solicitud || 1,
-                Nombre_Estado: asociado.Estado?.Nombre_Estado || 'Pendiente'
-            },
-            Tipo_Persona: 'Físico' as const,
-            Tipo_Afiliado: 'Asociado' as const,
-            datos_originales: asociado
-        }));
-
-        // Asociados Jurídicos
-        const asociadosJuridicosUnificados: PersonaUnificada[] = asociadosJuridicos.map(asociado => ({
-            Id: asociado.Id_Asociado || 0,
-            Nombre_Completo: asociado.Razon_Social,
-            Cedula_Documento: asociado.Cedula_Juridica,
-            Estado: {
-                Id_Estado: asociado.Estado?.Id_Estado_Solicitud || 1,
-                Nombre_Estado: asociado.Estado?.Nombre_Estado || 'Pendiente'
-            },
-            Tipo_Persona: 'Jurídico' as const,
-            Tipo_Afiliado: 'Asociado' as const,
-            datos_originales: asociado
+            Tipo_Afiliado: afiliado.Tipo_Afiliado.Nombre_Tipo_Afiliado as 'Abonado' | 'Asociado',
+            datos_originales: afiliado
         }));
 
         return [
-            ...abonadosFisicosUnificados,
-            ...abonadosJuridicosUnificados,
-            ...asociadosFisicosUnificados,
-            ...asociadosJuridicosUnificados
+            ...afiliadosFisicosUnificados,
+            ...afiliadosJuridicosUnificados
         ].sort((a, b) => a.Id - b.Id);
-    }, [abonadosFisicos, abonadosJuridicos, asociadosFisicos, asociadosJuridicos]);
+    }, [afiliadosFisicos, afiliadosJuridicos]);
 
-    const handleDelete = async (persona: PersonaUnificada) => {
-        const nombreCompleto = persona.Nombre_Completo;
-        const tipoPersona = persona.Tipo_Persona;
-        const tipoAfiliado = persona.Tipo_Afiliado;
+    const handleDelete = async (afiliado: AfiliadoUnificado) => {
+        const nombreCompleto = afiliado.Nombre_Completo;
+        const tipoPersona = afiliado.Tipo_Persona;
 
-        if (confirm(`¿Está seguro de eliminar al ${tipoAfiliado.toLowerCase()} ${tipoPersona.toLowerCase()} ${nombreCompleto}?`)) {
+        if (confirm(`¿Está seguro de eliminar al afiliado ${tipoPersona.toLowerCase()} ${nombreCompleto}?`)) {
             try {
-                if (persona.Tipo_Afiliado === 'Abonado') {
-                    if (persona.Tipo_Persona === 'Físico') {
-                        await deleteAbonado(persona.Id);
-                    } else {
-                        await deleteAbonadoJuridico(persona.Id);
-                    }
-                } else { // Asociado
-                    if (persona.Tipo_Persona === 'Físico') {
-                        await deleteAsociadoFisico(persona.Id);
-                    } else {
-                        await deleteAsociadoJuridico(persona.Id);
-                    }
-                }
-                alert(`${tipoAfiliado} eliminado exitosamente`);
+                // Aquí puedes implementar la lógica de eliminación cuando esté disponible
+                alert(`La funcionalidad de eliminar estará disponible próximamente`);
             } catch (error) {
-                alert(`Error al eliminar el ${tipoAfiliado.toLowerCase()}`);
+                alert(`Error al eliminar el afiliado`);
                 console.error('Error:', error);
             }
         }
@@ -138,8 +87,8 @@ export default function AbonadosTable() {
     const filteredData = useMemo(() => {
         if (!globalFilter) return datosUnificados;
         const q = globalFilter.toLowerCase();
-        return datosUnificados.filter((persona) =>
-            [persona.Nombre_Completo, persona.Cedula_Documento, persona.Estado.Nombre_Estado, persona.Tipo_Persona, persona.Tipo_Afiliado]
+        return datosUnificados.filter((afiliado) =>
+            [afiliado.Nombre_Completo, afiliado.Cedula_Documento, afiliado.Estado.Nombre_Estado, afiliado.Tipo_Persona, afiliado.Tipo_Afiliado]
                 .filter(Boolean)
                 .join(' ')
                 .toLowerCase()
@@ -147,8 +96,8 @@ export default function AbonadosTable() {
         );
     }, [datosUnificados, globalFilter]);
 
-    const columnHelper = createColumnHelper<PersonaUnificada>();
-    const columns: ColumnDef<PersonaUnificada, any>[] = [
+    const columnHelper = createColumnHelper<AfiliadoUnificado>();
+    const columns: ColumnDef<AfiliadoUnificado, any>[] = [
         columnHelper.accessor('Id', {
             header: 'ID',
             cell: (info) => info.getValue(),
@@ -217,12 +166,12 @@ export default function AbonadosTable() {
             id: 'actions',
             header: 'Acciones',
             cell: ({ row }) => {
-                const persona = row.original as PersonaUnificada;
+                const afiliado = row.original as AfiliadoUnificado;
                 return (
                     <div className="flex items-center gap-2">
-                        <button title="Ver" className="inline-flex items-center gap-2 px-2 py-1 rounded-md text-sky-700 bg-sky-50 hover:bg-sky-100 border border-sky-100" onClick={() => alert(`Ver ${persona.Tipo_Afiliado.toLowerCase()}: ${persona.Nombre_Completo}`)}><Eye size={14} /></button>
-                        <button title="Editar" className="inline-flex items-center gap-2 px-2 py-1 rounded-md text-sky-700 bg-white hover:bg-sky-50 border border-sky-100" onClick={() => alert(`Editar ${persona.Tipo_Afiliado.toLowerCase()}: ${persona.Nombre_Completo}`)}><Edit size={14} /></button>
-                        <button title="Eliminar" className="inline-flex items-center gap-2 px-2 py-1 rounded-md text-slate-600 bg-white hover:bg-slate-50 border border-slate-100" onClick={() => handleDelete(persona)}><Trash size={14} /></button>
+                        <button title="Ver" className="inline-flex items-center gap-2 px-2 py-1 rounded-md text-sky-700 bg-sky-50 hover:bg-sky-100 border border-sky-100" onClick={() => alert(`Ver afiliado: ${afiliado.Nombre_Completo}`)}><Eye size={14} /></button>
+                        <button title="Editar" className="inline-flex items-center gap-2 px-2 py-1 rounded-md text-sky-700 bg-white hover:bg-sky-50 border border-sky-100" onClick={() => alert(`Editar afiliado: ${afiliado.Nombre_Completo}`)}><Edit size={14} /></button>
+                        <button title="Eliminar" className="inline-flex items-center gap-2 px-2 py-1 rounded-md text-slate-600 bg-white hover:bg-slate-50 border border-slate-100" onClick={() => handleDelete(afiliado)}><Trash size={14} /></button>
                     </div>
                 );
             },
@@ -242,12 +191,12 @@ export default function AbonadosTable() {
         <div className="w-full">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
                 <div className="flex items-center gap-3">
-                    <h2 className="text-xl font-semibold text-sky-800">Gestión de Personas</h2>
+                    <h2 className="text-xl font-semibold text-sky-800">Gestión de Afiliados</h2>
                     <span className="text-sm text-slate-500">Abonados y Asociados (Físicos y Jurídicos)</span>
                 </div>
                 <div className="flex items-center gap-3">
                     <input value={globalFilter} onChange={(e) => setGlobalFilter(e.target.value)} placeholder="Buscar por nombre, cédula, estado, tipo..." className="px-3 py-2 rounded-lg border border-sky-200 bg-sky-50 focus:outline-none focus:ring-2 focus:ring-sky-200" />
-                    <button className="px-3 py-2 rounded-lg bg-sky-600 text-white hover:bg-sky-700 shadow-sm" onClick={() => alert('Crear solicitud — abrir formulario')}>+ Nueva Solicitud</button>
+                    <button className="px-3 py-2 rounded-lg bg-sky-600 text-white hover:bg-sky-700 shadow-sm" onClick={() => alert('Crear nueva solicitud — abrir formulario')}>+ Nueva Solicitud</button>
                 </div>
             </div>
             <div className="overflow-x-auto rounded-2xl border border-sky-100 shadow-sm bg-white">
