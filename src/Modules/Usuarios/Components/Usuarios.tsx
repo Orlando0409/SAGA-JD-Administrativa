@@ -17,9 +17,11 @@ import { NombreUsuarioCell, getStatusClass, getStatusDisplay, isActive } from '.
 import RolesTable from '../../Roles/Components/RolesTable';
 import type { FilterOptions } from '../Types/UserTypes';
 import FilterUserModal from './FilterUserModal';
+import { useUserPermissions } from '@/Modules/Auth/Hooks/PermissionHook';
 
 const Usuarios = () => {
   const { data: users = [], isLoading, refetch } = useUsers();
+  const { canCreate, canEdit } = useUserPermissions();
   const [globalFilter, setGlobalFilter] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
@@ -181,19 +183,24 @@ return (
                     </span>
                   )}
                 </button>
-                <button
-                  onClick={() => setShowCreateModal(true)}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center gap-2"
-                >
-                  <LuPlus className="w-4 h-4" />
-                  Nuevo
-                </button>
-                <button
-                  onClick={() => setShowRolesTable(true)}
-                  className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition"
-                >
-                  Roles
-                </button>
+                {canCreate('usuarios') && (
+                  <button
+                    onClick={() => setShowCreateModal(true)}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center gap-2"
+                  >
+                    <LuPlus className="w-4 h-4" />
+                    Nuevo
+                  </button>
+                )}
+
+                {canEdit('usuarios') && (
+                  <button
+                    onClick={() => setShowRolesTable(true)}
+                    className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition"
+                  >
+                    Roles
+                  </button>
+                )}
               </div>
             </div>
 

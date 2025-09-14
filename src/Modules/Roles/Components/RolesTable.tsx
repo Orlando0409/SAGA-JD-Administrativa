@@ -15,6 +15,7 @@ import CreateRoleModal from './CreateRoleModal';
 import type { Role } from '../Models/Role';
 import { EditRoleModal } from './EditRolModal';
 import { getStatusClass, getStatusDisplay, isActive } from '@/Modules/Usuarios/Helper/utils';
+import { useUserPermissions } from '@/Modules/Auth/Hooks/PermissionHook';
 
 
 
@@ -22,6 +23,7 @@ import { getStatusClass, getStatusDisplay, isActive } from '@/Modules/Usuarios/H
 
 const Roles = ({ onClose }: { onClose: () => void }) => {
   const { data: roles = [], isLoading } = useRoles();
+  const { canCreate } = useUserPermissions();
   const [globalFilter, setGlobalFilter] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [selectedRoleId, setSelectedRoleId] = useState<number | null>(null);
@@ -119,13 +121,15 @@ const Roles = ({ onClose }: { onClose: () => void }) => {
 
             {/* Buttons */}
             <div className="flex gap-3">
-              <button
-                onClick={() => setShowCreateModal(true)}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center gap-2"
-              >
-                <LuPlus className="w-4 h-4" />
-                Nuevo Rol
-              </button>
+              {canCreate('usuarios') && (
+                <button
+                  onClick={() => setShowCreateModal(true)}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center gap-2"
+                >
+                  <LuPlus className="w-4 h-4" />
+                  Nuevo Rol
+                </button>
+              )}
                 <button
                   onClick={() => {
                     // Dispara un evento personalizado para actualizar usuarios

@@ -22,11 +22,13 @@ import type { UserDetailModalProps } from '../Types/UserTypes';
 import type { Permiso } from '../Models/Usuario';
 import { getPermissionLabel } from '../Helper/GroupPermiByModule';
 import { isActive } from '../Helper/utils';
+import { useUserPermissions } from '@/Modules/Auth/Hooks/PermissionHook';
 
 
 
 const UserDetailModal: React.FC<UserDetailModalProps> = ({ userId, isOpen, onClose }) => {
   const { data: user, isLoading } = useUser(userId);
+  const { canEdit, canActivateDeactivate } = useUserPermissions();
   const deactivateUserMutation = useDeactivateUser();
   const activateUserMutation = useActivateUser();
   const [showEditModal, setShowEditModal] = useState(false);
@@ -65,7 +67,7 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({ userId, isOpen, onClo
   };
 
       // Agrupar permisos por módulo
-     const groupedPermisos = user?.rol.permisos?.reduce((acc: any, permiso: Permiso) => {
+     const groupedPermisos = user?.rol.permisos?.reduce((acc: Record<string, Permiso[]>, permiso: Permiso) => {
       if (!acc[permiso.modulo]) {
         acc[permiso.modulo] = [];
       }
@@ -254,16 +256,20 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({ userId, isOpen, onClo
 
           {/* Action Buttons */}
           <div className="flex justify-end gap-4 mt-8">
-            <Button
-              size="xl"
-              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center gap-2"
-              onClick={() => setShowEditModal(true)}
-            >
-              <FaUserEdit className="w-5 h-5" />
-              Editar Usuario
-            </Button>
+            {canEdit('usuarios') && (
+              <Button
+                size="xl"
+                className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center gap-2"
+                onClick={() => setShowEditModal(true)}
+              >
+                <FaUserEdit className="w-5 h-5" />
+                Editar Usuario
+              </Button>
+            )}
 
-            {/* Botón condicional para activar/desactivar con AlertDialog */}
+
+          {canActivateDeactivate('usuarios') && (
+            <>
             {isActive(user.Fecha_Eliminacion) ? (
               <AlertDialog>
                 <AlertDialogTrigger asChild>
@@ -330,7 +336,9 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({ userId, isOpen, onClo
                   </AlertDialogFooter>
                 </AlertDialogContent>
               </AlertDialog>
-            )}
+              )}
+            </>
+          )}
           </div>
         </div>
 

@@ -11,10 +11,12 @@ import type { FechaEliminacionType } from '@/Modules/Usuarios/Types/UserTypes';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/Modules/Global/components/Sidebar/ui/alert-dialog';
 import { Button } from '@/Modules/Global/components/Sidebar/ui/button';
 import { FaUserEdit } from 'react-icons/fa';
+import { useUserPermissions } from '@/Modules/Auth/Hooks/PermissionHook';
 
 
 const RoleDetailModal: React.FC<RoleDetailModalProps> = ({ roleId, isOpen, onClose }) => {
   const { data: role, isLoading } = useRoleById(roleId);
+  const { canEdit, canActivateDeactivate } = useUserPermissions();
   const [showEditModal, setShowEditModal] = useState(false);
   const deactivateRoleMutation = useDeactivateRole();
   const activateRoleMutation = useActivateRole();
@@ -155,84 +157,89 @@ const RoleDetailModal: React.FC<RoleDetailModalProps> = ({ roleId, isOpen, onClo
             )}
                       {/* Footer */}
           <div className="flex justify-end gap-4 mt-8">
-            <Button
-              size="xl"
-              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center gap-2"
-              onClick={() => setShowEditModal(true)}
-            >
-              <FaUserEdit className="w-5 h-5" />
-              Editar rol
-            </Button>
+            {canEdit('usuarios') && (
+              <Button
+                size="xl"
+                className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center gap-2"
+                onClick={() => setShowEditModal(true)}
+              >
+                <FaUserEdit className="w-5 h-5" />
+                Editar rol
+              </Button>
+            )}
 
-            {/* Botón condicional para activar/desactivar con AlertDialog */}
-            {isActive(role?.Fecha_Eliminacion) ? (
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button
-                    variant='destructive'
-                    size={'xl'}
-                  >
-                    <LuUserX className="w-5 h-5" />
-                    <span className="ml-2">Desactivar rol</span>
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>
-                      <span>¿Desactivar rol?</span>
-                    </AlertDialogTitle>
-                    <AlertDialogDescription>
-                      <span>¿Estás seguro de que deseas desactivar este rol?</span>
-                      <span>Si lo haces, se desactivarán los usuarios con este rol!</span>
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogAction
-                      onClick={handleDeactivate}
-                      disabled={deactivateRoleMutation.isPending}
-                    >
-                      <span>Desactivar</span>
-                    </AlertDialogAction>
-                    <AlertDialogCancel>
-                      <span>Cancelar</span>
-                    </AlertDialogCancel>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            ) : (
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button
-                    variant='create'
-                    size={'xl'}
-                  >
-                    <LuUserCheck className="w-5 h-5" />
-                    <span className="ml-2">Activar rol</span>
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>
-                      <span>¿Activar rol?</span>
-                    </AlertDialogTitle>
-                    <AlertDialogDescription>
-                      <span>¿Estás seguro de que deseas activar este rol?</span>
-                      <span>Si lo haces, se activarán los usuarios con este rol!</span>
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogAction
-                      onClick={handleActivate}
-                      disabled={activateRoleMutation.isPending}
-                    >
-                      <span>Activar</span>
-                    </AlertDialogAction>
-                    <AlertDialogCancel>
-                      <span>Cancelar</span>
-                    </AlertDialogCancel>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
+            {canActivateDeactivate('usuarios') && (
+              <>
+                {isActive(role?.Fecha_Eliminacion) ? (
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        variant='destructive'
+                        size={'xl'}
+                      >
+                        <LuUserX className="w-5 h-5" />
+                        <span className="ml-2">Desactivar rol</span>
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>
+                          <span>¿Desactivar rol?</span>
+                        </AlertDialogTitle>
+                        <AlertDialogDescription>
+                          <span>¿Estás seguro de que deseas desactivar este rol?</span>
+                          <span>Si lo haces, se desactivarán los usuarios con este rol!</span>
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogAction
+                          onClick={handleDeactivate}
+                          disabled={deactivateRoleMutation.isPending}
+                        >
+                          <span>Desactivar</span>
+                        </AlertDialogAction>
+                        <AlertDialogCancel>
+                          <span>Cancelar</span>
+                        </AlertDialogCancel>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                ) : (
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        variant='create'
+                        size={'xl'}
+                      >
+                        <LuUserCheck className="w-5 h-5" />
+                        <span className="ml-2">Activar rol</span>
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>
+                          <span>¿Activar rol?</span>
+                        </AlertDialogTitle>
+                        <AlertDialogDescription>
+                          <span>¿Estás seguro de que deseas activar este rol?</span>
+                          <span>Si lo haces, se activarán los usuarios con este rol!</span>
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogAction
+                          onClick={handleActivate}
+                          disabled={activateRoleMutation.isPending}
+                        >
+                          <span>Activar</span>
+                        </AlertDialogAction>
+                        <AlertDialogCancel>
+                          <span>Cancelar</span>
+                        </AlertDialogCancel>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                )}
+              </>
             )}
           </div>
           </div>
