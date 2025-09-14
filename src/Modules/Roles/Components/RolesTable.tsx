@@ -14,6 +14,7 @@ import RoleDetailModal from './RoleDetailModal';
 import CreateRoleModal from './CreateRoleModal';
 import type { Role } from '../Models/Role';
 import { EditRoleModal } from './EditRolModal';
+import { getStatusClass, getStatusDisplay } from '@/Modules/Usuarios/Helper/utils';
 
 
 
@@ -41,6 +42,14 @@ const Roles = ({ onClose }: { onClose: () => void }) => {
         cell: info => (
           <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
             {info.getValue()?.length ?? 0} permisos
+          </span>
+        ),
+      }),
+      columnHelper.accessor('Fecha_Eliminacion', { 
+        header: 'Estado',
+        cell: info => (
+          <span className={`px-2 py-1 rounded-full text-xs ${getStatusClass(info.getValue())}`}>
+            {getStatusDisplay(info.getValue())}
           </span>
         ),
       }),

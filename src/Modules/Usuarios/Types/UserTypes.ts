@@ -1,6 +1,6 @@
 import type { Usuario } from "../Models/Usuario";
 
-export type FechaEliminacionType = Date | string | null;
+export type FechaEliminacionType = Date | string | null | undefined;
 export interface UserDetailModalProps {
   userId: number;
   isOpen: boolean;

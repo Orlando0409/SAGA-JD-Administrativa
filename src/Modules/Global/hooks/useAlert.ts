@@ -53,7 +53,7 @@ export const useAlert = () => {
       }
 
       // Mostrar alerta normal
-      const id = Date.now().toString();
+      const id = generateUniqueId();
       const newAlert: AlertState = { id, type, title, description, duration };
       setAlerts(prev => [...prev, newAlert].slice(-MAX_ALERTS));
 
@@ -95,6 +95,11 @@ export const useAlert = () => {
       showAlert('info', title, description, duration),
     [showAlert]
   );
+
+    // Función para generar IDs únicos más robustos
+  const generateUniqueId = useCallback(() => {
+    return `alert_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
+  }, []);
 
   return {
     alerts,

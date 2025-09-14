@@ -21,6 +21,7 @@ import { CUSTOM_ANIMATION } from '@/Modules/Global/types/Sections';
 import type { UserDetailModalProps } from '../Types/UserTypes';
 import type { Permiso } from '../Models/Usuario';
 import { getPermissionLabel } from '../Helper/GroupPermiByModule';
+import { isActive } from '../Helper/utils';
 
 
 
@@ -58,12 +59,9 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({ userId, isOpen, onClo
     )
   }
 
-  const isUserActive = (Fecha_Eliminacion: Date | string | null) => {
-    return Fecha_Eliminacion === null || Fecha_Eliminacion === undefined;
-  };
 
   const getStatusDisplay = (Fecha_Eliminacion: Date | string | null) => {
-    return isUserActive(Fecha_Eliminacion) ? 'Activo' : 'Inactivo';
+    return isActive(Fecha_Eliminacion) ? 'Activo' : 'Inactivo';
   };
 
       // Agrupar permisos por módulo
@@ -151,7 +149,7 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({ userId, isOpen, onClo
                 </div>
               </AccordionHeader>
               <AccordionBody className="px-6 pb-6" placeholder="">
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div className="grid grid-cols-2 md:grid-cols-2 gap-6">
                   <div className="space-y-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-500 mb-1">Nombre de Usuario</label>
@@ -171,7 +169,7 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({ userId, isOpen, onClo
                       <div>
                       <label className="block text-sm font-medium text-gray-500 mb-2">Estado del Usuario</label>
                       <span className={`inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium border ${
-                        isUserActive(user.Fecha_Eliminacion)
+                        isActive(user.Fecha_Eliminacion)
                           ? 'bg-green-100 text-green-800 border-green-200' 
                           : 'bg-red-100 text-red-800 border-red-200'
                       }`}>
@@ -266,7 +264,7 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({ userId, isOpen, onClo
             </Button>
 
             {/* Botón condicional para activar/desactivar con AlertDialog */}
-            {isUserActive(user.Fecha_Eliminacion) ? (
+            {isActive(user.Fecha_Eliminacion) ? (
               <AlertDialog>
                 <AlertDialogTrigger asChild>
                   <Button

@@ -13,7 +13,7 @@ import { useUsers } from '../Hooks/userHook';
 import type { Usuario } from '../Models/Usuario';
 import CreateUserModal from './CreateUserModal';
 import UserDetailModal from './UserDetailModal';
-import { NombreUsuarioCell, getStatusClass, getStatusDisplay, isUserActive } from '../Helper/utils';
+import { NombreUsuarioCell, getStatusClass, getStatusDisplay, isActive } from '../Helper/utils';
 import RolesTable from '../../Roles/Components/RolesTable';
 import FilterModal from './FilterModal';
 import type { FilterOptions } from '../Types/UserTypes';
@@ -38,27 +38,9 @@ const Usuarios = () => {
 
       // Filtro por estado
       if (filters.estado) {
-        const userIsActive = isUserActive(user.Fecha_Eliminacion);
+        const userIsActive = isActive(user.Fecha_Eliminacion);
         if (filters.estado === 'activo' && !userIsActive) return false;
         if (filters.estado === 'inactivo' && userIsActive) return false;
-      }
-
-      // Filtro por fecha (asumiendo que tienes un campo de fecha de creación)
-      if (filters.fechaCreacionDesde || filters.fechaCreacionHasta) {
-        // Implementa según el campo de fecha que tengas en tu modelo
-        // Por ejemplo: user.Fecha_Creacion
-      }
-
-      // Búsqueda avanzada
-      if (filters.busquedaAvanzada) {
-        const searchTerm = filters.busquedaAvanzada.toLowerCase();
-        const matchesId = user.Id_Usuario.toString().includes(searchTerm);
-        const matchesEmail = user.Correo_Electronico.toLowerCase().includes(searchTerm);
-        const matchesName = user.Nombre_Usuario.toLowerCase().includes(searchTerm);
-        
-        if (!matchesId && !matchesEmail && !matchesName) {
-          return false;
-        }
       }
 
       return true;
