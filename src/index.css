@@ -1,6 +1,6 @@
 @import 'tailwindcss';
 @import "tw-animate-css";
-@plugin 'tailwind-scrollbar';
+/* Removed @plugin 'tailwind-scrollbar'; - configure this in tailwind.config.js */
 
 @custom-variant dark (&:is(.dark *));
 
