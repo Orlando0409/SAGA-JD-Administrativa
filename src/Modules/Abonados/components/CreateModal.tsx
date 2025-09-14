@@ -1,0 +1,280 @@
+import { useForm } from '@tanstack/react-form';
+import { useState } from 'react';
+import { useAbonados } from '../Hook/HookAbonado';
+import type { Abonado } from '../Models/ModelAbonado';
+import { useAlerts } from '@/Modules/Global/context/AlertContext';
+
+interface CreateModalProps {
+    isOpen: boolean;
+    onClose: () => void;
+}
+
+type TipoFormulario = 'abonado-fisico';
+
+const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
+    const [tipoActivo, setTipoActivo] = useState<TipoFormulario>('abonado-fisico');
+    const { showSuccess, showError } = useAlerts();
+
+    // Hooks para las mutaciones
+    const { createAbonado } = useAbonados();
+
+    if (!isOpen) return null;
+
+    const tabs = [
+        { id: 'abonado-fisico', label: '💧👤 Abonado Físico', icon: '💧' },
+    ] as const;
+
+    const getDefaultValues = () => {
+        return {
+            Nombre: '',
+            Apellido1: '',
+            Apellido2: '',
+            Cedula: '',
+            Numero_Telefono: '',
+            Correo: '',
+            Direccion_Exacta: '',
+            Edad: 0,
+        };
+    };
+
+    const form = useForm({
+        defaultValues: getDefaultValues(),
+        onSubmit: async ({ value }) => {
+            try {
+                await createAbonado(value as Omit<Abonado, 'Id_Abonado' | 'Fecha_Creacion' | 'Fecha_Actualizacion'>);
+                showSuccess('Abonado físico creado exitosamente');
+                onClose();
+                form.reset();
+            } catch (error) {
+                console.error('Error creando registro:', error);
+                showError('Error al crear el registro');
+            }
+        },
+    });
+
+    const renderFormularioFisico = () => (
+        <>
+            <form.Field name="Nombre">
+                {(field) => (
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Nombre *
+                        </label>
+                        <input
+                            type="text"
+                            value={field.state.value}
+                            onChange={(e) => field.handleChange(e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            placeholder="Nombre"
+                            required
+                        />
+                    </div>
+                )}
+            </form.Field>
+
+            <form.Field name="Apellido1">
+                {(field) => (
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Primer Apellido *
+                        </label>
+                        <input
+                            type="text"
+                            value={field.state.value}
+                            onChange={(e) => field.handleChange(e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            placeholder="Primer apellido"
+                            required
+                        />
+                    </div>
+                )}
+            </form.Field>
+
+            <form.Field name="Apellido2">
+                {(field) => (
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Segundo Apellido
+                        </label>
+                        <input
+                            type="text"
+                            value={field.state.value}
+                            onChange={(e) => field.handleChange(e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            placeholder="Segundo apellido (opcional)"
+                        />
+                    </div>
+                )}
+            </form.Field>
+
+            <form.Field name="Cedula">
+                {(field) => (
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Cédula *
+                        </label>
+                        <input
+                            type="text"
+                            value={field.state.value}
+                            onChange={(e) => field.handleChange(e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            placeholder="123456789"
+                            required
+                        />
+                    </div>
+                )}
+            </form.Field>
+
+            <form.Field name="Numero_Telefono">
+                {(field) => (
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Teléfono *
+                        </label>
+                        <input
+                            type="tel"
+                            value={field.state.value}
+                            onChange={(e) => field.handleChange(e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            placeholder="88888888"
+                            required
+                        />
+                    </div>
+                )}
+            </form.Field>
+
+            <form.Field name="Correo">
+                {(field) => (
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Correo Electrónico *
+                        </label>
+                        <input
+                            type="email"
+                            value={field.state.value}
+                            onChange={(e) => field.handleChange(e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            placeholder="ejemplo@email.com"
+                            required
+                        />
+                    </div>
+                )}
+            </form.Field>
+
+            {(
+                <form.Field name="Direccion_Exacta">
+                    {(field) => (
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Dirección Exacta
+                            </label>
+                            <textarea
+                                value={field.state.value}
+                                onChange={(e) => field.handleChange(e.target.value)}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                placeholder="Dirección exacta de la propiedad"
+                                rows={3}
+                            />
+                        </div>
+                    )}
+                </form.Field>
+            )}
+
+            {(
+                <form.Field name="Edad">
+                    {(field) => (
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Edad *
+                            </label>
+                            <input
+                                type="number"
+                                value={field.state.value}
+                                onChange={(e) => field.handleChange(parseInt(e.target.value) || 0)}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                placeholder="25"
+                                min="0"
+                                max="120"
+                                required
+                            />
+                        </div>
+                    )}
+                </form.Field>
+            )}
+
+        </>
+    );
+
+    const renderFormulario = () => {
+        return renderFormularioFisico();
+    };
+
+    return (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-lg w-full max-w-4xl max-h-[90vh] overflow-hidden">
+                {/* Header */}
+                <div className="flex justify-between items-center p-6 border-b">
+                    <h2 className="text-xl font-semibold text-gray-800">Nueva Solicitud</h2>
+                    <button
+                        onClick={onClose}
+                        className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                    >
+                        ✕
+                    </button>
+                </div>
+
+                {/* Tabs */}
+                <div className="border-b">
+                    <div className="flex overflow-x-auto">
+                        {tabs.map((tab) => (
+                            <button
+                                key={tab.id}
+                                onClick={() => {
+                                    setTipoActivo(tab.id);
+                                    form.reset();
+                                }}
+                                className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${tipoActivo === tab.id
+                                    ? 'border-blue-500 text-blue-600 bg-blue-50'
+                                    : 'border-transparent text-gray-600 hover:text-gray-800 hover:bg-gray-50'
+                                    }`}
+                            >
+                                {tab.label}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Contenido del formulario */}
+                <div className="p-6 overflow-y-auto max-h-[calc(90vh-140px)]">
+                    <form
+                        onSubmit={(e) => {
+                            e.preventDefault();
+                            form.handleSubmit();
+                        }}
+                        className="space-y-4"
+                    >
+                        {renderFormulario()}
+
+                        <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
+                            <button
+                                type="button"
+                                onClick={onClose}
+                                className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                type="submit"
+                                className="px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
+                            >
+                                Crear {tipoActivo.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+export default CreateModal;
