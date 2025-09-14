@@ -9,6 +9,7 @@ import {
 } from '../Services/userService';
 import { useAlerts } from '@/Modules/Global/context/AlertContext';
 import type { UpdateUserData } from '../Models/Usuario';
+import { AxiosError } from 'axios';
 
 export const useUsers = () => {
   return useQuery({
@@ -77,7 +78,7 @@ export const useDeactivateUser = () => {
 
 export const useActivateUser = () => {
   const queryClient = useQueryClient();
-  const { showSuccess, showError } = useAlerts();
+  const { showSuccess, showError, showWarning } = useAlerts();
 
   return useMutation({
     mutationFn: activateUser,
@@ -85,8 +86,20 @@ export const useActivateUser = () => {
       queryClient.invalidateQueries({ queryKey: ['users'] });
       showSuccess('Usuario activado', 'El usuario se ha activado exitosamente');
     },
-    onError: () => {
-      showError('Error', 'No se pudo activar el usuario');
+    onError: (err: unknown) => {
+      let errorMsg = '';
+      if (err instanceof AxiosError) {
+        errorMsg = err.response?.data?.message || err.message;
+      } else if (err instanceof Error) {
+        errorMsg = err.message;
+      } else {
+        errorMsg = String(err);
+      }
+
+      if (typeof errorMsg === 'string' && errorMsg.includes('deshabilitado')) {
+        showWarning('El rol está deshabilitado. Intenta activar el rol primero.');
+      }
+      showError('Error, No se pudo activar el usuario');
     },
   });
 };
