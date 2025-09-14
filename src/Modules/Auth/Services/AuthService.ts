@@ -1,4 +1,4 @@
-import type { Usuario } from '../../Usuarios/Models/Usuario'
+import type { ChangePassword, Usuario } from '../../Usuarios/Models/Usuario'
 import type { LoginForm } from '../Models/LoginForm';
 import axiosPrivate from '../../../Api/apiAuth'
 import { cookieUtils } from '../../Global/utils/CookieUtils';
@@ -21,6 +21,10 @@ export async function ResetPassword(nuevaContraseña: string): Promise<boolean> 
     nuevaContraseña,
     };
     const response = await axiosPrivate.post(`/auth/reset-password`, payload);
+    return response.data;
+}
+export async function changePassword({userid, currentPassword, newPassword}: ChangePassword): Promise<string> {
+    const response = await axiosPrivate.post(`/auth/change-password`, { userid, currentPassword, newPassword });
     return response.data;
 }
 

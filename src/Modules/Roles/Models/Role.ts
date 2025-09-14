@@ -10,7 +10,6 @@ export interface CreateRoleData {
 }
 
 export interface UpdateRoleData {
-  Id_Rol: number;
   Nombre_Rol: string;
   permisosIds: number[]; // Array de IDs específicos
 }
@@ -21,4 +20,3 @@ export interface Permiso {
   Ver: boolean; // true o false
   Editar: boolean; // true o false
 }
-

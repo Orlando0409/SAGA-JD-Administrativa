@@ -1,19 +1,26 @@
 import { useForm } from '@tanstack/react-form';
-import { useCreateUser, useRoles } from '../Hooks/userHook';
+import { useCreateUser } from '../Hooks/userHook';
 import type { CreateUserData } from '../Models/Usuario';
 import { useState } from 'react';
 import { CreateUserSchema, type CreateUserSchemaData } from '../Schema/CreateUserSchema';
-import { LuX } from "react-icons/lu";
+import type { Role } from '@/Modules/Roles/Models/Role';
+import { useRoles } from '@/Modules/Roles/Hooks/RoleHook';
+import { type CreateUserProps, NOMBRE_MAX_LENGTH, EMAIL_MAX_LENGTH, PASSWORD_MAX_LENGTH, PASSWORD_MIN_LENGTH } from '../Types/UserTypes';
+import { useAlerts } from '@/Modules/Global/context/AlertContext';
 
-type CreateUserProps = {
-  onClose?: () => void;
-  setShowCreateModal?: (show: boolean) => void;
-};
+
 
 const CreateUserModal = ({ onClose, setShowCreateModal }: CreateUserProps) => {
   const createUserMutation = useCreateUser();
   const { data: roles = [] } = useRoles();
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+  const {showSuccess, showError} = useAlerts();
+  const [fieldCharCounts, setFieldCharCounts] = useState({
+    nombreUsuario: 0,
+    email: 0,
+    password: 0,
+    confirmPassword: 0
+  });
 
   // Función para manejar el cierre del modal
   const handleClose = () => {
@@ -21,11 +28,30 @@ const CreateUserModal = ({ onClose, setShowCreateModal }: CreateUserProps) => {
     if (setShowCreateModal) setShowCreateModal(false);
   };
 
+
+  // Función para crear el handler de input con validación
+  const createInputHandler = (fieldName: string, handleChange: (value: string) => void, maxLength: number) => {
+    return (e: React.ChangeEvent<HTMLInputElement>) => {
+      const value = e.target.value;
+      
+      // Limitar caracteres al máximo permitido
+      if (value.length <= maxLength) {
+        handleChange(value);
+        setFieldCharCounts(prev => ({ ...prev, [fieldName]: value.length }));
+        
+        // Limpiar errores de validación cuando el usuario empieza a escribir
+        if (formErrors[fieldName]) {
+          setFormErrors(prev => ({ ...prev, [fieldName]: '' }));
+        }
+      }
+    };
+  };
+
   const form = useForm({
     defaultValues: {
       Nombre_Usuario: '',
       Correo_Electronico: '',
-      Contraseña:'',
+      Contraseña: '',
       confirmarPassword: '',
       Id_Rol: 0,
     },
@@ -46,200 +72,263 @@ const CreateUserModal = ({ onClose, setShowCreateModal }: CreateUserProps) => {
       }
 
       try {
-        const payload = {
-          Nombre_Usuario : value.Nombre_Usuario,
+        const payload : CreateUserData = {
+          Nombre_Usuario: value.Nombre_Usuario,
           Contraseña: value.Contraseña,
           Correo_Electronico: value.Correo_Electronico,
           Id_Rol: value.Id_Rol
-        } as CreateUserData
+        };
+
         await createUserMutation.mutateAsync(payload);
+        showSuccess('Usuario creado exitosamente');
         handleClose();
         form.reset();
       } catch (error) {
         console.error('Error creating user:', error);
+        showError('Error al crear usuario');
       }
     },
   });
 
+  // Función para renderizar contador de caracteres
+  const renderCharCounter = (current: number, max: number, hasError: boolean) => {
+    const remaining = max - current;
+    const isNearLimit = remaining <= 5;
+    
+    return (
+      <div className="flex justify-between items-center mt-1">
+        <span className="text-xs text-gray-500">
+          {hasError ? '' : `Máximo ${max} caracteres`}
+        </span>
+        <span className={`text-xs font-medium ${
+          isNearLimit ? 'text-orange-600' : 'text-gray-500'
+        }`}>
+          {current}/{max}
+          {isNearLimit && current < max && (
+            <span className="ml-1 text-orange-600">
+              ({remaining} restantes)
+            </span>
+          )}
+        </span>
+      </div>
+    );
+  };
+
+
   return (
     <div className="fixed inset-0 bg-white bg-opacity-95 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-2xl border border-gray-200 w-full max-w-md mx-4">
+      <div className="bg-white rounded-lg shadow-2xl border border-gray-200 w-full max-w-md mx-4 max-h-[90vh] overflow-hidden">
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
-          <h2 className="text-xl font-semibold text-gray-900">Crear Nuevo Usuario</h2>
-          <button
-            onClick={handleClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
-          >
-            <LuX className="w-6 h-6" />
-          </button>
+          <h2 className="text-xl font-semibold text-gray-900">Registrar un nuevo usuario</h2>
         </div>
 
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            form.handleSubmit();
-          }}
-          className="p-6 space-y-4"
-        >
-          {/* Campos del formulario igual */}
-          <form.Field name="Nombre_Usuario">
-            {(field) => (
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Nombre de Usuario
-                </label>
-                <input
-                  type="text"
-                  value={field.state.value}
-                  onChange={(e) => field.handleChange(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  required
-                />
-                {field.state.meta.errors?.map((err) => (
-                  <p key={err} className="text-red-500 text-sm">
-                    {err}
-                  </p>
-                ))}
-                {formErrors.Nombre_Usuario && (
-                  <p className="text-red-500 text-sm">
-                    {formErrors.Nombre_Usuario}
-                  </p>
-                )}
-              </div>
-            )}
-          </form.Field>
+        <div className="p-6 overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100 max-h-[calc(90vh-140px)]">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              form.handleSubmit();
+            }}
+            className="p-6 space-y-4"
+          >
+            {/* Nombre de Usuario */}
+            <form.Field name="Nombre_Usuario">
+              {(field) => (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Nombre de Usuario
+                  </label>
+                  <input
+                    type="text"
+                    value={field.state.value}
+                    onChange={createInputHandler('nombreUsuario', field.handleChange, NOMBRE_MAX_LENGTH)}
+                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-colors ${
+                      (formErrors.Nombre_Usuario || field.state.meta.errors?.length) 
+                        ? 'border-red-300 focus:ring-red-500' 
+                        : 'border-gray-300 focus:ring-blue-500'
+                    }`}
+                    placeholder={`Nombre de Usuario`}
+                    maxLength={NOMBRE_MAX_LENGTH}
+                  />
+                  
+                  {renderCharCounter(
+                    fieldCharCounts.nombreUsuario, 
+                    NOMBRE_MAX_LENGTH, 
+                    !!(formErrors.Nombre_Usuario || field.state.meta.errors?.length)
+                  )}
 
-          <form.Field name="Correo_Electronico">
-            {(field) => (
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Correo Electrónico
-                </label>
-                <input
-                  type="email"
-                  value={field.state.value}
-                  onChange={(e) => field.handleChange(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  required
-                />
-                {field.state.meta.errors?.map((err) => (
-                  <p key={err} className="text-red-500 text-sm">
-                    {err}
-                  </p>
-                ))}
-                {formErrors.Correo_Electronico && (
-                  <p className="text-red-500 text-sm">
-                    {formErrors.Correo_Electronico}
-                  </p>
-                )}
-              </div>
-            )}
-          </form.Field>
-
-          <form.Field name="Contraseña">
-            {(field) => (
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Contraseña
-                </label>
-                <input
-                  type="password"
-                  value={field.state.value}
-                  onChange={(e) => field.handleChange(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  required
-                />
-                {field.state.meta.errors?.map((err) => (
-                  <p key={err} className="text-red-500 text-sm">
-                    {err}
-                  </p>
-                ))}
-                {formErrors.password && (
-                  <p className="text-red-500 text-sm">
-                    {formErrors.password}
-                  </p>
-                )}
-              </div>
-            )}
-          </form.Field>
-
-          <form.Field name="confirmarPassword">
-            {(field) => (
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Confirme la Contraseña
-                </label>
-                <input
-                  type="password"
-                  value={field.state.value}
-                  onChange={(e) => field.handleChange(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  required
-                />
-                {field.state.meta.errors?.map((err) => (
-                  <p key={err} className="text-red-500 text-sm">
-                    {err}
-                  </p>
-                ))}
-                {formErrors.confirmarPassword && (
-                  <p className="text-red-500 text-sm">
-                    {formErrors.confirmarPassword}
-                  </p>
-                )}
-              </div>
-            )}
-          </form.Field>
-
-          <form.Field name="Id_Rol">
-            {(field) => (
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Rol
-                </label>
-                <select
-                  value={field.state.value}
-                  onChange={(e) => field.handleChange(Number(e.target.value))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  required
-                >
-                  <option value={0}>Seleccionar rol</option>
-                  {roles.map((rol: any) => (
-                    <option key={rol.Id_Rol} value={rol.Id_Rol}>
-                      {rol.Nombre_Rol}
-                    </option>
+                  {field.state.meta.errors?.map((err) => (
+                    <p key={err} className="text-red-500 text-xs mt-1">{err}</p>
                   ))}
-                </select>
-                {field.state.meta.errors?.map((err) => (
-                  <p key={err} className="text-red-500 text-sm">
-                    {err}
-                  </p>
-                ))}
-                {formErrors.id_rol && (
-                  <p className="text-red-500 text-sm">
-                    {formErrors.id_rol}
-                  </p>
-                )}
-              </div>
-            )}
-          </form.Field>
+                  {formErrors.Nombre_Usuario && (
+                    <p className="text-red-500 text-xs mt-1">{formErrors.Nombre_Usuario}</p>
+                  )}
+                </div>
+              )}
+            </form.Field>
 
-          <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
-            <button
-              type="button"
-              onClick={handleClose}
-              className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
-            >
-              Cancelar
-            </button>
-            <button
-              type="submit"
-              disabled={createUserMutation.isPending}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
-            >
-              {createUserMutation.isPending ? 'Creando...' : 'Crear Usuario'}
-            </button>
-          </div>
-        </form>
+            {/* Correo Electrónico */}
+            <form.Field name="Correo_Electronico">
+              {(field) => (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Correo Electrónico
+                  </label>
+                  <input
+                    type="email"
+                    value={field.state.value}
+                    onChange={createInputHandler('email', field.handleChange, EMAIL_MAX_LENGTH)}
+                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-colors ${
+                      (formErrors.Correo_Electronico || field.state.meta.errors?.length) 
+                        ? 'border-red-300 focus:ring-red-500' 
+                        : 'border-gray-300 focus:ring-blue-500'
+                    }`}
+                    placeholder="ejemplo@correo.com"
+                    maxLength={EMAIL_MAX_LENGTH}
+                  />
+                  
+                  {renderCharCounter(
+                    fieldCharCounts.email, 
+                    EMAIL_MAX_LENGTH, 
+                    !!(formErrors.Correo_Electronico || field.state.meta.errors?.length)
+                  )}
+                  
+                  {field.state.meta.errors?.map((err) => (
+                    <p key={err} className="text-red-500 text-xs mt-1">{err}</p>
+                  ))}
+                  {formErrors.Correo_Electronico && (
+                    <p className="text-red-500 text-xs mt-1">{formErrors.Correo_Electronico}</p>
+                  )}
+                </div>
+              )}
+            </form.Field>
+
+            {/* Contraseña */}
+            <form.Field name="Contraseña">
+              {(field) => (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Contraseña
+                  </label>
+                  <input
+                    type="password"
+                    value={field.state.value}
+                    onChange={createInputHandler('password', field.handleChange, PASSWORD_MAX_LENGTH)}
+                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-colors ${
+                      (formErrors.Contraseña || field.state.meta.errors?.length) 
+                        ? 'border-red-300 focus:ring-red-500' 
+                        : 'border-gray-300 focus:ring-blue-500'
+                    }`}
+                    placeholder={`Mínimo ${PASSWORD_MIN_LENGTH} caracteres`}
+                    maxLength={PASSWORD_MAX_LENGTH}
+                  />
+                  
+                  {renderCharCounter(
+                    fieldCharCounts.password, 
+                    PASSWORD_MAX_LENGTH, 
+                    !!(formErrors.Contraseña || field.state.meta.errors?.length)
+                  )}
+                
+                  {field.state.meta.errors?.map((err) => (
+                    <p key={err} className="text-red-500 text-xs mt-1">{err}</p>
+                  ))}
+                  {formErrors.Contraseña && (
+                    <p className="text-red-500 text-xs mt-1">{formErrors.Contraseña}</p>
+                  )}
+                </div>
+              )}
+            </form.Field>
+
+            {/* Confirmar Contraseña */}
+            <form.Field name="confirmarPassword">
+              {(field) => (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Confirme la Contraseña
+                  </label>
+                  <input
+                    type="password"
+                    value={field.state.value}
+                    onChange={createInputHandler('confirmPassword', field.handleChange, PASSWORD_MAX_LENGTH)}
+                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-colors ${
+                      (formErrors.confirmarPassword || field.state.meta.errors?.length) 
+                        ? 'border-red-300 focus:ring-red-500' 
+                        : 'border-gray-300 focus:ring-blue-500'
+                    }`}
+                    placeholder="Repita su contraseña"
+                    maxLength={PASSWORD_MAX_LENGTH}
+                  />
+                  
+                  {renderCharCounter(
+                    fieldCharCounts.confirmPassword, 
+                    PASSWORD_MAX_LENGTH, 
+                    !!(formErrors.confirmarPassword || field.state.meta.errors?.length)
+                  )}
+
+                  {field.state.meta.errors?.map((err) => (
+                    <p key={err} className="text-red-500 text-xs mt-1">{err}</p>
+                  ))}
+                  {formErrors.confirmarPassword && (
+                    <p className="text-red-500 text-xs mt-1">{formErrors.confirmarPassword}</p>
+                  )}
+                </div>
+              )}
+            </form.Field>
+
+            {/* Rol */}
+            <form.Field name="Id_Rol">
+              {(field) => (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Rol
+                  </label>
+                  <select
+                    value={field.state.value}
+                    onChange={(e) => field.handleChange(Number(e.target.value))}
+                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-colors ${
+                      (formErrors.id_rol || field.state.meta.errors?.length) 
+                        ? 'border-red-300 focus:ring-red-500' 
+                        : 'border-gray-300 focus:ring-blue-500'
+                    }`}
+                  >
+                    <option value={0}>Seleccionar rol</option>
+                    {roles.map((rol: Role) => (
+                      <option key={rol.Id_Rol} value={rol.Id_Rol}>
+                        {rol.Nombre_Rol}
+                      </option>
+                    ))}
+                  </select>
+                  {field.state.meta.errors?.map((err) => (
+                    <p key={err} className="text-red-500 text-xs mt-1">{err}</p>
+                  ))}
+                  {formErrors.id_rol && (
+                    <p className="text-red-500 text-xs mt-1">{formErrors.id_rol}</p>
+                  )}
+                </div>
+              )}
+            </form.Field>
+
+            <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
+              <button
+                type="button"
+                onClick={handleClose}
+                className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                disabled={createUserMutation.isPending}
+                className={`px-4 py-2 text-white rounded-lg transition-colors ${
+                  createUserMutation.isPending 
+                    ? 'bg-blue-300 cursor-not-allowed' 
+                    : 'bg-blue-600 hover:bg-blue-700' 
+                }`}
+              >
+                {createUserMutation.isPending ? 'Creando...' : 'Crear Usuario'}
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   );

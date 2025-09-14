@@ -17,18 +17,12 @@ import {
   AlertDialogFooter
 } from "@/Modules/Global/components/Sidebar/ui/alert-dialog";
 import { Button } from '@/Modules/Global/components/Sidebar/ui/button';
+import { CUSTOM_ANIMATION } from '@/Modules/Global/types/Sections';
+import type { UserDetailModalProps } from '../Types/UserTypes';
+import type { Permiso } from '../Models/Usuario';
+import { getPermissionLabel } from '../Helper/GroupPermiByModule';
 
-interface UserDetailModalProps {
-  userId: number;
-  isOpen: boolean;
-  onClose: () => void;
-}
 
-// Animación personalizada como en el sidebar
-const CUSTOM_ANIMATION = {
-  mount: { scale: 1 },
-  unmount: { scale: 0.9 },
-};
 
 const UserDetailModal: React.FC<UserDetailModalProps> = ({ userId, isOpen, onClose }) => {
   const { data: user, isLoading } = useUser(userId);
@@ -72,6 +66,15 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({ userId, isOpen, onClo
     return isUserActive(Fecha_Eliminacion) ? 'Activo' : 'Inactivo';
   };
 
+      // Agrupar permisos por módulo
+     const groupedPermisos = user?.rol.permisos?.reduce((acc: any, permiso: Permiso) => {
+      if (!acc[permiso.modulo]) {
+        acc[permiso.modulo] = [];
+      }
+      acc[permiso.modulo].push(permiso);
+      return acc;
+    }, {});
+
   if (!isOpen) return null;
 
   if (isLoading) {
@@ -97,7 +100,7 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({ userId, isOpen, onClo
 
   return (
     <div className="fixed inset-0 bg-white bg-opacity-95 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-2xl border border-gray-200 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+      <div className="bg-white rounded-lg shadow-2xl border border-gray-200 w-full max-w-4xl max-h-[90vh] overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100">
         {/* Header */}
         <div className="sticky top-0 bg-white border-b border-gray-200 p-6 z-10">
           <div className="flex items-center justify-between">
@@ -195,7 +198,7 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({ userId, isOpen, onClo
               <Accordion
                 open={openSections.includes(3)}
                 animate={CUSTOM_ANIMATION}
-                className="border border-gray-200 rounded-lg shadow-sm bg-white"
+                className="border border-gray-200 rounded-lg shadow-sm bg-white "
                 {...({} as any)}
               >
                 <AccordionHeader
@@ -213,47 +216,34 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({ userId, isOpen, onClo
                     <span className="text-gray-500">
                       {openSections.includes(3) ? <FiChevronDown size={20} /> : <FiChevronRight size={20} />}
                     </span>
-                  </div>
+                  </div> 
                 </AccordionHeader>
-                <AccordionBody className="px-6 pb-6" placeholder="">
-                  <div className="space-y-3">
-                    {user.rol.permisos.map((permiso: any) => (
-                      <div key={permiso.id} className="bg-gray-50 border border-gray-200 rounded-lg p-4 hover:bg-gray-100 transition-colors">
+                <AccordionBody className="px-6 pb-6 " placeholder="">
+                  <div className="space-y-4">
+                    {Object.entries(groupedPermisos || {}).map(([modulo, permisos]: [string, any]) => (
+                      <div key={modulo} className="bg-white border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
                             <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
                               <LuShield className="w-5 h-5 text-blue-600" />
                             </div>
                             <div>
-                              <h4 className="font-semibold text-gray-900 text-lg">{permiso.modulo}</h4>
-                              <p className="text-sm text-gray-500">Módulo del sistema</p>
+                              <h4 className="font-semibold text-gray-900 text-lg capitalize">{modulo}</h4>
                             </div>
                           </div>
                           
-                          <div className="flex items-center gap-8">
-                            {/* Toggle Ver */}
-                            <div className="flex flex-col items-center gap-2">
-                              <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Ver</span>
-                              <div className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                                permiso.Ver ? 'bg-green-500' : 'bg-red-400'
-                              }`}>
-                                <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                                  permiso.Ver ? 'translate-x-6' : 'translate-x-1'
-                                }`} />
-                              </div>
-                            </div>
-
-                            {/* Toggle Editar */}
-                            <div className="flex flex-col items-center gap-2">
-                              <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Editar</span>
-                              <div className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                                permiso.Editar ? 'bg-green-500' : 'bg-red-400'
-                              }`}>
-                                <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                                  permiso.Editar ? 'translate-x-6' : 'translate-x-1'
-                                }`} />
-                              </div>
-                            </div>
+                          <div className="flex items-center gap-4">
+                            {permisos.map((permiso: Permiso) => {
+                              const label = getPermissionLabel(permiso);
+                              return (
+                                <div key={permiso.id} className="text-center">
+                                  <div className={`px-3 py-1 rounded-full text-xs font-medium ${label.className}`}>
+                                    {label.text}
+                                  </div>
+                                
+                                </div>
+                              );
+                            })}
                           </div>
                         </div>
                       </div>
@@ -265,7 +255,7 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({ userId, isOpen, onClo
           </div>
 
           {/* Action Buttons */}
-          <div className="flex justify-center gap-4 mt-8">
+          <div className="flex justify-end gap-4 mt-8">
             <Button
               size="xl"
               className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center gap-2"

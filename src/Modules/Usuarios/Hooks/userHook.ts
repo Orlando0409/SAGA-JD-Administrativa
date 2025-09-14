@@ -5,10 +5,10 @@ import {
   createUser, 
   updateUser, 
   deactivateUser, 
-  getRoles,
   activateUser
 } from '../Services/userService';
 import { useAlerts } from '@/Modules/Global/context/AlertContext';
+import type { UpdateUserData } from '../Models/Usuario';
 
 export const useUsers = () => {
   return useQuery({
@@ -25,12 +25,6 @@ export const useUser = (id: number) => {
   });
 };
 
-export const useRoles = () => {
-  return useQuery({
-    queryKey: ['roles'],
-    queryFn: getRoles,
-  });
-};
 
 export const useCreateUser = () => {
   const queryClient = useQueryClient();
@@ -53,7 +47,7 @@ export const useUpdateUser = () => {
   const { showSuccess, showError } = useAlerts();
 
   return useMutation({
-    mutationFn: updateUser,
+    mutationFn: ({ Id_Usuario, userData }: { Id_Usuario: number; userData: UpdateUserData }) => updateUser(Id_Usuario, userData),
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['users'] });
       queryClient.invalidateQueries({ queryKey: ['user', data.Id_Usuario] });

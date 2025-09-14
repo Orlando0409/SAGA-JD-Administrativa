@@ -20,3 +20,5 @@ export const NombreUsuarioCell: React.FC<{ value: string }> = ({ value }) => (
     {value}
   </span>
 );
+
+
