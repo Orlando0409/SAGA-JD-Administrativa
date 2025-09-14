@@ -8,13 +8,14 @@ import {
   getSortedRowModel,
   useReactTable,
 } from '@tanstack/react-table';
-import { LuSearch, LuPlus, LuChevronLeft, LuChevronRight } from 'react-icons/lu';
+import { LuSearch, LuPlus, LuChevronLeft, LuChevronRight, LuFilter } from 'react-icons/lu';
 import { useRoles } from '../Hooks/RoleHook';
 import RoleDetailModal from './RoleDetailModal';
 import CreateRoleModal from './CreateRoleModal';
 import type { Role } from '../Models/Role';
 import { EditRoleModal } from './EditRolModal';
-import { getStatusClass, getStatusDisplay } from '@/Modules/Usuarios/Helper/utils';
+import { getStatusClass, getStatusDisplay, isActive } from '@/Modules/Usuarios/Helper/utils';
+
 
 
 
@@ -26,6 +27,7 @@ const Roles = ({ onClose }: { onClose: () => void }) => {
   const [selectedRoleId, setSelectedRoleId] = useState<number | null>(null);
   const [showRoleDetail, setShowRoleDetail] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+
 
   const columnHelper = createColumnHelper<Role>();
 
@@ -88,6 +90,7 @@ const Roles = ({ onClose }: { onClose: () => void }) => {
     setShowRoleDetail(true);
   };
 
+
   if (isLoading) {
     return (
       <div className="w-full flex items-center justify-center h-64">
@@ -97,7 +100,7 @@ const Roles = ({ onClose }: { onClose: () => void }) => {
   }
 
   return (
-    <div className="w-full flex flex-col items-start h-full p-6">
+    <div className="w-full flex flex-col items-start h-full">
       <div className="w-full bg-white rounded-lg shadow-lg overflow-hidden">
         {/* Controls */}
         <div className="p-6 border-b bg-gray-50">
@@ -123,12 +126,16 @@ const Roles = ({ onClose }: { onClose: () => void }) => {
                 <LuPlus className="w-4 h-4" />
                 Nuevo Rol
               </button>
-              <button
-                onClick={() => onClose()}
-                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition"
-              >
-                Usuarios
-              </button>
+                <button
+                  onClick={() => {
+                    // Dispara un evento personalizado para actualizar usuarios
+                    window.dispatchEvent(new CustomEvent('refreshUsuarios'));
+                    onClose();
+                  }}
+                  className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition"
+                >
+                  Usuarios
+                </button>
             </div>
           </div>
         </div>

@@ -92,7 +92,6 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
                 onClose();
                 form.reset();
             } catch (err: any) {
-          console.error('Error de inicio de sesión:', err);
 
           // Verifica si el error es por usuario deshabilitado
           const errorMsg = err?.response?.data?.message || err?.message || '';

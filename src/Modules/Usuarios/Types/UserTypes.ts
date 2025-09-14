@@ -22,9 +22,6 @@ export interface FilterModalProps {
 export interface FilterOptions {
   rol?: string;
   estado?: 'activo' | 'inactivo' | '';
-  fechaCreacionDesde?: string;
-  fechaCreacionHasta?: string;
-  busquedaAvanzada?: string;
 }
 
 export type CreateUserProps = {

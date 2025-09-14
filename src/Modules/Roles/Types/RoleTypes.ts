@@ -12,6 +12,5 @@ export interface CreateRoleModalProps {
   onClose: () => void;
 }
 
-
 export const RoleMIN_LENGTH = 5;
 export const RoleMAX_LENGTH = 30;

@@ -6,7 +6,7 @@ import type { FilterModalProps, FilterOptions } from '../Types/UserTypes';
 
 
 
-const FilterModal: React.FC<FilterModalProps> = ({ isOpen, onClose, onApplyFilters, currentFilters }) => {
+const FilterUserModal: React.FC<FilterModalProps> = ({ isOpen, onClose, onApplyFilters, currentFilters }) => {
   const { data: roles = [] } = useRoles();
   const [filters, setFilters] = useState<FilterOptions>(currentFilters);
 
@@ -19,9 +19,6 @@ const FilterModal: React.FC<FilterModalProps> = ({ isOpen, onClose, onApplyFilte
     const clearFilters: FilterOptions = {
       rol: '',
       estado: '',
-      fechaCreacionDesde: '',
-      fechaCreacionHasta: '',
-      busquedaAvanzada: ''
     };
     setFilters(clearFilters);
     onApplyFilters(clearFilters);
@@ -105,4 +102,4 @@ const FilterModal: React.FC<FilterModalProps> = ({ isOpen, onClose, onApplyFilte
   );
 };
 
-export default FilterModal;
+export default FilterUserModal;

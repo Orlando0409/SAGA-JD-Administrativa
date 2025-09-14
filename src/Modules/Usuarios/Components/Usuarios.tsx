@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import {
   createColumnHelper,
   flexRender,
@@ -15,11 +15,11 @@ import CreateUserModal from './CreateUserModal';
 import UserDetailModal from './UserDetailModal';
 import { NombreUsuarioCell, getStatusClass, getStatusDisplay, isActive } from '../Helper/utils';
 import RolesTable from '../../Roles/Components/RolesTable';
-import FilterModal from './FilterModal';
 import type { FilterOptions } from '../Types/UserTypes';
+import FilterUserModal from './FilterUserModal';
 
 const Usuarios = () => {
-  const { data: users = [], isLoading } = useUsers();
+  const { data: users = [], isLoading, refetch } = useUsers();
   const [globalFilter, setGlobalFilter] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
@@ -27,6 +27,15 @@ const Usuarios = () => {
   const [showRolesTable, setShowRolesTable] = useState(false);
   const [showFilterModal, setShowFilterModal] = useState(false);
   const [appliedFilters, setAppliedFilters] = useState<FilterOptions>({});
+
+
+    useEffect(() => {
+    const handler = () => {
+      refetch(); // Actualiza los usuarios desde el backend
+    };
+    window.addEventListener('refreshUsuarios', handler);
+    return () => window.removeEventListener('refreshUsuarios', handler);
+  }, [refetch]);
 
   // Función para aplicar filtros personalizados
   const applyCustomFilters = (data: Usuario[], filters: FilterOptions): Usuario[] => {
@@ -90,7 +99,7 @@ const Usuarios = () => {
   });
 
   const table = useReactTable({
-    data: filteredUsers, // Usar datos filtrados en lugar de users
+    data: filteredUsers, // Usar los datos filtrados
     columns,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
@@ -314,7 +323,7 @@ return (
         </>
       )}
 
-      {/* Modals - Movidos FUERA del condicional para que siempre se muestren */}
+      {/* Modals */}
       {showCreateModal && (
         <CreateUserModal onClose={() => setShowCreateModal(false)} />
       )}
@@ -328,7 +337,7 @@ return (
           }}
         />
       )}
-      <FilterModal
+      <FilterUserModal
         isOpen={showFilterModal}
         onClose={() => setShowFilterModal(false)}
         onApplyFilters={handleApplyFilters}

@@ -16,7 +16,7 @@ import { FaUserEdit } from 'react-icons/fa';
 const RoleDetailModal: React.FC<RoleDetailModalProps> = ({ roleId, isOpen, onClose }) => {
   const { data: role, isLoading } = useRoleById(roleId);
   const [showEditModal, setShowEditModal] = useState(false);
-    const deactivateRoleMutation = useDeactivateRole();
+  const deactivateRoleMutation = useDeactivateRole();
   const activateRoleMutation = useActivateRole();
 
     const handleDeactivate = async () => {
@@ -183,6 +183,7 @@ const RoleDetailModal: React.FC<RoleDetailModalProps> = ({ roleId, isOpen, onClo
                     </AlertDialogTitle>
                     <AlertDialogDescription>
                       <span>¿Estás seguro de que deseas desactivar este rol?</span>
+                      <span>Si lo haces, se desactivarán los usuarios con este rol!</span>
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
@@ -206,7 +207,7 @@ const RoleDetailModal: React.FC<RoleDetailModalProps> = ({ roleId, isOpen, onClo
                     size={'xl'}
                   >
                     <LuUserCheck className="w-5 h-5" />
-                    <span className="ml-2">Activar Usuario</span>
+                    <span className="ml-2">Activar rol</span>
                   </Button>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
@@ -216,6 +217,7 @@ const RoleDetailModal: React.FC<RoleDetailModalProps> = ({ roleId, isOpen, onClo
                     </AlertDialogTitle>
                     <AlertDialogDescription>
                       <span>¿Estás seguro de que deseas activar este rol?</span>
+                      <span>Si lo haces, se activarán los usuarios con este rol!</span>
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>

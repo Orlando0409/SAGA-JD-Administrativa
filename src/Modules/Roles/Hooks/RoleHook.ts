@@ -1,4 +1,5 @@
 
+import { useAlerts } from "@/Modules/Global/context/AlertContext";
 import type { UpdateRoleData } from "../Models/Role";
 import { GetRoles, GetPermissions, GetRoleById, CreateRole, UpdateRole, deactivateRole, activateRole } from "../Services/RoleService";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -45,20 +46,30 @@ export const useUpdateRole = () => {
 
 export const useDeactivateRole = () => {
   const queryClient = useQueryClient();
+    const { showSuccess, showError } = useAlerts();
   return useMutation({
     mutationFn: deactivateRole,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['roles'] });
+      showSuccess('Rol desactivado', 'El rol se ha desactivado exitosamente');
+    },
+    onError: () => {
+      showError("Error, No se pudo desactivar el rol");
     }
   });
 };
 
 export const useActivateRole = () => {
   const queryClient = useQueryClient();
+  const { showSuccess, showError } = useAlerts();
   return useMutation({
     mutationFn: activateRole,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['roles'] });
+      showSuccess('Rol activado', 'El rol se ha activado exitosamente');
+    },
+    onError: () => {
+      showError("Error, No se pudo activar el rol");
     }
   });
 };
