@@ -1,10 +1,11 @@
 import { useMutation } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
-import { ForgotPassword, getCurrentUser, loginUser, logoutUser, ResetPassword, verifyUser } from '../Services/AuthService'
+import { changePassword, ForgotPassword, getCurrentUser, loginUser, logoutUser, ResetPassword, verifyUser } from '../Services/AuthService'
 import type { LoginForm } from '../Models/LoginForm'
 import { useState, useEffect } from 'react'
 import { cookieUtils } from '../../Global/utils/CookieUtils'
-import {  type Usuario } from '@/Modules/Usuarios/Models/Usuario'
+import {  type ChangePassword, type Usuario } from '@/Modules/Usuarios/Models/Usuario'
+
 
 export const useLogin = () => {
   const navigate = useNavigate()
@@ -36,6 +37,16 @@ export const useResetPassword = () => {
     mutationFn: ({ nuevaContraseña }: { nuevaContraseña: string }) => 
       ResetPassword(nuevaContraseña),
 
+    onSuccess: (res) => {
+      return res
+    }
+  })
+}
+
+export const useChangePassword = () => {
+  return useMutation({
+    mutationFn: ({ UsuarioId, Contraseña_Actual, Nueva_Contraseña }: ChangePassword) =>
+      changePassword({ UsuarioId, Contraseña_Actual, Nueva_Contraseña }),
     onSuccess: (res) => {
       return res
     }

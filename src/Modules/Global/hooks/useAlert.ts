@@ -12,6 +12,12 @@ export const useAlert = () => {
   const ALERT_LIMIT_TIME = 5000;
   const BLOCK_DURATION = 5000;
 
+      // Función para generar IDs únicos más robustos
+  const generateUniqueId = useCallback(() => {
+    return `alert_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
+  }, []);
+
+
   const showAlert = useCallback(
     (type: AlertType, title: string, description?: string, duration: number = 4000) => {
       // Si está bloqueado, no mostrar nuevas alertas normales
@@ -53,7 +59,7 @@ export const useAlert = () => {
       }
 
       // Mostrar alerta normal
-      const id = Date.now().toString();
+      const id = generateUniqueId();
       const newAlert: AlertState = { id, type, title, description, duration };
       setAlerts(prev => [...prev, newAlert].slice(-MAX_ALERTS));
 
@@ -95,6 +101,7 @@ export const useAlert = () => {
       showAlert('info', title, description, duration),
     [showAlert]
   );
+
 
   return {
     alerts,

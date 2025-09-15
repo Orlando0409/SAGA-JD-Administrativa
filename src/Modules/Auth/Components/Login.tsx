@@ -4,12 +4,14 @@ import { Link } from '@tanstack/react-router';
 import { useState } from 'react';
 import { useLogin } from '../Hooks/AuthHook';
 import { useAlerts } from '@/Modules/Global/context/AlertContext';
+import { FiEye, FiEyeOff } from 'react-icons/fi';
+import { AxiosError } from 'axios';
 
 export default function LoginForm() {
   const mutation = useLogin();
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
-  const { showSuccess, showError, isBlocked } = useAlerts(); 
-
+  const { showSuccess, showError, showWarning, isBlocked } = useAlerts();
+  const [showPassword, setShowPassword] = useState(false);
   const form = useForm({
     defaultValues: {
       Nombre_Usuario: '',
@@ -32,19 +34,30 @@ export default function LoginForm() {
       }
 
       try {
-        await mutation.mutateAsync({
-          Nombre_Usuario: value.Nombre_Usuario,
-          Password: value.Password,
-        });
-        showSuccess('Inicio de sesión exitoso');
+          await mutation.mutateAsync({
+            Nombre_Usuario: value.Nombre_Usuario,
+            Password: value.Password,
+          });
+          showSuccess('Inicio de sesión exitoso');
+        } catch (err: unknown) {
+          let errorMsg = '';
+          if (err instanceof AxiosError) {
+            errorMsg = err.response?.data?.message || err.message;
+          } else if (err instanceof Error) {
+            errorMsg = err.message;
+          } else {
+            errorMsg = String(err);
+          }
 
-      } catch (err: unknown) {
-        console.error('Error de inicio de sesión:', err);
-        showError('Error de inicio de sesión');
-        setFormErrors({
-          general: 'Credenciales incorrectas o error en el servidor',
-        });
-      }
+          if (typeof errorMsg === 'string' && errorMsg.includes('deshabilitado')) {
+            showWarning('El usuario está deshabilitado. Contacta al administrador.');
+          } else {
+            setFormErrors({
+              general: 'Credenciales incorrectas o error en el servidor',
+            });
+          }
+          showError('Error de inicio de sesión');
+        }
     },
   });
 
@@ -118,20 +131,28 @@ export default function LoginForm() {
 
             <form.Field name="Password">
               {(field) => (
-                <div>
+                <div className="relative">
                   <label htmlFor="Password" className="block text-sm font-medium text-gray-700 mb-1">
                     Contraseña
                     <p className="inline text-red-500 pl-1">*</p>
                   </label>
                   <input
                     id="Password"
-                    type="password"
+                    type={showPassword ? "text" : "password"}
                     value={field.state.value}
                     onBlur={field.handleBlur}
                     onChange={(e) => field.handleChange(e.target.value)}
                     placeholder="Contraseña"
-                    className="w-full text-black p-2 rounded-md border border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full text-black p-2 rounded-md border border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 pr-10"
                   />
+                  <button
+                    type="button"
+                    tabIndex={-1}
+                    className="absolute right-3 top-9 text-gray-500 hover:text-blue-600"
+                    onClick={() => setShowPassword((prev) => !prev)}
+                  >
+                    {showPassword ? <FiEyeOff size={20} /> : <FiEye size={20} />}
+                  </button>
                   {field.state.meta.errors?.map((err) => (
                     <p key={err} className="text-red-500 text-sm">
                       {err}
