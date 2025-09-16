@@ -5,11 +5,12 @@ import { useState } from 'react';
 import { useLogin } from '../Hooks/AuthHook';
 import { useAlerts } from '@/Modules/Global/context/AlertContext';
 import { FiEye, FiEyeOff } from 'react-icons/fi';
+import { AxiosError } from 'axios';
 
 export default function LoginForm() {
   const mutation = useLogin();
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
-  const { showSuccess, showError, isBlocked } = useAlerts(); 
+  const { showSuccess, showError, showWarning, isBlocked } = useAlerts();
   const [showPassword, setShowPassword] = useState(false);
   const form = useForm({
     defaultValues: {
@@ -38,15 +39,18 @@ export default function LoginForm() {
             Password: value.Password,
           });
           showSuccess('Inicio de sesión exitoso');
-        } catch (err: any) {
-          console.error('Error de inicio de sesión:', err);
+        } catch (err: unknown) {
+          let errorMsg = '';
+          if (err instanceof AxiosError) {
+            errorMsg = err.response?.data?.message || err.message;
+          } else if (err instanceof Error) {
+            errorMsg = err.message;
+          } else {
+            errorMsg = String(err);
+          }
 
-          // Verifica si el error es por usuario deshabilitado
-          const errorMsg = err?.response?.data?.message || err?.message || '';
-          if (errorMsg.includes('deshabilitado')) {
-            setFormErrors({
-              general: 'El usuario está deshabilitado. Contacta al administrador.',
-            });
+          if (typeof errorMsg === 'string' && errorMsg.includes('deshabilitado')) {
+            showWarning('El usuario está deshabilitado. Contacta al administrador.');
           } else {
             setFormErrors({
               general: 'Credenciales incorrectas o error en el servidor',

@@ -33,7 +33,6 @@ export default function ForgotPassword() {
         await mutation.mutateAsync(value.email);
         showSuccess('Correo enviado', 'Revisa tu correo para restablecer tu contraseña', 5000);
       } catch (err: unknown) {
-        console.error('Error en el servidor o del correo:', err);
         showError('Error en el servidor o del correo', 'Por favor, inténtelo de nuevo más tarde', 5000);
         setFormErrors({
           general: 'Ingrese un correo electrónico válido',

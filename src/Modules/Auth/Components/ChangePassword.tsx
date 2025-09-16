@@ -84,15 +84,14 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
 
             try {
                 await mutateAsync({
-                    userid: userId,
-                    currentPassword: value.currentPassword,
-                    newPassword: value.newPassword,
+                    UsuarioId: userId,
+                    Contraseña_Actual: value.currentPassword,
+                    Nueva_Contraseña: value.newPassword,
                 });
                 showSuccess('Contraseña cambiada', 'La contraseña se ha cambiado exitosamente');
                 onClose();
                 form.reset();
             } catch (err: any) {
-          console.error('Error de inicio de sesión:', err);
 
           // Verifica si el error es por usuario deshabilitado
           const errorMsg = err?.response?.data?.message || err?.message || '';

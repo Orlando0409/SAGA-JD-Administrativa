@@ -45,8 +45,8 @@ export const useResetPassword = () => {
 
 export const useChangePassword = () => {
   return useMutation({
-    mutationFn: ({ userid, currentPassword, newPassword }: ChangePassword) =>
-      changePassword({ userid, currentPassword, newPassword }),
+    mutationFn: ({ UsuarioId, Contraseña_Actual, Nueva_Contraseña }: ChangePassword) =>
+      changePassword({ UsuarioId, Contraseña_Actual, Nueva_Contraseña }),
     onSuccess: (res) => {
       return res
     }

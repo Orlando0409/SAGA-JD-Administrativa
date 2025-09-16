@@ -8,23 +8,28 @@ import {
   getSortedRowModel,
   useReactTable,
 } from '@tanstack/react-table';
-import { LuSearch, LuPlus, LuChevronLeft, LuChevronRight } from 'react-icons/lu';
+import { LuSearch, LuPlus, LuChevronLeft, LuChevronRight, LuFilter } from 'react-icons/lu';
 import { useRoles } from '../Hooks/RoleHook';
 import RoleDetailModal from './RoleDetailModal';
 import CreateRoleModal from './CreateRoleModal';
 import type { Role } from '../Models/Role';
 import { EditRoleModal } from './EditRolModal';
+import { getStatusClass, getStatusDisplay, isActive } from '@/Modules/Usuarios/Helper/utils';
+import { useUserPermissions } from '@/Modules/Auth/Hooks/PermissionHook';
+
 
 
 
 
 const Roles = ({ onClose }: { onClose: () => void }) => {
   const { data: roles = [], isLoading } = useRoles();
+  const { canCreate } = useUserPermissions();
   const [globalFilter, setGlobalFilter] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [selectedRoleId, setSelectedRoleId] = useState<number | null>(null);
   const [showRoleDetail, setShowRoleDetail] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+
 
   const columnHelper = createColumnHelper<Role>();
 
@@ -41,6 +46,14 @@ const Roles = ({ onClose }: { onClose: () => void }) => {
         cell: info => (
           <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
             {info.getValue()?.length ?? 0} permisos
+          </span>
+        ),
+      }),
+      columnHelper.accessor('Fecha_Eliminacion', { 
+        header: 'Estado',
+        cell: info => (
+          <span className={`px-2 py-1 rounded-full text-xs ${getStatusClass(info.getValue())}`}>
+            {getStatusDisplay(info.getValue())}
           </span>
         ),
       }),
@@ -79,6 +92,7 @@ const Roles = ({ onClose }: { onClose: () => void }) => {
     setShowRoleDetail(true);
   };
 
+
   if (isLoading) {
     return (
       <div className="w-full flex items-center justify-center h-64">
@@ -88,7 +102,7 @@ const Roles = ({ onClose }: { onClose: () => void }) => {
   }
 
   return (
-    <div className="w-full flex flex-col items-start h-full p-6">
+    <div className="w-full flex flex-col items-start h-full">
       <div className="w-full bg-white rounded-lg shadow-lg overflow-hidden">
         {/* Controls */}
         <div className="p-6 border-b bg-gray-50">
@@ -107,19 +121,25 @@ const Roles = ({ onClose }: { onClose: () => void }) => {
 
             {/* Buttons */}
             <div className="flex gap-3">
-              <button
-                onClick={() => setShowCreateModal(true)}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center gap-2"
-              >
-                <LuPlus className="w-4 h-4" />
-                Nuevo Rol
-              </button>
-              <button
-                onClick={() => onClose()}
-                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition"
-              >
-                Usuarios
-              </button>
+              {canCreate('usuarios') && (
+                <button
+                  onClick={() => setShowCreateModal(true)}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center gap-2"
+                >
+                  <LuPlus className="w-4 h-4" />
+                  Nuevo Rol
+                </button>
+              )}
+                <button
+                  onClick={() => {
+                    // Dispara un evento personalizado para actualizar usuarios
+                    window.dispatchEvent(new CustomEvent('refreshUsuarios'));
+                    onClose();
+                  }}
+                  className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition"
+                >
+                  Usuarios
+                </button>
             </div>
           </div>
         </div>

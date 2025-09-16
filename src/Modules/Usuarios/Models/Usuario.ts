@@ -1,3 +1,5 @@
+import type { Role } from "@/Modules/Roles/Models/Role";
+
 export interface Usuario {
   Id_Usuario: number;
   Nombre_Usuario: string;
@@ -6,12 +8,7 @@ export interface Usuario {
   Refresh_Token?: string;
   Fecha_Eliminacion: Date | string | null;
   Id_Rol: number;
-  rol: RolUsuario;
-}
-export interface RolUsuario {
-    Id_Rol: number;
-    Nombre_Rol: string;
-    permisos?: Permiso[];
+  rol: Role;
 }
 export interface Permiso {
     id: number;
@@ -33,8 +30,9 @@ export interface UpdateUserData {
 }
 
 
+// src/Modules/Usuarios/Models/Usuario.ts
 export interface ChangePassword {
-  userid: number;
-  currentPassword: string;
-  newPassword: string;
+    UsuarioId: number;     
+    Contraseña_Actual: string;    
+    Nueva_Contraseña: string;    
 }

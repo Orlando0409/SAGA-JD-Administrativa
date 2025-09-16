@@ -23,8 +23,8 @@ export async function ResetPassword(nuevaContraseña: string): Promise<boolean> 
     const response = await axiosPrivate.post(`/auth/reset-password`, payload);
     return response.data;
 }
-export async function changePassword({userid, currentPassword, newPassword}: ChangePassword): Promise<string> {
-    const response = await axiosPrivate.post(`/auth/change-password`, { userid, currentPassword, newPassword });
+export async function changePassword({UsuarioId, Contraseña_Actual, Nueva_Contraseña}: ChangePassword): Promise<string> {
+    const response = await axiosPrivate.post(`/auth/change-password`, { UsuarioId, Contraseña_Actual, Nueva_Contraseña });
     return response.data;
 }
 

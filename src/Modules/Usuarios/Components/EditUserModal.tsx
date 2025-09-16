@@ -12,6 +12,7 @@ import { useAlerts } from '@/Modules/Global/context/AlertContext';
 const EditUserModal: React.FC<EditUserModalProps> = ({ isOpen, onClose, user }) => {
   const updateUserMutation = useUpdateUser();
   const { data: roles = [] } = useRoles();
+  const activeRoles = roles.filter((rol: Role) => rol.Fecha_Eliminacion === null);
   const {showSuccess, showError} = useAlerts();
     const [formErrors, setFormErrors] = useState<Record<string, string>>({});
     const [fieldCharCounts, setFieldCharCounts] = useState({
@@ -200,7 +201,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ isOpen, onClose, user }) 
                   }`}
                 >
                   <option value={0}>Seleccionar rol</option>
-                  {roles.map((rol: Role) => (
+                  {activeRoles.map((rol: Role) => (
                     <option key={rol.Id_Rol} value={rol.Id_Rol}>
                       {rol.Nombre_Rol}
                     </option>

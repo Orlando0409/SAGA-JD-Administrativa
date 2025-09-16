@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import {
   createColumnHelper,
   flexRender,
@@ -13,13 +13,15 @@ import { useUsers } from '../Hooks/userHook';
 import type { Usuario } from '../Models/Usuario';
 import CreateUserModal from './CreateUserModal';
 import UserDetailModal from './UserDetailModal';
-import { NombreUsuarioCell, getStatusClass, getStatusDisplay, isUserActive } from '../Helper/utils';
+import { NombreUsuarioCell, getStatusClass, getStatusDisplay, isActive } from '../Helper/utils';
 import RolesTable from '../../Roles/Components/RolesTable';
-import FilterModal from './FilterModal';
 import type { FilterOptions } from '../Types/UserTypes';
+import FilterUserModal from './FilterUserModal';
+import { useUserPermissions } from '@/Modules/Auth/Hooks/PermissionHook';
 
 const Usuarios = () => {
-  const { data: users = [], isLoading } = useUsers();
+  const { data: users = [], isLoading, refetch } = useUsers();
+  const { canCreate, canEdit } = useUserPermissions();
   const [globalFilter, setGlobalFilter] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
@@ -27,6 +29,15 @@ const Usuarios = () => {
   const [showRolesTable, setShowRolesTable] = useState(false);
   const [showFilterModal, setShowFilterModal] = useState(false);
   const [appliedFilters, setAppliedFilters] = useState<FilterOptions>({});
+
+
+    useEffect(() => {
+    const handler = () => {
+      refetch(); // Actualiza los usuarios desde el backend
+    };
+    window.addEventListener('refreshUsuarios', handler);
+    return () => window.removeEventListener('refreshUsuarios', handler);
+  }, [refetch]);
 
   // Función para aplicar filtros personalizados
   const applyCustomFilters = (data: Usuario[], filters: FilterOptions): Usuario[] => {
@@ -38,27 +49,9 @@ const Usuarios = () => {
 
       // Filtro por estado
       if (filters.estado) {
-        const userIsActive = isUserActive(user.Fecha_Eliminacion);
+        const userIsActive = isActive(user.Fecha_Eliminacion);
         if (filters.estado === 'activo' && !userIsActive) return false;
         if (filters.estado === 'inactivo' && userIsActive) return false;
-      }
-
-      // Filtro por fecha (asumiendo que tienes un campo de fecha de creación)
-      if (filters.fechaCreacionDesde || filters.fechaCreacionHasta) {
-        // Implementa según el campo de fecha que tengas en tu modelo
-        // Por ejemplo: user.Fecha_Creacion
-      }
-
-      // Búsqueda avanzada
-      if (filters.busquedaAvanzada) {
-        const searchTerm = filters.busquedaAvanzada.toLowerCase();
-        const matchesId = user.Id_Usuario.toString().includes(searchTerm);
-        const matchesEmail = user.Correo_Electronico.toLowerCase().includes(searchTerm);
-        const matchesName = user.Nombre_Usuario.toLowerCase().includes(searchTerm);
-        
-        if (!matchesId && !matchesEmail && !matchesName) {
-          return false;
-        }
       }
 
       return true;
@@ -108,7 +101,7 @@ const Usuarios = () => {
   });
 
   const table = useReactTable({
-    data: filteredUsers, // Usar datos filtrados en lugar de users
+    data: filteredUsers, // Usar los datos filtrados
     columns,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
@@ -190,19 +183,24 @@ return (
                     </span>
                   )}
                 </button>
-                <button
-                  onClick={() => setShowCreateModal(true)}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center gap-2"
-                >
-                  <LuPlus className="w-4 h-4" />
-                  Nuevo
-                </button>
-                <button
-                  onClick={() => setShowRolesTable(true)}
-                  className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition"
-                >
-                  Roles
-                </button>
+                {canCreate('usuarios') && (
+                  <button
+                    onClick={() => setShowCreateModal(true)}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center gap-2"
+                  >
+                    <LuPlus className="w-4 h-4" />
+                    Nuevo
+                  </button>
+                )}
+
+                {canEdit('usuarios') && (
+                  <button
+                    onClick={() => setShowRolesTable(true)}
+                    className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition"
+                  >
+                    Roles
+                  </button>
+                )}
               </div>
             </div>
 
@@ -332,7 +330,7 @@ return (
         </>
       )}
 
-      {/* Modals - Movidos FUERA del condicional para que siempre se muestren */}
+      {/* Modals */}
       {showCreateModal && (
         <CreateUserModal onClose={() => setShowCreateModal(false)} />
       )}
@@ -346,7 +344,7 @@ return (
           }}
         />
       )}
-      <FilterModal
+      <FilterUserModal
         isOpen={showFilterModal}
         onClose={() => setShowFilterModal(false)}
         onApplyFilters={handleApplyFilters}

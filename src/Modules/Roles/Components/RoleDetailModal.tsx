@@ -1,16 +1,50 @@
 import React, { useState } from 'react';
-import { useRoleById } from '../Hooks/RoleHook';
-import { LuShield, LuUser, LuX } from 'react-icons/lu';
+import { useActivateRole, useDeactivateRole, useRoleById } from '../Hooks/RoleHook';
+import { LuShield, LuUser, LuUserCheck, LuUserX, LuX } from 'react-icons/lu';
 import type { Permiso } from '@/Modules/Usuarios/Models/Usuario';
 
 import { getPermissionLabel } from '@/Modules/Usuarios/Helper/GroupPermiByModule';
 import type { RoleDetailModalProps } from '../Types/RoleTypes';
 import { EditRoleModal } from './EditRolModal';
+import { isActive } from '@/Modules/Usuarios/Helper/utils';
+import type { FechaEliminacionType } from '@/Modules/Usuarios/Types/UserTypes';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/Modules/Global/components/Sidebar/ui/alert-dialog';
+import { Button } from '@/Modules/Global/components/Sidebar/ui/button';
+import { FaUserEdit } from 'react-icons/fa';
+import { useUserPermissions } from '@/Modules/Auth/Hooks/PermissionHook';
 
 
 const RoleDetailModal: React.FC<RoleDetailModalProps> = ({ roleId, isOpen, onClose }) => {
   const { data: role, isLoading } = useRoleById(roleId);
+  const { canEdit, canActivateDeactivate } = useUserPermissions();
   const [showEditModal, setShowEditModal] = useState(false);
+  const deactivateRoleMutation = useDeactivateRole();
+  const activateRoleMutation = useActivateRole();
+
+    const handleDeactivate = async () => {
+      try {
+        await deactivateRoleMutation.mutateAsync(roleId);
+      } catch (error) {
+        console.error('Error deactivating role:', error);
+      }
+    
+  };
+
+  const handleActivate = async () => {
+   
+      try {
+        await activateRoleMutation.mutateAsync(roleId);
+      } catch (error) {
+        console.error('Error activating role:', error);
+      }
+    
+  };
+
+    const getStatusDisplay = (Fecha_Eliminacion: FechaEliminacionType | undefined) => {
+      if (Fecha_Eliminacion === undefined) return 'Desconocido';
+      return isActive(Fecha_Eliminacion) ? 'Activo' : 'Inactivo';
+    };
+
 
   if (!isOpen) return null;
 
@@ -26,7 +60,7 @@ const RoleDetailModal: React.FC<RoleDetailModalProps> = ({ roleId, isOpen, onClo
 
   return (
     <>
-      <div className="fixed inset-0 bg-white bg-opacity-30 flex items-center justify-center z-50">
+      <div className="fixed inset-0 bg-white bg-opacity-95 flex items-center justify-center z-50 p-4">
         <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
           {/* Header */}
           <div className="flex items-center justify-between p-6 border-b border-gray-200">
@@ -56,11 +90,7 @@ const RoleDetailModal: React.FC<RoleDetailModalProps> = ({ roleId, isOpen, onClo
                     <LuUser className="w-5 h-5 text-blue-600" />
                     Información del Rol
                   </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-500 mb-1">ID del Rol</label>
-                      <p className="text-gray-900 font-medium">{role?.Id_Rol}</p>
-                    </div>
+                  <div className="grid grid-cols-2 md:grid-cols-2 gap-6">
                     <div>
                       <label className="block text-sm font-medium text-gray-500 mb-1">Nombre del Rol</label>
                       <p className="text-gray-900 font-medium">{role?.Nombre_Rol}</p>
@@ -68,6 +98,16 @@ const RoleDetailModal: React.FC<RoleDetailModalProps> = ({ roleId, isOpen, onClo
                     <div>
                       <label className="block text-sm font-medium text-gray-500 mb-1">Total de Permisos</label>
                       <p className="text-gray-900 font-medium">{role?.permisos?.length || 0} permisos asignados</p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-500 mb-2">Estado del Rol</label>
+                      <span className={`inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium border ${
+                        isActive(role?.Fecha_Eliminacion)
+                          ? 'bg-green-100 text-green-800 border-green-200' 
+                          : 'bg-red-100 text-red-800 border-red-200'
+                      }`}>
+                        {getStatusDisplay(role?.Fecha_Eliminacion)}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -115,16 +155,93 @@ const RoleDetailModal: React.FC<RoleDetailModalProps> = ({ roleId, isOpen, onClo
                 </div>
               </div>
             )}
-          </div>
+                      {/* Footer */}
+          <div className="flex justify-end gap-4 mt-8">
+            {canEdit('usuarios') && (
+              <Button
+                size="xl"
+                className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center gap-2"
+                onClick={() => setShowEditModal(true)}
+              >
+                <FaUserEdit className="w-5 h-5" />
+                Editar rol
+              </Button>
+            )}
 
-          {/* Footer */}
-          <div className="flex justify-end px-6 py-4 items-center border-t border-gray-200">
-            <button
-              onClick={() => setShowEditModal(true)}
-              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
-            >
-              Editar
-            </button>
+            {canActivateDeactivate('usuarios') && (
+              <>
+                {isActive(role?.Fecha_Eliminacion) ? (
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        variant='destructive'
+                        size={'xl'}
+                      >
+                        <LuUserX className="w-5 h-5" />
+                        <span className="ml-2">Desactivar rol</span>
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>
+                          <span>¿Desactivar rol?</span>
+                        </AlertDialogTitle>
+                        <AlertDialogDescription>
+                          <span>¿Estás seguro de que deseas desactivar este rol?</span>
+                          <span>Si lo haces, se desactivarán los usuarios con este rol!</span>
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogAction
+                          onClick={handleDeactivate}
+                          disabled={deactivateRoleMutation.isPending}
+                        >
+                          <span>Desactivar</span>
+                        </AlertDialogAction>
+                        <AlertDialogCancel>
+                          <span>Cancelar</span>
+                        </AlertDialogCancel>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                ) : (
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        variant='create'
+                        size={'xl'}
+                      >
+                        <LuUserCheck className="w-5 h-5" />
+                        <span className="ml-2">Activar rol</span>
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>
+                          <span>¿Activar rol?</span>
+                        </AlertDialogTitle>
+                        <AlertDialogDescription>
+                          <span>¿Estás seguro de que deseas activar este rol?</span>
+                          <span>Si lo haces, se activarán los usuarios con este rol!</span>
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogAction
+                          onClick={handleActivate}
+                          disabled={activateRoleMutation.isPending}
+                        >
+                          <span>Activar</span>
+                        </AlertDialogAction>
+                        <AlertDialogCancel>
+                          <span>Cancelar</span>
+                        </AlertDialogCancel>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                )}
+              </>
+            )}
+          </div>
           </div>
         </div>
       </div>
