@@ -1,9 +1,9 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { AfiliadoJuridico } from "../Models/ModeloAfiliadoJuridico";
-import { getAfiliadosJuridicos } from "../Service/ServiceAfiliadoJuridico";
+import { createAfiliadoJuridico, getAfiliadosJuridicos } from "../Service/ServiceAfiliadoJuridico";
 
 export const useAfiliadosJuridicos = () => {
-  const queryClient = useQueryClient();
+  const queryClient = useQueryClient(); // 🔧 Agregar esta línea
 
   // Query para obtener todos los afiliados jurídicos
   const {
@@ -19,11 +19,21 @@ export const useAfiliadosJuridicos = () => {
     retry: 3,
   });
 
+  const createMutation = useMutation({
+    mutationFn: (data: FormData) => createAfiliadoJuridico(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["afiliadosJuridicos"] }); // 🔧 Cambiar clave
+      console.log("afiliado juridico creado con exito");
+    },
+    onError: () => console.error("no se creo el afiliado juridico"),
+  });
+
   return {
     afiliadosJuridicos,
     isLoading,
     isError,
     error,
-    refetch
+    refetch,
+    createAfiliadoJuridico: createMutation.mutateAsync,
   };
 }

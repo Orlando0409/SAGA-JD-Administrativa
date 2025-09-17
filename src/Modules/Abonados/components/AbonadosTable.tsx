@@ -7,6 +7,7 @@ import { useAfiliadosJuridicos } from '../Hook/HookAfiliadoJuridico';
 import type { AfiliadoFisico } from '../Models/ModeloAfiliadoFisico';
 import type { AfiliadoJuridico } from '../Models/ModeloAfiliadoJuridico';
 import DetailAbonados from './DetailAbonados';
+import FormularioAfiliados from './FormularioAfiliados';
 
 // Tipo unificado para la tabla
 type AfiliadoUnificado = {
@@ -36,6 +37,9 @@ export default function AbonadosTable() {
         tipo: 'afiliado-fisico' | 'afiliado-juridico';
         datos: AfiliadoFisico | AfiliadoJuridico;
     } | null>(null);
+
+    // Estados para el modal del formulario
+    const [showFormModal, setShowFormModal] = useState(false);
 
     // Estados combinados
     const isLoading = loadingFisicos || loadingJuridicos;
@@ -160,7 +164,7 @@ export default function AbonadosTable() {
             header: 'Cédula / Cédula Jurídica',
             cell: (info) => {
                 const fila = info.row.original;
-                
+
                 if (fila.Tipo_Persona === 'Físico') {
                     const datosOriginales = fila.datos_originales as AfiliadoFisico;
                     return datosOriginales.Cedula || 'Sin cédula';
@@ -255,7 +259,7 @@ export default function AbonadosTable() {
                 </div>
                 <div className="flex items-center gap-3">
                     <input value={globalFilter} onChange={(e) => setGlobalFilter(e.target.value)} placeholder="Buscar por nombre, cédula, estado, tipo..." className="px-3 py-2 rounded-lg border border-sky-200 bg-sky-50 focus:outline-none focus:ring-2 focus:ring-sky-200" />
-                    <button className="px-3 py-2 rounded-lg bg-sky-600 text-white hover:bg-sky-700 shadow-sm" onClick={() => alert('Crear nueva solicitud — abrir formulario')}>+ Nueva Solicitud</button>
+                    <button className="px-3 py-2 rounded-lg bg-sky-600 text-white hover:bg-sky-700 shadow-sm" onClick={() => setShowFormModal(true)}>+ Nueva Solicitud</button>
                 </div>
             </div>
             <div className="overflow-x-auto rounded-2xl border border-sky-100 shadow-sm bg-white">
@@ -326,6 +330,16 @@ export default function AbonadosTable() {
                     }}
                 />
             )}
+
+            {/* Modal del formulario */}
+            <FormularioAfiliados
+                isOpen={showFormModal}
+                onClose={() => setShowFormModal(false)}
+                onSuccess={() => {
+                    // Recargar datos después de crear un afiliado exitosamente
+                    window.location.reload(); // Simple reload, podrías usar una función más elegante
+                }}
+            />
         </div>
     );
 }
