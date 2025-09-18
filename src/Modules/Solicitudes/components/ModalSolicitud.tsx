@@ -1,8 +1,15 @@
 import React from 'react';
 import { X } from 'lucide-react';
-import { useAprobarSolicitud, useRechazarSolicitud } from '../Hooks/HookUpdateEstadoSolicitud';
+import { useAprobarSolicitudAfiliacion, useRechazarSolicitudAfiliacion } from '../Hooks/Fisico Update/HookAfiliadoFisico';
 import type { SolicitudFisica } from '../Models/ModelosFisicas';
 import type { SolicitudJuridica } from '../Models/ModelosJuridicos';
+import { useAprobarSolicitudCambioMedidor, useRechazarSolicitudCambioMedidor } from '../Hooks/Fisico Update/HookCambioMedidorFisico';
+import { useAprobarSolicitudAsociado, useRechazarSolicitudAsociado } from '../Hooks/Fisico Update/HookAsociadoFisico';
+import { useAprobarSolicitudDesconexion, useRechazarSolicitudDesconexion } from '../Hooks/Fisico Update/HookDesconexionMedidorFisico';
+import { useAprobarSolicitudAfiliacionJuridica, useRechazarSolicitudAfiliacionJuridica } from '../Hooks/Juridico Update/HookAfiliadoJuridico';
+import { useAprobarSolicitudAsociadoJuridico, useRechazarSolicitudAsociadoJuridico } from '../Hooks/Juridico Update/HookAsociadoJuridico';
+import { useAprobarSolicitudCambioMedidorJuridica, useRechazarSolicitudCambioMedidorJuridica } from '../Hooks/Juridico Update/HookCambioMedidorJuridico';
+import { useAprobarSolicitudDesconexionJuridica, useRechazarSolicitudDesconexionJuridica } from '../Hooks/Juridico Update/HookDesconexionMedidor';
 
 interface ModalSolicitudProps {
     isOpen: boolean;
@@ -10,6 +17,7 @@ interface ModalSolicitudProps {
     solicitud: {
         tipo: 'solicitud-fisica' | 'solicitud-juridica';
         datos: SolicitudFisica | SolicitudJuridica;
+        tipoSolicitud?: 'Afiliacion' | 'Cambio_Medidor' | 'Asociado' | 'Desconexion'; // Nuevo campo para identificar el subtipo
     };
 }
 
@@ -19,9 +27,22 @@ interface ModalSolicitudProps {
  */
 const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solicitud }) => {
     // Hooks para manejar los cambios de estado
-    const aprobarMutation = useAprobarSolicitud();
-    const rechazarMutation = useRechazarSolicitud();
-
+    const aprobarAfiliacionMutation = useAprobarSolicitudAfiliacion();
+    const rechazarAfiliacionMutation = useRechazarSolicitudAfiliacion();
+    const aprobarCambioMedidorMutation = useAprobarSolicitudCambioMedidor();
+    const rechazarCambioMedidorMutation = useRechazarSolicitudCambioMedidor();
+    const aprobarAsociadoMutation = useAprobarSolicitudAsociado();
+    const rechazarAsociadoMutation = useRechazarSolicitudAsociado();
+    const aprobarDesconexionMutation = useAprobarSolicitudDesconexion();
+    const rechazarDesconexionMutation = useRechazarSolicitudDesconexion();
+    const aprobarAfiliacionJuridicaMutation = useAprobarSolicitudAfiliacionJuridica();
+    const rechazarAfiliacionJuridicaMutation = useRechazarSolicitudAfiliacionJuridica();
+    const aprobarAsociadoJuridicoMutation = useAprobarSolicitudAsociadoJuridico();
+    const rechazarAsociadoJuridicoMutation = useRechazarSolicitudAsociadoJuridico();
+    const aprobarCambioMedidorJuridicoMutation = useAprobarSolicitudCambioMedidorJuridica();
+    const rechazarCambioMedidorJuridicoMutation = useRechazarSolicitudCambioMedidorJuridica();
+    const aprobarDesconexionJuridicoMutation = useAprobarSolicitudDesconexionJuridica();
+    const rechazarDesconexionJuridicoMutation = useRechazarSolicitudDesconexionJuridica();
     // Extraer información básica de la solicitud
     const getSolicitudInfo = () => {
         console.log('🔍 Datos completos de la solicitud:', solicitud.datos);
@@ -77,11 +98,59 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
 
     const info = getSolicitudInfo();
 
-    // Función para manejar aprobación
+    // Función para manejar aprobación por casos
     const handleAprobar = async () => {
         if (confirm(`¿Está seguro de APROBAR la solicitud de ${info.nombre}?`)) {
             try {
-                await aprobarMutation.mutateAsync(info.id);
+                const tipoSolicitud = solicitud.tipoSolicitud || info.tipoSolicitud;
+                const tipoPersona = solicitud.tipo; // 'solicitud-fisica' o 'solicitud-juridica'
+
+                console.log(`🎯 Aprobando solicitud: Tipo Persona: ${tipoPersona}, Tipo Solicitud: ${tipoSolicitud}`);
+
+                // Determinar qué mutación usar basado en tipo de persona y tipo de solicitud
+                if (tipoPersona === 'solicitud-fisica') {
+                    switch (tipoSolicitud) {
+                        case 'Afiliacion':
+                            await aprobarAfiliacionMutation.mutateAsync(info.id);
+                            break;
+                        case 'Cambio_Medidor':
+                            await aprobarCambioMedidorMutation.mutateAsync(info.id);
+                            break;
+                        case 'Asociado':
+                            await aprobarAsociadoMutation.mutateAsync(info.id);
+                            break;
+                        case 'Desconexion':
+                            await aprobarDesconexionMutation.mutateAsync(info.id);
+                            break;
+                        default:
+                            // Fallback a afiliación física si no se especifica tipo
+                            await aprobarAfiliacionMutation.mutateAsync(info.id);
+                            console.warn('⚠️ Tipo de solicitud física no especificado, usando Afiliación como fallback');
+                    }
+                } else if (tipoPersona === 'solicitud-juridica') {
+                    switch (tipoSolicitud) {
+                        case 'Afiliacion':
+                            await aprobarAfiliacionJuridicaMutation.mutateAsync(info.id);
+                            break;
+                        case 'Cambio_Medidor':
+                            await aprobarCambioMedidorJuridicoMutation.mutateAsync(info.id);
+                            break;
+                        case 'Asociado':
+                            await aprobarAsociadoJuridicoMutation.mutateAsync(info.id);
+                            break;
+                        case 'Desconexion':
+                            await aprobarDesconexionJuridicoMutation.mutateAsync(info.id);
+                            break;
+                        default:
+                            // Fallback a afiliación jurídica si no se especifica tipo
+                            await aprobarAfiliacionJuridicaMutation.mutateAsync(info.id);
+                            console.warn('⚠️ Tipo de solicitud jurídica no especificado, usando Afiliación como fallback');
+                    }
+                } else {
+                    console.error('❌ Tipo de persona no reconocido:', tipoPersona);
+                    throw new Error('Tipo de solicitud no válido');
+                }
+
                 alert('✅ Solicitud aprobada exitosamente');
                 onClose(); // Cerrar modal después del éxito
             } catch (error) {
@@ -91,11 +160,59 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
         }
     };
 
-    // Función para manejar rechazo
+    // Función para manejar rechazo por casos
     const handleRechazar = async () => {
         if (confirm(`¿Está seguro de RECHAZAR la solicitud de ${info.nombre}?`)) {
             try {
-                await rechazarMutation.mutateAsync(info.id);
+                const tipoSolicitud = solicitud.tipoSolicitud || info.tipoSolicitud;
+                const tipoPersona = solicitud.tipo; // 'solicitud-fisica' o 'solicitud-juridica'
+
+                console.log(`🎯 Rechazando solicitud: Tipo Persona: ${tipoPersona}, Tipo Solicitud: ${tipoSolicitud}`);
+
+                // Determinar qué mutación usar basado en tipo de persona y tipo de solicitud
+                if (tipoPersona === 'solicitud-fisica') {
+                    switch (tipoSolicitud) {
+                        case 'Afiliacion':
+                            await rechazarAfiliacionMutation.mutateAsync(info.id);
+                            break;
+                        case 'Cambio_Medidor':
+                            await rechazarCambioMedidorMutation.mutateAsync(info.id);
+                            break;
+                        case 'Asociado':
+                            await rechazarAsociadoMutation.mutateAsync(info.id);
+                            break;
+                        case 'Desconexion':
+                            await rechazarDesconexionMutation.mutateAsync(info.id);
+                            break;
+                        default:
+                            // Fallback a afiliación física si no se especifica tipo
+                            await rechazarAfiliacionMutation.mutateAsync(info.id);
+                            console.warn('⚠️ Tipo de solicitud física no especificado, usando Afiliación como fallback');
+                    }
+                } else if (tipoPersona === 'solicitud-juridica') {
+                    switch (tipoSolicitud) {
+                        case 'Afiliacion':
+                            await rechazarAfiliacionJuridicaMutation.mutateAsync(info.id);
+                            break;
+                        case 'Cambio_Medidor':
+                            await rechazarCambioMedidorJuridicoMutation.mutateAsync(info.id);
+                            break;
+                        case 'Asociado':
+                            await rechazarAsociadoJuridicoMutation.mutateAsync(info.id);
+                            break;
+                        case 'Desconexion':
+                            await rechazarDesconexionJuridicoMutation.mutateAsync(info.id);
+                            break;
+                        default:
+                            // Fallback a afiliación jurídica si no se especifica tipo
+                            await rechazarAfiliacionJuridicaMutation.mutateAsync(info.id);
+                            console.warn('⚠️ Tipo de solicitud jurídica no especificado, usando Afiliación como fallback');
+                    }
+                } else {
+                    console.error('❌ Tipo de persona no reconocido:', tipoPersona);
+                    throw new Error('Tipo de solicitud no válido');
+                }
+
                 alert('❌ Solicitud rechazada');
                 onClose(); // Cerrar modal después del éxito
             } catch (error) {
@@ -105,76 +222,106 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
         }
     };
 
-    const isLoading = aprobarMutation.isPending || rechazarMutation.isPending;
+    const isLoading =
+        // Mutaciones físicas
+        aprobarAfiliacionMutation.isPending || rechazarAfiliacionMutation.isPending ||
+        aprobarCambioMedidorMutation.isPending || rechazarCambioMedidorMutation.isPending ||
+        aprobarAsociadoMutation.isPending || rechazarAsociadoMutation.isPending ||
+        aprobarDesconexionMutation.isPending || rechazarDesconexionMutation.isPending ||
+        // Mutaciones jurídicas
+        aprobarAfiliacionJuridicaMutation.isPending || rechazarAfiliacionJuridicaMutation.isPending ||
+        aprobarCambioMedidorJuridicoMutation.isPending || rechazarCambioMedidorJuridicoMutation.isPending ||
+        aprobarAsociadoJuridicoMutation.isPending || rechazarAsociadoJuridicoMutation.isPending ||
+        aprobarDesconexionJuridicoMutation.isPending || rechazarDesconexionJuridicoMutation.isPending;
 
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
+        <div className="fixed inset-0 bg-white bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
                 {/* Header */}
                 <div className="flex items-center justify-between p-6 border-b border-gray-200">
                     <h2 className="text-xl font-semibold text-gray-800">
-                        🎛️ Gestionar Solicitud
+                        Gestionar Solicitud
                     </h2>
                     <button
                         onClick={onClose}
                         disabled={isLoading}
                         className="p-1 hover:bg-gray-100 rounded-full transition-colors disabled:opacity-50"
                     >
-                        <X size={20} className="text-gray-500" />
+                        <div className="w-5 h-5 text-gray-500 flex items-center justify-center">
+                            <X size={20} />
+                        </div>
                     </button>
                 </div>
 
                 {/* Contenido */}
-                <div className="p-6">
+                <div className="p-6 overflow-y-auto max-h-[calc(90vh-200px)]">
                     {/* Información de la solicitud */}
-                    <div className="mb-6 space-y-3">
-                        <div className="flex items-center justify-between">
-                            <span className="text-sm font-medium text-gray-600">ID:</span>
-                            <span className="text-sm text-gray-800">{info.id}</span>
-                        </div>
-                        <div className="flex items-center justify-between">
-                            <span className="text-sm font-medium text-gray-600">Nombre:</span>
-                            <span className="text-sm text-gray-800 text-right">{info.nombre}</span>
-                        </div>
-                        <div className="flex items-center justify-between">
-                            <span className="text-sm font-medium text-gray-600">Documento:</span>
-                            <span className="text-sm text-gray-800">{info.documento}</span>
-                        </div>
-                        <div className="flex items-center justify-between">
-                            <span className="text-sm font-medium text-gray-600">Tipo:</span>
-                            <span className={`text-sm px-2 py-1 rounded-full ${info.tipo === 'Física'
-                                ? 'bg-blue-100 text-blue-700'
-                                : 'bg-purple-100 text-purple-700'
-                                }`}>
-                                {info.tipo === 'Física' ? '👤' : '🏢'} {info.tipo}
-                            </span>
-                        </div>
-                        <div className="flex items-center justify-between">
-                            <span className="text-sm font-medium text-gray-600">Solicitud:</span>
-                            <span className="text-sm text-gray-800">{info.tipoSolicitud}</span>
-                        </div>
-                        <div className="flex items-center justify-between">
-                            <span className="text-sm font-medium text-gray-600">Estado actual:</span>
-                            <span className={`text-sm px-2 py-1 rounded-full ${info.estado === 'Pendiente' ? 'bg-amber-100 text-amber-700' :
-                                info.estado === 'Aprobada' ? 'bg-green-100 text-green-700' :
-                                    info.estado === 'Rechazada' ? 'bg-red-100 text-red-700' :
-                                        'bg-gray-100 text-gray-700'
-                                }`}>
-                                {info.estado}
-                            </span>
+                    <div className="mb-6">
+                        {/* Card principal con diseño elegante */}
+                        <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-6 shadow-sm border border-gray-200">
+                            {/* Header con información básica */}
+                            <div className="flex justify-between items-start mb-6 pb-4 border-b border-gray-300">
+                                <div className="flex-1">
+                                    <div className="flex items-center gap-3 mb-2">
+                                        <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">ID Solicitud</span>
+                                        <span className="text-lg font-bold text-gray-800">{info.id}</span>
+                                    </div>
+                                    <div className="flex items-center gap-3">
+                                        <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">Cédula</span>
+                                        <span className="text-sm font-mono text-gray-700">{info.documento}</span>
+                                    </div>
+                                </div>
+                                <div className="text-right">
+                                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${info.estado === 'Pendiente' ? 'bg-amber-100 text-amber-800 border border-amber-300' :
+                                        info.estado === 'Aprobada' ? 'bg-green-100 text-green-800 border border-green-300' :
+                                            info.estado === 'Rechazada' ? 'bg-red-100 text-red-800 border border-red-300' :
+                                                'bg-gray-100 text-gray-800 border border-gray-300'
+                                        }`}>
+                                        {info.estado}
+                                    </span>
+                                </div>
+                            </div>
+
+                            {/* Información del solicitante */}
+                            <div className="mb-6">
+                                <h3 className="text-sm font-semibold text-gray-600 uppercase tracking-wide mb-3">Información del Solicitante</h3>
+                                <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
+                                    <div className="text-center mb-4">
+                                        <div className={`inline-flex items-center justify-center w-12 h-12 rounded-full mb-2 ${info.tipo === 'Física'
+                                            ? 'bg-blue-100 text-blue-600'
+                                            : 'bg-purple-100 text-purple-600'
+                                            }`}>
+                                            <span className="text-xl">{info.tipo === 'Física' ? '👤' : '🏢'}</span>
+                                        </div>
+                                        <h4 className="text-lg font-semibold text-gray-800">{info.nombre}</h4>
+                                        <p className="text-sm text-gray-500">{info.tipo === 'Física' ? 'Persona Física' : 'Persona Jurídica'}</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Detalles de la solicitud */}
+                            <div>
+                                <h3 className="text-sm font-semibold text-gray-600 uppercase tracking-wide mb-3">Detalles de la Solicitud</h3>
+                                <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-sm font-medium text-gray-600">Tipo de Solicitud:</span>
+                                        <span className="text-sm font-semibold text-gray-800">{info.tipoSolicitud}</span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
                     {/* Botones de acción */}
-                    <div className="flex gap-3">
+                    <div className="flex gap-3 pt-6 border-t border-gray-200">
                         <button
                             onClick={handleAprobar}
                             disabled={isLoading || info.estado === 'Aprobada'}
                             className="flex-1 px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
                         >
-                            {aprobarMutation.isPending ? (
+                            {isLoading ? (
                                 <span className="flex items-center justify-center gap-2">
                                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                                     Aprobando...
@@ -191,7 +338,7 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
                             disabled={isLoading || info.estado === 'Rechazada'}
                             className="flex-1 px-4 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
                         >
-                            {rechazarMutation.isPending ? (
+                            {isLoading ? (
                                 <span className="flex items-center justify-center gap-2">
                                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                                     Rechazando...
@@ -208,7 +355,7 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
                     <button
                         onClick={onClose}
                         disabled={isLoading}
-                        className="w-full mt-3 px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors disabled:opacity-50"
+                        className="w-full mt-3 px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors disabled:opacity-50 font-medium"
                     >
                         Cancelar
                     </button>
