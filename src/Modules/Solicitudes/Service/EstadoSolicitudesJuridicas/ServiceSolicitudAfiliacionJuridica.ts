@@ -17,7 +17,7 @@ export class ServiceSolicitudAfiliacionJuridicas {
         try {
             console.log(`🔄 Actualizando estado de solicitud jurídica ${solicitudId} a estado ${nuevoEstadoId}...`);
             
-            const response = await apiAuth.put<SolicitudJuridica>(
+            const response = await apiAuth.patch<SolicitudJuridica>(
                 `/solicitud-afiliacion-juridica/${solicitudId}/update/estado/${nuevoEstadoId}`
             );
             

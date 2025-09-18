@@ -17,7 +17,7 @@ export class ServiceSolicitudDesconexionMedidorJuridicas {
         try {
             console.log(`🔄 Actualizando estado de solicitud ${solicitudId} a estado ${nuevoEstadoId}...`);
             
-            const response = await apiAuth.put<SolicitudFisica>(
+            const response = await apiAuth.patch<SolicitudFisica>(
                 `/solicitud-desconexion-juridica/${solicitudId}/update/estado/${nuevoEstadoId}`
             );
             
