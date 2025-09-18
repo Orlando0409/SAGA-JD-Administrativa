@@ -4,10 +4,10 @@ import { createColumnHelper, getCoreRowModel, getPaginationRowModel, useReactTab
 import { Eye, Edit, Trash } from 'lucide-react';
 import { useAfiliadosFisicos } from '../Hook/HookAfiliadoFisico';
 import { useAfiliadosJuridicos } from '../Hook/HookAfiliadoJuridico';
-import type { AfiliadoFisico } from '../Models/ModeloAfiliadoFisico';
-import type { AfiliadoJuridico } from '../Models/ModeloAfiliadoJuridico';
 import DetailAbonados from './DetailAbonados';
 import FormularioAfiliados from './FormularioAfiliados';
+import type { AfiliadoFisico } from '../Models/TablaAfiliados/ModeloAfiliadoFisico';
+import type { AfiliadoJuridico } from '../Models/TablaAfiliados/ModeloAfiliadoJuridico';
 
 // Tipo unificado para la tabla
 type AfiliadoUnificado = {

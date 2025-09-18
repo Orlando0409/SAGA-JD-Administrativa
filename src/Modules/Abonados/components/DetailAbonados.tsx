@@ -6,15 +6,14 @@ import { FiChevronDown, FiChevronRight } from 'react-icons/fi'
 
 import { Button } from '@/Modules/Global/components/Sidebar/ui/button';
 import { CUSTOM_ANIMATION } from '@/Modules/Global/types/Sections';
-import type { Abonado } from '../Models/ModelAbonado';
-import type { AfiliadoFisico } from '../Models/ModeloAfiliadoFisico';
-import type { AfiliadoJuridico } from '../Models/ModeloAfiliadoJuridico';
+import type { AfiliadoFisico } from '../Models/TablaAfiliados/ModeloAfiliadoFisico';
+import type { AfiliadoJuridico } from '../Models/TablaAfiliados/ModeloAfiliadoJuridico';
 import EditModal from './EditModal';
 
 // Tipo unificado para identificar qué estamos viendo
 type PersonaParaDetalle = {
-    tipo: 'abonado' | 'afiliado-fisico' | 'afiliado-juridico';
-    datos: Abonado | AfiliadoFisico | AfiliadoJuridico;
+    tipo: 'afiliado-fisico' | 'afiliado-juridico';
+    datos: AfiliadoFisico | AfiliadoJuridico;
 };
 
 interface DetailAbonadosProps {
@@ -38,28 +37,7 @@ const DetailAbonados: React.FC<DetailAbonadosProps> = ({ persona, isOpen, onClos
     const getPersonaInfo = () => {
         const { tipo, datos } = persona;
 
-        if (tipo === 'abonado') {
-            const abonado = datos as Abonado;
-            return {
-                id: abonado.Id_Abonado,
-                nombre: `${abonado.Nombre} ${abonado.Apellido1} ${abonado.Apellido2 || ''}`.trim(),
-                documento: abonado.Cedula,
-                tipoDocumento: 'Cédula',
-                telefono: abonado.Numero_Telefono,
-                correo: abonado.Correo,
-                direccion: abonado.Direccion_Exacta,
-                estado: abonado.Estado?.Nombre_Estado || 'Sin estado',
-                estadoId: abonado.Estado?.Id_Estado_Abonado || 0,
-                tipoPersona: 'Físico',
-                tipoAfiliado: 'Abonado',
-                edad: abonado.Edad,
-                fechaCreacion: abonado.Fecha_Creacion,
-                fechaActualizacion: abonado.Fecha_Actualizacion,
-                escritura: null,
-                planos: null,
-                motivo: null
-            };
-        } else if (tipo === 'afiliado-fisico') {
+        if (tipo === 'afiliado-fisico') {
             const afiliado = datos as AfiliadoFisico;
             return {
                 id: afiliado.Id_Afiliado,
@@ -138,15 +116,13 @@ const DetailAbonados: React.FC<DetailAbonadosProps> = ({ persona, isOpen, onClos
     };
 
     const getTipoAfiliadoColor = (tipo: string) => {
-        return tipo === 'Abonado'
+        return tipo === 'Físico'
             ? 'bg-blue-100 text-blue-800 border-blue-200'
             : 'bg-purple-100 text-purple-800 border-purple-200';
     };
 
     const getModalTitle = () => {
         switch (persona.tipo) {
-            case 'abonado':
-                return '💧 Detalle del Abonado';
             case 'afiliado-fisico':
                 return '👤 Detalle del Afiliado Físico';
             case 'afiliado-juridico':
