@@ -18,7 +18,7 @@ export class ServiceSolicitudCambioMedidorJuridicas {
         try {
             console.log(`🔄 Actualizando estado de solicitud de cambio de medidor ${solicitudId} a estado ${nuevoEstadoId}...`);
             
-            const response = await apiAuth.put<SolicitudFisica>(
+            const response = await apiAuth.patch<SolicitudFisica>(
                 `/solicitud-cambio-medidor-juridica/${solicitudId}/update/estado/${nuevoEstadoId}`
             );
             
