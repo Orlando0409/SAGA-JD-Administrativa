@@ -1,11 +1,11 @@
-import { useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createAfiliadoFisico, getAfiliadosFisicos } from "../Service/ServiceAfiliadoFisico";
-import type { AfiliadoFisico } from "../Models/ModeloAfiliadoFisico";
+import type { AfiliadoFisico } from "../Models/TablaAfiliados/ModeloAfiliadoFisico";
 
 export const useAfiliadosFisicos = () => {
   // Query para obtener todos los afiliados físicos
   const queryClient = useQueryClient(); // 🔧 Agregar esta línea
-  
+
   const {
     data: afiliadosFisicos = [],
     isLoading,
@@ -18,8 +18,8 @@ export const useAfiliadosFisicos = () => {
     staleTime: 5 * 60 * 1000, // 5 minutos
     retry: 3,
   });
-   
-    const createMutation = useMutation({
+
+  const createMutation = useMutation({
     mutationFn: (data: FormData) => createAfiliadoFisico(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["afiliadosFisicos"] }); // 🔧 Cambiar clave

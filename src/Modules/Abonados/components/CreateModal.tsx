@@ -1,7 +1,5 @@
 import { useForm } from '@tanstack/react-form';
 import { useState } from 'react';
-import { useAbonados } from '../Hook/HookAbonado';
-import type { Abonado } from '../Models/ModelAbonado';
 import { useAlerts } from '@/Modules/Global/context/AlertContext';
 
 interface CreateModalProps {
@@ -9,40 +7,53 @@ interface CreateModalProps {
     onClose: () => void;
 }
 
-type TipoFormulario = 'abonado-fisico';
+type TipoFormulario = 'afiliado-fisico' | 'afiliado-juridico';
 
 const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
-    const [tipoActivo, setTipoActivo] = useState<TipoFormulario>('abonado-fisico');
+    const [tipoActivo, setTipoActivo] = useState<TipoFormulario>('afiliado-fisico');
     const { showSuccess, showError } = useAlerts();
-
-    // Hooks para las mutaciones
-    const { createAbonado } = useAbonados();
 
     if (!isOpen) return null;
 
     const tabs = [
-        { id: 'abonado-fisico', label: '💧👤 Abonado Físico', icon: '💧' },
+        { id: 'afiliado-fisico', label: ' Afiliado Físico', icon: '�' },
+        { id: 'afiliado-juridico', label: '🏢 Afiliado Jurídico', icon: '🏢' },
     ] as const;
 
     const getDefaultValues = () => {
-        return {
-            Nombre: '',
-            Apellido1: '',
-            Apellido2: '',
-            Cedula: '',
-            Numero_Telefono: '',
-            Correo: '',
-            Direccion_Exacta: '',
-            Edad: 0,
-        };
+        if (tipoActivo === 'afiliado-fisico') {
+            return {
+                Nombre: '',
+                Apellido1: '',
+                Apellido2: '',
+                Cedula: '',
+                Numero_Telefono: '',
+                Correo: '',
+                Direccion_Exacta: '',
+                Edad: 0,
+                Escritura_Terreno: '',
+                Planos_Terreno: '',
+            };
+        } else {
+            return {
+                Razon_Social: '',
+                Cedula_Juridica: '',
+                Numero_Telefono: '',
+                Correo: '',
+                Direccion_Exacta: '',
+                Escritura_Terreno: '',
+                Planos_Terreno: '',
+            };
+        }
     };
 
     const form = useForm({
         defaultValues: getDefaultValues(),
         onSubmit: async ({ value }) => {
             try {
-                await createAbonado(value as Omit<Abonado, 'Id_Abonado' | 'Fecha_Creacion' | 'Fecha_Actualizacion'>);
-                showSuccess('Abonado físico creado exitosamente');
+                // TODO: Implementar creación de afiliados cuando estén disponibles las funciones
+                console.log('Crear afiliado:', tipoActivo, value);
+                showSuccess(`${tipoActivo === 'afiliado-fisico' ? 'Afiliado físico' : 'Afiliado jurídico'} creado exitosamente`);
                 onClose();
                 form.reset();
             } catch (error) {
@@ -180,33 +191,196 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                 </form.Field>
             )}
 
-            {(
-                <form.Field name="Edad">
-                    {(field) => (
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Edad *
-                            </label>
-                            <input
-                                type="number"
-                                value={field.state.value}
-                                onChange={(e) => field.handleChange(parseInt(e.target.value) || 0)}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                placeholder="25"
-                                min="0"
-                                max="120"
-                                required
-                            />
-                        </div>
-                    )}
-                </form.Field>
-            )}
+            <form.Field name="Edad">
+                {(field) => (
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Edad *
+                        </label>
+                        <input
+                            type="number"
+                            value={field.state.value}
+                            onChange={(e) => field.handleChange(parseInt(e.target.value) || 0)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            placeholder="25"
+                            min="0"
+                            max="120"
+                            required
+                        />
+                    </div>
+                )}
+            </form.Field>
+
+            <form.Field name="Escritura_Terreno">
+                {(field) => (
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Escritura del Terreno (URL)
+                        </label>
+                        <input
+                            type="url"
+                            value={field.state.value}
+                            onChange={(e) => field.handleChange(e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            placeholder="https://ejemplo.com/escritura.pdf"
+                        />
+                    </div>
+                )}
+            </form.Field>
+
+            <form.Field name="Planos_Terreno">
+                {(field) => (
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Planos del Terreno (URL)
+                        </label>
+                        <input
+                            type="url"
+                            value={field.state.value}
+                            onChange={(e) => field.handleChange(e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            placeholder="https://ejemplo.com/planos.pdf"
+                        />
+                    </div>
+                )}
+            </form.Field>
 
         </>
     );
 
+    const renderFormularioJuridico = () => (
+        <>
+            <form.Field name="Razon_Social">
+                {(field) => (
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Razón Social *
+                        </label>
+                        <input
+                            type="text"
+                            value={field.state.value}
+                            onChange={(e) => field.handleChange(e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            placeholder="Empresa S.A."
+                            required
+                        />
+                    </div>
+                )}
+            </form.Field>
+
+            <form.Field name="Cedula_Juridica">
+                {(field) => (
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Cédula Jurídica *
+                        </label>
+                        <input
+                            type="text"
+                            value={field.state.value}
+                            onChange={(e) => field.handleChange(e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            placeholder="3-101-123456"
+                            required
+                        />
+                    </div>
+                )}
+            </form.Field>
+
+            <form.Field name="Numero_Telefono">
+                {(field) => (
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Teléfono *
+                        </label>
+                        <input
+                            type="tel"
+                            value={field.state.value}
+                            onChange={(e) => field.handleChange(e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            placeholder="88888888"
+                            required
+                        />
+                    </div>
+                )}
+            </form.Field>
+
+            <form.Field name="Correo">
+                {(field) => (
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Correo Electrónico *
+                        </label>
+                        <input
+                            type="email"
+                            value={field.state.value}
+                            onChange={(e) => field.handleChange(e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            placeholder="ejemplo@email.com"
+                            required
+                        />
+                    </div>
+                )}
+            </form.Field>
+
+            <form.Field name="Direccion_Exacta">
+                {(field) => (
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Dirección Exacta
+                        </label>
+                        <textarea
+                            value={field.state.value}
+                            onChange={(e) => field.handleChange(e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            placeholder="Dirección exacta de la propiedad"
+                            rows={3}
+                        />
+                    </div>
+                )}
+            </form.Field>
+
+            <form.Field name="Escritura_Terreno">
+                {(field) => (
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Escritura del Terreno (URL)
+                        </label>
+                        <input
+                            type="url"
+                            value={field.state.value}
+                            onChange={(e) => field.handleChange(e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            placeholder="https://ejemplo.com/escritura.pdf"
+                        />
+                    </div>
+                )}
+            </form.Field>
+
+            <form.Field name="Planos_Terreno">
+                {(field) => (
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Planos del Terreno (URL)
+                        </label>
+                        <input
+                            type="url"
+                            value={field.state.value}
+                            onChange={(e) => field.handleChange(e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            placeholder="https://ejemplo.com/planos.pdf"
+                        />
+                    </div>
+                )}
+            </form.Field>
+        </>
+    );
+
     const renderFormulario = () => {
-        return renderFormularioFisico();
+        if (tipoActivo === 'afiliado-fisico') {
+            return renderFormularioFisico();
+        } else {
+            return renderFormularioJuridico();
+        }
     };
 
     return (
@@ -231,6 +405,7 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                                 key={tab.id}
                                 onClick={() => {
                                     setTipoActivo(tab.id);
+                                    // Reiniciar el formulario con los valores por defecto del nuevo tipo
                                     form.reset();
                                 }}
                                 className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${tipoActivo === tab.id

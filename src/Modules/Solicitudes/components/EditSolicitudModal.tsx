@@ -1,19 +1,19 @@
 import { useForm } from '@tanstack/react-form';
 import { useState } from 'react';
-import type { AfiliadoFisico } from '../Models/TablaAfiliados/ModeloAfiliadoFisico';
-import type { AfiliadoJuridico } from '../Models/TablaAfiliados/ModeloAfiliadoJuridico';
+import type { SolicitudFisica } from '../Models/ModelosFisicas';
+import type { SolicitudJuridica } from '../Models/ModelosJuridicos';
 import { useAlerts } from '@/Modules/Global/context/AlertContext';
 
 // Tipo unificado para identificar qué estamos editando
-type PersonaParaEditar = {
-    tipo: 'afiliado-fisico' | 'afiliado-juridico';
-    datos: AfiliadoFisico | AfiliadoJuridico;
+type SolicitudParaEditar = {
+    tipo: 'solicitud-fisica' | 'solicitud-juridica';
+    datos: SolicitudFisica | SolicitudJuridica;
 };
 
-interface EditModalProps {
+interface EditSolicitudModalProps {
     isOpen: boolean;
     onClose: () => void;
-    persona: PersonaParaEditar;
+    solicitud: SolicitudParaEditar;
 }
 
 // Constantes para límites de caracteres
@@ -23,9 +23,8 @@ const EMAIL_MAX_LENGTH = 100;
 const TELEFONO_MAX_LENGTH = 15;
 const CEDULA_MAX_LENGTH = 20;
 const DIRECCION_MAX_LENGTH = 200;
-const URL_MAX_LENGTH = 255;
 
-const EditModal: React.FC<EditModalProps> = ({ isOpen, onClose, persona }) => {
+const EditSolicitudModal: React.FC<EditSolicitudModalProps> = ({ isOpen, onClose, solicitud }) => {
     const { showSuccess, showError } = useAlerts();
     const [formErrors, setFormErrors] = useState<Record<string, string>>({});
     const [fieldCharCounts, setFieldCharCounts] = useState({
@@ -37,8 +36,6 @@ const EditModal: React.FC<EditModalProps> = ({ isOpen, onClose, persona }) => {
         telefono: 0,
         cedula: 0,
         direccion: 0,
-        escritura: 0,
-        planos: 0
     });
 
     const createInputHandler = (fieldName: string, handleChange: (value: string) => void, maxLength: number) => {
@@ -57,32 +54,30 @@ const EditModal: React.FC<EditModalProps> = ({ isOpen, onClose, persona }) => {
     };
 
     const getDefaultValues = () => {
-        const { tipo, datos } = persona;
+        const { tipo, datos } = solicitud;
 
-        if (tipo === 'afiliado-fisico') {
-            const afiliado = datos as AfiliadoFisico;
+        if (tipo === 'solicitud-fisica') {
+            const solicitudFisica = datos as SolicitudFisica;
             return {
-                Nombre: afiliado.Nombre,
-                Apellido1: afiliado.Apellido1,
-                Apellido2: afiliado.Apellido2 || '',
-                Cedula: afiliado.Cedula,
-                Numero_Telefono: afiliado.Numero_Telefono,
-                Correo: afiliado.Correo,
-                Direccion_Exacta: afiliado.Direccion_Exacta || '',
-                Edad: afiliado.Edad,
-                Escritura_Terreno: afiliado.Escritura_Terreno || '',
-                Planos_Terreno: afiliado.Planos_Terreno || '',
+                Nombre: solicitudFisica.Nombre,
+                Apellido1: solicitudFisica.Apellido1,
+                Apellido2: solicitudFisica.Apellido2 || '',
+                Cedula: solicitudFisica.Cedula,
+                Numero_Telefono: solicitudFisica.Numero_Telefono,
+                Correo: solicitudFisica.Correo,
+                Direccion_Exacta: solicitudFisica.Direccion_Exacta || '',
+                Edad: solicitudFisica.Edad,
+                Tipo_Solicitud: solicitudFisica.Tipo_Solicitud,
             };
-        } else { // afiliado-juridico
-            const afiliado = datos as AfiliadoJuridico;
+        } else { // solicitud-juridica
+            const solicitudJuridica = datos as SolicitudJuridica;
             return {
-                Razon_Social: afiliado.Razon_Social,
-                Cedula_Juridica: afiliado.Cedula_Juridica,
-                Numero_Telefono: afiliado.Numero_Telefono,
-                Correo: afiliado.Correo,
-                Direccion_Exacta: afiliado.Direccion_Exacta || '',
-                Escritura_Terreno: afiliado.Escritura_Terreno || '',
-                Planos_Terreno: afiliado.Planos_Terreno || '',
+                Razon_Social: solicitudJuridica.Razon_Social,
+                Cedula_Juridica: solicitudJuridica.Cedula_Juridica,
+                Numero_Telefono: solicitudJuridica.Numero_Telefono,
+                Correo: solicitudJuridica.Correo,
+                Direccion_Exacta: solicitudJuridica.Direccion_Exacta || '',
+                Tipo_Solicitud: solicitudJuridica.Tipo_Solicitud,
             };
         }
     };
@@ -93,13 +88,13 @@ const EditModal: React.FC<EditModalProps> = ({ isOpen, onClose, persona }) => {
             setFormErrors({});
 
             try {
-                // TODO: Implementar actualizaciones para afiliados cuando estén disponibles las funciones
-                console.log('Actualizar afiliado:', persona.tipo, value);
-                showSuccess(`${persona.tipo === 'afiliado-fisico' ? 'Afiliado físico' : 'Afiliado jurídico'} actualizado exitosamente`);
+                // TODO: Implementar actualizaciones para solicitudes cuando estén disponibles las funciones
+                console.log('Actualizar solicitud:', solicitud.tipo, value);
+                showSuccess(`${solicitud.tipo === 'solicitud-fisica' ? 'Solicitud física' : 'Solicitud jurídica'} actualizada exitosamente`);
                 onClose();
             } catch (error) {
                 console.error('Error actualizando:', error);
-                showError('Error al actualizar el registro');
+                showError('Error al actualizar la solicitud');
             }
         },
     });
@@ -127,13 +122,13 @@ const EditModal: React.FC<EditModalProps> = ({ isOpen, onClose, persona }) => {
     };
 
     const getModalTitle = () => {
-        switch (persona.tipo) {
-            case 'afiliado-fisico':
-                return '👤 Editar Afiliado Físico';
-            case 'afiliado-juridico':
-                return '🏢 Editar Afiliado Jurídico';
+        switch (solicitud.tipo) {
+            case 'solicitud-fisica':
+                return '👤 Editar Solicitud Física';
+            case 'solicitud-juridica':
+                return '🏢 Editar Solicitud Jurídica';
             default:
-                return 'Editar Afiliado';
+                return 'Editar Solicitud';
         }
     };
 
@@ -160,8 +155,29 @@ const EditModal: React.FC<EditModalProps> = ({ isOpen, onClose, persona }) => {
                         }}
                         className="space-y-4"
                     >
-                        {/* Campos para personas físicas (afiliado físico) */}
-                        {persona.tipo === 'afiliado-fisico' && (
+                        {/* Tipo de Solicitud */}
+                        <form.Field name="Tipo_Solicitud">
+                            {(field) => (
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        Tipo de Solicitud *
+                                    </label>
+                                    <select
+                                        value={field.state.value}
+                                        onChange={(e) => field.handleChange(e.target.value as any)}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    >
+                                        <option value="Afiliacion">Afiliación</option>
+                                        <option value="Desconexion">Desconexión</option>
+                                        <option value="Cambio de Medidor">Cambio de Medidor</option>
+                                        <option value="Asociado">Asociado</option>
+                                    </select>
+                                </div>
+                            )}
+                        </form.Field>
+
+                        {/* Campos para solicitudes físicas */}
+                        {solicitud.tipo === 'solicitud-fisica' && (
                             <>
                                 <form.Field name="Nombre">
                                     {(field) => (
@@ -173,17 +189,11 @@ const EditModal: React.FC<EditModalProps> = ({ isOpen, onClose, persona }) => {
                                                 type="text"
                                                 value={field.state.value}
                                                 onChange={createInputHandler('nombre', field.handleChange, NOMBRE_MAX_LENGTH)}
-                                                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-colors ${(formErrors.Nombre || field.state.meta.errors?.length)
-                                                    ? 'border-red-300 focus:ring-red-500'
-                                                    : 'border-gray-300 focus:ring-blue-500'
-                                                    }`}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                                 placeholder="Nombre"
                                                 maxLength={NOMBRE_MAX_LENGTH}
                                             />
-                                            {renderCharCounter(fieldCharCounts.nombre, NOMBRE_MAX_LENGTH, !!(formErrors.Nombre || field.state.meta.errors?.length))}
-                                            {field.state.meta.errors?.map((err) => (
-                                                <p key={err} className="text-red-500 text-xs mt-1">{err}</p>
-                                            ))}
+                                            {renderCharCounter(fieldCharCounts.nombre, NOMBRE_MAX_LENGTH, false)}
                                         </div>
                                     )}
                                 </form.Field>
@@ -270,8 +280,8 @@ const EditModal: React.FC<EditModalProps> = ({ isOpen, onClose, persona }) => {
                             </>
                         )}
 
-                        {/* Campos para persona jurídica */}
-                        {persona.tipo === 'afiliado-juridico' && (
+                        {/* Campos para solicitudes jurídicas */}
+                        {solicitud.tipo === 'solicitud-juridica' && (
                             <>
                                 <form.Field name="Razon_Social">
                                     {(field) => (
@@ -373,49 +383,6 @@ const EditModal: React.FC<EditModalProps> = ({ isOpen, onClose, persona }) => {
                             )}
                         </form.Field>
 
-                        {/* Campos adicionales para afiliados */}
-                        {(persona.tipo === 'afiliado-fisico' || persona.tipo === 'afiliado-juridico') && (
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <form.Field name="Escritura_Terreno">
-                                    {(field) => (
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                Escritura del Terreno (URL)
-                                            </label>
-                                            <input
-                                                type="url"
-                                                value={field.state.value}
-                                                onChange={createInputHandler('escritura', field.handleChange, URL_MAX_LENGTH)}
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                                placeholder="https://example.com/escritura.pdf"
-                                                maxLength={URL_MAX_LENGTH}
-                                            />
-                                            {renderCharCounter(fieldCharCounts.escritura, URL_MAX_LENGTH, false)}
-                                        </div>
-                                    )}
-                                </form.Field>
-
-                                <form.Field name="Planos_Terreno">
-                                    {(field) => (
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                Planos del Terreno (URL)
-                                            </label>
-                                            <input
-                                                type="url"
-                                                value={field.state.value}
-                                                onChange={createInputHandler('planos', field.handleChange, URL_MAX_LENGTH)}
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                                placeholder="https://example.com/planos.pdf"
-                                                maxLength={URL_MAX_LENGTH}
-                                            />
-                                            {renderCharCounter(fieldCharCounts.planos, URL_MAX_LENGTH, false)}
-                                        </div>
-                                    )}
-                                </form.Field>
-                            </div>
-                        )}
-
                         <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
                             <button
                                 type="button"
@@ -428,7 +395,7 @@ const EditModal: React.FC<EditModalProps> = ({ isOpen, onClose, persona }) => {
                                 type="submit"
                                 className="px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
                             >
-                                Actualizar Afiliado
+                                Actualizar Solicitud
                             </button>
                         </div>
                     </form>
@@ -438,4 +405,4 @@ const EditModal: React.FC<EditModalProps> = ({ isOpen, onClose, persona }) => {
     );
 };
 
-export default EditModal;
+export default EditSolicitudModal;
