@@ -17,7 +17,7 @@ export class ServiceSolicitudAsociado {
         try {
             console.log(`🔄 Actualizando estado de solicitud ${solicitudId} a estado ${nuevoEstadoId}...`);
             
-            const response = await apiAuth.put<SolicitudFisica>(
+            const response = await apiAuth.patch<SolicitudFisica>(
                 `/solicitud-asociado-fisica/${solicitudId}/update/estado/${nuevoEstadoId}`
             );
             

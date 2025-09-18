@@ -16,8 +16,8 @@ export class ServiceSolicitudDesconexionMedidor {
     static async updateEstado(solicitudId: string | number, nuevoEstadoId: string | number): Promise<SolicitudFisica> {
         try {
             console.log(`🔄 Actualizando estado de solicitud ${solicitudId} a estado ${nuevoEstadoId}...`);
-            
-            const response = await apiAuth.put<SolicitudFisica>(
+
+            const response = await apiAuth.patch<SolicitudFisica>(
                 `/solicitud-desconexion-fisica/${solicitudId}/update/estado/${nuevoEstadoId}`
             );
             
