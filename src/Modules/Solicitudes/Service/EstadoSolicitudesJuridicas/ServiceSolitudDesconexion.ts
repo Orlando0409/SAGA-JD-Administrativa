@@ -5,7 +5,7 @@ import type { SolicitudFisica } from "../../Models/ModelosFisicas";
  * 🔄 Servicio para gestionar estados de solicitudes de afiliación físicas
  * Utiliza el endpoint /:id/update/estado/:nuevoEstadoId
  */
-export class ServiceSolicitudAsociado {
+export class ServiceSolicitudDesconexionMedidorJuridicas {
     
     /**
      * 🔄 PUT - Actualizar estado de una solicitud de desconexión 
@@ -18,7 +18,7 @@ export class ServiceSolicitudAsociado {
             console.log(`🔄 Actualizando estado de solicitud ${solicitudId} a estado ${nuevoEstadoId}...`);
             
             const response = await apiAuth.put<SolicitudFisica>(
-                `/solicitud-asociado-fisica/${solicitudId}/update/estado/${nuevoEstadoId}`
+                `/solicitud-desconexion-juridica/${solicitudId}/update/estado/${nuevoEstadoId}`
             );
             
             console.log('✅ Estado de solicitud actualizado exitosamente:', response.data);
@@ -37,7 +37,7 @@ export class ServiceSolicitudAsociado {
      */
     static async aprobar(solicitudId: string | number, estadoAprobadoId: number = 3): Promise<SolicitudFisica> {
         try {
-            console.log(`✅ Aprobando solicitud de Asociado ${solicitudId}...`);
+            console.log(`✅ Aprobando solicitud de desconexión ${solicitudId}...`);
             return await this.updateEstado(solicitudId, estadoAprobadoId);
         } catch (error) {
             console.error('❌ Error al aprobar solicitud:', error);
@@ -53,7 +53,7 @@ export class ServiceSolicitudAsociado {
      */
     static async rechazar(solicitudId: string | number, estadoRechazadoId: number = 4): Promise<SolicitudFisica> {
         try {
-            console.log(`❌ Rechazando solicitud de asociado ${solicitudId}...`);
+            console.log(`❌ Rechazando solicitud de desconexión ${solicitudId}...`);
             return await this.updateEstado(solicitudId, estadoRechazadoId);
         } catch (error) {
             console.error('❌ Error al rechazar solicitud:', error);

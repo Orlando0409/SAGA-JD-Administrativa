@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { ServiceSolicitudAfiliacion } from '../Service/EstadoSolicitudesFisicas/UpdateEstadoSolicitudAfiliacion';
+import { ServiceSolicitudAfiliacion } from '../../Service/EstadoSolicitudesFisicas/ServiceSolicitudAfiliacion';
 
 /**
  * 🎣 Hook para actualizar estado de solicitudes físicas
@@ -38,7 +38,7 @@ export const useMutateEstadoSolicitud = () => {
 /**
  * 🎣 Hook específico para aprobar solicitudes
  */
-export const useAprobarSolicitud = () => {
+export const useAprobarSolicitudAfiliacion = () => {
     const queryClient = useQueryClient();
 
     return useMutation({
@@ -66,7 +66,7 @@ export const useAprobarSolicitud = () => {
 /**
  * 🎣 Hook específico para rechazar solicitudes
  */
-export const useRechazarSolicitud = () => {
+export const useRechazarSolicitudAfiliacion = () => {
     const queryClient = useQueryClient();
 
     return useMutation({
