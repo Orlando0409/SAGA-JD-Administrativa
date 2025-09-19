@@ -29,7 +29,7 @@ export const useSolicitudesJuridicasPendientes = () => {
     });
 };
 
- //🔄 Hook personalizable para filtrar solicitudes jurídicas por estado
+ //Hook personalizable para filtrar solicitudes jurídicas por estado
 
  
 export const useSolicitudesJuridicasPorEstado = (estado: string, enabled: boolean = true) => {
