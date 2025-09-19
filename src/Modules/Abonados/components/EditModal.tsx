@@ -129,9 +129,9 @@ const EditModal: React.FC<EditModalProps> = ({ isOpen, onClose, persona }) => {
     const getModalTitle = () => {
         switch (persona.tipo) {
             case 'afiliado-fisico':
-                return ' Editar Afiliado Físico';
+                return '👤 Editar Afiliado Físico';
             case 'afiliado-juridico':
-                return ' Editar Afiliado Jurídico';
+                return '🏢 Editar Afiliado Jurídico';
             default:
                 return 'Editar Afiliado';
         }
@@ -380,7 +380,7 @@ const EditModal: React.FC<EditModalProps> = ({ isOpen, onClose, persona }) => {
                                     {(field) => (
                                         <div>
                                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                Escritura del Terreno 
+                                                Escritura del Terreno (URL)
                                             </label>
                                             <input
                                                 type="url"
@@ -399,7 +399,7 @@ const EditModal: React.FC<EditModalProps> = ({ isOpen, onClose, persona }) => {
                                     {(field) => (
                                         <div>
                                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                Planos del Terreno 
+                                                Planos del Terreno (URL)
                                             </label>
                                             <input
                                                 type="url"

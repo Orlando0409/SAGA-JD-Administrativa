@@ -31,7 +31,7 @@ export const useMutateEstadoSolicitudAsociado = () => {
             console.log('✅ Estado de asociado actualizado exitosamente en caché:', data);
         },
         onError: (error: any) => {
-            console.error(' Error al actualizar estado de asociado:', error);
+            console.error('❌ Error al actualizar estado de asociado:', error);
         },
     });
 };
@@ -59,7 +59,7 @@ export const useAprobarSolicitudAsociado = () => {
             console.log('✅ Solicitud de asociado aprobada exitosamente:', data);
         },
         onError: (error: any) => {
-            console.error(' Error al aprobar solicitud de asociado:', error);
+            console.error('❌ Error al aprobar solicitud de asociado:', error);
         },
     });
 };
@@ -87,7 +87,7 @@ export const useRechazarSolicitudAsociado = () => {
             console.log('✅ Solicitud de asociado rechazada exitosamente:', data);
         },
         onError: (error: any) => {
-            console.error(' Error al rechazar solicitud de asociado:', error);
+            console.error('❌ Error al rechazar solicitud de asociado:', error);
         },
     });
 };

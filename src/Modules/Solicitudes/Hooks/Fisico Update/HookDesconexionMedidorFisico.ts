@@ -30,7 +30,7 @@ export const useMutateEstadoSolicitudDesconexion = () => {
             console.log('✅ Estado de desconexión actualizado exitosamente en caché:', data);
         },
         onError: (error: any) => {
-            console.error(' Error al actualizar estado de desconexión:', error);
+            console.error('❌ Error al actualizar estado de desconexión:', error);
         },
     });
 };
@@ -58,7 +58,7 @@ export const useAprobarSolicitudDesconexion = () => {
             console.log('✅ Solicitud de desconexión aprobada exitosamente:', data);
         },
         onError: (error: any) => {
-            console.error(' Error al aprobar solicitud de desconexión:', error);
+            console.error('❌ Error al aprobar solicitud de desconexión:', error);
         },
     });
 };
@@ -86,7 +86,7 @@ export const useRechazarSolicitudDesconexion = () => {
             console.log('✅ Solicitud de desconexión rechazada exitosamente:', data);
         },
         onError: (error: any) => {
-            console.error(' Error al rechazar solicitud de desconexión:', error);
+            console.error('❌ Error al rechazar solicitud de desconexión:', error);
         },
     });
 };
