@@ -1,7 +1,7 @@
 
 import { useMemo, useState } from 'react';
 import { createColumnHelper, getCoreRowModel, getPaginationRowModel, useReactTable, flexRender, type ColumnDef } from '@tanstack/react-table';
-import { Eye, Edit, Trash, User, Building } from 'lucide-react';
+import { User, Building } from 'lucide-react';
 import { useAfiliadosFisicos } from '../Hook/HookAfiliadoFisico';
 import { useAfiliadosJuridicos } from '../Hook/HookAfiliadoJuridico';
 //import type { AfiliadoFisico } from '../Models/ModeloAfiliadoFisico';
@@ -88,21 +88,6 @@ export default function AbonadosTable() {
             ...afiliadosJuridicosUnificados
         ].sort((a, b) => a.Id - b.Id);
     }, [afiliadosFisicos, afiliadosJuridicos]);
-
-    const handleDelete = async (afiliado: AfiliadoUnificado) => {
-        const nombreCompleto = afiliado.Nombre_Completo;
-        const tipoPersona = afiliado.Tipo_Persona;
-
-        if (confirm(`¿Está seguro de eliminar al afiliado ${tipoPersona.toLowerCase()} ${nombreCompleto}?`)) {
-            try {
-                // Aquí puedes implementar la lógica de eliminación cuando esté disponible
-                alert(`La funcionalidad de eliminar estará disponible próximamente`);
-            } catch (error) {
-                alert(`Error al eliminar el afiliado`);
-                console.error('Error:', error);
-            }
-        }
-    };
 
     // Función para abrir el modal de detalle
     const handleViewDetail = (persona: AfiliadoUnificado) => {
@@ -218,21 +203,6 @@ export default function AbonadosTable() {
             },
             size: 120,
         }),
-        columnHelper.display({
-            id: 'actions',
-            header: 'Acciones',
-            cell: ({ row }) => {
-                const afiliado = row.original as AfiliadoUnificado;
-                return (
-                    <div className="flex items-center gap-2">
-                        <button title="Ver" className="inline-flex items-center gap-2 px-2 py-1 rounded-md text-sky-700 bg-sky-50 hover:bg-sky-100 border border-sky-100" onClick={() => handleViewDetail(afiliado)}><Eye size={14} /></button>
-
-                        <button title="Eliminar" className="inline-flex items-center gap-2 px-2 py-1 rounded-md text-slate-600 bg-white hover:bg-slate-50 border border-slate-100" onClick={() => handleDelete(afiliado)}><Trash size={14} /></button>
-                    </div>
-                );
-            },
-            size: 120,
-        }),
     ];
 
     const table = useReactTable({
@@ -289,7 +259,11 @@ export default function AbonadosTable() {
                             </tr>
                         ) : (
                             table.getRowModel().rows.map((row) => (
-                                <tr key={row.id} className="hover:bg-sky-50">
+                                <tr
+                                    key={row.id}
+                                    className="hover:bg-sky-50 cursor-pointer transition-colors"
+                                    onClick={() => handleViewDetail(row.original)}
+                                >
                                     {row.getVisibleCells().map((cell) => (
                                         <td key={cell.id} className="px-2 sm:px-4 py-3 text-xs sm:text-sm text-slate-700 align-top">
                                             {flexRender(cell.column.columnDef.cell, cell.getContext())}
