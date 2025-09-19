@@ -68,9 +68,9 @@ const FilterModal: React.FC<FilterModalProps> = ({ isOpen, onClose, onApplyFilte
                             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         >
                             <option value="">Todos los estados</option>
-                            <option value="activo">✅ Activo</option>
-                            <option value="inactivo">❌ Inactivo</option>
-                            <option value="pendiente">⏳ Pendiente</option>
+                            <option value="activo"> Activo</option>
+                            <option value="inactivo"> Inactivo</option>
+                            <option value="pendiente"> Pendiente</option>
                         </select>
                     </div>
 
@@ -85,8 +85,8 @@ const FilterModal: React.FC<FilterModalProps> = ({ isOpen, onClose, onApplyFilte
                             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         >
                             <option value="">Todos los tipos</option>
-                            <option value="Físico">👤 Persona Física</option>
-                            <option value="Jurídico">🏢 Persona Jurídica</option>
+                            <option value="Físico"> Persona Física</option>
+                            <option value="Jurídico"> Persona Jurídica</option>
                         </select>
                     </div>
 
@@ -101,8 +101,8 @@ const FilterModal: React.FC<FilterModalProps> = ({ isOpen, onClose, onApplyFilte
                             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         >
                             <option value="">Todos los afiliados</option>
-                            <option value="Abonado">💧 Abonado</option>
-                            <option value="Asociado">🤝 Asociado</option>
+                            <option value="Abonado"> Abonado</option>
+                            <option value="Asociado"> Asociado</option>
                         </select>
                     </div>
 
@@ -152,13 +152,13 @@ const FilterModal: React.FC<FilterModalProps> = ({ isOpen, onClose, onApplyFilte
                         onClick={handleClear}
                         className="flex-1 px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
                     >
-                        🗑️ Limpiar Todo
+                         Limpiar Todo
                     </button>
                     <button
                         onClick={handleApply}
                         className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                     >
-                        ✅ Aplicar Filtros
+                         Aplicar Filtros
                     </button>
                 </div>
             </div>
