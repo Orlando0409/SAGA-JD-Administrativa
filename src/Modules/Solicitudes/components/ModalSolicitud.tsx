@@ -1,5 +1,5 @@
 import React from 'react';
-import { Building, CornerUpLeft, User, X } from 'lucide-react';
+import { Building, User, X } from 'lucide-react';
 import { useAprobarSolicitudAfiliacion, useRechazarSolicitudAfiliacion } from '../Hooks/Fisico Update/HookAfiliadoFisico';
 import type { SolicitudFisica } from '../Models/ModelosFisicas';
 import type { SolicitudJuridica } from '../Models/ModelosJuridicos';
@@ -17,7 +17,7 @@ interface ModalSolicitudProps {
     solicitud: {
         tipo: 'solicitud-fisica' | 'solicitud-juridica';
         datos: SolicitudFisica | SolicitudJuridica;
-        tipoSolicitud?: 'Afiliacion' | 'Cambio_Medidor' | 'Asociado' | 'Desconexion'; // Nuevo campo para identificar el subtipo
+        tipoSolicitud?: 'Afiliacion' | 'Cambio de Medidor' | 'Asociado' | 'Desconexion'; // Nuevo campo para identificar el subtipo
     };
 }
 
@@ -148,7 +148,7 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
                         case 'Afiliacion':
                             await aprobarAfiliacionMutation.mutateAsync(info.id);
                             break;
-                        case 'Cambio_Medidor':
+                        case 'Cambio de Medidor':
                             await aprobarCambioMedidorMutation.mutateAsync(info.id);
                             break;
                         case 'Asociado':
@@ -167,7 +167,7 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
                         case 'Afiliacion':
                             await aprobarAfiliacionJuridicaMutation.mutateAsync(info.id);
                             break;
-                        case 'Cambio_Medidor':
+                        case 'Cambio de Medidor':
                             await aprobarCambioMedidorJuridicoMutation.mutateAsync(info.id);
                             break;
                         case 'Asociado':
@@ -210,7 +210,7 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
                         case 'Afiliacion':
                             await rechazarAfiliacionMutation.mutateAsync(info.id);
                             break;
-                        case 'Cambio_Medidor':
+                        case 'Cambio de Medidor':
                             await rechazarCambioMedidorMutation.mutateAsync(info.id);
                             break;
                         case 'Asociado':
@@ -229,7 +229,7 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
                         case 'Afiliacion':
                             await rechazarAfiliacionJuridicaMutation.mutateAsync(info.id);
                             break;
-                        case 'Cambio_Medidor':
+                        case 'Cambio de Medidor':
                             await rechazarCambioMedidorJuridicoMutation.mutateAsync(info.id);
                             break;
                         case 'Asociado':
@@ -437,7 +437,7 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
                                 {info.tipoSolicitud !== 'Afiliacion' && info.tipoSolicitud !== 'Sin tipo' && (
 
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        {info.tipoSolicitud === 'Cambio_Medidor' && (
+                                        {info.tipoSolicitud === 'Cambio de Medidor' && (
                                             <>
                                                 <div>
                                                     <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Número de Medidor Actual</label>
