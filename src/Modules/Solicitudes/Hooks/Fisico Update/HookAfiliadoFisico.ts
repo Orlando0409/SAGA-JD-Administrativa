@@ -27,7 +27,7 @@ export const useMutateEstadoSolicitud = () => {
                 queryKey: ['solicitud-afiliacion-fisica'] 
             });
 
-            console.log(' Estado actualizado exitosamente en caché:', data);
+            console.log('✅ Estado actualizado exitosamente en caché:', data);
         },
         onError: (error: any) => {
             console.error(' Error al actualizar estado:', error);
@@ -55,7 +55,7 @@ export const useAprobarSolicitudAfiliacion = () => {
                 queryKey: ['solicitud-afiliacion-fisica'] 
             });
 
-            console.log(' Solicitud aprobada exitosamente:', data);
+            console.log('✅ Solicitud aprobada exitosamente:', data);
         },
         onError: (error: any) => {
             console.error(' Error al aprobar solicitud:', error);
@@ -83,7 +83,7 @@ export const useRechazarSolicitudAfiliacion = () => {
                 queryKey: ['solicitud-afiliacion-fisica'] 
             });
 
-            console.log(' Solicitud rechazada exitosamente:', data);
+            console.log('✅ Solicitud rechazada exitosamente:', data);
         },
         onError: (error: any) => {
             console.error(' Error al rechazar solicitud:', error);

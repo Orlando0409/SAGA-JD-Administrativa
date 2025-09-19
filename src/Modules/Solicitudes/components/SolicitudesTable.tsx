@@ -7,7 +7,7 @@ import {
     flexRender,
     type ColumnDef,
 } from '@tanstack/react-table';
-import { ChevronLeft, ChevronRight, User, Building } from 'lucide-react';
+import { Eye, Edit, Trash, ChevronLeft, ChevronRight, Plus, User, Building } from 'lucide-react';
 
 // Importar hooks de solicitudes
 import { useSolicitudesFisicas } from '../Hooks/HookSolicitudesFisicas';
@@ -137,6 +137,22 @@ export default function SolicitudesTable() {
         return resultado;
     }, [solicitudesFisicas, solicitudesJuridicas]);
 
+    const handleDelete = async (solicitud: SolicitudUnificada) => {
+        const nombreCompleto = solicitud.Nombre_Completo;
+        const tipoPersona = solicitud.Tipo_Persona;
+        const tipoSolicitud = solicitud.Tipo_Solicitud;
+
+        if (confirm(`¿Está seguro de eliminar la solicitud de ${tipoSolicitud.toLowerCase()} ${tipoPersona.toLowerCase()} de ${nombreCompleto}?`)) {
+            try {
+                // Aquí puedes implementar la lógica de eliminación cuando esté disponible
+                alert(`La funcionalidad de eliminar estará disponible próximamente`);
+            } catch (error) {
+                alert(`Error al eliminar la solicitud`);
+                console.error('Error:', error);
+            }
+        }
+    };
+
     // Función para abrir el modal de gestión (aprobar/rechazar)
     const handleViewDetail = (solicitud: SolicitudUnificada) => {
         // Determinar el tipo según Tipo_Persona
@@ -149,7 +165,16 @@ export default function SolicitudesTable() {
         setShowGestionModal(true);
     };
 
-    const filteredData = useMemo(() => {
+    // Función para abrir el modal de edición
+    const handleEdit = (solicitud: SolicitudUnificada) => {
+        const tipo = solicitud.Tipo_Persona === 'Físico' ? 'solicitud-fisica' : 'solicitud-juridica';
+
+        setSelectedSolicitud({
+            tipo: tipo as 'solicitud-fisica' | 'solicitud-juridica',
+            datos: solicitud.datos_originales
+        });
+        setShowEditModal(true);
+    }; const filteredData = useMemo(() => {
         if (!globalFilter) return datosUnificados;
         const q = globalFilter.toLowerCase();
         return datosUnificados.filter((solicitud) =>
@@ -283,6 +308,33 @@ export default function SolicitudesTable() {
             },
             size: 120,
         }),
+        columnHelper.display({
+            id: 'actions',
+            header: 'Acciones',
+            cell: ({ row }) => {
+                const solicitud = row.original as SolicitudUnificada;
+                return (
+                    <div className="flex items-center gap-2">
+                        <button
+                            title="Gestionar Solicitud"
+                            className="inline-flex items-center gap-2 px-2 py-1 rounded-md text-sky-700 bg-sky-50 hover:bg-sky-100 border border-sky-100"
+                            onClick={() => handleViewDetail(solicitud)}
+                        >
+                            <Eye size={14} />
+                        </button>
+
+                        <button
+                            title="Eliminar"
+                            className="inline-flex items-center gap-2 px-2 py-1 rounded-md text-slate-600 bg-white hover:bg-slate-50 border border-slate-100"
+                            onClick={() => handleDelete(solicitud)}
+                        >
+                            <Trash size={14} />
+                        </button>
+                    </div>
+                );
+            },
+            size: 120,
+        }),
     ];
 
     const table = useReactTable({
@@ -367,11 +419,7 @@ export default function SolicitudesTable() {
                             </tr>
                         ) : (
                             table.getRowModel().rows.map((row) => (
-                                <tr
-                                    key={row.original.id}
-                                    className="hover:bg-sky-50 cursor-pointer transition-colors"
-                                    onClick={() => handleViewDetail(row.original)}
-                                >
+                                <tr key={row.original.id} className="hover:bg-sky-25">
                                     {row.getVisibleCells().map((cell) => (
                                         <td key={cell.id} className="px-2 sm:px-4 py-4 whitespace-nowrap text-xs sm:text-sm">
                                             {flexRender(cell.column.columnDef.cell, cell.getContext())}

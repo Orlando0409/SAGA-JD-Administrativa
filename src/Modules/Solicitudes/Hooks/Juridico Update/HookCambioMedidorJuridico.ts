@@ -4,6 +4,10 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 //import { ServiceSolicitudCambioMedidor } from '../../Service/EstadoSolicitudesFisicas/ServiceCambioMedidor';
 import { ServiceSolicitudCambioMedidorJuridicas } from '../../Service/EstadoSolicitudesJuridicas/ServiceSolicitudCambioMedidorJuridico';
 
+/**
+ * 🎣 Hook para actualizar estado de solicitudes de cambio de medidor físicas
+ * Basado en el patrón useMutation de React Query
+ */
 export const useMutateEstadoSolicitudCambioMedidorJuridicas = () => {
     const queryClient = useQueryClient();
 
@@ -26,10 +30,10 @@ export const useMutateEstadoSolicitudCambioMedidorJuridicas = () => {
                 queryKey: ['solicitud-cambio-medidor-juridica'] 
             });
 
-            console.log(' Estado de cambio de medidor actualizado exitosamente en caché:', data);
+            console.log('✅ Estado de cambio de medidor actualizado exitosamente en caché:', data);
         },
         onError: (error: any) => {
-            console.error(' Error al actualizar estado de cambio de medidor:', error);
+            console.error('❌ Error al actualizar estado de cambio de medidor:', error);
         },
     });
 };
@@ -54,16 +58,16 @@ export const useAprobarSolicitudCambioMedidorJuridica = () => {
                 queryKey: ['solicitud-cambio-medidor-juridica'] 
             });
 
-            console.log(' Solicitud de cambio de medidor aprobada exitosamente:', data);
+            console.log('✅ Solicitud de cambio de medidor aprobada exitosamente:', data);
         },
         onError: (error: any) => {
-            console.error(' Error al aprobar solicitud de cambio de medidor:', error);
+            console.error('❌ Error al aprobar solicitud de cambio de medidor:', error);
         },
     });
 };
 
 /**
- * Hook específico para rechazar solicitudes de cambio de medidor
+ * 🎣 Hook específico para rechazar solicitudes de cambio de medidor
  */
 export const useRechazarSolicitudCambioMedidorJuridica = () => {
     const queryClient = useQueryClient();
@@ -82,10 +86,10 @@ export const useRechazarSolicitudCambioMedidorJuridica = () => {
                 queryKey: ['solicitud-cambio-medidor-juridica'] 
             });
 
-            console.log(' Solicitud de cambio de medidor rechazada exitosamente:', data);
+            console.log('✅ Solicitud de cambio de medidor rechazada exitosamente:', data);
         },
         onError: (error: any) => {
-            console.error(' Error al rechazar solicitud de cambio de medidor:', error);
+            console.error('❌ Error al rechazar solicitud de cambio de medidor:', error);
         },
     });
 };

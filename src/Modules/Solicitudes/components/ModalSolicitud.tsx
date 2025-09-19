@@ -1,5 +1,5 @@
 import React from 'react';
-import { Building, User, X } from 'lucide-react';
+import { Building, CornerUpLeft, User, X } from 'lucide-react';
 import { useAprobarSolicitudAfiliacion, useRechazarSolicitudAfiliacion } from '../Hooks/Fisico Update/HookAfiliadoFisico';
 import type { SolicitudFisica } from '../Models/ModelosFisicas';
 import type { SolicitudJuridica } from '../Models/ModelosJuridicos';
@@ -17,7 +17,7 @@ interface ModalSolicitudProps {
     solicitud: {
         tipo: 'solicitud-fisica' | 'solicitud-juridica';
         datos: SolicitudFisica | SolicitudJuridica;
-        tipoSolicitud?: 'Afiliacion' | 'Cambio de Medidor' | 'Asociado' | 'Desconexion'; // Nuevo campo para identificar el subtipo
+        tipoSolicitud?: 'Afiliacion' | 'Cambio_Medidor' | 'Asociado' | 'Desconexion'; // Nuevo campo para identificar el subtipo
     };
 }
 
@@ -148,7 +148,7 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
                         case 'Afiliacion':
                             await aprobarAfiliacionMutation.mutateAsync(info.id);
                             break;
-                        case 'Cambio de Medidor':
+                        case 'Cambio_Medidor':
                             await aprobarCambioMedidorMutation.mutateAsync(info.id);
                             break;
                         case 'Asociado':
@@ -167,7 +167,7 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
                         case 'Afiliacion':
                             await aprobarAfiliacionJuridicaMutation.mutateAsync(info.id);
                             break;
-                        case 'Cambio de Medidor':
+                        case 'Cambio_Medidor':
                             await aprobarCambioMedidorJuridicoMutation.mutateAsync(info.id);
                             break;
                         case 'Asociado':
@@ -210,7 +210,7 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
                         case 'Afiliacion':
                             await rechazarAfiliacionMutation.mutateAsync(info.id);
                             break;
-                        case 'Cambio de Medidor':
+                        case 'Cambio_Medidor':
                             await rechazarCambioMedidorMutation.mutateAsync(info.id);
                             break;
                         case 'Asociado':
@@ -229,7 +229,7 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
                         case 'Afiliacion':
                             await rechazarAfiliacionJuridicaMutation.mutateAsync(info.id);
                             break;
-                        case 'Cambio de Medidor':
+                        case 'Cambio_Medidor':
                             await rechazarCambioMedidorJuridicoMutation.mutateAsync(info.id);
                             break;
                         case 'Asociado':
@@ -437,7 +437,7 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
                                 {info.tipoSolicitud !== 'Afiliacion' && info.tipoSolicitud !== 'Sin tipo' && (
 
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        {info.tipoSolicitud === 'Cambio de Medidor' && (
+                                        {info.tipoSolicitud === 'Cambio_Medidor' && (
                                             <>
                                                 <div>
                                                     <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Número de Medidor Actual</label>
@@ -469,7 +469,7 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
                     <div className="flex gap-3 pt-6 border-t border-gray-200">
                         <button
                             onClick={handleAprobar}
-                            disabled={isLoading || info.estado === 'Aprobada' || info.estado === 'Rechazada'}
+                            disabled={isLoading || info.estado === 'Aprobada'}
                             className="flex-1 px-4 py-3 bg-green-400 hover:bg-green-500 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
                         >
                             {isLoading ? (
@@ -479,14 +479,14 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
                                 </span>
                             ) : (
                                 <span className="flex items-center justify-center  gap-2">
-                                    {info.estado === 'Aprobada' ? 'Aprobada' : info.estado === 'Rechazada' ? 'No Disponible' : 'Aprobar'}
+                                    Aprobar
                                 </span>
                             )}
                         </button>
 
                         <button
                             onClick={handleRechazar}
-                            disabled={isLoading || info.estado === 'Aprobada' || info.estado === 'Rechazada'}
+                            disabled={isLoading || info.estado === 'Rechazada'}
                             className="flex-1 px-4 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
                         >
                             {isLoading ? (
@@ -496,7 +496,7 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
                                 </span>
                             ) : (
                                 <span className="flex items-center justify-center gap-2">
-                                    {info.estado === 'Rechazada' ? 'Rechazada' : info.estado === 'Aprobada' ? 'No Disponible' : 'Rechazar'}
+                                    Rechazar
                                 </span>
                             )}
                         </button>
