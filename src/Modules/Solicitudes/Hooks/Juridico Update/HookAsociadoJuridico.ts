@@ -4,10 +4,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 //import { ServiceSolicitudAsociado } from '../../Service/EstadoSolicitudesFisicas/ServiceSolicitudAsociado';
 import { ServiceSolicitudAfiliacionJuridicas } from '../../Service/EstadoSolicitudesJuridicas/ServiceSolicitudAfiliacionJuridica';
 
-/**
- * 🎣 Hook para actualizar estado de solicitudes de desconexión físicas
- * Basado en el patrón useMutation de React Query
- */
+//actualizar 
 export const useMutateEstadoSolicitudAsociadoJuridico = () => {
     const queryClient = useQueryClient();
 
@@ -38,9 +35,9 @@ export const useMutateEstadoSolicitudAsociadoJuridico = () => {
     });
 };
 
-/**
- * 🎣 Hook específico para aprobar solicitudes de desconexión
- */
+
+ // Hook específico para aprobar solicitudes de desconexión
+ 
 export const useAprobarSolicitudAsociadoJuridico = () => {
     const queryClient = useQueryClient();
 
@@ -67,7 +64,7 @@ export const useAprobarSolicitudAsociadoJuridico = () => {
 };
 
 /**
- * 🎣 Hook específico para rechazar solicitudes de desconexión
+ * Hook específico para rechazar solicitudes de desconexión
  */
 export const useRechazarSolicitudAsociadoJuridico = () => {
     const queryClient = useQueryClient();

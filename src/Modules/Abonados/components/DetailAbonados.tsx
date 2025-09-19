@@ -124,9 +124,9 @@ const DetailAbonados: React.FC<DetailAbonadosProps> = ({ persona, isOpen, onClos
     const getModalTitle = () => {
         switch (persona.tipo) {
             case 'afiliado-fisico':
-                return '👤 Detalle del Afiliado Físico';
+                return ' Detalle del Afiliado Físico';
             case 'afiliado-juridico':
-                return '🏢 Detalle del Afiliado Jurídico';
+                return ' Detalle del Afiliado Jurídico';
             default:
                 return 'Detalle';
         }
@@ -334,7 +334,7 @@ const DetailAbonados: React.FC<DetailAbonadosProps> = ({ persona, isOpen, onClos
                                                         rel="noopener noreferrer"
                                                         className="text-blue-600 hover:text-blue-800 font-medium underline"
                                                     >
-                                                        📄 Ver documento
+                                                         Ver documento
                                                     </a>
                                                 ) : (
                                                     <p className="text-gray-500">No disponible</p>
@@ -353,7 +353,7 @@ const DetailAbonados: React.FC<DetailAbonadosProps> = ({ persona, isOpen, onClos
                                                         rel="noopener noreferrer"
                                                         className="text-blue-600 hover:text-blue-800 font-medium underline"
                                                     >
-                                                        📄 Ver documento
+                                                         Ver documento
                                                     </a>
                                                 ) : (
                                                     <p className="text-gray-500">No disponible</p>
