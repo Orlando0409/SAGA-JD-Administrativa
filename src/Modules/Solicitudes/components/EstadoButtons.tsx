@@ -16,7 +16,7 @@ import { useAprobarSolicitudDesconexionJuridica, useRechazarSolicitudDesconexion
 interface EstadoButtonsProps {
     solicitudId: string | number;
     estadoActual?: string;
-    tipoSolicitud: 'Afiliacion' | 'Cambio de Medidor' | 'Asociado' | 'Desconexion'; // Tipo de solicitud requerido
+    tipoSolicitud: 'Afiliacion' | 'Cambio_Medidor' | 'Asociado' | 'Desconexion'; // Tipo de solicitud requerido
     tipoPersona: 'solicitud-fisica' | 'solicitud-juridica'; // Nuevo campo para identificar si es física o jurídica
     onEstadoChanged?: (nuevoEstado: string) => void;
 }
@@ -64,7 +64,7 @@ const EstadoButtons: React.FC<EstadoButtonsProps> = ({
                         case 'Afiliacion':
                             await aprobarAfiliacionMutation.mutateAsync(solicitudId);
                             break;
-                        case 'Cambio de Medidor':
+                        case 'Cambio_Medidor':
                             await aprobarCambioMedidorMutation.mutateAsync(solicitudId);
                             break;
                         case 'Asociado':
@@ -82,7 +82,7 @@ const EstadoButtons: React.FC<EstadoButtonsProps> = ({
                         case 'Afiliacion':
                             await aprobarAfiliacionJuridicaMutation.mutateAsync(solicitudId);
                             break;
-                        case 'Cambio de Medidor':
+                        case 'Cambio_Medidor':
                             await aprobarCambioMedidorJuridicoMutation.mutateAsync(solicitudId);
                             break;
                         case 'Asociado':
@@ -92,19 +92,19 @@ const EstadoButtons: React.FC<EstadoButtonsProps> = ({
                             await aprobarDesconexionJuridicoMutation.mutateAsync(solicitudId);
                             break;
                         default:
-                            console.warn(' Tipo de solicitud jurídica no reconocido:', tipoSolicitud);
+                            console.warn('⚠️ Tipo de solicitud jurídica no reconocido:', tipoSolicitud);
                             await aprobarAfiliacionJuridicaMutation.mutateAsync(solicitudId);
                     }
                 } else {
-                    console.error(' Tipo de persona no reconocido:', tipoPersona);
+                    console.error('❌ Tipo de persona no reconocido:', tipoPersona);
                     throw new Error('Tipo de solicitud no válido');
                 }
 
                 onEstadoChanged?.('Aprobada');
-                alert(' Solicitud aprobada exitosamente');
+                alert('✅ Solicitud aprobada exitosamente');
             } catch (error) {
-                console.error(' Error al aprobar solicitud:', error);
-                alert(' Error al aprobar la solicitud');
+                console.error('❌ Error al aprobar solicitud:', error);
+                alert('❌ Error al aprobar la solicitud');
             }
         }
     };
@@ -113,7 +113,7 @@ const EstadoButtons: React.FC<EstadoButtonsProps> = ({
     const handleRechazar = async () => {
         if (confirm('¿Está seguro de rechazar esta solicitud?')) {
             try {
-                console.log(` Rechazando solicitud: Tipo Persona: ${tipoPersona}, Tipo Solicitud: ${tipoSolicitud}`);
+                console.log(`🎯 Rechazando solicitud: Tipo Persona: ${tipoPersona}, Tipo Solicitud: ${tipoSolicitud}`);
 
                 // Determinar qué mutación usar basado en tipo de persona y tipo de solicitud
                 if (tipoPersona === 'solicitud-fisica') {
@@ -121,7 +121,7 @@ const EstadoButtons: React.FC<EstadoButtonsProps> = ({
                         case 'Afiliacion':
                             await rechazarAfiliacionMutation.mutateAsync(solicitudId);
                             break;
-                        case 'Cambio de Medidor':
+                        case 'Cambio_Medidor':
                             await rechazarCambioMedidorMutation.mutateAsync(solicitudId);
                             break;
                         case 'Asociado':
@@ -131,7 +131,7 @@ const EstadoButtons: React.FC<EstadoButtonsProps> = ({
                             await rechazarDesconexionMutation.mutateAsync(solicitudId);
                             break;
                         default:
-                            console.warn(' Tipo de solicitud física no reconocido:', tipoSolicitud);
+                            console.warn('⚠️ Tipo de solicitud física no reconocido:', tipoSolicitud);
                             await rechazarAfiliacionMutation.mutateAsync(solicitudId);
                     }
                 } else if (tipoPersona === 'solicitud-juridica') {
@@ -139,7 +139,7 @@ const EstadoButtons: React.FC<EstadoButtonsProps> = ({
                         case 'Afiliacion':
                             await rechazarAfiliacionJuridicaMutation.mutateAsync(solicitudId);
                             break;
-                        case 'Cambio de Medidor':
+                        case 'Cambio_Medidor':
                             await rechazarCambioMedidorJuridicoMutation.mutateAsync(solicitudId);
                             break;
                         case 'Asociado':
@@ -149,19 +149,19 @@ const EstadoButtons: React.FC<EstadoButtonsProps> = ({
                             await rechazarDesconexionJuridicoMutation.mutateAsync(solicitudId);
                             break;
                         default:
-                            console.warn(' Tipo de solicitud jurídica no reconocido:', tipoSolicitud);
+                            console.warn('⚠️ Tipo de solicitud jurídica no reconocido:', tipoSolicitud);
                             await rechazarAfiliacionJuridicaMutation.mutateAsync(solicitudId);
                     }
                 } else {
-                    console.error(' Tipo de persona no reconocido:', tipoPersona);
+                    console.error('❌ Tipo de persona no reconocido:', tipoPersona);
                     throw new Error('Tipo de solicitud no válido');
                 }
 
                 onEstadoChanged?.('Rechazada');
-                alert(' Solicitud rechazada');
+                alert('❌ Solicitud rechazada');
             } catch (error) {
-                console.error(' Error al rechazar solicitud:', error);
-                alert(' Error al rechazar la solicitud');
+                console.error('❌ Error al rechazar solicitud:', error);
+                alert('❌ Error al rechazar la solicitud');
             }
         }
     };
@@ -174,9 +174,9 @@ const EstadoButtons: React.FC<EstadoButtonsProps> = ({
                 nuevoEstadoId
             });
             onEstadoChanged?.(nombreEstado);
-            alert(` Estado cambiado a: ${nombreEstado}`);
+            alert(`🔄 Estado cambiado a: ${nombreEstado}`);
         } catch (error) {
-            alert(' Error al cambiar estado');
+            alert('❌ Error al cambiar estado');
         }
     };
 
@@ -202,7 +202,7 @@ const EstadoButtons: React.FC<EstadoButtonsProps> = ({
                 disabled={isLoading || estadoActual === 'Aprobada'}
                 className="px-3 py-1 rounded-md bg-green-100 text-green-700 hover:bg-green-200 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium border border-green-200"
             >
-                {isLoading ? 'Procesando' : 'Aprobar'}
+                {isLoading ? '⏳' : '✅'} Aprobar
             </button>
 
             <button
@@ -210,7 +210,7 @@ const EstadoButtons: React.FC<EstadoButtonsProps> = ({
                 disabled={isLoading || estadoActual === 'Rechazada'}
                 className="px-3 py-1 rounded-md bg-red-100 text-red-700 hover:bg-red-200 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium border border-red-200"
             >
-                {isLoading ? 'Procesando' : 'Rechazar'}
+                {isLoading ? '⏳' : '❌'} Rechazar
             </button>
 
             {/* Ejemplo de botón con estado personalizado */}
@@ -219,7 +219,7 @@ const EstadoButtons: React.FC<EstadoButtonsProps> = ({
                 disabled={isLoading || estadoActual === 'Completada'}
                 className="px-3 py-1 rounded-md bg-purple-100 text-purple-700 hover:bg-purple-200 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium border border-purple-200"
             >
-                {updateEstadoMutation.isPending ? 'Procesando' : 'Completar'}
+                {updateEstadoMutation.isPending ? '⏳' : '🎯'} Completar
             </button>
         </div>
     );

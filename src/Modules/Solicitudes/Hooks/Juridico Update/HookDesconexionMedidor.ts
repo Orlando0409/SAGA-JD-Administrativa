@@ -32,7 +32,7 @@ export const useMutateEstadoSolicitudDesconexionJuridicas = () => {
             console.log('✅ Estado de desconexión actualizado exitosamente en caché:', data);
         },
         onError: (error: any) => {
-            console.error('Error al actualizar estado de desconexión:', error);
+            console.error('❌ Error al actualizar estado de desconexión:', error);
         },
     });
 };
@@ -60,7 +60,7 @@ export const useAprobarSolicitudDesconexionJuridica = () => {
             console.log('✅ Solicitud de desconexión aprobada exitosamente:', data);
         },
         onError: (error: any) => {
-            console.error(' Error al aprobar solicitud de desconexión:', error);
+            console.error('❌ Error al aprobar solicitud de desconexión:', error);
         },
     });
 };
@@ -85,10 +85,10 @@ export const useRechazarSolicitudDesconexionJuridica = () => {
                 queryKey: ['solicitud-desconexion-juridica'] 
             });
 
-            console.log(' Solicitud de desconexión rechazada exitosamente:', data);
+            console.log('✅ Solicitud de desconexión rechazada exitosamente:', data);
         },
         onError: (error: any) => {
-            console.error(' Error al rechazar solicitud de desconexión:', error);
+            console.error('❌ Error al rechazar solicitud de desconexión:', error);
         },
     });
 };

@@ -21,9 +21,6 @@ import { Button } from "./ui/button"
 import { useAlerts } from "../../context/AlertContext"
 import { LuKey } from "react-icons/lu"
 import { ChangePasswordModal } from "@/Modules/Auth/Components/ChangePassword"
-import { useNotificacionesSolicitudes } from "@/Modules/Solicitudes/Hooks/HookNotificaciones"
-
-
 
 export function AppSidebar({allowedModules}: Readonly<AppSidebarProps>) {
   const [hovered, setHovered] = useState(false)
@@ -33,7 +30,6 @@ export function AppSidebar({allowedModules}: Readonly<AppSidebarProps>) {
   const { state, setOpen: setSidebarOpen } = useSidebar()
   const { showSuccess } = useAlerts();
   const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
-  const { totalPendientes } = useNotificacionesSolicitudes();
 
 
   const { user, isLoading } = useAuthUser()
@@ -139,12 +135,6 @@ export function AppSidebar({allowedModules}: Readonly<AppSidebarProps>) {
                       >
                         <span className="w-6 h-6 flex items-center justify-center">{mod.icon}</span>
                         <span className="ml-2 group-data-[collapsible=icon]:hidden">{mod.name}</span>
-                            {/* Badge de notificaciones para Solicitudes */}
-                            {mod.name === 'Solicitudes' && totalPendientes > 0 && (
-                              <span className="ml-auto bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-medium">
-                                {totalPendientes > 9 ? '9+' : totalPendientes}
-                              </span>
-                            )}
                       </Link>
                           </li>
                         ))}
