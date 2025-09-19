@@ -676,7 +676,7 @@ export default function FormularioAfiliados({ isOpen, onClose, onSuccess }: Form
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    📄 Escritura del Terreno *
+                    Escritura del Terreno *
                   </label>
                   {tipoFormulario === 'fisico' ? (
                     <div>
@@ -789,7 +789,7 @@ export default function FormularioAfiliados({ isOpen, onClose, onSuccess }: Form
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    📐 Planos del Terreno *
+                    Planos del Terreno *
                   </label>
                   {tipoFormulario === 'fisico' ? (
                     <div>
