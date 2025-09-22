@@ -1,0 +1,39 @@
+export interface AfiliadoFisico {
+
+    Nombre: string
+    Apellido1: string
+    Apellido2?: string
+    Cedula: string
+    Numero_Telefono: string
+    Correo: string
+    Direccion_Exacta?: string
+    Edad: number
+    Planos_Terreno?: File | string;
+    Escritura_Terreno?: File | string;
+}
+
+export const AfiliadoFisicoInicialState: AfiliadoFisico = {
+
+    Nombre: '',
+    Apellido1: '',
+    Apellido2: '',
+    Cedula: '',
+    Numero_Telefono: '',
+    Correo: '',
+    Direccion_Exacta: '',
+    Edad: 0,
+    Planos_Terreno: undefined,
+    Escritura_Terreno: undefined,
+}
+export interface AfiliacionFisicaFormData {
+    Nombre: string;
+    Apellido1: string;
+    Apellido2?: string;
+    Cedula: string;
+    Correo: string;
+    Direccion_Exacta: string;
+    Numero_Telefono: string;
+    Edad: number;
+    Planos_Terreno?: File | string;
+    Escritura_Terreno?: File | string;
+}
