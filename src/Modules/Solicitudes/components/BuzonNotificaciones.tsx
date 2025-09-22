@@ -5,6 +5,11 @@ import { useNotificacionesSolicitudes, type NotificacionSolicitud } from '../Hoo
 import { IoPersonSharp } from "react-icons/io5";
 import { FaExchangeAlt } from "react-icons/fa";
 import { FaHandshakeSimple } from "react-icons/fa6";
+
+import { formatDistanceToNow } from 'date-fns';
+import { es } from 'date-fns/locale';
+
+
 interface BuzonNotificacionesProps {
   onVerSolicitud?: (notificacion: NotificacionSolicitud) => void;
 }
@@ -30,6 +35,18 @@ export const BuzonNotificaciones: React.FC<BuzonNotificacionesProps> = ({ onVerS
       case 'Cambio de Medidor': return 'text-blue-600 bg-blue-50';
       case 'Asociado': return 'text-orange-600 bg-orange-50';
       default: return 'text-gray-600 bg-gray-50';
+    }
+  };
+
+    const formatearFecha = (fecha: string) => {
+    if (!fecha) return 'Fecha no disponible';
+    try {
+      return formatDistanceToNow(new Date(fecha), { 
+        addSuffix: true, 
+        locale: es 
+      });
+    } catch {
+      return 'Fecha inválida';
     }
   };
 
@@ -156,7 +173,7 @@ export const BuzonNotificaciones: React.FC<BuzonNotificacionesProps> = ({ onVerS
                             
                             <div className="flex items-center gap-2 text-xs text-gray-500">
                               <LuClock className="w-3 h-3" />
-                              <span>{notificacion.fechaCreacion}</span>
+                              <span>{formatearFecha(notificacion.fechaCreacion)}</span>
                             </div>
                           </div>
 
