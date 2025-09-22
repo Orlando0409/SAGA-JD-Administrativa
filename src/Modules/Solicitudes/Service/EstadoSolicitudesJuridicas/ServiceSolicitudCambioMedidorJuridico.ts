@@ -6,7 +6,7 @@ import type { SolicitudFisica } from "../../Models/ModelosFisicas";
  * 🔄 Servicio para gestionar estados de solicitudes de cambio de medidor físicas
  * Utiliza el endpoint /:id/update/estado/:nuevoEstadoId
  */
-export class ServiceSolicitudCambioMedidor {
+export class ServiceSolicitudCambioMedidorJuridicas {
     
     /**
      * 🔄 PUT - Actualizar estado de una solicitud de cambio de medidor 
@@ -19,7 +19,7 @@ export class ServiceSolicitudCambioMedidor {
             console.log(`🔄 Actualizando estado de solicitud de cambio de medidor ${solicitudId} a estado ${nuevoEstadoId}...`);
             
             const response = await apiAuth.patch<SolicitudFisica>(
-                `/solicitud-cambio-medidor-fisica/${solicitudId}/update/estado/${nuevoEstadoId}`
+                `/solicitud-cambio-medidor-juridica/${solicitudId}/update/estado/${nuevoEstadoId}`
             );
             
             console.log('✅ Estado de solicitud de cambio de medidor actualizado exitosamente:', response.data);

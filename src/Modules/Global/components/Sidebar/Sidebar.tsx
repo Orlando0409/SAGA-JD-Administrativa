@@ -22,16 +22,15 @@ import { useAlerts } from "../../context/AlertContext"
 import { LuKey } from "react-icons/lu"
 import { ChangePasswordModal } from "@/Modules/Auth/Components/ChangePassword"
 
-
-
 export function AppSidebar({allowedModules}: Readonly<AppSidebarProps>) {
   const [hovered, setHovered] = useState(false)
   const [openSections, setOpenSections] = useState<number[]>([])
   const location = useLocation()
   const logoutMutation = useLogout()
   const { state, setOpen: setSidebarOpen } = useSidebar()
-   const { showSuccess } = useAlerts();
-   const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
+  const { showSuccess } = useAlerts();
+  const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
+
 
   const { user, isLoading } = useAuthUser()
   const currentUser = {
