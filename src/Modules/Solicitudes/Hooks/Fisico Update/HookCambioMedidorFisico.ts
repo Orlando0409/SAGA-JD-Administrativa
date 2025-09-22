@@ -29,10 +29,10 @@ export const useMutateEstadoSolicitudCambioMedidor = () => {
                 queryKey: ['solicitudes-cambio-medidor-fisicas'] 
             });
 
-            console.log(' Estado de cambio de medidor actualizado exitosamente en caché:', data);
+            console.log('✅ Estado de cambio de medidor actualizado exitosamente en caché:', data);
         },
         onError: (error: any) => {
-            console.error(' Error al actualizar estado de cambio de medidor:', error);
+            console.error('❌ Error al actualizar estado de cambio de medidor:', error);
         },
     });
 };
@@ -57,10 +57,10 @@ export const useAprobarSolicitudCambioMedidor = () => {
                 queryKey: ['solicitudes-cambio-medidor-fisicas'] 
             });
 
-            console.log(' Solicitud de cambio de medidor aprobada exitosamente:', data);
+            console.log('✅ Solicitud de cambio de medidor aprobada exitosamente:', data);
         },
         onError: (error: any) => {
-            console.error(' Error al aprobar solicitud de cambio de medidor:', error);
+            console.error('❌ Error al aprobar solicitud de cambio de medidor:', error);
         },
     });
 };
@@ -85,10 +85,10 @@ export const useRechazarSolicitudCambioMedidor = () => {
                 queryKey: ['solicitudes-cambio-medidor-fisicas'] 
             });
 
-            console.log(' Solicitud de cambio de medidor rechazada exitosamente:', data);
+            console.log('✅ Solicitud de cambio de medidor rechazada exitosamente:', data);
         },
         onError: (error: any) => {
-            console.error(' Error al rechazar solicitud de cambio de medidor:', error);
+            console.error('❌ Error al rechazar solicitud de cambio de medidor:', error);
         },
     });
 };
