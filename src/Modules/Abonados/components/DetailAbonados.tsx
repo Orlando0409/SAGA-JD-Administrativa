@@ -420,7 +420,18 @@ const DetailAbonados: React.FC<DetailAbonadosProps> = ({ persona, isOpen, onClos
                     </div>
 
                     {/* Action Buttons */}
-                    <div className="flex justify-end gap-4 mt-8">
+                    <div className="flex justify-between items-center mt-8">
+                        {/* Botón de eliminar - izquierda */}
+                       { /*<Button
+                            size="xl"
+                            className="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition flex items-center gap-2"
+                            onClick={handleDelete}
+                        >
+                            <Trash className="w-5 h-5" />
+                            Eliminar
+                        </Button>*/}
+
+                        {/* Botón de editar - derecha */}
                         <Button
                             size="xl"
                             className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center gap-2"
