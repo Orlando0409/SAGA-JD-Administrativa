@@ -39,14 +39,14 @@ export default function LoginForm() {
             Password: value.Password,
           });
           showSuccess('Inicio de sesión exitoso');
-        } catch (err: unknown) {
+        } catch (error: unknown) {
           let errorMsg = '';
-          if (err instanceof AxiosError) {
-            errorMsg = err.response?.data?.message || err.message;
-          } else if (err instanceof Error) {
-            errorMsg = err.message;
+          if (error instanceof AxiosError) {
+            errorMsg = error.response?.data?.message || error.message;
+          } else if (error instanceof Error) {
+            errorMsg = error.message;
           } else {
-            errorMsg = String(err);
+            errorMsg = String(error);
           }
 
           if (typeof errorMsg === 'string' && errorMsg.includes('deshabilitado')) {
@@ -61,13 +61,13 @@ export default function LoginForm() {
     },
   });
 
-  // Determinar si el botón debe estar deshabilitado
+
   const isButtonDisabled = mutation.isPending || isBlocked;
 
   return (
-    <div className="min-h-screen min-w-screen flex bg-gray-100">
+    <section className="min-h-screen min-w-screen flex bg-gray-100">
 
-      {/* Imagen - Solo visible en tablet y desktop */}
+      {/* Imagen */}
       <div className="hidden md:block md:w-[50vw] bg-cover bg-center">
         <img
           src="\ASADA_JUAN_D.png"
@@ -76,10 +76,9 @@ export default function LoginForm() {
         />
       </div>
 
-      {/* Formulario - Ocupa toda la pantalla en móvil, 50% en desktop */}
-      <div className="w-full md:w-[50vw] flex items-center justify-center bg-whitesmoke">
+      {/* Formulario */}
+      <section className="w-full md:w-[50vw] flex items-center justify-center bg-whitesmoke">
         <div className="w-full max-w-sm p-8 rounded-xl shadow-lg flex flex-col items-center bg-gray-200">
-          {/* Logo arriba */}
           <div className="w-30 h-30 flex justify-center mb-4">
             <img
               src="/Logo_ASADA_Juan_Díaz.png"
@@ -202,7 +201,7 @@ export default function LoginForm() {
             </div>
           </form>
         </div>
-      </div>
-    </div>
+      </section>
+    </section>
   );
 }
