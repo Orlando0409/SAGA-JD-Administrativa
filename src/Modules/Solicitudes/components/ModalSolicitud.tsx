@@ -1,5 +1,5 @@
 import React from 'react';
-import { Building, CornerUpLeft, User, X } from 'lucide-react';
+import { Building, User, X } from 'lucide-react';
 import { useAprobarSolicitudAfiliacion, useRechazarSolicitudAfiliacion } from '../Hooks/Fisico Update/HookAfiliadoFisico';
 import type { SolicitudFisica } from '../Models/ModelosFisicas';
 import type { SolicitudJuridica } from '../Models/ModelosJuridicos';
@@ -17,9 +17,11 @@ interface ModalSolicitudProps {
     solicitud: {
         tipo: 'solicitud-fisica' | 'solicitud-juridica';
         datos: SolicitudFisica | SolicitudJuridica;
-        tipoSolicitud?: 'Afiliacion' | 'Cambio_Medidor' | 'Asociado' | 'Desconexion'; // Nuevo campo para identificar el subtipo
+        tipoSolicitud?: 'Afiliacion' | 'Cambio de Medidor' | 'Asociado' | 'Desconexion'; // Nuevo campo para identificar el subtipo
     };
 }
+
+//Modal simple para gestionar estados de solicitudes
 
 //Modal simple para gestionar estados de solicitudes
 
@@ -148,7 +150,7 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
                         case 'Afiliacion':
                             await aprobarAfiliacionMutation.mutateAsync(info.id);
                             break;
-                        case 'Cambio_Medidor':
+                        case 'Cambio de Medidor':
                             await aprobarCambioMedidorMutation.mutateAsync(info.id);
                             break;
                         case 'Asociado':
@@ -167,7 +169,7 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
                         case 'Afiliacion':
                             await aprobarAfiliacionJuridicaMutation.mutateAsync(info.id);
                             break;
-                        case 'Cambio_Medidor':
+                        case 'Cambio de Medidor':
                             await aprobarCambioMedidorJuridicoMutation.mutateAsync(info.id);
                             break;
                         case 'Asociado':
@@ -210,7 +212,7 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
                         case 'Afiliacion':
                             await rechazarAfiliacionMutation.mutateAsync(info.id);
                             break;
-                        case 'Cambio_Medidor':
+                        case 'Cambio de Medidor':
                             await rechazarCambioMedidorMutation.mutateAsync(info.id);
                             break;
                         case 'Asociado':
@@ -229,7 +231,7 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
                         case 'Afiliacion':
                             await rechazarAfiliacionJuridicaMutation.mutateAsync(info.id);
                             break;
-                        case 'Cambio_Medidor':
+                        case 'Cambio de Medidor':
                             await rechazarCambioMedidorJuridicoMutation.mutateAsync(info.id);
                             break;
                         case 'Asociado':
@@ -311,96 +313,22 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
                                 </div>
                             </div>
 
-                            {/* Avatar y título */}
-                            <div className="text-center mb-6">
-                                <div className={`inline-flex items-center justify-center w-16 h-16 rounded-full mb-3 ${info.tipo === 'Física'
-                                    ? 'bg-blue-100 text-blue-600'
-                                    : 'bg-purple-100 text-purple-600'
-                                    }`}>
-                                    {info.tipo === 'Física' ? <User size={24} /> : <Building size={24} />}
-                                </div>
-                                <h4 className="text-xl font-semibold text-gray-800 mb-1">{info.nombre}</h4>
-                                <p className="text-sm text-gray-500 mb-2">{info.tipo === 'Física' ? 'Persona Física' : 'Persona Jurídica'}</p>
-                                <span className="inline-block bg-blue-50 px-4 py-1 rounded-full text-sm font-medium text-blue-800">
-                                    {info.tipoSolicitud.replace('_', ' ')}
-                                </span>
-                            </div>
-
-                            {/* Información completa en un solo grid */}
-                            <div className="space-y-6">
-                                {/* Información Personal/Empresarial */}
+                            {/* Información del solicitante */}
+                            <div className="mb-6">
+                                <h3 className="text-sm font-semibold text-gray-600 uppercase tracking-wide mb-3">Información del Solicitante</h3>
                                 <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
-                                        {info.tipo === 'Física' ? (
-                                            <>
-                                                <div>
-                                                    <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Nombre</label>
-                                                    <div className="text-sm text-gray-800">{info.Nombre}</div>
-                                                </div>
-                                                <div>
-                                                    <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Primer Apellido</label>
-                                                    <div className="text-sm text-gray-800">{info.Apellido1}</div>
-                                                </div>
-                                                <div>
-                                                    <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Segundo Apellido</label>
-                                                    <div className="text-sm text-gray-800">{info.Apellido2}</div>
-                                                </div>
-                                                <div>
-                                                    <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Número de Cédula</label>
-                                                    <div className="text-sm text-gray-800">{info.Cedula}</div>
-                                                </div>
-
-                                                <div>
-                                                    <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Edad</label>
-                                                    <div className="text-sm text-gray-800">{info.Edad}</div>
-                                                </div>
-                                                <div>
-                                                    <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Número de Teléfono</label>
-                                                    <div className="text-sm text-gray-800">{info.Numero_Telefono}</div>
-                                                </div>
-                                                <div className="md:col-span-2">
-                                                    <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Correo Electrónico</label>
-                                                    <div className="text-sm text-gray-800">{info.Correo}</div>
-                                                </div>
-                                                <div className="md:col-span-2">
-                                                    <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Direccion Exacta</label>
-                                                    <div className="text-sm text-gray-800">{info.Direccion_Exacta}</div>
-                                                </div>
-                                                <div className="md:col-span-2">
-                                                    <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Motivo Solicitud</label>
-                                                    <div className="text-sm text-gray-800">{info.Motivo_Solicitud}</div>
-                                                </div>
-
-
-                                            </>
-                                        ) : (
-                                            <>
-                                                <div>
-                                                    <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Razón Social</label>
-                                                    <div className="text-sm text-gray-800">{info.Razon_Social}</div>
-                                                </div>
-                                                <div>
-                                                    <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Cédula Jurídica</label>
-                                                    <div className="text-sm text-gray-800">{info.Cedula_Juridica}</div>
-                                                </div>
-
-                                                <div>
-                                                    <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Teléfono</label>
-                                                    <div className="text-sm text-gray-800">{info.Numero_Telefono}</div>
-                                                </div>
-                                                <div>
-                                                    <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Correo Electrónico</label>
-                                                    <div className="text-sm text-gray-800">{info.Correo}</div>
-                                                </div>
-                                                <div>
-                                                    <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Dirección Exacta</label>
-                                                    <div className="text-sm text-gray-800">{info.Direccion_Exacta}</div>
-                                                </div>
-
-
-                                            </>
-                                        )}
+                                    <div className="text-center mb-4">
+                                        <div className={`inline-flex items-center justify-center w-12 h-12 rounded-full mb-2 ${info.tipo === 'Física'
+                                            ? 'bg-blue-100 text-blue-600'
+                                            : 'bg-purple-100 text-purple-600'
+                                            }`}>
+                                            <span className="text-xl">{info.tipo === 'Física' ? '👤' : '🏢'}</span>
+                                        </div>
+                                        <h4 className="text-lg font-semibold text-gray-800">{info.nombre}</h4>
+                                        <p className="text-sm text-gray-500">{info.tipo === 'Física' ? 'Persona Física' : 'Persona Jurídica'}</p>
                                     </div>
                                 </div>
+                            </div>
 
                                 {/* Documentos */}
                                 <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
@@ -430,35 +358,6 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
                                         </div>
                                     </div>
                                 </div>
-
-                                {/* Información específica según el tipo de solicitud */}
-                                {info.tipoSolicitud !== 'Afiliacion' && info.tipoSolicitud !== 'Sin tipo' && (
-
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        {info.tipoSolicitud === 'Cambio_Medidor' && (
-                                            <>
-                                                <div>
-                                                    <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Número de Medidor Actual</label>
-                                                    <div className="text-sm font-mono text-gray-800 bg-gray-50 px-3 py-2 rounded">{info.Numero_Medidor_Actual}</div>
-                                                </div>
-
-                                            </>
-                                        )}
-                                        {info.tipoSolicitud === 'Desconexion' && (
-                                            <>
-
-                                            </>
-                                        )}
-                                        {info.tipoSolicitud === 'Asociado' && (
-                                            <div className="md:col-span-2">
-                                                <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Motivo de la Solicitud</label>
-                                                <div className="text-sm text-gray-800 bg-gray-50 p-3 rounded">{info.Motivo_Solicitud}</div>
-                                            </div>
-                                        )}
-                                    </div>
-
-                                )}
-
                             </div>
                         </div>
                     </div>
@@ -468,7 +367,7 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
                         <button
                             onClick={handleAprobar}
                             disabled={isLoading || info.estado === 'Aprobada'}
-                            className="flex-1 px-4 py-3 bg-green-400 hover:bg-green-500 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+                            className="flex-1 px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
                         >
                             {isLoading ? (
                                 <span className="flex items-center justify-center gap-2">
@@ -476,15 +375,15 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
                                     Aprobando...
                                 </span>
                             ) : (
-                                <span className="flex items-center justify-center  gap-2">
-                                    Aprobar
+                                <span className="flex items-center justify-center gap-2">
+                                    ✅ Aprobar
                                 </span>
                             )}
                         </button>
 
                         <button
                             onClick={handleRechazar}
-                            disabled={isLoading || info.estado === 'Rechazada'}
+                            disabled={isLoading || info.estado === 'Aprobada' || info.estado === 'Rechazada'}
                             className="flex-1 px-4 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
                         >
                             {isLoading ? (
@@ -494,7 +393,7 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
                                 </span>
                             ) : (
                                 <span className="flex items-center justify-center gap-2">
-                                    Rechazar
+                                    ❌ Rechazar
                                 </span>
                             )}
                         </button>

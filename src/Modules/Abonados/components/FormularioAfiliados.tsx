@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useForm } from '@tanstack/react-form';
 import { useAfiliadosFisicos } from '../Hook/HookAfiliadoFisico';
 import { useAfiliadosJuridicos } from '../Hook/HookAfiliadoJuridico';
+import { User } from 'lucide-react';
 
 interface FormularioAfiliadosProps {
   isOpen: boolean;
@@ -28,7 +29,7 @@ export default function FormularioAfiliados({ isOpen, onClose, onSuccess }: Form
   const { createAfiliadoFisico } = useAfiliadosFisicos();
   const { createAfiliadoJuridico } = useAfiliadosJuridicos();
 
-  // 🔥 VALIDACIÓN SIMPLE SIN ZOD (ya que los DTOs no incluyen archivos)
+  //  VALIDACIÓN SIMPLE SIN ZOD (ya que los DTOs no incluyen archivos)
   const validarFormularioFisico = (value: any) => {
     const errores: Record<string, string> = {};
 
@@ -98,20 +99,20 @@ export default function FormularioAfiliados({ isOpen, onClose, onSuccess }: Form
 
       setFormErrors({});
 
-      // 🛡️ VALIDAR ANTES DE ENVIAR
+      //  VALIDAR ANTES DE ENVIAR
       const errores = validarFormularioFisico(value);
       if (Object.keys(errores).length > 0) {
         setFormErrors(errores);
         return;
       }
 
-      console.log("🔍 Enviando formulario físico:", value);
-      console.log("🔍 Archivos físico:", archivosFisico);
+      console.log(" Enviando formulario físico:", value);
+      console.log(" Archivos físico:", archivosFisico);
 
       try {
         const formData = new FormData();
 
-        // ✅ VERIFICAR QUE LOS VALORES NO SEAN UNDEFINED O VACÍOS ANTES DE AGREGAR
+        //  VERIFICAR QUE LOS VALORES NO SEAN UNDEFINED O VACÍOS ANTES DE AGREGAR
         if (value.Nombre?.trim()) {
           formData.append('Nombre', value.Nombre.trim());
         }
@@ -137,19 +138,19 @@ export default function FormularioAfiliados({ isOpen, onClose, onSuccess }: Form
           formData.append('Edad', value.Edad.toString());
         }
 
-        // 🚨 VERIFICACIÓN CRÍTICA: SOLO AGREGAR ARCHIVOS SI SON REALMENTE ARCHIVOS
-        console.log("🔍 Verificando archivos antes de agregar:");
+        // VERIFICACIÓN CRÍTICA: SOLO AGREGAR ARCHIVOS SI SON REALMENTE ARCHIVOS
+        console.log(" Verificando archivos antes de agregar:");
         console.log("Escritura_Terreno:", archivosFisico.Escritura_Terreno);
         console.log("Planos_Terreno:", archivosFisico.Planos_Terreno);
         console.log("Es Escritura_Terreno un File?", archivosFisico.Escritura_Terreno instanceof File);
         console.log("Es Planos_Terreno un File?", archivosFisico.Planos_Terreno instanceof File);
 
-        // ✅ SOLO AGREGAR ARCHIVOS SI SON INSTANCIAS DE FILE
+        //  SOLO AGREGAR ARCHIVOS SI SON INSTANCIAS DE FILE
         if (archivosFisico.Escritura_Terreno && archivosFisico.Escritura_Terreno instanceof File) {
           formData.append('Escritura_Terreno', archivosFisico.Escritura_Terreno);
-          console.log("✅ Escritura_Terreno agregado:", archivosFisico.Escritura_Terreno.name);
+          console.log("Escritura_Terreno agregado:", archivosFisico.Escritura_Terreno.name);
         } else {
-          console.error("❌ Escritura_Terreno no es un archivo válido:", archivosFisico.Escritura_Terreno);
+          console.error(" Escritura_Terreno no es un archivo válido:", archivosFisico.Escritura_Terreno);
           setFormErrors({ Escritura_Terreno: "Debe seleccionar un archivo válido para la escritura" });
           return;
         }
@@ -158,13 +159,13 @@ export default function FormularioAfiliados({ isOpen, onClose, onSuccess }: Form
           formData.append('Planos_Terreno', archivosFisico.Planos_Terreno);
           console.log("✅ Planos_Terreno agregado:", archivosFisico.Planos_Terreno.name);
         } else {
-          console.error("❌ Planos_Terreno no es un archivo válido:", archivosFisico.Planos_Terreno);
+          console.error(" Planos_Terreno no es un archivo válido:", archivosFisico.Planos_Terreno);
           setFormErrors({ Planos_Terreno: "Debe seleccionar un archivo válido para los planos" });
           return;
         }
 
-        // 🔍 DEBUG FINAL - Ver EXACTAMENTE qué contiene el FormData
-        console.log("📦 FormData final ANTES de enviar:");
+        //  DEBUG FINAL - Ver EXACTAMENTE qué contiene el FormData
+        console.log(" FormData final ANTES de enviar:");
         const formDataEntries = Array.from(formData.entries());
         formDataEntries.forEach(([key, val]) => {
           if (val instanceof File) {
@@ -177,10 +178,10 @@ export default function FormularioAfiliados({ isOpen, onClose, onSuccess }: Form
         // 🚨 VERIFICACIÓN ADICIONAL: Contar el número de entradas
         const totalEntries = formDataEntries.length;
         const fileEntries = formDataEntries.filter(([, val]) => val instanceof File).length;
-        console.log(`📊 Total entradas: ${totalEntries}, Archivos: ${fileEntries}`);
+        console.log(` Total entradas: ${totalEntries}, Archivos: ${fileEntries}`);
 
         if (fileEntries !== 2) {
-          console.error("❌ No se encontraron exactamente 2 archivos");
+          console.error(" No se encontraron exactamente 2 archivos");
           setFormErrors({ general: "Error: Faltan archivos. Asegúrese de subir ambos documentos." });
           return;
         }
@@ -192,8 +193,8 @@ export default function FormularioAfiliados({ isOpen, onClose, onSuccess }: Form
         onSuccess();
         onClose();
       } catch (error: any) {
-        console.error("❌ Error al crear afiliado físico:", error);
-        console.error('❌ Respuesta del servidor:', error.response?.data);
+        console.error(" Error al crear afiliado físico:", error);
+        console.error(' Respuesta del servidor:', error.response?.data);
         setFormErrors({
           general: error.response?.data?.message || "Hubo un error al crear el afiliado físico. Intenta nuevamente."
         });
@@ -213,7 +214,7 @@ export default function FormularioAfiliados({ isOpen, onClose, onSuccess }: Form
 
     onSubmit: async ({ value }) => {
       // DEBUGGING TEMPORAL
-      console.log("🔍 Estado completo antes de validar jurídico:");
+      console.log(" Estado completo antes de validar jurídico:");
       console.log("value:", value);
       console.log("archivosJuridico:", archivosJuridico);
       console.log("Es Escritura_Terreno un File?", archivosJuridico.Escritura_Terreno instanceof File);
@@ -221,15 +222,15 @@ export default function FormularioAfiliados({ isOpen, onClose, onSuccess }: Form
 
       setFormErrors({});
 
-      // 🛡️ VALIDAR ANTES DE ENVIAR
+      //  VALIDAR ANTES DE ENVIAR
       const errores = validarFormularioJuridico(value);
       if (Object.keys(errores).length > 0) {
         setFormErrors(errores);
         return;
       }
 
-      console.log("🔍 Enviando formulario jurídico:", value);
-      console.log("🔍 Archivos jurídico:", archivosJuridico);
+      console.log(" Enviando formulario jurídico:", value);
+      console.log(" Archivos jurídico:", archivosJuridico);
 
       try {
         const formData = new FormData();
@@ -251,31 +252,31 @@ export default function FormularioAfiliados({ isOpen, onClose, onSuccess }: Form
           formData.append('Direccion_Exacta', value.Direccion_Exacta.trim());
         }
 
-        // 🚨 VERIFICACIÓN CRÍTICA: SOLO AGREGAR ARCHIVOS SI SON REALMENTE ARCHIVOS
-        console.log("🔍 Verificando archivos jurídicos antes de agregar:");
+        //  VERIFICACIÓN CRÍTICA: SOLO AGREGAR ARCHIVOS SI SON REALMENTE ARCHIVOS
+        console.log(" Verificando archivos jurídicos antes de agregar:");
         console.log("Escritura_Terreno:", archivosJuridico.Escritura_Terreno);
         console.log("Planos_Terreno:", archivosJuridico.Planos_Terreno);
 
         if (archivosJuridico.Escritura_Terreno && archivosJuridico.Escritura_Terreno instanceof File) {
           formData.append('Escritura_Terreno', archivosJuridico.Escritura_Terreno);
-          console.log("✅ Escritura_Terreno agregado:", archivosJuridico.Escritura_Terreno.name);
+          console.log(" Escritura_Terreno agregado:", archivosJuridico.Escritura_Terreno.name);
         } else {
-          console.error("❌ Escritura_Terreno no es un archivo válido:", archivosJuridico.Escritura_Terreno);
+          console.error(" Escritura_Terreno no es un archivo válido:", archivosJuridico.Escritura_Terreno);
           setFormErrors({ Escritura_Terreno: "Debe seleccionar un archivo válido para la escritura" });
           return;
         }
 
         if (archivosJuridico.Planos_Terreno && archivosJuridico.Planos_Terreno instanceof File) {
           formData.append('Planos_Terreno', archivosJuridico.Planos_Terreno);
-          console.log("✅ Planos_Terreno agregado:", archivosJuridico.Planos_Terreno.name);
+          console.log(" Planos_Terreno agregado:", archivosJuridico.Planos_Terreno.name);
         } else {
-          console.error("❌ Planos_Terreno no es un archivo válido:", archivosJuridico.Planos_Terreno);
+          console.error(" Planos_Terreno no es un archivo válido:", archivosJuridico.Planos_Terreno);
           setFormErrors({ Planos_Terreno: "Debe seleccionar un archivo válido para los planos" });
           return;
         }
 
-        // 🔍 DEBUG FINAL
-        console.log("📦 FormData final para jurídico:");
+        //  DEBUG FINAL
+        console.log(" FormData final para jurídico:");
         const formDataEntries = Array.from(formData.entries());
         formDataEntries.forEach(([key, val]) => {
           if (val instanceof File) {
@@ -292,8 +293,8 @@ export default function FormularioAfiliados({ isOpen, onClose, onSuccess }: Form
         onSuccess();
         onClose();
       } catch (error: any) {
-        console.error("❌ Error al crear afiliado jurídico:", error);
-        console.error('❌ Respuesta del servidor:', error.response?.data);
+        console.error(" Error al crear afiliado jurídico:", error);
+        console.error(' Respuesta del servidor:', error.response?.data);
         setFormErrors({
           general: error.response?.data?.message || "Hubo un error al crear el afiliado jurídico. Intenta nuevamente."
         });
@@ -343,7 +344,7 @@ export default function FormularioAfiliados({ isOpen, onClose, onSuccess }: Form
                   : 'border-gray-300 bg-white text-gray-600 hover:border-sky-300'
                   }`}
               >
-                <span className="text-2xl">👤</span>
+               <User size={24} />
                 <span className="font-medium">Persona Física</span>
               </button>
               <button
@@ -354,7 +355,7 @@ export default function FormularioAfiliados({ isOpen, onClose, onSuccess }: Form
                   : 'border-gray-300 bg-white text-gray-600 hover:border-purple-300'
                   }`}
               >
-                <span className="text-2xl">🏢</span>
+               <User size={24} />
                 <span className="font-medium">Persona Jurídica</span>
               </button>
             </div>
@@ -676,7 +677,7 @@ export default function FormularioAfiliados({ isOpen, onClose, onSuccess }: Form
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Escritura del Terreno *
+                     Escritura del Terreno *
                   </label>
                   {tipoFormulario === 'fisico' ? (
                     <div>
@@ -686,7 +687,7 @@ export default function FormularioAfiliados({ isOpen, onClose, onSuccess }: Form
                         disabled={!!archivosFisico.Escritura_Terreno}
                         onChange={(e) => {
                           const file = e.target.files?.[0];
-                          console.log("📄 Archivo Escritura seleccionado (físico):", file);
+                          console.log(" Archivo Escritura seleccionado (físico):", file);
                           if (file) {
                             setArchivosFisico(prev => ({
                               ...prev,
@@ -739,7 +740,7 @@ export default function FormularioAfiliados({ isOpen, onClose, onSuccess }: Form
                         disabled={!!archivosJuridico.Escritura_Terreno}
                         onChange={(e) => {
                           const file = e.target.files?.[0];
-                          console.log("📄 Archivo Escritura seleccionado (jurídico):", file);
+                          console.log(" Archivo Escritura seleccionado (jurídico):", file);
                           if (file) {
                             setArchivosJuridico(prev => ({
                               ...prev,
@@ -789,7 +790,7 @@ export default function FormularioAfiliados({ isOpen, onClose, onSuccess }: Form
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Planos del Terreno *
+                     Planos del Terreno *
                   </label>
                   {tipoFormulario === 'fisico' ? (
                     <div>
@@ -799,7 +800,7 @@ export default function FormularioAfiliados({ isOpen, onClose, onSuccess }: Form
                         disabled={!!archivosFisico.Planos_Terreno}
                         onChange={(e) => {
                           const file = e.target.files?.[0];
-                          console.log("📐 Archivo Planos seleccionado (físico):", file);
+                          console.log(" Archivo Planos seleccionado (físico):", file);
                           if (file) {
                             setArchivosFisico(prev => ({
                               ...prev,
