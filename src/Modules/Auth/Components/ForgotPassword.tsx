@@ -30,7 +30,7 @@ export default function ForgotPassword() {
       }
 
       try {
-        await mutation.mutateAsync(value.email);
+        await mutation.mutateAsync({ Email: value.email });
         showSuccess('Correo enviado', 'Revisa tu correo para restablecer tu contraseña', 5000);
       } catch (err: unknown) {
         showError('Error en el servidor o del correo', 'Por favor, inténtelo de nuevo más tarde', 5000);
