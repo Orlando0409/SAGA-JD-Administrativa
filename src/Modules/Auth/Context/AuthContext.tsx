@@ -4,13 +4,13 @@ import { getCurrentUser } from '../Services/AuthService';
 import type { Usuario } from '@/Modules/Usuarios/Models/Usuario';
 import type { AuthState } from '../Types/AuthTypes';
 
-
 const AuthContext = createContext<AuthState | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<Usuario | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+
 
   const refreshUser = async () => {
     try {
@@ -27,7 +27,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   useEffect(() => {
-    // No cargar en rutas públicas
     const currentPath = window.location.pathname;
     const publicRoutes = ['/Login', '/ForgotPassword', '/ResetPassword'];
     
@@ -48,6 +47,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     refreshUser
   };
 
+
   return (
     <AuthContext.Provider value={contextValue}>
       {children}
@@ -62,3 +62,4 @@ export const useAuth = (): AuthState => {
   }
   return context;
 };
+
