@@ -3,8 +3,6 @@ import { createColumnHelper, getCoreRowModel, getPaginationRowModel, useReactTab
 import { User, Building } from 'lucide-react';
 import { useAfiliadosFisicos } from '../Hook/HookAfiliadoFisico';
 import { useAfiliadosJuridicos } from '../Hook/HookAfiliadoJuridico';
-//import type { AfiliadoFisico } from '../Models/ModeloAfiliadoFisico';
-//import type { AfiliadoJuridico } from '../Models/ModeloAfiliadoJuridico';
 import DetailAbonados from './DetailAbonados';
 import type { AfiliadoFisico } from '../Models/TablaAfiliados/ModeloAfiliadoFisico';
 import type { AfiliadoJuridico } from '../Models/TablaAfiliados/ModeloAfiliadoJuridico';

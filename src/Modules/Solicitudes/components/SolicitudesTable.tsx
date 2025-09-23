@@ -244,13 +244,13 @@ export default function SolicitudesTable() {
                 const base = 'inline-flex items-center gap-2 px-2 py-1 rounded-full text-xs font-medium';
 
                 if (tipo === 'Afiliacion') {
-                    return <span className={`${base} bg-emerald-100 text-emerald-700`}>🆕 Afiliación</span>;
+                    return <span className={`${base} bg-emerald-100 text-emerald-700`}>Afiliación</span>;
                 } else if (tipo === 'Desconexion') {
-                    return <span className={`${base} bg-red-100 text-red-700`}>🔌 Desconexión</span>;
+                    return <span className={`${base} bg-red-100 text-red-700`}>Desconexión</span>;
                 } else if (tipo === 'Cambio de Medidor') {
-                    return <span className={`${base} bg-blue-100 text-blue-700`}>⚙️ Cambio Medidor</span>;
+                    return <span className={`${base} bg-blue-100 text-blue-700`}>Cambio Medidor</span>;
                 } else if (tipo === 'Asociado') {
-                    return <span className={`${base} bg-orange-100 text-orange-700`}>🤝 Asociado</span>;
+                    return <span className={`${base} bg-orange-100 text-orange-700`}>Asociado</span>;
                 }
 
                 return <span className={`${base} bg-slate-100 text-slate-700`}>{tipo}</span>;
@@ -266,13 +266,13 @@ export default function SolicitudesTable() {
                 const base = 'inline-flex items-center gap-2 px-2 py-1 rounded-full text-xs font-medium';
 
                 if (estadoNombre === 'Pendiente') {
-                    return <span className={`${base} bg-amber-100 text-amber-700`}>⏳ Pendiente</span>;
+                    return <span className={`${base} bg-amber-100 text-amber-700`}>Pendiente</span>;
                 } else if (estadoNombre === 'Aprobada' || estadoNombre === 'Aprobado') {
-                    return <span className={`${base} bg-green-100 text-green-700`}>✓ Aprobada</span>;
+                    return <span className={`${base} bg-green-100 text-green-700`}>Aprobada</span>;
                 } else if (estadoNombre === 'Rechazada' || estadoNombre === 'Rechazado') {
-                    return <span className={`${base} bg-red-100 text-red-700`}>✕ Rechazada</span>;
+                    return <span className={`${base} bg-red-100 text-red-700`}>Rechazada</span>;
                 } else if (estadoNombre === 'En Proceso') {
-                    return <span className={`${base} bg-blue-100 text-blue-700`}>🔄 En Proceso</span>;
+                    return <span className={`${base} bg-blue-100 text-blue-700`}>En Proceso</span>;
                 }
 
                 return <span className={`${base} bg-slate-100 text-slate-700`}>{estadoNombre}</span>;
@@ -319,27 +319,13 @@ export default function SolicitudesTable() {
             cell: ({ row }) => {
                 const solicitud = row.original as SolicitudUnificada;
                 return (
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center pl-3.5 gap-2">
                         <button
                             title="Gestionar Solicitud"
-                            className="inline-flex items-center gap-2 px-2 py-1 rounded-md text-sky-700 bg-sky-50 hover:bg-sky-100 border border-sky-100"
+                            className="inline-flex items-center justify-center gap-2 px-2 py-1 rounded-md text-sky-700 bg-sky-50 hover:bg-sky-100 border border-sky-100"
                             onClick={() => handleViewDetail(solicitud)}
                         >
-                            <Eye size={14} />
-                        </button>
-                        <button
-                            title="Editar"
-                            className="inline-flex items-center gap-2 px-2 py-1 rounded-md text-sky-700 bg-white hover:bg-sky-50 border border-sky-100"
-                            onClick={() => handleEdit(solicitud)}
-                        >
-                            <Edit size={14} />
-                        </button>
-                        <button
-                            title="Eliminar"
-                            className="inline-flex items-center gap-2 px-2 py-1 rounded-md text-slate-600 bg-white hover:bg-slate-50 border border-slate-100"
-                            onClick={() => handleDelete(solicitud)}
-                        >
-                            <Trash size={14} />
+                            <Eye size={16} />
                         </button>
                     </div>
                 );
@@ -388,9 +374,6 @@ export default function SolicitudesTable() {
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
                 <div className="flex items-center gap-3">
                     <h2 className="text-xl font-semibold text-sky-800">Gestión de Solicitudes</h2>
-                    <span className="text-sm text-slate-500">
-                        Afiliación, Desconexión, Cambio de Medidor y Asociado (Físicos y Jurídicos)
-                    </span>
                 </div>
                 <div className="flex items-center gap-3">
                     <input
@@ -399,13 +382,6 @@ export default function SolicitudesTable() {
                         placeholder="Buscar por nombre, cédula, tipo, estado..."
                         className="px-3 py-2 rounded-lg border border-sky-200 bg-sky-50 focus:outline-none focus:ring-2 focus:ring-sky-200"
                     />
-                    <button
-                        onClick={() => console.log('TODO: Implementar modal de nueva solicitud')}
-                        className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-sky-600 text-white hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-200"
-                    >
-                        <Plus size={16} />
-                        Nueva Solicitud
-                    </button>
                 </div>
             </div>
 
