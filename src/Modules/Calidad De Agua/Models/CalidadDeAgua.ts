@@ -1,21 +1,21 @@
 
 export interface ArchivoCalidadAgua {
-  id: number;
-  Titulo: string;
-  Archivo_Calidad_Agua: string; // URL del archivo PDF en el servidor
-  fechaCreacion: string;
+  Id_Calidad_Agua: number; // ID del registro
+  Titulo: string;          // Título del archivo
+  Url_Archivo: string;     // URL del archivo subido
+  fechaCreacion: string;   // Fecha de creación
 }
 
 export const ArchivoCalidadAgua: ArchivoCalidadAgua = {
 
-    id: 0,
+    Id_Calidad_Agua: 0,
     Titulo: '',
-    Archivo_Calidad_Agua: '',
+    Url_Archivo: '', // URL del archivo PDF en el servidor
     fechaCreacion: '',
 }
 export interface CalidadAguaFormData {
-   id: number;
+   Id_Calidad_Agua: number;
   Titulo: string;
-  Archivo_Calidad_Agua: string; // URL del archivo PDF en el servidor
+  Url_Archivo: string; // URL del archivo PDF en el servidor
   fechaCreacion: string;
 }

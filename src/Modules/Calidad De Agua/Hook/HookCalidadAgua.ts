@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import {getArchivosCalidadAgua,uploadArchivoCalidadAgua,deleteArchivoCalidadAgua,} from "../Service/ServiceCalidadAgua";
+import { getArchivosCalidadAgua, uploadArchivoCalidadAgua, deleteArchivoCalidadAgua } from "../Service/ServiceCalidadAgua";
 import type { ArchivoCalidadAgua } from "../Models/CalidadDeAgua";
 
 export function useCalidadDeAgua() {
@@ -20,15 +20,11 @@ export function useCalidadDeAgua() {
     }
   };
 
-  useEffect(() => {
-    fetchArchivos();
-  }, []);
-
-  const subirArchivo = async (Titulo: string, Archivo_Calidad_Agua: File) => {
+  const subirArchivo = async (formData: FormData) => {
     setLoading(true);
     setError(null);
     try {
-      await uploadArchivoCalidadAgua(Titulo, Archivo_Calidad_Agua);
+      await uploadArchivoCalidadAgua(formData);
       await fetchArchivos();
     } catch (err) {
       setError("Error al subir el archivo.");
@@ -49,6 +45,10 @@ export function useCalidadDeAgua() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchArchivos();
+  }, []);
 
   return {
     archivos,
