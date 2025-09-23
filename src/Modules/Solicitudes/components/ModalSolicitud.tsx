@@ -1,5 +1,5 @@
 import React from 'react';
-import { Building, User, X } from 'lucide-react';
+import { X } from 'lucide-react';
 import { useAprobarSolicitudAfiliacion, useRechazarSolicitudAfiliacion } from '../Hooks/Fisico Update/HookAfiliadoFisico';
 import type { SolicitudFisica } from '../Models/ModelosFisicas';
 import type { SolicitudJuridica } from '../Models/ModelosJuridicos';
@@ -22,9 +22,6 @@ interface ModalSolicitudProps {
 }
 
 //Modal simple para gestionar estados de solicitudes
-
-//Modal simple para gestionar estados de solicitudes
-
 const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solicitud }) => {
     // Hooks para manejar los cambios de estado
     const aprobarAfiliacionMutation = useAprobarSolicitudAfiliacion();
@@ -85,8 +82,6 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
                 Planos_Terreno: datos.Planos_Terreno || 'No proporcionados',
                 // Campos específicos para diferentes tipos de solicitud
                 Numero_Medidor_Actual: datos.Numero_Medidor_Actual || 'No especificado',
-
-
 
             };
         } else {
