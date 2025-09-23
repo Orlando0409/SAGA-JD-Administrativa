@@ -13,7 +13,7 @@ export const Route = createRootRoute({
 
 function RootComponent() {
   const location = useLocation();
-  const isPublicRoute = ['/Login', '/ForgotPassword', '/ResetPassword', '/Unauthorized'].includes(location.pathname);
+  const isPublicRoute = ['/Login', '/ForgotPassword', '/ResetPassword', '/Unauthorized', '/NotFound'].includes(location.pathname);
 
   return (
     isPublicRoute ? (

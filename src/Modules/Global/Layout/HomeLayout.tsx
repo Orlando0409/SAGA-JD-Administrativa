@@ -26,7 +26,6 @@ export const HomeLayout = ({ children }: { children: (allowedModules: any) => Re
             <SidebarProvider>
               <AppSidebar allowedModules={allowedModules} />
               <SidebarInset className="flex flex-col h-full">
-                {/* Header - Solo mostrar si puede ver solicitudes */}
                 {!isLoading && canView('solicitudes') && (
                   <header className="flex-shrink-0 bg-white border-b border-gray-200 px-4 py-2 flex items-center justify-between">
                     <SidebarTrigger className="md:hidden" />
@@ -35,8 +34,6 @@ export const HomeLayout = ({ children }: { children: (allowedModules: any) => Re
                     </div>
                   </header>
                 )}
-
-                {/* Contenido principal */}
                 <main className="flex-1 overflow-y-auto">
                   <div className="p-4">
                     {children(allowedModules)}
@@ -45,8 +42,6 @@ export const HomeLayout = ({ children }: { children: (allowedModules: any) => Re
               </SidebarInset>
             </SidebarProvider>
           </div>
-
-          {/* Modal fuera del layout */}
           {showModalSolicitud && selectedNotificacion && (
             <ModalSolicitud
               isOpen={showModalSolicitud}
