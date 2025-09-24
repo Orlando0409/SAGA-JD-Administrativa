@@ -1,21 +1,39 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useCalidadDeAgua } from "../Hook/HookCalidadAgua";
-import { Eye, Trash } from "lucide-react";
+import CalidadAguaModal from "./CalidadAguaModal";
+import { Trash, FileText } from "lucide-react";
 import { CalidadAguaSchema } from "../schemas/CalidadDeAgua";
 import { z } from "zod";
+import { ArchivoCalidadAgua } from "../Models/CalidadDeAgua";
 
 export default function CalidadAguaTable() {
-  const { archivos, loading, error, subirArchivo, eliminarArchivo } = useCalidadDeAgua();
+  const { archivos, fetchArchivos, reemplazarArchivo, subirArchivo, eliminarArchivo, loading, error } = useCalidadDeAgua();
   const [titulo, setTitulo] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [validationError, setValidationError] = useState<string | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [archivoSeleccionado, setArchivoSeleccionado] = useState<ArchivoCalidadAgua | null>(null);
+
+  // Cargar los archivos al montar el componente
+  useEffect(() => {
+    fetchArchivos();
+  }, [fetchArchivos]);
+
+  const handleOpenModal = (archivo: ArchivoCalidadAgua) => {
+    setArchivoSeleccionado(archivo);
+    setModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setModalOpen(false);
+    setArchivoSeleccionado(null);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setValidationError(null);
 
     try {
-      // Validar el título con zod
       CalidadAguaSchema.parse({ Titulo: titulo.trim() });
 
       if (!file) {
@@ -23,21 +41,30 @@ export default function CalidadAguaTable() {
       }
 
       const formData = new FormData();
-      formData.append("Titulo", titulo.trim()); // Adjunta el título
-      formData.append("Archivo_Calidad_Agua", file); // Adjunta el archivo
+      formData.append("Titulo", titulo.trim());
+      formData.append("Archivo_Calidad_Agua", file);
 
-      console.log("FormData antes de enviar:", formData.get("Titulo"), formData.get("Archivo_Calidad_Agua")); // Depuración
-
-      await subirArchivo(formData); // Llama al servicio con FormData
+      const nuevoArchivo: ArchivoCalidadAgua = await subirArchivo(formData);
       setTitulo("");
       setFile(null);
     } catch (err) {
       if (err instanceof z.ZodError) {
-        setValidationError(err.errors[0].message); // Mostrar el primer error de validación
+        setValidationError(err.errors[0].message);
       } else {
         console.error("Error al subir el archivo:", err);
         setValidationError("Error al subir el archivo.");
       }
+    }
+  };
+
+  const handleReemplazarArchivo = async (id: number, formData: FormData) => {
+    try {
+      console.log(`Reemplazando archivo con ID: ${id}`);
+      await reemplazarArchivo(id, formData); // El estado `archivos` se actualiza automáticamente dentro del hook
+      alert("Archivo reemplazado correctamente.");
+    } catch (error) {
+      console.error("Error al reemplazar el archivo:", error);
+      alert("Hubo un problema al reemplazar el archivo. Intente nuevamente.");
     }
   };
 
@@ -56,21 +83,26 @@ export default function CalidadAguaTable() {
             className="w-full sm:w-auto px-3 py-2 rounded-lg border border-sky-200 bg-sky-50 focus:outline-none focus:ring-2 focus:ring-sky-200 text-sm"
             required
           />
-          <input
-            type="file"
-            accept="application/pdf"
-            onChange={(e) => {
-              const selectedFile = e.target.files?.[0];
-              console.log("Archivo seleccionado:", selectedFile); // Depuración
-              if (selectedFile) {
-                setFile(selectedFile); // Guarda el archivo seleccionado en el estado
-              } else {
-                setFile(null); // Si no hay archivo, establece el estado como null
-              }
-            }}
-            className="w-full sm:w-auto px-3 py-2 rounded-lg border border-sky-200 bg-sky-50 focus:outline-none focus:ring-2 focus:ring-sky-200 text-sm"
-            required
-          />
+          <div className="relative">
+            <input
+              id="archivo"
+              type="file"
+              accept="application/pdf"
+              onChange={(e) => {
+                const selectedFile = e.target.files?.[0];
+                if (selectedFile) {
+                  setFile(selectedFile);
+                } else {
+                  setFile(null);
+                }
+              }}
+              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+              required
+            />
+            <div className="px-3 py-2 rounded-lg border border-sky-200 bg-sky-50 text-sm text-sky-700 cursor-pointer">
+              {file ? file.name : "Seleccione un archivo"}
+            </div>
+          </div>
           <button
             type="submit"
             className="px-3 py-2 rounded-lg bg-sky-600 text-white hover:bg-sky-700 shadow-sm text-sm whitespace-nowrap"
@@ -90,8 +122,8 @@ export default function CalidadAguaTable() {
           <thead className="bg-sky-50">
             <tr className="text-left text-xs sm:text-sm text-sky-700">
               <th className="px-2 sm:px-4 py-3 font-medium border-b border-sky-100">Título</th>
-              <th className="px-2 sm:px-4 py-3 font-medium border-b border-sky-100">Fecha</th>
-              <th className="px-2 sm:px-4 py-3 font-medium border-b border-sky-100">Archivo</th>
+              <th className="px-2 sm:px-4 py-3 font-medium border-b border-sky-100">Fecha de creación</th>
+              <th className="px-2 sm:px-4 py-3 font-medium border-b border-sky-100">Fecha de actualización</th>
               <th className="px-2 sm:px-4 py-3 font-medium border-b border-sky-100">Acciones</th>
             </tr>
           </thead>
@@ -105,7 +137,7 @@ export default function CalidadAguaTable() {
             ) : error ? (
               <tr>
                 <td colSpan={4} className="p-4 sm:p-6 text-center text-red-500 text-sm">
-                  Error al cargar los datos
+                  Error al cargar los datos.
                 </td>
               </tr>
             ) : archivos.length === 0 ? (
@@ -116,17 +148,29 @@ export default function CalidadAguaTable() {
               </tr>
             ) : (
               archivos.map((archivo) => (
-                <tr key={archivo.Id_Calidad_Agua} className="hover:bg-sky-50 cursor-pointer transition-colors">
-                  <td className="px-2 sm:px-4 py-3 text-xs sm:text-sm text-slate-700 align-top">{archivo.Titulo}</td>
-                  <td className="px-2 sm:px-4 py-3 text-xs sm:text-sm text-slate-700 align-top">{archivo.fechaCreacion}</td>
+                <tr
+                  key={archivo.Id_Calidad_Agua}
+                  className="hover:bg-sky-50 cursor-pointer transition-colors"
+                  onClick={() => handleOpenModal(archivo)}
+                >
+                  <td className="px-2 sm:px-4 py-3 text-xs sm:text-sm text-slate-700 align-top flex items-center gap-2">
+                    <FileText size={18} className="text-sky-600" />
+                    {archivo.Titulo}
+                  </td>
                   <td className="px-2 sm:px-4 py-3 text-xs sm:text-sm text-slate-700 align-top">
-                    <a href={archivo.Url_Archivo} target="_blank" rel="noopener noreferrer">
-                      <Eye size={18} />
-                    </a>
+                    {new Date(archivo.Fecha_Creacion).toLocaleDateString("es-ES")}
+                  </td>
+                  <td className="px-2 sm:px-4 py-3 text-xs sm:text-sm text-slate-700 align-top">
+                    {archivo.Fecha_Actualizacion
+                      ? new Date(archivo.Fecha_Actualizacion).toLocaleDateString("es-ES")
+                      : "No hay actualizaciones"}
                   </td>
                   <td className="px-2 sm:px-4 py-3 text-xs sm:text-sm text-slate-700 align-top">
                     <button
-                      onClick={() => eliminarArchivo(archivo.Id_Calidad_Agua)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        eliminarArchivo(archivo.Id_Calidad_Agua);
+                      }}
                       className="text-red-600 hover:text-red-800"
                       title="Eliminar"
                       disabled={loading}
@@ -140,6 +184,16 @@ export default function CalidadAguaTable() {
           </tbody>
         </table>
       </div>
+
+      {modalOpen && archivoSeleccionado && (
+        <CalidadAguaModal
+          isOpen={modalOpen}
+          onClose={handleCloseModal}
+          archivo={archivoSeleccionado}
+          onEliminar={eliminarArchivo}
+          onReemplazar={handleReemplazarArchivo}
+        />
+      )}
     </div>
   );
 }
