@@ -343,7 +343,7 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                 {(field) => (
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Escritura del Terreno (URL)
+                            Escritura del Terreno 
                         </label>
                         <input
                             type="url"
@@ -360,7 +360,7 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                 {(field) => (
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Planos del Terreno (URL)
+                            Planos del Terreno 
                         </label>
                         <input
                             type="url"

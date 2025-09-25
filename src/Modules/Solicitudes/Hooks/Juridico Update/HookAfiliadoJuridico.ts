@@ -27,10 +27,10 @@ export const useMutateEstadoSolicitudJuridica = () => {
                 queryKey: ['solicitud-afiliacion-juridica'] 
             });
 
-            console.log('✅ Estado actualizado exitosamente en caché:', data);
+            console.log(' Estado actualizado exitosamente en caché:', data);
         },
         onError: (error: any) => {
-            console.error('❌ Error al actualizar estado:', error);
+            console.error(' Error al actualizar estado:', error);
         },
     });
 };

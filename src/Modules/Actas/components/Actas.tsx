@@ -1,4 +1,5 @@
 import { useNavigate } from '@tanstack/react-router';
+import ActasTable from './ActasTable';
 
 const Actas = () => {
   const navigate = useNavigate();
@@ -15,6 +16,7 @@ const Actas = () => {
             Volver
         </button>
         <h1>Actas</h1>
+        <ActasTable />
     </div>
   )
 

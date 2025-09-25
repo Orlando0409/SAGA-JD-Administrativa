@@ -2,15 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { SolicitudesFisicasService } from '../Service/SolicitudesFisicas';
 import type { SolicitudFisica } from '../Models/ModelosFisicas';
 
-/**
- * 🎣 Hook para gestionar solicitudes físicas
- * Utiliza React Query para cache y gestión de estado
- */
 
-/**
- * 📥 Hook para obtener todas las solicitudes físicas
- * @returns UseQueryResult con las solicitudes físicas
- */
 export const useSolicitudesFisicas = () => {
     return useQuery<SolicitudFisica[], Error>({
         queryKey: ['solicitudes-fisicas'],
@@ -23,10 +15,7 @@ export const useSolicitudesFisicas = () => {
     });
 };
 
-/**
- * 📥 Hook para obtener solicitudes físicas pendientes (usa cache cuando es posible)
- * @returns UseQueryResult con las solicitudes físicas pendientes
- */
+
 export const useSolicitudesFisicasPendientes = () => {
     return useQuery<SolicitudFisica[], Error>({
         queryKey: ['solicitudes-fisicas', 'pendientes'],
@@ -38,12 +27,7 @@ export const useSolicitudesFisicasPendientes = () => {
     });
 };
 
-/**
- * 🔄 Hook personalizable para filtrar solicitudes físicas por estado
- * @param estado - Estado a filtrar
- * @param enabled - Si el query debe ejecutarse
- * @returns UseQueryResult con las solicitudes filtradas
- */
+
 export const useSolicitudesFisicasPorEstado = (estado: string, enabled: boolean = true) => {
     return useQuery<SolicitudFisica[], Error>({
         queryKey: ['solicitudes-fisicas', 'estado', estado],
@@ -56,12 +40,7 @@ export const useSolicitudesFisicasPorEstado = (estado: string, enabled: boolean 
     });
 };
 
-/**
- * 🔄 Hook personalizable para filtrar solicitudes físicas por tipo
- * @param tipo - Tipo de solicitud a filtrar
- * @param enabled - Si el query debe ejecutarse
- * @returns UseQueryResult con las solicitudes filtradas
- */
+
 export const useSolicitudesFisicasPorTipo = (
     tipo: 'Afiliacion' | 'Desconexion' | 'Cambio de Medidor' | 'Asociado',
     enabled: boolean = true
@@ -77,28 +56,28 @@ export const useSolicitudesFisicasPorTipo = (
     });
 };
 
-// 🎯 Hooks específicos por tipo (para conveniencia)
+// Hooks específicos por tipo (para conveniencia)
 
 export const useSolicitudesFisicasAfiliacion = () => {
     return useSolicitudesFisicasPorTipo('Afiliacion');
 };
 
-/**
- * 📥 Hook para obtener solicitudes de desconexión físicas
+/*
+ *  Hook para obtener solicitudes de desconexión físicas
  */
 export const useSolicitudesFisicasDesconexion = () => {
     return useSolicitudesFisicasPorTipo('Desconexion');
 };
 
 /**
- * 📥 Hook para obtener solicitudes de cambio de medidor físicas
+ *  Hook para obtener solicitudes de cambio de medidor físicas
  */
 export const useSolicitudesFisicasCambioMedidor = () => {
     return useSolicitudesFisicasPorTipo('Cambio de Medidor');
 };
 
 /**
- * 📥 Hook para obtener solicitudes de asociado físicas
+ *  Hook para obtener solicitudes de asociado físicas
  */
 export const useSolicitudesFisicasAsociado = () => {
     return useSolicitudesFisicasPorTipo('Asociado');
