@@ -1,60 +1,55 @@
 import { useState } from "react";
-import { FileText, Trash, Upload } from "lucide-react";
+import { useUpdateCalidadAgua } from "../Hook/HookCalidadAgua";
+import { CalidadAguaSchema } from "../schemas/CalidadDeAgua";
+import { z } from "zod";
 
 interface CalidadAguaModalProps {
-    isOpen: boolean;
-    onClose: () => void;
+    isOpen: boolean; // Controla si el modal está abierto
+    onClose: () => void; // Función para cerrar el modal
     archivo: {
+        Id_Calidad_Agua: number;
         Titulo: string;
         Url_Archivo: string;
-        Id_Calidad_Agua: number;
+        Fecha_Creacion: string;
+        Fecha_Actualizacion?: string;
     };
-    onEliminar: (id: number) => void;
-    onReemplazar: (id: number, formData: FormData) => Promise<void>;
+    refetch: () => void; // Función para refrescar la tabla
 }
 
-const CalidadAguaModal = ({ isOpen, onClose, archivo, onEliminar, onReemplazar }: CalidadAguaModalProps) => {
-    const [nuevoArchivo, setNuevoArchivo] = useState<File | null>(null);
-    const [reemplazarActivo, setReemplazarActivo] = useState(false); // Estado para habilitar/deshabilitar el input
-    const [mensajeExito, setMensajeExito] = useState<string | null>(null); // Estado para el mensaje de éxito
-    const [mensajeError, setMensajeError] = useState<string | null>(null); // Estado para el mensaje de error
+const CalidadAguaModal = ({ isOpen, onClose, archivo, refetch }: CalidadAguaModalProps) => {
+    const [isEditing, setIsEditing] = useState(false); // Controla el modo de edición
+    const [titulo, setTitulo] = useState(archivo.Titulo);
+    const [file, setFile] = useState<File | null>(null);
+    const updateCalidadAguaMutation = useUpdateCalidadAgua(); // Actualizar un archivo existente
 
-    if (!isOpen) return null;
-    const handleEliminar = async () => {
-        try {
-            await onEliminar(archivo.Id_Calidad_Agua); // Llama a la función para eliminar el archivo
-            setMensajeExito("Archivo eliminado con éxito."); // Muestra el mensaje de éxito
-            setMensajeError(null); // Limpia cualquier mensaje de error
-            onClose(); // Cierra el modal
-        } catch (error) {
-            console.error("Error al eliminar el archivo:", error);
-            setMensajeError("Hubo un problema al eliminar el archivo. Intente nuevamente."); // Muestra el mensaje de error
-        }
-    };
-    const handleReemplazar = async () => {
-        if (!nuevoArchivo) {
-            alert("Debe seleccionar un archivo para reemplazar.");
-            return;
-        }
+    if (!isOpen) return null; // Si el modal no está abierto, no renderiza nada
 
-        const formData = new FormData();
-        formData.append("Archivo_Calidad_Agua", nuevoArchivo);
-        formData.append("Titulo", archivo.Titulo); // Agrega el título al FormData
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
 
         try {
-            console.log("FormData antes de enviar:", {
-                Archivo_Calidad_Agua: formData.get("Archivo_Calidad_Agua"),
-                Titulo: formData.get("Titulo"),
+            // Validar los datos con el esquema
+            CalidadAguaSchema.parse({
+                Titulo: titulo.trim(),
             });
-            await onReemplazar(archivo.Id_Calidad_Agua, formData); // Llama a la función para reemplazar el archivo
-            setNuevoArchivo(null); // Limpia el archivo seleccionado
-            setReemplazarActivo(false); // Desactiva el input después de reemplazar
-            setMensajeExito("Archivo reemplazado con éxito."); // Muestra el mensaje de éxito
-            setMensajeError(null); // Limpia cualquier mensaje de error
-            onClose(); // Cierra el modal
+
+            const formData = new FormData();
+            formData.append("Titulo", titulo.trim());
+            if (file) {
+                formData.append("Archivo_Calidad_Agua", file); // Reemplaza el archivo existente
+            }
+
+            await updateCalidadAguaMutation.mutateAsync({ id: archivo.Id_Calidad_Agua, formData });
+            alert("Registro actualizado con éxito.");
+            refetch(); // Refresca la tabla
+            setIsEditing(false); // Salir del modo de edición
         } catch (error) {
-            console.error("Error al reemplazar el archivo:", error);
-            setMensajeError("Hubo un problema al reemplazar el archivo. Intente nuevamente."); // Muestra el mensaje de error
+            if (error instanceof z.ZodError) {
+                alert(error.errors[0].message); // Muestra el primer error de validación
+            } else {
+                console.error("Error inesperado:", error);
+                alert("Hubo un problema al actualizar el registro.");
+            }
         }
     };
 
@@ -63,95 +58,103 @@ const CalidadAguaModal = ({ isOpen, onClose, archivo, onEliminar, onReemplazar }
             <div className="bg-white rounded-lg shadow-xl w-full max-w-lg">
                 {/* Header */}
                 <div className="flex items-center justify-between p-6 border-b border-gray-200">
-                    <h2 className="text-xl font-semibold text-gray-800">Detalles del Archivo</h2>
+                    <h2 className="text-xl font-semibold text-gray-800">
+                        {isEditing ? "Editar Registro" : "Detalles del Registro"}
+                    </h2>
                     <button
                         onClick={onClose}
                         className="p-1 hover:bg-gray-100 rounded-full transition-colors"
                     >
-                        <div className="w-5 h-5 text-gray-500 flex items-center justify-center">✕</div>
+                        ✕
                     </button>
                 </div>
-
-                {/* Mensaje de éxito */}
-                {mensajeExito && (
-                    <div className="p-4 bg-green-100 text-green-700 rounded-lg mb-4">
-                        {mensajeExito}
-                    </div>
-                )}
-
-                {/* Mensaje de error */}
-                {mensajeError && (
-                    <div className="p-4 bg-red-100 text-red-700 rounded-lg mb-4">
-                        {mensajeError}
-                    </div>
-                )}
 
                 {/* Contenido */}
                 <div className="p-6 space-y-4">
-                    {/* Título */}
-                    <div>
-                        <h3 className="text-lg font-medium text-gray-700">Título:</h3>
-                        <p className="text-gray-600">{archivo.Titulo}</p>
-                    </div>
-
-                    {/* Archivo PDF */}
-                    <div>
-                        <h3 className="text-lg font-medium text-gray-700">Archivo:</h3>
-                        <a
-                            href={archivo.Url_Archivo}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-600 hover:underline flex items-center gap-2"
+                    {isEditing ? (
+                        <form
+                            onSubmit={handleSubmit}
+                            className="space-y-4"
                         >
-                            <FileText size={24} className="text-red-500" /> {/* Ícono de PDF */}
-                            Ver archivo PDF
-                        </a>
-                    </div>
-
-                    {/* Reemplazar archivo */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Reemplazar archivo:
-                        </label>
-                        <input
-                            type="file"
-                            accept="application/pdf"
-                            onChange={(e) => setNuevoArchivo(e.target.files?.[0] || null)}
-                            className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${reemplazarActivo
-                                ? "border-blue-500 bg-blue-50 text-blue-700 cursor-pointer"
-                                : "border-gray-300 bg-gray-100 text-gray-500 cursor-not-allowed"
-                                }`}
-                            disabled={!reemplazarActivo}
-                        />
-                    </div>
-                </div>
-
-                {/* Botones de acción */}
-                <div className="flex gap-3 p-6 border-t border-gray-200">
-                    <button
-                        type="button"
-                        onClick={handleEliminar}
-                        className="flex-1 px-4 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium flex items-center justify-center gap-2"
-                    >
-                        <Trash size={18} />
-                        Eliminar
-                    </button>
-                    <button
-                        type="button"
-                        onClick={() => setReemplazarActivo(true)}
-                        className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center justify-center gap-2"
-                    >
-                        <Upload size={18} />
-                        Reemplazar
-                    </button>
-                    {reemplazarActivo && (
-                        <button
-                            type="button"
-                            onClick={handleReemplazar}
-                            className="flex-1 px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium flex items-center justify-center gap-2"
-                        >
-                            Confirmar reemplazo
-                        </button>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">Título del archivo</label>
+                                <input
+                                    type="text"
+                                    value={titulo}
+                                    onChange={(e) => setTitulo(e.target.value)}
+                                    className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-sky-500 text-sm"
+                                    required
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">Archivo PDF</label>
+                                <input
+                                    type="file"
+                                    accept="application/pdf"
+                                    onChange={(e) => setFile(e.target.files?.[0] || null)}
+                                    className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-sky-500 text-sm"
+                                />
+                            </div>
+                            <div className="flex justify-end gap-4">
+                                <button
+                                    type="button"
+                                    onClick={() => setIsEditing(false)} // Salir del modo de edición
+                                    className="px-4 py-2 rounded-lg bg-gray-200 text-gray-800 hover:bg-gray-300 shadow-sm text-sm"
+                                >
+                                    Cancelar
+                                </button>
+                                <button
+                                    type="submit"
+                                    className="px-4 py-2 rounded-lg bg-sky-600 text-white hover:bg-sky-700 shadow-sm text-sm"
+                                    disabled={updateCalidadAguaMutation.status === "pending"}
+                                >
+                                    {updateCalidadAguaMutation.status === "pending" ? "Actualizando..." : "Guardar"}
+                                </button>
+                            </div>
+                        </form>
+                    ) : (
+                        <>
+                            {/* Mostrar detalles del archivo */}
+                            <div>
+                                <h3 className="text-lg font-medium text-gray-700">Título:</h3>
+                                <p className="text-gray-600">{archivo.Titulo}</p>
+                            </div>
+                            <div>
+                                <h3 className="text-lg font-medium text-gray-700">Fecha de creación:</h3>
+                                <p className="text-gray-600">
+                                    {new Date(archivo.Fecha_Creacion).toLocaleDateString("es-ES")}
+                                </p>
+                            </div>
+                            {archivo.Fecha_Actualizacion && (
+                                <div>
+                                    <h3 className="text-lg font-medium text-gray-700">Fecha de actualización:</h3>
+                                    <p className="text-gray-600">
+                                        {new Date(archivo.Fecha_Actualizacion).toLocaleDateString("es-ES")}
+                                    </p>
+                                </div>
+                            )}
+                            <div>
+                                <h3 className="text-lg font-medium text-gray-700">Archivo:</h3>
+                                <a
+                                    href={archivo.Url_Archivo}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-blue-600 hover:underline"
+                                >
+                                    Ver archivo PDF
+                                </a>
+                            </div>
+                            {/* Botón para activar modo de edición */}
+                            <div className="flex justify-end">
+                                <button
+                                    type="button"
+                                    onClick={() => setIsEditing(true)} // Activar modo de edición
+                                    className="px-4 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600 shadow-sm text-sm"
+                                >
+                                    Editar
+                                </button>
+                            </div>
+                        </>
                     )}
                 </div>
             </div>
@@ -160,4 +163,4 @@ const CalidadAguaModal = ({ isOpen, onClose, archivo, onEliminar, onReemplazar }
 };
 
 export default CalidadAguaModal;
-//ya sirve 
+//funsiona super bien 
