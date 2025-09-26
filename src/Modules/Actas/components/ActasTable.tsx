@@ -4,7 +4,7 @@ import { FileText, Plus } from "lucide-react";
 import type { Acta } from "../Models/ActasModels";
 import FormularioCrearActas from "./FormularioCrearActas";
 import ActasModal from "./ActasModal";
-
+//funciona 
 export default function ActasTable() {
     const { data: actas, isLoading, isError, refetch } = useGetActas(); // Obtener todas las actas
     const deleteActaMutation = useDeleteActa(); // Eliminar una acta
@@ -100,7 +100,9 @@ export default function ActasTable() {
                                 >
                                     <td className="px-2 sm:px-4 py-3 text-xs sm:text-sm text-slate-700 align-top flex items-center gap-2">
                                         <FileText size={18} className="text-sky-600" />
-                                        {acta.Titulo}
+                                        {acta.Titulo.length > 20
+                                            ? `${acta.Titulo.slice(0, 20)}...`
+                                            : acta.Titulo}
                                     </td>
                                     <td className="px-2 sm:px-4 py-3 text-xs sm:text-sm text-slate-700 align-top">
                                         {acta.Descripcion.length > 20
