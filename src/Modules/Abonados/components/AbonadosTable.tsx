@@ -3,8 +3,6 @@ import { createColumnHelper, getCoreRowModel, getPaginationRowModel, useReactTab
 import { User, Building } from 'lucide-react';
 import { useAfiliadosFisicos } from '../Hook/HookAfiliadoFisico';
 import { useAfiliadosJuridicos } from '../Hook/HookAfiliadoJuridico';
-//import type { AfiliadoFisico } from '../Models/ModeloAfiliadoFisico';
-//import type { AfiliadoJuridico } from '../Models/ModeloAfiliadoJuridico';
 import DetailAbonados from './DetailAbonados';
 import type { AfiliadoFisico } from '../Models/TablaAfiliados/ModeloAfiliadoFisico';
 import type { AfiliadoJuridico } from '../Models/TablaAfiliados/ModeloAfiliadoJuridico';
@@ -38,8 +36,6 @@ export default function AbonadosTable() {
         tipo: 'afiliado-fisico' | 'afiliado-juridico';
         datos: AfiliadoFisico | AfiliadoJuridico;
     } | null>(null);
-
-    const [showCreateModal, setShowCreateModal] = useState(false);
 
     // Estados combinados
     const isLoading = loadingFisicos || loadingJuridicos;
@@ -224,7 +220,7 @@ export default function AbonadosTable() {
                 </div>
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
                     <input value={globalFilter} onChange={(e) => setGlobalFilter(e.target.value)} placeholder="Buscar por nombre, cédula, estado, tipo..." className="w-full sm:w-auto px-3 py-2 rounded-lg border border-sky-200 bg-sky-50 focus:outline-none focus:ring-2 focus:ring-sky-200 text-sm" />
-                    <button className="px-3 py-2 rounded-lg bg-sky-600 text-white hover:bg-sky-700 shadow-sm text-sm whitespace-nowrap" onClick={() => setShowCreateModal(true)}>+ Nuevo Afiliado</button>
+                    <button className="px-3 py-2 rounded-lg bg-sky-600 text-white hover:bg-sky-700 shadow-sm text-sm whitespace-nowrap" onClick={() => alert('Crear nueva solicitud — abrir formulario')}>+ Nueva Solicitud</button>
                 </div>
             </div>
             <div className="overflow-x-auto rounded-2xl border border-sky-100 shadow-sm bg-white">
@@ -298,14 +294,6 @@ export default function AbonadosTable() {
                     }}
                 />
             )}
-
-            {/* Modal */}
-            <FormularioAfiliados
-                isOpen={showCreateModal}
-                onClose={() => setShowCreateModal(false)}
-                onSuccess={() => {
-                    window.location.reload();
-                }} />
         </div>
     );
 }

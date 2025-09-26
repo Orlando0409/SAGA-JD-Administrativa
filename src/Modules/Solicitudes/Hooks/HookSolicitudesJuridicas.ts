@@ -2,15 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { SolicitudesJuridicasService } from '../Service/SolicitudesJuridicas';
 import type { SolicitudJuridica } from '../Models/ModelosJuridicos';
 
-/**
- * 🎣 Hook para gestionar solicitudes jurídicas
- * Utiliza React Query para cache y gestión de estado
- */
 
-/**
- * 📥 Hook para obtener todas las solicitudes jurídicas
- * @returns UseQueryResult con las solicitudes jurídicas
- */
 export const useSolicitudesJuridicas = () => {
     return useQuery<SolicitudJuridica[], Error>({
         queryKey: ['solicitudes-juridicas'],
@@ -23,10 +15,9 @@ export const useSolicitudesJuridicas = () => {
     });
 };
 
-/**
- * 📥 Hook para obtener solicitudes jurídicas pendientes (usa cache cuando es posible)
- * @returns UseQueryResult con las solicitudes jurídicas pendientes
- */
+
+ // Hook para obtener solicitudes jurídicas pendientes (usa cache cuando es posible)
+
 export const useSolicitudesJuridicasPendientes = () => {
     return useQuery<SolicitudJuridica[], Error>({
         queryKey: ['solicitudes-juridicas', 'pendientes'],
@@ -38,12 +29,9 @@ export const useSolicitudesJuridicasPendientes = () => {
     });
 };
 
-/**
- * 🔄 Hook personalizable para filtrar solicitudes jurídicas por estado
- * @param estado - Estado a filtrar
- * @param enabled - Si el query debe ejecutarse
- * @returns UseQueryResult con las solicitudes filtradas
- */
+ //Hook personalizable para filtrar solicitudes jurídicas por estado
+
+ 
 export const useSolicitudesJuridicasPorEstado = (estado: string, enabled: boolean = true) => {
     return useQuery<SolicitudJuridica[], Error>({
         queryKey: ['solicitudes-juridicas', 'estado', estado],
@@ -56,12 +44,8 @@ export const useSolicitudesJuridicasPorEstado = (estado: string, enabled: boolea
     });
 };
 
-/**
- * 🔄 Hook personalizable para filtrar solicitudes jurídicas por tipo
- * @param tipo - Tipo de solicitud a filtrar
- * @param enabled - Si el query debe ejecutarse
- * @returns UseQueryResult con las solicitudes filtradas
- */
+  //Hook personalizable para filtrar solicitudes jurídicas por tipo
+
 export const useSolicitudesJuridicasPorTipo = (
     tipo: 'Afiliacion' | 'Desconexion' | 'Cambio de Medidor' | 'Asociado',
     enabled: boolean = true
@@ -77,28 +61,28 @@ export const useSolicitudesJuridicasPorTipo = (
     });
 };
 
-// 🎯 Hooks específicos por tipo (para conveniencia)
+//  Hooks específicos por tipo (para conveniencia)
 
 export const useSolicitudesJuridicasAfiliacion = () => {
     return useSolicitudesJuridicasPorTipo('Afiliacion');
 }
 
 /**
- * 📥 Hook para obtener solicitudes de desconexión jurídicas
+ *  Hook para obtener solicitudes de desconexión jurídicas
  */
 export const useSolicitudesJuridicasDesconexion = () => {
     return useSolicitudesJuridicasPorTipo('Desconexion');
 };
 
 /**
- * 📥 Hook para obtener solicitudes de cambio de medidor jurídicas
+ *  Hook para obtener solicitudes de cambio de medidor jurídicas
  */
 export const useSolicitudesJuridicasCambioMedidor = () => {
     return useSolicitudesJuridicasPorTipo('Cambio de Medidor');
 };
 
 /**
- * 📥 Hook para obtener solicitudes de asociado jurídicas
+ *  Hook para obtener solicitudes de asociado jurídicas
  */
 export const useSolicitudesJuridicasAsociado = () => {
     return useSolicitudesJuridicasPorTipo('Asociado');

@@ -18,19 +18,19 @@ export const useMutateEstadoSolicitud = () => {
         onSuccess: (data, variables) => {
             // 1. Actualizar la caché de la solicitud individual
             queryClient.setQueryData(
-                ['solicitud-fisica', { id: variables.solicitudId }], 
+                ['solicitud-afiliacion-fisica', { id: variables.solicitudId }], 
                 data
             );
 
             // 2. Invalidar y refrescar la lista completa de solicitudes
             queryClient.invalidateQueries({ 
-                queryKey: ['solicitudes-fisicas'] 
+                queryKey: ['solicitud-afiliacion-fisica'] 
             });
 
-            console.log('✅ Estado actualizado exitosamente en caché:', data);
+            console.log(' Estado actualizado exitosamente en caché:', data);
         },
         onError: (error: any) => {
-            console.error('❌ Error al actualizar estado:', error);
+            console.error(' Error al actualizar estado:', error);
         },
     });
 };
@@ -48,17 +48,17 @@ export const useAprobarSolicitudAfiliacion = () => {
         onSuccess: (data, solicitudId) => {
             // Actualizar cachés
             queryClient.setQueryData(
-                ['solicitud-fisica', { id: solicitudId }], 
+                ['solicitud-afiliacion-fisica', { id: solicitudId }], 
                 data
             );
             queryClient.invalidateQueries({ 
-                queryKey: ['solicitudes-fisicas'] 
+                queryKey: ['solicitud-afiliacion-fisica'] 
             });
 
-            console.log('✅ Solicitud aprobada exitosamente:', data);
+            console.log(' Solicitud aprobada exitosamente:', data);
         },
         onError: (error: any) => {
-            console.error('❌ Error al aprobar solicitud:', error);
+            console.error(' Error al aprobar solicitud:', error);
         },
     });
 };
@@ -76,17 +76,17 @@ export const useRechazarSolicitudAfiliacion = () => {
         onSuccess: (data, solicitudId) => {
             // Actualizar cachés
             queryClient.setQueryData(
-                ['solicitud-fisica', { id: solicitudId }], 
+                ['solicitud-afiliacion-fisica', { id: solicitudId }], 
                 data
             );
             queryClient.invalidateQueries({ 
-                queryKey: ['solicitudes-fisicas'] 
+                queryKey: ['solicitud-afiliacion-fisica'] 
             });
 
-            console.log('✅ Solicitud rechazada exitosamente:', data);
+            console.log(' Solicitud rechazada exitosamente:', data);
         },
         onError: (error: any) => {
-            console.error('❌ Error al rechazar solicitud:', error);
+            console.error(' Error al rechazar solicitud:', error);
         },
     });
 };

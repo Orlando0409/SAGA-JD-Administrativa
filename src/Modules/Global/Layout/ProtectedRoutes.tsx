@@ -1,59 +1,62 @@
-import { useAuth, useAuthUser } from '@/Modules/Auth/Hooks/AuthHook'
-import { Navigate, useLocation } from '@tanstack/react-router'
-import { modules } from '../components/DashboardGlobal/ModulosData'
-
+import { useAuth } from '@/Modules/Auth/Context/AuthContext';
+import { cookieUtils } from '../utils/CookieUtils';
+import { Navigate, useLocation } from '@tanstack/react-router';
+import { type ReactNode } from 'react';
+import { modules } from '../components/DashboardGlobal/ModulosData';
 
 interface ProtectedRouteProps {
-  children: (allowedModules: typeof modules) => React.ReactNode
+  children: (allowedModules: any[]) => ReactNode;
 }
 
-export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
-  const { isAuthenticated } = useAuth()
-  const { user, isLoading } = useAuthUser()
+export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
+  const { user, isLoading, isAuthenticated } = useAuth();
   const location = useLocation()
   const currentPath = location.pathname
-
-  // Muestra loader mientras carga
-  if (isLoading || !user) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-900"></div>
-      </div>
-    )
-  }
-
-  // Si no está autenticado, redirige al login
-  if (!isAuthenticated) {
-    return <Navigate to="/Login" />
-  }
-
-  const userPermisos = user?.rol?.permisos ?? []
-
-  // Filtra los módulos permitidos según los permisos del usuario
-  const allowedModules = modules.filter(mod => {
-    const permiso = userPermisos.find(p => p.modulo === mod.permiso)
-    return permiso && permiso.Ver === true
-  })
-
-  // Rutas que siempre están permitidas (Home)
+ 
   const alwaysAllowedRoutes = ['/Home']
   const isAlwaysAllowed = alwaysAllowedRoutes.some(route => 
     normalizePath(currentPath) === normalizePath(route)
-  )
+  );
 
-  // Verifica si tiene permiso para la ruta actual
+  const allowedModules = modules.filter(module => {
+  const hasPermission = user?.rol?.permisos?.some(p => 
+    p.modulo.toLowerCase() === module.permiso.toLowerCase() && (p.Ver || p.Editar)
+  );
+  return hasPermission;
+  });
+
   const hasPermissionForCurrentRoute = isAlwaysAllowed || 
-    allowedModules.some(mod => normalizePath(mod.path) === normalizePath(currentPath))
+  allowedModules.some(mod => normalizePath(mod.path) === normalizePath(currentPath))
 
-  // Si no tiene permiso para esta ruta específica, redirige
+  const existRoute = modules.some(mod => normalizePath(mod.path) === normalizePath(currentPath)) || isAlwaysAllowed;
+
+    if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600 text-lg">Verificando autenticación...</p>
+        </div>
+      </div>
+    );
+  }
+  
+  if (!isAuthenticated || !user) {
+    cookieUtils.removeToken();
+    return <Navigate to="/Login" />;
+  }
+  if (!existRoute) {
+    cookieUtils.removeToken();
+    return <Navigate to="/NotFound" />
+  }
   if (!hasPermissionForCurrentRoute) {
     return <Navigate to="/Unauthorized" />
   }
 
-  // Pasa los módulos permitidos a los hijos
-  return <>{children(allowedModules)}</>
-}
 
-function normalizePath(path: string) {
-  return path.replace(/^\/+|\/+$/g, '').toLowerCase();
+  return <>{children(allowedModules)}</>;
+};
+
+  function normalizePath(path: string) {
+  return path.replace(/(^\/+)|(\/+$)/g, '').toLowerCase();
 }

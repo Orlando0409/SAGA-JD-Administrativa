@@ -7,7 +7,7 @@ import {
     flexRender,
     type ColumnDef,
 } from '@tanstack/react-table';
-import { Eye, Edit, Trash, ChevronLeft, ChevronRight, Plus } from 'lucide-react';
+import { ChevronLeft, ChevronRight, User, Building } from 'lucide-react';
 
 // Importar hooks de solicitudes
 import { useSolicitudesFisicas } from '../Hooks/HookSolicitudesFisicas';
@@ -77,13 +77,13 @@ export default function SolicitudesTable() {
 
         // Solicitudes Físicas
         const solicitudesFisicasUnificadas: SolicitudUnificada[] = solicitudesFisicasArray.map((solicitud: SolicitudFisica, index: number) => {
-            console.log('🔍 Procesando solicitud física completa:', solicitud);
-            console.log('📋 Propiedades disponibles en solicitud física:', Object.keys(solicitud));
+            console.log(' Procesando solicitud física completa:', solicitud);
+            console.log(' Propiedades disponibles en solicitud física:', Object.keys(solicitud));
 
             // Buscar ID real en la solicitud
             const solicitudConId = solicitud as any;
             const idReal = solicitudConId.id || solicitudConId.Id || solicitudConId.ID || solicitudConId.solicitudId;
-            console.log('🆔 ID real encontrado en solicitud física:', idReal);
+            console.log(' ID real encontrado en solicitud física:', idReal);
 
             return {
                 id: `fisico-${index}`, // ID interno único para la tabla
@@ -103,13 +103,13 @@ export default function SolicitudesTable() {
 
         // Solicitudes Jurídicas
         const solicitudesJuridicasUnificadas: SolicitudUnificada[] = solicitudesJuridicasArray.map((solicitud: SolicitudJuridica, index: number) => {
-            console.log('🔍 Procesando solicitud jurídica completa:', solicitud);
-            console.log('📋 Propiedades disponibles en solicitud jurídica:', Object.keys(solicitud));
+            console.log(' Procesando solicitud jurídica completa:', solicitud);
+            console.log(' Propiedades disponibles en solicitud jurídica:', Object.keys(solicitud));
 
             // Buscar ID real en la solicitud
             const solicitudConId = solicitud as any;
             const idReal = solicitudConId.id || solicitudConId.Id || solicitudConId.ID || solicitudConId.solicitudId;
-            console.log('🆔 ID real encontrado en solicitud jurídica:', idReal);
+            console.log(' ID real encontrado en solicitud jurídica:', idReal);
 
             return {
                 id: `juridico-${index}`, // ID interno único para la tabla
@@ -132,26 +132,10 @@ export default function SolicitudesTable() {
             ...solicitudesJuridicasUnificadas
         ].sort((a, b) => a.Id - b.Id);
 
-        console.log('📊 Datos unificados finales:', resultado);
-        console.log('📊 IDs finales en la tabla:', resultado.map(s => ({ Id: s.Id, Cedula: s.Cedula_Documento, Tipo: s.Tipo_Persona })));
+        console.log(' Datos unificados finales:', resultado);
+        console.log(' IDs finales en la tabla:', resultado.map(s => ({ Id: s.Id, Cedula: s.Cedula_Documento, Tipo: s.Tipo_Persona })));
         return resultado;
     }, [solicitudesFisicas, solicitudesJuridicas]);
-
-    const handleDelete = async (solicitud: SolicitudUnificada) => {
-        const nombreCompleto = solicitud.Nombre_Completo;
-        const tipoPersona = solicitud.Tipo_Persona;
-        const tipoSolicitud = solicitud.Tipo_Solicitud;
-
-        if (confirm(`¿Está seguro de eliminar la solicitud de ${tipoSolicitud.toLowerCase()} ${tipoPersona.toLowerCase()} de ${nombreCompleto}?`)) {
-            try {
-                // Aquí puedes implementar la lógica de eliminación cuando esté disponible
-                alert(`La funcionalidad de eliminar estará disponible próximamente`);
-            } catch (error) {
-                alert(`Error al eliminar la solicitud`);
-                console.error('Error:', error);
-            }
-        }
-    };
 
     // Función para abrir el modal de gestión (aprobar/rechazar)
     const handleViewDetail = (solicitud: SolicitudUnificada) => {
@@ -165,16 +149,7 @@ export default function SolicitudesTable() {
         setShowGestionModal(true);
     };
 
-    // Función para abrir el modal de edición
-    const handleEdit = (solicitud: SolicitudUnificada) => {
-        const tipo = solicitud.Tipo_Persona === 'Físico' ? 'solicitud-fisica' : 'solicitud-juridica';
-
-        setSelectedSolicitud({
-            tipo: tipo as 'solicitud-fisica' | 'solicitud-juridica',
-            datos: solicitud.datos_originales
-        });
-        setShowEditModal(true);
-    }; const filteredData = useMemo(() => {
+    const filteredData = useMemo(() => {
         if (!globalFilter) return datosUnificados;
         const q = globalFilter.toLowerCase();
         return datosUnificados.filter((solicitud) =>
@@ -194,11 +169,6 @@ export default function SolicitudesTable() {
 
     const columnHelper = createColumnHelper<SolicitudUnificada>();
     const columns: ColumnDef<SolicitudUnificada, any>[] = [
-        columnHelper.accessor('Id', {
-            header: 'ID',
-            cell: (info) => info.getValue(),
-            size: 50
-        }),
         columnHelper.accessor('Nombre_Completo', {
             header: 'Nombre / Razón Social',
             cell: (info) => {
@@ -244,13 +214,13 @@ export default function SolicitudesTable() {
                 const base = 'inline-flex items-center gap-2 px-2 py-1 rounded-full text-xs font-medium';
 
                 if (tipo === 'Afiliacion') {
-                    return <span className={`${base} bg-emerald-100 text-emerald-700`}>🆕 Afiliación</span>;
+                    return <span className={`${base} bg-emerald-100 text-emerald-700`}> Afiliación</span>;
                 } else if (tipo === 'Desconexion') {
-                    return <span className={`${base} bg-red-100 text-red-700`}>🔌 Desconexión</span>;
+                    return <span className={`${base} bg-red-100 text-red-700`}> Desconexión</span>;
                 } else if (tipo === 'Cambio de Medidor') {
-                    return <span className={`${base} bg-blue-100 text-blue-700`}>⚙️ Cambio Medidor</span>;
+                    return <span className={`${base} bg-blue-100 text-blue-700`}> Cambio Medidor</span>;
                 } else if (tipo === 'Asociado') {
-                    return <span className={`${base} bg-orange-100 text-orange-700`}>🤝 Asociado</span>;
+                    return <span className={`${base} bg-orange-100 text-orange-700`}> Asociado</span>;
                 }
 
                 return <span className={`${base} bg-slate-100 text-slate-700`}>{tipo}</span>;
@@ -266,13 +236,13 @@ export default function SolicitudesTable() {
                 const base = 'inline-flex items-center gap-2 px-2 py-1 rounded-full text-xs font-medium';
 
                 if (estadoNombre === 'Pendiente') {
-                    return <span className={`${base} bg-amber-100 text-amber-700`}>⏳ Pendiente</span>;
+                    return <span className={`${base} bg-amber-100 text-amber-700`}> Pendiente</span>;
                 } else if (estadoNombre === 'Aprobada' || estadoNombre === 'Aprobado') {
-                    return <span className={`${base} bg-green-100 text-green-700`}>✓ Aprobada</span>;
+                    return <span className={`${base} bg-green-100 text-green-700`}> Aprobada</span>;
                 } else if (estadoNombre === 'Rechazada' || estadoNombre === 'Rechazado') {
-                    return <span className={`${base} bg-red-100 text-red-700`}>✕ Rechazada</span>;
+                    return <span className={`${base} bg-red-100 text-red-700`}>Rechazada</span>;
                 } else if (estadoNombre === 'En Proceso') {
-                    return <span className={`${base} bg-blue-100 text-blue-700`}>🔄 En Proceso</span>;
+                    return <span className={`${base} bg-blue-100 text-blue-700`}> En Proceso</span>;
                 }
 
                 return <span className={`${base} bg-slate-100 text-slate-700`}>{estadoNombre}</span>;
@@ -288,7 +258,7 @@ export default function SolicitudesTable() {
                         ? 'bg-blue-100 text-blue-700'
                         : 'bg-purple-100 text-purple-700'
                         }`}>
-                        {tipo === 'Físico' ? '👤' : '🏢'} {tipo}
+                        {tipo === 'Físico' ? <User size={14} /> : <Building size={14} />} {tipo}
                     </span>
                 );
             },
@@ -310,39 +280,6 @@ export default function SolicitudesTable() {
                 } catch {
                     return 'Fecha inválida';
                 }
-            },
-            size: 120,
-        }),
-        columnHelper.display({
-            id: 'actions',
-            header: 'Acciones',
-            cell: ({ row }) => {
-                const solicitud = row.original as SolicitudUnificada;
-                return (
-                    <div className="flex items-center gap-2">
-                        <button
-                            title="Gestionar Solicitud"
-                            className="inline-flex items-center gap-2 px-2 py-1 rounded-md text-sky-700 bg-sky-50 hover:bg-sky-100 border border-sky-100"
-                            onClick={() => handleViewDetail(solicitud)}
-                        >
-                            <Eye size={14} />
-                        </button>
-                        <button
-                            title="Editar"
-                            className="inline-flex items-center gap-2 px-2 py-1 rounded-md text-sky-700 bg-white hover:bg-sky-50 border border-sky-100"
-                            onClick={() => handleEdit(solicitud)}
-                        >
-                            <Edit size={14} />
-                        </button>
-                        <button
-                            title="Eliminar"
-                            className="inline-flex items-center gap-2 px-2 py-1 rounded-md text-slate-600 bg-white hover:bg-slate-50 border border-slate-100"
-                            onClick={() => handleDelete(solicitud)}
-                        >
-                            <Trash size={14} />
-                        </button>
-                    </div>
-                );
             },
             size: 120,
         }),
@@ -387,25 +324,17 @@ export default function SolicitudesTable() {
         <div className="w-full">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
                 <div className="flex items-center gap-3">
-                    <h2 className="text-xl font-semibold text-sky-800">Gestión de Solicitudes</h2>
-                    <span className="text-sm text-slate-500">
-                        Afiliación, Desconexión, Cambio de Medidor y Asociado (Físicos y Jurídicos)
-                    </span>
+                    <h2 className="text-lg sm:text-xl font-semibold text-sky-800">Gestión de Solicitudes</h2>
+
                 </div>
                 <div className="flex items-center gap-3">
                     <input
                         value={globalFilter}
                         onChange={(e) => setGlobalFilter(e.target.value)}
                         placeholder="Buscar por nombre, cédula, tipo, estado..."
-                        className="px-3 py-2 rounded-lg border border-sky-200 bg-sky-50 focus:outline-none focus:ring-2 focus:ring-sky-200"
+                        className="w-full sm:w-auto px-3 py-2 rounded-lg border border-sky-200 bg-sky-50 focus:outline-none focus:ring-2 focus:ring-sky-200 text-sm"
                     />
-                    <button
-                        onClick={() => console.log('TODO: Implementar modal de nueva solicitud')}
-                        className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-sky-600 text-white hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-200"
-                    >
-                        <Plus size={16} />
-                        Nueva Solicitud
-                    </button>
+
                 </div>
             </div>
 
@@ -417,7 +346,7 @@ export default function SolicitudesTable() {
                                 {headerGroup.headers.map((header) => (
                                     <th
                                         key={header.id}
-                                        className="px-4 py-3 text-left text-xs font-medium text-sky-800 uppercase tracking-wider"
+                                        className="px-2 sm:px-4 py-3 text-left text-xs font-medium text-sky-800 uppercase tracking-wider"
                                         style={{ width: header.getSize() }}
                                     >
                                         {header.isPlaceholder
@@ -432,15 +361,19 @@ export default function SolicitudesTable() {
                     <tbody className="bg-white divide-y divide-sky-50">
                         {table.getRowModel().rows.length === 0 ? (
                             <tr>
-                                <td colSpan={columns.length} className="px-4 py-8 text-center text-slate-500">
+                                <td colSpan={columns.length} className="px-2 sm:px-4 py-8 text-center text-slate-500 text-sm">
                                     No se encontraron solicitudes
                                 </td>
                             </tr>
                         ) : (
                             table.getRowModel().rows.map((row) => (
-                                <tr key={row.original.id} className="hover:bg-sky-25">
+                                <tr
+                                    key={row.original.id}
+                                    className="hover:bg-sky-50 cursor-pointer transition-colors"
+                                    onClick={() => handleViewDetail(row.original)}
+                                >
                                     {row.getVisibleCells().map((cell) => (
-                                        <td key={cell.id} className="px-4 py-4 whitespace-nowrap text-sm">
+                                        <td key={cell.id} className="px-2 sm:px-4 py-4 whitespace-nowrap text-xs sm:text-sm">
                                             {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                         </td>
                                     ))}
@@ -451,24 +384,24 @@ export default function SolicitudesTable() {
                 </table>
             </div>
 
-            <div className="flex items-center justify-between gap-4 mt-4">
-                <div className="text-sm text-slate-600">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mt-4">
+                <div className="text-xs sm:text-sm text-slate-600 text-center sm:text-left">
                     Mostrando {table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1} - {Math.min((table.getState().pagination.pageIndex + 1) * table.getState().pagination.pageSize, table.getFilteredRowModel().rows.length)} de {table.getFilteredRowModel().rows.length}
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center justify-center sm:justify-end gap-2">
                     <button
                         onClick={() => table.previousPage()}
                         disabled={!table.getCanPreviousPage()}
-                        className="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sky-700 bg-white hover:bg-sky-50 border border-sky-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="inline-flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-2 rounded-lg text-sky-700 bg-white hover:bg-sky-50 border border-sky-200 disabled:opacity-50 disabled:cursor-not-allowed text-xs sm:text-sm"
                     >
-                        <ChevronLeft size={16} /> Anterior
+                        <ChevronLeft size={14} /> <span className="hidden sm:inline">Anterior</span>
                     </button>
                     <button
                         onClick={() => table.nextPage()}
                         disabled={!table.getCanNextPage()}
-                        className="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sky-700 bg-white hover:bg-sky-50 border border-sky-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="inline-flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-2 rounded-lg text-sky-700 bg-white hover:bg-sky-50 border border-sky-200 disabled:opacity-50 disabled:cursor-not-allowed text-xs sm:text-sm"
                     >
-                        Siguiente <ChevronRight size={16} />
+                        <span className="hidden sm:inline">Siguiente</span> <ChevronRight size={14} />
                     </button>
                 </div>
             </div>
@@ -497,28 +430,7 @@ export default function SolicitudesTable() {
                 />
             )}
 
-            {/* Comentarios para modales futuros */}
-            {/* 
-            {showDetailModal && selectedSolicitud && (
-                <DetailSolicitudes
-                    solicitud={selectedSolicitud}
-                    isOpen={showDetailModal}
-                    onClose={() => {
-                        setShowDetailModal(false);
-                        setSelectedSolicitud(null);
-                    }}
-                />
-            )}
 
-            <FormularioSolicitudes
-                isOpen={showFormModal}
-                onClose={() => setShowFormModal(false)}
-                onSuccess={() => {
-                    // Recargar datos después de crear una solicitud exitosamente
-                    window.location.reload();
-                }}
-            />
-            */}
         </div>
     );
 }

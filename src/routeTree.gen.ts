@@ -9,22 +9,31 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as NotFoundRouteImport } from './routes/NotFound'
 import { Route as HomeRouteImport } from './routes/Home'
 import { Route as appSeguridadBitacoraRouteImport } from './routes/(app)/(Seguridad)/Bitacora'
 import { Route as appGestionUsuariosRouteImport } from './routes/(app)/(Gestion)/Usuarios'
 import { Route as appGestionSolicitudesRouteImport } from './routes/(app)/(Gestion)/Solicitudes'
 import { Route as appGestionProveedoresRouteImport } from './routes/(app)/(Gestion)/Proveedores'
 import { Route as appGestionInventarioRouteImport } from './routes/(app)/(Gestion)/Inventario'
+import { Route as appGestionContactoRouteImport } from './routes/(app)/(Gestion)/Contacto'
+import { Route as appGestionCalidadAguaRouteImport } from './routes/(app)/(Gestion)/CalidadAgua'
 import { Route as appGestionActasRouteImport } from './routes/(app)/(Gestion)/Actas'
 import { Route as appGestionAbonadosRouteImport } from './routes/(app)/(Gestion)/Abonados'
 import { Route as appEdicionProyectosRouteImport } from './routes/(app)/(Edicion)/Proyectos'
 import { Route as appEdicionImagenesRouteImport } from './routes/(app)/(Edicion)/Imagenes'
 import { Route as appEdicionFAQRouteImport } from './routes/(app)/(Edicion)/FAQ'
+import { Route as appAyudaManualesRouteImport } from './routes/(app)/(Ayuda)/Manuales'
 import { Route as appAuthUnauthorizedRouteImport } from './routes/(app)/(Auth)/Unauthorized'
 import { Route as appAuthResetPasswordRouteImport } from './routes/(app)/(Auth)/ResetPassword'
 import { Route as appAuthLoginRouteImport } from './routes/(app)/(Auth)/Login'
 import { Route as appAuthForgotPasswordRouteImport } from './routes/(app)/(Auth)/ForgotPassword'
 
+const NotFoundRoute = NotFoundRouteImport.update({
+  id: '/NotFound',
+  path: '/NotFound',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const HomeRoute = HomeRouteImport.update({
   id: '/Home',
   path: '/Home',
@@ -55,6 +64,16 @@ const appGestionInventarioRoute = appGestionInventarioRouteImport.update({
   path: '/Inventario',
   getParentRoute: () => rootRouteImport,
 } as any)
+const appGestionContactoRoute = appGestionContactoRouteImport.update({
+  id: '/(app)/(Gestion)/Contacto',
+  path: '/Contacto',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const appGestionCalidadAguaRoute = appGestionCalidadAguaRouteImport.update({
+  id: '/(app)/(Gestion)/CalidadAgua',
+  path: '/CalidadAgua',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const appGestionActasRoute = appGestionActasRouteImport.update({
   id: '/(app)/(Gestion)/Actas',
   path: '/Actas',
@@ -80,6 +99,11 @@ const appEdicionFAQRoute = appEdicionFAQRouteImport.update({
   path: '/FAQ',
   getParentRoute: () => rootRouteImport,
 } as any)
+const appAyudaManualesRoute = appAyudaManualesRouteImport.update({
+  id: '/(app)/(Ayuda)/Manuales',
+  path: '/Manuales',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const appAuthUnauthorizedRoute = appAuthUnauthorizedRouteImport.update({
   id: '/(app)/(Auth)/Unauthorized',
   path: '/Unauthorized',
@@ -103,15 +127,19 @@ const appAuthForgotPasswordRoute = appAuthForgotPasswordRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/Home': typeof HomeRoute
+  '/NotFound': typeof NotFoundRoute
   '/ForgotPassword': typeof appAuthForgotPasswordRoute
   '/Login': typeof appAuthLoginRoute
   '/ResetPassword': typeof appAuthResetPasswordRoute
   '/Unauthorized': typeof appAuthUnauthorizedRoute
+  '/Manuales': typeof appAyudaManualesRoute
   '/FAQ': typeof appEdicionFAQRoute
   '/Imagenes': typeof appEdicionImagenesRoute
   '/Proyectos': typeof appEdicionProyectosRoute
   '/Abonados': typeof appGestionAbonadosRoute
   '/Actas': typeof appGestionActasRoute
+  '/CalidadAgua': typeof appGestionCalidadAguaRoute
+  '/Contacto': typeof appGestionContactoRoute
   '/Inventario': typeof appGestionInventarioRoute
   '/Proveedores': typeof appGestionProveedoresRoute
   '/Solicitudes': typeof appGestionSolicitudesRoute
@@ -120,15 +148,19 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/Home': typeof HomeRoute
+  '/NotFound': typeof NotFoundRoute
   '/ForgotPassword': typeof appAuthForgotPasswordRoute
   '/Login': typeof appAuthLoginRoute
   '/ResetPassword': typeof appAuthResetPasswordRoute
   '/Unauthorized': typeof appAuthUnauthorizedRoute
+  '/Manuales': typeof appAyudaManualesRoute
   '/FAQ': typeof appEdicionFAQRoute
   '/Imagenes': typeof appEdicionImagenesRoute
   '/Proyectos': typeof appEdicionProyectosRoute
   '/Abonados': typeof appGestionAbonadosRoute
   '/Actas': typeof appGestionActasRoute
+  '/CalidadAgua': typeof appGestionCalidadAguaRoute
+  '/Contacto': typeof appGestionContactoRoute
   '/Inventario': typeof appGestionInventarioRoute
   '/Proveedores': typeof appGestionProveedoresRoute
   '/Solicitudes': typeof appGestionSolicitudesRoute
@@ -138,15 +170,19 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/Home': typeof HomeRoute
+  '/NotFound': typeof NotFoundRoute
   '/(app)/(Auth)/ForgotPassword': typeof appAuthForgotPasswordRoute
   '/(app)/(Auth)/Login': typeof appAuthLoginRoute
   '/(app)/(Auth)/ResetPassword': typeof appAuthResetPasswordRoute
   '/(app)/(Auth)/Unauthorized': typeof appAuthUnauthorizedRoute
+  '/(app)/(Ayuda)/Manuales': typeof appAyudaManualesRoute
   '/(app)/(Edicion)/FAQ': typeof appEdicionFAQRoute
   '/(app)/(Edicion)/Imagenes': typeof appEdicionImagenesRoute
   '/(app)/(Edicion)/Proyectos': typeof appEdicionProyectosRoute
   '/(app)/(Gestion)/Abonados': typeof appGestionAbonadosRoute
   '/(app)/(Gestion)/Actas': typeof appGestionActasRoute
+  '/(app)/(Gestion)/CalidadAgua': typeof appGestionCalidadAguaRoute
+  '/(app)/(Gestion)/Contacto': typeof appGestionContactoRoute
   '/(app)/(Gestion)/Inventario': typeof appGestionInventarioRoute
   '/(app)/(Gestion)/Proveedores': typeof appGestionProveedoresRoute
   '/(app)/(Gestion)/Solicitudes': typeof appGestionSolicitudesRoute
@@ -157,15 +193,19 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/Home'
+    | '/NotFound'
     | '/ForgotPassword'
     | '/Login'
     | '/ResetPassword'
     | '/Unauthorized'
+    | '/Manuales'
     | '/FAQ'
     | '/Imagenes'
     | '/Proyectos'
     | '/Abonados'
     | '/Actas'
+    | '/CalidadAgua'
+    | '/Contacto'
     | '/Inventario'
     | '/Proveedores'
     | '/Solicitudes'
@@ -174,15 +214,19 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/Home'
+    | '/NotFound'
     | '/ForgotPassword'
     | '/Login'
     | '/ResetPassword'
     | '/Unauthorized'
+    | '/Manuales'
     | '/FAQ'
     | '/Imagenes'
     | '/Proyectos'
     | '/Abonados'
     | '/Actas'
+    | '/CalidadAgua'
+    | '/Contacto'
     | '/Inventario'
     | '/Proveedores'
     | '/Solicitudes'
@@ -191,15 +235,19 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/Home'
+    | '/NotFound'
     | '/(app)/(Auth)/ForgotPassword'
     | '/(app)/(Auth)/Login'
     | '/(app)/(Auth)/ResetPassword'
     | '/(app)/(Auth)/Unauthorized'
+    | '/(app)/(Ayuda)/Manuales'
     | '/(app)/(Edicion)/FAQ'
     | '/(app)/(Edicion)/Imagenes'
     | '/(app)/(Edicion)/Proyectos'
     | '/(app)/(Gestion)/Abonados'
     | '/(app)/(Gestion)/Actas'
+    | '/(app)/(Gestion)/CalidadAgua'
+    | '/(app)/(Gestion)/Contacto'
     | '/(app)/(Gestion)/Inventario'
     | '/(app)/(Gestion)/Proveedores'
     | '/(app)/(Gestion)/Solicitudes'
@@ -209,15 +257,19 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   HomeRoute: typeof HomeRoute
+  NotFoundRoute: typeof NotFoundRoute
   appAuthForgotPasswordRoute: typeof appAuthForgotPasswordRoute
   appAuthLoginRoute: typeof appAuthLoginRoute
   appAuthResetPasswordRoute: typeof appAuthResetPasswordRoute
   appAuthUnauthorizedRoute: typeof appAuthUnauthorizedRoute
+  appAyudaManualesRoute: typeof appAyudaManualesRoute
   appEdicionFAQRoute: typeof appEdicionFAQRoute
   appEdicionImagenesRoute: typeof appEdicionImagenesRoute
   appEdicionProyectosRoute: typeof appEdicionProyectosRoute
   appGestionAbonadosRoute: typeof appGestionAbonadosRoute
   appGestionActasRoute: typeof appGestionActasRoute
+  appGestionCalidadAguaRoute: typeof appGestionCalidadAguaRoute
+  appGestionContactoRoute: typeof appGestionContactoRoute
   appGestionInventarioRoute: typeof appGestionInventarioRoute
   appGestionProveedoresRoute: typeof appGestionProveedoresRoute
   appGestionSolicitudesRoute: typeof appGestionSolicitudesRoute
@@ -227,6 +279,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/NotFound': {
+      id: '/NotFound'
+      path: '/NotFound'
+      fullPath: '/NotFound'
+      preLoaderRoute: typeof NotFoundRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/Home': {
       id: '/Home'
       path: '/Home'
@@ -269,6 +328,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof appGestionInventarioRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/(app)/(Gestion)/Contacto': {
+      id: '/(app)/(Gestion)/Contacto'
+      path: '/Contacto'
+      fullPath: '/Contacto'
+      preLoaderRoute: typeof appGestionContactoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/(app)/(Gestion)/CalidadAgua': {
+      id: '/(app)/(Gestion)/CalidadAgua'
+      path: '/CalidadAgua'
+      fullPath: '/CalidadAgua'
+      preLoaderRoute: typeof appGestionCalidadAguaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/(app)/(Gestion)/Actas': {
       id: '/(app)/(Gestion)/Actas'
       path: '/Actas'
@@ -304,6 +377,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof appEdicionFAQRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/(app)/(Ayuda)/Manuales': {
+      id: '/(app)/(Ayuda)/Manuales'
+      path: '/Manuales'
+      fullPath: '/Manuales'
+      preLoaderRoute: typeof appAyudaManualesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/(app)/(Auth)/Unauthorized': {
       id: '/(app)/(Auth)/Unauthorized'
       path: '/Unauthorized'
@@ -337,15 +417,19 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   HomeRoute: HomeRoute,
+  NotFoundRoute: NotFoundRoute,
   appAuthForgotPasswordRoute: appAuthForgotPasswordRoute,
   appAuthLoginRoute: appAuthLoginRoute,
   appAuthResetPasswordRoute: appAuthResetPasswordRoute,
   appAuthUnauthorizedRoute: appAuthUnauthorizedRoute,
+  appAyudaManualesRoute: appAyudaManualesRoute,
   appEdicionFAQRoute: appEdicionFAQRoute,
   appEdicionImagenesRoute: appEdicionImagenesRoute,
   appEdicionProyectosRoute: appEdicionProyectosRoute,
   appGestionAbonadosRoute: appGestionAbonadosRoute,
   appGestionActasRoute: appGestionActasRoute,
+  appGestionCalidadAguaRoute: appGestionCalidadAguaRoute,
+  appGestionContactoRoute: appGestionContactoRoute,
   appGestionInventarioRoute: appGestionInventarioRoute,
   appGestionProveedoresRoute: appGestionProveedoresRoute,
   appGestionSolicitudesRoute: appGestionSolicitudesRoute,

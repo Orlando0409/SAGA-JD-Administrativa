@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { LuX, LuUser, LuMail, LuPhone, LuMapPin, LuCalendar, LuBuilding, LuFileText, LuMap, LuInfo } from 'react-icons/lu';
 import { FaUserEdit } from "react-icons/fa";
+import { Trash } from 'lucide-react';
 import { Accordion, AccordionHeader, AccordionBody } from "@material-tailwind/react"
 import { FiChevronDown, FiChevronRight } from 'react-icons/fi'
 
@@ -33,6 +34,23 @@ const DetailAbonados: React.FC<DetailAbonadosProps> = ({ persona, isOpen, onClos
                 : [...prev, id]
         )
     }
+
+    const handleDelete = async () => {
+        const personaInfo = getPersonaInfo();
+        const nombreCompleto = personaInfo.nombre;
+        const tipoPersona = persona.tipo === 'afiliado-fisico' ? 'físico' : 'jurídico';
+
+        if (confirm(`¿Está seguro de eliminar al afiliado ${tipoPersona} ${nombreCompleto}?`)) {
+            try {
+                // Aquí puedes implementar la lógica de eliminación cuando esté disponible
+                alert(`La funcionalidad de eliminar estará disponible próximamente`);
+                onClose(); // Cerrar el modal después de eliminar
+            } catch (error) {
+                alert(`Error al eliminar el afiliado`);
+                console.error('Error:', error);
+            }
+        }
+    };
 
     const getPersonaInfo = () => {
         const { tipo, datos } = persona;
@@ -124,9 +142,9 @@ const DetailAbonados: React.FC<DetailAbonadosProps> = ({ persona, isOpen, onClos
     const getModalTitle = () => {
         switch (persona.tipo) {
             case 'afiliado-fisico':
-                return '👤 Detalle del Afiliado Físico';
+                return ' Detalle del Afiliado Físico';
             case 'afiliado-juridico':
-                return '🏢 Detalle del Afiliado Jurídico';
+                return ' Detalle del Afiliado Jurídico';
             default:
                 return 'Detalle';
         }
@@ -334,7 +352,7 @@ const DetailAbonados: React.FC<DetailAbonadosProps> = ({ persona, isOpen, onClos
                                                         rel="noopener noreferrer"
                                                         className="text-blue-600 hover:text-blue-800 font-medium underline"
                                                     >
-                                                        📄 Ver documento
+                                                        Ver documento
                                                     </a>
                                                 ) : (
                                                     <p className="text-gray-500">No disponible</p>
@@ -353,7 +371,7 @@ const DetailAbonados: React.FC<DetailAbonadosProps> = ({ persona, isOpen, onClos
                                                         rel="noopener noreferrer"
                                                         className="text-blue-600 hover:text-blue-800 font-medium underline"
                                                     >
-                                                        📄 Ver documento
+                                                        Ver documento
                                                     </a>
                                                 ) : (
                                                     <p className="text-gray-500">No disponible</p>

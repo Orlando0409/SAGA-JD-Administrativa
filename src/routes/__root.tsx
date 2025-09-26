@@ -1,4 +1,3 @@
-import { AlertProvider } from '@/Modules/Global/context/AlertContext';
 import { HomeLayout } from '@/Modules/Global/Layout/HomeLayout';
 import { createRootRoute, Outlet, redirect, useLocation } from '@tanstack/react-router';
 
@@ -14,17 +13,15 @@ export const Route = createRootRoute({
 
 function RootComponent() {
   const location = useLocation();
-  const isPublicRoute = ['/Login', '/ForgotPassword', '/ResetPassword', '/Unauthorized'].includes(location.pathname);
+  const isPublicRoute = ['/Login', '/ForgotPassword', '/ResetPassword', '/Unauthorized', '/NotFound'].includes(location.pathname);
 
   return (
-    <AlertProvider>
-      {isPublicRoute ? (
-        <Outlet />
-      ) : (
-        <HomeLayout>
-          {() => <Outlet />}
-        </HomeLayout>
-      )}
-    </AlertProvider>
+    isPublicRoute ? (
+      <Outlet />
+    ) : (
+      <HomeLayout>
+        {() => <Outlet />}
+      </HomeLayout>
+    )
   );
 }

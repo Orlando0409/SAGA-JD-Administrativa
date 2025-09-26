@@ -14,7 +14,6 @@ const CreateUserModal = ({ onClose, setShowCreateModal }: CreateUserProps) => {
   const createUserMutation = useCreateUser();
   const { data: roles = [] } = useRoles();
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
-  const {showSuccess, showError} = useAlerts();
   const [fieldCharCounts, setFieldCharCounts] = useState({
     nombreUsuario: 0,
     email: 0,
@@ -80,12 +79,10 @@ const CreateUserModal = ({ onClose, setShowCreateModal }: CreateUserProps) => {
         };
 
         await createUserMutation.mutateAsync(payload);
-        showSuccess('Usuario creado exitosamente');
         handleClose();
         form.reset();
       } catch (error) {
         console.error('Error creating user:', error);
-        showError('Error al crear usuario');
       }
     },
   });
