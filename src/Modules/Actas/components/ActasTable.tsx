@@ -103,7 +103,9 @@ export default function ActasTable() {
                                         {acta.Titulo}
                                     </td>
                                     <td className="px-2 sm:px-4 py-3 text-xs sm:text-sm text-slate-700 align-top">
-                                        {acta.Descripcion}
+                                        {acta.Descripcion.length > 20
+                                            ? `${acta.Descripcion.slice(0, 20)}...`
+                                            : acta.Descripcion}
                                     </td>
                                     <td className="px-2 sm:px-4 py-3 text-xs sm:text-sm text-slate-700 align-top">
                                         {new Date(acta.Fecha_Creacion).toLocaleDateString("es-ES")}

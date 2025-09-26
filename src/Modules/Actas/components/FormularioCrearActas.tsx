@@ -86,7 +86,8 @@ export default function FormularioCrearActas({ onClose, refetch }: FormularioCre
                         value={titulo}
                         onChange={handleTituloChange}
                         maxLength={100}
-                        className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-sky-500 text-sm"
+                        className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-sky-500 text-sm break-words"
+                        style={{ whiteSpace: "normal", overflowWrap: "break-word" }}
                         required
                     />
                     <div className="text-right text-xs text-gray-500 mt-1">
@@ -105,7 +106,8 @@ export default function FormularioCrearActas({ onClose, refetch }: FormularioCre
                         value={descripcion}
                         onChange={handleDescripcionChange}
                         maxLength={200}
-                        className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-sky-500 text-sm"
+                        className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-sky-500 text-sm break-words"
+                        style={{ whiteSpace: "normal", overflowWrap: "break-word" }}
                         rows={3}
                         required
                     />

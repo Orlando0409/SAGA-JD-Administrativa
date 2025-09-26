@@ -25,11 +25,13 @@ const ActasModal = ({ isOpen, onClose, acta, onEliminar }: ActasModalProps) => {
     const handleTituloChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
         setTitulo(value);
-        if (value.length <5) {
+        if (!value.trim()) {
+            setTituloError("Debe ingresar un título.");
+        } else if (value.length < 5) {
             setTituloError("El título debe tener al menos 5 caracteres.");
-        }  else if (value.length >= 100) {
+        } else if (value.length > 100) {
             setTituloError("El título no puede exceder los 100 caracteres.");
-        } else{
+        } else {
             setTituloError("");
         }
     };
@@ -37,29 +39,32 @@ const ActasModal = ({ isOpen, onClose, acta, onEliminar }: ActasModalProps) => {
     const handleDescripcionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
         const value = e.target.value;
         setDescripcion(value);
-        if (value.length <= 10) {
-            setDescripcionError("La descripción debe tener al menos 20 caracteres.");
-        } else if (value.length < 200) {
-            setDescripcionError("");
-        }else{
+        if (!value.trim()) {
+            setDescripcionError("Debe ingresar una descripción.");
+        } else if (value.length < 10) {
+            setDescripcionError("La descripción debe tener al menos 10 caracteres.");
+        } else if (value.length > 200) {
             setDescripcionError("La descripción no puede exceder los 200 caracteres.");
+        } else {
+            setDescripcionError("");
         }
     };
 
     const handleActualizar = async () => {
         try {
-            // Validar los datos con zod
+            // Validar los datos con Zod
             ActaSchema.parse({
                 Titulo: titulo.trim(),
                 Descripcion: descripcion.trim(),
                 Id_Usuario: 1, // Reemplaza con el ID dinámico del usuario
             });
+
             const formData = new FormData();
             formData.append("Id_Usuario", "1"); // Incluye el ID del usuario (puedes reemplazar "1" con el ID dinámico)
             formData.append("Titulo", titulo.trim());
             formData.append("Descripcion", descripcion.trim());
             if (file) {
-                formData.append("Archivo", file);
+                formData.append("Archivo", file); // Solo se envía si hay un archivo nuevo
             }
 
             await updateActaMutation.mutateAsync({ id: acta.Id_Acta, formData });
@@ -174,11 +179,18 @@ const ActasModal = ({ isOpen, onClose, acta, onEliminar }: ActasModalProps) => {
                         <>
                             {/* Tarjeta principal */}
                             <div className="bg-gray-100 p-4 rounded-lg shadow-sm">
-                                <div className="flex items-center gap-2">
-                                    <FileText size={24} className="text-sky-600" />
-                                    <h3 className="text-lg font-bold text-gray-800">{acta.Titulo}</h3>
+                                <div
+                                    className="text-lg font-bold text-gray-800 break-words"
+                                    style={{ whiteSpace: "normal", overflowWrap: "break-word" }}
+                                >
+                                    {acta.Titulo}
                                 </div>
-                                <p className="text-gray-600 mt-2">{acta.Descripcion}</p>
+                                <p
+                                    className="text-gray-600 mt-2 break-words"
+                                    style={{ whiteSpace: "normal", overflowWrap: "break-word" }}
+                                >
+                                    {acta.Descripcion}
+                                </p>
                                 <div className="mt-4">
                                     <h3 className="text-sm font-semibold text-gray-700">Archivos:</h3>
                                     {acta.Archivos.map((archivo: ArchivoActa) => (
