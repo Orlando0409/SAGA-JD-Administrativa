@@ -18,8 +18,10 @@ export default function FormularioCrearActas({ onClose, refetch }: FormularioCre
     const handleTituloChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
         setTitulo(value);
-        if (value.length === 20) {
-            setTituloError("Ya llegó al máximo de caracteres permitidos.");
+        if (value.length < 5) {
+            setTituloError("El título debe tener al menos 5 caracteres.");
+        } else if (value.length > 100) {
+            setTituloError("El título no puede exceder los 100 caracteres.");
         } else {
             setTituloError("");
         }
@@ -28,8 +30,10 @@ export default function FormularioCrearActas({ onClose, refetch }: FormularioCre
     const handleDescripcionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
         const value = e.target.value;
         setDescripcion(value);
-        if (value.length === 50) {
-            setDescripcionError("Ya llegó al máximo de caracteres permitidos.");
+        if (value.length < 10) {
+            setDescripcionError("La descripción debe tener al menos 10 caracteres.");
+        } else if (value.length > 200) {
+            setDescripcionError("La descripción no puede exceder los 200 caracteres.");
         } else {
             setDescripcionError("");
         }
@@ -81,12 +85,12 @@ export default function FormularioCrearActas({ onClose, refetch }: FormularioCre
                         placeholder="Título"
                         value={titulo}
                         onChange={handleTituloChange}
-                        maxLength={20}
+                        maxLength={100}
                         className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-sky-500 text-sm"
                         required
                     />
                     <div className="text-right text-xs text-gray-500 mt-1">
-                        {titulo.length}/20
+                        {titulo.length}/100
                     </div>
                     {tituloError && (
                         <p className="text-xs text-red-500 mt-1">{tituloError}</p>
@@ -100,13 +104,13 @@ export default function FormularioCrearActas({ onClose, refetch }: FormularioCre
                         placeholder="Descripción"
                         value={descripcion}
                         onChange={handleDescripcionChange}
-                        maxLength={50}
+                        maxLength={200}
                         className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-sky-500 text-sm"
                         rows={3}
                         required
                     />
                     <div className="text-right text-xs text-gray-500 mt-1">
-                        {descripcion.length}/50
+                        {descripcion.length}/200
                     </div>
                     {descripcionError && (
                         <p className="text-xs text-red-500 mt-1">{descripcionError}</p>
