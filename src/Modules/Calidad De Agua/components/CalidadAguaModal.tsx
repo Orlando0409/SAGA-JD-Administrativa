@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useUpdateCalidadAgua } from "../Hook/HookCalidadAgua";
 import { CalidadAguaSchema } from "../schemas/CalidadDeAgua";
 import { z } from "zod";
+import { FileText, Calendar, RefreshCcw } from "lucide-react";
 
 interface CalidadAguaModalProps {
     isOpen: boolean; // Controla si el modal está abierto
@@ -70,7 +71,7 @@ const CalidadAguaModal = ({ isOpen, onClose, archivo, refetch }: CalidadAguaModa
                 </div>
 
                 {/* Contenido */}
-                <div className="p-6 space-y-4">
+                <div className="p-6 space-y-6">
                     {isEditing ? (
                         <form
                             onSubmit={handleSubmit}
@@ -115,37 +116,45 @@ const CalidadAguaModal = ({ isOpen, onClose, archivo, refetch }: CalidadAguaModa
                     ) : (
                         <>
                             {/* Mostrar detalles del archivo */}
-                            <div>
-                                <h3 className="text-lg font-medium text-gray-700">Título:</h3>
-                                <p className="text-gray-600">{archivo.Titulo}</p>
-                            </div>
-                            <div>
-                                <h3 className="text-lg font-medium text-gray-700">Fecha de creación:</h3>
-                                <p className="text-gray-600">
-                                    {new Date(archivo.Fecha_Creacion).toLocaleDateString("es-ES")}
-                                </p>
-                            </div>
-                            {archivo.Fecha_Actualizacion && (
-                                <div>
-                                    <h3 className="text-lg font-medium text-gray-700">Fecha de actualización:</h3>
-                                    <p className="text-gray-600">
-                                        {new Date(archivo.Fecha_Actualizacion).toLocaleDateString("es-ES")}
-                                    </p>
+                            <div className="bg-gray-100 p-4 rounded-lg shadow-sm">
+                                <div className="flex items-center gap-2">
+
+                                    <h3 className="text-lg font-bold text-gray-800">{archivo.Titulo}</h3>
                                 </div>
-                            )}
-                            <div>
-                                <h3 className="text-lg font-medium text-gray-700">Archivo:</h3>
                                 <a
                                     href={archivo.Url_Archivo}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="text-blue-600 hover:underline"
+                                    className="text-blue-600 hover:underline mt-2 inline-flex items-center gap-2"
                                 >
+                                    <FileText size={18} />
                                     Ver archivo PDF
                                 </a>
                             </div>
+                            <div className="flex gap-4 mt-4">
+                                <div className="flex-1 bg-white border border-gray-300 rounded-lg p-4 shadow-sm flex items-center gap-2">
+                                    <Calendar size={18} className="text-gray-600" />
+                                    <div>
+                                        <h4 className="text-sm font-semibold text-gray-700">Fecha de creación</h4>
+                                        <p className="text-sm font-bold text-gray-800">
+                                            {new Date(archivo.Fecha_Creacion).toLocaleDateString("es-ES")}
+                                        </p>
+                                    </div>
+                                </div>
+                                {archivo.Fecha_Actualizacion && (
+                                    <div className="flex-1 bg-white border border-gray-300 rounded-lg p-4 shadow-sm flex items-center gap-2">
+                                        <RefreshCcw size={18} className="text-gray-600" />
+                                        <div>
+                                            <h4 className="text-sm font-semibold text-gray-700">Fecha de actualización</h4>
+                                            <p className="text-sm font-bold text-gray-800">
+                                                {new Date(archivo.Fecha_Actualizacion).toLocaleDateString("es-ES")}
+                                            </p>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
                             {/* Botón para activar modo de edición */}
-                            <div className="flex justify-end">
+                            <div className="flex justify-end mt-6">
                                 <button
                                     type="button"
                                     onClick={() => setIsEditing(true)} // Activar modo de edición
@@ -163,4 +172,3 @@ const CalidadAguaModal = ({ isOpen, onClose, archivo, refetch }: CalidadAguaModa
 };
 
 export default CalidadAguaModal;
-//funsiona super bien 
