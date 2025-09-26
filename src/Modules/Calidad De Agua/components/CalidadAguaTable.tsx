@@ -72,7 +72,9 @@ export default function CalidadAguaTable() {
                 >
                   <td className="px-2 sm:px-4 py-3 text-xs sm:text-sm text-slate-700 align-top flex items-center gap-2">
                     <FileText size={18} className="text-sky-600" />
-                    {archivo.Titulo}
+                    {archivo.Titulo.length > 20
+                      ? `${archivo.Titulo.slice(0, 20)}...`
+                      : archivo.Titulo}
                   </td>
                   <td className="px-2 sm:px-4 py-3 text-xs sm:text-sm text-slate-700 align-top">
                     {new Date(archivo.Fecha_Creacion).toLocaleDateString("es-ES")}
