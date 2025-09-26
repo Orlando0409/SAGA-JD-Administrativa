@@ -51,7 +51,7 @@ const CalidadAguaModal = ({ isOpen, onClose, archivo, refetch }: CalidadAguaModa
             const formData = new FormData();
             formData.append("Titulo", titulo.trim());
             if (file) {
-                formData.append("Archivo_Calidad_Agua", file); // Reemplaza el archivo existente
+                formData.append("Archivo_Calidad_Agua", file); // Reemplaza el archivo existente solo si se selecciona uno nuevo
             }
 
             await updateCalidadAguaMutation.mutateAsync({ id: archivo.Id_Calidad_Agua, formData });
@@ -108,7 +108,6 @@ const CalidadAguaModal = ({ isOpen, onClose, archivo, refetch }: CalidadAguaModa
                                 {tituloError && (
                                     <p className="text-xs text-red-500 mt-1">{tituloError}</p>
                                 )}
-
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">Archivo PDF</label>
@@ -146,9 +145,11 @@ const CalidadAguaModal = ({ isOpen, onClose, archivo, refetch }: CalidadAguaModa
                         <>
                             {/* Mostrar detalles del archivo */}
                             <div className="bg-gray-100 p-4 rounded-lg shadow-sm">
-                                <div className="flex items-center gap-2">
-
-                                    <h3 className="text-lg font-bold text-gray-800">{archivo.Titulo}</h3>
+                                <div
+                                    className="text-lg font-bold text-gray-800 break-words"
+                                    style={{ whiteSpace: "normal", overflowWrap: "break-word" }}
+                                >
+                                    {archivo.Titulo}
                                 </div>
                                 <a
                                     href={archivo.Url_Archivo}
