@@ -21,9 +21,21 @@ const CalidadAguaModal = ({ isOpen, onClose, archivo, refetch }: CalidadAguaModa
     const [isEditing, setIsEditing] = useState(false); // Controla el modo de edición
     const [titulo, setTitulo] = useState(archivo.Titulo);
     const [file, setFile] = useState<File | null>(null);
+    const [tituloError, setTituloError] = useState(""); // Validación de título
+
     const updateCalidadAguaMutation = useUpdateCalidadAgua(); // Actualizar un archivo existente
 
     if (!isOpen) return null; // Si el modal no está abierto, no renderiza nada
+
+    const handleTituloChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        setTitulo(value);
+        if (value.length === 20) {
+            setTituloError("Ya llegó al máximo de caracteres permitidos.");
+        } else {
+            setTituloError("");
+        }
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -81,20 +93,35 @@ const CalidadAguaModal = ({ isOpen, onClose, archivo, refetch }: CalidadAguaModa
                                 <label className="block text-sm font-medium text-gray-700">Título del archivo</label>
                                 <input
                                     type="text"
+                                    placeholder="Título"
                                     value={titulo}
-                                    onChange={(e) => setTitulo(e.target.value)}
+                                    onChange={handleTituloChange}
+                                    maxLength={20} // limita la cantidad de caracteres 
                                     className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-sky-500 text-sm"
                                     required
                                 />
+                                <div className="text-right text-xs text-gray-500 mt-1">
+                                    {titulo.length}/20
+                                </div>
+                                {tituloError && (
+                                    <p className="text-xs text-red-500 mt-1">{tituloError}</p>
+                                )}
+
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">Archivo PDF</label>
-                                <input
-                                    type="file"
-                                    accept="application/pdf"
-                                    onChange={(e) => setFile(e.target.files?.[0] || null)}
-                                    className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-sky-500 text-sm"
-                                />
+                                <div className="relative">
+                                    <input
+                                        id="archivo"
+                                        type="file"
+                                        accept="application/pdf"
+                                        onChange={(e) => setFile(e.target.files?.[0] || null)}
+                                        className="absolute inset-0 opacity-0 w-full h-full cursor-pointer"
+                                    />
+                                    <div className="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm text-gray-500 bg-white cursor-pointer">
+                                        {file ? file.name : "Seleccionar Archivo"}
+                                    </div>
+                                </div>
                             </div>
                             <div className="flex justify-end gap-4">
                                 <button
