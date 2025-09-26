@@ -103,7 +103,7 @@ export default function ActasTable() {
                                         {acta.Titulo.length > 20
                                             ? `${acta.Titulo.slice(0, 20)}...`
                                             : acta.Titulo}
-                                    </td>
+                                    </td>  {/* Limita el título para mejor visualización solo 20 caracteres */}
                                     <td className="px-2 sm:px-4 py-3 text-xs sm:text-sm text-slate-700 align-top">
                                         {acta.Descripcion.length > 20
                                             ? `${acta.Descripcion.slice(0, 20)}...`

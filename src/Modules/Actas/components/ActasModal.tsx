@@ -185,7 +185,7 @@ const ActasModal = ({ isOpen, onClose, acta, onEliminar }: ActasModalProps) => {
                                 >
                                     {acta.Titulo}
                                 </div>
-                                <p
+                                <p 
                                     className="text-gray-600 mt-2 break-words"
                                     style={{ whiteSpace: "normal", overflowWrap: "break-word" }}
                                 >
