@@ -4,10 +4,12 @@ import {
   getMaterialById, 
   createMaterial, 
   updateMaterial, 
-  deleteMaterial,
+  removeCategoriaFromMaterial,
   getAllCategories,
   getMaterialsWithStock,
-  createCategoria
+  createCategoria,
+  getMaterialesConCategorias,
+  getMaterialesSinCategorias
 } from '../service/InventarioService';
 import { useAlerts } from '@/Modules/Global/context/AlertContext';
 import type { UpdateMaterialData } from '../models/Inventario';
@@ -79,12 +81,13 @@ export const useUpdateMaterial = () => {
   });
 };
 
-export const useDeleteMaterial = () => {
+export const useDeleteCategoriaMaterial = () => {
   const queryClient = useQueryClient();
   const { showSuccess, showError } = useAlerts();
 
   return useMutation({
-    mutationFn: deleteMaterial,
+    mutationFn: ({ idMaterial, idCategoria }: { idMaterial: number; idCategoria: number }) => 
+      removeCategoriaFromMaterial(idMaterial, idCategoria),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['materials'] });
       queryClient.invalidateQueries({ queryKey: ['materials-with-stock'] });
@@ -111,5 +114,19 @@ export const useCreateCategoria = () => {
       const errorMessage = error?.response?.data?.message || 'No se pudo crear la categoría';
       showError('Error', errorMessage);
     },
+  });
+};
+
+export const useMaterialesConCategorias = () => {
+  return useQuery({
+    queryKey: ['materials-with-categories'],
+    queryFn: getMaterialesConCategorias,
+  });
+};
+
+export const useMaterialesSinCategorias = () => {
+  return useQuery({
+    queryKey: ['materials-without-categories'],
+    queryFn: getMaterialesSinCategorias,
   });
 };

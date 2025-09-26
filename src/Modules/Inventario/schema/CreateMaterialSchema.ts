@@ -18,7 +18,7 @@ export const CreateMaterialSchema = z.object({
     .min(0.10, "El precio unitario debe ser al menos 0.10"),
   
   IDS_Categorias: z.array(z.number())
-    .min(1, "Debe seleccionar al menos una categoría")
+    .optional()
 });
 
 export type CreateMaterialSchemaData = z.infer<typeof CreateMaterialSchema>;

@@ -45,7 +45,7 @@ const Inventario = () => {
     }
     
     return data.filter(material => {
-      if (filters.categoria && !material.Categorias.some(cat => cat.Nombre_Categoria_Material === filters.categoria)) {
+      if (filters.categoria && !material.Categorias?.some(cat => cat.Nombre_Categoria === filters.categoria)) {
         return false;
       }
       if (filters.estado && material.Estado_Material.Nombre_Estado_Material !== filters.estado) {
@@ -130,8 +130,8 @@ const Inventario = () => {
           return (
             <div className="flex flex-wrap gap-1">
               {categorias.slice(0, 2).map((categoria, index) => (
-                <span key={categoria.Id_Categoria_Material || index} className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
-                  {categoria.Nombre_Categoria_Material}
+                <span key={categoria.Id_Categoria || index} className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
+                  {categoria.Nombre_Categoria}
                 </span>
               ))}
               {categorias.length > 2 && (
@@ -226,13 +226,6 @@ const Inventario = () => {
             </span>
           )}
         </button>
-          <button
-            onClick={() => console.log('TODO: Crear modal de nueva categoría')}
-            className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition flex items-center gap-2"
-          >
-            <LuPlus className="w-4 h-4" />
-            Nueva Categoría
-          </button>
           <button
             onClick={() => setShowCreateModal(true)}
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"

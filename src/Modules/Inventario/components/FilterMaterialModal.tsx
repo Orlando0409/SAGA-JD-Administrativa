@@ -78,8 +78,8 @@ const FilterMaterialModal: React.FC<FilterMaterialModalProps> = ({
             >
               <option value="">Todas las categorías</option>
               {categorias.map((categoria) => (
-                <option key={categoria.Id_Categoria_Material} value={categoria.Nombre_Categoria_Material}>
-                  {categoria.Nombre_Categoria_Material}
+                <option key={categoria.Id_Categoria} value={categoria.Nombre_Categoria}>
+                  {categoria.Nombre_Categoria}
                 </option>
               ))}
             </select>

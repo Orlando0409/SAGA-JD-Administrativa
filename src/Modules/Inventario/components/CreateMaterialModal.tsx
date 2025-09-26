@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { LuX } from 'react-icons/lu';
+import { LuX, LuPlus } from 'react-icons/lu';
 import { useCreateMaterial, useCategories } from '../hooks/InventarioHook';
 import { CreateMaterialSchema, type CreateMaterialSchemaData } from '../schema/CreateMaterialSchema';
 import type { CreateMaterialModalProps } from '../types/MaterialTypes';
 import type { CreateMaterialData, CategoriaMaterial } from '../models/Inventario';
+import CreateCategoriaModal from './CreateCategoriaModal';
 import { 
   NOMBRE_MATERIAL_MAX_LENGTH, 
   DESCRIPCION_MAX_LENGTH, 
@@ -18,6 +19,7 @@ const CreateMaterialModal: React.FC<CreateMaterialModalProps> = ({ isOpen, onClo
     nombreMaterial: 0,
     descripcion: 0
   });
+  const [isCreateCategoriaModalOpen, setIsCreateCategoriaModalOpen] = useState(false);
   
   const [formData, setFormData] = useState<CreateMaterialSchemaData>({
     Nombre_Material: '',
@@ -70,7 +72,7 @@ const CreateMaterialModal: React.FC<CreateMaterialModalProps> = ({ isOpen, onClo
         Descripcion: formData.Descripcion,
         Cantidad: formData.Cantidad,
         Precio_Unitario: formData.Precio_Unitario,
-        IDS_Categorias: formData.IDS_Categorias
+        IDS_Categorias: formData.IDS_Categorias ?? []
       };
 
       await createMaterialMutation.mutateAsync(payload);
@@ -108,7 +110,7 @@ const CreateMaterialModal: React.FC<CreateMaterialModalProps> = ({ isOpen, onClo
   };
 
   const handleCategoryChange = (categoriaId: number, checked: boolean) => {
-    const currentValues = formData.IDS_Categorias;
+    const currentValues = formData.IDS_Categorias ?? [];
     if (checked) {
       setFormData(prev => ({ 
         ...prev, 
@@ -221,21 +223,37 @@ const CreateMaterialModal: React.FC<CreateMaterialModalProps> = ({ isOpen, onClo
 
             {/* Categorías */}
             <div>
-              <span className="block text-sm font-medium text-gray-700 mb-1">
-                Categorías <span className="text-red-500">*</span>
-              </span>
+              <div className="flex items-center justify-between mb-1">
+                <span className="block text-sm font-medium text-gray-700">
+                  Categorías (Opcional)
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setIsCreateCategoriaModalOpen(true)}
+                  className="flex items-center gap-1 px-2 py-1 text-xs text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded transition-colors"
+                >
+                  <LuPlus className="w-3 h-3" />
+                  Nueva
+                </button>
+              </div>
               <div className="max-h-32 overflow-y-auto border border-gray-300 rounded-lg p-2 scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100">
-                {categories.map((categoria: CategoriaMaterial) => (
-                  <label key={categoria.Id_Categoria_Material} className="flex items-center space-x-2 p-2 hover:bg-gray-50 rounded">
-                    <input
-                      type="checkbox"
-                      checked={formData.IDS_Categorias.includes(categoria.Id_Categoria_Material)}
-                      onChange={(e) => handleCategoryChange(categoria.Id_Categoria_Material, e.target.checked)}
-                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                    />
-                    <span className="text-sm text-gray-700">{categoria.Nombre_Categoria_Material}</span>
-                  </label>
-                ))}
+                {categories.length === 0 ? (
+                  <div className="text-center py-4 text-gray-500 text-sm">
+                    No hay categorías disponibles. Crea una nueva categoría.
+                  </div>
+                ) : (
+                  categories.map((categoria: CategoriaMaterial) => (
+                    <label key={categoria.Id_Categoria} className="flex items-center space-x-2 p-2 hover:bg-gray-50 rounded">
+                      <input
+                        type="checkbox"
+                        checked={(formData.IDS_Categorias ?? []).includes(categoria.Id_Categoria)}
+                        onChange={(e) => handleCategoryChange(categoria.Id_Categoria, e.target.checked)}
+                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      />
+                      <span className="text-sm text-gray-700">{categoria.Nombre_Categoria}</span>
+                    </label>
+                  ))
+                )}
               </div>
               {formErrors.IDS_Categorias && (
                 <p className="text-red-500 text-xs mt-1">{formErrors.IDS_Categorias}</p>
@@ -262,6 +280,12 @@ const CreateMaterialModal: React.FC<CreateMaterialModalProps> = ({ isOpen, onClo
           </form>
         </div>
       </div>
+
+      {/* Modal para crear categorías */}
+      <CreateCategoriaModal
+        isOpen={isCreateCategoriaModalOpen}
+        onClose={() => setIsCreateCategoriaModalOpen(false)}
+      />
     </div>
   );
 };

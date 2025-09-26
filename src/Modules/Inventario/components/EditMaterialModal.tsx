@@ -49,9 +49,9 @@ const EditMaterialModal: React.FC<EditMaterialModalProps> = ({
         Descripcion: material.Descripcion || '',
         Cantidad: material.Cantidad,
         Precio_Unitario: material.Precio_Unitario,
-        IDS_Categorias: material.Categorias?.map(cat => cat.Id_Categoria_Material) || [],
+        IDS_Categorias: material.Categorias?.map(cat => cat.Id_Categoria) || [],
       });
-      setSelectedCategorias(material.Categorias?.map(cat => cat.Id_Categoria_Material) || []);
+      setSelectedCategorias(material.Categorias?.map(cat => cat.Id_Categoria) || []);
       setFieldCharCounts({
         nombreMaterial: material.Nombre_Material.length,
         descripcion: (material.Descripcion || '').length
@@ -273,9 +273,8 @@ const EditMaterialModal: React.FC<EditMaterialModalProps> = ({
           </div>
 
           <div>
-            <div className="block text-sm flex gap-2 font-medium text-gray-700 mb-2">
-              Categorías
-            <p className='text-red-500'>*</p>
+            <div className="block text-sm font-medium text-gray-700 mb-2">
+              Categorías (Opcional)
             </div>
 
             <div className={`grid grid-cols-2 md:grid-cols-3 gap-2 max-h-40 overflow-y-auto border rounded-md p-3 ${
@@ -284,19 +283,19 @@ const EditMaterialModal: React.FC<EditMaterialModalProps> = ({
                 : 'border-gray-300'
             }`}>
               {categorias.map((categoria) => (
-                <label key={categoria.Id_Categoria_Material} className="flex items-center space-x-2">
+                <label key={categoria.Id_Categoria} className="flex items-center space-x-2">
                   <input
                     type="checkbox"
-                    checked={selectedCategorias.includes(categoria.Id_Categoria_Material)}
+                    checked={selectedCategorias.includes(categoria.Id_Categoria)}
                     onChange={(e) => {
-                      handleCategoriaChange(categoria.Id_Categoria_Material, e.target.checked);
+                      handleCategoriaChange(categoria.Id_Categoria, e.target.checked);
                       if (formErrors.IDS_Categorias) {
                         setFormErrors(prev => ({ ...prev, IDS_Categorias: '' }));
                       }
                     }}
                     className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                   />
-                  <span className="text-sm text-gray-700">{categoria.Nombre_Categoria_Material}</span>
+                  <span className="text-sm text-gray-700">{categoria.Nombre_Categoria}</span>
                 </label>
               ))}
             </div>

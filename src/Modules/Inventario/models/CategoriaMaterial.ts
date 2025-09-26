@@ -1,9 +1,15 @@
 import type { Material } from "./Material";
 
 export interface CategoriaMaterial {
-  Id_Categoria_Material: number;
-  Nombre_Categoria_Material: string;
+  Id_Categoria: number;
+  Nombre_Categoria: string;
   Materiales?: Material[];
+}
+
+export interface MaterialCategoria {
+  Id_Material_Categoria: number;
+  Material: Material;
+  Categoria: CategoriaMaterial;
 }
 
 export interface CreateCategoriaMaterialData {
