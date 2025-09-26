@@ -81,7 +81,11 @@ const DetailMaterialModal: React.FC<DetailMaterialModalProps> = ({
               </label>
               <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded border break-words overflow-wrap-anywhere">
                 {material.Categorias && material.Categorias.length > 0
-                  ? material.Categorias.map(cat => cat.Nombre_Categoria).join(', ')
+                  ? material.Categorias.map(cat => (
+                    <li key={cat.Id_Categoria} className="list-disc list-inside">
+                      {cat.Nombre_Categoria}
+                    </li>
+                  ))
                   : 'Sin categorías'}
               </p>
             </div>

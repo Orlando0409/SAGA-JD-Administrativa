@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
 import { LuPlus } from 'react-icons/lu';
-import { useCreateCategoria } from '../hooks/InventarioHook';
+import { useCategories, useCreateCategoria } from '../hooks/InventarioHook';
 import { CreateCategoriaMaterialSchema, type CreateCategoriaMaterialSchemaData } from '../schema/CreateCategoriaMaterialSchema';
 import { NOMBRE_CATEGORIA_MAX_LENGTH, type CreateCategoriaModalProps } from '../types/MaterialTypes';
+import type { CategoriaMaterial } from '../models/CategoriaMaterial';
 
 const CreateCategoriaModal: React.FC<CreateCategoriaModalProps> = ({ isOpen, onClose }) => {
   const createCategoriaMutation = useCreateCategoria();
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [fieldCharCount, setFieldCharCount] = useState(0);
+  const { data: categories = [] } = useCategories();
   
   const [formData, setFormData] = useState<CreateCategoriaMaterialSchemaData>({
     Nombre_Categoria: '',
@@ -80,7 +82,7 @@ const CreateCategoriaModal: React.FC<CreateCategoriaModalProps> = ({ isOpen, onC
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-white bg-opacity-95 flex items-center justify-center z-50">
+    <div className="fixed inset-0  bg-opacity-95 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg shadow-2xl border border-gray-200 w-full max-w-md mx-4">
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
@@ -115,6 +117,24 @@ const CreateCategoriaModal: React.FC<CreateCategoriaModalProps> = ({ isOpen, onC
                 <p className="mt-1 text-sm text-red-600">{formErrors.Nombre_Categoria}</p>
               )}
             </div>
+            {categories.length > 0 && (
+              <div className="text-sm text-gray-600">
+                <strong>Categorías existentes:</strong> 
+            <div className="max-h-32 overflow-y-auto border border-gray-300 rounded-lg p-2 scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100">
+                {categories.length === 0 ? (
+                  <div className="text-center py-4 text-gray-500 text-sm">
+                    No hay categorías disponibles. Crea una nueva categoría.
+                  </div>
+                ) : (
+                  categories.map((categoria: CategoriaMaterial) => (
+                    <label key={categoria.Id_Categoria} className="flex items-center space-x-2 p-2 hover:bg-gray-50 rounded">
+                      <span className="text-sm text-gray-700">{categoria.Nombre_Categoria}</span>
+                    </label>
+                  ))
+                )}
+              </div>
+              </div>
+            )}
           </div>
 
           <div className="flex justify-end gap-3 mt-6 pt-4 border-t">
