@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useGetActas, useDeleteActa } from "../Hook/hookActas";
-import { Trash, FileText, Plus } from "lucide-react";
+import { FileText, Plus } from "lucide-react";
 import type { Acta } from "../Models/ActasModels";
 import FormularioCrearActas from "./FormularioCrearActas";
 import ActasModal from "./ActasModal";
@@ -74,19 +74,20 @@ export default function ActasTable() {
                             <th className="px-2 sm:px-4 py-3 font-medium border-b border-sky-100">Título</th>
                             <th className="px-2 sm:px-4 py-3 font-medium border-b border-sky-100">Descripción</th>
                             <th className="px-2 sm:px-4 py-3 font-medium border-b border-sky-100">Fecha de creación</th>
-                            <th className="px-2 sm:px-4 py-3 font-medium border-b border-sky-100">Acciones</th>
+                            <th className="px-2 sm:px-4 py-3 font-medium border-b border-sky-100">Fecha de actualización</th>
+
                         </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-sky-50">
                         {isLoading ? (
                             <tr>
-                                <td colSpan={4} className="p-4 sm:p-6 text-center text-slate-500 text-sm">
+                                <td colSpan={5} className="p-4 sm:p-6 text-center text-slate-500 text-sm">
                                     Cargando...
                                 </td>
                             </tr>
                         ) : actas?.length === 0 ? (
                             <tr>
-                                <td colSpan={4} className="p-4 sm:p-6 text-center text-slate-500 text-sm">
+                                <td colSpan={5} className="p-4 sm:p-6 text-center text-slate-500 text-sm">
                                     No se encontraron registros.
                                 </td>
                             </tr>
@@ -108,18 +109,11 @@ export default function ActasTable() {
                                         {new Date(acta.Fecha_Creacion).toLocaleDateString("es-ES")}
                                     </td>
                                     <td className="px-2 sm:px-4 py-3 text-xs sm:text-sm text-slate-700 align-top">
-                                        <button
-                                            onClick={(e) => {
-                                                e.stopPropagation(); // Evita que el clic en el botón abra el modal de detalles
-                                                handleEliminarActa(acta.Id_Acta);
-                                            }}
-                                            className="text-red-600 hover:text-red-800"
-                                            title="Eliminar"
-                                            disabled={deleteActaMutation.isPending}
-                                        >
-                                            <Trash size={18} />
-                                        </button>
+                                        {acta.Fecha_Actualizacion
+                                            ? new Date(acta.Fecha_Actualizacion).toLocaleDateString("es-ES")
+                                            : "Sin actualizar"}
                                     </td>
+
                                 </tr>
                             ))
                         )}

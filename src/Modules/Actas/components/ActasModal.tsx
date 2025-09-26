@@ -1,4 +1,4 @@
-import { Trash, FileText, Edit } from "lucide-react";
+import { Trash, FileText, Edit, Calendar, RefreshCcw } from "lucide-react";
 import type { Acta, ArchivoActa } from "../Models/ActasModels";
 import { useUpdateActa } from "../Hook/hookActas";
 import { useState } from "react";
@@ -19,6 +19,28 @@ const ActasModal = ({ isOpen, onClose, acta, onEliminar }: ActasModalProps) => {
     const [titulo, setTitulo] = useState(acta.Titulo);
     const [descripcion, setDescripcion] = useState(acta.Descripcion);
     const [file, setFile] = useState<File | null>(null);
+    const [tituloError, setTituloError] = useState(""); // Validación de título
+    const [descripcionError, setDescripcionError] = useState(""); // Validación de descripción
+
+    const handleTituloChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        setTitulo(value);
+        if (value.length >= 20) {
+            setTituloError("Has alcanzado el límite máximo de caracteres.");
+        } else {
+            setTituloError("");
+        }
+    };
+
+    const handleDescripcionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+        const value = e.target.value;
+        setDescripcion(value);
+        if (value.length >= 50) {
+            setDescripcionError("Has alcanzado el límite máximo de caracteres.");
+        } else {
+            setDescripcionError("");
+        }
+    };
 
     const handleActualizar = async () => {
         try {
@@ -49,16 +71,20 @@ const ActasModal = ({ isOpen, onClose, acta, onEliminar }: ActasModalProps) => {
             }
         }
     };
+
     const handleEliminar = async () => {
         try {
             await onEliminar(acta.Id_Acta); // Llama a la función para eliminar el acta
+            alert("Acta eliminada con éxito.");
             onClose(); // Cierra el modal
         } catch (error) {
             console.error("Error al eliminar el acta:", error);
             alert("Hubo un problema al eliminar el acta.");
         }
     };
+
     if (!isOpen) return null;
+
     return (
         <div className="fixed inset-0 bg-white bg-opacity-50 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-lg shadow-xl w-full max-w-lg">
@@ -69,87 +95,131 @@ const ActasModal = ({ isOpen, onClose, acta, onEliminar }: ActasModalProps) => {
                         onClick={onClose}
                         className="p-1 hover:bg-gray-100 rounded-full transition-colors"
                     >
-                        <div className="w-5 h-5 text-gray-500 flex items-center justify-center">✕</div>
+                        ✕
                     </button>
                 </div>
 
-                <div className="p-6 space-y-4">
+                <div className="p-6 space-y-6">
                     {isEditing ? (
                         <>
-                            <input
-                                type="text"
-                                placeholder="Título del Acta"
-                                value={titulo}
-                                onChange={(e) => setTitulo(e.target.value)}
-                                className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-sky-500 text-sm"
-                                required
-                            />
-                            <textarea
-                                placeholder="Descripción del Acta"
-                                value={descripcion}
-                                onChange={(e) => setDescripcion(e.target.value)}
-                                className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-sky-500 text-sm"
-                                rows={3}
-                                required
-                            />
-                            <input
-                                id="archivo"
-                                type="file"
-                                accept="application/pdf"
-                                onChange={(e) => {
-                                    const selectedFile = e.target.files?.[0];
-                                    if (selectedFile) {
-                                        setFile(selectedFile);
-                                    } else {
-                                        setFile(null);
-                                    }
-                                }}
-                                className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-sky-500 text-sm"
-                            />
+                            {/* Campo de Título */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">Título</label>
+                                <input
+                                    type="text"
+                                    placeholder="Título"
+                                    value={titulo}
+                                    onChange={handleTituloChange}
+                                    maxLength={20}
+                                    className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-sky-500 text-sm"
+                                    required
+                                />
+                                <div className="text-right text-xs text-gray-500 mt-1">
+                                    {titulo.length}/20
+                                </div>
+                                {tituloError && (
+                                    <p className="text-xs text-red-500 mt-1">{tituloError}</p>
+                                )}
+                            </div>
+
+                            {/* Campo de Descripción */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">Descripción</label>
+                                <textarea
+                                    placeholder="Descripción"
+                                    value={descripcion}
+                                    onChange={handleDescripcionChange}
+                                    maxLength={50}
+                                    className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-sky-500 text-sm"
+                                    rows={3}
+                                    required
+                                />
+                                <div className="text-right text-xs text-gray-500 mt-1">
+                                    {descripcion.length}/50
+                                </div>
+                                {descripcionError && (
+                                    <p className="text-xs text-red-500 mt-1">{descripcionError}</p>
+                                )}
+                            </div>
+
+                            {/* Campo de Archivo */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">Archivo</label>
+                                <div className="relative">
+                                    <input
+                                        id="archivo"
+                                        type="file"
+                                        accept="application/pdf"
+                                        onChange={(e) => {
+                                            const selectedFile = e.target.files?.[0];
+                                            if (selectedFile) {
+                                                setFile(selectedFile);
+                                            } else {
+                                                setFile(null);
+                                            }
+                                        }}
+                                        className="absolute inset-0 opacity-0 w-full h-full cursor-pointer"
+                                    />
+                                    <div className="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm text-gray-500 bg-white cursor-pointer">
+                                        {file ? file.name : "Seleccionar Archivo"}
+                                    </div>
+                                </div>
+                            </div>
                         </>
                     ) : (
                         <>
-                            <div>
-                                <h3 className="text-lg font-medium text-gray-700">Título:</h3>
-                                <p className="text-gray-600">{acta.Titulo}</p>
-                            </div>
-                            <div>
-                                <h3 className="text-lg font-medium text-gray-700">Descripción:</h3>
-                                <p className="text-gray-600">{acta.Descripcion}</p>
-                            </div>
-                            <div>
-                                <h3 className="text-lg font-medium text-gray-700">Fecha de creación:</h3>
-                                <p className="text-gray-600">
-                                    {new Date(acta.Fecha_Creacion).toLocaleDateString("es-ES")}
-                                </p>
-                            </div>
-                            {acta.Fecha_Creacion && (
-                                <div>
-                                    <h3 className="text-lg font-medium text-gray-700">Fecha de edición:</h3>
-                                    <p className="text-gray-600">
-                                        {new Date(acta.Fecha_Creacion).toLocaleDateString("es-ES")}
-                                    </p>
+                            {/* Tarjeta principal */}
+                            <div className="bg-gray-100 p-4 rounded-lg shadow-sm">
+                                <div className="flex items-center gap-2">
+                                    <FileText size={24} className="text-sky-600" />
+                                    <h3 className="text-lg font-bold text-gray-800">{acta.Titulo}</h3>
                                 </div>
-                            )}
-                            <div>
-                                <h3 className="text-lg font-medium text-gray-700">Archivos:</h3>
-                                {acta.Archivos.map((archivo: ArchivoActa) => (
-                                    <a
-                                        key={archivo.Id_Archivo_Acta}
-                                        href={archivo.Url_Archivo}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="text-blue-600 hover:underline flex items-center gap-2"
-                                    >
-                                        <FileText size={24} className="text-red-500" />
-                                        Ver archivo PDF
-                                    </a>
-                                ))}
+                                <p className="text-gray-600 mt-2">{acta.Descripcion}</p>
+                                <div className="mt-4">
+                                    <h3 className="text-sm font-semibold text-gray-700">Archivos:</h3>
+                                    {acta.Archivos.map((archivo: ArchivoActa) => (
+                                        <a
+                                            key={archivo.Id_Archivo_Acta}
+                                            href={archivo.Url_Archivo}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="text-blue-600 hover:underline flex items-center gap-2 mt-2"
+                                        >
+                                            <FileText size={18} />
+                                            Ver archivo PDF
+                                        </a>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Fechas */}
+                            <div className="flex gap-4 mt-4">
+                                <div className="flex-1 bg-white border border-gray-300 rounded-lg p-4 shadow-sm flex items-center gap-2">
+                                    <Calendar size={18} className="text-gray-600" />
+                                    <div>
+                                        <h4 className="text-sm font-semibold text-gray-700">Fecha de creación</h4>
+                                        <p className="text-sm font-bold text-gray-800">
+                                            {new Date(acta.Fecha_Creacion).toLocaleDateString("es-ES")}
+                                        </p>
+                                    </div>
+                                </div>
+                                {acta.Fecha_Creacion && (
+                                    <div className="flex-1 bg-white border border-gray-300 rounded-lg p-4 shadow-sm flex items-center gap-2">
+                                        <RefreshCcw size={18} className="text-gray-600" />
+                                        <div>
+                                            <h4 className="text-sm font-semibold text-gray-700">Fecha de edición</h4>
+                                            <p className="text-sm font-bold text-gray-800">
+                                                {new Date(acta.Fecha_Creacion).toLocaleDateString("es-ES")}
+                                            </p>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         </>
                     )}
                 </div>
-                {/*botones */}
+
+                {/* Botones */}
                 <div className="flex gap-3 p-6 border-t border-gray-200">
                     {isEditing ? (
                         <>
@@ -170,12 +240,11 @@ const ActasModal = ({ isOpen, onClose, acta, onEliminar }: ActasModalProps) => {
                             </button>
                         </>
                     ) : (
-
                         <>
                             <button
                                 type="button"
                                 onClick={() => setIsEditing(true)} // Activar modo de edición
-                                className="flex-1 px-4 py-3 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors font-medium flex items-center justify-center gap-2"
+                                className="flex-1 px-4 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium flex items-center justify-center gap-2"
                             >
                                 <Edit size={18} />
                                 Editar
