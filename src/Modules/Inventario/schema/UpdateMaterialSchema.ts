@@ -7,7 +7,7 @@ export const UpdateMaterialSchema = z.object({
     .regex(/^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\s!?¿¡().,-]+$/, "El nombre solo puede contener letras, números, espacios y los caracteres !?¿¡().,-")
     .optional(),
   
-  Descripcion: z.string()
+  Descripcion: z.string().min(1,"Debe ingresar una descripción")
     .max(200, "La descripción no puede tener más de 200 caracteres")
     .regex(/^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\s!?¿¡().,-]*$/, "La descripción solo puede contener letras, números, espacios y los caracteres !?¿¡().,-")
     .optional(),
