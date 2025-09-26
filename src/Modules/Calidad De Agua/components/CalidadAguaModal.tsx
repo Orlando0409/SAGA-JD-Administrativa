@@ -30,8 +30,10 @@ const CalidadAguaModal = ({ isOpen, onClose, archivo, refetch }: CalidadAguaModa
     const handleTituloChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
         setTitulo(value);
-        if (value.length === 20) {
-            setTituloError("Ya llegó al máximo de caracteres permitidos.");
+        if (value.length < 5) {
+            setTituloError("El título debe tener al menos 5 caracteres.");
+        } else if (value.length > 100) {
+            setTituloError("El título no puede exceder los 100 caracteres.");
         } else {
             setTituloError("");
         }
@@ -96,12 +98,12 @@ const CalidadAguaModal = ({ isOpen, onClose, archivo, refetch }: CalidadAguaModa
                                     placeholder="Título"
                                     value={titulo}
                                     onChange={handleTituloChange}
-                                    maxLength={20} // limita la cantidad de caracteres 
+                                    maxLength={100} // limita la cantidad de caracteres
                                     className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-sky-500 text-sm"
                                     required
                                 />
                                 <div className="text-right text-xs text-gray-500 mt-1">
-                                    {titulo.length}/20
+                                    {titulo.length}/100
                                 </div>
                                 {tituloError && (
                                     <p className="text-xs text-red-500 mt-1">{tituloError}</p>
