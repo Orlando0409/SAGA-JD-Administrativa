@@ -36,7 +36,6 @@ const CreateMaterialModal: React.FC<CreateMaterialModalProps> = ({ isOpen, onClo
       if (value.length <= maxLength) {
         setFormData(prev => ({ ...prev, [fieldName]: value }));
         
-        // Update character count for specific fields
         if (fieldName === 'Nombre_Material') {
           setFieldCharCounts(prev => ({ ...prev, nombreMaterial: value.length }));
         } else if (fieldName === 'Descripcion') {
@@ -77,7 +76,6 @@ const CreateMaterialModal: React.FC<CreateMaterialModalProps> = ({ isOpen, onClo
 
       await createMaterialMutation.mutateAsync(payload);
       onClose();
-      // Reset form
       setFormData({
         Nombre_Material: '',
         Descripcion: '',
@@ -87,7 +85,7 @@ const CreateMaterialModal: React.FC<CreateMaterialModalProps> = ({ isOpen, onClo
       });
       setFieldCharCounts({ nombreMaterial: 0, descripcion: 0 });
     } catch (error) {
-      console.error('Error creating material:', error);
+      console.log('Error creating material:', error);
     }
   };
 
@@ -138,7 +136,6 @@ const CreateMaterialModal: React.FC<CreateMaterialModalProps> = ({ isOpen, onClo
 
         <div className="p-6 overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100 max-h-[calc(90vh-140px)]">
           <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Nombre del Material */}
             <div>
               <label htmlFor="nombre-material" className="block text-sm font-medium text-gray-700 mb-1">
                 Nombre del Material <span className="text-red-500">*</span>
@@ -159,7 +156,6 @@ const CreateMaterialModal: React.FC<CreateMaterialModalProps> = ({ isOpen, onClo
               )}
             </div>
 
-            {/* Descripción */}
             <div>
               <label htmlFor="descripcion" className="block text-sm font-medium text-gray-700 mb-1">
                 Descripción <span className="text-red-500">*</span>
@@ -180,7 +176,6 @@ const CreateMaterialModal: React.FC<CreateMaterialModalProps> = ({ isOpen, onClo
               )}
             </div>
 
-            {/* Cantidad */}
             <div>
               <label htmlFor="cantidad" className="block text-sm font-medium text-gray-700 mb-1">
                 Cantidad <span className="text-red-500">*</span>
@@ -200,7 +195,6 @@ const CreateMaterialModal: React.FC<CreateMaterialModalProps> = ({ isOpen, onClo
               )}
             </div>
 
-            {/* Precio Unitario */}
             <div>
               <label htmlFor="precio" className="block text-sm font-medium text-gray-700 mb-1">
                 Precio Unitario (₡) <span className="text-red-500">*</span>
@@ -221,7 +215,6 @@ const CreateMaterialModal: React.FC<CreateMaterialModalProps> = ({ isOpen, onClo
               )}
             </div>
 
-            {/* Categorías */}
             <div>
               <div className="flex items-center justify-between mb-1">
                 <span className="block text-sm font-medium text-gray-700">
@@ -260,7 +253,6 @@ const CreateMaterialModal: React.FC<CreateMaterialModalProps> = ({ isOpen, onClo
               )}
             </div>
 
-            {/* Botones */}
             <div className="flex gap-3 pt-4">
               <button
                 type="button"
@@ -281,13 +273,12 @@ const CreateMaterialModal: React.FC<CreateMaterialModalProps> = ({ isOpen, onClo
         </div>
       </div>
 
-      {/* Modal para crear categorías */}
       <CreateCategoriaModal
         isOpen={isCreateCategoriaModalOpen}
         onClose={() => setIsCreateCategoriaModalOpen(false)}
       />
     </div>
-  );
-};
+  )
+}
 
-export default CreateMaterialModal;
+export default CreateMaterialModal

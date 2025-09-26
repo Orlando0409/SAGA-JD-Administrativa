@@ -5,7 +5,7 @@ import type { EstadoMaterial } from "./EstadoMaterial";
 export interface Material {
   Id_Material: number;
   Nombre_Material: string;
-  Descripcion?: string;
+  Descripcion: string;
   Cantidad: number;
   Precio_Unitario: number;
   Fecha_Entrada: Date | string;
@@ -20,7 +20,7 @@ export interface Material {
 
 export interface CreateMaterialData {
   Nombre_Material: string;
-  Descripcion?: string;
+  Descripcion: string;
   Cantidad: number;
   Precio_Unitario: number;
   IDS_Categorias: number[];

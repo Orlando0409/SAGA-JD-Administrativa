@@ -22,7 +22,6 @@ const DetailMaterialModal: React.FC<DetailMaterialModalProps> = ({
   if (!isOpen) return null;
 
   const handleDelete = async () => {
-    if (window.confirm(`¿Estás seguro de que deseas eliminar el material "${material.Nombre_Material}"?`)) {
       setIsDeleting(true);
       try {
         await deleteMaterialMutation.mutateAsync({
@@ -31,12 +30,11 @@ const DetailMaterialModal: React.FC<DetailMaterialModalProps> = ({
         });
         onClose();
       } catch (error) {
-        console.error('Error al eliminar material:', error);
+        console.log('Error al eliminar la categoría del material:', error);
       } finally {
         setIsDeleting(false);
       }
-    }
-  };
+  }
 
   const handleEdit = () => {
     setShowEditModal(true);
@@ -60,7 +58,7 @@ const DetailMaterialModal: React.FC<DetailMaterialModalProps> = ({
         <div className="p-6 space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="nombre" className="block text-sm font-medium text-gray-700 mb-1">
                 Nombre del Material
               </label>
               <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded border break-words overflow-wrap-anywhere">
@@ -69,7 +67,7 @@ const DetailMaterialModal: React.FC<DetailMaterialModalProps> = ({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="descripcion" className="block text-sm font-medium text-gray-700 mb-1">
                 Descripción
               </label>
               <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded border break-words overflow-wrap-anywhere">
@@ -78,7 +76,7 @@ const DetailMaterialModal: React.FC<DetailMaterialModalProps> = ({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="categorias" className="block text-sm font-medium text-gray-700 mb-1">
                 Categorías
               </label>
               <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded border break-words overflow-wrap-anywhere">
@@ -89,7 +87,7 @@ const DetailMaterialModal: React.FC<DetailMaterialModalProps> = ({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="estado" className="block text-sm font-medium text-gray-700 mb-1">
                 Estado
               </label>
               <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded border">
@@ -98,25 +96,25 @@ const DetailMaterialModal: React.FC<DetailMaterialModalProps> = ({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Cantidad en Stock
+              <label htmlFor="cantidad-stock" className="block text-sm font-medium text-gray-700 mb-1">
+              Cantidad en Stock
               </label>
-              <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded border">
-                {material.Cantidad} unidades
+              <p id="cantidad-stock" className="text-sm text-gray-900 bg-gray-50 p-2 rounded border">
+              {material.Cantidad} unidades
               </p>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="precio-unitario" className="block text-sm font-medium text-gray-700 mb-1">
                 Precio Unitario
               </label>
-              <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded border">
+              <p id="precio-unitario" className="text-sm text-gray-900 bg-gray-50 p-2 rounded border">
                 ₡{material.Precio_Unitario?.toLocaleString() || '0'}
               </p>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="fecha-entrada" className="block text-sm font-medium text-gray-700 mb-1">
                 Fecha de Entrada
               </label>
               <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded border">
@@ -125,7 +123,7 @@ const DetailMaterialModal: React.FC<DetailMaterialModalProps> = ({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="fecha-actualizacion" className="block text-sm font-medium text-gray-700 mb-1">
                 Fecha de Actualización
               </label>
               <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded border">
@@ -135,7 +133,7 @@ const DetailMaterialModal: React.FC<DetailMaterialModalProps> = ({
 
             {material.Fecha_Salida && (
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="fecha-salida" className="block text-sm font-medium text-gray-700 mb-1">
                   Fecha de Salida
                 </label>
                 <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded border">
@@ -155,8 +153,6 @@ const DetailMaterialModal: React.FC<DetailMaterialModalProps> = ({
               </div>
             )}
           </div>
-
-
         </div>
 
         <div className="flex justify-end gap-3 p-6 border-t bg-gray-50">
@@ -178,7 +174,6 @@ const DetailMaterialModal: React.FC<DetailMaterialModalProps> = ({
         </div>
       </div>
 
-      {/* Edit Material Modal */}
       {showEditModal && (
         <EditMaterialModal
           isOpen={showEditModal}
@@ -187,7 +182,7 @@ const DetailMaterialModal: React.FC<DetailMaterialModalProps> = ({
         />
       )}
     </div>
-  );
-};
+  )
+}
 
-export default DetailMaterialModal;
+export default DetailMaterialModal

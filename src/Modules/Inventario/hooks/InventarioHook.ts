@@ -9,7 +9,9 @@ import {
   getMaterialsWithStock,
   createCategoria,
   getMaterialesConCategorias,
-  getMaterialesSinCategorias
+  getMaterialesSinCategorias,
+  getMaterialesPorEncimaDeStock,
+  getMaterialesPorDebajoDeStock
 } from '../service/InventarioService';
 import { useAlerts } from '@/Modules/Global/context/AlertContext';
 import type { UpdateMaterialData } from '../models/Inventario';
@@ -94,7 +96,7 @@ export const useDeleteCategoriaMaterial = () => {
       showSuccess('Material eliminado', 'El material se ha eliminado exitosamente');
     },
     onError: (error: any) => {
-      const errorMessage = error?.response?.data?.message || 'No se pudo eliminar el material';
+      const errorMessage = error?.response?.data?.message || 'No se pudo eliminar la categoría del material';
       showError('Error', errorMessage);
     },
   });
@@ -128,5 +130,21 @@ export const useMaterialesSinCategorias = () => {
   return useQuery({
     queryKey: ['materials-without-categories'],
     queryFn: getMaterialesSinCategorias,
+  });
+};
+
+export const useMaterialesPorEncimaDeStock = (threshold: number, enabled: boolean = false) => {
+  return useQuery({
+    queryKey: ['materials-above-stock', threshold],
+    queryFn: () => getMaterialesPorEncimaDeStock(threshold),
+    enabled: enabled && !!threshold,
+  });
+};
+
+export const useMaterialesPorDebajoDeStock = (threshold: number, enabled: boolean = false) => {
+  return useQuery({
+    queryKey: ['materials-below-stock', threshold],
+    queryFn: () => getMaterialesPorDebajoDeStock(threshold),
+    enabled: enabled && !!threshold,
   });
 };

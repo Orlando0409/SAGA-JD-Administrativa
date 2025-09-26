@@ -1,28 +1,22 @@
 import React, { useState, useEffect } from 'react';
-import { LuX } from 'react-icons/lu';
 import { useCategories, useUpdateMaterial } from '../hooks/InventarioHook';
 import { useAlerts } from '@/Modules/Global/context/AlertContext';
 import { CreateMaterialSchema } from '../schema/CreateMaterialSchema';
 import { 
   NOMBRE_MATERIAL_MAX_LENGTH, 
   DESCRIPCION_MAX_LENGTH, 
-  PRECIO_MIN 
+  PRECIO_MIN, 
+  type EditMaterialModalProps
 } from '../types/MaterialTypes';
-import type { Material } from '../models/Inventario';
 import type { UpdateMaterialData } from '../models/Material';
 
-interface EditMaterialModalProps {
-  material: Material;
-  isOpen: boolean;
-  onClose: () => void;
-}
 
 const EditMaterialModal: React.FC<EditMaterialModalProps> = ({
   material,
   isOpen,
   onClose,
 }) => {
-  const { showSuccess, showError } = useAlerts();
+  const { showError } = useAlerts();
   const updateMaterialMutation = useUpdateMaterial();
   const { data: categorias = [] } = useCategories();
   
@@ -93,7 +87,6 @@ const EditMaterialModal: React.FC<EditMaterialModalProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Validar el formulario antes de continuar
     const validationResult = CreateMaterialSchema.safeParse({
       ...formData,
       IDS_Categorias: selectedCategorias,
@@ -125,12 +118,10 @@ const EditMaterialModal: React.FC<EditMaterialModalProps> = ({
         materialData: updateData,
       });
 
-      showSuccess('Material actualizado exitosamente');
       onClose();
       window.dispatchEvent(new Event('refreshInventario'));
     } catch (error: any) {
-      console.error('Error al actualizar material:', error);
-      showError(error.response?.data?.message || 'Error al actualizar el material');
+      console.log('Error al actualizar material:', error);
     } finally {
       setIsSubmitting(false);
     }
@@ -151,12 +142,6 @@ const EditMaterialModal: React.FC<EditMaterialModalProps> = ({
           <h2 className="text-xl font-semibold text-gray-900">
             Editar Material
           </h2>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
-          >
-            <LuX size={24} />
-          </button>
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
@@ -323,7 +308,7 @@ const EditMaterialModal: React.FC<EditMaterialModalProps> = ({
         </form>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default EditMaterialModal;
+export default EditMaterialModal

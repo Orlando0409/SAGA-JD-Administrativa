@@ -1,14 +1,9 @@
 import React, { useState } from 'react';
 import { LuX, LuFilter } from 'react-icons/lu';
 import { useCategories } from '../hooks/InventarioHook';
-import type { MaterialFilterOptions } from '../types/MaterialTypes';
+import type { FilterMaterialModalProps, MaterialFilterOptions } from '../types/MaterialTypes';
 
-interface FilterMaterialModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onApplyFilters: (filters: MaterialFilterOptions) => void;
-  currentFilters: MaterialFilterOptions;
-}
+
 
 const FilterMaterialModal: React.FC<FilterMaterialModalProps> = ({ 
   isOpen, 
@@ -18,7 +13,6 @@ const FilterMaterialModal: React.FC<FilterMaterialModalProps> = ({
 }) => {
   const { data: categorias = [] } = useCategories();
   
-  // Estados hardcodeados basados en los que se muestran en la tabla
   const estados = [
     { id: 1, nombre: 'DISPONIBLE' },
     { id: 2, nombre: 'AGOTADO' }
@@ -38,6 +32,11 @@ const FilterMaterialModal: React.FC<FilterMaterialModalProps> = ({
       conStock: false,
       precioMin: undefined,
       precioMax: undefined,
+      soloConCategorias: false,
+      soloSinCategorias: false,
+      stockMinimo: undefined,
+      stockMaximo: undefined,
+      tipoFiltroStock: undefined,
     };
     setFilters(clearFilters);
     onApplyFilters(clearFilters);
@@ -47,9 +46,8 @@ const FilterMaterialModal: React.FC<FilterMaterialModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 flex items-start justify-end z-50">
+    <section className="fixed inset-0 flex items-start justify-end z-50">
       <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4 max-h-[90vh] overflow-hidden">
-        {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
             <LuFilter className="w-5 h-5" />
@@ -63,9 +61,7 @@ const FilterMaterialModal: React.FC<FilterMaterialModalProps> = ({
           </button>
         </div>
 
-        {/* Body */}
         <div className="p-6 space-y-4 overflow-y-auto max-h-[calc(90vh-140px)]">
-          {/* Filtro por Categoría */}
           <div>
             <label htmlFor="filter-categoria" className="block text-sm font-medium text-gray-700 mb-2">
               Categoría
@@ -85,7 +81,6 @@ const FilterMaterialModal: React.FC<FilterMaterialModalProps> = ({
             </select>
           </div>
 
-          {/* Filtro por Estado */}
           <div>
             <label htmlFor="filter-estado" className="block text-sm font-medium text-gray-700 mb-2">
               Estado
@@ -105,20 +100,136 @@ const FilterMaterialModal: React.FC<FilterMaterialModalProps> = ({
             </select>
           </div>
 
-          {/* Filtro por Stock */}
           <div>
-            <label className="flex items-center space-x-2">
-              <input
-                type="checkbox"
-                checked={filters.conStock || false}
-                onChange={(e) => setFilters(prev => ({ ...prev, conStock: e.target.checked }))}
-                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-              />
-              <span className="text-sm font-medium text-gray-700">Solo materiales con stock</span>
-            </label>
+            <div className="block text-sm font-medium text-gray-700 mb-2">
+              Filtrar por Categorías
+            </div>
+            <div className="space-y-2">
+              <label className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  checked={filters.soloConCategorias || false}
+                  onChange={(e) => setFilters(prev => ({ 
+                    ...prev, 
+                    soloConCategorias: e.target.checked,
+                    soloSinCategorias: e.target.checked ? false : prev.soloSinCategorias
+                  }))}
+                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                />
+                <span className="text-sm text-gray-700">Solo materiales con categorías</span>
+              </label>
+              <label className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  checked={filters.soloSinCategorias || false}
+                  onChange={(e) => setFilters(prev => ({ 
+                    ...prev, 
+                    soloSinCategorias: e.target.checked,
+                    soloConCategorias: e.target.checked ? false : prev.soloConCategorias
+                  }))}
+                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                />
+                <span className="text-sm text-gray-700">Solo materiales sin categorías</span>
+              </label>
+            </div>
           </div>
 
-          {/* Filtro por Precio */}
+          <div>
+            <div className="block text-sm font-medium text-gray-700 mb-2">
+              Filtrar por Stock
+            </div>
+            <div className="space-y-3">
+              <label className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  checked={filters.conStock || false}
+                  onChange={(e) => setFilters(prev => ({ ...prev, conStock: e.target.checked }))}
+                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                />
+                <span className="text-sm text-gray-700">Solo materiales con stock disponible</span>
+              </label>
+              
+              <div>
+                <label htmlFor="tipo-filtro-stock" className="block text-xs font-medium text-gray-600 mb-1">
+                  Tipo de filtro por cantidad
+                </label>
+                <select
+                  id="tipo-filtro-stock"
+                  value={filters.tipoFiltroStock || ''}
+                  onChange={(e) => setFilters(prev => ({ 
+                    ...prev, 
+                    tipoFiltroStock: e.target.value as 'encima' | 'debajo' | 'entre' | undefined
+                  }))}
+                  className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="">Sin filtro por cantidad</option>
+                  <option value="encima">Por encima de cantidad</option>
+                  <option value="debajo">Por debajo de cantidad</option>
+                  <option value="entre">Entre cantidades</option>
+                </select>
+              </div>
+
+              {filters.tipoFiltroStock === 'encima' && (
+                <div>
+                  <input
+                    type="number"
+                    placeholder="Cantidad mínima"
+                    value={filters.stockMinimo || ''}
+                    onChange={(e) => setFilters(prev => ({ 
+                      ...prev, 
+                      stockMinimo: e.target.value ? Number(e.target.value) : undefined 
+                    }))}
+                    className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-transparent"
+                    min="0"
+                  />
+                </div>
+              )}
+
+              {filters.tipoFiltroStock === 'debajo' && (
+                <div>
+                  <input
+                    type="number"
+                    placeholder="Cantidad máxima"
+                    value={filters.stockMaximo || ''}
+                    onChange={(e) => setFilters(prev => ({ 
+                      ...prev, 
+                      stockMaximo: e.target.value ? Number(e.target.value) : undefined 
+                    }))}
+                    className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-transparent"
+                    min="0"
+                  />
+                </div>
+              )}
+
+              {filters.tipoFiltroStock === 'entre' && (
+                <div className="grid grid-cols-2 gap-2">
+                  <input
+                    type="number"
+                    placeholder="Stock mín."
+                    value={filters.stockMinimo || ''}
+                    onChange={(e) => setFilters(prev => ({ 
+                      ...prev, 
+                      stockMinimo: e.target.value ? Number(e.target.value) : undefined 
+                    }))}
+                    className="px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-transparent"
+                    min="0"
+                  />
+                  <input
+                    type="number"
+                    placeholder="Stock máx."
+                    value={filters.stockMaximo || ''}
+                    onChange={(e) => setFilters(prev => ({ 
+                      ...prev, 
+                      stockMaximo: e.target.value ? Number(e.target.value) : undefined 
+                    }))}
+                    className="px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-transparent"
+                    min="0"
+                  />
+                </div>
+              )}
+            </div>
+          </div>
+
           <div>
             <div className="block text-sm font-medium text-gray-700 mb-2">
               Rango de Precio
@@ -156,7 +267,6 @@ const FilterMaterialModal: React.FC<FilterMaterialModalProps> = ({
           </div>
         </div>
 
-        {/* Footer */}
         <div className="flex items-center justify-between p-6 border-t border-gray-200 bg-gray-50">
           <button
             onClick={handleClear}
@@ -180,8 +290,8 @@ const FilterMaterialModal: React.FC<FilterMaterialModalProps> = ({
           </div>
         </div>
       </div>
-    </div>
-  );
-};
+    </section>
+  )
+}
 
-export default FilterMaterialModal;
+export default FilterMaterialModal

@@ -1,13 +1,8 @@
 import React, { useState } from 'react';
-import { LuX, LuPlus } from 'react-icons/lu';
+import { LuPlus } from 'react-icons/lu';
 import { useCreateCategoria } from '../hooks/InventarioHook';
 import { CreateCategoriaMaterialSchema, type CreateCategoriaMaterialSchemaData } from '../schema/CreateCategoriaMaterialSchema';
-import { NOMBRE_CATEGORIA_MAX_LENGTH } from '../types/MaterialTypes';
-
-interface CreateCategoriaModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-}
+import { NOMBRE_CATEGORIA_MAX_LENGTH, type CreateCategoriaModalProps } from '../types/MaterialTypes';
 
 const CreateCategoriaModal: React.FC<CreateCategoriaModalProps> = ({ isOpen, onClose }) => {
   const createCategoriaMutation = useCreateCategoria();
@@ -53,11 +48,10 @@ const CreateCategoriaModal: React.FC<CreateCategoriaModalProps> = ({ isOpen, onC
     try {
       await createCategoriaMutation.mutateAsync(formData);
       onClose();
-      // Reset form
       setFormData({ Nombre_Categoria: '' });
       setFieldCharCount(0);
     } catch (error) {
-      console.error('Error creating categoria:', error);
+      console.log('Error al crear la categoria:', error);
     }
   };
 
@@ -88,21 +82,13 @@ const CreateCategoriaModal: React.FC<CreateCategoriaModalProps> = ({ isOpen, onC
   return (
     <div className="fixed inset-0 bg-white bg-opacity-95 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg shadow-2xl border border-gray-200 w-full max-w-md mx-4">
-        {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
             <LuPlus className="w-5 h-5" />
             Nueva Categoría
           </h2>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
-          >
-            <LuX size={24} />
-          </button>
         </div>
 
-        {/* Form */}
         <form onSubmit={handleSubmit} className="p-6">
           <div className="space-y-4">
             <div>
@@ -131,7 +117,6 @@ const CreateCategoriaModal: React.FC<CreateCategoriaModalProps> = ({ isOpen, onC
             </div>
           </div>
 
-          {/* Footer */}
           <div className="flex justify-end gap-3 mt-6 pt-4 border-t">
             <button
               type="button"
@@ -161,7 +146,7 @@ const CreateCategoriaModal: React.FC<CreateCategoriaModalProps> = ({ isOpen, onC
         </form>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default CreateCategoriaModal;
+export default CreateCategoriaModal
