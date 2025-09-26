@@ -1,19 +1,19 @@
 import { useState } from "react";
-import { useCreateActa } from "../Hook/hookActas";
+import { useUploadCalidadAgua } from "../Hook/HookCalidadAgua";
 
-interface FormularioCrearActasProps {
+interface FormularioCalidadAguaProps {
+    id: number; // Agregada la propiedad id
+    tituloInicial: string;
     onClose: () => void; // Función para cerrar el modal
     refetch: () => void; // Función para refrescar la tabla
 }
 
-export default function FormularioCrearActas({ onClose, refetch }: FormularioCrearActasProps) {
-    const createActaMutation = useCreateActa(); // Crear una nueva acta
+export default function FormularioCalidadAgua({ onClose, refetch }: FormularioCalidadAguaProps) {
+    const uploadCalidadAguaMutation = useUploadCalidadAgua(); // Subir un nuevo archivo
 
     const [titulo, setTitulo] = useState("");
-    const [descripcion, setDescripcion] = useState("");
     const [file, setFile] = useState<File | null>(null);
     const [tituloError, setTituloError] = useState(""); // Validación de título
-    const [descripcionError, setDescripcionError] = useState(""); // Validación de descripción
 
     const handleTituloChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
@@ -22,16 +22,6 @@ export default function FormularioCrearActas({ onClose, refetch }: FormularioCre
             setTituloError("Ya llegó al máximo de caracteres permitidos.");
         } else {
             setTituloError("");
-        }
-    };
-
-    const handleDescripcionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-        const value = e.target.value;
-        setDescripcion(value);
-        if (value.length === 50) {
-            setDescripcionError("Ya llegó al máximo de caracteres permitidos.");
-        } else {
-            setDescripcionError("");
         }
     };
 
@@ -44,23 +34,20 @@ export default function FormularioCrearActas({ onClose, refetch }: FormularioCre
         }
 
         const formData = new FormData();
-        formData.append("Id_Usuario", "1"); // Incluye el ID del usuario (puedes reemplazar "1" con el ID dinámico)
         formData.append("Titulo", titulo.trim());
-        formData.append("Descripcion", descripcion.trim());
-        formData.append("Archivo", file); // Cambiado a "Archivo" para coincidir con el backend
+        formData.append("Archivo_Calidad_Agua", file);
 
-        createActaMutation.mutate(formData, {
+        uploadCalidadAguaMutation.mutate(formData, {
             onSuccess: () => {
                 setTitulo("");
-                setDescripcion("");
                 setFile(null);
-                onClose(); // Oculta el modal después de crear el acta
-                refetch(); // Refresca la tabla para mostrar la nueva acta
-                alert("Acta creada con éxito.");
+                onClose(); // Oculta el modal después de crear el archivo
+                refetch(); // Refresca la tabla para mostrar el nuevo archivo
+                alert("Archivo creado con éxito.");
             },
             onError: (error) => {
-                console.error("Error al crear el acta:", error);
-                alert("Hubo un problema al crear el acta.");
+                console.error("Error al crear el archivo:", error);
+                alert("Hubo un problema al crear el archivo.");
             },
         });
     };
@@ -71,7 +58,7 @@ export default function FormularioCrearActas({ onClose, refetch }: FormularioCre
                 onSubmit={handleSubmit}
                 className="w-full max-w-md bg-white rounded-lg shadow-lg p-6 space-y-4"
             >
-                <h3 className="text-lg font-semibold text-gray-800">Crear Acta</h3>
+                <h3 className="text-lg font-semibold text-gray-800">Crear Archivo</h3>
 
                 {/* Campo de Título */}
                 <div>
@@ -90,26 +77,6 @@ export default function FormularioCrearActas({ onClose, refetch }: FormularioCre
                     </div>
                     {tituloError && (
                         <p className="text-xs text-red-500 mt-1">{tituloError}</p>
-                    )}
-                </div>
-
-                {/* Campo de Descripción */}
-                <div>
-                    <label className="block text-sm font-medium text-gray-700">Descripción</label>
-                    <textarea
-                        placeholder="Descripción"
-                        value={descripcion}
-                        onChange={handleDescripcionChange}
-                        maxLength={50}
-                        className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-sky-500 text-sm"
-                        rows={3}
-                        required
-                    />
-                    <div className="text-right text-xs text-gray-500 mt-1">
-                        {descripcion.length}/50
-                    </div>
-                    {descripcionError && (
-                        <p className="text-xs text-red-500 mt-1">{descripcionError}</p>
                     )}
                 </div>
 
@@ -148,12 +115,12 @@ export default function FormularioCrearActas({ onClose, refetch }: FormularioCre
                     <button
                         type="submit"
                         className="px-4 py-2 rounded-lg bg-sky-600 text-white hover:bg-sky-700 shadow-sm text-sm"
-                        disabled={createActaMutation.isPending}
+                        disabled={uploadCalidadAguaMutation.status === "pending"}
                     >
-                        {createActaMutation.isPending ? "Subiendo..." : "Subir Acta"}
+                        {uploadCalidadAguaMutation.status === "pending" ? "Subiendo..." : "Subir Archivo"}
                     </button>
                 </div>
             </form>
         </div>
     );
-}
+} //funciona 

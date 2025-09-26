@@ -19,13 +19,11 @@ export const uploadArchivoCalidadAgua = async (formData: FormData): Promise<Arch
 
 // Actualizar un archivo existente
 export const updateArchivoCalidadAgua = async (id: number, formData: FormData): Promise<ArchivoCalidadAgua> => {
-  console.log("Datos enviados al backend:", { id, formData });
   const res = await apiAuth.put(`/calidad-agua/update/${id}`, formData, {
     headers: {
       "Content-Type": "multipart/form-data",
     },
   });
-  console.log("Respuesta del backend:", res.data);
   return res.data;
 };
 
