@@ -3,6 +3,7 @@ import { createColumnHelper, getCoreRowModel, getPaginationRowModel, useReactTab
 import { Building2, Eye } from 'lucide-react';
 import { useProveedoresFisicos } from '../Hook/proveedoresFisicos';
 import ProveedorDetailModal from './proveedorDetailModal';
+import CreateModalProveedor from './CreateModalProveedor';
 import type { ProveedorFisico } from '../Models/TablaProveedo/proveedorFisico';
 
 export default function ProveedoresTable() {
@@ -11,9 +12,12 @@ export default function ProveedoresTable() {
 
     const [globalFilter, setGlobalFilter] = useState('');
 
-    // Estados para el modal de detalle (por implementar después)
+    // Estados para el modal de detalle
     const [showDetailModal, setShowDetailModal] = useState(false);
     const [selectedProveedor, setSelectedProveedor] = useState<ProveedorFisico | null>(null);
+
+    // Estados para el modal de creación
+    const [showCreateModal, setShowCreateModal] = useState(false);
 
     // Función para abrir el modal de detalle
     const handleViewDetail = (proveedor: ProveedorFisico) => {
@@ -27,8 +31,8 @@ export default function ProveedoresTable() {
         return proveedoresFisicos.filter((proveedor) =>
             [
                 proveedor.Nombre_Proveedor,
-                proveedor.Tipo_Proveedor,
-                proveedor.Categoria_Proveedor,
+                proveedor.Identificacion,
+                proveedor.Tipo_Identificacion,
                 proveedor.Telefono_Proveedor,
                 proveedor.Estado_Proveedor?.Estado_Proveedor
             ]
@@ -48,15 +52,15 @@ export default function ProveedoresTable() {
                 return nombre || 'Sin nombre';
             }
         }),
-        columnHelper.accessor('Tipo_Proveedor', {
-            header: 'Tipo/Categoría',
+        columnHelper.accessor('Identificacion', {
+            header: 'Identificación',
             cell: (info) => {
-                const tipoProveedor = info.getValue();
-                const categoria = info.row.original.Categoria_Proveedor;
+                const identificacion = info.getValue();
+                const tipoIdentificacion = info.row.original.Tipo_Identificacion;
                 return (
                     <div className="flex flex-col">
-                        <span className="font-medium">{categoria || 'Sin categoría'}</span>
-                        <span className="text-xs text-slate-500">{tipoProveedor || 'Sin tipo'}</span>
+                        <span className="font-medium">{identificacion || 'Sin identificación'}</span>
+                        <span className="text-xs text-slate-500">{tipoIdentificacion || 'Sin tipo'}</span>
                     </div>
                 );
             },
@@ -111,12 +115,12 @@ export default function ProveedoresTable() {
                     <input 
                         value={globalFilter} 
                         onChange={(e) => setGlobalFilter(e.target.value)} 
-                        placeholder="Buscar por nombre, tipo, categoría, teléfono..." 
+                        placeholder="Buscar por nombre, identificación, teléfono..." 
                         className="w-full sm:w-auto px-3 py-2 rounded-lg border border-sky-200 bg-sky-50 focus:outline-none focus:ring-2 focus:ring-sky-200 text-sm" 
                     />
                     <button 
                         className="px-3 py-2 rounded-lg bg-sky-600 text-white hover:bg-sky-700 shadow-sm text-sm whitespace-nowrap" 
-                        onClick={() => alert('Crear nuevo proveedor — abrir formulario')}
+                        onClick={() => setShowCreateModal(true)}
                     >
                         + Nuevo Proveedor
                     </button>
@@ -205,6 +209,14 @@ export default function ProveedoresTable() {
                     setSelectedProveedor(null);
                 }}
             />
+
+            {/* Modal de creación de proveedores */}
+            {showCreateModal && (
+                <CreateModalProveedor
+                    onClose={() => setShowCreateModal(false)}
+                    setShowCreateModal={setShowCreateModal}
+                />
+            )}
         </div>
     );
 }

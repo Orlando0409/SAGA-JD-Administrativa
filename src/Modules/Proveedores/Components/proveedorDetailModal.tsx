@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { LuX, LuUserX, LuPhone, LuBuilding2, LuUserCheck, LuCalendar, LuIdCard , LuUserRound, LuTag, LuPackage} from 'react-icons/lu';
+import { LuX, LuUserX, LuPhone, LuBuilding2, LuUserCheck, LuCalendar, LuIdCard , LuUserRound} from 'react-icons/lu';
 import { FaUserEdit } from "react-icons/fa";
 import { useProveedoresFisicos } from '../Hook/proveedoresFisicos';
 import { Accordion, AccordionHeader, AccordionBody } from "@material-tailwind/react";
@@ -167,14 +167,7 @@ const ProveedorDetailModal: React.FC<ProveedorDetailModalProps> = ({ proveedor, 
                         <p className="text-xs text-gray-500">{proveedor.Tipo_Identificacion || 'Sin tipo'}</p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <LuTag className="w-4 h-4 text-gray-400" />
-                      <div>
-                        <label className="block text-sm font-medium text-gray-500 mb-1">Categoría del Proveedor</label>
-                        <p className="text-gray-900 font-medium">{proveedor.Categoria_Proveedor || 'Sin categoría'}</p>
-                        <p className="text-xs text-gray-500">{proveedor.Tipo_Proveedor || 'Sin tipo'}</p>
-                      </div>
-                    </div>
+
                   </div>
                   
                   <div className="space-y-4">
