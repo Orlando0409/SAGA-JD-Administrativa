@@ -7,7 +7,7 @@ import {
   getPaginationRowModel,
   createColumnHelper,
 } from '@tanstack/react-table';
-import { LuPlus, LuFilter, LuSearch } from 'react-icons/lu';
+import { LuPlus, LuFilter, LuSearch, LuPackage, LuTags, LuRuler, LuActivity, LuArrowLeft } from 'react-icons/lu';
 import { 
   useMaterials, 
   useMaterialesConCategorias, 
@@ -18,15 +18,21 @@ import {
 import { MdKeyboardArrowLeft, MdKeyboardArrowRight, MdKeyboardDoubleArrowLeft,
   MdKeyboardDoubleArrowRight, 
   MdKeyboardArrowDown,
-  MdKeyboardArrowUp} from "react-icons/md";
+  MdKeyboardArrowUp, MdInventory} from "react-icons/md";
 
 import type { Material } from '../models/Inventario';
 import type { MaterialFilterOptions } from '../types/MaterialTypes';
-import CreateMaterialModal from './CreateMaterialModal';
-import DetailMaterialModal from './DetailMaterialModal';
-import FilterMaterialModal from './FilterMaterialModal';
+import CreateMaterialModal from './Materiales/CreateMaterialModal';
+import DetailMaterialModal from './Materiales/DetailMaterialModal';
+import CategoriasManagement from './Categorias/CategoriasManagement';
+import UnidadesMedicionManagement from './UnidadesMedicion/UnidadesMedicionManagement';
+import MovimientosManagement from './Movimientos/MovimientosManagement';
+import FilterMaterialModal from './Materiales/FilterMaterialModal';
+
+type ViewType = 'dashboard' | 'materiales' | 'categorias' | 'unidades' | 'movimientos';
 
 const Inventario = () => {
+  const [currentView, setCurrentView] = useState<ViewType>('dashboard');
   const [globalFilter, setGlobalFilter] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showDetailModal, setShowDetailModal] = useState(false);
@@ -166,6 +172,14 @@ const Inventario = () => {
           </div>
         ),
       }),
+      columnHelper.accessor('Unidad_Medicion.Nombre_Unidad', {
+        header: 'Unidad de medida',
+        cell: info => (
+          <div className="text-sm text-gray-600">
+            {info.getValue() || 'Sin unidad'}
+          </div>
+        ),
+      }),
       columnHelper.accessor('Precio_Unitario', {
         header: 'Precio Unitario',
         cell: info => (
@@ -179,13 +193,11 @@ const Inventario = () => {
         cell: info => {
           const estado = info.getValue();
           let colorClass = '';
-          if (estado === 'DISPONIBLE') {
+          if (estado === 'Disponible') {
             colorClass = 'bg-green-100 text-green-800';
-          } else if (estado === 'AGOTADO') {
+          } else if (estado === 'Agotado') {
             colorClass = 'bg-red-100 text-red-800';
-          } else {
-            colorClass = 'bg-yellow-100 text-yellow-800';
-          }
+          } 
           return (
             <span className={`px-2 py-1 rounded-full text-sm font-medium ${colorClass}`}>
               {estado}
@@ -251,19 +263,26 @@ const Inventario = () => {
     v !== undefined && v !== '' && v !== false
   ).length;
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-96">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
-      </div>
-    );
-  }
+  const handleModuleClick = (moduleId: ViewType) => {
+    setCurrentView(moduleId);
+  };
 
-  return (
+  const handleBackToDashboard = () => {
+    setCurrentView('dashboard');
+  };
+
+  // Renderizar vista específica de materiales
+  const renderMaterialesView = () => {
+    if (isLoading) {
+      return (
+        <div className="flex items-center justify-center min-h-96">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+        </div>
+      );
+    }
+
+    return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <h1 className="text-2xl font-bold text-gray-900">Gestión de Inventario</h1>
-      </div>
       <div className="flex  sm:flex-row justify-between gap-4">
         <div className="flex-1 relative">
           <LuSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -433,8 +452,196 @@ const Inventario = () => {
         currentFilters={appliedFilters}
       />
 
+      </div>
+    );
+  };
+
+  // Renderizar vista específica según el módulo seleccionado
+  const renderCurrentView = () => {
+    switch (currentView) {
+      case 'materiales':
+        return renderMaterialesView();
+      case 'categorias':
+        return <CategoriasManagement />;
+      case 'unidades':
+        return <UnidadesMedicionManagement />;
+      case 'movimientos':
+        return <MovimientosManagement />;
+      default:
+        return null;
+    }
+  };
+
+  // Si no estamos en dashboard, mostrar la vista específica
+  if (currentView !== 'dashboard') {
+    return (
+      <div className="space-y-6">
+        {/* Header con botón de regreso */}
+        <div className="flex items-center gap-4">
+          <button
+            onClick={handleBackToDashboard}
+            className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
+          >
+            <LuArrowLeft className="w-4 h-4" />
+            Volver al Dashboard
+          </button>
+          <div className="h-6 w-px bg-gray-300" />
+          <h1 className="text-2xl font-bold text-gray-900">
+            {currentView === 'materiales' && 'Catálogo de Materiales'}
+            {currentView === 'categorias' && 'Gestión de Categorías'}
+            {currentView === 'unidades' && 'Unidades de Medición'}
+            {currentView === 'movimientos' && 'Movimientos de Inventario'}
+          </h1>
+        </div>
+
+        {/* Contenido de la vista actual */}
+        {renderCurrentView()}
+      </div>
+    );
+  }
+
+  // Dashboard principal
+  return (
+    <div className="space-y-7">
+      {/* Header del Dashboard */}
+      <div className="text-center">
+        <div className="flex items-center justify-center mb-4">
+          <div className="p-3 bg-blue-100 rounded-full">
+            <MdInventory className="w-12 h-12 text-blue-600" />
+          </div>
+        </div>
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">
+          Gestión del Inventario
+        </h1>
+        <p className="text-gray-600 max-w-2xl mx-auto">
+          Gestión integral de materiales, categorías, unidades de medición y movimientos de inventario.
+        </p>
+      </div>
+
+      {/* Módulos principales */}
+      <div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-[70vw] justify-center mx-auto">
+          <button
+            className="p-4 rounded-lg border-2 cursor-pointer transition-all duration-200 hover:shadow-md bg-blue-50 border-blue-200 hover:scale-105 w-full text-left"
+            onClick={() => handleModuleClick('materiales')}
+          >
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="text-blue-600">
+                    <LuPackage className="w-8 h-8" />
+                  </div>
+                  <h3 className="text-xl font-semibold text-gray-900">
+                    Materiales
+                  </h3>
+                </div>
+                <p className="text-gray-600 mb-4 text-sm leading-relaxed">
+                  Gestión completa del catálogo de materiales, inventario y stock disponible
+                </p>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium text-blue-600">
+                    Ver catálogo completo
+                  </span>
+                  <span className="px-3 py-1 text-sm font-medium rounded-md transition-colors text-blue-600 hover:bg-white/50">
+                    Acceder →
+                  </span>
+                </div>
+              </div>
+            </div>
+          </button>
+
+          <button
+            className="p-6 rounded-lg border-2 cursor-pointer transition-all duration-200 hover:shadow-md bg-green-50 border-green-200 hover:scale-105 w-full text-left"
+            onClick={() => handleModuleClick('categorias')}
+          >
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="text-green-600">
+                    <LuTags className="w-8 h-8" />
+                  </div>
+                  <h3 className="text-xl font-semibold text-gray-900">
+                    Categorías
+                  </h3>
+                </div>
+                <p className="text-gray-600 mb-4 text-sm leading-relaxed">
+                  Organización y clasificación de materiales por categorías
+                </p>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium text-green-600">
+                    Gestionar clasificaciones
+                  </span>
+                  <span className="px-3 py-1 text-sm font-medium rounded-md transition-colors text-green-600 hover:bg-white/50">
+                    Acceder →
+                  </span>
+                </div>
+              </div>
+            </div>
+          </button>
+
+          <button
+            className="p-6 rounded-lg border-2 cursor-pointer transition-all duration-200 hover:shadow-md bg-purple-50 border-purple-200 hover:scale-105 w-full text-left"
+            onClick={() => handleModuleClick('unidades')}
+          >
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="text-purple-600">
+                    <LuRuler className="w-8 h-8" />
+                  </div>
+                  <h3 className="text-xl font-semibold text-gray-900">
+                    Unidades de Medición
+                  </h3>
+                </div>
+                <p className="text-gray-600 mb-4 text-sm leading-relaxed">
+                  Configuración de unidades de medida para materiales
+                </p>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium text-purple-600">
+                    Configurar medidas
+                  </span>
+                  <span className="px-3 py-1 text-sm font-medium rounded-md transition-colors text-purple-600 hover:bg-white/50">
+                    Acceder →
+                  </span>
+                </div>
+              </div>
+            </div>
+          </button>
+
+          <button
+            className="p-6 rounded-lg border-2 cursor-pointer transition-all duration-200 hover:shadow-md bg-orange-50 border-orange-200 hover:scale-105 w-full text-left"
+            onClick={() => handleModuleClick('movimientos')}
+          >
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="text-orange-600">
+                    <LuActivity className="w-8 h-8" />
+                  </div>
+                  <h3 className="text-xl font-semibold text-gray-900">
+                    Movimientos
+                  </h3>
+                </div>
+                <p className="text-gray-600 mb-4 text-sm leading-relaxed">
+                  Registro de entradas y salidas de inventario
+                </p>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium text-orange-600">
+                    Ver historial completo
+                  </span>
+                  <span className="px-3 py-1 text-sm font-medium rounded-md transition-colors text-orange-600 hover:bg-white/50">
+                    Acceder →
+                  </span>
+                </div>
+              </div>
+            </div>
+          </button>
+        </div>
+      </div>
+
+
     </div>
-  )
+  );
 }
 
 export default Inventario

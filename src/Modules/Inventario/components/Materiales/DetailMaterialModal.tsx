@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { LuX, LuPencil, LuTrash2 } from 'react-icons/lu';
-import { useDeleteCategoriaMaterial } from '../hooks/InventarioHook';
-import type { Material } from '../models/Inventario';
+import { useDeleteCategoriaMaterial } from '../../hooks/InventarioHook';
+import type { Material } from '../../models/Inventario';
 import EditMaterialModal from './EditMaterialModal';
 
 interface DetailMaterialModalProps {

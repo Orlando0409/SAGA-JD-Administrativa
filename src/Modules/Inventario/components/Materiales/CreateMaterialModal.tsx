@@ -1,19 +1,21 @@
 import React, { useState } from 'react';
 import { LuX, LuPlus } from 'react-icons/lu';
-import { useCreateMaterial, useCategories } from '../hooks/InventarioHook';
-import { CreateMaterialSchema, type CreateMaterialSchemaData } from '../schema/CreateMaterialSchema';
-import type { CreateMaterialModalProps } from '../types/MaterialTypes';
-import type { CreateMaterialData, CategoriaMaterial } from '../models/Inventario';
-import CreateCategoriaModal from './CreateCategoriaModal';
+import { useCreateMaterial, useCategories } from '../../hooks/InventarioHook';
+import { useUnidadesMedicionSimple } from '../../hooks/HookUnidadMedicion';
+import { CreateMaterialSchema, type CreateMaterialSchemaData } from '../../schema/CreateMaterialSchema';
+import type { CreateMaterialModalProps } from '../../types/MaterialTypes';
+import type { CreateMaterialData, CategoriaMaterial } from '../../models/Inventario';
+import CreateCategoriaModal from '../Categorias/CreateCategoriaModal';
 import { 
   NOMBRE_MATERIAL_MAX_LENGTH, 
   DESCRIPCION_MAX_LENGTH, 
   PRECIO_MIN 
-} from '../types/MaterialTypes';
+} from '../../types/MaterialTypes';
 
 const CreateMaterialModal: React.FC<CreateMaterialModalProps> = ({ isOpen, onClose }) => {
   const createMaterialMutation = useCreateMaterial();
   const { data: categories = [] } = useCategories();
+  const { data: unidadesMedicion = [] } = useUnidadesMedicionSimple();
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [fieldCharCounts, setFieldCharCounts] = useState({
     nombreMaterial: 0,
@@ -24,8 +26,9 @@ const CreateMaterialModal: React.FC<CreateMaterialModalProps> = ({ isOpen, onClo
   const [formData, setFormData] = useState<CreateMaterialSchemaData>({
     Nombre_Material: '',
     Descripcion: '',
+    Id_Unidad_Medicion: 0,
     Cantidad: 1,
-    Precio_Unitario: 0.10,
+    Precio_Unitario: 5,
     IDS_Categorias: [],
   });
 
@@ -69,6 +72,7 @@ const CreateMaterialModal: React.FC<CreateMaterialModalProps> = ({ isOpen, onClo
       const payload: CreateMaterialData = {
         Nombre_Material: formData.Nombre_Material,
         Descripcion: formData.Descripcion,
+        Id_Unidad_Medicion: formData.Id_Unidad_Medicion,
         Cantidad: formData.Cantidad,
         Precio_Unitario: formData.Precio_Unitario,
         IDS_Categorias: formData.IDS_Categorias ?? []
@@ -79,8 +83,9 @@ const CreateMaterialModal: React.FC<CreateMaterialModalProps> = ({ isOpen, onClo
       setFormData({
         Nombre_Material: '',
         Descripcion: '',
+        Id_Unidad_Medicion: 0,
         Cantidad: 1,
-        Precio_Unitario: 0.10,
+        Precio_Unitario: 5,
         IDS_Categorias: [],
       });
       setFieldCharCounts({ nombreMaterial: 0, descripcion: 0 });
@@ -173,6 +178,30 @@ const CreateMaterialModal: React.FC<CreateMaterialModalProps> = ({ isOpen, onClo
               {renderCharCounter(fieldCharCounts.descripcion, DESCRIPCION_MAX_LENGTH, !!formErrors.Descripcion)}
               {formErrors.Descripcion && (
                 <p className="text-red-500 text-xs mt-1">{formErrors.Descripcion}</p>
+              )}
+            </div>
+
+            <div>
+              <label htmlFor="unidad-medicion" className="block text-sm font-medium text-gray-700 mb-1">
+                Unidad de Medición <span className="text-red-500">*</span>
+              </label>
+              <select
+                id="unidad-medicion"
+                value={formData.Id_Unidad_Medicion || ''}
+                onChange={(e) => setFormData(prev => ({ ...prev, Id_Unidad_Medicion: parseInt(e.target.value) || 0 }))}
+                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                  formErrors.Id_Unidad_Medicion ? 'border-red-500' : 'border-gray-300'
+                }`}
+              >
+                <option value="">Seleccionar unidad de medición</option>
+                {unidadesMedicion.map((unidad) => (
+                  <option key={unidad.Id_Unidad_Medicion} value={unidad.Id_Unidad_Medicion}>
+                    {unidad.Nombre_Unidad_Medicion}
+                  </option>
+                ))}
+              </select>
+              {formErrors.Id_Unidad_Medicion && (
+                <p className="text-red-500 text-xs mt-1">{formErrors.Id_Unidad_Medicion}</p>
               )}
             </div>
 

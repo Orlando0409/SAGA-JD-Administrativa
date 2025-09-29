@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { LuX, LuFilter } from 'react-icons/lu';
-import { useCategories } from '../hooks/InventarioHook';
-import type { FilterMaterialModalProps, MaterialFilterOptions } from '../types/MaterialTypes';
+import { useCategories } from '../../hooks/InventarioHook';
+import type { FilterMaterialModalProps, MaterialFilterOptions } from '../../types/MaterialTypes';
 
 
 
