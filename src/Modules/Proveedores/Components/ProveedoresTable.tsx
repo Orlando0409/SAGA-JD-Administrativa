@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { createColumnHelper, getCoreRowModel, getPaginationRowModel, useReactTable, flexRender, type ColumnDef } from '@tanstack/react-table';
 import { Building2, Eye } from 'lucide-react';
 import { useProveedoresFisicos } from '../Hook/proveedoresFisicos';
+import ProveedorDetailModal from './proveedorDetailModal';
 import type { ProveedorFisico } from '../Models/TablaProveedo/proveedorFisico';
 
 export default function ProveedoresTable() {
@@ -18,8 +19,6 @@ export default function ProveedoresTable() {
     const handleViewDetail = (proveedor: ProveedorFisico) => {
         setSelectedProveedor(proveedor);
         setShowDetailModal(true);
-        // Por ahora solo mostramos un alert, después implementaremos el modal
-        alert(`Ver detalles de: ${proveedor.Nombre_Proveedor}`);
     };
 
     const filteredData = useMemo(() => {
@@ -28,8 +27,8 @@ export default function ProveedoresTable() {
         return proveedoresFisicos.filter((proveedor) =>
             [
                 proveedor.Nombre_Proveedor,
-                proveedor.Identificacion,
-                proveedor.Tipo_Identificacion,
+                proveedor.Tipo_Proveedor,
+                proveedor.Categoria_Proveedor,
                 proveedor.Telefono_Proveedor,
                 proveedor.Estado_Proveedor?.Estado_Proveedor
             ]
@@ -49,15 +48,15 @@ export default function ProveedoresTable() {
                 return nombre || 'Sin nombre';
             }
         }),
-        columnHelper.accessor('Identificacion', {
-            header: 'Identificación',
+        columnHelper.accessor('Tipo_Proveedor', {
+            header: 'Tipo/Categoría',
             cell: (info) => {
-                const Identificacion = info.getValue();
-                const tipoId = info.row.original.Tipo_Identificacion;
+                const tipoProveedor = info.getValue();
+                const categoria = info.row.original.Categoria_Proveedor;
                 return (
                     <div className="flex flex-col">
-                        <span className="font-medium">{Identificacion || 'Sin identificación'}</span>
-                        <span className="text-xs text-slate-500">{tipoId || 'Sin tipo'}</span>
+                        <span className="font-medium">{categoria || 'Sin categoría'}</span>
+                        <span className="text-xs text-slate-500">{tipoProveedor || 'Sin tipo'}</span>
                     </div>
                 );
             },
@@ -91,42 +90,6 @@ export default function ProveedoresTable() {
             },
             size: 120,
         }),
-        columnHelper.accessor('Fecha_Creacion', {
-            header: 'Fecha Registro',
-            cell: (info) => {
-                const fecha = info.getValue();
-                if (!fecha) return 'Sin fecha';
-                
-                try {
-                    const fechaFormateada = new Date(fecha).toLocaleDateString('es-ES', {
-                        day: '2-digit',
-                        month: '2-digit',
-                        year: 'numeric'
-                    });
-                    return fechaFormateada;
-                } catch {
-                    return 'Fecha inválida';
-                }
-            },
-            size: 120,
-        }),
-        columnHelper.display({
-            id: 'acciones',
-            header: 'Acciones',
-            cell: (info) => (
-                <button
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        handleViewDetail(info.row.original);
-                    }}
-                    className="inline-flex items-center gap-1 px-2 py-1 text-xs bg-sky-100 text-sky-700 rounded hover:bg-sky-200 transition-colors"
-                >
-                    <Eye size={12} />
-                    Ver
-                </button>
-            ),
-            size: 80,
-        }),
     ];
 
     const table = useReactTable({
@@ -148,7 +111,7 @@ export default function ProveedoresTable() {
                     <input 
                         value={globalFilter} 
                         onChange={(e) => setGlobalFilter(e.target.value)} 
-                        placeholder="Buscar por nombre, identificación, teléfono..." 
+                        placeholder="Buscar por nombre, tipo, categoría, teléfono..." 
                         className="w-full sm:w-auto px-3 py-2 rounded-lg border border-sky-200 bg-sky-50 focus:outline-none focus:ring-2 focus:ring-sky-200 text-sm" 
                     />
                     <button 
@@ -233,21 +196,15 @@ export default function ProveedoresTable() {
                 </div>
             </div>
 
-            {/* TODO: Implementar modal de detalle de proveedores */}
-            {showDetailModal && selectedProveedor && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                    <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-                        <h3 className="text-lg font-semibold mb-4">Detalles del Proveedor</h3>
-                        <p>Modal de detalle por implementar</p>
-                        <button 
-                            onClick={() => setShowDetailModal(false)}
-                            className="mt-4 px-4 py-2 bg-sky-600 text-white rounded hover:bg-sky-700"
-                        >
-                            Cerrar
-                        </button>
-                    </div>
-                </div>
-            )}
+            {/* Modal de detalle de proveedores */}
+            <ProveedorDetailModal
+                proveedor={selectedProveedor}
+                isOpen={showDetailModal}
+                onClose={() => {
+                    setShowDetailModal(false);
+                    setSelectedProveedor(null);
+                }}
+            />
         </div>
     );
 }
