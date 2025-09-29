@@ -8,8 +8,8 @@ export interface ProveedorFisico {
   } 
   Fecha_Creacion: string; // Fecha de creación del registro
   Fecha_Actualizacion: string; // Fecha de actualización del registro
-  Tipo_identificacion: string;
-  identificacion: string; 
+  Tipo_Identificacion: string;
+  Identificacion : string; 
 }
 
 export const ProveedorFisicoInicialState: ProveedorFisico = {
@@ -22,6 +22,6 @@ export const ProveedorFisicoInicialState: ProveedorFisico = {
   },
   Fecha_Creacion: "",
   Fecha_Actualizacion: "",
-  Tipo_identificacion: "",
-  identificacion: ""
+  Tipo_Identificacion: "",
+  Identificacion: ""
 };

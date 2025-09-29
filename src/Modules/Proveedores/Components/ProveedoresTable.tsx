@@ -28,8 +28,8 @@ export default function ProveedoresTable() {
         return proveedoresFisicos.filter((proveedor) =>
             [
                 proveedor.Nombre_Proveedor,
-                proveedor.identificacion,
-                proveedor.Tipo_identificacion,
+                proveedor.Identificacion,
+                proveedor.Tipo_Identificacion,
                 proveedor.Telefono_Proveedor,
                 proveedor.Estado_Proveedor?.Estado_Proveedor
             ]
@@ -49,14 +49,14 @@ export default function ProveedoresTable() {
                 return nombre || 'Sin nombre';
             }
         }),
-        columnHelper.accessor('identificacion', {
+        columnHelper.accessor('Identificacion', {
             header: 'Identificación',
             cell: (info) => {
-                const identificacion = info.getValue();
-                const tipoId = info.row.original.Tipo_identificacion;
+                const Identificacion = info.getValue();
+                const tipoId = info.row.original.Tipo_Identificacion;
                 return (
                     <div className="flex flex-col">
-                        <span className="font-medium">{identificacion || 'Sin identificación'}</span>
+                        <span className="font-medium">{Identificacion || 'Sin identificación'}</span>
                         <span className="text-xs text-slate-500">{tipoId || 'Sin tipo'}</span>
                     </div>
                 );
