@@ -1,25 +1,15 @@
 import { useForm } from '@tanstack/react-form';
 import { useState } from 'react';
 import { LuX, LuUserPlus } from 'react-icons/lu';
-
-// Tipos de identificación disponibles
-const TIPOS_IDENTIFICACION = [
-  { value: 'Cedula', label: 'Cédula' },
-  { value: 'Pasaporte', label: 'Pasaporte' },
-  { value: 'Dimex', label: 'DIMEX' },
-];
-
-// Estados de proveedor disponibles (simulado - luego se puede obtener de una API)
-const ESTADOS_PROVEEDOR = [
-  { id: 1, nombre: 'Activo' },
-  { id: 2, nombre: 'Inactivo' },
-  { id: 3, nombre: 'Pendiente' },
-];
-
-// Límites de caracteres
-const NOMBRE_MAX_LENGTH = 100;
-const TELEFONO_MAX_LENGTH = 20;
-const IDENTIFICACION_MAX_LENGTH = 20;
+import { 
+  CreateProveedorSchemaWithIdentificacionValidation, 
+  type CreateProveedorSchemaData,
+  VALIDATION_LIMITS,
+  TIPOS_IDENTIFICACION_OPTIONS,
+  ESTADOS_PROVEEDOR_OPTIONS,
+  IDENTIFICACION_PLACEHOLDERS,
+  IDENTIFICACION_LIMITS_BY_TYPE
+} from '../Schema/Proveedores';
 
 interface CreateModalProveedorProps {
   onClose: () => void;
@@ -29,9 +19,9 @@ interface CreateModalProveedorProps {
 const CreateModalProveedor = ({ onClose, setShowCreateModal }: CreateModalProveedorProps) => {
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [fieldCharCounts, setFieldCharCounts] = useState({
-    nombreProveedor: 0,
-    telefono: 0,
-    identificacion: 0
+    Nombre_Proveedor: 0,
+    Telefono_Proveedor: 0,
+    Identificacion: 0
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -41,8 +31,85 @@ const CreateModalProveedor = ({ onClose, setShowCreateModal }: CreateModalProvee
     if (setShowCreateModal) setShowCreateModal(false);
   };
 
-  // Función para crear el handler de input con validación
-  const createInputHandler = (fieldName: string, handleChange: (value: string) => void, maxLength: number) => {
+  // Función para validar en tiempo real
+  const validateFieldRealTime = (fieldName: string, value: string, tipoIdentificacion?: string) => {
+    let error = '';
+
+    switch (fieldName) {
+      case 'Nombre_Proveedor':
+        const nombre = value.trim();
+        if (nombre && nombre.length >= 2) {
+          const NOMBRE_REGEX = /^[a-zA-ZÀ-ÿ\u00f1\u00d1\s]+$/;
+          if (!NOMBRE_REGEX.test(nombre)) {
+            error = 'El nombre solo puede contener letras y espacios';
+          }
+        }
+        break;
+
+      case 'Identificacion':
+        if (value && tipoIdentificacion) {
+          const cleanValue = value.replace(/[\s\-]/g, '').toUpperCase();
+          
+          switch (tipoIdentificacion) {
+            case 'Cedula':
+              if (!/^\d*$/.test(cleanValue)) {
+                error = 'La cédula solo puede contener números';
+              } else if (cleanValue.length > 0 && cleanValue[0] === '0') {
+                error = 'La cédula no puede empezar con 0';
+              } else if (cleanValue.length > 0 && cleanValue.length !== 9 && cleanValue.length === value.length) {
+                error = 'La cédula debe tener exactamente 9 dígitos';
+              }
+              break;
+
+            case 'Dimex':
+              if (!/^\d*$/.test(cleanValue)) {
+                error = 'El DIMEX solo puede contener números';
+              } else if (cleanValue.length > 0 && cleanValue[0] === '0') {
+                error = 'El DIMEX no puede empezar con 0';
+              } else if (cleanValue.length > 0 && cleanValue.length !== 12 && cleanValue.length === value.length) {
+                error = 'El DIMEX debe tener exactamente 12 dígitos';
+              }
+              break;
+
+            case 'Pasaporte':
+              if (!/^[A-Z0-9]*$/.test(cleanValue)) {
+                error = 'El pasaporte solo puede contener letras y números';
+              } else if (cleanValue.length > 0 && cleanValue.length < 6) {
+                error = 'El pasaporte debe tener al menos 6 caracteres';
+              } else if (cleanValue.length >= 6) {
+                const letters = cleanValue.match(/[A-Z]/g);
+                if (!letters || letters.length === 0) {
+                  error = 'El pasaporte debe tener al menos 1 letra';
+                } else if (letters.length > 3) {
+                  error = 'El pasaporte puede tener máximo 3 letras';
+                }
+              }
+              break;
+          }
+        }
+        break;
+
+      case 'Telefono_Proveedor':
+        if (value) {
+          const TELEFONO_REGEX = /^(\+?\d{1,3}[\s\-]?)?\d{4}[\s\-]?\d{4}$/;
+          if (!TELEFONO_REGEX.test(value)) {
+            error = 'Formato de teléfono inválido. Ej: 8888-7777 o +506-8888-7777';
+          }
+        }
+        break;
+    }
+
+    // Actualizar errores en tiempo real
+    setFormErrors(prev => ({
+      ...prev,
+      [fieldName]: error
+    }));
+
+    return error === '';
+  };
+
+  // Función para crear el handler de input con validación en tiempo real
+  const createInputHandler = (fieldName: string, handleChange: (value: string) => void, maxLength: number, tipoIdentificacion?: string) => {
     return (e: React.ChangeEvent<HTMLInputElement>) => {
       const value = e.target.value;
       
@@ -51,10 +118,8 @@ const CreateModalProveedor = ({ onClose, setShowCreateModal }: CreateModalProvee
         handleChange(value);
         setFieldCharCounts(prev => ({ ...prev, [fieldName]: value.length }));
         
-        // Limpiar errores de validación cuando el usuario empieza a escribir
-        if (formErrors[fieldName]) {
-          setFormErrors(prev => ({ ...prev, [fieldName]: '' }));
-        }
+        // Validar en tiempo real
+        validateFieldRealTime(fieldName, value, tipoIdentificacion);
       }
     };
   };
@@ -63,47 +128,35 @@ const CreateModalProveedor = ({ onClose, setShowCreateModal }: CreateModalProvee
     defaultValues: {
       Nombre_Proveedor: '',
       Telefono_Proveedor: '',
-      Tipo_Identificacion: '',
+      Tipo_Identificacion: '' as any,
       Identificacion: '',
       Id_Estado_Proveedor: 0,
     },
 
-    onSubmit: async ({ value }) => {
+    onSubmit: async ({ value }: { value: CreateProveedorSchemaData }) => {
       setFormErrors({});
       setIsSubmitting(true);
 
-      // Validaciones básicas
-      const errors: Record<string, string> = {};
+      // Validar usando el schema de Zod
+      const validation = CreateProveedorSchemaWithIdentificacionValidation.safeParse(value);
 
-      if (!value.Nombre_Proveedor.trim()) {
-        errors.Nombre_Proveedor = 'El nombre del proveedor es requerido';
-      }
-
-      if (!value.Telefono_Proveedor.trim()) {
-        errors.Telefono_Proveedor = 'El teléfono es requerido';
-      }
-
-      if (!value.Tipo_Identificacion) {
-        errors.Tipo_Identificacion = 'El tipo de identificación es requerido';
-      }
-
-      if (!value.Identificacion.trim()) {
-        errors.Identificacion = 'La identificación es requerida';
-      }
-
-      if (value.Id_Estado_Proveedor === 0) {
-        errors.Id_Estado_Proveedor = 'Debe seleccionar un estado';
-      }
-
-      if (Object.keys(errors).length > 0) {
-        setFormErrors(errors);
+      if (!validation.success) {
+        const fieldErrors: Record<string, string> = {};
+        validation.error.errors.forEach((err) => {
+          const field = err.path[0] as string;
+          fieldErrors[field] = err.message;
+        });
+        setFormErrors(fieldErrors);
         setIsSubmitting(false);
         return;
       }
 
       try {
+        // Los datos ya están transformados por el schema
+        const payload = validation.data;
+
         // TODO: Aquí se implementará la llamada al servicio de creación
-        console.log('Datos del proveedor a crear:', value);
+        console.log('Datos del proveedor a crear:', payload);
         
         // Simulamos una llamada async
         await new Promise(resolve => setTimeout(resolve, 2000));
@@ -175,19 +228,19 @@ const CreateModalProveedor = ({ onClose, setShowCreateModal }: CreateModalProvee
                   <input
                     type="text"
                     value={field.state.value}
-                    onChange={createInputHandler('nombreProveedor', field.handleChange, NOMBRE_MAX_LENGTH)}
+                    onChange={createInputHandler('Nombre_Proveedor', field.handleChange, VALIDATION_LIMITS.NOMBRE_MAX_LENGTH)}
                     className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-colors ${
                       (formErrors.Nombre_Proveedor || field.state.meta.errors?.length) 
                         ? 'border-red-300 focus:ring-red-500' 
                         : 'border-gray-300 focus:ring-blue-500'
                     }`}
-                    placeholder="Ingrese el nombre del proveedor"
-                    maxLength={NOMBRE_MAX_LENGTH}
+                    placeholder="Ingrese el nombre del proveedor (mín. 2 caracteres)"
+                    maxLength={VALIDATION_LIMITS.NOMBRE_MAX_LENGTH}
                   />
                   
                   {renderCharCounter(
-                    fieldCharCounts.nombreProveedor, 
-                    NOMBRE_MAX_LENGTH, 
+                    fieldCharCounts.Nombre_Proveedor, 
+                    VALIDATION_LIMITS.NOMBRE_MAX_LENGTH, 
                     !!(formErrors.Nombre_Proveedor || field.state.meta.errors?.length)
                   )}
 
@@ -210,7 +263,7 @@ const CreateModalProveedor = ({ onClose, setShowCreateModal }: CreateModalProvee
                   </label>
                   <select
                     value={field.state.value}
-                    onChange={(e) => field.handleChange(e.target.value)}
+                    onChange={(e) => field.handleChange(e.target.value as any)}
                     className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-colors ${
                       (formErrors.Tipo_Identificacion || field.state.meta.errors?.length) 
                         ? 'border-red-300 focus:ring-red-500' 
@@ -218,7 +271,7 @@ const CreateModalProveedor = ({ onClose, setShowCreateModal }: CreateModalProvee
                     }`}
                   >
                     <option value="">Seleccionar tipo de identificación</option>
-                    {TIPOS_IDENTIFICACION.map((tipo) => (
+                    {TIPOS_IDENTIFICACION_OPTIONS.map((tipo) => (
                       <option key={tipo.value} value={tipo.value}>
                         {tipo.label}
                       </option>
@@ -237,36 +290,66 @@ const CreateModalProveedor = ({ onClose, setShowCreateModal }: CreateModalProvee
             {/* Identificación */}
             <form.Field name="Identificacion">
               {(field) => (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Número de Identificación *
-                  </label>
-                  <input
-                    type="text"
-                    value={field.state.value}
-                    onChange={createInputHandler('identificacion', field.handleChange, IDENTIFICACION_MAX_LENGTH)}
-                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-colors ${
-                      (formErrors.Identificacion || field.state.meta.errors?.length) 
-                        ? 'border-red-300 focus:ring-red-500' 
-                        : 'border-gray-300 focus:ring-blue-500'
-                    }`}
-                    placeholder="Ingrese el número de identificación"
-                    maxLength={IDENTIFICACION_MAX_LENGTH}
-                  />
-                  
-                  {renderCharCounter(
-                    fieldCharCounts.identificacion, 
-                    IDENTIFICACION_MAX_LENGTH, 
-                    !!(formErrors.Identificacion || field.state.meta.errors?.length)
-                  )}
-                  
-                  {field.state.meta.errors?.map((err) => (
-                    <p key={err} className="text-red-500 text-xs mt-1">{err}</p>
-                  ))}
-                  {formErrors.Identificacion && (
-                    <p className="text-red-500 text-xs mt-1">{formErrors.Identificacion}</p>
-                  )}
-                </div>
+                <form.Field name="Tipo_Identificacion">
+                  {(tipoField) => {
+                    const tipoSeleccionado = tipoField.state.value;
+                    const isValidTipo = tipoSeleccionado && tipoSeleccionado !== '';
+                    
+                    // Obtener límite específico según tipo seleccionado
+                    const maxLength = isValidTipo && tipoSeleccionado in IDENTIFICACION_LIMITS_BY_TYPE 
+                      ? IDENTIFICACION_LIMITS_BY_TYPE[tipoSeleccionado as keyof typeof IDENTIFICACION_LIMITS_BY_TYPE]
+                      : IDENTIFICACION_LIMITS_BY_TYPE.default;
+                    
+                    const placeholder = isValidTipo && tipoSeleccionado in IDENTIFICACION_PLACEHOLDERS
+                      ? `Ej: ${IDENTIFICACION_PLACEHOLDERS[tipoSeleccionado as keyof typeof IDENTIFICACION_PLACEHOLDERS]}` 
+                      : IDENTIFICACION_PLACEHOLDERS.default;
+                    
+                    return (
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Número de Identificación *
+                        </label>
+                        <input
+                          type="text"
+                          value={field.state.value}
+                          onChange={createInputHandler('Identificacion', field.handleChange, maxLength, tipoSeleccionado)}
+                          className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-colors ${
+                            (formErrors.Identificacion || field.state.meta.errors?.length) 
+                              ? 'border-red-300 focus:ring-red-500' 
+                              : 'border-gray-300 focus:ring-blue-500'
+                          }`}
+                          placeholder={placeholder}
+                          maxLength={maxLength}
+                          style={{ textTransform: 'uppercase' }}
+                          disabled={!isValidTipo}
+                        />
+                        
+                        {isValidTipo && (
+                          <div className="mt-1">
+                            <span className="text-xs text-blue-600">
+                              {tipoSeleccionado === 'Cedula' && `Formato: exactamente ${IDENTIFICACION_LIMITS_BY_TYPE.Cedula} dígitos, no puede empezar con 0`}
+                              {tipoSeleccionado === 'Dimex' && `Formato: exactamente ${IDENTIFICACION_LIMITS_BY_TYPE.Dimex} dígitos, no puede empezar con 0`}
+                              {tipoSeleccionado === 'Pasaporte' && `Formato: 6-${IDENTIFICACION_LIMITS_BY_TYPE.Pasaporte} caracteres (obligatorio), al menos 1 letra, máximo 3 letras`}
+                            </span>
+                          </div>
+                        )}
+                        
+                        {renderCharCounter(
+                          fieldCharCounts.Identificacion, 
+                          maxLength, 
+                          !!(formErrors.Identificacion || field.state.meta.errors?.length)
+                        )}
+                        
+                        {field.state.meta.errors?.map((err) => (
+                          <p key={err} className="text-red-500 text-xs mt-1">{err}</p>
+                        ))}
+                        {formErrors.Identificacion && (
+                          <p className="text-red-500 text-xs mt-1">{formErrors.Identificacion}</p>
+                        )}
+                      </div>
+                    );
+                  }}
+                </form.Field>
               )}
             </form.Field>
 
@@ -280,19 +363,19 @@ const CreateModalProveedor = ({ onClose, setShowCreateModal }: CreateModalProvee
                   <input
                     type="tel"
                     value={field.state.value}
-                    onChange={createInputHandler('telefono', field.handleChange, TELEFONO_MAX_LENGTH)}
+                    onChange={createInputHandler('Telefono_Proveedor', field.handleChange, VALIDATION_LIMITS.TELEFONO_MAX_LENGTH)}
                     className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-colors ${
                       (formErrors.Telefono_Proveedor || field.state.meta.errors?.length) 
                         ? 'border-red-300 focus:ring-red-500' 
                         : 'border-gray-300 focus:ring-blue-500'
                     }`}
-                    placeholder="Ej: 8888-8888"
-                    maxLength={TELEFONO_MAX_LENGTH}
+                    placeholder="Ej: 8888-7777 o +506-8888-7777"
+                    maxLength={VALIDATION_LIMITS.TELEFONO_MAX_LENGTH}
                   />
                   
                   {renderCharCounter(
-                    fieldCharCounts.telefono, 
-                    TELEFONO_MAX_LENGTH, 
+                    fieldCharCounts.Telefono_Proveedor, 
+                    VALIDATION_LIMITS.TELEFONO_MAX_LENGTH, 
                     !!(formErrors.Telefono_Proveedor || field.state.meta.errors?.length)
                   )}
                   
@@ -323,7 +406,7 @@ const CreateModalProveedor = ({ onClose, setShowCreateModal }: CreateModalProvee
                     }`}
                   >
                     <option value={0}>Seleccionar estado</option>
-                    {ESTADOS_PROVEEDOR.map((estado) => (
+                    {ESTADOS_PROVEEDOR_OPTIONS.map((estado) => (
                       <option key={estado.id} value={estado.id}>
                         {estado.nombre}
                       </option>
