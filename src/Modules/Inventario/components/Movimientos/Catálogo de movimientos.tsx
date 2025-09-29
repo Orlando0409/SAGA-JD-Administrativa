@@ -12,7 +12,8 @@ import {
   LuFilter, 
   LuSearch, 
   LuArrowUp,
-  LuArrowDown
+  LuArrowDown,
+  LuArrowLeft
 } from 'react-icons/lu';
 import { 
   MdKeyboardArrowLeft, 
@@ -29,7 +30,11 @@ import CreateMovimientoModal from './CreateMovimientoModal';
 import FilterMovimientosModal from './FilterMovimientosModal';
 import DetailMovimientoModal from './DetailMovimientoModal';
 
-const MovimientosManagement = () => {
+interface MovimientosManagementProps {
+  onBack?: () => void;
+}
+
+const MovimientosManagement: React.FC<MovimientosManagementProps> = ({ onBack }) => {
   const [globalFilter, setGlobalFilter] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showFilterModal, setShowFilterModal] = useState(false);
@@ -163,6 +168,23 @@ const MovimientosManagement = () => {
 
   return (
     <div className="space-y-6">
+      {/* Header con botón de regreso */}
+      {onBack && (
+        <div className="flex items-center gap-4">
+          <button
+            onClick={onBack}
+            className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
+          >
+            <LuArrowLeft className="w-4 h-4" />
+            Volver al Dashboard
+          </button>
+          <div className="h-6 w-px bg-gray-300" />
+          <h1 className="text-2xl font-bold text-gray-900">
+            Movimientos de Inventario
+          </h1>
+        </div>
+      )}
+
       <div className="flex flex-col sm:flex-row justify-between gap-4">
         <div className="flex-1 relative">
           <LuSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />

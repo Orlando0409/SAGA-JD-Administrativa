@@ -7,7 +7,7 @@ import {
   getPaginationRowModel,
   createColumnHelper,
 } from '@tanstack/react-table';
-import { LuPlus, LuFilter, LuSearch, LuArrowLeft, LuEye, LuPencil } from 'react-icons/lu';
+import { LuPlus, LuFilter, LuSearch, LuEye, LuPencil, LuArrowLeft } from 'react-icons/lu';
 import { 
   useGetAllMaterials, 
   useGetMaterialesConCategorias, 
@@ -24,23 +24,19 @@ import type { Material } from '../../models/Inventario';
 import type { MaterialFilterOptions } from '../../types/MaterialTypes';
 import CreateMaterialModal from './CreateMaterialModal';
 import DetailMaterialModal from './DetailMaterialModal';
-import CategoriasManagement from '../Categorias/Catálogo de Categorias';
-import UnidadesMedicionManagement from '../UnidadesMedicion/Catálogo de Unidades de medicion';
-import MovimientosManagement from '../Movimientos/Catálogo de movimientos';
 import FilterMaterialModal from './FilterMaterialModal';
 import EditMaterialModal from './EditMaterialModal';
-import { InventarioDashboard } from '../Dashboard/InventarioDashboard';
 
-type ViewType = 'dashboard' | 'materiales' | 'categorias' | 'unidades' | 'movimientos';
+interface CatalogoMaterialesProps {
+  onBack?: () => void;
+}
 
-const Inventario = () => {
-  const [currentView, setCurrentView] = useState<ViewType>('dashboard');
+const CatalogoMateriales: React.FC<CatalogoMaterialesProps> = ({ onBack }) => {
   const [globalFilter, setGlobalFilter] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [selectedMaterial, setSelectedMaterial] = useState<Material | null>(null);
   const [showFilterModal, setShowFilterModal] = useState(false);
-
   const [showEditModal, setShowEditModal] = useState(false);
   const [appliedFilters, setAppliedFilters] = useState<MaterialFilterOptions>({});
   const { data: allMaterials = [], isLoading: isLoadingAll, refetch: refetchAllMaterials } = useGetAllMaterials();
@@ -291,14 +287,6 @@ const Inventario = () => {
     v !== undefined && v !== '' && v !== false
   ).length;
 
-  const handleModuleClick = (moduleId: ViewType) => {
-    setCurrentView(moduleId);
-  };
-
-  const handleBackToDashboard = () => {
-    setCurrentView('dashboard');
-  };
-
   const renderMaterialesView = () => {
     if (isLoading) {
       return (
@@ -310,6 +298,22 @@ const Inventario = () => {
 
     return (
     <div className="space-y-6">
+      {/* Header con botón de regreso */}
+      {onBack && (
+        <div className="flex items-center gap-4">
+          <button
+            onClick={onBack}
+            className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
+          >
+            <LuArrowLeft className="w-4 h-4" />
+            Volver al Dashboard
+          </button>
+          <div className="h-6 w-px bg-gray-300" />
+          <h1 className="text-2xl font-bold text-gray-900">
+            Catálogo de Materiales
+          </h1>
+        </div>
+      )}
       <div className="flex  sm:flex-row justify-between gap-4">
         <div className="flex-1 relative">
           <LuSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -493,48 +497,7 @@ const Inventario = () => {
     );
   };
 
-  // Renderizar vista específica según el módulo seleccionado
-  const renderCurrentView = () => {
-    switch (currentView) {
-      case 'materiales':
-        return renderMaterialesView();
-      case 'categorias':
-        return <CategoriasManagement />;
-      case 'unidades':
-        return <UnidadesMedicionManagement />;
-      case 'movimientos':
-        return <MovimientosManagement />;
-      default:
-        return null;
-    }
-  };
-
-  if (currentView !== 'dashboard') {
-    return (
-      <div className="space-y-6">
-        <div className="flex items-center gap-4">
-          <button
-            onClick={handleBackToDashboard}
-            className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
-          >
-            <LuArrowLeft className="w-4 h-4" />
-            Volver al Dashboard
-          </button>
-          <div className="h-6 w-px bg-gray-300" />
-          <h1 className="text-2xl font-bold text-gray-900">
-            {currentView === 'materiales' && 'Catálogo de Materiales'}
-            {currentView === 'categorias' && 'Gestión de Categorías'}
-            {currentView === 'unidades' && 'Unidades de Medición'}
-            {currentView === 'movimientos' && 'Movimientos de Inventario'}
-          </h1>
-        </div>
-
-        {renderCurrentView()}
-      </div>
-    );
-  }
-
-  return <InventarioDashboard onNavigate={(section) => handleModuleClick(section as ViewType)} />;
+  return renderMaterialesView();
 }
 
-export default Inventario
+export default CatalogoMateriales

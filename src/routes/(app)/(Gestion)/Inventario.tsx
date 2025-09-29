@@ -1,7 +1,7 @@
-import Inventario from '@/Modules/Inventario/components/Materiales/Catálogo de Materiales'
+import { InventarioWrapper } from '@/Modules/Inventario/components/Dashboard/InventarioWrapper'
 import { createFileRoute } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/(app)/(Gestion)/Inventario')({
-  component: Inventario,
+  component: InventarioWrapper,
 })
 

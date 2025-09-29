@@ -7,7 +7,7 @@ import {
   getPaginationRowModel,
   createColumnHelper,
 } from '@tanstack/react-table';
-import { LuPlus, LuSearch, LuPencil, LuTrash2, LuEye, LuToggleLeft, LuToggleRight } from 'react-icons/lu';
+import { LuPlus, LuSearch, LuPencil, LuTrash2, LuEye, LuToggleLeft, LuToggleRight, LuArrowLeft } from 'react-icons/lu';
 import { MdKeyboardArrowLeft, MdKeyboardArrowRight, MdKeyboardDoubleArrowLeft,
   MdKeyboardDoubleArrowRight, 
   MdKeyboardArrowDown,
@@ -18,7 +18,11 @@ import EditUnidadMedicionModal from './EditUnidadMedicionModal';
 import DetailUnidadMedicionModal from './DetailUnidadMedicionModal';
 import type { UnidadMedicion } from '../../models/Inventario';
 
-const UnidadesMedicionManagement = () => {
+interface UnidadesMedicionManagementProps {
+  onBack?: () => void;
+}
+
+const UnidadesMedicionManagement: React.FC<UnidadesMedicionManagementProps> = ({ onBack }) => {
   const [globalFilter, setGlobalFilter] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -184,6 +188,23 @@ const UnidadesMedicionManagement = () => {
 
   return (
     <div className="space-y-6">
+      {/* Header con botón de regreso */}
+      {onBack && (
+        <div className="flex items-center gap-4">
+          <button
+            onClick={onBack}
+            className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
+          >
+            <LuArrowLeft className="w-4 h-4" />
+            Volver al Dashboard
+          </button>
+          <div className="h-6 w-px bg-gray-300" />
+          <h1 className="text-2xl font-bold text-gray-900">
+            Unidades de Medición
+          </h1>
+        </div>
+      )}
+
       <div className="bg-white rounded-lg p-3">
         <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
           <div className="relative flex-1 max-w-md">

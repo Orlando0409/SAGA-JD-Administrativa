@@ -7,7 +7,7 @@ import {
   getPaginationRowModel,
   createColumnHelper,
 } from '@tanstack/react-table';
-import { LuPlus, LuSearch, LuPencil, LuEye } from 'react-icons/lu';
+import { LuPlus, LuSearch, LuPencil, LuEye, LuArrowLeft } from 'react-icons/lu';
 import { MdKeyboardArrowLeft, MdKeyboardArrowRight, MdKeyboardDoubleArrowLeft,
   MdKeyboardDoubleArrowRight, 
   MdKeyboardArrowDown,
@@ -20,7 +20,11 @@ import type { CategoriaMaterial } from '../../models/Inventario';
 import { IoMdCheckmarkCircleOutline } from "react-icons/io";
 import { FiXCircle } from "react-icons/fi"; 
 
-const CategoriasManagement = () => {
+interface CategoriasManagementProps {
+  onBack?: () => void;
+}
+
+const CategoriasManagement: React.FC<CategoriasManagementProps> = ({ onBack }) => {
   const [globalFilter, setGlobalFilter] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -153,6 +157,22 @@ const CategoriasManagement = () => {
 
   return (
     <div className="space-y-6">
+      {/* Header con botón de regreso */}
+      {onBack && (
+        <div className="flex items-center gap-4">
+          <button
+            onClick={onBack}
+            className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
+          >
+            <LuArrowLeft className="w-4 h-4" />
+            Volver al Dashboard
+          </button>
+          <div className="h-6 w-px bg-gray-300" />
+          <h1 className="text-2xl font-bold text-gray-900">
+            Gestión de Categorías
+          </h1>
+        </div>
+      )}
 
       {/* Filtros y búsqueda */}
       <div className="bg-white rounded-lg p-3">
