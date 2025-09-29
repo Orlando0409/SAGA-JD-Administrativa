@@ -6,7 +6,6 @@ import type {
   UpdateUnidadMedicionData,
 } from '../models/Inventario';
 
-// ========== SERVICIOS DE UNIDADES DE MEDICIÓN ==========
 export const getAllUnidadesMedicion = async (): Promise<UnidadMedicion[]> => {
   const response = await axiosPrivate.get('/Inventario/all/unidades-medicion');
   return response.data;

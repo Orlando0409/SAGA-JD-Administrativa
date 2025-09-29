@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { LuX } from 'react-icons/lu';
-import { useCreateUnidadMedicion } from '../../hooks/useUnidadesMedicion';
+import { useCreateUnidadMedicion } from '../../hooks/HookUnidadMedicion';
 
 interface CreateUnidadMedicionModalProps {
   isOpen: boolean;
@@ -38,7 +38,6 @@ const CreateUnidadMedicionModal: React.FC<CreateUnidadMedicionModalProps> = ({
     e.preventDefault();
     setFormErrors({});
 
-    // Validación simple
     const errors: Record<string, string> = {};
     
     if (!formData.Nombre_Unidad_Medicion.trim()) {

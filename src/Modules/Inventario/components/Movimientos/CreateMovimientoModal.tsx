@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { LuX, LuPackage, LuTrendingUp, LuTrendingDown } from 'react-icons/lu';
-import { useMaterials } from '../../hooks/InventarioHook';
-import { useIngresoMaterial, useEgresoMaterial } from '../../hooks/useMovimientos';
+import { useGetAllMaterials } from '../../hooks/useMaterials';
+import { useIngresoMaterial, useEgresoMaterial } from '../../hooks/HookMaterialMovimiento';
 import type { Material } from '../../models/Inventario';
 import type { TipoMovimiento } from '../../models/MovimientoMaterial';
 
@@ -37,25 +37,14 @@ const CreateMovimientoModal: React.FC<CreateMovimientoModalProps> = ({
   const [errors, setErrors] = useState<Partial<FormData>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const { data: materials = [], isLoading: isLoadingMaterials } = useMaterials();
+  const { data: materials = [], isLoading: isLoadingMaterials } = useGetAllMaterials();
   const ingresoMutation = useIngresoMaterial();
   const egresoMutation = useEgresoMaterial();
 
   const selectedMaterial = materials.find((m: Material) => m.Id_Material === formData.materialId);
   const isIngreso = formData.tipoMovimiento === 'INGRESO';
 
-  useEffect(() => {
-    if (isOpen) {
-      setFormData({
-        materialId: initialMaterial?.Id_Material || 0,
-        tipoMovimiento: initialTipo,
-        cantidad: 1,
-        motivo: '',
-        observaciones: ''
-      });
-      setErrors({});
-    }
-  }, [isOpen, initialMaterial?.Id_Material, initialTipo]);
+
 
   const validateForm = (): boolean => {
     const newErrors: Partial<FormData> = {};
@@ -295,7 +284,6 @@ const CreateMovimientoModal: React.FC<CreateMovimientoModalProps> = ({
   return (
     <div className="fixed inset-0 bg-white bg-opacity-95 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
-        {/* Header */}
         <div className="flex items-center justify-between p-6 border-b">
           <h2 className="text-xl font-semibold text-gray-900">
             Nuevo {isIngreso ? 'Ingreso' : 'Egreso'}
@@ -307,8 +295,6 @@ const CreateMovimientoModal: React.FC<CreateMovimientoModalProps> = ({
             <LuX className="w-6 h-6" />
           </button>
         </div>
-
-        {/* Content */}
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
           {renderTipoMovimiento()}
           {renderMaterialSelect()}
@@ -317,7 +303,6 @@ const CreateMovimientoModal: React.FC<CreateMovimientoModalProps> = ({
           {renderMotivoInput()}
           {renderObservacionesInput()}
           {renderNuevoStock()}
-          {/* Actions */}
           <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-gray-200">
             <button
               type="button"

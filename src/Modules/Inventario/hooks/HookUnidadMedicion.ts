@@ -1,18 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAlerts } from '@/Modules/Global/context/AlertContext';
-import { 
-  getAllUnidadesMedicion, 
-  createUnidadMedicion, 
-  updateUnidadMedicion, 
-  deleteUnidadMedicion,
-  getAllUnidadesMedicionSimple
-} from '../service/InventarioService';
 import type { 
   CreateUnidadMedicionData, 
   UpdateUnidadMedicionData 
 } from '../models/UnidadMedicion';
+import { getAllUnidadesMedicion, getAllUnidadesMedicionSimple, createUnidadMedicion, updateUnidadMedicion, updateEstadoUnidadMedicion, deleteUnidadMedicion } from '../service/UnidadesMedicionService';
 
-// Hook para obtener todas las unidades de medición
+
 export const useUnidadesMedicion = () => {
   return useQuery({
     queryKey: ['unidades-medicion'],
@@ -21,7 +15,6 @@ export const useUnidadesMedicion = () => {
   });
 };
 
-// Hook para obtener unidades de medición simplificadas (para dropdowns)
 export const useUnidadesMedicionSimple = () => {
   return useQuery({
     queryKey: ['unidades-medicion-simple'],
@@ -30,7 +23,6 @@ export const useUnidadesMedicionSimple = () => {
   });
 };
 
-// Hook para crear unidad de medición
 export const useCreateUnidadMedicion = () => {
   const queryClient = useQueryClient();
   const { showSuccess, showError } = useAlerts();
@@ -49,7 +41,6 @@ export const useCreateUnidadMedicion = () => {
   });
 };
 
-// Hook para actualizar unidad de medición
 export const useUpdateUnidadMedicion = () => {
   const queryClient = useQueryClient();
   const { showSuccess, showError } = useAlerts();
@@ -70,7 +61,23 @@ export const useUpdateUnidadMedicion = () => {
   });
 };
 
-// Hook para eliminar unidad de medición
+export const useUpdateEstadoUnidadMedicion = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ unidadId, estadoId }: { unidadId: number; estadoId: number }) => 
+      updateEstadoUnidadMedicion(unidadId, estadoId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['unidades-medicion'] });
+      queryClient.invalidateQueries({ queryKey: ['unidades-medicion-simple'] });
+      queryClient.invalidateQueries({ queryKey: ['unidad-medicion'] });
+    },
+    onError: () => {
+      console.error('Error al actualizar el estado de la unidad de medición');
+    },
+  });
+};
+
 export const useDeleteUnidadMedicion = () => {
   const queryClient = useQueryClient();
   const { showSuccess, showError } = useAlerts();

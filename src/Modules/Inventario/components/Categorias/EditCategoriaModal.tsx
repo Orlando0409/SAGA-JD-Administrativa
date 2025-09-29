@@ -136,15 +136,6 @@ const EditCategoriaModal: React.FC<EditCategoriaModalProps> = ({ isOpen, onClose
                 <p className="text-red-500 text-sm mt-1">{formErrors.Nombre_Categoria}</p>
               )}
             </div>
-
-            {/* Información adicional */}
-            <div className="bg-gray-50 rounded-md p-3">
-              <h4 className="text-sm font-medium text-gray-700 mb-2">Información de la categoría:</h4>
-              <div className="text-sm text-gray-600 space-y-1">
-                <p><span className="font-medium">Nombre actual:</span> {categoria.Nombre_Categoria}</p>
-              </div>
-            </div>
-
             <div className="flex gap-3 pt-4 border-t">
               <button
                 type="button"

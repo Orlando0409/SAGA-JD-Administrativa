@@ -1,8 +1,7 @@
 import axiosPrivate from '@/Api/apiAuth';
 import type { 
   Material, 
-  IngresoEgresoMaterialData,
-  MovimientoMaterial
+  IngresoEgresoMaterialData
 } from '../models/Inventario';
 
 const transformMaterial = (material: Material) => {
@@ -12,7 +11,6 @@ const transformMaterial = (material: Material) => {
   };
 };
 
-// ========== SERVICIOS DE MOVIMIENTOS (INGRESO/EGRESO) ==========
 export const ingresoMaterial = async (materialId: number, ingresoData: IngresoEgresoMaterialData): Promise<Material> => {
   const response = await axiosPrivate.patch(`/Inventario/ingreso/material/${materialId}`, ingresoData);
   return transformMaterial(response.data);

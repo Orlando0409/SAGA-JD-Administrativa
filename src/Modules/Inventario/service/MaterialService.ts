@@ -12,7 +12,6 @@ const transformMaterial = (material: Material) => {
   };
 };
 
-// ========== SERVICIOS DE MATERIALES ==========
 export const getAllMaterials = async (): Promise<Material[]> => {
   const response = await axiosPrivate.get('/Inventario/all/materiales');
   return response.data.map(transformMaterial);
@@ -50,5 +49,10 @@ export const createMaterial = async (materialData: CreateMaterialData): Promise<
 
 export const updateMaterial = async (id: number, materialData: UpdateMaterialData): Promise<Material> => {
   const response = await axiosPrivate.put(`/Inventario/update/material/${id}`, materialData);
+  return transformMaterial(response.data);
+};
+
+export const removeCategoriaFromMaterial = async (materialId: number, categoriaId: number): Promise<Material> => {
+  const response = await axiosPrivate.delete(`/Inventario/material/${materialId}/categoria/${categoriaId}`);
   return transformMaterial(response.data);
 };

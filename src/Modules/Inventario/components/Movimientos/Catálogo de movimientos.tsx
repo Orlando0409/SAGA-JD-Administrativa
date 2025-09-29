@@ -25,12 +25,9 @@ import {
 
 import type { MovimientoMaterial } from '../../models/MovimientoMaterial';
 import type { MovimientoFilterOptions } from '../../types/MovimientosTypes';
-
-// Modales
 import CreateMovimientoModal from './CreateMovimientoModal';
 import FilterMovimientosModal from './FilterMovimientosModal';
 import DetailMovimientoModal from './DetailMovimientoModal';
-import { da } from 'date-fns/locale';
 
 const MovimientosManagement = () => {
   const [globalFilter, setGlobalFilter] = useState('');
@@ -39,9 +36,9 @@ const MovimientosManagement = () => {
   const [selectedMovimiento, setSelectedMovimiento] = useState<MovimientoMaterial | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [appliedFilters, setAppliedFilters] = useState<MovimientoFilterOptions>({});
-  const  movimientos:any  = []; // Reemplazar con el hook de datos real
+  const  movimientos:any  = []; 
 
-  // Configuración de columnas
+
   const columnHelper = createColumnHelper<MovimientoMaterial>();
 
   const columns = useMemo(
@@ -134,8 +131,6 @@ const MovimientosManagement = () => {
     []
   );
 
-
-  // Configuración de la tabla
   const table = useReactTable({
     data: movimientos as MovimientoMaterial[],
     columns,
@@ -168,8 +163,6 @@ const MovimientosManagement = () => {
 
   return (
     <div className="space-y-6">
-
-      {/* Controles */}
       <div className="flex flex-col sm:flex-row justify-between gap-4">
         <div className="flex-1 relative">
           <LuSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -209,7 +202,6 @@ const MovimientosManagement = () => {
         </div>
       </div>
 
-      {/* Tabla */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
@@ -262,7 +254,6 @@ const MovimientosManagement = () => {
           </table>
         </div>
 
-        {/* Paginación */}
         <div className="bg-white px-6 py-3 border-t border-gray-200 flex items-center justify-between">
           <div className="flex items-center gap-2 text-sm text-gray-700">
             <span>Mostrar</span>
@@ -319,7 +310,6 @@ const MovimientosManagement = () => {
         </div>
       </div>
 
-      {/* Modales */}
       <CreateMovimientoModal
         isOpen={showCreateModal}
         onClose={() => setShowCreateModal(false)}

@@ -7,27 +7,29 @@ import {
   getPaginationRowModel,
   createColumnHelper,
 } from '@tanstack/react-table';
-import { LuPlus, LuFilter, LuSearch, LuPackage, LuTags, LuRuler, LuActivity, LuArrowLeft } from 'react-icons/lu';
+import { LuPlus, LuFilter, LuSearch, LuArrowLeft, LuEye, LuPencil } from 'react-icons/lu';
 import { 
-  useMaterials, 
-  useMaterialesConCategorias, 
-  useMaterialesSinCategorias,
-  useMaterialesPorEncimaDeStock,
-  useMaterialesPorDebajoDeStock
-} from '../hooks/InventarioHook';
+  useGetAllMaterials, 
+  useGetMaterialesConCategorias, 
+  useGetMaterialesSinCategorias,
+  useGetMaterialesPorDebajoDeStock,
+  useGetMaterialesPorEncimaDeStock
+} from '../../hooks/useMaterials';
 import { MdKeyboardArrowLeft, MdKeyboardArrowRight, MdKeyboardDoubleArrowLeft,
   MdKeyboardDoubleArrowRight, 
   MdKeyboardArrowDown,
-  MdKeyboardArrowUp, MdInventory} from "react-icons/md";
+  MdKeyboardArrowUp} from "react-icons/md";
 
-import type { Material } from '../models/Inventario';
-import type { MaterialFilterOptions } from '../types/MaterialTypes';
-import CreateMaterialModal from './Materiales/CreateMaterialModal';
-import DetailMaterialModal from './Materiales/DetailMaterialModal';
-import CategoriasManagement from './Categorias/CategoriasManagement';
-import UnidadesMedicionManagement from './UnidadesMedicion/UnidadesMedicionManagement';
-import MovimientosManagement from './Movimientos/MovimientosManagement';
-import FilterMaterialModal from './Materiales/FilterMaterialModal';
+import type { Material } from '../../models/Inventario';
+import type { MaterialFilterOptions } from '../../types/MaterialTypes';
+import CreateMaterialModal from './CreateMaterialModal';
+import DetailMaterialModal from './DetailMaterialModal';
+import CategoriasManagement from '../Categorias/Catálogo de Categorias';
+import UnidadesMedicionManagement from '../UnidadesMedicion/Catálogo de Unidades de medicion';
+import MovimientosManagement from '../Movimientos/Catálogo de movimientos';
+import FilterMaterialModal from './FilterMaterialModal';
+import EditMaterialModal from './EditMaterialModal';
+import { InventarioDashboard } from '../Dashboard/InventarioDashboard';
 
 type ViewType = 'dashboard' | 'materiales' | 'categorias' | 'unidades' | 'movimientos';
 
@@ -38,19 +40,18 @@ const Inventario = () => {
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [selectedMaterial, setSelectedMaterial] = useState<Material | null>(null);
   const [showFilterModal, setShowFilterModal] = useState(false);
+
+  const [showEditModal, setShowEditModal] = useState(false);
   const [appliedFilters, setAppliedFilters] = useState<MaterialFilterOptions>({});
-  const { data: allMaterials = [], isLoading: isLoadingAll, refetch: refetchAllMaterials } = useMaterials();
-  const { data: materialesConCategorias = [], isLoading: isLoadingConCat, refetch: refetchConCat } = useMaterialesConCategorias();
-  const { data: materialesSinCategorias = [], isLoading: isLoadingSinCat, refetch: refetchSinCat } = useMaterialesSinCategorias();
-  const enableStockAbove = appliedFilters.tipoFiltroStock === 'encima' && !!appliedFilters.stockMinimo;
-  const enableStockBelow = appliedFilters.tipoFiltroStock === 'debajo' && !!appliedFilters.stockMaximo;
-  const { data: materialesEncimaStock = [], isLoading: isLoadingAbove, refetch: refetchAbove } = useMaterialesPorEncimaDeStock(
+  const { data: allMaterials = [], isLoading: isLoadingAll, refetch: refetchAllMaterials } = useGetAllMaterials();
+  const { data: materialesConCategorias = [], isLoading: isLoadingConCat, refetch: refetchConCat } = useGetMaterialesConCategorias();
+  const { data: materialesSinCategorias = [], isLoading: isLoadingSinCat, refetch: refetchSinCat } = useGetMaterialesSinCategorias();
+  const { data: materialesEncimaStock = [], isLoading: isLoadingAbove, refetch: refetchAbove } = useGetMaterialesPorEncimaDeStock(
     appliedFilters.stockMinimo || 0, 
-    enableStockAbove
+
   );
-  const { data: materialesDebajoStock = [], isLoading: isLoadingBelow, refetch: refetchBelow } = useMaterialesPorDebajoDeStock(
+  const { data: materialesDebajoStock = [], isLoading: isLoadingBelow, refetch: refetchBelow } = useGetMaterialesPorDebajoDeStock(
     appliedFilters.stockMaximo || 0, 
-    enableStockBelow
   );
 
   const pageSizeOptions = [5, 10, 20, 50];
@@ -225,6 +226,28 @@ const Inventario = () => {
           );
         },
       }),
+      columnHelper.display({
+        id: 'acciones',
+        header: 'Acciones',
+        cell: info => (
+          <div className="flex justify-center gap-2">
+            <button
+              className="p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-md transition-colors"
+              onClick={() => handleViewDetail(info.row.original)}
+              title="Ver detalles"
+            >
+              <LuEye className="w-4 h-4" />
+            </button>
+            <button
+              className="p-2 text-green-600 hover:text-green-800 hover:bg-green-50 rounded-md transition-colors"
+              onClick={() => handleEdit(info.row.original)}
+              title="Editar"
+            >
+              <LuPencil className="w-4 h-4" />
+            </button>
+          </div>
+        ),
+      }),
     ],
     []
   );
@@ -248,11 +271,16 @@ const Inventario = () => {
       },
     },
   });
+    const handleEdit = (material: Material) => {
+    setSelectedMaterial(material);
+    setShowEditModal(true);
+  };
 
-  const handleRowClick = (material: Material) => {
+  const handleViewDetail = (material: Material) => {
     setSelectedMaterial(material);
     setShowDetailModal(true);
   };
+
 
   const handleApplyFilters = (filters: MaterialFilterOptions) => {
     setAppliedFilters(filters);
@@ -357,7 +385,7 @@ const Inventario = () => {
                 <tr
                   key={row.id}
                   className="hover:bg-gray-50 cursor-pointer transition-colors"
-                  onClick={() => handleRowClick(row.original)}
+                  onClick={() => handleViewDetail(row.original)}
                 >
                   {row.getVisibleCells().map((cell) => (
                     <td key={cell.id} className="px-6 py-4 whitespace-nowrap text-sm">
@@ -445,6 +473,17 @@ const Inventario = () => {
         />
       )}
 
+        {showEditModal && selectedMaterial && (
+        <EditMaterialModal
+          isOpen={showEditModal}
+          onClose={() => {
+            setShowEditModal(false);
+            setSelectedMaterial(null);
+          }}
+          material={selectedMaterial}
+        />
+      )}
+
       <FilterMaterialModal
         isOpen={showFilterModal}
         onClose={() => setShowFilterModal(false)}
@@ -501,147 +540,7 @@ const Inventario = () => {
   }
 
   // Dashboard principal
-  return (
-    <div className="space-y-7">
-      {/* Header del Dashboard */}
-      <div className="text-center">
-        <div className="flex items-center justify-center mb-4">
-          <div className="p-3 bg-blue-100 rounded-full">
-            <MdInventory className="w-12 h-12 text-blue-600" />
-          </div>
-        </div>
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">
-          Gestión del Inventario
-        </h1>
-        <p className="text-gray-600 max-w-2xl mx-auto">
-          Gestión integral de materiales, categorías, unidades de medición y movimientos de inventario.
-        </p>
-      </div>
-
-      {/* Módulos principales */}
-      <div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-[70vw] justify-center mx-auto">
-          <button
-            className="p-4 rounded-lg border-2 cursor-pointer transition-all duration-200 hover:shadow-md bg-blue-50 border-blue-200 hover:scale-105 w-full text-left"
-            onClick={() => handleModuleClick('materiales')}
-          >
-            <div className="flex items-start justify-between">
-              <div className="flex-1">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="text-blue-600">
-                    <LuPackage className="w-8 h-8" />
-                  </div>
-                  <h3 className="text-xl font-semibold text-gray-900">
-                    Materiales
-                  </h3>
-                </div>
-                <p className="text-gray-600 mb-4 text-sm leading-relaxed">
-                  Gestión completa del catálogo de materiales, inventario y stock disponible
-                </p>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-blue-600">
-                    Ver catálogo completo
-                  </span>
-                  <span className="px-3 py-1 text-sm font-medium rounded-md transition-colors text-blue-600 hover:bg-white/50">
-                    Acceder →
-                  </span>
-                </div>
-              </div>
-            </div>
-          </button>
-
-          <button
-            className="p-6 rounded-lg border-2 cursor-pointer transition-all duration-200 hover:shadow-md bg-green-50 border-green-200 hover:scale-105 w-full text-left"
-            onClick={() => handleModuleClick('categorias')}
-          >
-            <div className="flex items-start justify-between">
-              <div className="flex-1">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="text-green-600">
-                    <LuTags className="w-8 h-8" />
-                  </div>
-                  <h3 className="text-xl font-semibold text-gray-900">
-                    Categorías
-                  </h3>
-                </div>
-                <p className="text-gray-600 mb-4 text-sm leading-relaxed">
-                  Organización y clasificación de materiales por categorías
-                </p>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-green-600">
-                    Gestionar clasificaciones
-                  </span>
-                  <span className="px-3 py-1 text-sm font-medium rounded-md transition-colors text-green-600 hover:bg-white/50">
-                    Acceder →
-                  </span>
-                </div>
-              </div>
-            </div>
-          </button>
-
-          <button
-            className="p-6 rounded-lg border-2 cursor-pointer transition-all duration-200 hover:shadow-md bg-purple-50 border-purple-200 hover:scale-105 w-full text-left"
-            onClick={() => handleModuleClick('unidades')}
-          >
-            <div className="flex items-start justify-between">
-              <div className="flex-1">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="text-purple-600">
-                    <LuRuler className="w-8 h-8" />
-                  </div>
-                  <h3 className="text-xl font-semibold text-gray-900">
-                    Unidades de Medición
-                  </h3>
-                </div>
-                <p className="text-gray-600 mb-4 text-sm leading-relaxed">
-                  Configuración de unidades de medida para materiales
-                </p>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-purple-600">
-                    Configurar medidas
-                  </span>
-                  <span className="px-3 py-1 text-sm font-medium rounded-md transition-colors text-purple-600 hover:bg-white/50">
-                    Acceder →
-                  </span>
-                </div>
-              </div>
-            </div>
-          </button>
-
-          <button
-            className="p-6 rounded-lg border-2 cursor-pointer transition-all duration-200 hover:shadow-md bg-orange-50 border-orange-200 hover:scale-105 w-full text-left"
-            onClick={() => handleModuleClick('movimientos')}
-          >
-            <div className="flex items-start justify-between">
-              <div className="flex-1">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="text-orange-600">
-                    <LuActivity className="w-8 h-8" />
-                  </div>
-                  <h3 className="text-xl font-semibold text-gray-900">
-                    Movimientos
-                  </h3>
-                </div>
-                <p className="text-gray-600 mb-4 text-sm leading-relaxed">
-                  Registro de entradas y salidas de inventario
-                </p>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-orange-600">
-                    Ver historial completo
-                  </span>
-                  <span className="px-3 py-1 text-sm font-medium rounded-md transition-colors text-orange-600 hover:bg-white/50">
-                    Acceder →
-                  </span>
-                </div>
-              </div>
-            </div>
-          </button>
-        </div>
-      </div>
-
-
-    </div>
-  );
+  return <InventarioDashboard onNavigate={(section) => handleModuleClick(section as ViewType)} />;
 }
 
 export default Inventario

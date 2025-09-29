@@ -7,86 +7,62 @@ import {
   getPaginationRowModel,
   createColumnHelper,
 } from '@tanstack/react-table';
-import { LuPlus, LuSearch, LuPencil, LuTrash2, LuEye, LuToggleLeft, LuToggleRight } from 'react-icons/lu';
+import { LuPlus, LuSearch, LuPencil, LuEye } from 'react-icons/lu';
 import { MdKeyboardArrowLeft, MdKeyboardArrowRight, MdKeyboardDoubleArrowLeft,
   MdKeyboardDoubleArrowRight, 
   MdKeyboardArrowDown,
   MdKeyboardArrowUp} from "react-icons/md";
-import { useGetAllUnidadesMedicion, useDeleteUnidadMedicion, useUpdateEstadoUnidadMedicion } from '../../hooks/useUnidadesMedicion';
-import CreateUnidadMedicionModal from './CreateUnidadMedicionModal';
-import EditUnidadMedicionModal from './EditUnidadMedicionModal';
-import DetailUnidadMedicionModal from './DetailUnidadMedicionModal';
-import type { UnidadMedicion } from '../../models/Inventario';
+import { useGetAllCategories, useDeleteCategoria } from '../../hooks/useCategorias';
+import CreateCategoriaModal from './CreateCategoriaModal';
+import EditCategoriaModal from './EditCategoriaModal';
+import DetailCategoriaModal from './DetailCategoriaModal';
+import type { CategoriaMaterial } from '../../models/Inventario';
+import { IoMdCheckmarkCircleOutline } from "react-icons/io";
+import { FiXCircle } from "react-icons/fi"; 
 
-const UnidadesMedicionManagement = () => {
+const CategoriasManagement = () => {
   const [globalFilter, setGlobalFilter] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDetailModal, setShowDetailModal] = useState(false);
-  const [selectedUnidad, setSelectedUnidad] = useState<UnidadMedicion | null>(null);
+  const [selectedCategoria, setSelectedCategoria] = useState<CategoriaMaterial | null>(null);
+
 
   // Hooks
-  const { data: unidades = [], isLoading, error } = useGetAllUnidadesMedicion();
-  const deleteUnidadMutation = useDeleteUnidadMedicion();
-  const updateEstadoMutation = useUpdateEstadoUnidadMedicion();
+  const { data: categorias = [], isLoading, error } = useGetAllCategories();
+  const deleteMutation = useDeleteCategoria();
 
   // Configuración de columnas
-  const columnHelper = createColumnHelper<UnidadMedicion>();
+  const columnHelper = createColumnHelper<CategoriaMaterial>();
   
   const columns = useMemo(() => [
-    columnHelper.accessor('Nombre_Unidad', {
+    columnHelper.accessor('Nombre_Categoria', {
       header: 'Nombre',
       cell: info => (
         <button 
-          className="font-medium text-blue-600 hover:text-blue-800 transition-colors text-left"
+          className="font-medium transition-colors text-left w-full"
           onClick={() => handleViewDetail(info.row.original)}
         >
           {info.getValue()}
         </button>
       ),
     }),
-    columnHelper.accessor('Abreviatura', {
-      header: 'Abreviatura',
-      cell: info => (
-        <span className="inline-flex px-2 py-1 text-sm font-mono font-semibold rounded bg-gray-100 text-gray-800">
-          {info.getValue()}
-        </span>
-      ),
-    }),
-    columnHelper.accessor('Estado_Unidad_Medicion.Nombre_Estado_Unidad_Medicion', {
+    columnHelper.display({
+      id: 'estado',
       header: 'Estado',
-      cell: info => {
-        const estado = info.getValue();
-        return (
-          <div className="flex items-center gap-2">
-            <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-              estado === 'Activo' 
-                ? 'bg-green-100 text-green-800' 
-                : 'bg-red-100 text-red-800'
-            }`}>
-              {estado}
-            </span>
-            <button
-              onClick={() => handleToggleEstado(info.row.original)}
-              disabled={updateEstadoMutation.isPending}
-              className="text-gray-400 hover:text-gray-600 transition-colors"
-              title={`Cambiar a ${estado === 'Activo' ? 'Inactivo' : 'Activo'}`}
-            >
-              {estado === 'Activo' ? (
-                <LuToggleRight className="w-5 h-5 text-green-600" />
-              ) : (
-                <LuToggleLeft className="w-5 h-5 text-gray-400" />
-              )}
-            </button>
-          </div>
-        );
-      },
+      cell: () => (
+        <div className="flex justify-center">
+          <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
+            Activa
+          </span>
+        </div>
+      ),
     }),
     columnHelper.display({
       id: 'acciones',
       header: 'Acciones',
       cell: info => (
-        <div className="flex justify-start gap-2">
+        <div className="flex justify-center gap-2">
           <button
             className="p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-md transition-colors"
             onClick={() => handleViewDetail(info.row.original)}
@@ -104,19 +80,23 @@ const UnidadesMedicionManagement = () => {
           <button
             className="p-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-md transition-colors"
             onClick={() => handleDelete(info.row.original)}
-            disabled={deleteUnidadMutation.isPending}
-            title="Eliminar"
+            disabled={deleteMutation.isPending}
+            title="desactivar"
           >
-            <LuTrash2 className="w-4 h-4" />
+            {deleteMutation.isPending && deleteMutation.variables === info.row.original.Id_Categoria ? (
+              <IoMdCheckmarkCircleOutline className="w-4 h-4" />
+            ) : (
+              <FiXCircle className="w-4 h-4" />
+            )}
           </button>
         </div>
       ),
     }),
-  ], [deleteUnidadMutation.isPending, updateEstadoMutation.isPending]);
+  ], [deleteMutation.isPending]);
 
   // Configuración de la tabla
   const table = useReactTable({
-    data: unidades,
+    data: categorias,
     columns,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
@@ -134,45 +114,31 @@ const UnidadesMedicionManagement = () => {
   });
 
   // Handlers
-  const handleEdit = (unidad: UnidadMedicion) => {
-    setSelectedUnidad(unidad);
+  const handleEdit = (categoria: CategoriaMaterial) => {
+    setSelectedCategoria(categoria);
     setShowEditModal(true);
   };
 
-  const handleViewDetail = (unidad: UnidadMedicion) => {
-    setSelectedUnidad(unidad);
+  const handleViewDetail = (categoria: CategoriaMaterial) => {
+    setSelectedCategoria(categoria);
     setShowDetailModal(true);
   };
 
-  const handleToggleEstado = async (unidad: UnidadMedicion) => {
-    const currentEstado = unidad.Estado_Unidad_Medicion?.Nombre_Estado_Unidad_Medicion || 'Inactivo';
-    const nuevoEstado = currentEstado === 'Activo' ? 'Inactivo' : 'Activo';
-    try {
-      await updateEstadoMutation.mutateAsync({
-        unidadId: unidad.Id_Unidad_Medicion,
-        estadoId: nuevoEstado === 'Activo' ? 1 : 2
-      });
-    } catch (error) {
-      console.error('Error al cambiar estado:', error);
-    }
-  };
-
-  const handleDelete = async (unidad: UnidadMedicion) => {
-    if (confirm(`¿Estás seguro de que quieres eliminar la unidad "${unidad.Nombre_Unidad}"?`)) {
+  const handleDelete = async (categoria: CategoriaMaterial) => {
+    if (confirm(`¿Estás seguro de que quieres eliminar la categoría "${categoria.Nombre_Categoria}"?`)) {
       try {
-        await deleteUnidadMutation.mutateAsync(unidad.Id_Unidad_Medicion);
+        await deleteMutation.mutateAsync(categoria.Id_Categoria);
       } catch (error) {
-        console.error('Error al eliminar unidad:', error);
+        console.error('Error al eliminar categoría:', error);
       }
     }
   };
-
 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-        <span className="ml-2 text-gray-600">Cargando unidades de medición...</span>
+        <span className="ml-2 text-gray-600">Cargando categorías...</span>
       </div>
     );
   }
@@ -180,7 +146,7 @@ const UnidadesMedicionManagement = () => {
   if (error) {
     return (
       <div className="text-center text-red-600 p-4">
-        Error al cargar las unidades de medición. Por favor, intenta nuevamente.
+        Error al cargar las categorías. Por favor, intenta nuevamente.
       </div>
     );
   }
@@ -195,18 +161,18 @@ const UnidadesMedicionManagement = () => {
             <LuSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
             <input
               type="text"
-              placeholder="Buscar unidades..."
+              placeholder="Buscar categorías..."
               value={globalFilter ?? ''}
               onChange={(e) => setGlobalFilter(e.target.value)}
               className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
-          <button 
-          onClick={() => setShowCreateModal(true)}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md flex items-center gap-2 transition-colors"
-          >
-          <LuPlus className="w-4 h-4" />
-          Nueva Unidad
+            <button 
+             onClick={() => setShowCreateModal(true)}
+             className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md flex items-center gap-2 transition-colors"
+              >
+            <LuPlus className="w-4 h-4" />
+            Nueva Categoría
          </button>
         </div>
       </div>
@@ -215,23 +181,46 @@ const UnidadesMedicionManagement = () => {
       <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+            <thead className="bg-gray-50 justify-between">
               {table.getHeaderGroups().map(headerGroup => (
                 <tr key={headerGroup.id}>
-                  {headerGroup.headers.map(header => (
-                    <th key={header.id} className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      {header.isPlaceholder ? null : (
-                        <div
-                          className={header.column.getCanSort() ? 'cursor-pointer select-none flex items-center gap-2' : ''}
-                          onClick={header.column.getToggleSortingHandler()}
-                        >
-                          {header.column.columnDef.header as string}
-                          {{
-                            asc: <MdKeyboardArrowUp className="w-4 h-4" />,
-                            desc: <MdKeyboardArrowDown className="w-4 h-4" />,
-                          }[header.column.getIsSorted() as string] ?? null}
-                        </div>
-                      )}
+                  {headerGroup.headers.map((header, index) => (
+                    <th key={header.id} className={`px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider ${
+                      index === 0 ? 'text-left' : 'text-center'
+                    }`}>
+                      {(() => {
+                        if (header.isPlaceholder) {
+                          return null;
+                        }
+                        if (header.column.getCanSort()) {
+                          return (
+                            <button
+                              type="button"
+                              className={`cursor-pointer select-none flex items-center gap-2 bg-transparent border-none p-0 ${
+                                index === 0 ? 'justify-start' : 'justify-center'
+                              }`}
+                              onClick={header.column.getToggleSortingHandler()}
+                              onKeyDown={e => {
+                                if (e.key === 'Enter' || e.key === ' ') {
+                                  e.preventDefault();
+                                  header.column.getToggleSortingHandler()?.(e);
+                                }
+                              }}
+                              tabIndex={0}
+                              aria-label={`Ordenar por ${header.column.columnDef.header as string}`}
+                            >
+                              {header.column.columnDef.header as string}
+                              {header.column.getIsSorted() === 'asc' && <MdKeyboardArrowUp className="w-4 h-4" />}
+                              {header.column.getIsSorted() === 'desc' && <MdKeyboardArrowDown className="w-4 h-4" />}
+                            </button>
+                          );
+                        }
+                        return (
+                          <span className={index === 0 ? 'text-left' : 'text-center'}>
+                            {header.column.columnDef.header as string}
+                          </span>
+                        );
+                      })()}
                     </th>
                   ))}
                 </tr>
@@ -240,15 +229,17 @@ const UnidadesMedicionManagement = () => {
             <tbody className="bg-white divide-y divide-gray-200">
               {table.getRowModel().rows.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-6 py-8 text-center text-gray-500">
-                    {globalFilter ? 'No se encontraron unidades que coincidan con la búsqueda' : 'No hay unidades de medición registradas'}
+                  <td colSpan={4} className="px-6 py-8 text-center text-gray-500">
+                    {globalFilter ? 'No se encontraron categorías que coincidan con la búsqueda' : 'No hay categorías registradas'}
                   </td>
                 </tr>
               ) : (
                 table.getRowModel().rows.map(row => (
                   <tr key={row.id} className="hover:bg-gray-50">
-                    {row.getVisibleCells().map(cell => (
-                      <td key={cell.id} className="px-6 py-4 whitespace-nowrap">
+                    {row.getVisibleCells().map((cell, index) => (
+                      <td key={cell.id} className={`px-6 py-4 whitespace-nowrap ${
+                        index === 0 ? 'text-left' : 'text-center'
+                      }`}>
                         {cell.column.columnDef.cell ? 
                           (typeof cell.column.columnDef.cell === 'function' ? cell.column.columnDef.cell(cell.getContext()) : cell.column.columnDef.cell) :
                           cell.getValue() as React.ReactNode
@@ -312,29 +303,29 @@ const UnidadesMedicionManagement = () => {
       </div>
 
       {/* Modales */}
-      <CreateUnidadMedicionModal
+      <CreateCategoriaModal
         isOpen={showCreateModal}
         onClose={() => setShowCreateModal(false)}
       />
 
-      {selectedUnidad && (
+      {selectedCategoria && (
         <>
-          <EditUnidadMedicionModal
+          <EditCategoriaModal
             isOpen={showEditModal}
             onClose={() => {
               setShowEditModal(false);
-              setSelectedUnidad(null);
+              setSelectedCategoria(null);
             }}
-            unidad={selectedUnidad}
+            categoria={selectedCategoria}
           />
 
-          <DetailUnidadMedicionModal
+          <DetailCategoriaModal
             isOpen={showDetailModal}
             onClose={() => {
               setShowDetailModal(false);
-              setSelectedUnidad(null);
+              setSelectedCategoria(null);
             }}
-            unidad={selectedUnidad}
+            categoria={selectedCategoria}
           />
         </>
       )}
@@ -342,4 +333,4 @@ const UnidadesMedicionManagement = () => {
   );
 };
 
-export default UnidadesMedicionManagement;
+export default CategoriasManagement;

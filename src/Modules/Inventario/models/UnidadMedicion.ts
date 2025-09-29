@@ -1,4 +1,3 @@
-// Nuevos modelos para las unidades de medición
 export interface UnidadMedicion {
   Id_Unidad_Medicion: number;
   Nombre_Unidad: string;

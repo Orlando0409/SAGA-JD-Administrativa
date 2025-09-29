@@ -1,5 +1,4 @@
 import type { CategoriaMaterial, MaterialCategoria } from "./CategoriaMaterial";
-import type { EstadoMaterial } from "./EstadoMaterial";
 import type { UnidadMedicion } from "./UnidadMedicion";
 
 
@@ -37,4 +36,10 @@ export interface UpdateMaterialData {
   Cantidad?: number;
   Precio_Unitario?: number;
   IDS_Categorias?: number[];
+}
+
+export interface EstadoMaterial {
+  Id_Estado_Material: number;
+  Nombre_Estado_Material: string;
+  Materiales?: Material[];
 }

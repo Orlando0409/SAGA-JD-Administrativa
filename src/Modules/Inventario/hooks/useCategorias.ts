@@ -2,9 +2,6 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import * as CategoriasService from '../service/CategoriasService';
 import type { CreateCategoriaMaterialData, UpdateCategoriaMaterialData } from '../models/Inventario';
 
-// ========== HOOKS PARA CATEGORÍAS ==========
-
-// Query para obtener todas las categorías
 export const useGetAllCategories = () => {
   return useQuery({
     queryKey: ['categories'],
@@ -14,7 +11,6 @@ export const useGetAllCategories = () => {
   });
 };
 
-// Query para obtener una categoría por ID
 export const useGetCategoriaById = (id: number) => {
   return useQuery({
     queryKey: ['category', id],
@@ -24,7 +20,6 @@ export const useGetCategoriaById = (id: number) => {
   });
 };
 
-// Mutation para crear categoría
 export const useCreateCategoria = () => {
   const queryClient = useQueryClient();
 
@@ -39,7 +34,6 @@ export const useCreateCategoria = () => {
   });
 };
 
-// Mutation para actualizar categoría
 export const useUpdateCategoria = () => {
   const queryClient = useQueryClient();
 
@@ -56,7 +50,6 @@ export const useUpdateCategoria = () => {
   });
 };
 
-// Mutation para eliminar categoría
 export const useDeleteCategoria = () => {
   const queryClient = useQueryClient();
 

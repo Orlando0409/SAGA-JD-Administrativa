@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useCategories, useUpdateMaterial } from '../../hooks/InventarioHook';
+import { useGetAllCategories } from '../../hooks/useCategorias';
+import { useUpdateMaterial } from '../../hooks/useMaterials';
 import { useUnidadesMedicionSimple } from '../../hooks/HookUnidadMedicion';
 import { useAlerts } from '@/Modules/Global/context/AlertContext';
 import { UpdateMaterialSchema } from '../../schema/UpdateMaterialSchema';
@@ -19,7 +20,7 @@ const EditMaterialModal: React.FC<EditMaterialModalProps> = ({
 }) => {
   const { showError } = useAlerts();
   const updateMaterialMutation = useUpdateMaterial();
-  const { data: categorias = [] } = useCategories();
+  const { data: categorias = [] } = useGetAllCategories();
   const { data: unidadesMedicion = [] } = useUnidadesMedicionSimple();
   
   const [formData, setFormData] = useState<UpdateMaterialData>({
@@ -118,8 +119,8 @@ const EditMaterialModal: React.FC<EditMaterialModalProps> = ({
       };
 
       await updateMaterialMutation.mutateAsync({
-        Id_Material: material.Id_Material,
-        materialData: updateData,
+        id: material.Id_Material,
+        data: updateData,
       });
 
       onClose();
@@ -140,8 +141,8 @@ const EditMaterialModal: React.FC<EditMaterialModalProps> = ({
   };
 
   return (
-    <div className="absolute inset-0 bg-white bg-opacity-95 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-white bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-lg shadow-lg w-full max-w-2xl max-h-[85vh] overflow-y-auto">
         <div className="flex items-center justify-between p-6 border-b">
           <h2 className="text-xl font-semibold text-gray-900">
             Editar Material

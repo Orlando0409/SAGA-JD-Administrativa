@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { LuX, LuPlus } from 'react-icons/lu';
-import { useCreateMaterial, useCategories } from '../../hooks/InventarioHook';
+import {  useGetAllCategories } from '../../hooks/useCategorias';
+import { useCreateMaterial } from '../../hooks/useMaterials';
 import { useUnidadesMedicionSimple } from '../../hooks/HookUnidadMedicion';
 import { CreateMaterialSchema, type CreateMaterialSchemaData } from '../../schema/CreateMaterialSchema';
 import type { CreateMaterialModalProps } from '../../types/MaterialTypes';
@@ -14,7 +15,7 @@ import {
 
 const CreateMaterialModal: React.FC<CreateMaterialModalProps> = ({ isOpen, onClose }) => {
   const createMaterialMutation = useCreateMaterial();
-  const { data: categories = [] } = useCategories();
+  const { data: categories = [] } = useGetAllCategories();
   const { data: unidadesMedicion = [] } = useUnidadesMedicionSimple();
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [fieldCharCounts, setFieldCharCounts] = useState({

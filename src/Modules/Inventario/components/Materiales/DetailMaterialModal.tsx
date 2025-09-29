@@ -1,8 +1,6 @@
-import React, { useState } from 'react';
-import { LuX, LuPencil, LuTrash2 } from 'react-icons/lu';
-import { useDeleteCategoriaMaterial } from '../../hooks/InventarioHook';
+import React from 'react';
+import { LuX } from 'react-icons/lu';
 import type { Material } from '../../models/Inventario';
-import EditMaterialModal from './EditMaterialModal';
 
 interface DetailMaterialModalProps {
   material: Material;
@@ -15,30 +13,9 @@ const DetailMaterialModal: React.FC<DetailMaterialModalProps> = ({
   isOpen,
   onClose,
 }) => {
-  const deleteMaterialMutation = useDeleteCategoriaMaterial();
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [showEditModal, setShowEditModal] = useState(false);
+
 
   if (!isOpen) return null;
-
-  const handleDelete = async () => {
-      setIsDeleting(true);
-      try {
-        await deleteMaterialMutation.mutateAsync({
-          idMaterial: material.Id_Material,
-          idCategoria: material.Categorias?.[0]?.Id_Categoria ?? 0
-        });
-        onClose();
-      } catch (error) {
-        console.log('Error al eliminar la categoría del material:', error);
-      } finally {
-        setIsDeleting(false);
-      }
-  }
-
-  const handleEdit = () => {
-    setShowEditModal(true);
-  };
 
   return (
     <div className="fixed inset-0 bg-white bg-opacity-95 flex items-center justify-center z-50 p-4">
@@ -161,30 +138,13 @@ const DetailMaterialModal: React.FC<DetailMaterialModalProps> = ({
 
         <div className="flex justify-end gap-3 p-6 border-t bg-gray-50">
           <button
-            onClick={handleEdit}
-            className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 flex items-center gap-2"
+            onClick={onClose}
+            className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
           >
-            <LuPencil size={16} />
-            Editar
-          </button>
-          <button
-            onClick={handleDelete}
-            disabled={isDeleting}
-            className="px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-          >
-            <LuTrash2 size={16} />
-            {isDeleting ? 'Eliminando...' : 'Eliminar Categoría'}
+            Cerrar
           </button>
         </div>
       </div>
-
-      {showEditModal && (
-        <EditMaterialModal
-          isOpen={showEditModal}
-          onClose={() => setShowEditModal(false)}
-          material={material}
-        />
-      )}
     </div>
   )
 }

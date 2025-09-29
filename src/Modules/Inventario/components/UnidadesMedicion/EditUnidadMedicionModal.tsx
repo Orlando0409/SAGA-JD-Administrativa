@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { LuX } from 'react-icons/lu';
-import { useUpdateUnidadMedicion } from '../../hooks/useUnidadesMedicion';
+import { useUpdateUnidadMedicion } from '../../hooks/HookUnidadMedicion';
 import type { UnidadMedicion } from '../../models/Inventario';
 
 interface EditUnidadMedicionModalProps {

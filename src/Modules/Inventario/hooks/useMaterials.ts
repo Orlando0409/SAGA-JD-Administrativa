@@ -2,9 +2,6 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import * as MaterialService from '../service/MaterialService';
 import type { CreateMaterialData, UpdateMaterialData } from '../models/Inventario';
 
-// ========== HOOKS PARA MATERIALES ==========
-
-// Query para obtener todos los materiales
 export const useGetAllMaterials = () => {
   return useQuery({
     queryKey: ['materials'],
@@ -14,7 +11,6 @@ export const useGetAllMaterials = () => {
   });
 };
 
-// Query para obtener un material por ID
 export const useGetMaterialById = (id: number) => {
   return useQuery({
     queryKey: ['material', id],
@@ -24,7 +20,6 @@ export const useGetMaterialById = (id: number) => {
   });
 };
 
-// Query para materiales con categorías
 export const useGetMaterialesConCategorias = () => {
   return useQuery({
     queryKey: ['materials', 'with-categories'],
@@ -33,7 +28,6 @@ export const useGetMaterialesConCategorias = () => {
   });
 };
 
-// Query para materiales sin categorías
 export const useGetMaterialesSinCategorias = () => {
   return useQuery({
     queryKey: ['materials', 'without-categories'],
@@ -42,7 +36,6 @@ export const useGetMaterialesSinCategorias = () => {
   });
 };
 
-// Query para materiales por encima de stock
 export const useGetMaterialesPorEncimaDeStock = (threshold: number) => {
   return useQuery({
     queryKey: ['materials', 'above-stock', threshold],
@@ -52,7 +45,6 @@ export const useGetMaterialesPorEncimaDeStock = (threshold: number) => {
   });
 };
 
-// Query para materiales por debajo de stock
 export const useGetMaterialesPorDebajoDeStock = (threshold: number) => {
   return useQuery({
     queryKey: ['materials', 'below-stock', threshold],
@@ -62,7 +54,6 @@ export const useGetMaterialesPorDebajoDeStock = (threshold: number) => {
   });
 };
 
-// Mutation para crear material
 export const useCreateMaterial = () => {
   const queryClient = useQueryClient();
 
@@ -77,7 +68,6 @@ export const useCreateMaterial = () => {
   });
 };
 
-// Mutation para actualizar material
 export const useUpdateMaterial = () => {
   const queryClient = useQueryClient();
 

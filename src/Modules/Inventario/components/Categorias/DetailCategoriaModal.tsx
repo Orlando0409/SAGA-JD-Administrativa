@@ -26,16 +26,20 @@ const DetailCategoriaModal: React.FC<DetailCategoriaModalProps> = ({ isOpen, onC
 
         <div className="p-6 space-y-6">
           <div className="space-y-4">
-            <div>
-              <div className="text-sm font-medium text-gray-700 mb-1">Nombre de la Categoría</div>
-              <p className="text-lg font-semibold text-gray-900">{categoria.Nombre_Categoria}</p>
+              <div>
+              <div className="block text-sm font-medium text-gray-700 mb-1">
+                Nombre de la Categoría
+              </div>
+              <p className="w-full text-sm text-gray-900 bg-gray-50 p-2 rounded border break-words overflow-wrap-anywhere">
+                {categoria.Nombre_Categoria}
+              </p>
             </div>
 
             <div>
-              <div className="text-sm font-medium text-gray-700 mb-1">Estado</div>
-              <span className="inline-flex px-2 py-1 text-sm font-semibold rounded-full bg-green-100 text-green-800">
+              <div className="block text-sm font-medium text-gray-700 mb-1">Estado</div>
+              <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded border break-words overflow-wrap-anywhere">
                 Activa
-              </span>
+              </p>
             </div>
           </div>
 
