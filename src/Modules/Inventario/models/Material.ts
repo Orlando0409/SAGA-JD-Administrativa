@@ -33,7 +33,6 @@ export interface UpdateMaterialData {
   Nombre_Material?: string;
   Descripcion?: string;
   Id_Unidad_Medicion?: number;
-  Cantidad?: number;
   Precio_Unitario?: number;
   IDS_Categorias?: number[];
 }

@@ -9,7 +9,6 @@ interface InventarioDashboardProps {
 export const InventarioDashboard: React.FC<InventarioDashboardProps> = ({ onNavigate }) => {
   return (
     <div className="space-y-7">
-      {/* Header del Dashboard */}
       <div className="text-center">
         <div className="flex items-center justify-center mb-4">
           <div className="p-3 bg-blue-100 rounded-full">
@@ -24,7 +23,6 @@ export const InventarioDashboard: React.FC<InventarioDashboardProps> = ({ onNavi
         </p>
       </div>
 
-      {/* Módulos principales */}
       <div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-[70vw] justify-center mx-auto">
           <button
@@ -47,9 +45,6 @@ export const InventarioDashboard: React.FC<InventarioDashboardProps> = ({ onNavi
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium text-blue-600">
                     Ver catálogo completo
-                  </span>
-                  <span className="px-3 py-1 text-sm font-medium rounded-md transition-colors text-blue-600 hover:bg-white/50">
-                    Acceder →
                   </span>
                 </div>
               </div>
@@ -77,9 +72,6 @@ export const InventarioDashboard: React.FC<InventarioDashboardProps> = ({ onNavi
                   <span className="text-sm font-medium text-green-600">
                     Gestionar clasificaciones
                   </span>
-                  <span className="px-3 py-1 text-sm font-medium rounded-md transition-colors text-green-600 hover:bg-white/50">
-                    Acceder →
-                  </span>
                 </div>
               </div>
             </div>
@@ -106,9 +98,6 @@ export const InventarioDashboard: React.FC<InventarioDashboardProps> = ({ onNavi
                   <span className="text-sm font-medium text-purple-600">
                     Configurar medidas
                   </span>
-                  <span className="px-3 py-1 text-sm font-medium rounded-md transition-colors text-purple-600 hover:bg-white/50">
-                    Acceder →
-                  </span>
                 </div>
               </div>
             </div>
@@ -134,9 +123,6 @@ export const InventarioDashboard: React.FC<InventarioDashboardProps> = ({ onNavi
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium text-orange-600">
                     Ver historial completo
-                  </span>
-                  <span className="px-3 py-1 text-sm font-medium rounded-md transition-colors text-orange-600 hover:bg-white/50">
-                    Acceder →
                   </span>
                 </div>
               </div>

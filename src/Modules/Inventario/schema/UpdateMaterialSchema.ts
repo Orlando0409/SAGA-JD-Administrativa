@@ -16,12 +16,6 @@ export const UpdateMaterialSchema = z.object({
     .min(1, "Debe seleccionar una unidad de medición")
     .optional(),
   
-  Cantidad: z.number()
-    .min(1, "La cantidad debe ser al menos 1")
-    .max(100000, "La cantidad no puede ser mayor a 100,000")
-    .int("La cantidad debe ser un número entero")
-    .optional(),
-  
   Precio_Unitario: z.number()
     .min(5, "El precio unitario debe ser al menos 5")
     .max(10000000, "El precio unitario no puede ser mayor a 10,000,000")

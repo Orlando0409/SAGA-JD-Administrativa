@@ -27,7 +27,6 @@ const EditMaterialModal: React.FC<EditMaterialModalProps> = ({
     Nombre_Material: '',
     Descripcion: '',
     Id_Unidad_Medicion: 0,
-    Cantidad: 0,
     Precio_Unitario: 0,
     IDS_Categorias: [],
   });
@@ -46,7 +45,6 @@ const EditMaterialModal: React.FC<EditMaterialModalProps> = ({
         Nombre_Material: material.Nombre_Material,
         Descripcion: material.Descripcion || '',
         Id_Unidad_Medicion: material.Id_Unidad_Medicion,
-        Cantidad: material.Cantidad,
         Precio_Unitario: material.Precio_Unitario,
         IDS_Categorias: material.Categorias?.map(cat => cat.Id_Categoria) || [],
       });
@@ -207,35 +205,6 @@ const EditMaterialModal: React.FC<EditMaterialModalProps> = ({
               </select>
               {formErrors.Id_Unidad_Medicion && (
                 <p className="mt-1 text-sm text-red-600">{formErrors.Id_Unidad_Medicion}</p>
-              )}
-            </div>
-
-            <div>
-              <label htmlFor="cantidad" className="block text-sm flex gap-2 font-medium text-gray-700 mb-1">
-                Cantidad 
-                <p className="text-red-500">*</p>
-              </label>
-              <input
-                type="number"
-                id="cantidad"
-                min="1"
-                value={formData.Cantidad}
-                onChange={(e) => {
-                  const value = parseInt(e.target.value) || 0;
-                  setFormData({ ...formData, Cantidad: value });
-                  if (formErrors.Cantidad) {
-                    setFormErrors(prev => ({ ...prev, Cantidad: '' }));
-                  }
-                }}
-                className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
-                  formErrors.Cantidad 
-                    ? 'border-red-500 focus:ring-red-500 focus:border-red-500' 
-                    : 'border-gray-300'
-                }`}
-                required
-              />
-              {formErrors.Cantidad && (
-                <p className="mt-1 text-sm text-red-600">{formErrors.Cantidad}</p>
               )}
             </div>
 

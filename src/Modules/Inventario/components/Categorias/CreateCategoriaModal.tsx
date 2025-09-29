@@ -38,7 +38,6 @@ const CreateCategoriaModal: React.FC<CreateCategoriaModalProps> = ({ isOpen, onC
     e.preventDefault();
     setFormErrors({});
 
-    // Validación simple
     if (!formData.Nombre_Categoria.trim()) {
       setFormErrors({ Nombre_Categoria: 'El nombre de la categoría es requerido' });
       return;
@@ -53,8 +52,6 @@ const CreateCategoriaModal: React.FC<CreateCategoriaModalProps> = ({ isOpen, onC
       await createCategoriaMutation.mutateAsync({
         Nombre_Categoria: formData.Nombre_Categoria.trim()
       });
-      
-      // Resetear formulario y cerrar modal
       setFormData({ Nombre_Categoria: '' });
       setCharCount(0);
       onClose();
@@ -85,7 +82,7 @@ const CreateCategoriaModal: React.FC<CreateCategoriaModalProps> = ({ isOpen, onC
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-white bg-opacity-95 flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0  flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between p-6 border-b">
           <h2 className="text-xl font-semibold text-gray-900">Crear Nueva Categoría</h2>

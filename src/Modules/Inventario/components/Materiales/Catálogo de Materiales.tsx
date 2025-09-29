@@ -299,7 +299,6 @@ const Inventario = () => {
     setCurrentView('dashboard');
   };
 
-  // Renderizar vista específica de materiales
   const renderMaterialesView = () => {
     if (isLoading) {
       return (
@@ -385,7 +384,6 @@ const Inventario = () => {
                 <tr
                   key={row.id}
                   className="hover:bg-gray-50 cursor-pointer transition-colors"
-                  onClick={() => handleViewDetail(row.original)}
                 >
                   {row.getVisibleCells().map((cell) => (
                     <td key={cell.id} className="px-6 py-4 whitespace-nowrap text-sm">
@@ -511,11 +509,9 @@ const Inventario = () => {
     }
   };
 
-  // Si no estamos en dashboard, mostrar la vista específica
   if (currentView !== 'dashboard') {
     return (
       <div className="space-y-6">
-        {/* Header con botón de regreso */}
         <div className="flex items-center gap-4">
           <button
             onClick={handleBackToDashboard}
@@ -533,13 +529,11 @@ const Inventario = () => {
           </h1>
         </div>
 
-        {/* Contenido de la vista actual */}
         {renderCurrentView()}
       </div>
     );
   }
 
-  // Dashboard principal
   return <InventarioDashboard onNavigate={(section) => handleModuleClick(section as ViewType)} />;
 }
 
