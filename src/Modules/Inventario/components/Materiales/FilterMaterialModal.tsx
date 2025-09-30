@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { LuX, LuFilter } from 'react-icons/lu';
-import { useCategories } from '../hooks/InventarioHook';
-import type { FilterMaterialModalProps, MaterialFilterOptions } from '../types/MaterialTypes';
+import { useGetAllCategories } from '../../hooks/useCategorias';
+import type { FilterMaterialModalProps, MaterialFilterOptions } from '../../types/MaterialTypes';
 
 
 
@@ -11,7 +11,7 @@ const FilterMaterialModal: React.FC<FilterMaterialModalProps> = ({
   onApplyFilters, 
   currentFilters 
 }) => {
-  const { data: categorias = [] } = useCategories();
+  const { data: categorias = [] } = useGetAllCategories();
   
   const estados = [
     { id: 1, nombre: 'DISPONIBLE' },

@@ -7,44 +7,47 @@ import {
   getPaginationRowModel,
   createColumnHelper,
 } from '@tanstack/react-table';
-import { LuPlus, LuFilter, LuSearch } from 'react-icons/lu';
+import { LuPlus, LuFilter, LuSearch, LuEye, LuPencil, LuArrowLeft } from 'react-icons/lu';
 import { 
-  useMaterials, 
-  useMaterialesConCategorias, 
-  useMaterialesSinCategorias,
-  useMaterialesPorEncimaDeStock,
-  useMaterialesPorDebajoDeStock
-} from '../hooks/InventarioHook';
+  useGetAllMaterials, 
+  useGetMaterialesConCategorias, 
+  useGetMaterialesSinCategorias,
+  useGetMaterialesPorDebajoDeStock,
+  useGetMaterialesPorEncimaDeStock
+} from '../../hooks/useMaterials';
 import { MdKeyboardArrowLeft, MdKeyboardArrowRight, MdKeyboardDoubleArrowLeft,
   MdKeyboardDoubleArrowRight, 
   MdKeyboardArrowDown,
   MdKeyboardArrowUp} from "react-icons/md";
 
-import type { Material } from '../models/Inventario';
-import type { MaterialFilterOptions } from '../types/MaterialTypes';
+import type { Material } from '../../models/Inventario';
+import type { MaterialFilterOptions } from '../../types/MaterialTypes';
 import CreateMaterialModal from './CreateMaterialModal';
 import DetailMaterialModal from './DetailMaterialModal';
 import FilterMaterialModal from './FilterMaterialModal';
+import EditMaterialModal from './EditMaterialModal';
 
-const Inventario = () => {
+interface CatalogoMaterialesProps {
+  onBack?: () => void;
+}
+
+const CatalogoMateriales: React.FC<CatalogoMaterialesProps> = ({ onBack }) => {
   const [globalFilter, setGlobalFilter] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [selectedMaterial, setSelectedMaterial] = useState<Material | null>(null);
   const [showFilterModal, setShowFilterModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
   const [appliedFilters, setAppliedFilters] = useState<MaterialFilterOptions>({});
-  const { data: allMaterials = [], isLoading: isLoadingAll, refetch: refetchAllMaterials } = useMaterials();
-  const { data: materialesConCategorias = [], isLoading: isLoadingConCat, refetch: refetchConCat } = useMaterialesConCategorias();
-  const { data: materialesSinCategorias = [], isLoading: isLoadingSinCat, refetch: refetchSinCat } = useMaterialesSinCategorias();
-  const enableStockAbove = appliedFilters.tipoFiltroStock === 'encima' && !!appliedFilters.stockMinimo;
-  const enableStockBelow = appliedFilters.tipoFiltroStock === 'debajo' && !!appliedFilters.stockMaximo;
-  const { data: materialesEncimaStock = [], isLoading: isLoadingAbove, refetch: refetchAbove } = useMaterialesPorEncimaDeStock(
+  const { data: allMaterials = [], isLoading: isLoadingAll, refetch: refetchAllMaterials } = useGetAllMaterials();
+  const { data: materialesConCategorias = [], isLoading: isLoadingConCat, refetch: refetchConCat } = useGetMaterialesConCategorias();
+  const { data: materialesSinCategorias = [], isLoading: isLoadingSinCat, refetch: refetchSinCat } = useGetMaterialesSinCategorias();
+  const { data: materialesEncimaStock = [], isLoading: isLoadingAbove, refetch: refetchAbove } = useGetMaterialesPorEncimaDeStock(
     appliedFilters.stockMinimo || 0, 
-    enableStockAbove
+
   );
-  const { data: materialesDebajoStock = [], isLoading: isLoadingBelow, refetch: refetchBelow } = useMaterialesPorDebajoDeStock(
+  const { data: materialesDebajoStock = [], isLoading: isLoadingBelow, refetch: refetchBelow } = useGetMaterialesPorDebajoDeStock(
     appliedFilters.stockMaximo || 0, 
-    enableStockBelow
   );
 
   const pageSizeOptions = [5, 10, 20, 50];
@@ -166,6 +169,14 @@ const Inventario = () => {
           </div>
         ),
       }),
+      columnHelper.accessor('Unidad_Medicion.Nombre_Unidad', {
+        header: 'Unidad de medida',
+        cell: info => (
+          <div className="text-sm text-gray-600">
+            {info.getValue() || 'Sin unidad'}
+          </div>
+        ),
+      }),
       columnHelper.accessor('Precio_Unitario', {
         header: 'Precio Unitario',
         cell: info => (
@@ -179,13 +190,11 @@ const Inventario = () => {
         cell: info => {
           const estado = info.getValue();
           let colorClass = '';
-          if (estado === 'DISPONIBLE') {
+          if (estado === 'Disponible') {
             colorClass = 'bg-green-100 text-green-800';
-          } else if (estado === 'AGOTADO') {
+          } else if (estado === 'Agotado') {
             colorClass = 'bg-red-100 text-red-800';
-          } else {
-            colorClass = 'bg-yellow-100 text-yellow-800';
-          }
+          } 
           return (
             <span className={`px-2 py-1 rounded-full text-sm font-medium ${colorClass}`}>
               {estado}
@@ -213,6 +222,28 @@ const Inventario = () => {
           );
         },
       }),
+      columnHelper.display({
+        id: 'acciones',
+        header: 'Acciones',
+        cell: info => (
+          <div className="flex justify-center gap-2">
+            <button
+              className="p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-md transition-colors"
+              onClick={() => handleViewDetail(info.row.original)}
+              title="Ver detalles"
+            >
+              <LuEye className="w-4 h-4" />
+            </button>
+            <button
+              className="p-2 text-green-600 hover:text-green-800 hover:bg-green-50 rounded-md transition-colors"
+              onClick={() => handleEdit(info.row.original)}
+              title="Editar"
+            >
+              <LuPencil className="w-4 h-4" />
+            </button>
+          </div>
+        ),
+      }),
     ],
     []
   );
@@ -236,11 +267,16 @@ const Inventario = () => {
       },
     },
   });
+    const handleEdit = (material: Material) => {
+    setSelectedMaterial(material);
+    setShowEditModal(true);
+  };
 
-  const handleRowClick = (material: Material) => {
+  const handleViewDetail = (material: Material) => {
     setSelectedMaterial(material);
     setShowDetailModal(true);
   };
+
 
   const handleApplyFilters = (filters: MaterialFilterOptions) => {
     setAppliedFilters(filters);
@@ -251,19 +287,33 @@ const Inventario = () => {
     v !== undefined && v !== '' && v !== false
   ).length;
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-96">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
-      </div>
-    );
-  }
+  const renderMaterialesView = () => {
+    if (isLoading) {
+      return (
+        <div className="flex items-center justify-center min-h-96">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+        </div>
+      );
+    }
 
-  return (
+    return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <h1 className="text-2xl font-bold text-gray-900">Gestión de Inventario</h1>
-      </div>
+      {/* Header con botón de regreso */}
+      {onBack && (
+        <div className="flex items-center gap-4">
+          <button
+            onClick={onBack}
+            className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
+          >
+            <LuArrowLeft className="w-4 h-4" />
+            Volver al Dashboard
+          </button>
+          <div className="h-6 w-px bg-gray-300" />
+          <h1 className="text-2xl font-bold text-gray-900">
+            Catálogo de Materiales
+          </h1>
+        </div>
+      )}
       <div className="flex  sm:flex-row justify-between gap-4">
         <div className="flex-1 relative">
           <LuSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -338,7 +388,6 @@ const Inventario = () => {
                 <tr
                   key={row.id}
                   className="hover:bg-gray-50 cursor-pointer transition-colors"
-                  onClick={() => handleRowClick(row.original)}
                 >
                   {row.getVisibleCells().map((cell) => (
                     <td key={cell.id} className="px-6 py-4 whitespace-nowrap text-sm">
@@ -426,6 +475,17 @@ const Inventario = () => {
         />
       )}
 
+        {showEditModal && selectedMaterial && (
+        <EditMaterialModal
+          isOpen={showEditModal}
+          onClose={() => {
+            setShowEditModal(false);
+            setSelectedMaterial(null);
+          }}
+          material={selectedMaterial}
+        />
+      )}
+
       <FilterMaterialModal
         isOpen={showFilterModal}
         onClose={() => setShowFilterModal(false)}
@@ -433,8 +493,11 @@ const Inventario = () => {
         currentFilters={appliedFilters}
       />
 
-    </div>
-  )
+      </div>
+    );
+  };
+
+  return renderMaterialesView();
 }
 
-export default Inventario
+export default CatalogoMateriales
