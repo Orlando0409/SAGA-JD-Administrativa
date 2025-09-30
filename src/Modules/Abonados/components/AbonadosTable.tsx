@@ -12,14 +12,15 @@ import FormularioAfiliados from './FormularioAfiliados';
 type AfiliadoUnificado = {
     Id: number;
     Nombre_Completo: string;
-    Cedula_Documento: string;
+    Cedula_Documento?: string; // Para cédula o documento jurídico
+    Identificacion: string;
     Estado: {
         Id_Estado: number;
         Nombre_Estado: string;
     };
     Tipo_Persona: 'Físico' | 'Jurídico';
     Tipo_Afiliado: 'Abonado' | 'Asociado';
-    Tipo_Identificacion?: string; // <-- CAMBIO: Nuevo campo
+    Tipo_Identificacion?: string; // <-- FIX: Añadido campo
     datos_originales: AfiliadoFisico | AfiliadoJuridico;
 };
 
@@ -42,7 +43,7 @@ export default function AbonadosTable() {
         const afiliadosFisicosUnificados: AfiliadoUnificado[] = afiliadosFisicos.map((afiliado: AfiliadoFisico) => ({
             Id: afiliado.Id_Afiliado,
             Nombre_Completo: `${afiliado.Nombre || ''} ${afiliado.Apellido1 || ''} ${afiliado.Apellido2 || ''}`.trim() || 'Sin nombre',
-            Cedula_Documento: afiliado.Cedula || 'Sin cédula',
+            Identificacion: afiliado.Identificacion || 'Sin cédula',
             Estado: {
                 Id_Estado: afiliado.Estado?.Id_Estado_Afiliado || 0,
                 Nombre_Estado: afiliado.Estado?.Nombre_Estado || 'Sin estado'
@@ -57,6 +58,7 @@ export default function AbonadosTable() {
             Id: afiliado.Id_Afiliado,
             Nombre_Completo: afiliado.Razon_Social || 'Sin razón social',
             Cedula_Documento: afiliado.Cedula_Juridica || 'Sin cédula jurídica',
+            Identificacion: afiliado.Cedula_Juridica || 'Sin cédula jurídica', // <-- FIX: Añadido campo Identificacion
             Estado: {
                 Id_Estado: afiliado.Estado?.Id_Estado_Afiliado || 0,
                 Nombre_Estado: afiliado.Estado?.Nombre_Estado || 'Sin estado'
@@ -114,12 +116,12 @@ export default function AbonadosTable() {
             }
         }),
         columnHelper.accessor('Cedula_Documento', {
-            header: 'Cédula / Cédula Jurídica',
+            header: 'Número Identificación / Cédula Jurídica', // <-- CAMBIO: Nuevo encabezado
             cell: (info) => {
                 const fila = info.row.original;
                 if (fila.Tipo_Persona === 'Físico') {
                     const datosOriginales = fila.datos_originales as AfiliadoFisico;
-                    return datosOriginales.Cedula || 'Sin cédula';
+                    return datosOriginales.Identificacion || 'Sin número de identificación'; // <-- CAMBIO: usa Numero_Identidad
                 } else {
                     const datosOriginales = fila.datos_originales as AfiliadoJuridico;
                     return datosOriginales.Cedula_Juridica || 'Sin cédula jurídica';

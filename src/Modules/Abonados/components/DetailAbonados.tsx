@@ -60,8 +60,8 @@ const DetailAbonados: React.FC<DetailAbonadosProps> = ({ persona, isOpen, onClos
             return {
                 id: afiliado.Id_Afiliado,
                 nombre: `${afiliado.Nombre} ${afiliado.Apellido1} ${afiliado.Apellido2 || ''}`.trim(),
-                documento: afiliado.Cedula,
-                tipoDocumento: 'Cédula',
+                documento: afiliado.Identificacion,
+                
                 telefono: afiliado.Numero_Telefono,
                 correo: afiliado.Correo,
                 direccion: afiliado.Direccion_Exacta,
