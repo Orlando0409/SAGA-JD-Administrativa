@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { LuX, LuUserX, LuPhone, LuBuilding2, LuUserCheck, LuCalendar, LuIdCard , LuUserRound} from 'react-icons/lu';
 import { FaUserEdit } from "react-icons/fa";
 import { useProveedoresFisicos } from '../Hook/proveedoresFisicos';
 import { Accordion, AccordionHeader, AccordionBody } from "@material-tailwind/react";
 import { FiChevronDown, FiChevronRight } from 'react-icons/fi';
+import EditProveedorModal from './EditProveedoresModal';
 import {
   AlertDialog,
   AlertDialogTrigger,
@@ -321,21 +322,12 @@ const ProveedorDetailModal: React.FC<ProveedorDetailModalProps> = ({ proveedor, 
           </div>
         </div>
 
-        {/* TODO: Implementar Edit Proveedor Modal */}
-        {showEditModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-60">
-            <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-              <h3 className="text-lg font-semibold mb-4">Editar Proveedor</h3>
-              <p>Modal de edición por implementar</p>
-              <button 
-                onClick={() => setShowEditModal(false)}
-                className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-              >
-                Cerrar
-              </button>
-            </div>
-          </div>
-        )}
+        {/* Edit Proveedor Modal */}
+        <EditProveedorModal
+          isOpen={showEditModal}
+          onClose={() => setShowEditModal(false)}
+          proveedor={proveedor}
+        />
       </div>
     </div>
   );

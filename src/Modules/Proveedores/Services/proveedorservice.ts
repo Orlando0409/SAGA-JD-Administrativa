@@ -1,5 +1,5 @@
 import apiAuth from '@/Api/apiAuth';
-import type { ProveedorFisico } from '../Models/TablaProveedo/proveedorFisico';
+import type { ProveedorFisico, CreateProveedorData } from '../Models/TablaProveedo/proveedorFisico';
 
 // Función para obtener todos los proveedores físicos
 export const getProveedoresFisicos = async (): Promise<ProveedorFisico[]> => {
@@ -13,12 +13,44 @@ export const getProveedoresFisicos = async (): Promise<ProveedorFisico[]> => {
 };
 
 // Función para crear un proveedor físico
-export const createProveedorFisico = async (proveedor: Omit<ProveedorFisico, 'Id_Proveedor' | 'Fecha_Creacion' | 'Fecha_Actualizacion'>): Promise<ProveedorFisico> => {
+export const createProveedorFisico = async (proveedor: CreateProveedorData): Promise<ProveedorFisico> => {
   try {
-    const response = await apiAuth.post('/proveedores-fisicos', proveedor);
+    const response = await apiAuth.post('/Proveedores/fisico/create', proveedor);
     return response.data;
   } catch (error) {
     console.error('Error al crear proveedor físico:', error);
+    throw error;
+  }
+};
+
+// Función para obtener un proveedor físico por ID
+export const getProveedorFisicoById = async (id: number): Promise<ProveedorFisico> => {
+  try {
+    const response = await apiAuth.get(`/Proveedores/fisico/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error al obtener proveedor físico por ID:', error);
+    throw error;
+  }
+};
+
+// Función para actualizar un proveedor físico
+export const updateProveedorFisico = async (id: number, proveedor: CreateProveedorData): Promise<ProveedorFisico> => {
+  try {
+    const response = await apiAuth.put(`/Proveedores/fisico/update/${id}`, proveedor);
+    return response.data;
+  } catch (error) {
+    console.error('Error al actualizar proveedor físico:', error);
+    throw error;
+  }
+};
+
+// Función para eliminar un proveedor físico
+export const deleteProveedorFisico = async (id: number): Promise<void> => {
+  try {
+    await apiAuth.delete(`/Proveedores/fisico/delete/${id}`);
+  } catch (error) {
+    console.error('Error al eliminar proveedor físico:', error);
     throw error;
   }
 };

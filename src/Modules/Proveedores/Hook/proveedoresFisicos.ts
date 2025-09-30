@@ -1,5 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
-import { getProveedoresFisicos } from "../Services/proveedorservice";
+import { 
+  getProveedoresFisicos, 
+  getProveedorFisicoById
+} from "../Services/proveedorservice";
 import type { ProveedorFisico } from "../Models/TablaProveedo/proveedorFisico";
 
 export const useProveedoresFisicos = () => {
@@ -24,4 +27,12 @@ export const useProveedoresFisicos = () => {
     error,
     refetch,
   };
+};
+
+export const useProveedorFisico = (id: number) => {
+  return useQuery({
+    queryKey: ['proveedorFisico', id],
+    queryFn: () => getProveedorFisicoById(id),
+    enabled: !!id,
+  });
 };

@@ -12,6 +12,15 @@ export interface ProveedorFisico {
   Identificacion : string; 
 }
 
+// Tipo específico para crear/actualizar proveedores (simplificado, similar a CreateUserData)
+export interface CreateProveedorData {
+  Nombre_Proveedor: string;
+  Telefono_Proveedor: string;
+  Identificacion: string;
+  Tipo_Identificacion: string;
+  Id_Estado_Proveedor: number;
+}
+
 export const ProveedorFisicoInicialState: ProveedorFisico = {
   Id_Proveedor: 0,
   Nombre_Proveedor: "",
