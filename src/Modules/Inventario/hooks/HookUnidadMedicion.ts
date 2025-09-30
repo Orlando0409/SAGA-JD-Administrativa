@@ -35,7 +35,7 @@ export const useCreateUnidadMedicion = () => {
       queryClient.invalidateQueries({ queryKey: ['unidades-medicion-simple'] });
     },
     onError: (error: any) => {
-      const errorMessage = error?.response?.data?.message || 'Error al crear la unidad de medición';
+      const errorMessage = error?.response?.data?.message;
       showError('Error', errorMessage);
     },
   });
@@ -55,7 +55,7 @@ export const useUpdateUnidadMedicion = () => {
       queryClient.invalidateQueries({ queryKey: ['unidad-medicion'] });
     },
     onError: (error: any) => {
-      const errorMessage = error?.response?.data?.message || 'Error al actualizar la unidad de medición';
+      const errorMessage = error?.response?.data?.message;
       showError('Error', errorMessage);
     },
   });

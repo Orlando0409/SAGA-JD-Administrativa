@@ -72,6 +72,7 @@ const CategoriasManagement: React.FC<CategoriasManagementProps> = ({ onBack }) =
             onClick={() => handleViewDetail(info.row.original)}
             title="Ver detalles"
           >
+            ver
             <LuEye className="w-4 h-4" />
           </button>
           <button
@@ -79,6 +80,7 @@ const CategoriasManagement: React.FC<CategoriasManagementProps> = ({ onBack }) =
             onClick={() => handleEdit(info.row.original)}
             title="Editar"
           >
+            Editar
             <LuPencil className="w-4 h-4" />
           </button>
           <button
@@ -87,6 +89,7 @@ const CategoriasManagement: React.FC<CategoriasManagementProps> = ({ onBack }) =
             disabled={deleteMutation.isPending}
             title="desactivar"
           >
+            Desactivar
             {deleteMutation.isPending && deleteMutation.variables === info.row.original.Id_Categoria ? (
               <IoMdCheckmarkCircleOutline className="w-4 h-4" />
             ) : (
