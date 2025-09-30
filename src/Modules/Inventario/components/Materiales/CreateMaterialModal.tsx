@@ -7,6 +7,7 @@ import { CreateMaterialSchema, type CreateMaterialSchemaData } from '../../schem
 import type { CreateMaterialModalProps } from '../../types/MaterialTypes';
 import type { CreateMaterialData, CategoriaMaterial } from '../../models/Inventario';
 import CreateCategoriaModal from '../Categorias/CreateCategoriaModal';
+import CreateUnidadMedicionModal from '../UnidadesMedicion/CreateUnidadMedicionModal';
 import { 
   NOMBRE_MATERIAL_MAX_LENGTH, 
   DESCRIPCION_MAX_LENGTH, 
@@ -23,6 +24,7 @@ const CreateMaterialModal: React.FC<CreateMaterialModalProps> = ({ isOpen, onClo
     descripcion: 0
   });
   const [isCreateCategoriaModalOpen, setIsCreateCategoriaModalOpen] = useState(false);
+  const [isCreateUnidadMedicionModalOpen, setIsCreateUnidadMedicionModalOpen] = useState(false);
   
   const [formData, setFormData] = useState<CreateMaterialSchemaData>({
     Nombre_Material: '',
@@ -183,8 +185,16 @@ const CreateMaterialModal: React.FC<CreateMaterialModalProps> = ({ isOpen, onClo
             </div>
 
             <div>
-              <label htmlFor="unidad-medicion" className="block text-sm font-medium text-gray-700 mb-1">
-                Unidad de Medición <span className="text-red-500">*</span>
+              <label htmlFor="unidad-medicion" className="block text-sm flex justify-between font-medium text-gray-700 mb-1">
+                <span>Unidad de Medición <span className="text-red-500">*</span></span>
+                 <button
+                  type="button"
+                  onClick={() => setIsCreateUnidadMedicionModalOpen(true)}
+                  className="flex items-center gap-1 px-2 py-1 text-xs text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded transition-colors"
+                >
+                  <LuPlus className="w-3 h-3" />
+                  Nueva
+                </button>
               </label>
               <select
                 id="unidad-medicion"
@@ -306,6 +316,10 @@ const CreateMaterialModal: React.FC<CreateMaterialModalProps> = ({ isOpen, onClo
       <CreateCategoriaModal
         isOpen={isCreateCategoriaModalOpen}
         onClose={() => setIsCreateCategoriaModalOpen(false)}
+      />
+      <CreateUnidadMedicionModal
+        isOpen={isCreateUnidadMedicionModalOpen}
+        onClose={() => setIsCreateUnidadMedicionModalOpen(false)}
       />
     </div>
   )
