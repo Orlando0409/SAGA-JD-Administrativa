@@ -8,8 +8,23 @@ export interface ProveedorFisico {
   } 
   Fecha_Creacion: string; // Fecha de creación del registro
   Fecha_Actualizacion: string; // Fecha de actualización del registro
-  Tipo_identificacion: string;
-  identificacion: string; 
+  Tipo_Identificacion: string;
+  Identificacion : string; 
+}
+
+// Tipo específico para crear/actualizar proveedores (simplificado, similar a CreateUserData)
+export interface CreateProveedorData {
+  Nombre_Proveedor: string;
+  Telefono_Proveedor: string;
+  Identificacion: string;
+  Tipo_Identificacion: string;
+  Id_Estado_Proveedor: number;
+}
+
+// Tipo específico para actualizar proveedores (solo campos editables)
+export interface UpdateProveedorData {
+  Nombre_Proveedor: string;
+  Telefono_Proveedor: string;
 }
 
 export const ProveedorFisicoInicialState: ProveedorFisico = {
@@ -22,6 +37,6 @@ export const ProveedorFisicoInicialState: ProveedorFisico = {
   },
   Fecha_Creacion: "",
   Fecha_Actualizacion: "",
-  Tipo_identificacion: "",
-  identificacion: ""
+  Tipo_Identificacion: "",
+  Identificacion: ""
 };

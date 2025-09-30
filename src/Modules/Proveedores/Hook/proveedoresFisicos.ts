@@ -1,6 +1,12 @@
-import { useQuery } from "@tanstack/react-query";
-import { getProveedoresFisicos } from "../Services/proveedorservice";
-import type { ProveedorFisico } from "../Models/TablaProveedo/proveedorFisico";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { 
+  getProveedoresFisicos, 
+  getProveedorFisicoById,
+  createProveedorFisico,
+  updateProveedorFisico,
+  deleteProveedorFisico
+} from "../Services/proveedorservice";
+import type { ProveedorFisico, CreateProveedorData, UpdateProveedorData } from "../Models/TablaProveedo/proveedorFisico";
 
 export const useProveedoresFisicos = () => {
   // Query para obtener todos los proveedores físicos
@@ -23,5 +29,96 @@ export const useProveedoresFisicos = () => {
     isError,
     error,
     refetch,
+  };
+};
+
+export const useProveedorFisico = (id: number) => {
+  return useQuery({
+    queryKey: ['proveedorFisico', id],
+    queryFn: () => getProveedorFisicoById(id),
+    enabled: !!id,
+  });
+};
+
+export const useCreateProveedorFisico = () => {
+  const queryClient = useQueryClient();
+  
+  const createMutation = useMutation({
+    mutationFn: (data: CreateProveedorData) => createProveedorFisico(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["proveedoresFisicos"] });
+      console.log("Proveedor físico creado con éxito");
+    },
+    onError: (error) => {
+      console.error("Error al crear el proveedor físico:", error);
+    },
+  });
+   
+  return {
+    createProveedorFisico: createMutation.mutateAsync,
+    createProveedorFisicoSync: createMutation.mutate,
+    isCreating: createMutation.isPending,
+    isError: createMutation.isError,
+    error: createMutation.error,
+    isSuccess: createMutation.isSuccess,
+  };
+};
+
+export const useUpdateProveedorFisico = () => {
+  const queryClient = useQueryClient();
+  
+  const updateMutation = useMutation({
+    mutationFn: ({ id, data }: { id: number; data: UpdateProveedorData }) => 
+      updateProveedorFisico(id, data),
+    onSuccess: (updatedProveedor, { id }) => {
+      // Invalidar la lista de proveedores para refrescar la tabla
+      queryClient.invalidateQueries({ queryKey: ["proveedoresFisicos"] });
+      
+      // Actualizar el cache del proveedor específico si existe
+      queryClient.setQueryData(['proveedorFisico', id], updatedProveedor);
+      
+      console.log("Proveedor físico actualizado con éxito");
+    },
+    onError: (error) => {
+      console.error("Error al actualizar el proveedor físico:", error);
+    },
+  });
+   
+  return {
+    updateProveedorFisico: updateMutation.mutateAsync,
+    updateProveedorFisicoSync: updateMutation.mutate,
+    isUpdating: updateMutation.isPending,
+    isError: updateMutation.isError,
+    error: updateMutation.error,
+    isSuccess: updateMutation.isSuccess,
+  };
+};
+
+export const useDeleteProveedorFisico = () => {
+  const queryClient = useQueryClient();
+  
+  const deleteMutation = useMutation({
+    mutationFn: (id: number) => deleteProveedorFisico(id),
+    onSuccess: (_, deletedId) => {
+      // Invalidar la lista de proveedores para refrescar la tabla
+      queryClient.invalidateQueries({ queryKey: ["proveedoresFisicos"] });
+      
+      // Remover el proveedor específico del cache
+      queryClient.removeQueries({ queryKey: ['proveedorFisico', deletedId] });
+      
+      console.log("Proveedor físico eliminado con éxito");
+    },
+    onError: (error) => {
+      console.error("Error al eliminar el proveedor físico:", error);
+    },
+  });
+   
+  return {
+    deleteProveedorFisico: deleteMutation.mutateAsync,
+    deleteProveedorFisicoSync: deleteMutation.mutate,
+    isDeleting: deleteMutation.isPending,
+    isError: deleteMutation.isError,
+    error: deleteMutation.error,
+    isSuccess: deleteMutation.isSuccess,
   };
 };

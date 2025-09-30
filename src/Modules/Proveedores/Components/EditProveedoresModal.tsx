@@ -1,0 +1,286 @@
+import { useForm } from '@tanstack/react-form';
+import { useState } from 'react';
+import { 
+  EditProveedorSchema, 
+  type EditProveedorSchemaData,
+  VALIDATION_LIMITS
+} from '../Schema/Proveedores';
+import type { ProveedorFisico, UpdateProveedorData } from '../Models/TablaProveedo/proveedorFisico';
+import { useUpdateProveedorFisico } from '../Hook/proveedoresFisicos';
+
+interface EditProveedorModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  proveedor: ProveedorFisico;
+}
+
+const EditProveedorModal: React.FC<EditProveedorModalProps> = ({ isOpen, onClose, proveedor }) => {
+  // Hook para actualizar proveedor físico
+  const { 
+    updateProveedorFisico, 
+    isUpdating 
+  } = useUpdateProveedorFisico();
+  
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+  const [fieldCharCounts, setFieldCharCounts] = useState({
+    Nombre_Proveedor: proveedor.Nombre_Proveedor.length,
+    Telefono_Proveedor: proveedor.Telefono_Proveedor.length
+  });
+
+  // Función para validar en tiempo real (solo campos editables)
+  const validateFieldRealTime = (fieldName: string, value: string) => {
+    let error = '';
+
+    switch (fieldName) {
+      case 'Nombre_Proveedor':
+        const nombre = value.trim();
+        if (nombre && nombre.length >= 2) {
+          const NOMBRE_REGEX = /^[a-zA-ZÀ-ÿ\u00f1\u00d1\s]+$/;
+          if (!NOMBRE_REGEX.test(nombre)) {
+            error = 'El nombre solo puede contener letras y espacios';
+          }
+        }
+        break;
+
+      case 'Telefono_Proveedor':
+        if (value) {
+          const TELEFONO_REGEX = /^(\+?506[\s\-]?)?[0-9]{8}$|^(\+?506[\s\-]?)?[0-9]{4}[\s\-]?[0-9]{4}$/;
+          if (!TELEFONO_REGEX.test(value)) {
+            error = 'Formato de teléfono inválido. Ej: 88887777, 8888-7777 o +506-8888-7777';
+          }
+        }
+        break;
+    }
+
+    // Actualizar errores en tiempo real
+    setFormErrors(prev => ({
+      ...prev,
+      [fieldName]: error
+    }));
+
+    return error === '';
+  };
+
+  // Función para crear el handler de input con validación en tiempo real
+  const createInputHandler = (fieldName: string, handleChange: (value: string) => void, maxLength: number) => {
+    return (e: React.ChangeEvent<HTMLInputElement>) => {
+      const value = e.target.value;
+      
+      // Limitar caracteres al máximo permitido
+      if (value.length <= maxLength) {
+        handleChange(value);
+        setFieldCharCounts(prev => ({ ...prev, [fieldName]: value.length }));
+        
+        // Validar en tiempo real
+        validateFieldRealTime(fieldName, value);
+      }
+    };
+  };
+
+  const form = useForm({
+    defaultValues: {
+      Nombre_Proveedor: proveedor.Nombre_Proveedor,
+      Telefono_Proveedor: proveedor.Telefono_Proveedor,
+    },
+    onSubmit: async ({ value }: { value: EditProveedorSchemaData }) => {
+      setFormErrors({});
+
+      // Validar usando el schema de Zod simplificado
+      const validation = EditProveedorSchema.safeParse(value);
+
+      if (!validation.success) {
+        const fieldErrors: Record<string, string> = {};
+        validation.error.errors.forEach((err) => {
+          const field = err.path[0] as string;
+          fieldErrors[field] = err.message;
+        });
+        setFormErrors(fieldErrors);
+        return;
+      }
+
+      try {
+        // Solo enviar los campos que se pueden actualizar según el DTO del backend
+        const payload: UpdateProveedorData = {
+          Nombre_Proveedor: validation.data.Nombre_Proveedor,
+          Telefono_Proveedor: validation.data.Telefono_Proveedor,
+        };
+
+        // Usar el hook para actualizar el proveedor
+        await updateProveedorFisico({ 
+          id: proveedor.Id_Proveedor, 
+          data: payload 
+        });
+        
+        alert('Proveedor actualizado exitosamente');
+        onClose();
+      } catch (error) {
+        console.error('❌ Error al actualizar proveedor:', error);
+        const errorMessage = error instanceof Error ? error.message : 'Error desconocido al actualizar el proveedor';
+        alert(`Error al actualizar el proveedor: ${errorMessage}`);
+      }
+    },
+  });
+
+  // Función para renderizar contador de caracteres
+  const renderCharCounter = (current: number, max: number, hasError: boolean) => {
+    const remaining = max - current;
+    const isNearLimit = remaining <= 5;
+    
+    return (
+      <div className="flex justify-between items-center mt-1">
+        <span className="text-xs text-gray-500">
+          {hasError ? '' : `Máximo ${max} caracteres`}
+        </span>
+        <span className={`text-xs font-medium ${
+          isNearLimit ? 'text-orange-600' : 'text-gray-500'
+        }`}>
+          {current}/{max}
+          {isNearLimit && current < max && (
+            <span className="ml-1 text-orange-600">
+              ({remaining} restantes)
+            </span>
+          )}
+        </span>
+      </div>
+    );
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="absolute inset-0 bg-black/40 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4 max-h-[90vh] overflow-hidden">
+        <div className="flex items-center justify-between p-6 border-b">
+          <h2 className="text-xl font-semibold text-gray-900">Editar Proveedor</h2>
+        </div>
+
+        <div className="p-6 overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100 max-h-[calc(90vh-140px)]">
+          {/* Información de campos no editables */}
+          <div className="mb-6 p-4 bg-gray-50 rounded-lg border">
+            <h3 className="text-sm font-medium text-gray-700 mb-3">Información no editable:</h3>
+            <div className="grid grid-cols-1 gap-2 text-sm">
+              <div>
+                <span className="font-medium text-gray-600">Tipo de Identificación:</span>
+                <span className="ml-2 text-gray-800">{proveedor.Tipo_Identificacion}</span>
+              </div>
+              <div>
+                <span className="font-medium text-gray-600">Identificación:</span>
+                <span className="ml-2 text-gray-800">{proveedor.Identificacion}</span>
+              </div>
+              <div>
+                <span className="font-medium text-gray-600">Estado:</span>
+                <span className="ml-2 text-gray-800">
+                  {proveedor.Estado_Proveedor?.Estado_Proveedor || 'Activo'}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              form.handleSubmit();
+            }}
+            className="space-y-4"
+          >
+            {/* Nombre del Proveedor */}
+            <form.Field name="Nombre_Proveedor">
+              {(field) => (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Nombre del Proveedor *
+                  </label>
+                  <input
+                    type="text"
+                    value={field.state.value}
+                    onChange={createInputHandler('Nombre_Proveedor', field.handleChange, VALIDATION_LIMITS.NOMBRE_MAX_LENGTH)}
+                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-colors ${
+                      (formErrors.Nombre_Proveedor || field.state.meta.errors?.length) 
+                        ? 'border-red-300 focus:ring-red-500' 
+                        : 'border-gray-300 focus:ring-blue-500'
+                    }`}
+                    placeholder="Ingrese el nombre del proveedor (mín. 2 caracteres)"
+                    maxLength={VALIDATION_LIMITS.NOMBRE_MAX_LENGTH}
+                  />
+                  
+                  {renderCharCounter(
+                    fieldCharCounts.Nombre_Proveedor, 
+                    VALIDATION_LIMITS.NOMBRE_MAX_LENGTH, 
+                    !!(formErrors.Nombre_Proveedor || field.state.meta.errors?.length)
+                  )}
+
+                  {field.state.meta.errors?.map((err) => (
+                    <p key={err} className="text-red-500 text-xs mt-1">{err}</p>
+                  ))}
+                  {formErrors.Nombre_Proveedor && (
+                    <p className="text-red-500 text-xs mt-1">{formErrors.Nombre_Proveedor}</p>
+                  )}
+                </div>
+              )}
+            </form.Field>
+
+            {/* Teléfono */}
+            <form.Field name="Telefono_Proveedor">
+              {(field) => (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Teléfono *
+                  </label>
+                  <input
+                    type="tel"
+                    value={field.state.value}
+                    onChange={createInputHandler('Telefono_Proveedor', field.handleChange, VALIDATION_LIMITS.TELEFONO_MAX_LENGTH)}
+                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-colors ${
+                      (formErrors.Telefono_Proveedor || field.state.meta.errors?.length) 
+                        ? 'border-red-300 focus:ring-red-500' 
+                        : 'border-gray-300 focus:ring-blue-500'
+                    }`}
+                    placeholder="Ej: 88887777, 8888-7777 o +506-8888-7777"
+                    maxLength={VALIDATION_LIMITS.TELEFONO_MAX_LENGTH}
+                  />
+                  
+                  {renderCharCounter(
+                    fieldCharCounts.Telefono_Proveedor, 
+                    VALIDATION_LIMITS.TELEFONO_MAX_LENGTH, 
+                    !!(formErrors.Telefono_Proveedor || field.state.meta.errors?.length)
+                  )}
+                  
+                  {field.state.meta.errors?.map((err) => (
+                    <p key={err} className="text-red-500 text-xs mt-1">{err}</p>
+                  ))}
+                  {formErrors.Telefono_Proveedor && (
+                    <p className="text-red-500 text-xs mt-1">{formErrors.Telefono_Proveedor}</p>
+                  )}
+                </div>
+              )}
+            </form.Field>
+
+            <div className="flex justify-end gap-3 pt-4">
+              <button
+                type="button"
+                onClick={onClose}
+                className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                disabled={isUpdating}
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                disabled={isUpdating}
+                className={`px-4 py-2 text-white rounded-lg transition-colors ${
+                  isUpdating 
+                    ? 'bg-blue-300 cursor-not-allowed' 
+                    : 'bg-blue-600 hover:bg-blue-700' 
+                }`}
+              >
+                {isUpdating ? 'Actualizando...' : 'Actualizar Proveedor'}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default EditProveedorModal;

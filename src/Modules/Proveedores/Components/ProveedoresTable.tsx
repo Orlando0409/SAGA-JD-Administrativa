@@ -1,7 +1,9 @@
 import { useMemo, useState } from 'react';
 import { createColumnHelper, getCoreRowModel, getPaginationRowModel, useReactTable, flexRender, type ColumnDef } from '@tanstack/react-table';
-import { Building2, Eye } from 'lucide-react';
+import { Building2 } from 'lucide-react';
 import { useProveedoresFisicos } from '../Hook/proveedoresFisicos';
+import ProveedorDetailModal from './proveedorDetailModal';
+import CreateModalProveedor from './CreateModalProveedor';
 import type { ProveedorFisico } from '../Models/TablaProveedo/proveedorFisico';
 
 export default function ProveedoresTable() {
@@ -10,16 +12,17 @@ export default function ProveedoresTable() {
 
     const [globalFilter, setGlobalFilter] = useState('');
 
-    // Estados para el modal de detalle (por implementar después)
+    // Estados para el modal de detalle
     const [showDetailModal, setShowDetailModal] = useState(false);
     const [selectedProveedor, setSelectedProveedor] = useState<ProveedorFisico | null>(null);
+
+    // Estados para el modal de creación
+    const [showCreateModal, setShowCreateModal] = useState(false);
 
     // Función para abrir el modal de detalle
     const handleViewDetail = (proveedor: ProveedorFisico) => {
         setSelectedProveedor(proveedor);
         setShowDetailModal(true);
-        // Por ahora solo mostramos un alert, después implementaremos el modal
-        alert(`Ver detalles de: ${proveedor.Nombre_Proveedor}`);
     };
 
     const filteredData = useMemo(() => {
@@ -28,8 +31,8 @@ export default function ProveedoresTable() {
         return proveedoresFisicos.filter((proveedor) =>
             [
                 proveedor.Nombre_Proveedor,
-                proveedor.identificacion,
-                proveedor.Tipo_identificacion,
+                proveedor.Identificacion,
+                proveedor.Tipo_Identificacion,
                 proveedor.Telefono_Proveedor,
                 proveedor.Estado_Proveedor?.Estado_Proveedor
             ]
@@ -49,15 +52,15 @@ export default function ProveedoresTable() {
                 return nombre || 'Sin nombre';
             }
         }),
-        columnHelper.accessor('identificacion', {
+        columnHelper.accessor('Identificacion', {
             header: 'Identificación',
             cell: (info) => {
                 const identificacion = info.getValue();
-                const tipoId = info.row.original.Tipo_identificacion;
+                const tipoIdentificacion = info.row.original.Tipo_Identificacion;
                 return (
                     <div className="flex flex-col">
                         <span className="font-medium">{identificacion || 'Sin identificación'}</span>
-                        <span className="text-xs text-slate-500">{tipoId || 'Sin tipo'}</span>
+                        <span className="text-xs text-slate-500">{tipoIdentificacion || 'Sin tipo'}</span>
                     </div>
                 );
             },
@@ -91,42 +94,6 @@ export default function ProveedoresTable() {
             },
             size: 120,
         }),
-        columnHelper.accessor('Fecha_Creacion', {
-            header: 'Fecha Registro',
-            cell: (info) => {
-                const fecha = info.getValue();
-                if (!fecha) return 'Sin fecha';
-                
-                try {
-                    const fechaFormateada = new Date(fecha).toLocaleDateString('es-ES', {
-                        day: '2-digit',
-                        month: '2-digit',
-                        year: 'numeric'
-                    });
-                    return fechaFormateada;
-                } catch {
-                    return 'Fecha inválida';
-                }
-            },
-            size: 120,
-        }),
-        columnHelper.display({
-            id: 'acciones',
-            header: 'Acciones',
-            cell: (info) => (
-                <button
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        handleViewDetail(info.row.original);
-                    }}
-                    className="inline-flex items-center gap-1 px-2 py-1 text-xs bg-sky-100 text-sky-700 rounded hover:bg-sky-200 transition-colors"
-                >
-                    <Eye size={12} />
-                    Ver
-                </button>
-            ),
-            size: 80,
-        }),
     ];
 
     const table = useReactTable({
@@ -153,7 +120,7 @@ export default function ProveedoresTable() {
                     />
                     <button 
                         className="px-3 py-2 rounded-lg bg-sky-600 text-white hover:bg-sky-700 shadow-sm text-sm whitespace-nowrap" 
-                        onClick={() => alert('Crear nuevo proveedor — abrir formulario')}
+                        onClick={() => setShowCreateModal(true)}
                     >
                         + Nuevo Proveedor
                     </button>
@@ -233,20 +200,22 @@ export default function ProveedoresTable() {
                 </div>
             </div>
 
-            {/* TODO: Implementar modal de detalle de proveedores */}
-            {showDetailModal && selectedProveedor && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                    <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-                        <h3 className="text-lg font-semibold mb-4">Detalles del Proveedor</h3>
-                        <p>Modal de detalle por implementar</p>
-                        <button 
-                            onClick={() => setShowDetailModal(false)}
-                            className="mt-4 px-4 py-2 bg-sky-600 text-white rounded hover:bg-sky-700"
-                        >
-                            Cerrar
-                        </button>
-                    </div>
-                </div>
+            {/* Modal de detalle de proveedores */}
+            <ProveedorDetailModal
+                proveedor={selectedProveedor}
+                isOpen={showDetailModal}
+                onClose={() => {
+                    setShowDetailModal(false);
+                    setSelectedProveedor(null);
+                }}
+            />
+
+            {/* Modal de creación de proveedores */}
+            {showCreateModal && (
+                <CreateModalProveedor
+                    onClose={() => setShowCreateModal(false)}
+                    setShowCreateModal={setShowCreateModal}
+                />
             )}
         </div>
     );
