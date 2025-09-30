@@ -135,8 +135,8 @@ const FilterMovimientosModal: React.FC<FilterMovimientosModalProps> = ({
                 />
                 <span className="ml-2 text-sm text-gray-700">Todos los movimientos</span>
               </label>
-              
-              <label className="flex items-center">
+
+              <label aria-label='Tipo de Movimiento: Ingreso' className="flex items-center">
                 <input
                   type="radio"
                   name="tipoMovimiento"
@@ -149,8 +149,8 @@ const FilterMovimientosModal: React.FC<FilterMovimientosModalProps> = ({
                   <span>Solo Ingresos</span>
                 </span>
               </label>
-              
-              <label className="flex items-center">
+
+              <label aria-label='Tipo de Movimiento: Egreso' className="flex items-center">
                 <input
                   type="radio"
                   name="tipoMovimiento"

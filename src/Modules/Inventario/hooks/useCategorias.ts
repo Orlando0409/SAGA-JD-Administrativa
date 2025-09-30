@@ -25,7 +25,8 @@ export const useCreateCategoria = () => {
   const queryClient = useQueryClient();
   const { showSuccess, showError } = useAlerts();
   return useMutation({
-    mutationFn: (data: CreateCategoriaMaterialData) => CategoriasService.createCategoria(data),
+    mutationFn: ({ data, idUsuario }: { data: CreateCategoriaMaterialData; idUsuario: number }) => 
+      CategoriasService.createCategoria(data, idUsuario),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['categories'] });
         showSuccess('Categoría creada', 'La categoría se ha creado exitosamente');
@@ -65,6 +66,21 @@ export const useDeleteCategoria = () => {
     },
     onError: (error: any) => {
       console.error('Error al eliminar la categoría:', error);
+    },
+  });
+};
+
+export const useUpdateEstadoCategoria = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, nuevoEstado }: { id: number; nuevoEstado: number }) =>
+      CategoriasService.updateEstadoCategoria(id, nuevoEstado),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['categories'] });
+    },
+    onError: () => {
+      console.error('Error al actualizar el estado de la categoría');
     },
   });
 };

@@ -11,16 +11,19 @@ interface EditCategoriaModalProps {
 
 interface FormData {
   Nombre_Categoria: string;
+  Descripcion_Categoria: string;
 }
 
 const EditCategoriaModal: React.FC<EditCategoriaModalProps> = ({ isOpen, onClose, categoria }) => {
   const updateCategoriaMutation = useUpdateCategoria();
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
-  const [charCount, setCharCount] = useState(0);
+  const [charCount, setCharCount] = useState({ name: 0, description: 0 });
   const MAX_LENGTH = 100;
+  const MAX_DESC_LENGTH = 255;
   
   const [formData, setFormData] = useState<FormData>({
     Nombre_Categoria: '',
+    Descripcion_Categoria: '',
   });
 
   // Cargar los datos de la categoría cuando cambie
@@ -28,20 +31,28 @@ const EditCategoriaModal: React.FC<EditCategoriaModalProps> = ({ isOpen, onClose
     if (categoria) {
       setFormData({
         Nombre_Categoria: categoria.Nombre_Categoria,
+        Descripcion_Categoria: categoria.Descripcion_Categoria || '',
       });
-      setCharCount(categoria.Nombre_Categoria.length);
+      setCharCount({
+        name: categoria.Nombre_Categoria.length,
+        description: (categoria.Descripcion_Categoria || '').length,
+      });
     }
   }, [categoria]);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    const maxLength = name === 'Nombre_Categoria' ? MAX_LENGTH : MAX_DESC_LENGTH;
     
-    if (value.length <= MAX_LENGTH) {
-      setFormData(prev => ({ ...prev, Nombre_Categoria: value }));
-      setCharCount(value.length);
+    if (value.length <= maxLength) {
+      setFormData(prev => ({ ...prev, [name]: value }));
+      setCharCount(prev => ({
+        ...prev,
+        [name === 'Nombre_Categoria' ? 'name' : 'description']: value.length
+      }));
       
-      if (formErrors.Nombre_Categoria) {
-        setFormErrors(prev => ({ ...prev, Nombre_Categoria: '' }));
+      if (formErrors[name]) {
+        setFormErrors(prev => ({ ...prev, [name]: '' }));
       }
     }
   };
@@ -61,8 +72,17 @@ const EditCategoriaModal: React.FC<EditCategoriaModalProps> = ({ isOpen, onClose
       return;
     }
 
+    if (!formData.Descripcion_Categoria.trim()) {
+      setFormErrors({ Descripcion_Categoria: 'La descripción de la categoría es requerida' });
+      return;
+    }
+
     // Verificar si hay cambios
-    if (formData.Nombre_Categoria.trim() === categoria.Nombre_Categoria) {
+    const hasChanges = 
+      formData.Nombre_Categoria.trim() !== categoria.Nombre_Categoria ||
+      formData.Descripcion_Categoria.trim() !== (categoria.Descripcion_Categoria || '');
+
+    if (!hasChanges) {
       onClose();
       return;
     }
@@ -71,7 +91,8 @@ const EditCategoriaModal: React.FC<EditCategoriaModalProps> = ({ isOpen, onClose
       await updateCategoriaMutation.mutateAsync({
         id: categoria.Id_Categoria,
         data: {
-          Nombre_Categoria: formData.Nombre_Categoria.trim()
+          Nombre_Categoria: formData.Nombre_Categoria.trim(),
+          Descripcion_Categoria: formData.Descripcion_Categoria.trim()
         }
       });
       
@@ -122,6 +143,7 @@ const EditCategoriaModal: React.FC<EditCategoriaModalProps> = ({ isOpen, onClose
               </label>
               <input
                 id="nombre-categoria"
+                name="Nombre_Categoria"
                 type="text"
                 value={formData.Nombre_Categoria}
                 onChange={handleInputChange}
@@ -131,9 +153,30 @@ const EditCategoriaModal: React.FC<EditCategoriaModalProps> = ({ isOpen, onClose
                 placeholder="Ej: Tuberías, Herramientas, Químicos"
                 autoComplete="off"
               />
-              {renderCharCounter(charCount, MAX_LENGTH, !!formErrors.Nombre_Categoria)}
+              {renderCharCounter(charCount.name, MAX_LENGTH, !!formErrors.Nombre_Categoria)}
               {formErrors.Nombre_Categoria && (
                 <p className="text-red-500 text-sm mt-1">{formErrors.Nombre_Categoria}</p>
+              )}
+            </div>
+
+            <div>
+              <label htmlFor="descripcion-categoria" className="block text-sm font-medium text-gray-700 mb-1">
+                Descripción de la Categoría <span className="text-red-500">*</span>
+              </label>
+              <textarea
+                id="descripcion-categoria"
+                name="Descripcion_Categoria"
+                value={formData.Descripcion_Categoria}
+                onChange={handleInputChange}
+                rows={3}
+                className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors resize-none ${
+                  formErrors.Descripcion_Categoria ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                }`}
+                placeholder="Describe el tipo de materiales que incluye esta categoría"
+              />
+              {renderCharCounter(charCount.description, MAX_DESC_LENGTH, !!formErrors.Descripcion_Categoria)}
+              {formErrors.Descripcion_Categoria && (
+                <p className="text-red-500 text-sm mt-1">{formErrors.Descripcion_Categoria}</p>
               )}
             </div>
             <div className="flex gap-3 pt-4 border-t">

@@ -65,8 +65,7 @@ export const useUpdateEstadoUnidadMedicion = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ unidadId, estadoId }: { unidadId: number; estadoId: number }) => 
-      updateEstadoUnidadMedicion(unidadId, estadoId),
+    mutationFn: ({ unidadId, estadoUnidad }: { unidadId: number; estadoUnidad: number }) => updateEstadoUnidadMedicion(unidadId, estadoUnidad),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['unidades-medicion'] });
       queryClient.invalidateQueries({ queryKey: ['unidades-medicion-simple'] });

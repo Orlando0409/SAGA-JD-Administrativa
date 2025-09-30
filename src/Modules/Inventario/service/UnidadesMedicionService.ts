@@ -31,8 +31,8 @@ export const updateUnidadMedicion = async (id: number, unidadData: UpdateUnidadM
   return response.data;
 };
 
-export const updateEstadoUnidadMedicion = async (unidadId: number, estadoId: number): Promise<UnidadMedicion> => {
-  const response = await axiosPrivate.patch(`/Inventario/update/estado/unidad-medicion/${unidadId}/${estadoId}`);
+export const updateEstadoUnidadMedicion = async (unidadId: number, estadoUnidad:number): Promise<UnidadMedicion> => {
+  const response = await axiosPrivate.patch(`/Inventario/update/estado/unidad-medicion/${unidadId}/${estadoUnidad}`);
   return response.data;
 };
 

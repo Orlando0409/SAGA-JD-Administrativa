@@ -14,8 +14,8 @@ const FilterMaterialModal: React.FC<FilterMaterialModalProps> = ({
   const { data: categorias = [] } = useGetAllCategories();
   
   const estados = [
-    { id: 1, nombre: 'DISPONIBLE' },
-    { id: 2, nombre: 'AGOTADO' }
+    { id: 1, nombre: 'Disponible' },
+    { id: 2, nombre: 'Agotado' }
   ];
   
   const [filters, setFilters] = useState<MaterialFilterOptions>(currentFilters);

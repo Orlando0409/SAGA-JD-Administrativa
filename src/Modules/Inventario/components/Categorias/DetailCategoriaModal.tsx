@@ -12,6 +12,9 @@ const DetailCategoriaModal: React.FC<DetailCategoriaModalProps> = ({ isOpen, onC
   
   if (!isOpen) return null;
 
+  const estado = categoria.Estado_Categoria?.Nombre_Estado_Categoria || 'Activa';
+  const isActiva = estado === 'Activa';
+
   return (
     <div className="fixed inset-0 bg-white bg-opacity-95 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
@@ -37,10 +40,24 @@ const DetailCategoriaModal: React.FC<DetailCategoriaModalProps> = ({ isOpen, onC
 
             <div>
               <div className="block text-sm font-medium text-gray-700 mb-1">Estado</div>
-              <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded border break-words overflow-wrap-anywhere">
-                Activa
+              <p className='text-sm text-gray-900 bg-gray-50 p-2 rounded border '>
+                <span  className={`inline-flex px-2 py-1 rounded-full break-words overflow-wrap-anywhere ${isActiva ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>{estado}</span>
               </p>
             </div>
+          </div>
+
+          <div>
+            <div className="block text-sm font-medium text-gray-700 mb-1">Descripción</div>
+            <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded border break-words overflow-wrap-anywhere">
+              {categoria.Descripcion_Categoria || 'Sin descripción'}
+            </p>
+          </div>
+
+          <div>
+            <div className="block text-sm font-medium text-gray-700 mb-1">Creado por: </div>
+            <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded border">
+              {categoria.Usuario_Creador?.Nombre_Usuario || 'Desconocido'}
+            </p>
           </div>
 
           <div className="flex justify-end pt-6 border-t">

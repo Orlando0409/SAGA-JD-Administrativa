@@ -1,0 +1,149 @@
+import { useState, useCallback, useMemo } from 'react';
+import type { Material } from '../models/Inventario';
+import type { MovimientoType, MovimientoFormData } from '../types/MovimientoTypes';
+import { useGetAllMaterials } from './useMaterials';
+import { useIngresoMaterial, useEgresoMaterial } from './HookMaterialMovimiento';
+import { useAlerts } from '@/Modules/Global/context/AlertContext';
+
+export const useMovimientoForm = (initialMaterial?: Material) => {
+  // Estados principales
+  const [tipoMovimiento, setTipoMovimiento] = useState<MovimientoType>('entrada');
+  const [selectedMaterial, setSelectedMaterial] = useState<Material | null>(initialMaterial || null);
+  const [cantidad, setCantidad] = useState<number>(1);
+  const [descripcion, setDescripcion] = useState<string>('');
+  const [busquedaMaterial, setBusquedaMaterial] = useState<string>('');
+  const [showMaterialSelector, setShowMaterialSelector] = useState<boolean>(!initialMaterial);
+
+  // Hooks
+  const { data: materiales = [], isLoading: loadingMateriales, refetch: refetchMateriales } = useGetAllMaterials();
+  const ingresoMutation = useIngresoMaterial();
+  const egresoMutation = useEgresoMaterial();
+  const { showError } = useAlerts();
+
+  // Filtro de materiales optimizado con useMemo
+  const materialesFiltrados = useMemo(() => {
+    if (!busquedaMaterial.trim()) return materiales;
+    const termino = busquedaMaterial.toLowerCase().trim();
+    return materiales.filter((material: Material) => 
+      material.Nombre_Material.toLowerCase().includes(termino) ||
+      material.Categorias?.some(cat => 
+        cat.Categoria.Nombre_Categoria.toLowerCase().includes(termino)
+      )
+    );
+  }, [materiales, busquedaMaterial]);
+
+  // Handlers optimizados con useCallback
+  const handleSelectMaterial = useCallback((material: Material) => {
+    setSelectedMaterial(material);
+    setShowMaterialSelector(false);
+    setBusquedaMaterial('');
+  }, []);
+
+  const handleCantidadChange = useCallback((delta: number) => {
+    setCantidad(prev => Math.max(1, prev + delta));
+  }, []);
+
+  const handleDirectCantidadChange = useCallback((newCantidad: number) => {
+    setCantidad(Math.max(1, newCantidad));
+  }, []);
+
+  const resetForm = useCallback(() => {
+    setSelectedMaterial(initialMaterial || null);
+    setCantidad(1);
+    setDescripcion('');
+    setBusquedaMaterial('');
+    setShowMaterialSelector(!initialMaterial);
+  }, [initialMaterial]);
+
+  const validateForm = useCallback(() => {
+    if (!selectedMaterial) {
+      showError('Error', 'Debe seleccionar un material');
+      return false;
+    }
+
+    if (cantidad <= 0) {
+      showError('Error', 'La cantidad debe ser mayor a 0');
+      return false;
+    }
+
+    if (!descripcion.trim()) {
+      showError('Error', 'Debe agregar una descripción');
+      return false;
+    }
+
+    return true;
+  }, [selectedMaterial, cantidad, descripcion, showError]);
+
+  const handleSubmit = useCallback(async () => {
+    if (!validateForm()) return;
+
+    try {
+      const movimientoData = {
+        Cantidad: cantidad
+      };
+
+      if (tipoMovimiento === 'entrada') {
+        await ingresoMutation.mutateAsync({
+          materialId: selectedMaterial!.Id_Material,
+          data: movimientoData
+        });
+      } else {
+        await egresoMutation.mutateAsync({
+          materialId: selectedMaterial!.Id_Material,
+          data: movimientoData
+        });
+      }
+      
+      await refetchMateriales();
+      resetForm();
+      return true; // Indica éxito
+    } catch (error) {
+      console.error('Error creating movimiento:', error);
+      return false; // Indica error
+    }
+  }, [
+    validateForm, 
+    cantidad, 
+    tipoMovimiento, 
+    selectedMaterial, 
+    ingresoMutation, 
+    egresoMutation, 
+    refetchMateriales, 
+    resetForm
+  ]);
+
+  const formData: MovimientoFormData = {
+    tipoMovimiento,
+    selectedMaterial,
+    cantidad,
+    descripcion,
+    busquedaMaterial,
+    showMaterialSelector
+  };
+
+  const isLoading = ingresoMutation.isPending || egresoMutation.isPending;
+
+  return {
+    // Estado del formulario
+    formData,
+    
+    // Datos derivados
+    materialesFiltrados,
+    loadingMateriales,
+    isLoading,
+    
+    // Setters
+    setTipoMovimiento,
+    setCantidad,
+    setDescripcion,
+    setBusquedaMaterial,
+    setShowMaterialSelector,
+    
+    // Handlers
+    handleSelectMaterial,
+    handleCantidadChange,
+    handleDirectCantidadChange,
+    handleSubmit,
+    resetForm
+  };
+};

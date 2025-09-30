@@ -1,6 +1,6 @@
 export interface UnidadMedicion {
   Id_Unidad_Medicion: number;
-  Nombre_Unidad: string;
+  Nombre_Unidad: string; // Backend field name from UnidadMedicion entity
   Abreviatura: string;
   Descripcion?: string;
   Estado_Unidad_Medicion: EstadoUnidadMedicion;
@@ -27,7 +27,7 @@ export interface UpdateUnidadMedicionData {
 
 export interface UnidadMedicionSimple {
   Id_Unidad_Medicion: number;
-  Nombre_Unidad_Medicion: string;
+  Nombre_Unidad_Medicion: string; // This gets normalized in backend service
 }
 
 // DTO para ingreso/egreso de materiales

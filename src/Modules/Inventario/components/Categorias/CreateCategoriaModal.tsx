@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { LuX } from 'react-icons/lu';
 import { useCreateCategoria } from '../../hooks/useCategorias';
+import { useAuth } from '@/Modules/Auth/Context/AuthContext';
 
 interface CreateCategoriaModalProps {
   isOpen: boolean;
@@ -9,27 +10,36 @@ interface CreateCategoriaModalProps {
 
 interface FormData {
   Nombre_Categoria: string;
+  Descripcion_Categoria: string;
 }
 
 const CreateCategoriaModal: React.FC<CreateCategoriaModalProps> = ({ isOpen, onClose }) => {
   const createCategoriaMutation = useCreateCategoria();
+  const { user } = useAuth();
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
-  const [charCount, setCharCount] = useState(0);
+  const [charCount, setCharCount] = useState({ name: 0, description: 0 });
   const MAX_LENGTH = 100;
+  const MAX_DESC_LENGTH = 255;
   
   const [formData, setFormData] = useState<FormData>({
     Nombre_Categoria: '',
+    Descripcion_Categoria: ''
+
   });
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    const maxLength = name === 'Nombre_Categoria' ? MAX_LENGTH : MAX_DESC_LENGTH;
     
-    if (value.length <= MAX_LENGTH) {
-      setFormData(prev => ({ ...prev, Nombre_Categoria: value }));
-      setCharCount(value.length);
+    if (value.length <= maxLength) {
+      setFormData(prev => ({ ...prev, [name]: value }));
+      setCharCount(prev => ({
+        ...prev,
+        [name === 'Nombre_Categoria' ? 'name' : 'description']: value.length
+      }));
       
-      if (formErrors.Nombre_Categoria) {
-        setFormErrors(prev => ({ ...prev, Nombre_Categoria: '' }));
+      if (formErrors[name]) {
+        setFormErrors(prev => ({ ...prev, [name]: '' }));
       }
     }
   };
@@ -37,6 +47,12 @@ const CreateCategoriaModal: React.FC<CreateCategoriaModalProps> = ({ isOpen, onC
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormErrors({});
+
+    // Validar que el usuario esté autenticado
+    if (!user?.Id_Usuario) {
+      setFormErrors({ Nombre_Categoria: 'No se pudo obtener la información del usuario' });
+      return;
+    }
 
     if (!formData.Nombre_Categoria.trim()) {
       setFormErrors({ Nombre_Categoria: 'El nombre de la categoría es requerido' });
@@ -48,12 +64,21 @@ const CreateCategoriaModal: React.FC<CreateCategoriaModalProps> = ({ isOpen, onC
       return;
     }
 
+    if (!formData.Descripcion_Categoria.trim()) {
+      setFormErrors({ Descripcion_Categoria: 'La descripción de la categoría es requerida' });
+      return;
+    }
+
     try {
       await createCategoriaMutation.mutateAsync({
-        Nombre_Categoria: formData.Nombre_Categoria.trim()
+        data: {
+          Nombre_Categoria: formData.Nombre_Categoria.trim(),
+          Descripcion_Categoria: formData.Descripcion_Categoria.trim()
+        },
+        idUsuario: user.Id_Usuario
       });
-      setFormData({ Nombre_Categoria: '' });
-      setCharCount(0);
+      setFormData({ Nombre_Categoria: '', Descripcion_Categoria: '' });
+      setCharCount({ name: 0, description: 0 });
       onClose();
     } catch (error) {
       console.error('Error creating categoria:', error);
@@ -82,7 +107,7 @@ const CreateCategoriaModal: React.FC<CreateCategoriaModalProps> = ({ isOpen, onC
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0  flex items-center justify-center z-50 p-4">
+  <div className="fixed inset-0 bg-opacity-10 backdrop-blur-sm flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between p-6 border-b">
           <h2 className="text-xl font-semibold text-gray-900">Crear Nueva Categoría</h2>
@@ -99,6 +124,7 @@ const CreateCategoriaModal: React.FC<CreateCategoriaModalProps> = ({ isOpen, onC
               </label>
               <input
                 id="nombre-categoria"
+                name="Nombre_Categoria"
                 type="text"
                 value={formData.Nombre_Categoria}
                 onChange={handleInputChange}
@@ -108,9 +134,30 @@ const CreateCategoriaModal: React.FC<CreateCategoriaModalProps> = ({ isOpen, onC
                 placeholder="Ej: Tuberías, Herramientas, Químicos"
                 autoComplete="off"
               />
-              {renderCharCounter(charCount, MAX_LENGTH, !!formErrors.Nombre_Categoria)}
+              {renderCharCounter(charCount.name, MAX_LENGTH, !!formErrors.Nombre_Categoria)}
               {formErrors.Nombre_Categoria && (
                 <p className="text-red-500 text-sm mt-1">{formErrors.Nombre_Categoria}</p>
+              )}
+            </div>
+
+            <div>
+              <label htmlFor="descripcion-categoria" className="block text-sm font-medium text-gray-700 mb-1">
+                Descripción de la Categoría <span className="text-red-500">*</span>
+              </label>
+              <textarea
+                id="descripcion-categoria"
+                name="Descripcion_Categoria"
+                value={formData.Descripcion_Categoria}
+                onChange={handleInputChange}
+                rows={3}
+                className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors resize-none ${
+                  formErrors.Descripcion_Categoria ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                }`}
+                placeholder="Describe el tipo de materiales que incluye esta categoría"
+              />
+              {renderCharCounter(charCount.description, MAX_DESC_LENGTH, !!formErrors.Descripcion_Categoria)}
+              {formErrors.Descripcion_Categoria && (
+                <p className="text-red-500 text-sm mt-1">{formErrors.Descripcion_Categoria}</p>
               )}
             </div>
 

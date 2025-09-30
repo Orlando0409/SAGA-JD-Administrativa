@@ -44,11 +44,11 @@ const EditMaterialModal: React.FC<EditMaterialModalProps> = ({
       setFormData({
         Nombre_Material: material.Nombre_Material,
         Descripcion: material.Descripcion || '',
-        Id_Unidad_Medicion: material.Id_Unidad_Medicion,
+        Id_Unidad_Medicion: material.Unidad_Medicion.Id_Unidad_Medicion,
         Precio_Unitario: material.Precio_Unitario,
-        IDS_Categorias: material.Categorias?.map(cat => cat.Id_Categoria) || [],
+        IDS_Categorias: material.Categorias?.map(cat => cat.Categoria.Id_Categoria) || [],
       });
-      setSelectedCategorias(material.Categorias?.map(cat => cat.Id_Categoria) || []);
+      setSelectedCategorias(material.Categorias?.map(cat => cat.Categoria.Id_Categoria) || []);
       setFieldCharCounts({
         nombreMaterial: material.Nombre_Material.length,
         descripcion: (material.Descripcion || '').length

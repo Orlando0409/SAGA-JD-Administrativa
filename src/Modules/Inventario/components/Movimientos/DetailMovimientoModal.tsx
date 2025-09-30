@@ -72,6 +72,45 @@ const DetailMovimientoModal: React.FC<DetailMovimientoModalProps> = ({
               </p>
             </div>
 
+            {movimiento.Motivo && (
+              <div>
+                <div className="text-sm font-medium text-gray-700 mb-1">Motivo</div>
+                <p className="text-gray-700">{movimiento.Motivo}</p>
+              </div>
+            )}
+
+            {movimiento.Usuario && (
+              <div>
+                <div className="text-sm font-medium text-gray-700 mb-1">Usuario</div>
+                <p className="text-gray-700">{movimiento.Usuario}</p>
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <div className="text-sm font-medium text-gray-700 mb-1">Cantidad Anterior</div>
+                <p className="text-sm text-gray-600">
+                  {movimiento.Cantidad_Anterior} {movimiento.Material?.Unidad_Medicion?.Nombre_Unidad}
+                </p>
+              </div>
+              
+              <div>
+                <div className="text-sm font-medium text-gray-700 mb-1">Cantidad Movimiento</div>
+                <p className={`text-sm font-semibold ${
+                  isIngreso ? 'text-green-600' : 'text-red-600'
+                }`}>
+                  {isIngreso ? '+' : '-'}{movimiento.Cantidad} {movimiento.Material?.Unidad_Medicion?.Nombre_Unidad}
+                </p>
+              </div>
+              
+              <div>
+                <div className="text-sm font-medium text-gray-700 mb-1">Cantidad Nueva</div>
+                <p className="text-sm text-gray-600">
+                  {movimiento.Cantidad_Nueva} {movimiento.Material?.Unidad_Medicion?.Nombre_Unidad}
+                </p>
+              </div>
+            </div>
+
             {movimiento.Observaciones && (
               <div>
                 <div className="text-sm font-medium text-gray-700 mb-1">Observaciones</div>

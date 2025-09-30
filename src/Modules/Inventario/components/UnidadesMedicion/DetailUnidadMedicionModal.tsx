@@ -21,6 +21,9 @@ const DetailUnidadMedicionModal: React.FC<DetailUnidadMedicionModalProps> = ({ i
     });
   };
 
+       const estado = unidad.Estado_Unidad_Medicion?.Nombre_Estado_Unidad_Medicion || 'Activo';
+       const isActiva = estado === 'Activo';
+
   if (!isOpen) return null;
 
   return (
@@ -59,8 +62,8 @@ const DetailUnidadMedicionModal: React.FC<DetailUnidadMedicionModalProps> = ({ i
               <div className="block text-sm font-medium text-gray-700 mb-1">
                 Estado
               </div>
-              <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded border">
-                {unidad.Estado_Unidad_Medicion.Nombre_Estado_Unidad_Medicion}
+               <p className='text-sm text-gray-900 bg-gray-50 p-2 rounded border '>
+                <span  className={`inline-flex px-2 py-1 rounded-full break-words overflow-wrap-anywhere ${isActiva ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>{estado}</span>
               </p>
             </div>
 

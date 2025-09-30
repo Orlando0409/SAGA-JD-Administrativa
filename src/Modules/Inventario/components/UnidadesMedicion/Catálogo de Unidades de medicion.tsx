@@ -7,12 +7,12 @@ import {
   getPaginationRowModel,
   createColumnHelper,
 } from '@tanstack/react-table';
-import { LuPlus, LuSearch, LuPencil, LuTrash2, LuEye, LuToggleLeft, LuToggleRight, LuArrowLeft } from 'react-icons/lu';
+import { LuPlus, LuSearch, LuArrowLeft } from 'react-icons/lu';
 import { MdKeyboardArrowLeft, MdKeyboardArrowRight, MdKeyboardDoubleArrowLeft,
   MdKeyboardDoubleArrowRight, 
   MdKeyboardArrowDown,
   MdKeyboardArrowUp} from "react-icons/md";
-import { useUnidadesMedicion, useDeleteUnidadMedicion, useUpdateEstadoUnidadMedicion } from '../../hooks/HookUnidadMedicion';
+import { useUnidadesMedicion, useUpdateEstadoUnidadMedicion } from '../../hooks/HookUnidadMedicion';
 import CreateUnidadMedicionModal from './CreateUnidadMedicionModal';
 import EditUnidadMedicionModal from './EditUnidadMedicionModal';
 import DetailUnidadMedicionModal from './DetailUnidadMedicionModal';
@@ -30,7 +30,6 @@ const UnidadesMedicionManagement: React.FC<UnidadesMedicionManagementProps> = ({
   const [selectedUnidad, setSelectedUnidad] = useState<UnidadMedicion | null>(null);
 
   const { data: unidades = [], isLoading, error } = useUnidadesMedicion();
-  const deleteUnidadMutation = useDeleteUnidadMedicion();
   const updateEstadoMutation = useUpdateEstadoUnidadMedicion();
 
 
@@ -71,18 +70,6 @@ const UnidadesMedicionManagement: React.FC<UnidadesMedicionManagementProps> = ({
             }`}>
               {estado}
             </span>
-            <button
-              onClick={() => handleToggleEstado(info.row.original)}
-              disabled={updateEstadoMutation.isPending}
-              className="text-gray-400 hover:text-gray-600 transition-colors"
-              title={`Cambiar a ${estado === 'Activo' ? 'Inactivo' : 'Activo'}`}
-            >
-              {estado === 'Activo' ? (
-                <LuToggleRight className="w-5 h-5 text-green-600" />
-              ) : (
-                <LuToggleLeft className="w-5 h-5 text-gray-400" />
-              )}
-            </button>
           </div>
         );
       },
@@ -91,33 +78,44 @@ const UnidadesMedicionManagement: React.FC<UnidadesMedicionManagementProps> = ({
       id: 'acciones',
       header: 'Acciones',
       cell: info => (
-        <div className="flex justify-center gap-2">
+     <div className="flex justify-center gap-1">
           <button
-            className="p-2 rounded-md text-blue-600 hover:text-blue-800 hover:bg-blue-50 transition-colors"
+            className="px-2 py-1 bg-gray-600 text-white text-xs rounded hover:bg-gray-700 transition-colors"
             onClick={() => handleViewDetail(info.row.original)}
             title="Ver detalles"
           >
-            <LuEye className="w-4 h-4" />
+            Ver
           </button>
           <button
-            className="p-2 text-green-600 hover:text-green-800 hover:bg-green-50 rounded-md transition-colors"
+            className="px-2 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition-colors"
             onClick={() => handleEdit(info.row.original)}
             title="Editar"
           >
-            <LuPencil className="w-4 h-4" />
+            Editar
           </button>
-          <button
-            className="p-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-md transition-colors"
-            onClick={() => handleDelete(info.row.original)}
-            disabled={deleteUnidadMutation.isPending}
-            title="Eliminar"
-          >
-            <LuTrash2 className="w-4 h-4" />
-          </button>
+            {info.row.original.Estado_Unidad_Medicion?.Nombre_Estado_Unidad_Medicion === 'Activo' ? (
+            <button
+              className="px-2 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-700 transition-colors"
+              onClick={() => handleToggleEstado(info.row.original)}
+              disabled={updateEstadoMutation.isPending}
+              title="Desactivar"
+            >
+              Desactivar
+            </button>
+            ) : (
+            <button
+              className="px-2 py-1 bg-green-600 text-white text-xs rounded hover:bg-green-700 transition-colors"
+              onClick={() => handleToggleEstado(info.row.original)}
+              disabled={updateEstadoMutation.isPending}
+              title="Activar"
+            >
+              Activar
+            </button>
+            )}
         </div>
       ),
     }),
-  ], [deleteUnidadMutation.isPending, updateEstadoMutation.isPending]);
+  ], [updateEstadoMutation.isPending]);
 
   const table = useReactTable({
     data: unidades,
@@ -151,22 +149,14 @@ const UnidadesMedicionManagement: React.FC<UnidadesMedicionManagementProps> = ({
     try {
       await updateEstadoMutation.mutateAsync({
         unidadId: unidad.Id_Unidad_Medicion,
-        estadoId: unidad.Estado_Unidad_Medicion.Id_Estado_Unidad_Medicion === 1 ? 2 : 1
+        estadoUnidad: unidad.Estado_Unidad_Medicion?.Id_Estado_Unidad_Medicion === 1 ? 2 : 1
       });
     } catch (error) {
       console.error('Error al cambiar estado:', error);
     }
   };
 
-  const handleDelete = async (unidad: UnidadMedicion) => {
-    if (confirm(`¿Estás seguro de que quieres eliminar la unidad "${unidad.Nombre_Unidad}"?`)) {
-      try {
-        await deleteUnidadMutation.mutateAsync(unidad.Id_Unidad_Medicion);
-      } catch (error) {
-        console.error('Error al eliminar unidad:', error);
-      }
-    }
-  };
+
 
 
   if (isLoading) {
@@ -188,7 +178,6 @@ const UnidadesMedicionManagement: React.FC<UnidadesMedicionManagementProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* Header con botón de regreso */}
       {onBack && (
         <div className="flex items-center gap-4">
           <button
@@ -233,26 +222,44 @@ const UnidadesMedicionManagement: React.FC<UnidadesMedicionManagementProps> = ({
             <thead className="bg-gray-50">
               {table.getHeaderGroups().map(headerGroup => (
                 <tr key={headerGroup.id}>
-                  {headerGroup.headers.map((header, index) => (
-                    <th key={header.id} className={`px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider ${
-                      index === 0 ? 'text-left' : 'text-center'
-                    }`}>
-                      {header.isPlaceholder ? null : (
-                        <div
-                          className={header.column.getCanSort() ? `cursor-pointer select-none flex items-center gap-2 ${
-                            index === 0 ? 'justify-start' : 'justify-center'
-                          }` : `${index === 0 ? 'text-left' : 'text-center'}`}
-                          onClick={header.column.getToggleSortingHandler()}
-                        >
-                          {header.column.columnDef.header as string}
-                          {{
-                            asc: <MdKeyboardArrowUp className="w-4 h-4" />,
-                            desc: <MdKeyboardArrowDown className="w-4 h-4" />,
-                          }[header.column.getIsSorted() as string] ?? null}
-                        </div>
-                      )}
-                    </th>
-                  ))}
+                  {headerGroup.headers.map((header, index) => {
+                    const alignClass = index === 0 ? 'text-left' : 'text-center';
+                    return (
+                      <th
+                        key={header.id}
+                        className={`px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider ${alignClass}`}
+                      >
+                        {(() => {
+                          if (header.isPlaceholder) {
+                            return null;
+                          }
+                          let content;
+                          if (header.column.getCanSort()) {
+                            content = (
+                              <button
+                                type="button"
+                                className={`cursor-pointer select-none flex items-center gap-2 ${index === 0 ? 'justify-start' : 'justify-center'} w-full bg-transparent border-0 p-0 m-0 focus:outline-none`}
+                                onClick={header.column.getToggleSortingHandler()}
+                                tabIndex={0}
+                                aria-label={`Ordenar por ${header.column.columnDef.header as string}`}
+                              >
+                                {header.column.columnDef.header as string}
+                                {header.column.getIsSorted() === 'asc' && <MdKeyboardArrowUp className="w-4 h-4" />}
+                                {header.column.getIsSorted() === 'desc' && <MdKeyboardArrowDown className="w-4 h-4" />}
+                              </button>
+                            );
+                          } else {
+                            content = (
+                              <span className={alignClass}>
+                                {header.column.columnDef.header as string}
+                              </span>
+                            );
+                          }
+                          return content;
+                        })()}
+                      </th>
+                    );
+                  })}
                 </tr>
               ))}
             </thead>
@@ -270,10 +277,19 @@ const UnidadesMedicionManagement: React.FC<UnidadesMedicionManagementProps> = ({
                       <td key={cell.id} className={`px-6 py-4 whitespace-nowrap ${
                         index === 0 ? 'text-left' : 'text-center'
                       }`}>
-                        {cell.column.columnDef.cell ? 
-                          (typeof cell.column.columnDef.cell === 'function' ? cell.column.columnDef.cell(cell.getContext()) : cell.column.columnDef.cell) :
-                          cell.getValue() as React.ReactNode
-                        }
+                        {(() => {
+                          let cellContent;
+                          if (cell.column.columnDef.cell) {
+                            if (typeof cell.column.columnDef.cell === 'function') {
+                              cellContent = cell.column.columnDef.cell(cell.getContext());
+                            } else {
+                              cellContent = cell.column.columnDef.cell;
+                            }
+                          } else {
+                            cellContent = cell.getValue() as React.ReactNode;
+                          }
+                          return cellContent;
+                        })()}
                       </td>
                     ))}
                   </tr>
