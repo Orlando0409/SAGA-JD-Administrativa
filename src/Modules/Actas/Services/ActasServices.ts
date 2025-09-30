@@ -17,6 +17,16 @@ export const createActa = async (formData: FormData): Promise<Acta> => {
   return res.data;
 };
 
+// lograr Actualizar una acta existente
+export const updateActa = async (id: number, formData: FormData): Promise<Acta> => {
+  const res = await apiAuth.put(`/Actas/update/${id}`, formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+  return res.data;
+};
+
 // Eliminar un acta
 export const deleteActa = async (id: number): Promise<void> => {
   try {

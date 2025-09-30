@@ -19,67 +19,53 @@ type AfiliadoUnificado = {
     };
     Tipo_Persona: 'Físico' | 'Jurídico';
     Tipo_Afiliado: 'Abonado' | 'Asociado';
-    // Datos originales para acciones
+    Tipo_Identificacion?: string; // <-- CAMBIO: Nuevo campo
     datos_originales: AfiliadoFisico | AfiliadoJuridico;
 };
 
 export default function AbonadosTable() {
-    // Hooks para ambos tipos de afiliados
     const { afiliadosFisicos, isLoading: loadingFisicos, isError: errorFisicos } = useAfiliadosFisicos();
     const { afiliadosJuridicos, isLoading: loadingJuridicos, isError: errorJuridicos } = useAfiliadosJuridicos();
 
     const [globalFilter, setGlobalFilter] = useState('');
-
-    // Estados para el modal de detalle
     const [showDetailModal, setShowDetailModal] = useState(false);
     const [selectedPersona, setSelectedPersona] = useState<{
         tipo: 'afiliado-fisico' | 'afiliado-juridico';
         datos: AfiliadoFisico | AfiliadoJuridico;
     } | null>(null);
 
-    // Estados combinados
     const isLoading = loadingFisicos || loadingJuridicos;
     const isError = errorFisicos || errorJuridicos;
 
-    // Función para unificar los datos
+    // Unificar datos y agregar Tipo_Identificacion
     const datosUnificados = useMemo((): AfiliadoUnificado[] => {
-        // Debug: verificar qué datos están llegando
-        console.log('Afiliados Físicos:', afiliadosFisicos);
-        console.log('Afiliados Jurídicos:', afiliadosJuridicos);
+        const afiliadosFisicosUnificados: AfiliadoUnificado[] = afiliadosFisicos.map((afiliado: AfiliadoFisico) => ({
+            Id: afiliado.Id_Afiliado,
+            Nombre_Completo: `${afiliado.Nombre || ''} ${afiliado.Apellido1 || ''} ${afiliado.Apellido2 || ''}`.trim() || 'Sin nombre',
+            Cedula_Documento: afiliado.Cedula || 'Sin cédula',
+            Estado: {
+                Id_Estado: afiliado.Estado?.Id_Estado_Afiliado || 0,
+                Nombre_Estado: afiliado.Estado?.Nombre_Estado || 'Sin estado'
+            },
+            Tipo_Persona: 'Físico' as const,
+            Tipo_Afiliado: afiliado.Tipo_Afiliado?.Nombre_Tipo_Afiliado as 'Abonado' | 'Asociado' || 'Asociado',
+            Tipo_Identificacion: (afiliado as any).Tipo_Identificacion || 'Sin dato', // <-- CAMBIO: Mapeo del campo
+            datos_originales: afiliado
+        }));
 
-        // Afiliados Físicos
-        const afiliadosFisicosUnificados: AfiliadoUnificado[] = afiliadosFisicos.map((afiliado: AfiliadoFisico) => {
-            console.log('Procesando afiliado físico:', afiliado);
-            return {
-                Id: afiliado.Id_Afiliado,
-                Nombre_Completo: `${afiliado.Nombre || ''} ${afiliado.Apellido1 || ''} ${afiliado.Apellido2 || ''}`.trim() || 'Sin nombre',
-                Cedula_Documento: afiliado.Cedula || 'Sin cédula',
-                Estado: {
-                    Id_Estado: afiliado.Estado?.Id_Estado_Afiliado || 0,
-                    Nombre_Estado: afiliado.Estado?.Nombre_Estado || 'Sin estado'
-                },
-                Tipo_Persona: 'Físico' as const,
-                Tipo_Afiliado: afiliado.Tipo_Afiliado?.Nombre_Tipo_Afiliado as 'Abonado' | 'Asociado' || 'Asociado',
-                datos_originales: afiliado
-            };
-        });
-
-        // Afiliados Jurídicos
-        const afiliadosJuridicosUnificados: AfiliadoUnificado[] = afiliadosJuridicos.map((afiliado: AfiliadoJuridico) => {
-            console.log('Procesando afiliado jurídico:', afiliado);
-            return {
-                Id: afiliado.Id_Afiliado,
-                Nombre_Completo: afiliado.Razon_Social || 'Sin razón social',
-                Cedula_Documento: afiliado.Cedula_Juridica || 'Sin cédula jurídica',
-                Estado: {
-                    Id_Estado: afiliado.Estado?.Id_Estado_Afiliado || 0,
-                    Nombre_Estado: afiliado.Estado?.Nombre_Estado || 'Sin estado'
-                },
-                Tipo_Persona: 'Jurídico' as const,
-                Tipo_Afiliado: afiliado.Tipo_Afiliado?.Nombre_Tipo_Afiliado as 'Abonado' | 'Asociado' || 'Asociado',
-                datos_originales: afiliado
-            };
-        });
+        const afiliadosJuridicosUnificados: AfiliadoUnificado[] = afiliadosJuridicos.map((afiliado: AfiliadoJuridico) => ({
+            Id: afiliado.Id_Afiliado,
+            Nombre_Completo: afiliado.Razon_Social || 'Sin razón social',
+            Cedula_Documento: afiliado.Cedula_Juridica || 'Sin cédula jurídica',
+            Estado: {
+                Id_Estado: afiliado.Estado?.Id_Estado_Afiliado || 0,
+                Nombre_Estado: afiliado.Estado?.Nombre_Estado || 'Sin estado'
+            },
+            Tipo_Persona: 'Jurídico' as const,
+            Tipo_Afiliado: afiliado.Tipo_Afiliado?.Nombre_Tipo_Afiliado as 'Abonado' | 'Asociado' || 'Asociado',
+            Tipo_Identificacion: (afiliado as any).Tipo_Identificacion || 'Sin dato', // <-- CAMBIO: Mapeo del campo
+            datos_originales: afiliado
+        }));
 
         return [
             ...afiliadosFisicosUnificados,
@@ -87,11 +73,8 @@ export default function AbonadosTable() {
         ].sort((a, b) => a.Id - b.Id);
     }, [afiliadosFisicos, afiliadosJuridicos]);
 
-    // Función para abrir el modal de detalle
     const handleViewDetail = (persona: AfiliadoUnificado) => {
-        // Determinar el tipo según Tipo_Persona
         const tipo = persona.Tipo_Persona === 'Físico' ? 'afiliado-fisico' : 'afiliado-juridico';
-
         setSelectedPersona({
             tipo,
             datos: persona.datos_originales
@@ -103,7 +86,7 @@ export default function AbonadosTable() {
         if (!globalFilter) return datosUnificados;
         const q = globalFilter.toLowerCase();
         return datosUnificados.filter((afiliado) =>
-            [afiliado.Nombre_Completo, afiliado.Cedula_Documento, afiliado.Estado.Nombre_Estado, afiliado.Tipo_Persona, afiliado.Tipo_Afiliado]
+            [afiliado.Nombre_Completo, afiliado.Cedula_Documento, afiliado.Estado.Nombre_Estado, afiliado.Tipo_Persona, afiliado.Tipo_Afiliado, afiliado.Tipo_Identificacion] // <-- CAMBIO: Incluido en filtro
                 .filter(Boolean)
                 .join(' ')
                 .toLowerCase()
@@ -117,21 +100,15 @@ export default function AbonadosTable() {
             header: 'Nombre / Razón Social',
             cell: (info) => {
                 const fila = info.row.original;
-
                 if (fila.Tipo_Persona === 'Físico') {
                     const datosOriginales = fila.datos_originales as AfiliadoFisico;
-                    console.log('Datos físico en celda:', datosOriginales);
-
                     if (!datosOriginales.Nombre && !datosOriginales.Apellido1) {
                         return 'Datos no disponibles';
                     }
-
                     const nombreCompleto = `${datosOriginales.Nombre || ''} ${datosOriginales.Apellido1 || ''} ${datosOriginales.Apellido2 || ''}`.trim();
                     return nombreCompleto || 'Sin nombre';
                 } else {
                     const datosOriginales = fila.datos_originales as AfiliadoJuridico;
-                    console.log('Datos jurídico en celda:', datosOriginales);
-
                     return datosOriginales.Razon_Social || 'Sin razón social';
                 }
             }
@@ -140,7 +117,6 @@ export default function AbonadosTable() {
             header: 'Cédula / Cédula Jurídica',
             cell: (info) => {
                 const fila = info.row.original;
-
                 if (fila.Tipo_Persona === 'Físico') {
                     const datosOriginales = fila.datos_originales as AfiliadoFisico;
                     return datosOriginales.Cedula || 'Sin cédula';
@@ -151,14 +127,18 @@ export default function AbonadosTable() {
             },
             size: 160
         }),
+        // <-- CAMBIO: Nueva columna Tipo_Identificacion después de cédula
+        columnHelper.accessor('Tipo_Identificacion', {
+            header: 'Tipo Identificación',
+            cell: (info) => info.getValue() || 'Sin dato',
+            size: 120,
+        }),
         columnHelper.accessor('Estado', {
             header: 'Estado',
             cell: (info) => {
                 const estado = info.getValue();
                 const estadoNombre = estado?.Nombre_Estado || 'Sin estado';
-
                 const base = 'inline-flex items-center gap-2 px-2 py-1 rounded-full text-xs font-medium';
-
                 if (estadoNombre === 'Activo') {
                     return <span className={`${base} bg-green-100 text-green-700`}>Activo</span>;
                 } else if (estadoNombre === 'Inactivo') {
@@ -166,7 +146,6 @@ export default function AbonadosTable() {
                 } else if (estadoNombre === 'Pendiente') {
                     return <span className={`${base} bg-amber-100 text-amber-700`}> Pendiente</span>;
                 }
-
                 return <span className={`${base} bg-slate-100 text-slate-700`}>{estadoNombre}</span>;
             },
             size: 120,
@@ -216,7 +195,6 @@ export default function AbonadosTable() {
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
                 <div className="flex items-center gap-3">
                     <h2 className="text-lg sm:text-xl font-semibold text-sky-800">Gestión de Afiliados</h2>
-
                 </div>
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
                     <input value={globalFilter} onChange={(e) => setGlobalFilter(e.target.value)} placeholder="Buscar por nombre, cédula, estado, tipo..." className="w-full sm:w-auto px-3 py-2 rounded-lg border border-sky-200 bg-sky-50 focus:outline-none focus:ring-2 focus:ring-sky-200 text-sm" />

@@ -1,4 +1,5 @@
 import { useNavigate } from '@tanstack/react-router';
+import ProveedoresTable from './ProveedoresTable';
 
 const Proveedores = () => {
   const navigate = useNavigate();
@@ -14,7 +15,9 @@ const Proveedores = () => {
         >
             Volver
         </button>
-        <h1>Proveedores</h1>
+        <div className="w-full mt-4">
+            <ProveedoresTable />
+        </div>
     </div>
   )
 
