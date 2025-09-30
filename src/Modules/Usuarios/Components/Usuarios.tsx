@@ -70,7 +70,7 @@ const Usuarios = () => {
     if (!filters.rol && !filters.estado) return data;
     
     return data.filter(user => {
-      if (filters.rol && user.rol?.Nombre_Rol !== filters.rol) {
+      if (filters.rol && user.Rol?.Nombre_Rol !== filters.rol) {
         return false;
       }
 
@@ -99,7 +99,7 @@ const Usuarios = () => {
       columnHelper.accessor('Correo_Electronico', {
         header: 'Correo Electrónico',
       }),
-      columnHelper.accessor('rol.Nombre_Rol', {
+      columnHelper.accessor('Rol.Nombre_Rol', {
         header: 'Rol',
         cell: info => (
           <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
@@ -184,7 +184,6 @@ const Usuarios = () => {
           <RolesTable onClose={() => setShowRolesTable(false)} />
         ) : (
           <>
-            {/* Controls - Solo mostrar si tiene permisos de editar o hay múltiples usuarios */}
             {(hasEditPermission || filteredUsers.length > 1) && (
               <div className="p-6 border-b bg-gray-50">
                 <div className="flex justify-between items-center gap-4">
@@ -202,7 +201,6 @@ const Usuarios = () => {
                     </div>
                   )}
 
-                  {/* Buttons - Solo si tiene permisos de editar */}
                   {hasEditPermission && (
                     <div className="flex gap-3">
                       <button 
@@ -242,7 +240,6 @@ const Usuarios = () => {
                   )}
                 </div>
 
-                {/* Filtros activos - Solo si puede editar */}
                 {hasEditPermission && activeFiltersCount > 0 && (
                   <div className="mt-4 flex flex-wrap gap-2">
                     {appliedFilters.rol && (
@@ -278,7 +275,6 @@ const Usuarios = () => {
               </div>
             )}
 
-            {/* Table */}
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead className="bg-gray-100">
@@ -320,7 +316,6 @@ const Usuarios = () => {
               </table>
             </div>
 
-            {/* Pagination - Solo si hay múltiples páginas */}
             {table.getPageCount() > 1 && (
               <div className="px-6 py-2 bg-white border-t flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                 <div className="text-sm text-gray-700">
@@ -371,7 +366,6 @@ const Usuarios = () => {
           </>
         )}
 
-        {/* Modals */}
         {showCreateModal && hasCreatePermission && (
           <CreateUserModal onClose={() => setShowCreateModal(false)} />
         )}

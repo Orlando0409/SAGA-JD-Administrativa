@@ -37,8 +37,12 @@ export const useCreateUser = () => {
       queryClient.invalidateQueries({ queryKey: ['users'] });
       showSuccess('Usuario creado', 'El usuario se ha creado exitosamente');
     },
-    onError: () => {
-      showError('Error', 'No se pudo crear el usuario');
+    onError: (error:any) => {
+      let errMsg = '';
+      if (error instanceof AxiosError) {
+        errMsg = error.response?.data?.message || error.message;
+      }
+      showError('Error', errMsg);
     },
   });
 };
@@ -54,8 +58,12 @@ export const useUpdateUser = () => {
       queryClient.invalidateQueries({ queryKey: ['user', data.Id_Usuario] });
       showSuccess('Usuario actualizado', 'Los datos se han actualizado exitosamente');
     },
-    onError: () => {
-      showError('Error', 'No se pudo actualizar el usuario');
+    onError: (error:any) => {
+      let errMsg = '';
+      if (error instanceof AxiosError) {
+        errMsg = error.response?.data?.message || error.message;
+      }
+      showError('Error', errMsg);
     },
   });
 };

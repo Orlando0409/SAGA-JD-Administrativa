@@ -4,10 +4,10 @@ export const useUserPermissions = () => {
   const { user, isLoading } = useAuth();
 
   const hasPermission = (modulo: string, action: 'ver' | 'editar') => {
-    if (isLoading || !user?.rol?.permisos) return false;
+    if (isLoading || !user?.Rol?.Permisos) return false;
 
-    const modulePermissions = user.rol.permisos.filter(
-      permiso => permiso.modulo.toLowerCase() === modulo.toLowerCase()
+    const modulePermissions = user.Rol.Permisos.filter(
+      permiso => permiso.Modulo.toLowerCase() === modulo.toLowerCase()
     );
 
     if (modulePermissions.length === 0) return false;

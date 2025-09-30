@@ -19,7 +19,7 @@ import {
 import { Button } from '@/Modules/Global/components/Sidebar/ui/button';
 import { CUSTOM_ANIMATION } from '@/Modules/Global/types/Sections';
 import type { UserDetailModalProps } from '../Types/UserTypes';
-import type { Permiso } from '../Models/Usuario';
+import type { Permiso } from '../../Roles/Models/Role';
 import { getPermissionLabel } from '../Helper/GroupPermiByModule';
 import { isActive } from '../Helper/utils';
 import { useUserPermissions } from '@/Modules/Auth/Hooks/PermissionHook';
@@ -67,11 +67,11 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({ userId, isOpen, onClo
   };
 
       // Agrupar permisos por módulo
-     const groupedPermisos = user?.rol.permisos?.reduce((acc: Record<string, Permiso[]>, permiso: Permiso) => {
-      if (!acc[permiso.modulo]) {
-        acc[permiso.modulo] = [];
+     const groupedPermisos = user?.Rol.Permisos?.reduce((acc: Record<string, Permiso[]>, permiso: Permiso) => {
+      if (!acc[permiso.Modulo]) {
+        acc[permiso.Modulo] = [];
       }
-      acc[permiso.modulo].push(permiso);
+      acc[permiso.Modulo].push(permiso);
       return acc;
     }, {});
 
@@ -126,9 +126,8 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({ userId, isOpen, onClo
             </div>
           </div>
 
-          {/* Accordion Sections */}
+
           <div className="space-y-4">
-            {/* Información Básica */}
             <Accordion
               open={openSections.includes(1)}
               animate={CUSTOM_ANIMATION}
@@ -154,22 +153,34 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({ userId, isOpen, onClo
                 <div className="grid grid-cols-2 md:grid-cols-2 gap-6">
                   <div className="space-y-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-500 mb-1">Nombre de Usuario</label>
-                      <p className="text-gray-900 font-medium">{user.Nombre_Usuario}</p>
+                      <label
+                        className="block text-sm font-medium text-gray-500 mb-1"
+                        id="nombre-usuario-label"
+                        htmlFor="nombre-usuario"
+                      >
+                        Nombre de Usuario
+                      </label>
+                      <p
+                        className="text-gray-900 font-medium"
+                        id="nombre-usuario"
+                        aria-labelledby="nombre-usuario-label"
+                      >
+                        {user.Nombre_Usuario}
+                      </p>
                     </div>
                   </div>
                   <div className="space-y-4">
                     <div className="flex items-center gap-2">
                       <LuMail className="w-4 h-4 text-gray-400" />
                       <div>
-                        <label className="block text-sm font-medium text-gray-500 mb-1">Correo Electrónico</label>
+                        <label htmlFor="correo-electronico" className="block text-sm font-medium text-gray-500 mb-1">Correo Electrónico</label>
                         <p className="text-gray-900 font-medium">{user.Correo_Electronico}</p>
                       </div>
                     </div>
                   </div>
                     <div className="space-y-4">
                       <div>
-                      <label className="block text-sm font-medium text-gray-500 mb-2">Estado del Usuario</label>
+                      <label htmlFor="estado-usuario" className="block text-sm font-medium text-gray-500 mb-2">Estado del Usuario</label>
                       <span className={`inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium border ${
                         isActive(user.Fecha_Eliminacion)
                           ? 'bg-green-100 text-green-800 border-green-200' 
@@ -182,10 +193,10 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({ userId, isOpen, onClo
 
                   <div className="space-y-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-500 mb-2">Rol Asignado</label>
+                      <label htmlFor="rol-asignado" className="block text-sm font-medium text-gray-500 mb-2">Rol Asignado</label>
                       <span className="inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium bg-blue-100 text-blue-800 border border-blue-200">
                         <LuShield className="w-4 h-4 mr-2" />
-                        {user.rol?.Nombre_Rol}
+                        {user.Rol?.Nombre_Rol}
                       </span>
                     </div>
                   </div>
@@ -194,7 +205,7 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({ userId, isOpen, onClo
             </Accordion>
 
             {/* Permisos */}
-            {user.rol?.permisos && user.rol.permisos.length > 0 && (
+            {user.Rol?.Permisos && user.Rol.Permisos.length > 0 && (
               <Accordion
                 open={openSections.includes(3)}
                 animate={CUSTOM_ANIMATION}
@@ -210,7 +221,7 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({ userId, isOpen, onClo
                     <div className="flex items-center gap-3">
                       <LuShield className="w-5 h-5 text-blue-600" />
                       <span className="text-gray-900">
-                        Permisos del Rol ({user.rol.permisos.length})
+                        Permisos del Rol ({user.Rol.Permisos.length})
                       </span>
                     </div>
                     <span className="text-gray-500">
@@ -236,7 +247,7 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({ userId, isOpen, onClo
                             {permisos.map((permiso: Permiso) => {
                               const label = getPermissionLabel(permiso);
                               return (
-                                <div key={permiso.id} className="text-center">
+                                <div key={permiso.Id} className="text-center">
                                   <div className={`px-3 py-1 rounded-full text-xs font-medium ${label.className}`}>
                                     {label.text}
                                   </div>
@@ -254,7 +265,6 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({ userId, isOpen, onClo
             )}
           </div>
 
-          {/* Action Buttons */}
           <div className="flex justify-end gap-4 mt-8">
             {canEdit('usuarios') && (
               <Button
@@ -342,7 +352,6 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({ userId, isOpen, onClo
           </div>
         </div>
 
-        {/* Edit User Modal */}
         {showEditModal && (
           <EditUserModal
             isOpen={showEditModal}
