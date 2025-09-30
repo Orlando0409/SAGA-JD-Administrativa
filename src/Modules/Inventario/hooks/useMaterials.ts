@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import * as MaterialService from '../service/MaterialService';
 import type { CreateMaterialData, UpdateMaterialData } from '../models/Inventario';
-
+import { useAlerts } from '@/Modules/Global/context/AlertContext';
 export const useGetAllMaterials = () => {
   return useQuery({
     queryKey: ['materials'],
@@ -56,30 +56,34 @@ export const useGetMaterialesPorDebajoDeStock = (threshold: number) => {
 
 export const useCreateMaterial = () => {
   const queryClient = useQueryClient();
-
+    const { showSuccess, showError } = useAlerts();
   return useMutation({
     mutationFn: (data: CreateMaterialData) => MaterialService.createMaterial(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['materials'] });
+      showSuccess('Material creado exitosamente');
     },
     onError: (error: any) => {
-      console.error('Error al crear el material:', error);
+      const errorMessage = error?.response?.data?.message || 'Error al crear el material';
+      showError('Error', errorMessage);
     },
   });
 };
 
 export const useUpdateMaterial = () => {
   const queryClient = useQueryClient();
-
+  const { showSuccess, showError } = useAlerts();
   return useMutation({
     mutationFn: ({ id, data }: { id: number; data: UpdateMaterialData }) => 
       MaterialService.updateMaterial(id, data),
     onSuccess: (updatedMaterial) => {
       queryClient.invalidateQueries({ queryKey: ['materials'] });
       queryClient.invalidateQueries({ queryKey: ['material', updatedMaterial.Id_Material] });
+      showSuccess('Material actualizado exitosamente');
     },
     onError: (error: any) => {
-      console.error('Error al actualizar el material:', error);
+        const errorMessage = error?.response?.data?.message || 'Error al actualizar el material';
+        showError('Error', errorMessage);
     },
   });
 };
