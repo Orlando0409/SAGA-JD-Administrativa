@@ -65,7 +65,7 @@ const EditModal: React.FC<EditModalProps> = ({ isOpen, onClose, persona }) => {
                 Nombre: afiliado.Nombre,
                 Apellido1: afiliado.Apellido1,
                 Apellido2: afiliado.Apellido2 || '',
-                Cedula: afiliado.Cedula,
+                Cedula: afiliado.Identificacion,
                 Numero_Telefono: afiliado.Numero_Telefono,
                 Correo: afiliado.Correo,
                 Direccion_Exacta: afiliado.Direccion_Exacta || '',

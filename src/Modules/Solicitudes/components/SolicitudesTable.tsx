@@ -36,6 +36,7 @@ type SolicitudUnificada = {
     Fecha_Creacion: string;
     // Datos originales para acciones
     datos_originales: SolicitudFisica | SolicitudJuridica;
+  
 };
 
 export default function SolicitudesTable() {
@@ -193,13 +194,12 @@ export default function SolicitudesTable() {
             }
         }),
         columnHelper.accessor('Cedula_Documento', {
-            header: 'Cédula / Cédula Jurídica',
+            header: 'Número Identificación / Cédula Jurídica', // <-- CAMBIO: Nuevo encabezado
             cell: (info) => {
                 const fila = info.row.original;
-
                 if (fila.Tipo_Persona === 'Físico') {
                     const datosOriginales = fila.datos_originales as SolicitudFisica;
-                    return datosOriginales.Cedula || 'Sin cédula';
+                    return datosOriginales.Identificacion || 'Sin número de identificación'; // <-- CAMBIO: usa Identificacion
                 } else {
                     const datosOriginales = fila.datos_originales as SolicitudJuridica;
                     return datosOriginales.Cedula_Juridica || 'Sin cédula jurídica';
