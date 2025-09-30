@@ -1,11 +1,12 @@
 import { useForm } from '@tanstack/react-form';
 import { useState } from 'react';
 import { 
-  CreateProveedorSchemaWithIdentificacionValidation, 
-  type CreateProveedorSchemaData,
+  EditProveedorSchema, 
+  type EditProveedorSchemaData,
   VALIDATION_LIMITS
 } from '../Schema/Proveedores';
-import type { ProveedorFisico } from '../Models/TablaProveedo/proveedorFisico';
+import type { ProveedorFisico, UpdateProveedorData } from '../Models/TablaProveedo/proveedorFisico';
+import { useUpdateProveedorFisico } from '../Hook/proveedoresFisicos';
 
 interface EditProveedorModalProps {
   isOpen: boolean;
@@ -14,23 +15,20 @@ interface EditProveedorModalProps {
 }
 
 const EditProveedorModal: React.FC<EditProveedorModalProps> = ({ isOpen, onClose, proveedor }) => {
-  // const updateProveedorMutation = useUpdateProveedorFisico(); // Temporalmente comentado
-  // Mock temporal para evitar errores
-  const updateProveedorMutation = {
-    mutateAsync: async (data: any) => {
-      console.log('Función de actualización temporalmente deshabilitada:', data);
-      return Promise.resolve();
-    },
-    isPending: false
-  };
+  // Hook para actualizar proveedor físico
+  const { 
+    updateProveedorFisico, 
+    isUpdating 
+  } = useUpdateProveedorFisico();
+  
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [fieldCharCounts, setFieldCharCounts] = useState({
     Nombre_Proveedor: proveedor.Nombre_Proveedor.length,
     Telefono_Proveedor: proveedor.Telefono_Proveedor.length
   });
 
-  // Función para validar en tiempo real
-  const validateFieldRealTime = (fieldName: string, value: string, tipoIdentificacion?: string) => {
+  // Función para validar en tiempo real (solo campos editables)
+  const validateFieldRealTime = (fieldName: string, value: string) => {
     let error = '';
 
     switch (fieldName) {
@@ -44,54 +42,11 @@ const EditProveedorModal: React.FC<EditProveedorModalProps> = ({ isOpen, onClose
         }
         break;
 
-      case 'Identificacion':
-        if (value && tipoIdentificacion) {
-          const cleanValue = value.replace(/[\s\-]/g, '').toUpperCase();
-          
-          switch (tipoIdentificacion) {
-            case 'Cedula':
-              if (!/^\d*$/.test(cleanValue)) {
-                error = 'La cédula solo puede contener números';
-              } else if (cleanValue.length > 0 && cleanValue[0] === '0') {
-                error = 'La cédula no puede empezar con 0';
-              } else if (cleanValue.length > 0 && cleanValue.length !== 9 && cleanValue.length === value.length) {
-                error = 'La cédula debe tener exactamente 9 dígitos';
-              }
-              break;
-
-            case 'Dimex':
-              if (!/^\d*$/.test(cleanValue)) {
-                error = 'El DIMEX solo puede contener números';
-              } else if (cleanValue.length > 0 && cleanValue[0] === '0') {
-                error = 'El DIMEX no puede empezar con 0';
-              } else if (cleanValue.length > 0 && cleanValue.length !== 12 && cleanValue.length === value.length) {
-                error = 'El DIMEX debe tener exactamente 12 dígitos';
-              }
-              break;
-
-            case 'Pasaporte':
-              if (!/^[A-Z0-9]*$/.test(cleanValue)) {
-                error = 'El pasaporte solo puede contener letras y números';
-              } else if (cleanValue.length > 0 && cleanValue.length < 6) {
-                error = 'El pasaporte debe tener al menos 6 caracteres';
-              } else if (cleanValue.length >= 6) {
-                const letters = cleanValue.match(/[A-Z]/g);
-                if (!letters || letters.length === 0) {
-                  error = 'El pasaporte debe tener al menos 1 letra';
-                } else if (letters.length > 3) {
-                  error = 'El pasaporte puede tener máximo 3 letras';
-                }
-              }
-              break;
-          }
-        }
-        break;
-
       case 'Telefono_Proveedor':
         if (value) {
-          const TELEFONO_REGEX = /^(\+?\d{1,3}[\s\-]?)?\d{4}[\s\-]?\d{4}$/;
+          const TELEFONO_REGEX = /^(\+?506[\s\-]?)?[0-9]{8}$|^(\+?506[\s\-]?)?[0-9]{4}[\s\-]?[0-9]{4}$/;
           if (!TELEFONO_REGEX.test(value)) {
-            error = 'Formato de teléfono inválido. Ej: 8888-7777 o +506-8888-7777';
+            error = 'Formato de teléfono inválido. Ej: 88887777, 8888-7777 o +506-8888-7777';
           }
         }
         break;
@@ -107,7 +62,7 @@ const EditProveedorModal: React.FC<EditProveedorModalProps> = ({ isOpen, onClose
   };
 
   // Función para crear el handler de input con validación en tiempo real
-  const createInputHandler = (fieldName: string, handleChange: (value: string) => void, maxLength: number, tipoIdentificacion?: string) => {
+  const createInputHandler = (fieldName: string, handleChange: (value: string) => void, maxLength: number) => {
     return (e: React.ChangeEvent<HTMLInputElement>) => {
       const value = e.target.value;
       
@@ -117,7 +72,7 @@ const EditProveedorModal: React.FC<EditProveedorModalProps> = ({ isOpen, onClose
         setFieldCharCounts(prev => ({ ...prev, [fieldName]: value.length }));
         
         // Validar en tiempo real
-        validateFieldRealTime(fieldName, value, tipoIdentificacion);
+        validateFieldRealTime(fieldName, value);
       }
     };
   };
@@ -126,15 +81,12 @@ const EditProveedorModal: React.FC<EditProveedorModalProps> = ({ isOpen, onClose
     defaultValues: {
       Nombre_Proveedor: proveedor.Nombre_Proveedor,
       Telefono_Proveedor: proveedor.Telefono_Proveedor,
-      Tipo_Identificacion: proveedor.Tipo_Identificacion as any,
-      Identificacion: proveedor.Identificacion,
-      Id_Estado_Proveedor: proveedor.Estado_Proveedor?.Id_Estado_Proveedor || 0,
     },
-    onSubmit: async ({ value }: { value: CreateProveedorSchemaData }) => {
+    onSubmit: async ({ value }: { value: EditProveedorSchemaData }) => {
       setFormErrors({});
 
-      // Validar usando el schema de Zod
-      const validation = CreateProveedorSchemaWithIdentificacionValidation.safeParse(value);
+      // Validar usando el schema de Zod simplificado
+      const validation = EditProveedorSchema.safeParse(value);
 
       if (!validation.success) {
         const fieldErrors: Record<string, string> = {};
@@ -147,21 +99,24 @@ const EditProveedorModal: React.FC<EditProveedorModalProps> = ({ isOpen, onClose
       }
 
       try {
-        // Los datos del formulario ya coinciden con la estructura esperada
-        const payload = validation.data;
-        console.log('🔍 Datos del formulario validados para actualización:', JSON.stringify(payload, null, 2));
+        // Solo enviar los campos que se pueden actualizar según el DTO del backend
+        const payload: UpdateProveedorData = {
+          Nombre_Proveedor: validation.data.Nombre_Proveedor,
+          Telefono_Proveedor: validation.data.Telefono_Proveedor,
+        };
 
-        // Llamada real al servicio de actualización usando el hook
-        await updateProveedorMutation.mutateAsync({ 
+        // Usar el hook para actualizar el proveedor
+        await updateProveedorFisico({ 
           id: proveedor.Id_Proveedor, 
-          proveedor: payload 
+          data: payload 
         });
         
-        // Cerrar modal después de actualización exitosa
+        alert('Proveedor actualizado exitosamente');
         onClose();
       } catch (error) {
-        console.error('❌ Error updating proveedor:', error);
-        // El hook ya maneja mostrar el error
+        console.error('❌ Error al actualizar proveedor:', error);
+        const errorMessage = error instanceof Error ? error.message : 'Error desconocido al actualizar el proveedor';
+        alert(`Error al actualizar el proveedor: ${errorMessage}`);
       }
     },
   });
@@ -200,6 +155,27 @@ const EditProveedorModal: React.FC<EditProveedorModalProps> = ({ isOpen, onClose
         </div>
 
         <div className="p-6 overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100 max-h-[calc(90vh-140px)]">
+          {/* Información de campos no editables */}
+          <div className="mb-6 p-4 bg-gray-50 rounded-lg border">
+            <h3 className="text-sm font-medium text-gray-700 mb-3">Información no editable:</h3>
+            <div className="grid grid-cols-1 gap-2 text-sm">
+              <div>
+                <span className="font-medium text-gray-600">Tipo de Identificación:</span>
+                <span className="ml-2 text-gray-800">{proveedor.Tipo_Identificacion}</span>
+              </div>
+              <div>
+                <span className="font-medium text-gray-600">Identificación:</span>
+                <span className="ml-2 text-gray-800">{proveedor.Identificacion}</span>
+              </div>
+              <div>
+                <span className="font-medium text-gray-600">Estado:</span>
+                <span className="ml-2 text-gray-800">
+                  {proveedor.Estado_Proveedor?.Estado_Proveedor || 'Activo'}
+                </span>
+              </div>
+            </div>
+          </div>
+
           <form
             onSubmit={(e) => {
               e.preventDefault();
@@ -259,7 +235,7 @@ const EditProveedorModal: React.FC<EditProveedorModalProps> = ({ isOpen, onClose
                         ? 'border-red-300 focus:ring-red-500' 
                         : 'border-gray-300 focus:ring-blue-500'
                     }`}
-                    placeholder="Ej: 8888-7777 o +506-8888-7777"
+                    placeholder="Ej: 88887777, 8888-7777 o +506-8888-7777"
                     maxLength={VALIDATION_LIMITS.TELEFONO_MAX_LENGTH}
                   />
                   
@@ -284,20 +260,20 @@ const EditProveedorModal: React.FC<EditProveedorModalProps> = ({ isOpen, onClose
                 type="button"
                 onClick={onClose}
                 className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
-                disabled={updateProveedorMutation.isPending}
+                disabled={isUpdating}
               >
                 Cancelar
               </button>
               <button
                 type="submit"
-                disabled={updateProveedorMutation.isPending}
+                disabled={isUpdating}
                 className={`px-4 py-2 text-white rounded-lg transition-colors ${
-                  updateProveedorMutation.isPending 
+                  isUpdating 
                     ? 'bg-blue-300 cursor-not-allowed' 
                     : 'bg-blue-600 hover:bg-blue-700' 
                 }`}
               >
-                {updateProveedorMutation.isPending ? 'Actualizando...' : 'Actualizar Proveedor'}
+                {isUpdating ? 'Actualizando...' : 'Actualizar Proveedor'}
               </button>
             </div>
           </form>

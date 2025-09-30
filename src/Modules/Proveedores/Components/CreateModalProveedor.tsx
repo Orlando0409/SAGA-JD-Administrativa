@@ -10,6 +10,8 @@ import {
   IDENTIFICACION_PLACEHOLDERS,
   IDENTIFICACION_LIMITS_BY_TYPE
 } from '../Schema/Proveedores';
+import { useCreateProveedorFisico } from '../Hook/proveedoresFisicos';
+import type { CreateProveedorData } from '../Models/TablaProveedo/proveedorFisico';
 
 interface CreateModalProveedorProps {
   onClose: () => void;
@@ -23,7 +25,12 @@ const CreateModalProveedor = ({ onClose, setShowCreateModal }: CreateModalProvee
     Telefono_Proveedor: 0,
     Identificacion: 0
   });
-  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Hook para crear proveedor físico
+  const { 
+    createProveedorFisico, 
+    isCreating
+  } = useCreateProveedorFisico();
 
   // Función para manejar el cierre del modal
   const handleClose = () => {
@@ -51,7 +58,7 @@ const CreateModalProveedor = ({ onClose, setShowCreateModal }: CreateModalProvee
           const cleanValue = value.replace(/[\s\-]/g, '').toUpperCase();
           
           switch (tipoIdentificacion) {
-            case 'Cedula':
+            case 'Cedula Nacional':
               if (!/^\d*$/.test(cleanValue)) {
                 error = 'La cédula solo puede contener números';
               } else if (cleanValue.length > 0 && cleanValue[0] === '0') {
@@ -61,7 +68,7 @@ const CreateModalProveedor = ({ onClose, setShowCreateModal }: CreateModalProvee
               }
               break;
 
-            case 'Dimex':
+            case 'DIMEX':
               if (!/^\d*$/.test(cleanValue)) {
                 error = 'El DIMEX solo puede contener números';
               } else if (cleanValue.length > 0 && cleanValue[0] === '0') {
@@ -91,9 +98,9 @@ const CreateModalProveedor = ({ onClose, setShowCreateModal }: CreateModalProvee
 
       case 'Telefono_Proveedor':
         if (value) {
-          const TELEFONO_REGEX = /^(\+?\d{1,3}[\s\-]?)?\d{4}[\s\-]?\d{4}$/;
+          const TELEFONO_REGEX = /^(\+?506[\s\-]?)?[0-9]{8}$|^(\+?506[\s\-]?)?[0-9]{4}[\s\-]?[0-9]{4}$/;
           if (!TELEFONO_REGEX.test(value)) {
-            error = 'Formato de teléfono inválido. Ej: 8888-7777 o +506-8888-7777';
+            error = 'Formato de teléfono inválido. Ej: 88887777, 8888-7777 o +506-8888-7777';
           }
         }
         break;
@@ -135,7 +142,6 @@ const CreateModalProveedor = ({ onClose, setShowCreateModal }: CreateModalProvee
 
     onSubmit: async ({ value }: { value: CreateProveedorSchemaData }) => {
       setFormErrors({});
-      setIsSubmitting(true);
 
       // Validar usando el schema de Zod
       const validation = CreateProveedorSchemaWithIdentificacionValidation.safeParse(value);
@@ -147,28 +153,29 @@ const CreateModalProveedor = ({ onClose, setShowCreateModal }: CreateModalProvee
           fieldErrors[field] = err.message;
         });
         setFormErrors(fieldErrors);
-        setIsSubmitting(false);
         return;
       }
 
       try {
-        // Los datos ya están transformados por el schema
-        const payload = validation.data;
+        // Preparar los datos según el tipo CreateProveedorData
+        const payload: CreateProveedorData = {
+          Nombre_Proveedor: validation.data.Nombre_Proveedor,
+          Telefono_Proveedor: validation.data.Telefono_Proveedor,
+          Tipo_Identificacion: validation.data.Tipo_Identificacion,
+          Identificacion: validation.data.Identificacion,
+          Id_Estado_Proveedor: validation.data.Id_Estado_Proveedor,
+        };
 
-        // TODO: Aquí se implementará la llamada al servicio de creación
-        console.log('Datos del proveedor a crear:', payload);
+        // Usar el hook para crear el proveedor
+        await createProveedorFisico(payload);
         
-        // Simulamos una llamada async
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        
-        alert('Proveedor creado exitosamente (simulado)');
+        alert('Proveedor creado exitosamente');
         handleClose();
         form.reset();
       } catch (error) {
         console.error('Error creating proveedor:', error);
-        alert('Error al crear el proveedor');
-      } finally {
-        setIsSubmitting(false);
+        const errorMessage = error instanceof Error ? error.message : 'Error desconocido al crear el proveedor';
+        alert(`Error al crear el proveedor: ${errorMessage}`);
       }
     },
   });
@@ -327,9 +334,9 @@ const CreateModalProveedor = ({ onClose, setShowCreateModal }: CreateModalProvee
                         {isValidTipo && (
                           <div className="mt-1">
                             <span className="text-xs text-blue-600">
-                              {tipoSeleccionado === 'Cedula' && `Formato: exactamente ${IDENTIFICACION_LIMITS_BY_TYPE.Cedula} dígitos, no puede empezar con 0`}
-                              {tipoSeleccionado === 'Dimex' && `Formato: exactamente ${IDENTIFICACION_LIMITS_BY_TYPE.Dimex} dígitos, no puede empezar con 0`}
-                              {tipoSeleccionado === 'Pasaporte' && `Formato: 6-${IDENTIFICACION_LIMITS_BY_TYPE.Pasaporte} caracteres (obligatorio), al menos 1 letra, máximo 3 letras`}
+                              {tipoSeleccionado === 'Cedula Nacional' && `Formato: exactamente ${IDENTIFICACION_LIMITS_BY_TYPE['Cedula Nacional']} dígitos, no puede empezar con 0`}
+                              {tipoSeleccionado === 'DIMEX' && `Formato: exactamente ${IDENTIFICACION_LIMITS_BY_TYPE['DIMEX']} dígitos, no puede empezar con 0`}
+                              {tipoSeleccionado === 'Pasaporte' && `Formato: 6-${IDENTIFICACION_LIMITS_BY_TYPE['Pasaporte']} caracteres (obligatorio), al menos 1 letra, máximo 3 letras`}
                             </span>
                           </div>
                         )}
@@ -369,7 +376,7 @@ const CreateModalProveedor = ({ onClose, setShowCreateModal }: CreateModalProvee
                         ? 'border-red-300 focus:ring-red-500' 
                         : 'border-gray-300 focus:ring-blue-500'
                     }`}
-                    placeholder="Ej: 8888-7777 o +506-8888-7777"
+                    placeholder="Ej: 88887777, 8888-7777 o +506-8888-7777"
                     maxLength={VALIDATION_LIMITS.TELEFONO_MAX_LENGTH}
                   />
                   
@@ -427,20 +434,20 @@ const CreateModalProveedor = ({ onClose, setShowCreateModal }: CreateModalProvee
                 type="button"
                 onClick={handleClose}
                 className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
-                disabled={isSubmitting}
+                disabled={isCreating}
               >
                 Cancelar
               </button>
               <button
                 type="submit"
-                disabled={isSubmitting}
+                disabled={isCreating}
                 className={`px-4 py-2 text-white rounded-lg transition-colors ${
-                  isSubmitting 
+                  isCreating 
                     ? 'bg-blue-300 cursor-not-allowed' 
                     : 'bg-blue-600 hover:bg-blue-700' 
                 }`}
               >
-                {isSubmitting ? 'Creando...' : 'Crear Proveedor'}
+                {isCreating ? 'Creando...' : 'Crear Proveedor'}
               </button>
             </div>
           </form>

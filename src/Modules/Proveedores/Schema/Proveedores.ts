@@ -14,12 +14,12 @@ function normalizeIdentificacion(value: string): string {
     return value.replace(/[\s\-]/g, '').toUpperCase();
 }
 
-// Validación de teléfono (acepta varios formatos)
-const TELEFONO_REGEX = /^(\+?\d{1,3}[\s\-]?)?\d{4}[\s\-]?\d{4}$/;
+// Validación de teléfono (específica para Costa Rica)
+const TELEFONO_REGEX = /^(\+?506[\s\-]?)?[0-9]{8}$|^(\+?506[\s\-]?)?[0-9]{4}[\s\-]?[0-9]{4}$/;
 
-// Enum para tipos de identificación
-const TipoIdentificacionEnum = z.enum(['Cedula', 'Dimex', 'Pasaporte'], {
-  errorMap: () => ({ message: 'Para proveedores físicos solo se permiten: Cedula Nacional, Dimex, Pasaporte' })
+// Enum para tipos de identificación (valores que espera el backend)
+const TipoIdentificacionEnum = z.enum(['Cedula Nacional', 'DIMEX', 'Pasaporte'], {
+  errorMap: () => ({ message: 'Para proveedores físicos solo se permiten: Cedula Nacional, DIMEX, Pasaporte' })
 });
 
 export const CreateProveedorSchema = z.object({
@@ -53,12 +53,36 @@ export const CreateProveedorSchema = z.object({
     .int({ message: 'El estado debe ser un número entero' })
 });
 
+// Schema simplificado para edición (solo campos permitidos)
+export const EditProveedorSchema = z.object({
+  Nombre_Proveedor: z.string()
+    .min(1, { message: 'El nombre no puede estar vacío' })
+    .min(2, { message: 'El nombre debe tener al menos 2 caracteres' })
+    .max(50, { message: 'El nombre no debe superar los 50 caracteres' })
+    .transform((val) => val.trim())
+    .refine((val) => NOMBRE_NO_SOLO_ESPACIOS.test(val), {
+      message: 'El nombre no puede contener solo espacios'
+    })
+    .refine((val) => NOMBRE_REGEX.test(val), {
+      message: 'El nombre solo puede contener letras y espacios'
+    }),
+
+  Telefono_Proveedor: z.string()
+    .min(1, { message: 'El número de teléfono no puede estar vacío' })
+    .transform((val) => val.trim())
+    .refine((val) => TELEFONO_REGEX.test(val), {
+      message: 'Formato de teléfono inválido. Ej: 88887777, 8888-7777 o +506-8888-7777'
+    })
+});
+
+export type EditProveedorSchemaData = z.infer<typeof EditProveedorSchema>;
+
 // Validación refinada completa para identificación específica por tipo
 export const CreateProveedorSchemaWithIdentificacionValidation = CreateProveedorSchema.superRefine((data, ctx) => {
   const { Identificacion, Tipo_Identificacion } = data;
 
   switch (Tipo_Identificacion) {
-    case 'Cedula':
+    case 'Cedula Nacional':
       if (!CEDULA_REGEX.test(Identificacion)) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
@@ -67,7 +91,7 @@ export const CreateProveedorSchemaWithIdentificacionValidation = CreateProveedor
         });
       }
       break;
-    case 'Dimex':
+    case 'DIMEX':
       if (!DIMEX_REGEX.test(Identificacion)) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
@@ -104,25 +128,25 @@ export const VALIDATION_LIMITS = {
 
 // Límites específicos por tipo de identificación
 export const IDENTIFICACION_LIMITS_BY_TYPE = {
-  Cedula: VALIDATION_LIMITS.CEDULA_LENGTH,
-  Dimex: VALIDATION_LIMITS.DIMEX_LENGTH,
-  Pasaporte: VALIDATION_LIMITS.PASAPORTE_MAX_LENGTH,
+  'Cedula Nacional': VALIDATION_LIMITS.CEDULA_LENGTH,
+  'DIMEX': VALIDATION_LIMITS.DIMEX_LENGTH,
+  'Pasaporte': VALIDATION_LIMITS.PASAPORTE_MAX_LENGTH,
   default: VALIDATION_LIMITS.IDENTIFICACION_MAX_LENGTH
 } as const;
 
 // Formatos de placeholder para cada tipo de identificación
 export const IDENTIFICACION_PLACEHOLDERS = {
-  Cedula: '123456789',
-  Dimex: '123456789012', 
-  Pasaporte: 'ABC123456',
+  'Cedula Nacional': '123456789',
+  'DIMEX': '123456789012', 
+  'Pasaporte': 'ABC123456',
   default: 'Seleccione un tipo primero'
 } as const;
 
 // Tipos de identificación disponibles (para usar en el frontend)
 export const TIPOS_IDENTIFICACION_OPTIONS = [
-  { value: 'Cedula' as const, label: 'Cédula Nacional' },
+  { value: 'Cedula Nacional' as const, label: 'Cédula Nacional' },
   { value: 'Pasaporte' as const, label: 'Pasaporte' },
-  { value: 'Dimex' as const, label: 'DIMEX' },
+  { value: 'DIMEX' as const, label: 'DIMEX' },
 ] as const;
 
 // Estados de proveedor (para usar en el frontend)

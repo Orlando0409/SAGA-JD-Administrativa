@@ -1,5 +1,5 @@
 import apiAuth from '@/Api/apiAuth';
-import type { ProveedorFisico, CreateProveedorData } from '../Models/TablaProveedo/proveedorFisico';
+import type { ProveedorFisico, CreateProveedorData, UpdateProveedorData } from '../Models/TablaProveedo/proveedorFisico';
 
 // Función para obtener todos los proveedores físicos
 export const getProveedoresFisicos = async (): Promise<ProveedorFisico[]> => {
@@ -35,9 +35,9 @@ export const getProveedorFisicoById = async (id: number): Promise<ProveedorFisic
 };
 
 // Función para actualizar un proveedor físico
-export const updateProveedorFisico = async (id: number, proveedor: CreateProveedorData): Promise<ProveedorFisico> => {
+export const updateProveedorFisico = async (id: number, proveedor: UpdateProveedorData): Promise<ProveedorFisico> => {
   try {
-    const response = await apiAuth.put(`/Proveedores/fisico/update/${id}`, proveedor);
+    const response = await apiAuth.put(`/Proveedores/fisico/${id}`, proveedor);
     return response.data;
   } catch (error) {
     console.error('Error al actualizar proveedor físico:', error);
@@ -48,9 +48,11 @@ export const updateProveedorFisico = async (id: number, proveedor: CreateProveed
 // Función para eliminar un proveedor físico
 export const deleteProveedorFisico = async (id: number): Promise<void> => {
   try {
-    await apiAuth.delete(`/Proveedores/fisico/delete/${id}`);
+    console.log(`🗑️ Eliminando proveedor físico ID: ${id}`);
+    await apiAuth.delete(`/Proveedores/fisico/${id}`);
+    console.log(`✅ Proveedor físico ID: ${id} eliminado correctamente`);
   } catch (error) {
-    console.error('Error al eliminar proveedor físico:', error);
+    console.error(`❌ Error al eliminar proveedor físico ID: ${id}`, error);
     throw error;
   }
 };

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { LuX, LuUserX, LuPhone, LuBuilding2, LuUserCheck, LuCalendar, LuIdCard , LuUserRound} from 'react-icons/lu';
 import { FaUserEdit } from "react-icons/fa";
-import { useProveedoresFisicos } from '../Hook/proveedoresFisicos';
+import { useProveedoresFisicos, useDeleteProveedorFisico } from '../Hook/proveedoresFisicos';
 import { Accordion, AccordionHeader, AccordionBody } from "@material-tailwind/react";
 import { FiChevronDown, FiChevronRight } from 'react-icons/fi';
 import EditProveedorModal from './EditProveedoresModal';
@@ -28,22 +28,25 @@ interface ProveedorDetailModalProps {
 
 const ProveedorDetailModal: React.FC<ProveedorDetailModalProps> = ({ proveedor, isOpen, onClose }) => {
   const { refetch } = useProveedoresFisicos();
+  const { deleteProveedorFisico, isDeleting } = useDeleteProveedorFisico();
   const [showEditModal, setShowEditModal] = useState(false);
   const [openSections, setOpenSections] = useState<number[]>([1, 2]); // Abrir por defecto
-  const [isDeactivating, setIsDeactivating] = useState(false);
   const [isActivating, setIsActivating] = useState(false);
 
   const handleDeactivate = async () => {
-    setIsDeactivating(true);
+    if (!proveedor?.Id_Proveedor) {
+      console.error('No se puede eliminar: ID del proveedor no encontrado');
+      return;
+    }
+
     try {
-      // TODO: Implementar servicio de desactivación
-      console.log('Desactivar proveedor:', proveedor?.Id_Proveedor);
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulación
-      refetch(); // Actualizar datos
+      await deleteProveedorFisico(proveedor.Id_Proveedor);
+      alert('Proveedor eliminado exitosamente');
+      onClose(); // Cerrar el modal después de eliminar
     } catch (error) {
-      console.error('Error deactivating proveedor:', error);
-    } finally {
-      setIsDeactivating(false);
+      console.error('Error al eliminar proveedor:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Error desconocido al eliminar el proveedor';
+      alert(`Error al eliminar el proveedor: ${errorMessage}`);
     }
   };
 
@@ -260,24 +263,24 @@ const ProveedorDetailModal: React.FC<ProveedorDetailModalProps> = ({ proveedor, 
                     size={'xl'}
                   >
                     <LuUserX className="w-5 h-5" />
-                    <span className="ml-2">Desactivar Proveedor</span>
+                    <span className="ml-2">Eliminar Proveedor</span>
                   </Button>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
                   <AlertDialogHeader>
                     <AlertDialogTitle>
-                      <span>¿Desactivar proveedor?</span>
+                      <span>¿Eliminar proveedor?</span>
                     </AlertDialogTitle>
                     <AlertDialogDescription>
-                      <span>¿Estás seguro de que deseas desactivar este proveedor? Esta acción puede afectar los registros relacionados.</span>
+                      <span>¿Estás seguro de que deseas eliminar este proveedor? Esta acción no se puede deshacer y eliminará permanentemente todos los datos del proveedor.</span>
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
                     <AlertDialogAction
                       onClick={handleDeactivate}
-                      disabled={isDeactivating}
+                      disabled={isDeleting}
                     >
-                      <span>{isDeactivating ? 'Desactivando...' : 'Desactivar'}</span>
+                      <span>{isDeleting ? 'Eliminando...' : 'Eliminar'}</span>
                     </AlertDialogAction>
                     <AlertDialogCancel>
                       <span>Cancelar</span>

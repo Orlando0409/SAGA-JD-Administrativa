@@ -21,6 +21,12 @@ export interface CreateProveedorData {
   Id_Estado_Proveedor: number;
 }
 
+// Tipo específico para actualizar proveedores (solo campos editables)
+export interface UpdateProveedorData {
+  Nombre_Proveedor: string;
+  Telefono_Proveedor: string;
+}
+
 export const ProveedorFisicoInicialState: ProveedorFisico = {
   Id_Proveedor: 0,
   Nombre_Proveedor: "",
