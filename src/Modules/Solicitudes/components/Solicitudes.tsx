@@ -9,10 +9,7 @@ const Solicitudes = () => {
 
   return (
     <div className='w-full flex flex-col items-start h-full'>
-
-      <h1>Revisión de Solicitudes</h1>
       <SolicitudesTable />
-
       <button
         onClick={handleButtonClick}
         className="mt-1 px-3 py-1 text-base bg-blue-700 text-white rounded-lg shadow hover:bg-blue-800 transition font-semibold"

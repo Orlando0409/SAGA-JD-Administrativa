@@ -309,7 +309,7 @@ export default function FormularioAfiliados({ isOpen, onClose, onSuccess }: Form
       <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
         <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-gradient-to-r from-sky-50 to-blue-50">
           <h2 className="text-2xl font-bold text-sky-800">
-            Nueva Solicitud de Afiliación
+            Nuevo Afiliado
           </h2>
           <button
             onClick={onClose}

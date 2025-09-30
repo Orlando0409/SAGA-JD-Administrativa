@@ -3,7 +3,6 @@ import type { LoginForm } from '../Models/LoginForm';
 import axiosPrivate from '../../../Api/apiAuth'
 import { cookieUtils } from '../../Global/utils/CookieUtils';
 
-
 export async function loginUser(LoginForm: LoginForm): Promise<Usuario> {
     const response = await axiosPrivate.post(`/auth/login`, LoginForm);
     return response.data;
