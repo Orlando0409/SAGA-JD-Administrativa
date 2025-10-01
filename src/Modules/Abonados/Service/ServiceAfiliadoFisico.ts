@@ -19,3 +19,15 @@ export const createAfiliadoFisico = async (formData: FormData) => {
 
     return response.data;
 };
+
+export const updateAfiliadoFisico = async (cedula: string, formData: FormData) => {
+    console.log("🔄 Hook - Actualizando FormData:", formData);
+
+    const response = await apiAuth.put(`/afiliados/update/fisico/${cedula}`, formData, {
+        headers: {
+            'Content-Type': 'multipart/form-data',
+        },
+    });
+
+    return response.data;
+};

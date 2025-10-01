@@ -62,7 +62,7 @@ const EditSolicitudModal: React.FC<EditSolicitudModalProps> = ({ isOpen, onClose
                 Nombre: solicitudFisica.Nombre,
                 Apellido1: solicitudFisica.Apellido1,
                 Apellido2: solicitudFisica.Apellido2 || '',
-                Cedula: solicitudFisica.Cedula,
+                Cedula: solicitudFisica.Identificacion || '', // Priorizar Identificacion
                 Numero_Telefono: solicitudFisica.Numero_Telefono,
                 Correo: solicitudFisica.Correo,
                 Direccion_Exacta: solicitudFisica.Direccion_Exacta || '',

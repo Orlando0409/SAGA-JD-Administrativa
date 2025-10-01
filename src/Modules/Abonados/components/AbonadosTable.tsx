@@ -4,6 +4,7 @@ import { User, Building } from 'lucide-react';
 import { useAfiliadosFisicos } from '../Hook/HookAfiliadoFisico';
 import { useAfiliadosJuridicos } from '../Hook/HookAfiliadoJuridico';
 import DetailAbonados from './DetailAbonados';
+import CreateModal from './CreateModal';
 import type { AfiliadoFisico } from '../Models/TablaAfiliados/ModeloAfiliadoFisico';
 import type { AfiliadoJuridico } from '../Models/TablaAfiliados/ModeloAfiliadoJuridico';
 import FormularioAfiliados from './FormularioAfiliados';
@@ -30,6 +31,7 @@ export default function AbonadosTable() {
 
     const [globalFilter, setGlobalFilter] = useState('');
     const [showDetailModal, setShowDetailModal] = useState(false);
+    const [showCreateModal, setShowCreateModal] = useState(false);
     const [selectedPersona, setSelectedPersona] = useState<{
         tipo: 'afiliado-fisico' | 'afiliado-juridico';
         datos: AfiliadoFisico | AfiliadoJuridico;
@@ -194,13 +196,18 @@ export default function AbonadosTable() {
 
     return (
         <div className="w-full">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
+            <div className="flex flex-col  sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
                 <div className="flex items-center gap-3">
                     <h2 className="text-lg sm:text-xl font-semibold text-sky-800">Gestión de Afiliados</h2>
                 </div>
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
                     <input value={globalFilter} onChange={(e) => setGlobalFilter(e.target.value)} placeholder="Buscar por nombre, cédula, estado, tipo..." className="w-full sm:w-auto px-3 py-2 rounded-lg border border-sky-200 bg-sky-50 focus:outline-none focus:ring-2 focus:ring-sky-200 text-sm" />
-                    <button className="px-3 py-2 rounded-lg bg-sky-600 text-white hover:bg-sky-700 shadow-sm text-sm whitespace-nowrap" onClick={() => alert('Crear nueva solicitud — abrir formulario')}>+ Nueva Solicitud</button>
+                    <button
+                        className="px-3 py-2 rounded-lg bg-sky-600 text-white hover:bg-sky-700 shadow-sm text-sm whitespace-nowrap"
+                        onClick={() => setShowCreateModal(true)}
+                    >
+                        + Nueva Solicitud
+                    </button>
                 </div>
             </div>
             <div className="overflow-x-auto rounded-2xl border border-sky-100 shadow-sm bg-white">
@@ -274,6 +281,12 @@ export default function AbonadosTable() {
                     }}
                 />
             )}
+
+            {/* Modal de crear nueva solicitud */}
+            <CreateModal
+                isOpen={showCreateModal}
+                onClose={() => setShowCreateModal(false)}
+            />
         </div>
     );
 }
