@@ -36,7 +36,7 @@ type SolicitudUnificada = {
     Fecha_Creacion: string;
     // Datos originales para acciones
     datos_originales: SolicitudFisica | SolicitudJuridica;
-  
+
 };
 
 export default function SolicitudesTable() {
