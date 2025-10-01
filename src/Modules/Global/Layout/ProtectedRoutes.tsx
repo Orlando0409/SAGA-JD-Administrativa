@@ -19,8 +19,8 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   );
 
   const allowedModules = modules.filter(module => {
-  const hasPermission = user?.rol?.permisos?.some(p => 
-    p.modulo.toLowerCase() === module.permiso.toLowerCase() && (p.Ver || p.Editar)
+  const hasPermission = user?.Rol?.Permisos.some(p => 
+    p.Modulo.toLowerCase() === module.Permiso.toLowerCase() && (p.Ver || p.Editar)
   );
   return hasPermission;
   });
@@ -40,7 +40,6 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
       </div>
     );
   }
-  
   if (!isAuthenticated || !user) {
     cookieUtils.removeToken();
     return <Navigate to="/Login" />;

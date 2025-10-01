@@ -1,29 +1,37 @@
 import React, { useState } from 'react';
-import { LuX } from 'react-icons/lu';
-import { useCreateMaterial, useCategories } from '../hooks/InventarioHook';
-import { CreateMaterialSchema, type CreateMaterialSchemaData } from '../schema/CreateMaterialSchema';
-import type { CreateMaterialModalProps } from '../types/MaterialTypes';
-import type { CreateMaterialData, CategoriaMaterial } from '../models/Inventario';
+import { LuX, LuPlus } from 'react-icons/lu';
+import {  useGetAllCategories } from '../../hooks/useCategorias';
+import { useCreateMaterial } from '../../hooks/useMaterials';
+import { useUnidadesMedicionSimple } from '../../hooks/HookUnidadMedicion';
+import { CreateMaterialSchema, type CreateMaterialSchemaData } from '../../schema/CreateMaterialSchema';
+import type { CreateMaterialModalProps } from '../../types/MaterialTypes';
+import type { CreateMaterialData, CategoriaMaterial } from '../../models/Inventario';
+import CreateCategoriaModal from '../Categorias/CreateCategoriaModal';
+import CreateUnidadMedicionModal from '../UnidadesMedicion/CreateUnidadMedicionModal';
 import { 
   NOMBRE_MATERIAL_MAX_LENGTH, 
   DESCRIPCION_MAX_LENGTH, 
   PRECIO_MIN 
-} from '../types/MaterialTypes';
+} from '../../types/MaterialTypes';
 
 const CreateMaterialModal: React.FC<CreateMaterialModalProps> = ({ isOpen, onClose }) => {
   const createMaterialMutation = useCreateMaterial();
-  const { data: categories = [] } = useCategories();
+  const { data: categories = [] } = useGetAllCategories();
+  const { data: unidadesMedicion = [] } = useUnidadesMedicionSimple();
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [fieldCharCounts, setFieldCharCounts] = useState({
     nombreMaterial: 0,
     descripcion: 0
   });
+  const [isCreateCategoriaModalOpen, setIsCreateCategoriaModalOpen] = useState(false);
+  const [isCreateUnidadMedicionModalOpen, setIsCreateUnidadMedicionModalOpen] = useState(false);
   
   const [formData, setFormData] = useState<CreateMaterialSchemaData>({
     Nombre_Material: '',
     Descripcion: '',
+    Id_Unidad_Medicion: 0,
     Cantidad: 1,
-    Precio_Unitario: 0.10,
+    Precio_Unitario: 5,
     IDS_Categorias: [],
   });
 
@@ -34,7 +42,6 @@ const CreateMaterialModal: React.FC<CreateMaterialModalProps> = ({ isOpen, onClo
       if (value.length <= maxLength) {
         setFormData(prev => ({ ...prev, [fieldName]: value }));
         
-        // Update character count for specific fields
         if (fieldName === 'Nombre_Material') {
           setFieldCharCounts(prev => ({ ...prev, nombreMaterial: value.length }));
         } else if (fieldName === 'Descripcion') {
@@ -68,24 +75,25 @@ const CreateMaterialModal: React.FC<CreateMaterialModalProps> = ({ isOpen, onClo
       const payload: CreateMaterialData = {
         Nombre_Material: formData.Nombre_Material,
         Descripcion: formData.Descripcion,
+        Id_Unidad_Medicion: formData.Id_Unidad_Medicion,
         Cantidad: formData.Cantidad,
         Precio_Unitario: formData.Precio_Unitario,
-        IDS_Categorias: formData.IDS_Categorias
+        IDS_Categorias: formData.IDS_Categorias ?? []
       };
 
       await createMaterialMutation.mutateAsync(payload);
       onClose();
-      // Reset form
       setFormData({
         Nombre_Material: '',
         Descripcion: '',
+        Id_Unidad_Medicion: 0,
         Cantidad: 1,
-        Precio_Unitario: 0.10,
+        Precio_Unitario: 5,
         IDS_Categorias: [],
       });
       setFieldCharCounts({ nombreMaterial: 0, descripcion: 0 });
     } catch (error) {
-      console.error('Error creating material:', error);
+      console.log('Error creating material:', error);
     }
   };
 
@@ -108,7 +116,7 @@ const CreateMaterialModal: React.FC<CreateMaterialModalProps> = ({ isOpen, onClo
   };
 
   const handleCategoryChange = (categoriaId: number, checked: boolean) => {
-    const currentValues = formData.IDS_Categorias;
+    const currentValues = formData.IDS_Categorias ?? [];
     if (checked) {
       setFormData(prev => ({ 
         ...prev, 
@@ -136,7 +144,6 @@ const CreateMaterialModal: React.FC<CreateMaterialModalProps> = ({ isOpen, onClo
 
         <div className="p-6 overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100 max-h-[calc(90vh-140px)]">
           <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Nombre del Material */}
             <div>
               <label htmlFor="nombre-material" className="block text-sm font-medium text-gray-700 mb-1">
                 Nombre del Material <span className="text-red-500">*</span>
@@ -157,7 +164,6 @@ const CreateMaterialModal: React.FC<CreateMaterialModalProps> = ({ isOpen, onClo
               )}
             </div>
 
-            {/* Descripción */}
             <div>
               <label htmlFor="descripcion" className="block text-sm font-medium text-gray-700 mb-1">
                 Descripción <span className="text-red-500">*</span>
@@ -178,7 +184,38 @@ const CreateMaterialModal: React.FC<CreateMaterialModalProps> = ({ isOpen, onClo
               )}
             </div>
 
-            {/* Cantidad */}
+            <div>
+              <label htmlFor="unidad-medicion" className="block text-sm flex justify-between font-medium text-gray-700 mb-1">
+                <span>Unidad de Medición <span className="text-red-500">*</span></span>
+                 <button
+                  type="button"
+                  onClick={() => setIsCreateUnidadMedicionModalOpen(true)}
+                  className="flex items-center gap-1 px-2 py-1 text-xs text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded transition-colors"
+                >
+                  <LuPlus className="w-3 h-3" />
+                  Nueva
+                </button>
+              </label>
+              <select
+                id="unidad-medicion"
+                value={formData.Id_Unidad_Medicion || ''}
+                onChange={(e) => setFormData(prev => ({ ...prev, Id_Unidad_Medicion: parseInt(e.target.value) || 0 }))}
+                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                  formErrors.Id_Unidad_Medicion ? 'border-red-500' : 'border-gray-300'
+                }`}
+              >
+                <option value="">Seleccionar unidad de medición</option>
+                {unidadesMedicion.map((unidad) => (
+                  <option key={unidad.Id_Unidad_Medicion} value={unidad.Id_Unidad_Medicion}>
+                    {unidad.Nombre_Unidad_Medicion}
+                  </option>
+                ))}
+              </select>
+              {formErrors.Id_Unidad_Medicion && (
+                <p className="text-red-500 text-xs mt-1">{formErrors.Id_Unidad_Medicion}</p>
+              )}
+            </div>
+
             <div>
               <label htmlFor="cantidad" className="block text-sm font-medium text-gray-700 mb-1">
                 Cantidad <span className="text-red-500">*</span>
@@ -198,7 +235,6 @@ const CreateMaterialModal: React.FC<CreateMaterialModalProps> = ({ isOpen, onClo
               )}
             </div>
 
-            {/* Precio Unitario */}
             <div>
               <label htmlFor="precio" className="block text-sm font-medium text-gray-700 mb-1">
                 Precio Unitario (₡) <span className="text-red-500">*</span>
@@ -219,30 +255,44 @@ const CreateMaterialModal: React.FC<CreateMaterialModalProps> = ({ isOpen, onClo
               )}
             </div>
 
-            {/* Categorías */}
             <div>
-              <span className="block text-sm font-medium text-gray-700 mb-1">
-                Categorías <span className="text-red-500">*</span>
-              </span>
+              <div className="flex items-center justify-between mb-1">
+                <span className="block text-sm font-medium text-gray-700">
+                  Categorías (Opcional)
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setIsCreateCategoriaModalOpen(true)}
+                  className="flex items-center gap-1 px-2 py-1 text-xs text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded transition-colors"
+                >
+                  <LuPlus className="w-3 h-3" />
+                  Nueva
+                </button>
+              </div>
               <div className="max-h-32 overflow-y-auto border border-gray-300 rounded-lg p-2 scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100">
-                {categories.map((categoria: CategoriaMaterial) => (
-                  <label key={categoria.Id_Categoria_Material} className="flex items-center space-x-2 p-2 hover:bg-gray-50 rounded">
-                    <input
-                      type="checkbox"
-                      checked={formData.IDS_Categorias.includes(categoria.Id_Categoria_Material)}
-                      onChange={(e) => handleCategoryChange(categoria.Id_Categoria_Material, e.target.checked)}
-                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                    />
-                    <span className="text-sm text-gray-700">{categoria.Nombre_Categoria_Material}</span>
-                  </label>
-                ))}
+                {categories.length === 0 ? (
+                  <div className="text-center py-4 text-gray-500 text-sm">
+                    No hay categorías disponibles. Crea una nueva categoría.
+                  </div>
+                ) : (
+                  categories.map((categoria: CategoriaMaterial) => (
+                    <label key={categoria.Id_Categoria} className="flex items-center space-x-2 p-2 hover:bg-gray-50 rounded">
+                      <input
+                        type="checkbox"
+                        checked={(formData.IDS_Categorias ?? []).includes(categoria.Id_Categoria)}
+                        onChange={(e) => handleCategoryChange(categoria.Id_Categoria, e.target.checked)}
+                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      />
+                      <span className="text-sm text-gray-700">{categoria.Nombre_Categoria}</span>
+                    </label>
+                  ))
+                )}
               </div>
               {formErrors.IDS_Categorias && (
                 <p className="text-red-500 text-xs mt-1">{formErrors.IDS_Categorias}</p>
               )}
             </div>
 
-            {/* Botones */}
             <div className="flex gap-3 pt-4">
               <button
                 type="button"
@@ -262,8 +312,17 @@ const CreateMaterialModal: React.FC<CreateMaterialModalProps> = ({ isOpen, onClo
           </form>
         </div>
       </div>
-    </div>
-  );
-};
 
-export default CreateMaterialModal;
+      <CreateCategoriaModal
+        isOpen={isCreateCategoriaModalOpen}
+        onClose={() => setIsCreateCategoriaModalOpen(false)}
+      />
+      <CreateUnidadMedicionModal
+        isOpen={isCreateUnidadMedicionModalOpen}
+        onClose={() => setIsCreateUnidadMedicionModalOpen(false)}
+      />
+    </div>
+  )
+}
+
+export default CreateMaterialModal

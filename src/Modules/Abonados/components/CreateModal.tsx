@@ -1,6 +1,10 @@
 import { useForm } from '@tanstack/react-form';
 import { useState } from 'react';
 import { useAlerts } from '@/Modules/Global/context/AlertContext';
+import { useAfiliadosFisicos } from '../Hook/HookAfiliadoFisico';
+import { useAfiliadosJuridicos } from '../Hook/HookAfiliadoJuridico';
+import PhoneInput from "react-phone-number-input";
+import "react-phone-number-input/style.css";
 
 interface CreateModalProps {
     isOpen: boolean;
@@ -11,12 +15,15 @@ type TipoFormulario = 'afiliado-fisico' | 'afiliado-juridico';
 
 const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
     const [tipoActivo, setTipoActivo] = useState<TipoFormulario>('afiliado-fisico');
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [escrituraFile, setEscrituraFile] = useState<File | null>(null);
+    const [planosFile, setPlanosFile] = useState<File | null>(null);
     const { showSuccess, showError } = useAlerts();
-
-    if (!isOpen) return null;
+    const { createAfiliadoFisico } = useAfiliadosFisicos();
+    const { createAfiliadoJuridico } = useAfiliadosJuridicos();
 
     const tabs = [
-        { id: 'afiliado-fisico', label: ' Afiliado Físico', icon: '�' },
+        { id: 'afiliado-fisico', label: '👤 Afiliado Físico', icon: '👤' },
         { id: 'afiliado-juridico', label: '🏢 Afiliado Jurídico', icon: '🏢' },
     ] as const;
 
@@ -26,7 +33,8 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                 Nombre: '',
                 Apellido1: '',
                 Apellido2: '',
-                Cedula: '',
+                Tipo_Identificacion: 'Cedula Nacional' as 'Cedula Nacional' | 'DIMEX' | 'Pasaporte',
+                Identificacion: '',
                 Numero_Telefono: '',
                 Correo: '',
                 Direccion_Exacta: '',
@@ -50,18 +58,65 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
     const form = useForm({
         defaultValues: getDefaultValues(),
         onSubmit: async ({ value }) => {
+            if (isSubmitting) return;
+
             try {
-                // TODO: Implementar creación de afiliados cuando estén disponibles las funciones
-                console.log('Crear afiliado:', tipoActivo, value);
-                showSuccess(`${tipoActivo === 'afiliado-fisico' ? 'Afiliado físico' : 'Afiliado jurídico'} creado exitosamente`);
+                setIsSubmitting(true);
+
+                // Crear FormData para enviar archivos
+                const formData = new FormData();
+
+                if (tipoActivo === 'afiliado-fisico') {
+                    // Agregar campos de afiliado físico
+                    formData.append('Nombre', value.Nombre || '');
+                    formData.append('Apellido1', value.Apellido1 || '');
+                    formData.append('Apellido2', value.Apellido2 || '');
+                    formData.append('Tipo_Identificacion', value.Tipo_Identificacion || 'Cedula Nacional');
+                    formData.append('Identificacion', value.Identificacion || '');
+                    formData.append('Numero_Telefono', value.Numero_Telefono || '');
+                    formData.append('Correo', value.Correo || '');
+                    formData.append('Direccion_Exacta', value.Direccion_Exacta || '');
+                    formData.append('Edad', value.Edad?.toString() || '0');
+
+                    // Agregar archivos si están disponibles
+                    if (escrituraFile) formData.append('Escritura_Terreno', escrituraFile);
+                    if (planosFile) formData.append('Planos_Terreno', planosFile);
+
+                    await createAfiliadoFisico(formData);
+                    showSuccess('Afiliado físico creado exitosamente');
+                } else {
+                    // Agregar campos de afiliado jurídico
+                    formData.append('Razon_Social', value.Razon_Social || '');
+                    formData.append('Cedula_Juridica', value.Cedula_Juridica || '');
+                    formData.append('Numero_Telefono', value.Numero_Telefono || '');
+                    formData.append('Correo', value.Correo || '');
+                    formData.append('Direccion_Exacta', value.Direccion_Exacta || '');
+
+                    // Agregar archivos si están disponibles
+                    if (escrituraFile) formData.append('Escritura_Terreno', escrituraFile);
+                    if (planosFile) formData.append('Planos_Terreno', planosFile);
+
+                    await createAfiliadoJuridico(formData);
+                    showSuccess('Afiliado jurídico creado exitosamente');
+                }
+
+                // Cerrar modal y resetear formulario
                 onClose();
                 form.reset();
+                setEscrituraFile(null);
+                setPlanosFile(null);
+
             } catch (error) {
                 console.error('Error creando registro:', error);
-                showError('Error al crear el registro');
+                showError('Error al crear el registro. Por favor intente nuevamente.');
+            } finally {
+                setIsSubmitting(false);
             }
         },
     });
+
+    // Mover la verificación de isOpen DESPUÉS de todos los hooks
+    if (!isOpen) return null;
 
     const renderFormularioFisico = () => (
         <>
@@ -118,20 +173,45 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                 )}
             </form.Field>
 
-            <form.Field name="Cedula">
+            <form.Field name="Tipo_Identificacion">
                 {(field) => (
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Cédula *
+                            Tipo de Identificación *
+                        </label>
+                        <select
+                            value={field.state.value}
+                            onChange={(e) => field.handleChange(e.target.value as 'Cedula Nacional' | 'DIMEX' | 'Pasaporte')}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            required
+                        >
+                            <option value="Cedula Nacional">Cédula Nacional</option>
+                            <option value="DIMEX">DIMEX</option>
+                            <option value="Pasaporte">Pasaporte</option>
+                        </select>
+                    </div>
+                )}
+            </form.Field>
+
+            <form.Field name="Identificacion">
+                {(field) => (
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Número de Identificación *
                         </label>
                         <input
                             type="text"
                             value={field.state.value}
                             onChange={(e) => field.handleChange(e.target.value)}
                             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            placeholder="123456789"
+                            placeholder="Ingrese el número según el tipo seleccionado"
                             required
                         />
+                        <p className="text-xs text-gray-500 mt-1">
+                            {field.form.getFieldValue('Tipo_Identificacion') === 'Cedula Nacional' && 'Formato: 9-10 dígitos (ej: 123456789)'}
+                            {field.form.getFieldValue('Tipo_Identificacion') === 'DIMEX' && 'Formato: 11-12 dígitos (ej: 123456789012)'}
+                            {field.form.getFieldValue('Tipo_Identificacion') === 'Pasaporte' && 'Formato: 6-20 caracteres alfanuméricos (ej: AB123456)'}
+                        </p>
                     </div>
                 )}
             </form.Field>
@@ -142,14 +222,19 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                         <label className="block text-sm font-medium text-gray-700 mb-1">
                             Teléfono *
                         </label>
-                        <input
-                            type="tel"
-                            value={field.state.value}
-                            onChange={(e) => field.handleChange(e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            placeholder="88888888"
-                            required
+                        <PhoneInput
+                            international
+                            countryCallingCodeEditable={false}
+                            defaultCountry="CR"
+                            value={field.state.value as any}
+                            onChange={(value) => field.handleChange(value || '')}
+                            className="w-full"
+                            inputClassName="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            placeholder="Ingrese número de teléfono"
                         />
+                        <p className="text-xs text-gray-500 mt-1">
+                            Ejemplo: +506 8888 8888
+                        </p>
                     </div>
                 )}
             </form.Field>
@@ -215,15 +300,36 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                 {(field) => (
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Escritura del Terreno (URL)
+                            Escritura del Terreno
                         </label>
-                        <input
-                            type="url"
-                            value={field.state.value}
-                            onChange={(e) => field.handleChange(e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            placeholder="https://ejemplo.com/escritura.pdf"
-                        />
+                        <div className="relative">
+                            <input
+                                type="file"
+                                accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                                onChange={(e) => {
+                                    const file = e.target.files?.[0];
+                                    if (file) {
+                                        setEscrituraFile(file);
+                                        field.handleChange(file.name);
+                                    } else {
+                                        setEscrituraFile(null);
+                                        field.handleChange('');
+                                    }
+                                }}
+                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                            />
+                            <div className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 flex items-center justify-between cursor-pointer hover:bg-gray-100 transition-colors">
+                                <span className="text-gray-700">
+                                    {field.state.value || 'Seleccionar archivo...'}
+                                </span>
+                                <span className="bg-blue-500 text-white px-3 py-1 rounded text-sm">
+                                    Archivo cargado
+                                </span>
+                            </div>
+                        </div>
+                        <p className="text-xs text-gray-500 mt-1">
+                            Formatos permitidos: PDF, DOC, DOCX, JPG, PNG
+                        </p>
                     </div>
                 )}
             </form.Field>
@@ -232,15 +338,36 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                 {(field) => (
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Planos del Terreno (URL)
+                            Planos del Terreno
                         </label>
-                        <input
-                            type="url"
-                            value={field.state.value}
-                            onChange={(e) => field.handleChange(e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            placeholder="https://ejemplo.com/planos.pdf"
-                        />
+                        <div className="relative">
+                            <input
+                                type="file"
+                                accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                                onChange={(e) => {
+                                    const file = e.target.files?.[0];
+                                    if (file) {
+                                        setPlanosFile(file);
+                                        field.handleChange(file.name);
+                                    } else {
+                                        setPlanosFile(null);
+                                        field.handleChange('');
+                                    }
+                                }}
+                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                            />
+                            <div className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 flex items-center justify-between cursor-pointer hover:bg-gray-100 transition-colors">
+                                <span className="text-gray-700">
+                                    {field.state.value || 'Seleccionar archivo...'}
+                                </span>
+                                <span className="bg-blue-500 text-white px-3 py-1 rounded text-sm">
+                                    Archivo cargado
+                                </span>
+                            </div>
+                        </div>
+                        <p className="text-xs text-gray-500 mt-1">
+                            Formatos permitidos: PDF, DOC, DOCX, JPG, PNG
+                        </p>
                     </div>
                 )}
             </form.Field>
@@ -282,6 +409,9 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                             placeholder="3-101-123456"
                             required
                         />
+                        <p className="text-xs text-gray-500 mt-1">
+                            Formato: 3-XXX-XXXXXX (ej: 3-101-123456)
+                        </p>
                     </div>
                 )}
             </form.Field>
@@ -292,14 +422,19 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                         <label className="block text-sm font-medium text-gray-700 mb-1">
                             Teléfono *
                         </label>
-                        <input
-                            type="tel"
-                            value={field.state.value}
-                            onChange={(e) => field.handleChange(e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            placeholder="88888888"
-                            required
+                        <PhoneInput
+                            international
+                            countryCallingCodeEditable={false}
+                            defaultCountry="CR"
+                            value={field.state.value as any}
+                            onChange={(value) => field.handleChange(value || '')}
+                            className="w-full"
+                            inputClassName="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            placeholder="Ingrese número de teléfono"
                         />
+                        <p className="text-xs text-gray-500 mt-1">
+                            Ejemplo: +506 8888 8888
+                        </p>
                     </div>
                 )}
             </form.Field>
@@ -343,15 +478,36 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                 {(field) => (
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Escritura del Terreno 
+                            Escritura del Terreno
                         </label>
-                        <input
-                            type="url"
-                            value={field.state.value}
-                            onChange={(e) => field.handleChange(e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            placeholder="https://ejemplo.com/escritura.pdf"
-                        />
+                        <div className="relative">
+                            <input
+                                type="file"
+                                accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                                onChange={(e) => {
+                                    const file = e.target.files?.[0];
+                                    if (file) {
+                                        setEscrituraFile(file);
+                                        field.handleChange(file.name);
+                                    } else {
+                                        setEscrituraFile(null);
+                                        field.handleChange('');
+                                    }
+                                }}
+                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                            />
+                            <div className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 flex items-center justify-between cursor-pointer hover:bg-gray-100 transition-colors">
+                                <span className="text-gray-700">
+                                    {field.state.value || 'Seleccionar archivo...'}
+                                </span>
+                                <span className="bg-blue-500 text-white px-3 py-1 rounded text-sm">
+                                    Archivo cargado
+                                </span>
+                            </div>
+                        </div>
+                        <p className="text-xs text-gray-500 mt-1">
+                            Formatos permitidos: PDF, DOC, DOCX, JPG, PNG
+                        </p>
                     </div>
                 )}
             </form.Field>
@@ -360,15 +516,36 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                 {(field) => (
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Planos del Terreno 
+                            Planos del Terreno
                         </label>
-                        <input
-                            type="url"
-                            value={field.state.value}
-                            onChange={(e) => field.handleChange(e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            placeholder="https://ejemplo.com/planos.pdf"
-                        />
+                        <div className="relative">
+                            <input
+                                type="file"
+                                accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                                onChange={(e) => {
+                                    const file = e.target.files?.[0];
+                                    if (file) {
+                                        setPlanosFile(file);
+                                        field.handleChange(file.name);
+                                    } else {
+                                        setPlanosFile(null);
+                                        field.handleChange('');
+                                    }
+                                }}
+                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                            />
+                            <div className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 flex items-center justify-between cursor-pointer hover:bg-gray-100 transition-colors">
+                                <span className="text-gray-700">
+                                    {field.state.value || 'Seleccionar archivo...'}
+                                </span>
+                                <span className="bg-blue-500 text-white px-3 py-1 rounded text-sm">
+                                    Archivo cargado
+                                </span>
+                            </div>
+                        </div>
+                        <p className="text-xs text-gray-500 mt-1">
+                            Formatos permitidos: PDF, DOC, DOCX, JPG, PNG
+                        </p>
                     </div>
                 )}
             </form.Field>
@@ -384,7 +561,7 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
     };
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-white bg-opacity-50 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
                 {/* Header */}
                 <div className="flex items-center justify-between p-6 border-b border-gray-200">
@@ -407,6 +584,9 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                                     setTipoActivo(tab.id);
                                     // Reiniciar el formulario con los valores por defecto del nuevo tipo
                                     form.reset();
+                                    // Limpiar archivos
+                                    setEscrituraFile(null);
+                                    setPlanosFile(null);
                                 }}
                                 className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${tipoActivo === tab.id
                                     ? 'border-blue-500 text-blue-600 bg-blue-50'
@@ -441,9 +621,17 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                             </button>
                             <button
                                 type="submit"
-                                className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                                disabled={isSubmitting}
+                                className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed transition-colors font-medium flex items-center justify-center gap-2"
                             >
-                                Crear {tipoActivo.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                                {isSubmitting ? (
+                                    <>
+                                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                        Creando...
+                                    </>
+                                ) : (
+                                    `Crear ${tipoActivo.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}`
+                                )}
                             </button>
                         </div>
                     </form>

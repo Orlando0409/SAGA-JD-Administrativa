@@ -3,6 +3,7 @@ export interface AfiliadoJuridico {
     Razon_Social: string
     Cedula_Juridica: string
     Numero_Telefono: string
+   
     Correo: string
     Direccion_Exacta?: string
     Estado: {

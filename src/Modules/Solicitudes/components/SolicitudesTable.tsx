@@ -36,13 +36,16 @@ type SolicitudUnificada = {
     Fecha_Creacion: string;
     // Datos originales para acciones
     datos_originales: SolicitudFisica | SolicitudJuridica;
+
 };
 
 export default function SolicitudesTable() {
     // Hooks para ambos tipos de solicitudes
-    const { data: solicitudesFisicas, isLoading: loadingFisicas, isError: errorFisicos } = useSolicitudesFisicas();
-    const { data: solicitudesJuridicas, isLoading: loadingJuridicas, isError: errorJuridicos } = useSolicitudesJuridicas();
+    const { data: solicitudesFisicas, isLoading: loadingFisicas, isError: errorFisicos, error: errorDetalleFisicos } = useSolicitudesFisicas();
+    const { data: solicitudesJuridicas, isLoading: loadingJuridicas, isError: errorJuridicos, error: errorDetalleJuridicos } = useSolicitudesJuridicas();
 
+    // Debug INMEDIATO al cargar el componente
+  
     const [globalFilter, setGlobalFilter] = useState('');
 
     // Estados para el modal de edición
@@ -65,31 +68,27 @@ export default function SolicitudesTable() {
 
     // Función para unificar los datos de solicitudes
     const datosUnificados = useMemo((): SolicitudUnificada[] => {
-        // Debug: verificar qué datos están llegando
-        console.log('Solicitudes Físicas:', solicitudesFisicas);
-        console.log('Solicitudes Jurídicas:', solicitudesJuridicas);
+      
 
         // Validar que los datos sean arrays
         const solicitudesFisicasArray = Array.isArray(solicitudesFisicas) ? solicitudesFisicas : [];
         const solicitudesJuridicasArray = Array.isArray(solicitudesJuridicas) ? solicitudesJuridicas : [];
 
-        console.log('Arrays validados - Físicas:', solicitudesFisicasArray.length, 'Jurídicas:', solicitudesJuridicasArray.length);
+       
 
         // Solicitudes Físicas
         const solicitudesFisicasUnificadas: SolicitudUnificada[] = solicitudesFisicasArray.map((solicitud: SolicitudFisica, index: number) => {
-            console.log(' Procesando solicitud física completa:', solicitud);
-            console.log(' Propiedades disponibles en solicitud física:', Object.keys(solicitud));
 
-            // Buscar ID real en la solicitud
+
+            // Buscar ID real en la solicitud (backend usa Id_Solicitud)
             const solicitudConId = solicitud as any;
-            const idReal = solicitudConId.id || solicitudConId.Id || solicitudConId.ID || solicitudConId.solicitudId;
-            console.log(' ID real encontrado en solicitud física:', idReal);
-
+            const idReal = solicitudConId.Id_Solicitud || solicitudConId.id || solicitudConId.Id || solicitudConId.ID;
+            
             return {
                 id: `fisico-${index}`, // ID interno único para la tabla
                 Id: idReal || (index + 1), // Usar ID real del backend o secuencial como fallback
                 Nombre_Completo: `${solicitud.Nombre || ''} ${solicitud.Apellido1 || ''} ${solicitud.Apellido2 || ''}`.trim() || 'Sin nombre',
-                Cedula_Documento: solicitud.Cedula || 'Sin cédula',
+                Cedula_Documento: solicitud.Identificacion  || 'Sin identificación',
                 Tipo_Solicitud: solicitud.Tipo_Solicitud,
                 Estado: {
                     Id_Estado: solicitud.Estado?.Id_Estado_Solicitud || 0,
@@ -103,14 +102,11 @@ export default function SolicitudesTable() {
 
         // Solicitudes Jurídicas
         const solicitudesJuridicasUnificadas: SolicitudUnificada[] = solicitudesJuridicasArray.map((solicitud: SolicitudJuridica, index: number) => {
-            console.log(' Procesando solicitud jurídica completa:', solicitud);
-            console.log(' Propiedades disponibles en solicitud jurídica:', Object.keys(solicitud));
-
-            // Buscar ID real en la solicitud
+      
+            // Buscar ID real en la solicitud (backend usa Id_Solicitud)
             const solicitudConId = solicitud as any;
-            const idReal = solicitudConId.id || solicitudConId.Id || solicitudConId.ID || solicitudConId.solicitudId;
-            console.log(' ID real encontrado en solicitud jurídica:', idReal);
-
+            const idReal = solicitudConId.Id_Solicitud || solicitudConId.id || solicitudConId.Id || solicitudConId.ID;
+       
             return {
                 id: `juridico-${index}`, // ID interno único para la tabla
                 Id: idReal || (solicitudesFisicasUnificadas.length + index + 1), // Usar ID real del backend o continuar secuencia
@@ -193,13 +189,12 @@ export default function SolicitudesTable() {
             }
         }),
         columnHelper.accessor('Cedula_Documento', {
-            header: 'Cédula / Cédula Jurídica',
+            header: 'Número Identificación / Cédula Jurídica', // <-- CAMBIO: Nuevo encabezado
             cell: (info) => {
                 const fila = info.row.original;
-
                 if (fila.Tipo_Persona === 'Físico') {
                     const datosOriginales = fila.datos_originales as SolicitudFisica;
-                    return datosOriginales.Cedula || 'Sin cédula';
+                    return datosOriginales.Identificacion || 'Sin número de identificación'; // <-- CAMBIO: usa Identificacion
                 } else {
                     const datosOriginales = fila.datos_originales as SolicitudJuridica;
                     return datosOriginales.Cedula_Juridica || 'Sin cédula jurídica';

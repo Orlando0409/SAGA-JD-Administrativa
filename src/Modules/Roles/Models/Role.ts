@@ -3,23 +3,23 @@ import type { FechaEliminacionType } from "@/Modules/Usuarios/Types/UserTypes";
 export interface Role {
   Id_Rol: number;
   Nombre_Rol: string;
-  permisos: Permiso[];
+  Permisos: Permiso[];
   Fecha_Eliminacion: FechaEliminacionType;
 }
 
 export interface CreateRoleData {
   Nombre_Rol: string;
-  permisosIds: number[]; // Array de IDs específicos
+  permisosIds: number[];
 }
 
 export interface UpdateRoleData {
   Nombre_Rol: string;
-  permisosIds: number[]; // Array de IDs específicos
+  permisosIds: number[]; 
 }
 
 export interface Permiso {
-  id: number;
-  modulo: string;
-  Ver: boolean; // true o false
-  Editar: boolean; // true o false
+  Id: number;
+  Modulo: string;
+  Ver: boolean; 
+  Editar: boolean; 
 }

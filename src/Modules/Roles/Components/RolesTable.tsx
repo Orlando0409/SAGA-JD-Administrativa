@@ -8,13 +8,13 @@ import {
   getSortedRowModel,
   useReactTable,
 } from '@tanstack/react-table';
-import { LuSearch, LuPlus, LuChevronLeft, LuChevronRight, LuFilter } from 'react-icons/lu';
+import { LuSearch, LuPlus, LuChevronLeft, LuChevronRight } from 'react-icons/lu';
 import { useRoles } from '../Hooks/RoleHook';
 import RoleDetailModal from './RoleDetailModal';
 import CreateRoleModal from './CreateRoleModal';
 import type { Role } from '../Models/Role';
 import { EditRoleModal } from './EditRolModal';
-import { getStatusClass, getStatusDisplay, isActive } from '@/Modules/Usuarios/Helper/utils';
+import { getStatusClass, getStatusDisplay } from '@/Modules/Usuarios/Helper/utils';
 import { useUserPermissions } from '@/Modules/Auth/Hooks/PermissionHook';
 
 
@@ -41,11 +41,11 @@ const Roles = ({ onClose }: { onClose: () => void }) => {
           <span className="font-semibold">{info.getValue()}</span>
         ),
       }),
-      columnHelper.accessor('permisos', {
+      columnHelper.accessor('Permisos', {
         header: 'Permisos',
         cell: info => (
           <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
-            {info.getValue()?.length ?? 0} permisos
+            {info.getValue()?.length ?? 0} Permisos
           </span>
         ),
       }),

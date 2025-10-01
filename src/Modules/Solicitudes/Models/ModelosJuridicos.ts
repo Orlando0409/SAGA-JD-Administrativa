@@ -1,4 +1,5 @@
 export interface SolicitudJuridicaBase {
+    Id_Solicitud?: number; // ID del backend
     Tipo_Solicitud: "Afiliacion" | "Desconexion" | "Cambio de Medidor" | "Asociado";
     Razon_Social: string;
     Cedula_Juridica: string;
@@ -11,7 +12,6 @@ export interface SolicitudJuridicaBase {
     };
     Fecha_Creacion: string;
     Fecha_Actualizacion: string;
-
 }
 
 

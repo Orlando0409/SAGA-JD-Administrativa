@@ -6,19 +6,16 @@ import { EMAIL_MAX_LENGTH, NOMBRE_MAX_LENGTH, type EditUserModalProps } from '..
 import { useState } from 'react';
 import { UpdateUserSchema, type UpdateUserSchemaData } from '../Schema/UpdateUserSchema';
 import type { Role } from '@/Modules/Roles/Models/Role';
-import { useAlerts } from '@/Modules/Global/context/AlertContext';
-
 
 const EditUserModal: React.FC<EditUserModalProps> = ({ isOpen, onClose, user }) => {
   const updateUserMutation = useUpdateUser();
   const { data: roles = [] } = useRoles();
   const activeRoles = roles.filter((rol: Role) => rol.Fecha_Eliminacion === null);
-  const {showSuccess, showError} = useAlerts();
-    const [formErrors, setFormErrors] = useState<Record<string, string>>({});
-    const [fieldCharCounts, setFieldCharCounts] = useState({
-      nombreUsuario: 0,
-      email: 0
-    });
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+  const [fieldCharCounts, setFieldCharCounts] = useState({
+    nombreUsuario: 0,
+    email: 0
+  });
 
       const createInputHandler = (fieldName: string, handleChange: (value: string) => void, maxLength: number) => {
     return (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -29,7 +26,6 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ isOpen, onClose, user }) 
         handleChange(value);
         setFieldCharCounts(prev => ({ ...prev, [fieldName]: value.length }));
         
-        // Limpiar errores de validación cuando el usuario empieza a escribir
         if (formErrors[fieldName]) {
           setFormErrors(prev => ({ ...prev, [fieldName]: '' }));
         }
@@ -66,11 +62,9 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ isOpen, onClose, user }) 
         };
 
         await updateUserMutation.mutateAsync({ Id_Usuario: user.Id_Usuario, userData: updateData });
-        showSuccess('Usuario actualizado exitosamente');
         onClose();
       } catch (error) {
         console.error('Error updating user:', error);
-        showError('Error al actualizar usuario');
       }
     },
   });
@@ -118,10 +112,11 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ isOpen, onClose, user }) 
           <form.Field name="Nombre_Usuario">
             {(field) => (
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor='Nombre_Usuario' className="block text-sm font-medium text-gray-700 mb-1">
                   Nombre de Usuario
                 </label>
                 <input
+                  id='Nombre_Usuario'
                   type="text"
                   value={field.state.value}
                   onChange={createInputHandler('nombreUsuario', field.handleChange, NOMBRE_MAX_LENGTH)}
@@ -153,10 +148,11 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ isOpen, onClose, user }) 
           <form.Field name="Correo_Electronico">
             {(field) => (
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor='Correo_Electronico' className="block text-sm font-medium text-gray-700 mb-1">
                   Correo Electrónico
                 </label>
                 <input
+                  id='Correo_Electronico'
                   type="email"
                   value={field.state.value}
                   onChange={createInputHandler('email', field.handleChange, EMAIL_MAX_LENGTH)}
@@ -188,10 +184,11 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ isOpen, onClose, user }) 
           <form.Field name="Id_Rol">
             {(field) => (
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor='Id_Rol' className="block text-sm font-medium text-gray-700 mb-1">
                   Rol
                 </label>
                 <select
+                  id='Id_Rol'
                   value={field.state.value}
                   onChange={(e) => field.handleChange(Number(e.target.value))}
                   className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-colors ${

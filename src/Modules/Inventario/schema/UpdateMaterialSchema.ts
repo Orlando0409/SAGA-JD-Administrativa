@@ -11,18 +11,17 @@ export const UpdateMaterialSchema = z.object({
     .max(200, "La descripción no puede tener más de 200 caracteres")
     .regex(/^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\s!?¿¡().,-]*$/, "La descripción solo puede contener letras, números, espacios y los caracteres !?¿¡().,-")
     .optional(),
-  
-  Cantidad: z.number()
-    .min(1, "La cantidad debe ser al menos 1")
-    .int("La cantidad debe ser un número entero")
+    
+  Id_Unidad_Medicion: z.number()
+    .min(1, "Debe seleccionar una unidad de medición")
     .optional(),
   
   Precio_Unitario: z.number()
-    .min(0.10, "El precio unitario debe ser al menos 0.10")
+    .min(5, "El precio unitario debe ser al menos 5")
+    .max(10000000, "El precio unitario no puede ser mayor a 10,000,000")
     .optional(),
   
   IDS_Categorias: z.array(z.number())
-    .min(1, "Debe seleccionar al menos una categoría")
     .optional()
 });
 

@@ -3,6 +3,10 @@ import { useState } from 'react';
 import type { AfiliadoFisico } from '../Models/TablaAfiliados/ModeloAfiliadoFisico';
 import type { AfiliadoJuridico } from '../Models/TablaAfiliados/ModeloAfiliadoJuridico';
 import { useAlerts } from '@/Modules/Global/context/AlertContext';
+import { useAfiliadosFisicos } from '../Hook/HookAfiliadoFisico';
+import { useAfiliadosJuridicos } from '../Hook/HookAfiliadoJuridico';
+import PhoneInput from "react-phone-number-input";
+import "react-phone-number-input/style.css";
 
 // Tipo unificado para identificar qué estamos editando
 type PersonaParaEditar = {
@@ -20,14 +24,17 @@ interface EditModalProps {
 const NOMBRE_MAX_LENGTH = 50;
 const APELLIDO_MAX_LENGTH = 50;
 const EMAIL_MAX_LENGTH = 100;
-const TELEFONO_MAX_LENGTH = 15;
 const CEDULA_MAX_LENGTH = 20;
 const DIRECCION_MAX_LENGTH = 200;
-const URL_MAX_LENGTH = 255;
 
 const EditModal: React.FC<EditModalProps> = ({ isOpen, onClose, persona }) => {
     const { showSuccess, showError } = useAlerts();
     const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+    const [escrituraFile, setEscrituraFile] = useState<File | null>(null);
+    const [planosFile, setPlanosFile] = useState<File | null>(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const { updateAfiliadoFisico } = useAfiliadosFisicos();
+    const { updateAfiliadoJuridico } = useAfiliadosJuridicos();
     const [fieldCharCounts, setFieldCharCounts] = useState({
         nombre: 0,
         apellido1: 0,
@@ -65,13 +72,14 @@ const EditModal: React.FC<EditModalProps> = ({ isOpen, onClose, persona }) => {
                 Nombre: afiliado.Nombre,
                 Apellido1: afiliado.Apellido1,
                 Apellido2: afiliado.Apellido2 || '',
-                Cedula: afiliado.Cedula,
+                Tipo_Identificacion: (afiliado as any).Tipo_Identificacion || 'Cedula Nacional' as 'Cedula Nacional' | 'DIMEX' | 'Pasaporte',
+                Identificacion: afiliado.Identificacion,
                 Numero_Telefono: afiliado.Numero_Telefono,
                 Correo: afiliado.Correo,
                 Direccion_Exacta: afiliado.Direccion_Exacta || '',
                 Edad: afiliado.Edad,
-                Escritura_Terreno: afiliado.Escritura_Terreno || '',
-                Planos_Terreno: afiliado.Planos_Terreno || '',
+                Escritura_Terreno: '',
+                Planos_Terreno: '',
             };
         } else { // afiliado-juridico
             const afiliado = datos as AfiliadoJuridico;
@@ -90,16 +98,62 @@ const EditModal: React.FC<EditModalProps> = ({ isOpen, onClose, persona }) => {
     const form = useForm({
         defaultValues: getDefaultValues(),
         onSubmit: async ({ value }) => {
+            if (isSubmitting) return;
+
             setFormErrors({});
 
             try {
-                // TODO: Implementar actualizaciones para afiliados cuando estén disponibles las funciones
-                console.log('Actualizar afiliado:', persona.tipo, value);
-                showSuccess(`${persona.tipo === 'afiliado-fisico' ? 'Afiliado físico' : 'Afiliado jurídico'} actualizado exitosamente`);
-                onClose();
+                setIsSubmitting(true);
+
+                // Crear FormData para enviar archivos
+                const formData = new FormData();
+
+                if (persona.tipo === 'afiliado-fisico') {
+                    const afiliadoFisico = persona.datos as AfiliadoFisico;
+
+                    // Agregar campos de afiliado físico
+                    formData.append('Nombre', value.Nombre || '');
+                    formData.append('Apellido1', value.Apellido1 || '');
+                    formData.append('Apellido2', value.Apellido2 || '');
+                    formData.append('Tipo_Identificacion', value.Tipo_Identificacion || 'Cedula Nacional');
+                    formData.append('Identificacion', value.Identificacion || '');
+                    formData.append('Numero_Telefono', value.Numero_Telefono || '');
+                    formData.append('Correo', value.Correo || '');
+                    formData.append('Direccion_Exacta', value.Direccion_Exacta || '');
+                    formData.append('Edad', value.Edad?.toString() || '0');
+
+                    // Agregar archivos si están disponibles
+                    if (escrituraFile) formData.append('Escritura_Terreno', escrituraFile);
+                    if (planosFile) formData.append('Planos_Terreno', planosFile);
+
+                    // Usar la identificación como cédula para la ruta
+                    const cedula = afiliadoFisico.Identificacion || '';
+                    await updateAfiliadoFisico({ cedula, data: formData });
+                    showSuccess('Afiliado físico actualizado exitosamente');
+                } else {
+                    const afiliadoJuridico = persona.datos as AfiliadoJuridico;
+
+                    // Agregar campos de afiliado jurídico
+                    formData.append('Razon_Social', value.Razon_Social || '');
+                    formData.append('Cedula_Juridica', value.Cedula_Juridica || '');
+                    formData.append('Numero_Telefono', value.Numero_Telefono || '');
+                    formData.append('Correo', value.Correo || '');
+                    formData.append('Direccion_Exacta', value.Direccion_Exacta || '');
+
+                    // Agregar archivos si están disponibles
+                    if (escrituraFile) formData.append('Escritura_Terreno', escrituraFile);
+                    if (planosFile) formData.append('Planos_Terreno', planosFile);
+
+                    // Usar la cédula jurídica para la ruta
+                    const cedulaJuridica = afiliadoJuridico.Cedula_Juridica || '';
+                    await updateAfiliadoJuridico({ cedulaJuridica, data: formData });
+                    showSuccess('Afiliado jurídico actualizado exitosamente');
+                } onClose();
             } catch (error) {
                 console.error('Error actualizando:', error);
-                showError('Error al actualizar el registro');
+                showError('Error al actualizar el registro. Por favor intente nuevamente.');
+            } finally {
+                setIsSubmitting(false);
             }
         },
     });
@@ -228,25 +282,47 @@ const EditModal: React.FC<EditModalProps> = ({ isOpen, onClose, persona }) => {
                                     </form.Field>
                                 </div>
 
+                                <form.Field name="Tipo_Identificacion">
+                                    {(field) => (
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                Tipo de Identificación *
+                                            </label>
+                                            <select
+                                                value={field.state.value}
+                                                onChange={(e) => field.handleChange(e.target.value as 'Cedula Nacional' | 'DIMEX' | 'Pasaporte')}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                required
+                                            >
+                                                <option value="Cedula Nacional">Cédula Nacional</option>
+                                                <option value="DIMEX">DIMEX</option>
+                                                <option value="Pasaporte">Pasaporte</option>
+                                            </select>
+                                        </div>
+                                    )}
+                                </form.Field>
+
+                                <form.Field name="Identificacion">
+                                    {(field) => (
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                Número de Identificación *
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={field.state.value}
+                                                onChange={createInputHandler('cedula', field.handleChange, CEDULA_MAX_LENGTH)}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                placeholder="Ingrese el número de identificación"
+                                                maxLength={CEDULA_MAX_LENGTH}
+                                                required
+                                            />
+                                            {renderCharCounter(fieldCharCounts.cedula, CEDULA_MAX_LENGTH, false)}
+                                        </div>
+                                    )}
+                                </form.Field>
+
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <form.Field name="Cedula">
-                                        {(field) => (
-                                            <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                    Cédula *
-                                                </label>
-                                                <input
-                                                    type="text"
-                                                    value={field.state.value}
-                                                    onChange={createInputHandler('cedula', field.handleChange, CEDULA_MAX_LENGTH)}
-                                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                                    placeholder="123456789"
-                                                    maxLength={CEDULA_MAX_LENGTH}
-                                                />
-                                                {renderCharCounter(fieldCharCounts.cedula, CEDULA_MAX_LENGTH, false)}
-                                            </div>
-                                        )}
-                                    </form.Field>
 
                                     <form.Field name="Edad">
                                         {(field) => (
@@ -321,15 +397,16 @@ const EditModal: React.FC<EditModalProps> = ({ isOpen, onClose, persona }) => {
                                         <label className="block text-sm font-medium text-gray-700 mb-1">
                                             Teléfono *
                                         </label>
-                                        <input
-                                            type="tel"
-                                            value={field.state.value}
-                                            onChange={createInputHandler('telefono', field.handleChange, TELEFONO_MAX_LENGTH)}
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                            placeholder="88888888"
-                                            maxLength={TELEFONO_MAX_LENGTH}
+                                        <PhoneInput
+                                            value={field.state.value as any}
+                                            onChange={(value) => field.handleChange(value || '')}
+                                            defaultCountry="CR"
+                                            placeholder="Ingrese número de teléfono"
+                                            className="w-full"
+                                            numberInputProps={{
+                                                className: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                            }}
                                         />
-                                        {renderCharCounter(fieldCharCounts.telefono, TELEFONO_MAX_LENGTH, false)}
                                     </div>
                                 )}
                             </form.Field>
@@ -380,17 +457,36 @@ const EditModal: React.FC<EditModalProps> = ({ isOpen, onClose, persona }) => {
                                     {(field) => (
                                         <div>
                                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                Escritura del Terreno 
+                                                Escritura del Terreno
                                             </label>
-                                            <input
-                                                type="url"
-                                                value={field.state.value}
-                                                onChange={createInputHandler('escritura', field.handleChange, URL_MAX_LENGTH)}
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                                placeholder="https://example.com/escritura.pdf"
-                                                maxLength={URL_MAX_LENGTH}
-                                            />
-                                            {renderCharCounter(fieldCharCounts.escritura, URL_MAX_LENGTH, false)}
+                                            <div className="relative">
+                                                <input
+                                                    type="file"
+                                                    accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                                                    onChange={(e) => {
+                                                        const file = e.target.files?.[0];
+                                                        if (file) {
+                                                            setEscrituraFile(file);
+                                                            field.handleChange(file.name);
+                                                        } else {
+                                                            setEscrituraFile(null);
+                                                            field.handleChange('');
+                                                        }
+                                                    }}
+                                                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                                />
+                                                <div className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 flex items-center justify-between cursor-pointer hover:bg-gray-100 transition-colors">
+                                                    <span className="text-gray-700">
+                                                        {field.state.value || 'Seleccionar archivo...'}
+                                                    </span>
+                                                    <span className="bg-blue-500 text-white px-3 py-1 rounded text-sm">
+                                                        Examinar
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <p className="text-xs text-gray-500 mt-1">
+                                                Formatos permitidos: PDF, DOC, DOCX, JPG, PNG
+                                            </p>
                                         </div>
                                     )}
                                 </form.Field>
@@ -399,17 +495,36 @@ const EditModal: React.FC<EditModalProps> = ({ isOpen, onClose, persona }) => {
                                     {(field) => (
                                         <div>
                                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                Planos del Terreno 
+                                                Planos del Terreno
                                             </label>
-                                            <input
-                                                type="url"
-                                                value={field.state.value}
-                                                onChange={createInputHandler('planos', field.handleChange, URL_MAX_LENGTH)}
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                                placeholder="https://example.com/planos.pdf"
-                                                maxLength={URL_MAX_LENGTH}
-                                            />
-                                            {renderCharCounter(fieldCharCounts.planos, URL_MAX_LENGTH, false)}
+                                            <div className="relative">
+                                                <input
+                                                    type="file"
+                                                    accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                                                    onChange={(e) => {
+                                                        const file = e.target.files?.[0];
+                                                        if (file) {
+                                                            setPlanosFile(file);
+                                                            field.handleChange(file.name);
+                                                        } else {
+                                                            setPlanosFile(null);
+                                                            field.handleChange('');
+                                                        }
+                                                    }}
+                                                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                                />
+                                                <div className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 flex items-center justify-between cursor-pointer hover:bg-gray-100 transition-colors">
+                                                    <span className="text-gray-700">
+                                                        {field.state.value || 'Seleccionar archivo...'}
+                                                    </span>
+                                                    <span className="bg-blue-500 text-white px-3 py-1 rounded text-sm">
+                                                        Examinar
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <p className="text-xs text-gray-500 mt-1">
+                                                Formatos permitidos: PDF, DOC, DOCX, JPG, PNG
+                                            </p>
                                         </div>
                                     )}
                                 </form.Field>
@@ -426,9 +541,17 @@ const EditModal: React.FC<EditModalProps> = ({ isOpen, onClose, persona }) => {
                             </button>
                             <button
                                 type="submit"
-                                className="px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
+                                disabled={isSubmitting}
+                                className="px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
                             >
-                                Actualizar Afiliado
+                                {isSubmitting ? (
+                                    <>
+                                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                        Actualizando...
+                                    </>
+                                ) : (
+                                    'Actualizar Afiliado'
+                                )}
                             </button>
                         </div>
                     </form>

@@ -7,65 +7,138 @@ import {
   getPaginationRowModel,
   createColumnHelper,
 } from '@tanstack/react-table';
-import { LuPlus, LuFilter, LuSearch } from 'react-icons/lu';
-import { useMaterials } from '../hooks/InventarioHook';
+import { LuPlus, LuFilter, LuSearch, LuArrowLeft } from 'react-icons/lu';
+import { 
+  useGetAllMaterials, 
+  useGetMaterialesConCategorias, 
+  useGetMaterialesSinCategorias,
+  useGetMaterialesPorDebajoDeStock,
+  useGetMaterialesPorEncimaDeStock,
+} from '../../hooks/useMaterials';
+import { MdKeyboardArrowLeft, MdKeyboardArrowRight, MdKeyboardDoubleArrowLeft,
+  MdKeyboardDoubleArrowRight, 
+  MdKeyboardArrowDown,
+  MdKeyboardArrowUp} from "react-icons/md";
 
-import type { Material } from '../models/Inventario';
-import type { MaterialFilterOptions } from '../types/MaterialTypes';
+import type { Material } from '../../models/Inventario';
+import type { MaterialFilterOptions } from '../../types/MaterialTypes';
 import CreateMaterialModal from './CreateMaterialModal';
 import DetailMaterialModal from './DetailMaterialModal';
 import FilterMaterialModal from './FilterMaterialModal';
+import EditMaterialModal from './EditMaterialModal';
 
-const Inventario = () => {
-  const { data: materials = [], isLoading, refetch } = useMaterials();
-  
+interface CatalogoMaterialesProps {
+  onBack?: () => void;
+}
+
+const CatalogoMateriales: React.FC<CatalogoMaterialesProps> = ({ onBack }) => {
   const [globalFilter, setGlobalFilter] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [selectedMaterial, setSelectedMaterial] = useState<Material | null>(null);
   const [showFilterModal, setShowFilterModal] = useState(false);
-
+  const [showEditModal, setShowEditModal] = useState(false);
   const [appliedFilters, setAppliedFilters] = useState<MaterialFilterOptions>({});
+  const { data: allMaterials = [], isLoading: isLoadingAll, refetch: refetchAllMaterials } = useGetAllMaterials();
+  const { data: materialesConCategorias = [], isLoading: isLoadingConCat, refetch: refetchConCat } = useGetMaterialesConCategorias();
+  const { data: materialesSinCategorias = [], isLoading: isLoadingSinCat, refetch: refetchSinCat } = useGetMaterialesSinCategorias();
+  const { data: materialesEncimaStock = [], isLoading: isLoadingAbove, refetch: refetchAbove } = useGetMaterialesPorEncimaDeStock(
+    appliedFilters.stockMinimo || 0, 
+
+  );
+  const { data: materialesDebajoStock = [], isLoading: isLoadingBelow, refetch: refetchBelow } = useGetMaterialesPorDebajoDeStock(
+    appliedFilters.stockMaximo || 0, 
+  );
 
   const pageSizeOptions = [5, 10, 20, 50];
   const [pagination, setPagination] = useState({
-    pageSize: 10,
+    pageSize: 5,
     pageIndex: 0,
   });
 
+  const refetchAllData = () => {
+    refetchAllMaterials();
+    refetchConCat();
+    refetchSinCat();
+    refetchAbove();
+    refetchBelow();
+  };
+
   useEffect(() => {
-    const handler = () => refetch();
+    const handler = () => refetchAllData();
     window.addEventListener('refreshInventario', handler);
     return () => window.removeEventListener('refreshInventario', handler);
-  }, [refetch]);
+  }, []);
 
-  const applyCustomFilters = (data: Material[], filters: MaterialFilterOptions): Material[] => {
-    if (!filters.categoria && !filters.estado && !filters.conStock && !filters.precioMin && !filters.precioMax) {
-      return data;
+  const { materials, isLoading } = useMemo(() => {
+    if (appliedFilters.soloConCategorias) {
+      return { materials: materialesConCategorias, isLoading: isLoadingConCat };
+    }
+    if (appliedFilters.soloSinCategorias) {
+      return { materials: materialesSinCategorias, isLoading: isLoadingSinCat };
+    }
+    if (appliedFilters.tipoFiltroStock === 'encima' && appliedFilters.stockMinimo) {
+      return { materials: materialesEncimaStock, isLoading: isLoadingAbove };
+    }
+    if (appliedFilters.tipoFiltroStock === 'debajo' && appliedFilters.stockMaximo) {
+      return { materials: materialesDebajoStock, isLoading: isLoadingBelow };
     }
     
-    return data.filter(material => {
-      if (filters.categoria && !material.Categorias.some(cat => cat.Nombre_Categoria_Material === filters.categoria)) {
-        return false;
-      }
-      if (filters.estado && material.Estado_Material.Nombre_Estado_Material !== filters.estado) {
-        return false;
-      }
-      if (filters.conStock && material.Cantidad <= 0) {
-        return false;
-      }
-      if (filters.precioMin && material.Precio_Unitario < filters.precioMin) {
-        return false;
-      }
-      if (filters.precioMax && material.Precio_Unitario > filters.precioMax) {
-        return false;
-      }
-      return true;
-    });
+    return { materials: allMaterials, isLoading: isLoadingAll };
+  }, [
+    appliedFilters, 
+    allMaterials, isLoadingAll,
+    materialesConCategorias, isLoadingConCat,
+    materialesSinCategorias, isLoadingSinCat,
+    materialesEncimaStock, isLoadingAbove,
+    materialesDebajoStock, isLoadingBelow
+  ]);
+
+  const filterByCategoria = (material: Material, categoria?: string) => {
+    if (!categoria) return true;
+    return material.Categorias?.some(cat => cat.Categoria.Nombre_Categoria === categoria);
+  };
+
+  const filterByEstado = (material: Material, estado?: string) => {
+    if (!estado) return true;
+    return material.Estado_Material.Nombre_Estado_Material === estado;
+  };
+
+  const filterByStock = (material: Material, conStock?: boolean) => {
+    if (!conStock) return true;
+    return material.Cantidad > 0;
+  };
+
+  const filterByPrecioMin = (material: Material, precioMin?: number) => {
+    if (!precioMin) return true;
+    return material.Precio_Unitario >= precioMin;
+  };
+
+  const filterByPrecioMax = (material: Material, precioMax?: number) => {
+    if (!precioMax) return true;
+    return material.Precio_Unitario <= precioMax;
+  };
+
+  const filterByStockEntre = (material: Material, tipoFiltroStock?: string, stockMinimo?: number, stockMaximo?: number) => {
+    if (tipoFiltroStock !== 'entre') return true;
+    if (stockMinimo && material.Cantidad < stockMinimo) return false;
+    if (stockMaximo && material.Cantidad > stockMaximo) return false;
+    return true;
+  };
+
+  const applyAdditionalFilters = (data: Material[], filters: MaterialFilterOptions): Material[] => {
+    return data.filter(material =>
+      filterByCategoria(material, filters.categoria) &&
+      filterByEstado(material, filters.estado) &&
+      filterByStock(material, filters.conStock) &&
+      filterByPrecioMin(material, filters.precioMin) &&
+      filterByPrecioMax(material, filters.precioMax) &&
+      filterByStockEntre(material, filters.tipoFiltroStock, filters.stockMinimo, filters.stockMaximo)
+    );
   };
 
   const filteredMaterials = useMemo(() => {
-    return applyCustomFilters(materials, appliedFilters);
+    return applyAdditionalFilters(materials, appliedFilters);
   }, [materials, appliedFilters]);
 
   const columnHelper = createColumnHelper<Material>();
@@ -96,6 +169,14 @@ const Inventario = () => {
           </div>
         ),
       }),
+      columnHelper.accessor('Unidad_Medicion.Nombre_Unidad', {
+        header: 'Unidad de medida',
+        cell: info => (
+          <div className="text-sm text-gray-600">
+            {info.getValue() || 'Sin unidad'}
+          </div>
+        ),
+      }),
       columnHelper.accessor('Precio_Unitario', {
         header: 'Precio Unitario',
         cell: info => (
@@ -109,13 +190,11 @@ const Inventario = () => {
         cell: info => {
           const estado = info.getValue();
           let colorClass = '';
-          if (estado === 'DISPONIBLE') {
+          if (estado === 'Disponible') {
             colorClass = 'bg-green-100 text-green-800';
-          } else if (estado === 'AGOTADO') {
+          } else if (estado === 'Agotado') {
             colorClass = 'bg-red-100 text-red-800';
-          } else {
-            colorClass = 'bg-yellow-100 text-yellow-800';
-          }
+          } 
           return (
             <span className={`px-2 py-1 rounded-full text-sm font-medium ${colorClass}`}>
               {estado}
@@ -127,21 +206,55 @@ const Inventario = () => {
         header: 'Categorías',
         cell: info => {
           const categorias = info.getValue() || [];
+          
+          if (!categorias || categorias.length === 0) {
+            return (
+              <span className="px-2 py-1 bg-gray-100 text-gray-600 rounded-full text-xs">
+                Sin categoría
+              </span>
+            );
+          }
+          
           return (
-            <div className="flex flex-wrap gap-1">
-              {categorias.slice(0, 2).map((categoria, index) => (
-                <span key={categoria.Id_Categoria_Material || index} className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
-                  {categoria.Nombre_Categoria_Material}
+            <div className="flex flex-wrap gap-1 max-w-xs">
+              {categorias.slice(0, 3).map((categoria, index) => (
+                <span 
+                  key={categoria.Id_Material_Categoria || index} 
+                  className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs whitespace-nowrap"
+                >
+                  {categoria.Categoria?.Nombre_Categoria || 'N/A'}
                 </span>
               ))}
-              {categorias.length > 2 && (
+              {categorias.length > 3 && (
                 <span className="px-2 py-1 bg-gray-100 text-gray-600 rounded-full text-xs">
-                  +{categorias.length - 2}
+                  +{categorias.length - 3}
                 </span>
               )}
             </div>
           );
         },
+      }),
+      columnHelper.display({
+        id: 'acciones',
+        header: 'Acciones',
+        cell: info => (
+          <div className="flex justify-start gap-1">
+            <button
+              className="px-2 py-1 bg-gray-600 text-white text-xs rounded hover:bg-gray-700 transition-colors"
+              onClick={() => handleViewDetail(info.row.original)}
+              title="Ver detalles"
+            >
+              Ver
+            </button>
+            <button
+              className="px-2 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition-colors"
+              onClick={() => handleEdit(info.row.original)}
+              title="Editar"
+            >
+              Editar
+            </button>
+          </div>
+        ),
       }),
     ],
     []
@@ -162,15 +275,20 @@ const Inventario = () => {
     onPaginationChange: setPagination,
     initialState: {
       pagination: {
-        pageSize: 10,
+        pageSize: 5,
       },
     },
   });
+    const handleEdit = (material: Material) => {
+    setSelectedMaterial(material);
+    setShowEditModal(true);
+  };
 
-  const handleRowClick = (material: Material) => {
+  const handleViewDetail = (material: Material) => {
     setSelectedMaterial(material);
     setShowDetailModal(true);
   };
+
 
   const handleApplyFilters = (filters: MaterialFilterOptions) => {
     setAppliedFilters(filters);
@@ -181,22 +299,33 @@ const Inventario = () => {
     v !== undefined && v !== '' && v !== false
   ).length;
 
-  if (isLoading) {
+  const renderMaterialesView = () => {
+    if (isLoading) {
+      return (
+        <div className="flex items-center justify-center min-h-96">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+        </div>
+      );
+    }
+
     return (
-      <div className="flex items-center justify-center min-h-96">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
-      </div>
-    );
-  }
-
-  return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <h1 className="text-2xl font-bold text-gray-900">Inventario</h1>
-      </div>
-
-      {/* Filters and Search */}
+      {/* Header con botón de regreso */}
+      {onBack && (
+        <div className="flex items-center gap-4">
+          <button
+            onClick={onBack}
+            className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
+          >
+            <LuArrowLeft className="w-4 h-4" />
+            Volver al Dashboard
+          </button>
+          <div className="h-6 w-px bg-gray-300" />
+          <h1 className="text-2xl font-bold text-gray-900">
+            Catálogo de Materiales
+          </h1>
+        </div>
+      )}
       <div className="flex  sm:flex-row justify-between gap-4">
         <div className="flex-1 relative">
           <LuSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -227,13 +356,6 @@ const Inventario = () => {
           )}
         </button>
           <button
-            onClick={() => console.log('TODO: Crear modal de nueva categoría')}
-            className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition flex items-center gap-2"
-          >
-            <LuPlus className="w-4 h-4" />
-            Nueva Categoría
-          </button>
-          <button
             onClick={() => setShowCreateModal(true)}
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
           >
@@ -243,7 +365,6 @@ const Inventario = () => {
         </div>
       </div>
 
-      {/* Table */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
@@ -263,8 +384,8 @@ const Inventario = () => {
                               ? header.column.columnDef.header(header.getContext())
                               : header.column.columnDef.header}
                             {{
-                              asc: ' 🔺',
-                              desc: ' 🔻',
+                              asc: <MdKeyboardArrowUp />,
+                              desc: <MdKeyboardArrowDown />,
                             }[header.column.getIsSorted() as string] ?? null}
                           </>
                         )}
@@ -279,7 +400,6 @@ const Inventario = () => {
                 <tr
                   key={row.id}
                   className="hover:bg-gray-50 cursor-pointer transition-colors"
-                  onClick={() => handleRowClick(row.original)}
                 >
                   {row.getVisibleCells().map((cell) => (
                     <td key={cell.id} className="px-6 py-4 whitespace-nowrap text-sm">
@@ -294,7 +414,6 @@ const Inventario = () => {
           </table>
         </div>
 
-        {/* Pagination */}
         <div className="bg-white px-6 py-3 border-t border-gray-200 flex items-center justify-between">
           <div className="flex items-center gap-2 text-sm text-gray-700">
             <span>Mostrar</span>
@@ -320,14 +439,14 @@ const Inventario = () => {
               disabled={!table.getCanPreviousPage()}
               className="px-2 py-1 text-sm border border-gray-300 rounded disabled:opacity-50"
             >
-              {'<<'}
+              <MdKeyboardDoubleArrowLeft />
             </button>
             <button
               onClick={() => table.previousPage()}
               disabled={!table.getCanPreviousPage()}
               className="px-2 py-1 text-sm border border-gray-300 rounded disabled:opacity-50"
             >
-              {'<'}
+              <MdKeyboardArrowLeft />
             </button>
             <span className="px-2 py-1 text-sm">
               Página {table.getState().pagination.pageIndex + 1} de{' '}
@@ -338,20 +457,20 @@ const Inventario = () => {
               disabled={!table.getCanNextPage()}
               className="px-2 py-1 text-sm border border-gray-300 rounded disabled:opacity-50"
             >
-              {'>'}
+              <MdKeyboardArrowRight />
             </button>
             <button
               onClick={() => table.setPageIndex(table.getPageCount() - 1)}
               disabled={!table.getCanNextPage()}
               className="px-2 py-1 text-sm border border-gray-300 rounded disabled:opacity-50"
             >
-              {'>>'}
+              <MdKeyboardDoubleArrowRight />
             </button>
           </div>
         </div>
       </div>
 
-      {/* Modales */}
+
       <CreateMaterialModal
         isOpen={showCreateModal}
         onClose={() => setShowCreateModal(false)}
@@ -368,6 +487,17 @@ const Inventario = () => {
         />
       )}
 
+        {showEditModal && selectedMaterial && (
+        <EditMaterialModal
+          isOpen={showEditModal}
+          onClose={() => {
+            setShowEditModal(false);
+            setSelectedMaterial(null);
+          }}
+          material={selectedMaterial}
+        />
+      )}
+
       <FilterMaterialModal
         isOpen={showFilterModal}
         onClose={() => setShowFilterModal(false)}
@@ -375,8 +505,11 @@ const Inventario = () => {
         currentFilters={appliedFilters}
       />
 
-    </div>
-  );
-};
+      </div>
+    );
+  };
 
-export default Inventario;
+  return renderMaterialesView();
+}
+
+export default CatalogoMateriales

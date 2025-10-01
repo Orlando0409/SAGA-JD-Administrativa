@@ -1,10 +1,13 @@
+export type TipoIdentificacion = "Cedula" | "Pasaporte" | "DIMEX" | "Otro";
+
 export interface AfiliadoFisico {
     Id_Afiliado: number
     Nombre: string
     Apellido1: string
     Apellido2?: string
-    Cedula: string
+  
     Numero_Telefono: string
+     Identificacion: string;
     Correo: string
     Direccion_Exacta?: string
     Edad: number
@@ -20,6 +23,7 @@ export interface AfiliadoFisico {
     Fecha_Actualizacion: string
     Escritura_Terreno?: string
     Planos_Terreno?: string
+     Tipo_Identificacion: TipoIdentificacion;
 }
 
 export const AfiliadoFisicoInicialState: AfiliadoFisico = {
@@ -27,7 +31,7 @@ export const AfiliadoFisicoInicialState: AfiliadoFisico = {
     Nombre: '',
     Apellido1: '',
     Apellido2: '',
-    Cedula: '',
+    Identificacion: '',
     Numero_Telefono: '',
     Correo: '',
     Direccion_Exacta: '',
@@ -42,4 +46,6 @@ export const AfiliadoFisicoInicialState: AfiliadoFisico = {
     },
     Fecha_Creacion: new Date().toISOString(),
     Fecha_Actualizacion: new Date().toISOString(),
+    Tipo_Identificacion: 'Cedula'
+
 }

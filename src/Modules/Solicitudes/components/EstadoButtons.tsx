@@ -22,7 +22,7 @@ interface EstadoButtonsProps {
 }
 
 /**
- * 🎛️ Componente de botones para cambiar estados de solicitudes
+ *  Componente de botones para cambiar estados de solicitudes
  * Ejemplo de uso de los hooks de mutación
  */
 const EstadoButtons: React.FC<EstadoButtonsProps> = ({

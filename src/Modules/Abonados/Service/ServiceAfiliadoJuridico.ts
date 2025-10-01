@@ -18,3 +18,15 @@ export const createAfiliadoJuridico = async (formData: FormData) => {
 
     return response.data;
 };
+
+export const updateAfiliadoJuridico = async (cedulaJuridica: string, formData: FormData) => {
+    console.log("🔄 Hook - Actualizando FormData:", formData);
+
+    const response = await apiAuth.put(`/afiliados/update/juridico/${cedulaJuridica}`, formData, {
+        headers: {
+            'Content-Type': 'multipart/form-data',
+        },
+    });
+
+    return response.data;
+};

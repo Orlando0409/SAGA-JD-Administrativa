@@ -1,35 +1,32 @@
 import React, { useState, useEffect } from 'react';
-import { LuX } from 'react-icons/lu';
-import { useCategories, useUpdateMaterial } from '../hooks/InventarioHook';
+import { useGetAllCategories } from '../../hooks/useCategorias';
+import { useUpdateMaterial } from '../../hooks/useMaterials';
+import { useUnidadesMedicionSimple } from '../../hooks/HookUnidadMedicion';
 import { useAlerts } from '@/Modules/Global/context/AlertContext';
-import { CreateMaterialSchema } from '../schema/CreateMaterialSchema';
+import { UpdateMaterialSchema } from '../../schema/UpdateMaterialSchema';
 import { 
   NOMBRE_MATERIAL_MAX_LENGTH, 
   DESCRIPCION_MAX_LENGTH, 
-  PRECIO_MIN 
-} from '../types/MaterialTypes';
-import type { Material } from '../models/Inventario';
-import type { UpdateMaterialData } from '../models/Material';
+  PRECIO_MIN, 
+  type EditMaterialModalProps
+} from '../../types/MaterialTypes';
+import type { UpdateMaterialData } from '../../models/Material';
 
-interface EditMaterialModalProps {
-  material: Material;
-  isOpen: boolean;
-  onClose: () => void;
-}
 
 const EditMaterialModal: React.FC<EditMaterialModalProps> = ({
   material,
   isOpen,
   onClose,
 }) => {
-  const { showSuccess, showError } = useAlerts();
+  const { showError } = useAlerts();
   const updateMaterialMutation = useUpdateMaterial();
-  const { data: categorias = [] } = useCategories();
+  const { data: categorias = [] } = useGetAllCategories();
+  const { data: unidadesMedicion = [] } = useUnidadesMedicionSimple();
   
   const [formData, setFormData] = useState<UpdateMaterialData>({
     Nombre_Material: '',
     Descripcion: '',
-    Cantidad: 0,
+    Id_Unidad_Medicion: 0,
     Precio_Unitario: 0,
     IDS_Categorias: [],
   });
@@ -47,11 +44,11 @@ const EditMaterialModal: React.FC<EditMaterialModalProps> = ({
       setFormData({
         Nombre_Material: material.Nombre_Material,
         Descripcion: material.Descripcion || '',
-        Cantidad: material.Cantidad,
+        Id_Unidad_Medicion: material.Unidad_Medicion.Id_Unidad_Medicion,
         Precio_Unitario: material.Precio_Unitario,
-        IDS_Categorias: material.Categorias?.map(cat => cat.Id_Categoria_Material) || [],
+        IDS_Categorias: material.Categorias?.map(cat => cat.Categoria.Id_Categoria) || [],
       });
-      setSelectedCategorias(material.Categorias?.map(cat => cat.Id_Categoria_Material) || []);
+      setSelectedCategorias(material.Categorias?.map(cat => cat.Categoria.Id_Categoria) || []);
       setFieldCharCounts({
         nombreMaterial: material.Nombre_Material.length,
         descripcion: (material.Descripcion || '').length
@@ -93,15 +90,14 @@ const EditMaterialModal: React.FC<EditMaterialModalProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Validar el formulario antes de continuar
-    const validationResult = CreateMaterialSchema.safeParse({
+    const validationResult = UpdateMaterialSchema.safeParse({
       ...formData,
       IDS_Categorias: selectedCategorias,
     });
     
     if (!validationResult.success) {
       const errors: { [key: string]: string } = {};
-      validationResult.error.errors.forEach((error) => {
+      validationResult.error.errors.forEach((error: any) => {
         if (error.path[0]) {
           errors[error.path[0] as string] = error.message;
         }
@@ -121,16 +117,14 @@ const EditMaterialModal: React.FC<EditMaterialModalProps> = ({
       };
 
       await updateMaterialMutation.mutateAsync({
-        Id_Material: material.Id_Material,
-        materialData: updateData,
+        id: material.Id_Material,
+        data: updateData,
       });
 
-      showSuccess('Material actualizado exitosamente');
       onClose();
       window.dispatchEvent(new Event('refreshInventario'));
     } catch (error: any) {
-      console.error('Error al actualizar material:', error);
-      showError(error.response?.data?.message || 'Error al actualizar el material');
+      console.log('Error al actualizar material:', error);
     } finally {
       setIsSubmitting(false);
     }
@@ -145,18 +139,12 @@ const EditMaterialModal: React.FC<EditMaterialModalProps> = ({
   };
 
   return (
-    <div className="absolute inset-0 bg-white bg-opacity-95 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-white bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-lg shadow-lg w-full max-w-2xl max-h-[85vh] overflow-y-auto">
         <div className="flex items-center justify-between p-6 border-b">
           <h2 className="text-xl font-semibold text-gray-900">
             Editar Material
           </h2>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
-          >
-            <LuX size={24} />
-          </button>
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
@@ -187,31 +175,36 @@ const EditMaterialModal: React.FC<EditMaterialModalProps> = ({
             </div>
 
             <div>
-              <label htmlFor="cantidad" className="block text-sm flex gap-2 font-medium text-gray-700 mb-1">
-                Cantidad 
+              <label htmlFor="unidad" className="block text-sm flex gap-2 font-medium text-gray-700 mb-1">
+                Unidad de Medición
                 <p className="text-red-500">*</p>
               </label>
-              <input
-                type="number"
-                id="cantidad"
-                min="1"
-                value={formData.Cantidad}
+              <select
+                id="unidad"
+                value={formData.Id_Unidad_Medicion || ''}
                 onChange={(e) => {
                   const value = parseInt(e.target.value) || 0;
-                  setFormData({ ...formData, Cantidad: value });
-                  if (formErrors.Cantidad) {
-                    setFormErrors(prev => ({ ...prev, Cantidad: '' }));
+                  setFormData({ ...formData, Id_Unidad_Medicion: value });
+                  if (formErrors.Id_Unidad_Medicion) {
+                    setFormErrors(prev => ({ ...prev, Id_Unidad_Medicion: '' }));
                   }
                 }}
                 className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
-                  formErrors.Cantidad 
+                  formErrors.Id_Unidad_Medicion 
                     ? 'border-red-500 focus:ring-red-500 focus:border-red-500' 
                     : 'border-gray-300'
                 }`}
                 required
-              />
-              {formErrors.Cantidad && (
-                <p className="mt-1 text-sm text-red-600">{formErrors.Cantidad}</p>
+              >
+                <option value="">Seleccionar unidad de medición</option>
+                {unidadesMedicion.map((unidad) => (
+                  <option key={unidad.Id_Unidad_Medicion} value={unidad.Id_Unidad_Medicion}>
+                    {unidad.Nombre_Unidad_Medicion}
+                  </option>
+                ))}
+              </select>
+              {formErrors.Id_Unidad_Medicion && (
+                <p className="mt-1 text-sm text-red-600">{formErrors.Id_Unidad_Medicion}</p>
               )}
             </div>
 
@@ -273,9 +266,8 @@ const EditMaterialModal: React.FC<EditMaterialModalProps> = ({
           </div>
 
           <div>
-            <div className="block text-sm flex gap-2 font-medium text-gray-700 mb-2">
-              Categorías
-            <p className='text-red-500'>*</p>
+            <div className="block text-sm font-medium text-gray-700 mb-2">
+              Categorías (Opcional)
             </div>
 
             <div className={`grid grid-cols-2 md:grid-cols-3 gap-2 max-h-40 overflow-y-auto border rounded-md p-3 ${
@@ -284,19 +276,19 @@ const EditMaterialModal: React.FC<EditMaterialModalProps> = ({
                 : 'border-gray-300'
             }`}>
               {categorias.map((categoria) => (
-                <label key={categoria.Id_Categoria_Material} className="flex items-center space-x-2">
+                <label key={categoria.Id_Categoria} className="flex items-center space-x-2">
                   <input
                     type="checkbox"
-                    checked={selectedCategorias.includes(categoria.Id_Categoria_Material)}
+                    checked={selectedCategorias.includes(categoria.Id_Categoria)}
                     onChange={(e) => {
-                      handleCategoriaChange(categoria.Id_Categoria_Material, e.target.checked);
+                      handleCategoriaChange(categoria.Id_Categoria, e.target.checked);
                       if (formErrors.IDS_Categorias) {
                         setFormErrors(prev => ({ ...prev, IDS_Categorias: '' }));
                       }
                     }}
                     className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                   />
-                  <span className="text-sm text-gray-700">{categoria.Nombre_Categoria_Material}</span>
+                  <span className="text-sm text-gray-700">{categoria.Nombre_Categoria}</span>
                 </label>
               ))}
             </div>
@@ -324,7 +316,7 @@ const EditMaterialModal: React.FC<EditMaterialModalProps> = ({
         </form>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default EditMaterialModal;
+export default EditMaterialModal
