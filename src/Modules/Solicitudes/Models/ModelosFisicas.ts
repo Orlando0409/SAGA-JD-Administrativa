@@ -1,24 +1,25 @@
 export interface SolicitudFisicaBase {
+    Id_Solicitud?: number; // ID del backend
     Tipo_Solicitud: "Afiliacion" | "Desconexion" | "Cambio de Medidor" | "Asociado";
     Nombre: string;
     Apellido1: string;
     Apellido2?: string;
-    Cedula: string;
+    Tipo_Identificacion: 'Cedula Nacional' | 'DIMEX' | 'Pasaporte';
+    Identificacion: string;
     Numero_Telefono: string;
     Correo: string;
     Direccion_Exacta?: string;
-    Edad: number;
+    Edad?: number;
     Estado: {
         Id_Estado_Solicitud: number;
         Nombre_Estado: string;
     };
     Fecha_Creacion: string;
     Fecha_Actualizacion: string;
-    Planos_Terreno: File | string;
-    Escritura_Terreno: File | string;
-    // --- AGREGADO ---
-    Tipo_Identificacion: 'Cedula Nacional' | 'DIMEX' | 'Pasaporte';
-    Identificacion: string;
+    Planos_Terreno?: File | string;
+    Escritura_Terreno?: File | string;
+    // Mantener Cedula por compatibilidad pero priorizar Identificacion
+   
 }
 
 export interface SolicitudAfiliacionFisica extends SolicitudFisicaBase {
@@ -73,7 +74,7 @@ function getInitialSolicitudFisica(tipo: SolicitudFisicaBase['Tipo_Solicitud']) 
         case 'Desconexion':
             return {
                 Tipo_Solicitud: 'Desconexion',
-                Cedula: '',
+               
                 Nombre: '',
                 Apellido1: '',
                 Apellido2: '',
@@ -90,7 +91,7 @@ function getInitialSolicitudFisica(tipo: SolicitudFisicaBase['Tipo_Solicitud']) 
         case 'Cambio de Medidor':
             return {
                 Tipo_Solicitud: 'Cambio de Medidor',
-                Cedula: '',
+               
                 Nombre: '',
                 Apellido1: '',
                 Apellido2: '',
@@ -106,7 +107,7 @@ function getInitialSolicitudFisica(tipo: SolicitudFisicaBase['Tipo_Solicitud']) 
         case 'Asociado':
             return {
                 Tipo_Solicitud: 'Asociado',
-                Cedula: '',
+               
                 Nombre: '',
                 Apellido1: '',
                 Apellido2: '',
