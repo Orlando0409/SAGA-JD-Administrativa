@@ -57,3 +57,18 @@ export const deleteProveedorFisico = async (id: number): Promise<void> => {
   }
 };
 
+// Función para cambiar el estado de un proveedor físico
+export const changeProveedorFisicoStatus = async (id: number, nuevoEstado: number): Promise<ProveedorFisico> => {
+  try {
+    console.log(`🔄 Cambiando estado del proveedor físico ID: ${id} al estado: ${nuevoEstado}`);
+    const response = await apiAuth.patch(`/Proveedores/fisico/${id}/estado`, { 
+      Id_Estado_Proveedor: nuevoEstado 
+    });
+    console.log(`✅ Estado del proveedor físico ID: ${id} cambiado correctamente`);
+    return response.data;
+  } catch (error) {
+    console.error(`❌ Error al cambiar estado del proveedor físico ID: ${id}`, error);
+    throw error;
+  }
+};
+

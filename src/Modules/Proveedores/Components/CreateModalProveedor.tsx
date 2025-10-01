@@ -8,7 +8,6 @@ import {
   type CreateProveedorSchemaData,
   VALIDATION_LIMITS,
   TIPOS_IDENTIFICACION_OPTIONS,
-  ESTADOS_PROVEEDOR_OPTIONS,
   IDENTIFICACION_PLACEHOLDERS,
   IDENTIFICACION_LIMITS_BY_TYPE
 } from '../Schema/Proveedores';
@@ -184,7 +183,7 @@ const CreateModalProveedor = ({ onClose, setShowCreateModal }: CreateModalProvee
       Telefono_Proveedor: '',
       Tipo_Identificacion: '' as any,
       Identificacion: '',
-      Id_Estado_Proveedor: 0,
+      Id_Estado_Proveedor: 1, // Siempre activo por defecto
     },
 
     onSubmit: async ({ value }: { value: CreateProveedorSchemaData }) => {
@@ -210,7 +209,7 @@ const CreateModalProveedor = ({ onClose, setShowCreateModal }: CreateModalProvee
           Telefono_Proveedor: validation.data.Telefono_Proveedor,
           Tipo_Identificacion: validation.data.Tipo_Identificacion,
           Identificacion: validation.data.Identificacion,
-          Id_Estado_Proveedor: validation.data.Id_Estado_Proveedor,
+          Id_Estado_Proveedor: 1, // Siempre activo al crear
         };
 
         // Usar el hook para crear el proveedor
@@ -482,39 +481,6 @@ const CreateModalProveedor = ({ onClose, setShowCreateModal }: CreateModalProvee
                   ))}
                   {formErrors.Telefono_Proveedor && (
                     <p className="text-red-500 text-xs mt-1">{formErrors.Telefono_Proveedor}</p>
-                  )}
-                </div>
-              )}
-            </form.Field>
-
-            {/* Estado del Proveedor */}
-            <form.Field name="Id_Estado_Proveedor">
-              {(field) => (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Estado del Proveedor *
-                  </label>
-                  <select
-                    value={field.state.value}
-                    onChange={(e) => field.handleChange(Number(e.target.value))}
-                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-colors ${
-                      (formErrors.Id_Estado_Proveedor || field.state.meta.errors?.length) 
-                        ? 'border-red-300 focus:ring-red-500' 
-                        : 'border-gray-300 focus:ring-blue-500'
-                    }`}
-                  >
-                    <option value={0}>Seleccionar estado</option>
-                    {ESTADOS_PROVEEDOR_OPTIONS.map((estado) => (
-                      <option key={estado.id} value={estado.id}>
-                        {estado.nombre}
-                      </option>
-                    ))}
-                  </select>
-                  {field.state.meta.errors?.map((err) => (
-                    <p key={err} className="text-red-500 text-xs mt-1">{err}</p>
-                  ))}
-                  {formErrors.Id_Estado_Proveedor && (
-                    <p className="text-red-500 text-xs mt-1">{formErrors.Id_Estado_Proveedor}</p>
                   )}
                 </div>
               )}

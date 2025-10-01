@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { LuX, LuUserX, LuPhone, LuBuilding2, LuUserCheck, LuCalendar, LuIdCard , LuUserRound} from 'react-icons/lu';
 import { FaUserEdit } from "react-icons/fa";
-import { useProveedoresFisicos, useDeleteProveedorFisico } from '../Hook/proveedoresFisicos';
+import { useProveedoresFisicos, useDeleteProveedorFisico, useChangeProveedorFisicoStatus } from '../Hook/proveedoresFisicos';
 import { Accordion, AccordionHeader, AccordionBody } from "@material-tailwind/react";
 import { FiChevronDown, FiChevronRight } from 'react-icons/fi';
 import EditProveedorModal from './EditProveedoresModal';
@@ -30,14 +30,14 @@ interface ProveedorDetailModalProps {
 const ProveedorDetailModal: React.FC<ProveedorDetailModalProps> = ({ proveedor, isOpen, onClose }) => {
   const { refetch } = useProveedoresFisicos();
   const { deleteProveedorFisico, isDeleting } = useDeleteProveedorFisico();
+  const { changeStatus, isChangingStatus } = useChangeProveedorFisicoStatus();
   const [showEditModal, setShowEditModal] = useState(false);
   const [openSections, setOpenSections] = useState<number[]>([1, 2]); // Abrir por defecto
-  const [isActivating, setIsActivating] = useState(false);
   
   // Hook de alertas
   const { showSuccess, showError } = useAlerts();
 
-  const handleDeactivate = async () => {
+  const handleDelete = async () => {
     if (!proveedor?.Id_Proveedor) {
       showError('Error: No se puede eliminar, ID del proveedor no encontrado');
       return;
@@ -54,18 +54,30 @@ const ProveedorDetailModal: React.FC<ProveedorDetailModalProps> = ({ proveedor, 
     }
   };
 
-  const handleActivate = async () => {
-    setIsActivating(true);
+  const handleChangeStatus = async (newStatus: number) => {
+    if (!proveedor?.Id_Proveedor) {
+      showError('Error: No se puede cambiar el estado, ID del proveedor no encontrado');
+      return;
+    }
+
     try {
-      // TODO: Implementar servicio de activación
-      console.log('Activar proveedor:', proveedor?.Id_Proveedor);
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulación
+      await changeStatus({ id: proveedor.Id_Proveedor, nuevoEstado: newStatus });
+      const statusText = newStatus === 1 ? 'activado' : 'desactivado';
+      showSuccess(`¡Proveedor ${statusText} exitosamente!`);
       refetch(); // Actualizar datos
     } catch (error) {
-      console.error('Error activating proveedor:', error);
-    } finally {
-      setIsActivating(false);
+      console.error('Error al cambiar estado del proveedor:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Error desconocido al cambiar el estado del proveedor';
+      showError(`Error al cambiar el estado del proveedor: ${errorMessage}`);
     }
+  };
+
+  const handleActivate = async () => {
+    await handleChangeStatus(1); // 1 = Activo
+  };
+
+  const handleDeactivate = async () => {
+    await handleChangeStatus(2); // 2 = Inactivo
   };
 
   const handleAccordion = (id: number) => {
@@ -259,32 +271,33 @@ const ProveedorDetailModal: React.FC<ProveedorDetailModalProps> = ({ proveedor, 
               Editar Proveedor
             </Button>
 
+            {/* Botón de cambio de estado */}
             {isActiveProveedor(proveedor.Estado_Proveedor) ? (
               <AlertDialog>
                 <AlertDialogTrigger asChild>
                   <Button
-                    variant='destructive'
+                    variant='alert'
                     size={'xl'}
                   >
                     <LuUserX className="w-5 h-5" />
-                    <span className="ml-2">Eliminar Proveedor</span>
+                    <span className="ml-2">Desactivar Proveedor</span>
                   </Button>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
                   <AlertDialogHeader>
                     <AlertDialogTitle>
-                      <span>¿Eliminar proveedor?</span>
+                      <span>¿Desactivar proveedor?</span>
                     </AlertDialogTitle>
                     <AlertDialogDescription>
-                      <span>¿Estás seguro de que deseas eliminar este proveedor? Esta acción no se puede deshacer y eliminará permanentemente todos los datos del proveedor.</span>
+                      <span>¿Estás seguro de que deseas desactivar este proveedor? Podrás reactivarlo más tarde si es necesario.</span>
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
                     <AlertDialogAction
                       onClick={handleDeactivate}
-                      disabled={isDeleting}
+                      disabled={isChangingStatus}
                     >
-                      <span>{isDeleting ? 'Eliminando...' : 'Eliminar'}</span>
+                      <span>{isChangingStatus ? 'Desactivando...' : 'Desactivar'}</span>
                     </AlertDialogAction>
                     <AlertDialogCancel>
                       <span>Cancelar</span>
@@ -315,9 +328,9 @@ const ProveedorDetailModal: React.FC<ProveedorDetailModalProps> = ({ proveedor, 
                   <AlertDialogFooter>
                     <AlertDialogAction
                       onClick={handleActivate}
-                      disabled={isActivating}
+                      disabled={isChangingStatus}
                     >
-                      <span>{isActivating ? 'Activando...' : 'Activar'}</span>
+                      <span>{isChangingStatus ? 'Activando...' : 'Activar'}</span>
                     </AlertDialogAction>
                     <AlertDialogCancel>
                       <span>Cancelar</span>
@@ -326,6 +339,40 @@ const ProveedorDetailModal: React.FC<ProveedorDetailModalProps> = ({ proveedor, 
                 </AlertDialogContent>
               </AlertDialog>
             )}
+
+            {/* Botón de eliminar - siempre disponible */}
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button
+                  variant='destructive'
+                  size={'xl'}
+                >
+                  <LuUserX className="w-5 h-5" />
+                  <span className="ml-2">Eliminar Proveedor</span>
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>
+                    <span>¿Eliminar proveedor?</span>
+                  </AlertDialogTitle>
+                  <AlertDialogDescription>
+                    <span>¿Estás seguro de que deseas eliminar este proveedor? Esta acción no se puede deshacer y eliminará permanentemente todos los datos del proveedor.</span>
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogAction
+                    onClick={handleDelete}
+                    disabled={isDeleting}
+                  >
+                    <span>{isDeleting ? 'Eliminando...' : 'Eliminar'}</span>
+                  </AlertDialogAction>
+                  <AlertDialogCancel>
+                    <span>Cancelar</span>
+                  </AlertDialogCancel>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
         </div>
 
