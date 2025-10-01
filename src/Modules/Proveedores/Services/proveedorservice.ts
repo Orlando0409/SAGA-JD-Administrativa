@@ -61,7 +61,7 @@ export const deleteProveedorFisico = async (id: number): Promise<void> => {
 export const changeProveedorFisicoStatus = async (id: number, nuevoEstado: number): Promise<ProveedorFisico> => {
   try {
     console.log(`🔄 Cambiando estado del proveedor físico ID: ${id} al estado: ${nuevoEstado}`);
-    const response = await apiAuth.patch(`/Proveedores/fisico/${id}/estado`, { 
+    const response = await apiAuth.patch(`/Proveedores/Fisico/${id}/estado`, { 
       Id_Estado_Proveedor: nuevoEstado 
     });
     console.log(`✅ Estado del proveedor físico ID: ${id} cambiado correctamente`);
