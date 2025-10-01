@@ -52,6 +52,7 @@ export default function ProveedoresTable() {
                 return nombre || 'Sin nombre';
             }
         }),
+        
         columnHelper.accessor('Identificacion', {
             header: 'Identificación',
             cell: (info) => {
