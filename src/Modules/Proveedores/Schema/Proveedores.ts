@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { isValidPhoneNumber } from 'libphonenumber-js';
 
 // Expresiones regulares para validaciones
 const NOMBRE_REGEX = /^[a-zA-ZÀ-ÿ\u00f1\u00d1\s]+$/; // Solo letras, espacios y caracteres latinos (sin números)
@@ -14,8 +15,14 @@ function normalizeIdentificacion(value: string): string {
     return value.replace(/[\s\-]/g, '').toUpperCase();
 }
 
-// Validación de teléfono (específica para Costa Rica)
-const TELEFONO_REGEX = /^(\+?506[\s\-]?)?[0-9]{8}$|^(\+?506[\s\-]?)?[0-9]{4}[\s\-]?[0-9]{4}$/;
+// Validación de teléfono (formato internacional usando libphonenumber-js)
+const validatePhoneNumber = (value: string): boolean => {
+  try {
+    return isValidPhoneNumber(value);
+  } catch {
+    return false;
+  }
+};
 
 // Enum para tipos de identificación (valores que espera el backend)
 const TipoIdentificacionEnum = z.enum(['Cedula Nacional', 'DIMEX', 'Pasaporte'], {
@@ -44,8 +51,8 @@ export const CreateProveedorSchema = z.object({
   Telefono_Proveedor: z.string()
     .min(1, { message: 'El número de teléfono no puede estar vacío' })
     .transform((val) => val.trim())
-    .refine((val) => TELEFONO_REGEX.test(val), {
-      message: 'Formato de teléfono inválido. Ej: 8888-7777 o +506-8888-7777'
+    .refine((val) => validatePhoneNumber(val), {
+      message: 'Número de teléfono internacional inválido. Debe incluir código de país válido'
     }),
 
   Id_Estado_Proveedor: z.number()
@@ -70,8 +77,8 @@ export const EditProveedorSchema = z.object({
   Telefono_Proveedor: z.string()
     .min(1, { message: 'El número de teléfono no puede estar vacío' })
     .transform((val) => val.trim())
-    .refine((val) => TELEFONO_REGEX.test(val), {
-      message: 'Formato de teléfono inválido. Ej: 88887777, 8888-7777 o +506-8888-7777'
+    .refine((val) => validatePhoneNumber(val), {
+      message: 'Número de teléfono internacional inválido. Debe incluir código de país válido'
     })
 });
 

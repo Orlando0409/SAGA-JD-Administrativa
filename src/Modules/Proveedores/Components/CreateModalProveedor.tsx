@@ -1,6 +1,8 @@
 import { useForm } from '@tanstack/react-form';
 import { useState } from 'react';
 import { LuX, LuUserPlus } from 'react-icons/lu';
+import PhoneInput, { isValidPhoneNumber } from 'react-phone-number-input';
+import 'react-phone-number-input/style.css';
 import { 
   CreateProveedorSchemaWithIdentificacionValidation, 
   type CreateProveedorSchemaData,
@@ -98,9 +100,9 @@ const CreateModalProveedor = ({ onClose, setShowCreateModal }: CreateModalProvee
 
       case 'Telefono_Proveedor':
         if (value) {
-          const TELEFONO_REGEX = /^(\+?506[\s\-]?)?[0-9]{8}$|^(\+?506[\s\-]?)?[0-9]{4}[\s\-]?[0-9]{4}$/;
-          if (!TELEFONO_REGEX.test(value)) {
-            error = 'Formato de teléfono inválido. Ej: 88887777, 8888-7777 o +506-8888-7777';
+          // Validar usando libphonenumber-js para mayor precisión
+          if (!isValidPhoneNumber(value)) {
+            error = 'Número de teléfono inválido para el país seleccionado';
           }
         }
         break;
@@ -367,24 +369,70 @@ const CreateModalProveedor = ({ onClose, setShowCreateModal }: CreateModalProvee
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Teléfono *
                   </label>
-                  <input
-                    type="tel"
+                  <PhoneInput
+                    defaultCountry="CR"
+                    international
+                    countryCallingCodeEditable={false}
                     value={field.state.value}
-                    onChange={createInputHandler('Telefono_Proveedor', field.handleChange, VALIDATION_LIMITS.TELEFONO_MAX_LENGTH)}
-                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-colors ${
+                    onChange={(value) => {
+                      const phoneValue = value || '';
+                      field.handleChange(phoneValue);
+                      setFieldCharCounts(prev => ({ 
+                        ...prev, 
+                        Telefono_Proveedor: phoneValue.length 
+                      }));
+                      validateFieldRealTime('Telefono_Proveedor', phoneValue);
+                    }}
+                    className={`react-phone-number-input ${
                       (formErrors.Telefono_Proveedor || field.state.meta.errors?.length) 
-                        ? 'border-red-300 focus:ring-red-500' 
-                        : 'border-gray-300 focus:ring-blue-500'
+                        ? 'react-phone-number-input--error' 
+                        : ''
                     }`}
-                    placeholder="Ej: 88887777, 8888-7777 o +506-8888-7777"
-                    maxLength={VALIDATION_LIMITS.TELEFONO_MAX_LENGTH}
+                    style={{
+                      '--PhoneInput-color--focus': '#3b82f6',
+                      '--PhoneInputCountrySelect-marginRight': '0.5rem',
+                      '--PhoneInputCountryFlag-aspectRatio': '1.5',
+                      '--PhoneInputCountryFlag-height': '1rem',
+                      '--PhoneInputCountrySelectArrow-color': '#6b7280',
+                      '--PhoneInputCountrySelectArrow-color--focus': '#3b82f6',
+                    } as React.CSSProperties}
+                    inputProps={{
+                      autoComplete: 'tel',
+                      'aria-label': 'Número de teléfono internacional',
+                      className: `w-full px-3 py-2 border rounded-r-lg focus:ring-2 focus:border-transparent transition-colors ${
+                        (formErrors.Telefono_Proveedor || field.state.meta.errors?.length) 
+                          ? 'border-red-300 focus:ring-red-500' 
+                          : 'border-gray-300 focus:ring-blue-500'
+                      }`,
+                      placeholder: 'Número de teléfono'
+                    }}
+                    countrySelectProps={{
+                      'aria-label': 'Seleccionar país',
+                      className: `border rounded-l-lg px-2 py-2 bg-white hover:bg-gray-50 focus:ring-2 focus:border-transparent transition-colors ${
+                        (formErrors.Telefono_Proveedor || field.state.meta.errors?.length) 
+                          ? 'border-red-300 focus:ring-red-500' 
+                          : 'border-gray-300 focus:ring-blue-500'
+                      }`
+                    }}
                   />
                   
-                  {renderCharCounter(
-                    fieldCharCounts.Telefono_Proveedor, 
-                    VALIDATION_LIMITS.TELEFONO_MAX_LENGTH, 
-                    !!(formErrors.Telefono_Proveedor || field.state.meta.errors?.length)
-                  )}
+                  <div className="flex justify-between items-center mt-1">
+                    <span className="text-xs text-gray-500">
+                      Seleccione país y ingrese su número
+                    </span>
+                    <span className={`text-xs ${
+                      field.state.value && isValidPhoneNumber(field.state.value) 
+                        ? 'text-green-600' 
+                        : field.state.value 
+                          ? 'text-red-600' 
+                          : 'text-gray-500'
+                    }`}>
+                      {field.state.value 
+                        ? (isValidPhoneNumber(field.state.value) ? '✓ Válido' : '✗ Inválido')
+                        : 'Pendiente'
+                      }
+                    </span>
+                  </div>
                   
                   {field.state.meta.errors?.map((err) => (
                     <p key={err} className="text-red-500 text-xs mt-1">{err}</p>
