@@ -19,6 +19,7 @@ import {
 import { Button } from '@/Modules/Global/components/Sidebar/ui/button';
 import { CUSTOM_ANIMATION } from '@/Modules/Global/types/Sections';
 import type { ProveedorFisico } from '../Models/TablaProveedo/proveedorFisico';
+import { useAlerts } from '@/Modules/Global/context/AlertContext';
 
 interface ProveedorDetailModalProps {
   proveedor: ProveedorFisico | null;
@@ -32,21 +33,24 @@ const ProveedorDetailModal: React.FC<ProveedorDetailModalProps> = ({ proveedor, 
   const [showEditModal, setShowEditModal] = useState(false);
   const [openSections, setOpenSections] = useState<number[]>([1, 2]); // Abrir por defecto
   const [isActivating, setIsActivating] = useState(false);
+  
+  // Hook de alertas
+  const { showSuccess, showError } = useAlerts();
 
   const handleDeactivate = async () => {
     if (!proveedor?.Id_Proveedor) {
-      console.error('No se puede eliminar: ID del proveedor no encontrado');
+      showError('Error: No se puede eliminar, ID del proveedor no encontrado');
       return;
     }
 
     try {
       await deleteProveedorFisico(proveedor.Id_Proveedor);
-      alert('Proveedor eliminado exitosamente');
+      showSuccess('¡Proveedor eliminado exitosamente!');
       onClose(); // Cerrar el modal después de eliminar
     } catch (error) {
       console.error('Error al eliminar proveedor:', error);
       const errorMessage = error instanceof Error ? error.message : 'Error desconocido al eliminar el proveedor';
-      alert(`Error al eliminar el proveedor: ${errorMessage}`);
+      showError(`Error al eliminar el proveedor: ${errorMessage}`);
     }
   };
 

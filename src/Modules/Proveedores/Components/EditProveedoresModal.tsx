@@ -7,6 +7,7 @@ import {
 } from '../Schema/Proveedores';
 import type { ProveedorFisico, UpdateProveedorData } from '../Models/TablaProveedo/proveedorFisico';
 import { useUpdateProveedorFisico } from '../Hook/proveedoresFisicos';
+import { useAlerts } from '@/Modules/Global/context/AlertContext';
 
 interface EditProveedorModalProps {
   isOpen: boolean;
@@ -15,6 +16,9 @@ interface EditProveedorModalProps {
 }
 
 const EditProveedorModal: React.FC<EditProveedorModalProps> = ({ isOpen, onClose, proveedor }) => {
+  // Hook de alertas
+  const { showSuccess, showError, showWarning } = useAlerts();
+  
   // Hook para actualizar proveedor físico
   const { 
     updateProveedorFisico, 
@@ -77,6 +81,47 @@ const EditProveedorModal: React.FC<EditProveedorModalProps> = ({ isOpen, onClose
     };
   };
 
+  // Función para manejar errores de API específicos
+  const handleApiError = (error: any) => {
+    console.error('❌ Error al actualizar proveedor:', error);
+    
+    // Manejar errores HTTP 409 (conflictos de duplicación) - ALERTAS AMARILLAS
+    if (error?.response?.status === 409) {
+      const errorMessage = error.response?.data?.message || error.message || '';
+      
+      if (errorMessage.toLowerCase().includes('nombre') || errorMessage.toLowerCase().includes('name')) {
+        showWarning('⚠️ Ya existe un proveedor con este nombre. Por favor, utiliza un nombre diferente.');
+        return;
+      }
+      
+      if (errorMessage.toLowerCase().includes('identificacion') || errorMessage.toLowerCase().includes('identification')) {
+        showWarning('⚠️ Ya existe un proveedor con esta identificación. Por favor, verifica el número de identificación.');
+        return;
+      }
+      
+      // Error 409 genérico - también amarillo
+      showWarning('⚠️ Ya existe un proveedor con esa identificación. Por favor, verifica la información ingresada.');
+      return;
+    }
+    
+    // Otros errores de validación del servidor
+    if (error?.response?.status === 400) {
+      const errorMessage = error.response?.data?.message || 'Datos inválidos';
+      showError(`Error de validación: ${errorMessage}`);
+      return;
+    }
+    
+    // Errores de red o servidor
+    if (error?.response?.status >= 500) {
+      showError('Error del servidor. Por favor, intenta nuevamente más tarde.');
+      return;
+    }
+    
+    // Error genérico
+    const errorMessage = error?.message || 'Error desconocido al actualizar el proveedor';
+    showError(`Error al actualizar el proveedor: ${errorMessage}`);
+  };
+
   const form = useForm({
     defaultValues: {
       Nombre_Proveedor: proveedor.Nombre_Proveedor,
@@ -111,12 +156,10 @@ const EditProveedorModal: React.FC<EditProveedorModalProps> = ({ isOpen, onClose
           data: payload 
         });
         
-        alert('Proveedor actualizado exitosamente');
+        showSuccess('¡Proveedor actualizado exitosamente!');
         onClose();
       } catch (error) {
-        console.error('❌ Error al actualizar proveedor:', error);
-        const errorMessage = error instanceof Error ? error.message : 'Error desconocido al actualizar el proveedor';
-        alert(`Error al actualizar el proveedor: ${errorMessage}`);
+        handleApiError(error);
       }
     },
   });

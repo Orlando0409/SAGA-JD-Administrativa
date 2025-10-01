@@ -14,6 +14,7 @@ import {
 } from '../Schema/Proveedores';
 import { useCreateProveedorFisico } from '../Hook/proveedoresFisicos';
 import type { CreateProveedorData } from '../Models/TablaProveedo/proveedorFisico';
+import { useAlerts } from '@/Modules/Global/context/AlertContext';
 
 interface CreateModalProveedorProps {
   onClose: () => void;
@@ -27,6 +28,9 @@ const CreateModalProveedor = ({ onClose, setShowCreateModal }: CreateModalProvee
     Telefono_Proveedor: 0,
     Identificacion: 0
   });
+
+  // Hook de alertas
+  const { showSuccess, showError, showWarning } = useAlerts();
 
   // Hook para crear proveedor físico
   const { 
@@ -133,6 +137,47 @@ const CreateModalProveedor = ({ onClose, setShowCreateModal }: CreateModalProvee
     };
   };
 
+  // Función para manejar errores de API específicos
+  const handleApiError = (error: any) => {
+    console.error('Error creating proveedor:', error);
+    
+    // Manejar errores HTTP 409 (conflictos de duplicación) - ALERTAS AMARILLAS
+    if (error?.response?.status === 409) {
+      const errorMessage = error.response?.data?.message || error.message || '';
+      
+      if (errorMessage.toLowerCase().includes('nombre') || errorMessage.toLowerCase().includes('name')) {
+        showWarning('⚠️ Ya existe un proveedor con este nombre. Por favor, utiliza un nombre diferente.');
+        return;
+      }
+      
+      if (errorMessage.toLowerCase().includes('identificacion') || errorMessage.toLowerCase().includes('identification')) {
+        showWarning('⚠️ Ya existe un proveedor con esta identificación. Por favor, verifica el número de identificación.');
+        return;
+      }
+      
+      // Error 409 genérico - también amarillo
+      showWarning('⚠️ Ya existe un proveedor con esa identificación. Por favor, verifica la información ingresada.');
+      return;
+    }
+    
+    // Otros errores de validación del servidor
+    if (error?.response?.status === 400) {
+      const errorMessage = error.response?.data?.message || 'Datos inválidos';
+      showError(`Error de validación: ${errorMessage}`);
+      return;
+    }
+    
+    // Errores de red o servidor
+    if (error?.response?.status >= 500) {
+      showError('Error del servidor. Por favor, intenta nuevamente más tarde.');
+      return;
+    }
+    
+    // Error genérico
+    const errorMessage = error?.message || 'Error desconocido al crear el proveedor';
+    showError(`Error al crear el proveedor: ${errorMessage}`);
+  };
+
   const form = useForm({
     defaultValues: {
       Nombre_Proveedor: '',
@@ -171,13 +216,11 @@ const CreateModalProveedor = ({ onClose, setShowCreateModal }: CreateModalProvee
         // Usar el hook para crear el proveedor
         await createProveedorFisico(payload);
         
-        alert('Proveedor creado exitosamente');
+        showSuccess('¡Proveedor creado exitosamente!');
         handleClose();
         form.reset();
       } catch (error) {
-        console.error('Error creating proveedor:', error);
-        const errorMessage = error instanceof Error ? error.message : 'Error desconocido al crear el proveedor';
-        alert(`Error al crear el proveedor: ${errorMessage}`);
+        handleApiError(error);
       }
     },
   });
