@@ -2,49 +2,164 @@ import { useMemo, useState } from 'react';
 import { createColumnHelper, getCoreRowModel, getPaginationRowModel, useReactTable, flexRender, type ColumnDef } from '@tanstack/react-table';
 import { Building2 } from 'lucide-react';
 import { useProveedoresFisicos } from '../Hook/proveedoresFisicos';
+import { useProveedoresJuridicos } from '../Hook/hookjuridicoproveedor';
 import ProveedorDetailModal from './proveedorDetailModal';
+import ProveedorJuridicoDetailModal from './ProveedorJuridicoDetailModal';
 import CreateModalProveedor from './CreateModalProveedor';
 import type { ProveedorFisico } from '../Models/TablaProveedo/proveedorFisico';
+import type { ProveedorJuridico } from '../Models/TablaProveedo/proveedorjuridico';
+
+// Tipo unificado para la tabla (similar al patrón de AbonadosTable)
+type ProveedorUnificado = {
+    Id_Proveedor: number;
+    Nombre_Proveedor: string;
+    Telefono_Proveedor: string;
+    Identificacion_Unificada: string; // Campo unificado para ambos tipos
+    Tipo_Identificacion_Unificado: string; // Campo unificado para ambos tipos
+    Estado_Proveedor: {
+        Id_Estado_Proveedor: number;
+        Estado_Proveedor: string;
+    };
+    Tipo_Proveedor: 'Físico' | 'Jurídico';
+    Razon_Social?: string; // Solo para jurídicos
+    Fecha_Creacion: string;
+    Fecha_Actualizacion: string;
+    datos_originales: ProveedorFisico | ProveedorJuridico;
+};
 
 export default function ProveedoresTable() {
-    // Hook para obtener proveedores físicos
-    const { proveedoresFisicos, isLoading, isError, error } = useProveedoresFisicos();
+    // Hooks para obtener ambos tipos de proveedores
+    const { proveedoresFisicos, isLoading: isLoadingFisicos, isError: isErrorFisicos, error: errorFisicos } = useProveedoresFisicos();
+    const { proveedoresJuridicos, isLoading: isLoadingJuridicos, isError: isErrorJuridicos, error: errorJuridicos } = useProveedoresJuridicos();
 
     const [globalFilter, setGlobalFilter] = useState('');
 
-    // Estados para el modal de detalle
+    // Estados para los modales de detalle
     const [showDetailModal, setShowDetailModal] = useState(false);
-    const [selectedProveedor, setSelectedProveedor] = useState<ProveedorFisico | null>(null);
+    const [showJuridicoDetailModal, setShowJuridicoDetailModal] = useState(false);
+    const [selectedProveedorFisico, setSelectedProveedorFisico] = useState<ProveedorFisico | null>(null);
+    const [selectedProveedorJuridico, setSelectedProveedorJuridico] = useState<ProveedorJuridico | null>(null);
 
     // Estados para el modal de creación
     const [showCreateModal, setShowCreateModal] = useState(false);
 
-    // Función para abrir el modal de detalle
-    const handleViewDetail = (proveedor: ProveedorFisico) => {
-        setSelectedProveedor(proveedor);
-        setShowDetailModal(true);
+    // Combinar ambos tipos de proveedores en una lista unificada (similar a AbonadosTable)
+    const proveedoresUnificados = useMemo((): ProveedorUnificado[] => {
+        const fisicosMapeados: ProveedorUnificado[] = proveedoresFisicos.map((proveedor: ProveedorFisico) => ({
+            Id_Proveedor: proveedor.Id_Proveedor,
+            Nombre_Proveedor: proveedor.Nombre_Proveedor,
+            Telefono_Proveedor: proveedor.Telefono_Proveedor,
+            Identificacion_Unificada: proveedor.Identificacion || 'Sin identificación',
+            Tipo_Identificacion_Unificado: proveedor.Tipo_Identificacion || 'Sin tipo',
+            Estado_Proveedor: proveedor.Estado_Proveedor,
+            Tipo_Proveedor: 'Físico' as const,
+            Fecha_Creacion: proveedor.Fecha_Creacion,
+            Fecha_Actualizacion: proveedor.Fecha_Actualizacion,
+            datos_originales: proveedor
+        }));
+
+        const juridicosMapeados: ProveedorUnificado[] = proveedoresJuridicos.map((proveedor: ProveedorJuridico) => {
+            // Debug log para ver los datos
+            console.log('🔍 Proveedor Jurídico Original:', {
+                Id_Proveedor: proveedor.Id_Proveedor,
+                Nombre_Proveedor: proveedor.Nombre_Proveedor,
+                Cedula_Juridica: proveedor.Cedula_Juridica, // Campo corregido
+                Tipo_identificacion: proveedor.Tipo_identificacion,
+                Razon_Social: proveedor.Razon_Social
+            });
+
+            return {
+                Id_Proveedor: proveedor.Id_Proveedor,
+                Nombre_Proveedor: proveedor.Nombre_Proveedor,
+                Telefono_Proveedor: proveedor.Telefono_Proveedor,
+                Identificacion_Unificada: proveedor.Cedula_Juridica || 'Sin cédula jurídica', // Campo corregido
+                Tipo_Identificacion_Unificado: proveedor.Tipo_identificacion || 'Sin tipo',
+                Estado_Proveedor: proveedor.Estado_Proveedor,
+                Tipo_Proveedor: 'Jurídico' as const,
+                Razon_Social: proveedor.Razon_Social,
+                Fecha_Creacion: proveedor.Fecha_Creacion,
+                Fecha_Actualizacion: proveedor.Fecha_Actualizacion,
+                datos_originales: proveedor
+            };
+        });
+
+        return [...fisicosMapeados, ...juridicosMapeados]
+            .sort((a, b) => a.Id_Proveedor - b.Id_Proveedor);
+    }, [proveedoresFisicos, proveedoresJuridicos]);
+
+    // Debug log para ver el resultado final
+    console.log('📊 Datos Unificados Final:', {
+        totalProveedores: proveedoresUnificados.length,
+        fisicos: proveedoresUnificados.filter(p => p.Tipo_Proveedor === 'Físico').length,
+        juridicos: proveedoresUnificados.filter(p => p.Tipo_Proveedor === 'Jurídico').length,
+        primerosJuridicos: proveedoresUnificados
+            .filter(p => p.Tipo_Proveedor === 'Jurídico')
+            .slice(0, 2)
+            .map(p => ({
+                nombre: p.Nombre_Proveedor,
+                identificacion: p.Identificacion_Unificada,
+                razonSocial: p.Razon_Social
+            }))
+    });
+
+    // Estados de carga y error combinados
+    const isLoading = isLoadingFisicos || isLoadingJuridicos;
+    const isError = isErrorFisicos || isErrorJuridicos;
+    const error = errorFisicos || errorJuridicos;
+
+    // Función para abrir el modal de detalle correspondiente
+    const handleViewDetail = (proveedor: ProveedorUnificado) => {
+        if (proveedor.Tipo_Proveedor === 'Físico') {
+            // Para proveedores físicos
+            setSelectedProveedorFisico(proveedor.datos_originales as ProveedorFisico);
+            setShowDetailModal(true);
+        } else {
+            // Para proveedores jurídicos
+            setSelectedProveedorJuridico(proveedor.datos_originales as ProveedorJuridico);
+            setShowJuridicoDetailModal(true);
+        }
     };
 
     const filteredData = useMemo(() => {
-        if (!globalFilter) return proveedoresFisicos;
+        if (!globalFilter) return proveedoresUnificados;
         const q = globalFilter.toLowerCase();
-        return proveedoresFisicos.filter((proveedor) =>
-            [
+        return proveedoresUnificados.filter((proveedor) => {
+            const searchFields = [
                 proveedor.Nombre_Proveedor,
-                proveedor.Identificacion,
-                proveedor.Tipo_Identificacion,
                 proveedor.Telefono_Proveedor,
-                proveedor.Estado_Proveedor?.Estado_Proveedor
-            ]
+                proveedor.Estado_Proveedor?.Estado_Proveedor,
+                proveedor.Tipo_Proveedor,
+                proveedor.Identificacion_Unificada,
+                proveedor.Tipo_Identificacion_Unificado,
+                proveedor.Razon_Social
+            ];
+
+            return searchFields
                 .filter(Boolean)
                 .join(' ')
                 .toLowerCase()
-                .includes(q)
-        );
-    }, [proveedoresFisicos, globalFilter]);
+                .includes(q);
+        });
+    }, [proveedoresUnificados, globalFilter]);
 
-    const columnHelper = createColumnHelper<ProveedorFisico>();
-    const columns: ColumnDef<ProveedorFisico, any>[] = [
+    const columnHelper = createColumnHelper<ProveedorUnificado>();
+    const columns: ColumnDef<ProveedorUnificado, any>[] = [
+        columnHelper.accessor('Tipo_Proveedor', {
+            header: 'Tipo',
+            cell: (info) => {
+                const tipo = info.getValue();
+                return (
+                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                        tipo === 'Físico' 
+                            ? 'bg-blue-100 text-blue-700' 
+                            : 'bg-purple-100 text-purple-700'
+                    }`}>
+                        {tipo}
+                    </span>
+                );
+            },
+            size: 100
+        }),
         columnHelper.accessor('Nombre_Proveedor', {
             header: 'Nombre del Proveedor',
             cell: (info) => {
@@ -53,20 +168,48 @@ export default function ProveedoresTable() {
             }
         }),
         
-        columnHelper.accessor('Identificacion', {
+        columnHelper.accessor('Identificacion_Unificada', {
             header: 'Identificación',
             cell: (info) => {
-                const identificacion = info.getValue();
-                const tipoIdentificacion = info.row.original.Tipo_Identificacion;
+                const proveedor = info.row.original;
+                
+                // Debug log para ver qué está llegando a la celda
+                if (proveedor.Tipo_Proveedor === 'Jurídico') {
+                    console.log('🏢 Celda Jurídico:', {
+                        nombre: proveedor.Nombre_Proveedor,
+                        identificacion: proveedor.Identificacion_Unificada,
+                        datosOriginales: proveedor.datos_originales
+                    });
+                }
+                
                 return (
                     <div className="flex flex-col">
-                        <span className="font-medium">{identificacion || 'Sin identificación'}</span>
-                        <span className="text-xs text-slate-500">{tipoIdentificacion || 'Sin tipo'}</span>
+                        <span className="font-medium">{proveedor.Identificacion_Unificada}</span>
+                        <span className="text-xs text-slate-500">
+                            {proveedor.Tipo_Proveedor === 'Jurídico' 
+                                ? 'Cédula Jurídica' 
+                                : proveedor.Tipo_Identificacion_Unificado
+                            }
+                        </span>
                     </div>
                 );
             },
             size: 160
         }),
+        
+        columnHelper.accessor('Razon_Social', {
+            header: 'Razón Social / Detalle',
+            cell: (info) => {
+                const proveedor = info.row.original;
+                if (proveedor.Tipo_Proveedor === 'Jurídico') {
+                    return proveedor.Razon_Social || 'Sin razón social';
+                } else {
+                    return <span className="text-slate-400 italic">N/A (Persona Física)</span>;
+                }
+            },
+            size: 180
+        }),
+        
         columnHelper.accessor('Telefono_Proveedor', {
             header: 'Teléfono',
             cell: (info) => {
@@ -116,7 +259,7 @@ export default function ProveedoresTable() {
                     <input 
                         value={globalFilter} 
                         onChange={(e) => setGlobalFilter(e.target.value)} 
-                        placeholder="Buscar por nombre, identificación, teléfono..." 
+                        placeholder="Buscar por nombre, identificación, teléfono, razón social..." 
                         className="w-full sm:w-auto px-3 py-2 rounded-lg border border-sky-200 bg-sky-50 focus:outline-none focus:ring-2 focus:ring-sky-200 text-sm" 
                     />
                     <button 
@@ -201,13 +344,23 @@ export default function ProveedoresTable() {
                 </div>
             </div>
 
-            {/* Modal de detalle de proveedores */}
+            {/* Modal de detalle de proveedores físicos */}
             <ProveedorDetailModal
-                proveedor={selectedProveedor}
+                proveedor={selectedProveedorFisico}
                 isOpen={showDetailModal}
                 onClose={() => {
                     setShowDetailModal(false);
-                    setSelectedProveedor(null);
+                    setSelectedProveedorFisico(null);
+                }}
+            />
+
+            {/* Modal de detalle de proveedores jurídicos */}
+            <ProveedorJuridicoDetailModal
+                proveedor={selectedProveedorJuridico}
+                isOpen={showJuridicoDetailModal}
+                onClose={() => {
+                    setShowJuridicoDetailModal(false);
+                    setSelectedProveedorJuridico(null);
                 }}
             />
 

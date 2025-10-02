@@ -379,7 +379,7 @@ const CreateModalProveedor = ({ onClose, setShowCreateModal }: CreateModalProvee
                           <div className="mt-1">
                             <span className="text-xs text-blue-600">
                               {tipoSeleccionado === 'Cedula Nacional' && `Formato: exactamente ${IDENTIFICACION_LIMITS_BY_TYPE['Cedula Nacional']} dígitos, no puede empezar con 0`}
-                              {tipoSeleccionado === 'DIMEX' && `Formato: exactamente ${IDENTIFICACION_LIMITS_BY_TYPE['DIMEX']} dígitos, no puede empezar con 0`}
+                              {tipoSeleccionado === 'Dimex' && `Formato: exactamente ${IDENTIFICACION_LIMITS_BY_TYPE['Dimex']} dígitos, no puede empezar con 0`}
                               {tipoSeleccionado === 'Pasaporte' && `Formato: 6-${IDENTIFICACION_LIMITS_BY_TYPE['Pasaporte']} caracteres (obligatorio), al menos 1 letra, máximo 3 letras`}
                             </span>
                           </div>

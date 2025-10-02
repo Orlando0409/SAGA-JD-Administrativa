@@ -15,7 +15,7 @@ export const getProveedoresFisicos = async (): Promise<ProveedorFisico[]> => {
 // Función para crear un proveedor físico
 export const createProveedorFisico = async (proveedor: CreateProveedorData): Promise<ProveedorFisico> => {
   try {
-    const response = await apiAuth.post('/Proveedores/fisico', proveedor);
+    const response = await apiAuth.post('/Proveedores/fisico/create', proveedor);
     return response.data;
   } catch (error) {
     console.error('Error al crear proveedor físico:', error);
