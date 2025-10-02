@@ -33,7 +33,7 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                 Nombre: '',
                 Apellido1: '',
                 Apellido2: '',
-                Tipo_Identificacion: 'Cedula Nacional' as 'Cedula Nacional' | 'DIMEX' | 'Pasaporte',
+                Tipo_Identificacion: 'Cedula Nacional' as 'Cedula Nacional' | 'Dimex' | 'Pasaporte',
                 Identificacion: '',
                 Numero_Telefono: '',
                 Correo: '',
@@ -181,12 +181,12 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                         </label>
                         <select
                             value={field.state.value}
-                            onChange={(e) => field.handleChange(e.target.value as 'Cedula Nacional' | 'DIMEX' | 'Pasaporte')}
+                            onChange={(e) => field.handleChange(e.target.value as 'Cedula Nacional' | 'Dimex' | 'Pasaporte')}
                             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             required
                         >
                             <option value="Cedula Nacional">Cédula Nacional</option>
-                            <option value="DIMEX">DIMEX</option>
+                            <option value="Dimex">DIMEX</option>
                             <option value="Pasaporte">Pasaporte</option>
                         </select>
                     </div>
@@ -209,7 +209,7 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                         />
                         <p className="text-xs text-gray-500 mt-1">
                             {field.form.getFieldValue('Tipo_Identificacion') === 'Cedula Nacional' && 'Formato: 9-10 dígitos (ej: 123456789)'}
-                            {field.form.getFieldValue('Tipo_Identificacion') === 'DIMEX' && 'Formato: 11-12 dígitos (ej: 123456789012)'}
+                            {field.form.getFieldValue('Tipo_Identificacion') === 'Dimex' && 'Formato: 11-12 dígitos (ej: 123456789012)'}
                             {field.form.getFieldValue('Tipo_Identificacion') === 'Pasaporte' && 'Formato: 6-20 caracteres alfanuméricos (ej: AB123456)'}
                         </p>
                     </div>
