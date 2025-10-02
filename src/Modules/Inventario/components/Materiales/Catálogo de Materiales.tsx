@@ -94,9 +94,18 @@ const CatalogoMateriales: React.FC<CatalogoMaterialesProps> = ({ onBack }) => {
     materialesDebajoStock, isLoadingBelow
   ]);
 
-  const filterByCategoria = (material: Material, categoria?: string) => {
-    if (!categoria) return true;
-    return material.Categorias?.some(cat => cat.Categoria.Nombre_Categoria === categoria);
+  const filterByCategoria = (material: Material, categoria?: string | (string | number)[]) => {
+    if (!categoria || (Array.isArray(categoria) && categoria.length === 0)) return true;
+    if (Array.isArray(categoria)) {
+      return material.Categorias?.some(cat =>
+        categoria.includes(cat.Categoria.Nombre_Categoria) ||
+        categoria.includes(cat.Categoria.Id_Categoria)
+      );
+    }
+    return material.Categorias?.some(cat => 
+      cat.Categoria.Nombre_Categoria === categoria ||
+      String(cat.Categoria.Id_Categoria) === String(categoria)
+    );
   };
 
   const filterByEstado = (material: Material, estado?: string) => {
