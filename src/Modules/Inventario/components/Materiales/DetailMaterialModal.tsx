@@ -14,6 +14,13 @@ const DetailMaterialModal: React.FC<DetailMaterialModalProps> = ({
   onClose,
 }) => {
 
+    const estado = material.Estado_Material?.Nombre_Estado_Material || 'N/A';
+    let colorClass = '';
+    if (estado === 'Disponible') {
+      colorClass = 'bg-green-100 text-green-800';
+    } else if (estado === 'Agotado') {
+      colorClass = 'bg-red-100 text-red-800';
+    } 
 
   if (!isOpen) return null;
 
@@ -72,7 +79,7 @@ const DetailMaterialModal: React.FC<DetailMaterialModalProps> = ({
                 Estado
               </label>
               <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded border">
-                {material.Estado_Material?.Nombre_Estado_Material || 'N/A'}
+                <span className={` px-2 py-1 rounded-full text-sm font-mediu ${colorClass}`}>{estado}</span>
               </p>
             </div>
 

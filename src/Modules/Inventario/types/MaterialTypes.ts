@@ -25,7 +25,7 @@ export interface FilterMaterialModalProps {
 }
 
 export interface MaterialFilterOptions {
-  categoria?: string;
+  categoria?: number[];
   estado?: string;
   conStock?: boolean;
   precioMin?: number;
