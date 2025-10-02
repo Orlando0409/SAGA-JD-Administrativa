@@ -118,8 +118,8 @@ const ProveedorJuridicoDetailModal: React.FC<ProveedorJuridicoDetailModalProps> 
   if (!isOpen || !proveedor) return null;
 
   return (
-    <div className="fixed inset-0 bg-white bg-opacity-95 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-2xl border border-gray-200 w-full max-w-4xl max-h-[90vh] overflow-y-auto scrollbar-thin scrollbar-thumb-purple-600 scrollbar-track-purple-100">
+    <div className="fixed inset-0 bg-black/10 backdrop-blur-md flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-lg shadow-2xl border border-gray-200 w-full max-w-4xl max-h-[90vh] overflow-y-auto scrollbar-thin scrollbar-thumb-teal-600 scrollbar-track-teal-100">
         {/* Header */}
         <div className="sticky top-0 bg-white border-b border-gray-200 p-6 z-10">
           <div className="flex items-center justify-between">
@@ -133,15 +133,15 @@ const ProveedorJuridicoDetailModal: React.FC<ProveedorJuridicoDetailModalProps> 
         {/* Content */}
         <div className="p-6">
           {/* Proveedor Header Card */}
-          <div className="bg-gradient-to-r from-purple-600 to-purple-700 p-6 rounded-lg mb-6">
+          <div className="bg-gradient-to-r from-teal-600 to-teal-700 p-6 rounded-lg mb-6">
             <div className="flex items-center gap-4">
               <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center">
-                <LuBuilding className="w-8 h-8 text-purple-600" />
+                <LuBuilding className="w-8 h-8 text-teal-600" />
               </div>
               <div>
                 <h2 className="text-2xl font-bold text-white">{proveedor.Nombre_Proveedor}</h2>
-                <p className="text-purple-100">{proveedor.Tipo_identificacion}: {proveedor.Cedula_Juridica}</p>
-                <p className="text-purple-200 text-sm">{proveedor.Razon_Social}</p>
+                <p className="text-teal-100">{proveedor.Tipo_identificacion}: {proveedor.Cedula_Juridica}</p>
+                <p className="text-teal-200 text-sm">{proveedor.Razon_Social}</p>
               </div>
             </div>
           </div>
@@ -162,7 +162,7 @@ const ProveedorJuridicoDetailModal: React.FC<ProveedorJuridicoDetailModalProps> 
               >
                 <div className="flex items-center justify-between w-full">
                   <div className="flex items-center gap-3">
-                    <LuBuilding className="w-5 h-5 text-purple-600" />
+                    <LuBuilding className="w-5 h-5 text-teal-600" />
                     <span className="text-gray-900">Información Básica</span>
                   </div>
                   <span className="text-gray-500">
@@ -234,7 +234,7 @@ const ProveedorJuridicoDetailModal: React.FC<ProveedorJuridicoDetailModalProps> 
               >
                 <div className="flex items-center justify-between w-full">
                   <div className="flex items-center gap-3">
-                    <LuCalendar className="w-5 h-5 text-purple-600" />
+                    <LuCalendar className="w-5 h-5 text-teal-600" />
                     <span className="text-gray-900">Información de Fechas</span>
                   </div>
                   <span className="text-gray-500">
@@ -271,7 +271,7 @@ const ProveedorJuridicoDetailModal: React.FC<ProveedorJuridicoDetailModalProps> 
           <div className="flex justify-end gap-4 mt-8">
             <Button
               size="xl"
-              className="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition flex items-center gap-2"
+              className="px-6 py-3 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition flex items-center gap-2"
               onClick={() => setShowEditModal(true)}
             >
               <FaUserEdit className="w-5 h-5" />
@@ -283,17 +283,18 @@ const ProveedorJuridicoDetailModal: React.FC<ProveedorJuridicoDetailModalProps> 
               <AlertDialog>
                 <AlertDialogTrigger asChild>
                   <Button
-                    variant='alert'
+                    variant='default'
                     size={'xl'}
+                    className="bg-teal-500 hover:bg-teal-600 text-white"
                   >
                     <LuUserX className="w-5 h-5" />
-                    <span className="ml-2">Desactivar Proveedor</span>
+                    <span className="ml-2">Cambiar Estado</span>
                   </Button>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
                   <AlertDialogHeader>
                     <AlertDialogTitle>
-                      <span>¿Desactivar proveedor jurídico?</span>
+                      <span>¿Cambiar estado del proveedor?</span>
                     </AlertDialogTitle>
                     <AlertDialogDescription>
                       <span>¿Estás seguro de que deseas desactivar este proveedor jurídico? Podrás reactivarlo más tarde si es necesario.</span>
@@ -316,17 +317,18 @@ const ProveedorJuridicoDetailModal: React.FC<ProveedorJuridicoDetailModalProps> 
               <AlertDialog>
                 <AlertDialogTrigger asChild>
                   <Button
-                    variant='create'
+                    variant='default'
                     size={'xl'}
+                    className="bg-teal-500 hover:bg-teal-600 text-white"
                   >
                     <LuUserCheck className="w-5 h-5" />
-                    <span className="ml-2">Activar Proveedor</span>
+                    <span className="ml-2">Cambiar Estado</span>
                   </Button>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
                   <AlertDialogHeader>
                     <AlertDialogTitle>
-                      <span>¿Activar proveedor jurídico?</span>
+                      <span>¿Cambiar estado del proveedor?</span>
                     </AlertDialogTitle>
                     <AlertDialogDescription>
                       <span>¿Estás seguro de que deseas activar este proveedor jurídico?</span>

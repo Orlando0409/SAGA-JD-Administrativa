@@ -193,7 +193,7 @@ const EditProveedorModal: React.FC<EditProveedorModalProps> = ({ isOpen, onClose
   if (!isOpen) return null;
 
   return (
-    <div className="absolute inset-0 bg-black/40 flex items-center justify-center z-50">
+    <div className="absolute inset-0 bg-black/10 backdrop-blur-md flex items-center justify-center z-50">
       <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4 max-h-[90vh] overflow-hidden">
         <div className="flex items-center justify-between p-6 border-b">
           <h2 className="text-xl font-semibold text-gray-900">Editar Proveedor</h2>

@@ -249,7 +249,7 @@ const CreateModalProveedor = ({ onClose, setShowCreateModal }: CreateModalProvee
   };
 
   return (
-    <div className="fixed inset-0 bg-white bg-opacity-95 flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-black/10 backdrop-blur-md flex items-center justify-center z-50">
       <div className="bg-white rounded-lg shadow-2xl border border-gray-200 w-full max-w-md mx-4 max-h-[90vh] overflow-hidden">
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <div className="flex items-center gap-3">

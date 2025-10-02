@@ -118,7 +118,7 @@ const ProveedorDetailModal: React.FC<ProveedorDetailModalProps> = ({ proveedor, 
   if (!isOpen || !proveedor) return null;
 
   return (
-    <div className="fixed inset-0 bg-white bg-opacity-95 flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 bg-black/10 backdrop-blur-md flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg shadow-2xl border border-gray-200 w-full max-w-4xl max-h-[90vh] overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100">
         {/* Header */}
         <div className="sticky top-0 bg-white border-b border-gray-200 p-6 z-10">
@@ -202,7 +202,7 @@ const ProveedorDetailModal: React.FC<ProveedorDetailModalProps> = ({ proveedor, 
                       <label className="block text-sm font-medium text-gray-500 mb-2">Estado del Proveedor</label>
                       <span className={`inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium border ${
                         isActiveProveedor(proveedor.Estado_Proveedor)
-                          ? 'bg-green-100 text-green-800 border-green-200' 
+                          ? 'bg-blue-100 text-blue-800 border-blue-200' 
                           : 'bg-red-100 text-red-800 border-red-200'
                       }`}>
                         {getStatusDisplay(proveedor.Estado_Proveedor)}
@@ -276,17 +276,18 @@ const ProveedorDetailModal: React.FC<ProveedorDetailModalProps> = ({ proveedor, 
               <AlertDialog>
                 <AlertDialogTrigger asChild>
                   <Button
-                    variant='alert'
+                    variant='default'
                     size={'xl'}
+                    className="bg-blue-500 hover:bg-blue-600 text-white"
                   >
                     <LuUserX className="w-5 h-5" />
-                    <span className="ml-2">Desactivar Proveedor</span>
+                    <span className="ml-2">Cambiar Estado</span>
                   </Button>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
                   <AlertDialogHeader>
                     <AlertDialogTitle>
-                      <span>¿Desactivar proveedor?</span>
+                      <span>¿Cambiar estado del proveedor?</span>
                     </AlertDialogTitle>
                     <AlertDialogDescription>
                       <span>¿Estás seguro de que deseas desactivar este proveedor? Podrás reactivarlo más tarde si es necesario.</span>
@@ -309,17 +310,18 @@ const ProveedorDetailModal: React.FC<ProveedorDetailModalProps> = ({ proveedor, 
               <AlertDialog>
                 <AlertDialogTrigger asChild>
                   <Button
-                    variant='create'
+                    variant='default'
                     size={'xl'}
+                    className="bg-blue-500 hover:bg-blue-600 text-white"
                   >
                     <LuUserCheck className="w-5 h-5" />
-                    <span className="ml-2">Activar Proveedor</span>
+                    <span className="ml-2">Cambiar Estado</span>
                   </Button>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
                   <AlertDialogHeader>
                     <AlertDialogTitle>
-                      <span>¿Activar proveedor?</span>
+                      <span>¿Cambiar estado del proveedor?</span>
                     </AlertDialogTitle>
                     <AlertDialogDescription>
                       <span>¿Estás seguro de que deseas activar este proveedor?</span>

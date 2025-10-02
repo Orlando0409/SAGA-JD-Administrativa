@@ -58,49 +58,23 @@ export default function ProveedoresTable() {
             datos_originales: proveedor
         }));
 
-        const juridicosMapeados: ProveedorUnificado[] = proveedoresJuridicos.map((proveedor: ProveedorJuridico) => {
-            // Debug log para ver los datos
-            console.log('🔍 Proveedor Jurídico Original:', {
-                Id_Proveedor: proveedor.Id_Proveedor,
-                Nombre_Proveedor: proveedor.Nombre_Proveedor,
-                Cedula_Juridica: proveedor.Cedula_Juridica, // Campo corregido
-                Tipo_identificacion: proveedor.Tipo_identificacion,
-                Razon_Social: proveedor.Razon_Social
-            });
-
-            return {
-                Id_Proveedor: proveedor.Id_Proveedor,
-                Nombre_Proveedor: proveedor.Nombre_Proveedor,
-                Telefono_Proveedor: proveedor.Telefono_Proveedor,
-                Identificacion_Unificada: proveedor.Cedula_Juridica || 'Sin cédula jurídica', // Campo corregido
-                Tipo_Identificacion_Unificado: proveedor.Tipo_identificacion || 'Sin tipo',
-                Estado_Proveedor: proveedor.Estado_Proveedor,
-                Tipo_Proveedor: 'Jurídico' as const,
-                Razon_Social: proveedor.Razon_Social,
-                Fecha_Creacion: proveedor.Fecha_Creacion,
-                Fecha_Actualizacion: proveedor.Fecha_Actualizacion,
-                datos_originales: proveedor
-            };
-        });
+        const juridicosMapeados: ProveedorUnificado[] = proveedoresJuridicos.map((proveedor: ProveedorJuridico) => ({
+            Id_Proveedor: proveedor.Id_Proveedor,
+            Nombre_Proveedor: proveedor.Razon_Social || proveedor.Nombre_Proveedor, // Usar Razón Social como nombre principal para la tabla
+            Telefono_Proveedor: proveedor.Telefono_Proveedor,
+            Identificacion_Unificada: proveedor.Cedula_Juridica || 'Sin cédula jurídica', // Campo corregido
+            Tipo_Identificacion_Unificado: proveedor.Tipo_identificacion || 'Sin tipo',
+            Estado_Proveedor: proveedor.Estado_Proveedor,
+            Tipo_Proveedor: 'Jurídico' as const,
+            Razon_Social: proveedor.Razon_Social,
+            Fecha_Creacion: proveedor.Fecha_Creacion,
+            Fecha_Actualizacion: proveedor.Fecha_Actualizacion,
+            datos_originales: proveedor
+        }));
 
         return [...fisicosMapeados, ...juridicosMapeados]
             .sort((a, b) => a.Id_Proveedor - b.Id_Proveedor);
     }, [proveedoresFisicos, proveedoresJuridicos]);
-
-    // Debug log para ver el resultado final
-    console.log('📊 Datos Unificados Final:', {
-        totalProveedores: proveedoresUnificados.length,
-        fisicos: proveedoresUnificados.filter(p => p.Tipo_Proveedor === 'Físico').length,
-        juridicos: proveedoresUnificados.filter(p => p.Tipo_Proveedor === 'Jurídico').length,
-        primerosJuridicos: proveedoresUnificados
-            .filter(p => p.Tipo_Proveedor === 'Jurídico')
-            .slice(0, 2)
-            .map(p => ({
-                nombre: p.Nombre_Proveedor,
-                identificacion: p.Identificacion_Unificada,
-                razonSocial: p.Razon_Social
-            }))
-    });
 
     // Estados de carga y error combinados
     const isLoading = isLoadingFisicos || isLoadingJuridicos;
@@ -152,7 +126,7 @@ export default function ProveedoresTable() {
                     <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
                         tipo === 'Físico' 
                             ? 'bg-blue-100 text-blue-700' 
-                            : 'bg-purple-100 text-purple-700'
+                            : 'bg-teal-100 text-teal-700'
                     }`}>
                         {tipo}
                     </span>
@@ -161,7 +135,7 @@ export default function ProveedoresTable() {
             size: 100
         }),
         columnHelper.accessor('Nombre_Proveedor', {
-            header: 'Nombre del Proveedor',
+            header: 'Nombre / Razón Social',
             cell: (info) => {
                 const nombre = info.getValue();
                 return nombre || 'Sin nombre';
@@ -172,15 +146,6 @@ export default function ProveedoresTable() {
             header: 'Identificación',
             cell: (info) => {
                 const proveedor = info.row.original;
-                
-                // Debug log para ver qué está llegando a la celda
-                if (proveedor.Tipo_Proveedor === 'Jurídico') {
-                    console.log('🏢 Celda Jurídico:', {
-                        nombre: proveedor.Nombre_Proveedor,
-                        identificacion: proveedor.Identificacion_Unificada,
-                        datosOriginales: proveedor.datos_originales
-                    });
-                }
                 
                 return (
                     <div className="flex flex-col">
@@ -195,19 +160,6 @@ export default function ProveedoresTable() {
                 );
             },
             size: 160
-        }),
-        
-        columnHelper.accessor('Razon_Social', {
-            header: 'Razón Social / Detalle',
-            cell: (info) => {
-                const proveedor = info.row.original;
-                if (proveedor.Tipo_Proveedor === 'Jurídico') {
-                    return proveedor.Razon_Social || 'Sin razón social';
-                } else {
-                    return <span className="text-slate-400 italic">N/A (Persona Física)</span>;
-                }
-            },
-            size: 180
         }),
         
         columnHelper.accessor('Telefono_Proveedor', {
