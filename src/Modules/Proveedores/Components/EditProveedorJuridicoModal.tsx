@@ -45,7 +45,7 @@ const EditProveedorJuridicoModal: React.FC<EditProveedorJuridicoModalProps> = ({
                 <p><strong>Nombre:</strong> {proveedor.Nombre_Proveedor}</p>
                 <p><strong>Razón Social:</strong> {proveedor.Razon_Social}</p>
                 <p><strong>Cédula Jurídica:</strong> {proveedor.Cedula_Juridica}</p>
-                <p><strong>Tipo:</strong> {proveedor.Tipo_identificacion}</p>
+                <p><strong>Tipo:</strong> Cédula Jurídica</p>
                 <p><strong>Teléfono:</strong> {proveedor.Telefono_Proveedor}</p>
                 <p><strong>Estado:</strong> {proveedor.Estado_Proveedor?.Estado_Proveedor}</p>
               </div>

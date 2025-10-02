@@ -26,10 +26,12 @@ export const getProveedorJuridicoById = async (id: number): Promise<ProveedorJur
 // Función para crear un proveedor jurídico
 export const createProveedorJuridico = async (proveedor: CreateProveedorJuridicoData): Promise<ProveedorJuridico> => {
   try {
-    const response = await apiAuth.post('/Proveedores/juridico/create', proveedor);
+    console.log('🔄 Creando proveedor jurídico:', proveedor);
+    const response = await apiAuth.post('/Proveedores/juridico', proveedor);
+    console.log('✅ Proveedor jurídico creado correctamente:', response.data);
     return response.data;
   } catch (error) {
-    console.error('Error al crear proveedor jurídico:', error);
+    console.error('❌ Error al crear proveedor jurídico:', error);
     throw error;
   }
 };

@@ -63,7 +63,7 @@ export default function ProveedoresTable() {
             Nombre_Proveedor: proveedor.Razon_Social || proveedor.Nombre_Proveedor, // Usar Razón Social como nombre principal para la tabla
             Telefono_Proveedor: proveedor.Telefono_Proveedor,
             Identificacion_Unificada: proveedor.Cedula_Juridica || 'Sin cédula jurídica', // Campo corregido
-            Tipo_Identificacion_Unificado: proveedor.Tipo_identificacion || 'Sin tipo',
+            Tipo_Identificacion_Unificado: 'Cédula Jurídica',
             Estado_Proveedor: proveedor.Estado_Proveedor,
             Tipo_Proveedor: 'Jurídico' as const,
             Razon_Social: proveedor.Razon_Social,

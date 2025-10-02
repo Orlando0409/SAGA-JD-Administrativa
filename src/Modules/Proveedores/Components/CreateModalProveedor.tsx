@@ -1,6 +1,6 @@
 import { useForm } from '@tanstack/react-form';
 import { useState } from 'react';
-import { LuX, LuUserPlus } from 'react-icons/lu';
+import { LuX, LuUserPlus, LuUser, LuBuilding2 } from 'react-icons/lu';
 import PhoneInput, { isValidPhoneNumber } from 'react-phone-number-input';
 import 'react-phone-number-input/style.css';
 import { 
@@ -12,7 +12,9 @@ import {
   IDENTIFICACION_LIMITS_BY_TYPE
 } from '../Schema/Proveedores';
 import { useCreateProveedorFisico } from '../Hook/proveedoresFisicos';
+import { useCreateProveedorJuridico } from '../Hook/hookjuridicoproveedor';
 import type { CreateProveedorData } from '../Models/TablaProveedo/proveedorFisico';
+import type { CreateProveedorJuridicoData } from '../Models/TablaProveedo/proveedorjuridico';
 import { useAlerts } from '@/Modules/Global/context/AlertContext';
 
 interface CreateModalProveedorProps {
@@ -20,12 +22,17 @@ interface CreateModalProveedorProps {
   setShowCreateModal?: (show: boolean) => void;
 }
 
+type TipoProveedor = 'fisico' | 'juridico';
+
 const CreateModalProveedor = ({ onClose, setShowCreateModal }: CreateModalProveedorProps) => {
+  const [tipoProveedor, setTipoProveedor] = useState<TipoProveedor>('fisico');
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [fieldCharCounts, setFieldCharCounts] = useState({
     Nombre_Proveedor: 0,
     Telefono_Proveedor: 0,
-    Identificacion: 0
+    Identificacion: 0,
+    Cedula_Juridica: 0,
+    Razon_Social: 0
   });
 
   // Hook de alertas
@@ -34,8 +41,16 @@ const CreateModalProveedor = ({ onClose, setShowCreateModal }: CreateModalProvee
   // Hook para crear proveedor físico
   const { 
     createProveedorFisico, 
-    isCreating
+    isCreating: isCreatingFisico
   } = useCreateProveedorFisico();
+
+  // Hook para crear proveedor jurídico
+  const { 
+    createProveedorJuridico, 
+    isCreating: isCreatingJuridico
+  } = useCreateProveedorJuridico();
+
+  const isCreating = isCreatingFisico || isCreatingJuridico;
 
   // Función para manejar el cierre del modal
   const handleClose = () => {
@@ -101,9 +116,30 @@ const CreateModalProveedor = ({ onClose, setShowCreateModal }: CreateModalProvee
         }
         break;
 
+      case 'Cedula_Juridica':
+        if (value) {
+          const cleanValue = value.replace(/[\s\-]/g, '');
+          if (!/^\d*$/.test(cleanValue)) {
+            error = 'La cédula jurídica solo puede contener números';
+          } else if (cleanValue.length > 0 && cleanValue[0] === '0') {
+            error = 'La cédula jurídica no puede empezar con 0';
+          } else if (cleanValue.length > 0 && cleanValue.length !== 10 && cleanValue.length === value.length) {
+            error = 'La cédula jurídica debe tener exactamente 10 dígitos';
+          }
+        }
+        break;
+
+      case 'Razon_Social':
+        const razonSocial = value.trim();
+        if (razonSocial && razonSocial.length >= 2) {
+          if (razonSocial.length < 2) {
+            error = 'La razón social debe tener al menos 2 caracteres';
+          }
+        }
+        break;
+
       case 'Telefono_Proveedor':
         if (value) {
-          // Validar usando libphonenumber-js para mayor precisión
           if (!isValidPhoneNumber(value)) {
             error = 'Número de teléfono inválido para el país seleccionado';
           }
@@ -111,7 +147,6 @@ const CreateModalProveedor = ({ onClose, setShowCreateModal }: CreateModalProvee
         break;
     }
 
-    // Actualizar errores en tiempo real
     setFormErrors(prev => ({
       ...prev,
       [fieldName]: error
@@ -125,12 +160,9 @@ const CreateModalProveedor = ({ onClose, setShowCreateModal }: CreateModalProvee
     return (e: React.ChangeEvent<HTMLInputElement>) => {
       const value = e.target.value;
       
-      // Limitar caracteres al máximo permitido
       if (value.length <= maxLength) {
         handleChange(value);
         setFieldCharCounts(prev => ({ ...prev, [fieldName]: value.length }));
-        
-        // Validar en tiempo real
         validateFieldRealTime(fieldName, value, tipoIdentificacion);
       }
     };
@@ -140,7 +172,6 @@ const CreateModalProveedor = ({ onClose, setShowCreateModal }: CreateModalProvee
   const handleApiError = (error: any) => {
     console.error('Error creating proveedor:', error);
     
-    // Manejar errores HTTP 409 (conflictos de duplicación) - ALERTAS AMARILLAS
     if (error?.response?.status === 409) {
       const errorMessage = error.response?.data?.message || error.message || '';
       
@@ -154,42 +185,38 @@ const CreateModalProveedor = ({ onClose, setShowCreateModal }: CreateModalProvee
         return;
       }
       
-      // Error 409 genérico - también amarillo
       showWarning('⚠️ Ya existe un proveedor con esa identificación. Por favor, verifica la información ingresada.');
       return;
     }
     
-    // Otros errores de validación del servidor
     if (error?.response?.status === 400) {
       const errorMessage = error.response?.data?.message || 'Datos inválidos';
       showError(`Error de validación: ${errorMessage}`);
       return;
     }
     
-    // Errores de red o servidor
     if (error?.response?.status >= 500) {
       showError('Error del servidor. Por favor, intenta nuevamente más tarde.');
       return;
     }
     
-    // Error genérico
     const errorMessage = error?.message || 'Error desconocido al crear el proveedor';
     showError(`Error al crear el proveedor: ${errorMessage}`);
   };
 
-  const form = useForm({
+  // Formulario para proveedor físico
+  const formFisico = useForm({
     defaultValues: {
       Nombre_Proveedor: '',
       Telefono_Proveedor: '',
       Tipo_Identificacion: '' as any,
       Identificacion: '',
-      Id_Estado_Proveedor: 1, // Siempre activo por defecto
+      Id_Estado_Proveedor: 1,
     },
 
     onSubmit: async ({ value }: { value: CreateProveedorSchemaData }) => {
       setFormErrors({});
 
-      // Validar usando el schema de Zod
       const validation = CreateProveedorSchemaWithIdentificacionValidation.safeParse(value);
 
       if (!validation.success) {
@@ -203,26 +230,76 @@ const CreateModalProveedor = ({ onClose, setShowCreateModal }: CreateModalProvee
       }
 
       try {
-        // Preparar los datos según el tipo CreateProveedorData
         const payload: CreateProveedorData = {
           Nombre_Proveedor: validation.data.Nombre_Proveedor,
           Telefono_Proveedor: validation.data.Telefono_Proveedor,
           Tipo_Identificacion: validation.data.Tipo_Identificacion,
           Identificacion: validation.data.Identificacion,
-          Id_Estado_Proveedor: 1, // Siempre activo al crear
+          Id_Estado_Proveedor: 1,
         };
 
-        // Usar el hook para crear el proveedor
         await createProveedorFisico(payload);
         
-        showSuccess('¡Proveedor creado exitosamente!');
+        showSuccess('¡Proveedor físico creado exitosamente!');
         handleClose();
-        form.reset();
+        formFisico.reset();
       } catch (error) {
         handleApiError(error);
       }
     },
   });
+
+  // Formulario para proveedor jurídico
+  const formJuridico = useForm({
+    defaultValues: {
+      Nombre_Proveedor: '',
+      Telefono_Proveedor: '',
+      Cedula_Juridica: '',
+      Razon_Social: '',
+      Id_Estado_Proveedor: 1,
+    },
+
+    onSubmit: async ({ value }: { value: any }) => {
+      setFormErrors({});
+
+      if (!value.Nombre_Proveedor.trim()) {
+        setFormErrors(prev => ({ ...prev, Nombre_Proveedor: 'El nombre es requerido' }));
+        return;
+      }
+      if (!value.Cedula_Juridica.trim()) {
+        setFormErrors(prev => ({ ...prev, Cedula_Juridica: 'La cédula jurídica es requerida' }));
+        return;
+      }
+      if (!value.Razon_Social.trim()) {
+        setFormErrors(prev => ({ ...prev, Razon_Social: 'La razón social es requerida' }));
+        return;
+      }
+      if (!value.Telefono_Proveedor.trim()) {
+        setFormErrors(prev => ({ ...prev, Telefono_Proveedor: 'El teléfono es requerido' }));
+        return;
+      }
+
+      try {
+        const payload: CreateProveedorJuridicoData = {
+          Nombre_Proveedor: value.Nombre_Proveedor.trim(),
+          Telefono_Proveedor: value.Telefono_Proveedor,
+          Cedula_Juridica: value.Cedula_Juridica.replace(/[\s\-]/g, ''),
+          Razon_Social: value.Razon_Social.trim(),
+          Id_Estado_Proveedor: 1,
+        };
+
+        await createProveedorJuridico(payload);
+        
+        showSuccess('¡Proveedor jurídico creado exitosamente!');
+        handleClose();
+        formJuridico.reset();
+      } catch (error) {
+        handleApiError(error);
+      }
+    },
+  });
+
+  const form = tipoProveedor === 'fisico' ? formFisico : formJuridico;
 
   // Función para renderizar contador de caracteres
   const renderCharCounter = (current: number, max: number, hasError: boolean) => {
@@ -253,12 +330,56 @@ const CreateModalProveedor = ({ onClose, setShowCreateModal }: CreateModalProvee
       <div className="bg-white rounded-lg shadow-2xl border border-gray-200 w-full max-w-md mx-4 max-h-[90vh] overflow-hidden">
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <div className="flex items-center gap-3">
-            <LuUserPlus className="w-6 h-6 text-blue-600" />
-            <h2 className="text-xl font-semibold text-gray-900">Registrar Nuevo Proveedor</h2>
+            {tipoProveedor === 'fisico' ? (
+              <LuUser className="w-6 h-6 text-green-600" />
+            ) : (
+              <LuBuilding2 className="w-6 h-6 text-blue-600" />
+            )}
+            <h2 className="text-xl font-semibold text-gray-900">
+              Registrar Proveedor {tipoProveedor === 'fisico' ? 'Físico' : 'Jurídico'}
+            </h2>
           </div>
           <button onClick={handleClose} className="text-gray-400 hover:text-gray-600 transition-colors">
             <LuX className="w-6 h-6" />
           </button>
+        </div>
+
+        {/* Botones para cambiar tipo de proveedor */}
+        <div className="p-4 border-b border-gray-100 bg-gray-50">
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                setTipoProveedor('fisico');
+                setFormErrors({});
+                formFisico.reset();
+              }}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${
+                tipoProveedor === 'fisico'
+                  ? 'bg-green-100 text-green-700 border-2 border-green-300'
+                  : 'bg-white text-gray-600 border-2 border-gray-200 hover:bg-gray-50'
+              }`}
+            >
+              <LuUser className="w-4 h-4" />
+              Físico
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setTipoProveedor('juridico');
+                setFormErrors({});
+                formJuridico.reset();
+              }}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${
+                tipoProveedor === 'juridico'
+                  ? 'bg-blue-100 text-blue-700 border-2 border-blue-300'
+                  : 'bg-white text-gray-600 border-2 border-gray-200 hover:bg-gray-50'
+              }`}
+            >
+              <LuBuilding2 className="w-4 h-4" />
+              Jurídico
+            </button>
+          </div>
         </div>
 
         <div className="p-6 overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100 max-h-[calc(90vh-140px)]">
@@ -269,222 +390,288 @@ const CreateModalProveedor = ({ onClose, setShowCreateModal }: CreateModalProvee
             }}
             className="space-y-4"
           >
-            {/* Nombre del Proveedor */}
-            <form.Field name="Nombre_Proveedor">
-              {(field) => (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Nombre del Proveedor *
-                  </label>
-                  <input
-                    type="text"
-                    value={field.state.value}
-                    onChange={createInputHandler('Nombre_Proveedor', field.handleChange, VALIDATION_LIMITS.NOMBRE_MAX_LENGTH)}
-                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-colors ${
-                      (formErrors.Nombre_Proveedor || field.state.meta.errors?.length) 
-                        ? 'border-red-300 focus:ring-red-500' 
-                        : 'border-gray-300 focus:ring-blue-500'
-                    }`}
-                    placeholder="Ingrese el nombre del proveedor (mín. 2 caracteres)"
-                    maxLength={VALIDATION_LIMITS.NOMBRE_MAX_LENGTH}
-                  />
-                  
-                  {renderCharCounter(
-                    fieldCharCounts.Nombre_Proveedor, 
-                    VALIDATION_LIMITS.NOMBRE_MAX_LENGTH, 
-                    !!(formErrors.Nombre_Proveedor || field.state.meta.errors?.length)
-                  )}
+            {tipoProveedor === 'fisico' ? (
+              // FORMULARIO PARA PROVEEDOR FÍSICO
+              <>
+                {/* Nombre del Proveedor */}
+                <form.Field name="Nombre_Proveedor">
+                  {(field) => (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Nombre del Proveedor *
+                      </label>
+                      <input
+                        type="text"
+                        value={field.state.value}
+                        onChange={createInputHandler('Nombre_Proveedor', field.handleChange, VALIDATION_LIMITS.NOMBRE_MAX_LENGTH)}
+                        className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-colors ${
+                          (formErrors.Nombre_Proveedor || field.state.meta.errors?.length) 
+                            ? 'border-red-300 focus:ring-red-500' 
+                            : 'border-gray-300 focus:ring-green-500'
+                        }`}
+                        placeholder="Ingrese el nombre del proveedor (mín. 2 caracteres)"
+                        maxLength={VALIDATION_LIMITS.NOMBRE_MAX_LENGTH}
+                      />
+                      
+                      {renderCharCounter(
+                        fieldCharCounts.Nombre_Proveedor, 
+                        VALIDATION_LIMITS.NOMBRE_MAX_LENGTH, 
+                        !!(formErrors.Nombre_Proveedor || field.state.meta.errors?.length)
+                      )}
 
-                  {field.state.meta.errors?.map((err) => (
-                    <p key={err} className="text-red-500 text-xs mt-1">{err}</p>
-                  ))}
-                  {formErrors.Nombre_Proveedor && (
-                    <p className="text-red-500 text-xs mt-1">{formErrors.Nombre_Proveedor}</p>
+                      {field.state.meta.errors?.map((err) => (
+                        <p key={err} className="text-red-500 text-xs mt-1">{err}</p>
+                      ))}
+                      {formErrors.Nombre_Proveedor && (
+                        <p className="text-red-500 text-xs mt-1">{formErrors.Nombre_Proveedor}</p>
+                      )}
+                    </div>
                   )}
-                </div>
-              )}
-            </form.Field>
-
-            {/* Tipo de Identificación */}
-            <form.Field name="Tipo_Identificacion">
-              {(field) => (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Tipo de Identificación *
-                  </label>
-                  <select
-                    value={field.state.value}
-                    onChange={(e) => field.handleChange(e.target.value as any)}
-                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-colors ${
-                      (formErrors.Tipo_Identificacion || field.state.meta.errors?.length) 
-                        ? 'border-red-300 focus:ring-red-500' 
-                        : 'border-gray-300 focus:ring-blue-500'
-                    }`}
-                  >
-                    <option value="">Seleccionar tipo de identificación</option>
-                    {TIPOS_IDENTIFICACION_OPTIONS.map((tipo) => (
-                      <option key={tipo.value} value={tipo.value}>
-                        {tipo.label}
-                      </option>
-                    ))}
-                  </select>
-                  {field.state.meta.errors?.map((err) => (
-                    <p key={err} className="text-red-500 text-xs mt-1">{err}</p>
-                  ))}
-                  {formErrors.Tipo_Identificacion && (
-                    <p className="text-red-500 text-xs mt-1">{formErrors.Tipo_Identificacion}</p>
-                  )}
-                </div>
-              )}
-            </form.Field>
-
-            {/* Identificación */}
-            <form.Field name="Identificacion">
-              {(field) => (
-                <form.Field name="Tipo_Identificacion">
-                  {(tipoField) => {
-                    const tipoSeleccionado = tipoField.state.value;
-                    const isValidTipo = tipoSeleccionado && tipoSeleccionado !== '';
-                    
-                    // Obtener límite específico según tipo seleccionado
-                    const maxLength = isValidTipo && tipoSeleccionado in IDENTIFICACION_LIMITS_BY_TYPE 
-                      ? IDENTIFICACION_LIMITS_BY_TYPE[tipoSeleccionado as keyof typeof IDENTIFICACION_LIMITS_BY_TYPE]
-                      : IDENTIFICACION_LIMITS_BY_TYPE.default;
-                    
-                    const placeholder = isValidTipo && tipoSeleccionado in IDENTIFICACION_PLACEHOLDERS
-                      ? `Ej: ${IDENTIFICACION_PLACEHOLDERS[tipoSeleccionado as keyof typeof IDENTIFICACION_PLACEHOLDERS]}` 
-                      : IDENTIFICACION_PLACEHOLDERS.default;
-                    
-                    return (
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Número de Identificación *
-                        </label>
-                        <input
-                          type="text"
-                          value={field.state.value}
-                          onChange={createInputHandler('Identificacion', field.handleChange, maxLength, tipoSeleccionado)}
-                          className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-colors ${
-                            (formErrors.Identificacion || field.state.meta.errors?.length) 
-                              ? 'border-red-300 focus:ring-red-500' 
-                              : 'border-gray-300 focus:ring-blue-500'
-                          }`}
-                          placeholder={placeholder}
-                          maxLength={maxLength}
-                          style={{ textTransform: 'uppercase' }}
-                          disabled={!isValidTipo}
-                        />
-                        
-                        {isValidTipo && (
-                          <div className="mt-1">
-                            <span className="text-xs text-blue-600">
-                              {tipoSeleccionado === 'Cedula Nacional' && `Formato: exactamente ${IDENTIFICACION_LIMITS_BY_TYPE['Cedula Nacional']} dígitos, no puede empezar con 0`}
-                              {tipoSeleccionado === 'Dimex' && `Formato: exactamente ${IDENTIFICACION_LIMITS_BY_TYPE['Dimex']} dígitos, no puede empezar con 0`}
-                              {tipoSeleccionado === 'Pasaporte' && `Formato: 6-${IDENTIFICACION_LIMITS_BY_TYPE['Pasaporte']} caracteres (obligatorio), al menos 1 letra, máximo 3 letras`}
-                            </span>
-                          </div>
-                        )}
-                        
-                        {renderCharCounter(
-                          fieldCharCounts.Identificacion, 
-                          maxLength, 
-                          !!(formErrors.Identificacion || field.state.meta.errors?.length)
-                        )}
-                        
-                        {field.state.meta.errors?.map((err) => (
-                          <p key={err} className="text-red-500 text-xs mt-1">{err}</p>
-                        ))}
-                        {formErrors.Identificacion && (
-                          <p className="text-red-500 text-xs mt-1">{formErrors.Identificacion}</p>
-                        )}
-                      </div>
-                    );
-                  }}
                 </form.Field>
-              )}
-            </form.Field>
 
-            {/* Teléfono */}
-            <form.Field name="Telefono_Proveedor">
-              {(field) => (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Teléfono *
-                  </label>
-                  <PhoneInput
-                    defaultCountry="CR"
-                    international
-                    countryCallingCodeEditable={false}
-                    value={field.state.value}
-                    onChange={(value) => {
-                      const phoneValue = value || '';
-                      field.handleChange(phoneValue);
-                      setFieldCharCounts(prev => ({ 
-                        ...prev, 
-                        Telefono_Proveedor: phoneValue.length 
-                      }));
-                      validateFieldRealTime('Telefono_Proveedor', phoneValue);
-                    }}
-                    className={`react-phone-number-input ${
-                      (formErrors.Telefono_Proveedor || field.state.meta.errors?.length) 
-                        ? 'react-phone-number-input--error' 
-                        : ''
-                    }`}
-                    style={{
-                      '--PhoneInput-color--focus': '#3b82f6',
-                      '--PhoneInputCountrySelect-marginRight': '0.5rem',
-                      '--PhoneInputCountryFlag-aspectRatio': '1.5',
-                      '--PhoneInputCountryFlag-height': '1rem',
-                      '--PhoneInputCountrySelectArrow-color': '#6b7280',
-                      '--PhoneInputCountrySelectArrow-color--focus': '#3b82f6',
-                    } as React.CSSProperties}
-                    inputProps={{
-                      autoComplete: 'tel',
-                      'aria-label': 'Número de teléfono internacional',
-                      className: `w-full px-3 py-2 border rounded-r-lg focus:ring-2 focus:border-transparent transition-colors ${
-                        (formErrors.Telefono_Proveedor || field.state.meta.errors?.length) 
-                          ? 'border-red-300 focus:ring-red-500' 
-                          : 'border-gray-300 focus:ring-blue-500'
-                      }`,
-                      placeholder: 'Número de teléfono'
-                    }}
-                    countrySelectProps={{
-                      'aria-label': 'Seleccionar país',
-                      className: `border rounded-l-lg px-2 py-2 bg-white hover:bg-gray-50 focus:ring-2 focus:border-transparent transition-colors ${
-                        (formErrors.Telefono_Proveedor || field.state.meta.errors?.length) 
-                          ? 'border-red-300 focus:ring-red-500' 
-                          : 'border-gray-300 focus:ring-blue-500'
-                      }`
-                    }}
-                  />
-                  
-                  <div className="flex justify-between items-center mt-1">
-                    <span className="text-xs text-gray-500">
-                      Seleccione país y ingrese su número
-                    </span>
-                    <span className={`text-xs ${
-                      field.state.value && isValidPhoneNumber(field.state.value) 
-                        ? 'text-green-600' 
-                        : field.state.value 
-                          ? 'text-red-600' 
-                          : 'text-gray-500'
-                    }`}>
-                      {field.state.value 
-                        ? (isValidPhoneNumber(field.state.value) ? '✓ Válido' : '✗ Inválido')
-                        : 'Pendiente'
-                      }
-                    </span>
-                  </div>
-                  
-                  {field.state.meta.errors?.map((err) => (
-                    <p key={err} className="text-red-500 text-xs mt-1">{err}</p>
-                  ))}
-                  {formErrors.Telefono_Proveedor && (
-                    <p className="text-red-500 text-xs mt-1">{formErrors.Telefono_Proveedor}</p>
+                {/* Tipo de Identificación */}
+                <form.Field name="Tipo_Identificacion">
+                  {(field) => (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Tipo de Identificación *
+                      </label>
+                      <select
+                        value={field.state.value}
+                        onChange={(e) => field.handleChange(e.target.value as any)}
+                        className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-colors ${
+                          (formErrors.Tipo_Identificacion || field.state.meta.errors?.length) 
+                            ? 'border-red-300 focus:ring-red-500' 
+                            : 'border-gray-300 focus:ring-green-500'
+                        }`}
+                      >
+                        <option value="">Seleccione un tipo de identificación</option>
+                        {TIPOS_IDENTIFICACION_OPTIONS.map((tipo) => (
+                          <option key={tipo.value} value={tipo.value}>
+                            {tipo.label}
+                          </option>
+                        ))}
+                      </select>
+                      {field.state.meta.errors?.map((err) => (
+                        <p key={err} className="text-red-500 text-xs mt-1">{err}</p>
+                      ))}
+                      {formErrors.Tipo_Identificacion && (
+                        <p className="text-red-500 text-xs mt-1">{formErrors.Tipo_Identificacion}</p>
+                      )}
+                    </div>
                   )}
-                </div>
-              )}
-            </form.Field>
+                </form.Field>
+
+                {/* Identificación */}
+                <form.Field name="Identificacion">
+                  {(field) => (
+                    <form.Field name="Tipo_Identificacion">
+                      {(tipoField) => {
+                        const tipoIdentificacion = tipoField.state.value;
+                        const limites = IDENTIFICACION_LIMITS_BY_TYPE[tipoIdentificacion as keyof typeof IDENTIFICACION_LIMITS_BY_TYPE];
+                        const placeholder = IDENTIFICACION_PLACEHOLDERS[tipoIdentificacion as keyof typeof IDENTIFICACION_PLACEHOLDERS] || 'Ingrese la identificación';
+                        const maxLength = limites?.maxLength || 50;
+
+                        return (
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              {tipoIdentificacion ? `${tipoIdentificacion} *` : 'Identificación *'}
+                            </label>
+                            <input
+                              type="text"
+                              value={field.state.value}
+                              onChange={createInputHandler('Identificacion', field.handleChange, maxLength, tipoIdentificacion)}
+                              className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-colors ${
+                                (formErrors.Identificacion || field.state.meta.errors?.length) 
+                                  ? 'border-red-300 focus:ring-red-500' 
+                                  : 'border-gray-300 focus:ring-green-500'
+                              }`}
+                              placeholder={placeholder}
+                              maxLength={maxLength}
+                              disabled={!tipoIdentificacion}
+                            />
+                            
+                            {renderCharCounter(
+                              fieldCharCounts.Identificacion, 
+                              maxLength, 
+                              !!(formErrors.Identificacion || field.state.meta.errors?.length)
+                            )}
+
+                            {field.state.meta.errors?.map((err) => (
+                              <p key={err} className="text-red-500 text-xs mt-1">{err}</p>
+                            ))}
+                            {formErrors.Identificacion && (
+                              <p className="text-red-500 text-xs mt-1">{formErrors.Identificacion}</p>
+                            )}
+                          </div>
+                        );
+                      }}
+                    </form.Field>
+                  )}
+                </form.Field>
+
+                {/* Teléfono */}
+                <form.Field name="Telefono_Proveedor">
+                  {(field) => (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Teléfono *
+                      </label>
+                      <PhoneInput
+                        value={field.state.value}
+                        onChange={(value) => {
+                          field.handleChange(value || '');
+                          validateFieldRealTime('Telefono_Proveedor', value || '');
+                        }}
+                        defaultCountry="CR"
+                        placeholder="Ingrese el número de teléfono"
+                        className={`phone-input ${
+                          (formErrors.Telefono_Proveedor || field.state.meta.errors?.length) 
+                            ? 'phone-input-error' 
+                            : 'phone-input-success'
+                        }`}
+                      />
+                      {field.state.meta.errors?.map((err) => (
+                        <p key={err} className="text-red-500 text-xs mt-1">{err}</p>
+                      ))}
+                      {formErrors.Telefono_Proveedor && (
+                        <p className="text-red-500 text-xs mt-1">{formErrors.Telefono_Proveedor}</p>
+                      )}
+                    </div>
+                  )}
+                </form.Field>
+              </>
+            ) : (
+              // FORMULARIO PARA PROVEEDOR JURÍDICO
+              <>
+                {/* Nombre del Proveedor */}
+                <form.Field name="Nombre_Proveedor">
+                  {(field) => (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Nombre del Proveedor *
+                      </label>
+                      <input
+                        type="text"
+                        value={field.state.value}
+                        onChange={createInputHandler('Nombre_Proveedor', field.handleChange, 100)}
+                        className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-colors ${
+                          formErrors.Nombre_Proveedor
+                            ? 'border-red-300 focus:ring-red-500' 
+                            : 'border-gray-300 focus:ring-blue-500'
+                        }`}
+                        placeholder="Ingrese el nombre del proveedor (mín. 2 caracteres)"
+                        maxLength={100}
+                      />
+                      
+                      {renderCharCounter(
+                        fieldCharCounts.Nombre_Proveedor, 
+                        100, 
+                        !!formErrors.Nombre_Proveedor
+                      )}
+
+                      {formErrors.Nombre_Proveedor && (
+                        <p className="text-red-500 text-xs mt-1">{formErrors.Nombre_Proveedor}</p>
+                      )}
+                    </div>
+                  )}
+                </form.Field>
+
+                {/* Cédula Jurídica */}
+                <form.Field name="Cedula_Juridica">
+                  {(field) => (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Cédula Jurídica *
+                      </label>
+                      <input
+                        type="text"
+                        value={field.state.value}
+                        onChange={createInputHandler('Cedula_Juridica', field.handleChange, 12)}
+                        className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-colors ${
+                          formErrors.Cedula_Juridica
+                            ? 'border-red-300 focus:ring-red-500' 
+                            : 'border-gray-300 focus:ring-blue-500'
+                        }`}
+                        placeholder="Ingrese la cédula jurídica (10 dígitos)"
+                        maxLength={12}
+                      />
+                      
+                      {renderCharCounter(
+                        fieldCharCounts.Cedula_Juridica, 
+                        12, 
+                        !!formErrors.Cedula_Juridica
+                      )}
+
+                      {formErrors.Cedula_Juridica && (
+                        <p className="text-red-500 text-xs mt-1">{formErrors.Cedula_Juridica}</p>
+                      )}
+                    </div>
+                  )}
+                </form.Field>
+
+                {/* Razón Social */}
+                <form.Field name="Razon_Social">
+                  {(field) => (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Razón Social *
+                      </label>
+                      <input
+                        type="text"
+                        value={field.state.value}
+                        onChange={createInputHandler('Razon_Social', field.handleChange, 150)}
+                        className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-colors ${
+                          formErrors.Razon_Social
+                            ? 'border-red-300 focus:ring-red-500' 
+                            : 'border-gray-300 focus:ring-blue-500'
+                        }`}
+                        placeholder="Ingrese la razón social (mín. 2 caracteres)"
+                        maxLength={150}
+                      />
+                      
+                      {renderCharCounter(
+                        fieldCharCounts.Razon_Social, 
+                        150, 
+                        !!formErrors.Razon_Social
+                      )}
+
+                      {formErrors.Razon_Social && (
+                        <p className="text-red-500 text-xs mt-1">{formErrors.Razon_Social}</p>
+                      )}
+                    </div>
+                  )}
+                </form.Field>
+
+                {/* Teléfono */}
+                <form.Field name="Telefono_Proveedor">
+                  {(field) => (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Teléfono *
+                      </label>
+                      <PhoneInput
+                        value={field.state.value}
+                        onChange={(value) => {
+                          field.handleChange(value || '');
+                          validateFieldRealTime('Telefono_Proveedor', value || '');
+                        }}
+                        defaultCountry="CR"
+                        placeholder="Ingrese el número de teléfono"
+                        className={`phone-input ${
+                          formErrors.Telefono_Proveedor
+                            ? 'phone-input-error' 
+                            : 'phone-input-success-juridico'
+                        }`}
+                      />
+                      {formErrors.Telefono_Proveedor && (
+                        <p className="text-red-500 text-xs mt-1">{formErrors.Telefono_Proveedor}</p>
+                      )}
+                    </div>
+                  )}
+                </form.Field>
+              </>
+            )}
 
             <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
               <button
@@ -500,11 +687,11 @@ const CreateModalProveedor = ({ onClose, setShowCreateModal }: CreateModalProvee
                 disabled={isCreating}
                 className={`px-4 py-2 text-white rounded-lg transition-colors ${
                   isCreating 
-                    ? 'bg-blue-300 cursor-not-allowed' 
-                    : 'bg-blue-600 hover:bg-blue-700' 
+                    ? `${tipoProveedor === 'fisico' ? 'bg-green-300' : 'bg-blue-300'} cursor-not-allowed` 
+                    : `${tipoProveedor === 'fisico' ? 'bg-green-600 hover:bg-green-700' : 'bg-blue-600 hover:bg-blue-700'}` 
                 }`}
               >
-                {isCreating ? 'Creando...' : 'Crear Proveedor'}
+                {isCreating ? 'Creando...' : `Crear Proveedor ${tipoProveedor === 'fisico' ? 'Físico' : 'Jurídico'}`}
               </button>
             </div>
           </form>

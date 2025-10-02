@@ -8,7 +8,6 @@ export interface ProveedorJuridico {
   } 
   Fecha_Creacion: string; // Fecha de creación del registro
   Fecha_Actualizacion: string; // Fecha de actualización del registro
-  Tipo_identificacion: string;
   Cedula_Juridica: string; // Campo corregido para coincidir con el backend
   Razon_Social : string;
 }
@@ -18,7 +17,6 @@ export interface CreateProveedorJuridicoData {
   Nombre_Proveedor: string;
   Telefono_Proveedor: string;
   Cedula_Juridica: string; // Campo corregido
-  Tipo_identificacion: string;
   Razon_Social: string;
   Id_Estado_Proveedor: number;
 }
@@ -40,7 +38,6 @@ export const ProveedorJuridicoInicialState: ProveedorJuridico = {
   },
   Fecha_Creacion: "",
   Fecha_Actualizacion: "",
-  Tipo_identificacion: "",
   Cedula_Juridica: "", // Campo corregido
   Razon_Social: ""
 };
