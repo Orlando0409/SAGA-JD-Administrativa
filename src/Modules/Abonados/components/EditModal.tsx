@@ -72,7 +72,7 @@ const EditModal: React.FC<EditModalProps> = ({ isOpen, onClose, persona }) => {
                 Nombre: afiliado.Nombre,
                 Apellido1: afiliado.Apellido1,
                 Apellido2: afiliado.Apellido2 || '',
-                Tipo_Identificacion: (afiliado as any).Tipo_Identificacion || 'Cedula Nacional' as 'Cedula Nacional' | 'DIMEX' | 'Pasaporte',
+                Tipo_Identificacion: (afiliado as any).Tipo_Identificacion || 'Cedula Nacional' as 'Cedula Nacional' | 'Dimex' | 'Pasaporte',
                 Identificacion: afiliado.Identificacion,
                 Numero_Telefono: afiliado.Numero_Telefono,
                 Correo: afiliado.Correo,
@@ -194,7 +194,7 @@ const EditModal: React.FC<EditModalProps> = ({ isOpen, onClose, persona }) => {
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-white bg-opacity-50 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-hidden">
                 <div className="flex items-center justify-between p-6 border-b">
                     <h2 className="text-xl font-semibold text-gray-900">{getModalTitle()}</h2>
@@ -290,7 +290,7 @@ const EditModal: React.FC<EditModalProps> = ({ isOpen, onClose, persona }) => {
                                             </label>
                                             <select
                                                 value={field.state.value}
-                                                onChange={(e) => field.handleChange(e.target.value as 'Cedula Nacional' | 'DIMEX' | 'Pasaporte')}
+                                                onChange={(e) => field.handleChange(e.target.value as 'Cedula Nacional' | 'Dimex' | 'Pasaporte')}
                                                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                                 required
                                             >
