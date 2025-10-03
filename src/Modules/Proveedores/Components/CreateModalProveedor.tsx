@@ -116,8 +116,8 @@ const CreateModalProveedor = ({ onClose, setShowCreateModal }: CreateModalProvee
             case 'Cedula Nacional':
               if (!/^\d*$/.test(cleanValue)) {
                 error = 'La cédula solo puede contener números';
-              } else if (cleanValue.length > 0 && cleanValue[0] === '0') {
-                error = 'La cédula no puede empezar con 0';
+              } else if (cleanValue.length > 0 && !/^[1-7]/.test(cleanValue)) {
+                error = 'La cédula nacional debe comenzar con un número del 1 al 7';
               } else if (cleanValue.length > 0 && cleanValue.length !== 9 && cleanValue.length === value.length) {
                 error = 'La cédula debe tener exactamente 9 dígitos';
               }

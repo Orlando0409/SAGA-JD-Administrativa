@@ -5,7 +5,7 @@ import { isValidPhoneNumber } from 'libphonenumber-js';
 const NOMBRE_NO_SOLO_ESPACIOS = /\S/; // No puede contener solo espacios (Matches(/\S/))
 
 // Validaciones de identificación más específicas según backend
-const CEDULA_REGEX = /^[1-9]\d{8}$/; // 9 dígitos, no puede empezar con 0
+const CEDULA_REGEX = /^[1-7]\d{8}$/; // 9 dígitos, debe empezar con 1-7
 const DIMEX_REGEX = /^[1-9]\d{11}$/; // 12 dígitos, no puede empezar con 0
 const PASAPORTE_REGEX = /^(?=.*[A-Z])(?![A-Z]{4,})[A-Z0-9]{6,12}$/; // 6-12 caracteres, al menos 1 letra, máximo 3 letras
 
@@ -87,7 +87,7 @@ export const CreateProveedorSchemaWithIdentificacionValidation = CreateProveedor
       if (!CEDULA_REGEX.test(Identificacion)) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          message: 'La cédula nacional debe tener 9 dígitos numéricos y no puede comenzar con 0',
+          message: 'La cédula nacional debe tener 9 dígitos numéricos y debe comenzar con un número del 1 al 7',
           path: ['Identificacion'],
         });
       }
@@ -137,7 +137,7 @@ export const IDENTIFICACION_LIMITS_BY_TYPE = {
 
 // Formatos de placeholder para cada tipo de identificación
 export const IDENTIFICACION_PLACEHOLDERS = {
-  'Cedula Nacional': '123456789',
+  'Cedula Nacional': '123456789 (1-7)',
   'Dimex': '123456789012', 
   'Pasaporte': 'ABC123456',
   default: 'Seleccione un tipo primero'
