@@ -3,8 +3,8 @@ import { createColumnHelper, getCoreRowModel, getPaginationRowModel, useReactTab
 import { Building2 } from 'lucide-react';
 import { useProveedoresFisicos } from '../Hook/hookFisicoProveedor';
 import { useProveedoresJuridicos } from '../Hook/hookjuridicoproveedor';
-import ProveedorDetailModal from './proveedorDetailModal';
-import ProveedorJuridicoDetailModal from './ProveedorJuridicoDetailModal';
+import ProveedorDetailModal from './DetailFisicoProveedor';
+import ProveedorJuridicoDetailModal from './DetailJuridicoProveedor';
 import CreateModalProveedor from './CreateModalProveedor';
 import { formatCedulaJuridica } from '../Schema/SchemaProveedorJuridico';
 import type { ProveedorFisico } from '../Models/TablaProveedo/tablaFisicoProveedor';
