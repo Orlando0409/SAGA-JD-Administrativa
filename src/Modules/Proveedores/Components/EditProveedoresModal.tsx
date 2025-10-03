@@ -200,27 +200,6 @@ const EditProveedorModal: React.FC<EditProveedorModalProps> = ({ isOpen, onClose
         </div>
 
         <div className="p-6 overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100 max-h-[calc(90vh-140px)]">
-          {/* Información de campos no editables */}
-          <div className="mb-6 p-4 bg-gray-50 rounded-lg border">
-            <h3 className="text-sm font-medium text-gray-700 mb-3">Información no editable:</h3>
-            <div className="grid grid-cols-1 gap-2 text-sm">
-              <div>
-                <span className="font-medium text-gray-600">Tipo de Identificación:</span>
-                <span className="ml-2 text-gray-800">{proveedor.Tipo_Identificacion}</span>
-              </div>
-              <div>
-                <span className="font-medium text-gray-600">Identificación:</span>
-                <span className="ml-2 text-gray-800">{proveedor.Identificacion}</span>
-              </div>
-              <div>
-                <span className="font-medium text-gray-600">Estado:</span>
-                <span className="ml-2 text-gray-800">
-                  {proveedor.Estado_Proveedor?.Estado_Proveedor || 'Activo'}
-                </span>
-              </div>
-            </div>
-          </div>
-
           <form
             onSubmit={(e) => {
               e.preventDefault();

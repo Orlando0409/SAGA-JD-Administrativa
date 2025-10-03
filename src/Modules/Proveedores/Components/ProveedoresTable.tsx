@@ -6,6 +6,7 @@ import { useProveedoresJuridicos } from '../Hook/hookjuridicoproveedor';
 import ProveedorDetailModal from './proveedorDetailModal';
 import ProveedorJuridicoDetailModal from './ProveedorJuridicoDetailModal';
 import CreateModalProveedor from './CreateModalProveedor';
+import { formatCedulaJuridica } from '../Schema/SchemaProveedorJuridico';
 import type { ProveedorFisico } from '../Models/TablaProveedo/proveedorFisico';
 import type { ProveedorJuridico } from '../Models/TablaProveedo/proveedorjuridico';
 
@@ -62,7 +63,7 @@ export default function ProveedoresTable() {
             Id_Proveedor: proveedor.Id_Proveedor,
             Nombre_Proveedor: proveedor.Razon_Social || proveedor.Nombre_Proveedor, // Usar Razón Social como nombre principal para la tabla
             Telefono_Proveedor: proveedor.Telefono_Proveedor,
-            Identificacion_Unificada: proveedor.Cedula_Juridica || 'Sin cédula jurídica', // Campo corregido
+            Identificacion_Unificada: formatCedulaJuridica(proveedor.Cedula_Juridica || ''), // Aplicar formato
             Tipo_Identificacion_Unificado: 'Cédula Jurídica',
             Estado_Proveedor: proveedor.Estado_Proveedor,
             Tipo_Proveedor: 'Jurídico' as const,

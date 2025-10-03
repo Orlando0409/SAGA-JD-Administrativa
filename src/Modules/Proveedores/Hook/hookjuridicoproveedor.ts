@@ -78,7 +78,7 @@ export const useUpdateProveedorJuridico = () => {
   });
 
   return {
-    updateProveedorJuridico: updateMutation.mutate,
+    updateProveedorJuridico: updateMutation.mutateAsync,
     isUpdating: updateMutation.isPending,
     updateError: updateMutation.error,
     updateSuccess: updateMutation.isSuccess,

@@ -5,6 +5,7 @@ import { useProveedoresJuridicos, useDeleteProveedorJuridico, useChangeProveedor
 import { Accordion, AccordionHeader, AccordionBody } from "@material-tailwind/react";
 import { FiChevronDown, FiChevronRight } from 'react-icons/fi';
 import EditProveedorJuridicoModal from './EditProveedorJuridicoModal';
+import { formatCedulaJuridica } from '../Schema/SchemaProveedorJuridico';
 import {
   AlertDialog,
   AlertDialogTrigger,
@@ -140,7 +141,7 @@ const ProveedorJuridicoDetailModal: React.FC<ProveedorJuridicoDetailModalProps> 
               </div>
               <div>
                 <h2 className="text-2xl font-bold text-white">{proveedor.Nombre_Proveedor}</h2>
-                <p className="text-teal-100">Cédula Jurídica: {proveedor.Cedula_Juridica}</p>
+                <p className="text-teal-100">Cédula Jurídica: {formatCedulaJuridica(proveedor.Cedula_Juridica || '')}</p>
                 <p className="text-teal-200 text-sm">{proveedor.Razon_Social}</p>
               </div>
             </div>
@@ -191,7 +192,7 @@ const ProveedorJuridicoDetailModal: React.FC<ProveedorJuridicoDetailModalProps> 
                       <LuIdCard className="w-4 h-4 text-gray-400" />
                       <div>
                         <label className="block text-sm font-medium text-gray-500 mb-1">Cédula Jurídica</label>
-                        <p className="text-gray-900 font-medium">{proveedor.Cedula_Juridica || 'Sin cédula jurídica'}</p>
+                        <p className="text-gray-900 font-medium">{formatCedulaJuridica(proveedor.Cedula_Juridica || '') || 'Sin cédula jurídica'}</p>
                         <p className="text-xs text-gray-500">Cédula Jurídica</p>
                       </div>
                     </div>

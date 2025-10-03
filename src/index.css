@@ -169,11 +169,11 @@
 
 /* Estilos específicos para formularios de proveedores */
 .phone-input-success .react-phone-number-input__input {
-  @apply border-gray-300 focus:ring-green-500 focus:border-transparent;
+  @apply border-gray-300 focus:ring-blue-500 focus:border-transparent;
 }
 
 .phone-input-success-juridico .react-phone-number-input__input {
-  @apply border-gray-300 focus:ring-blue-500 focus:border-transparent;
+  @apply border-gray-300 focus:ring-green-500 focus:border-transparent;
 }
 
 .phone-input-error .react-phone-number-input__input {
@@ -181,11 +181,11 @@
 }
 
 .phone-input-success .react-phone-number-input__country-select {
-  @apply border-gray-300 focus:ring-green-500 focus:border-transparent;
+  @apply border-gray-300 focus:ring-blue-500 focus:border-transparent;
 }
 
 .phone-input-success-juridico .react-phone-number-input__country-select {
-  @apply border-gray-300 focus:ring-blue-500 focus:border-transparent;
+  @apply border-gray-300 focus:ring-green-500 focus:border-transparent;
 }
 
 .phone-input-error .react-phone-number-input__country-select {
