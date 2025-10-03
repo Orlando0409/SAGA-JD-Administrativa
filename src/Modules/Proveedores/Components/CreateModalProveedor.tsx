@@ -1,17 +1,19 @@
 import { useForm } from '@tanstack/react-form';
 import { useState } from 'react';
 import { LuX, LuUserPlus } from 'react-icons/lu';
+import PhoneInput, { isValidPhoneNumber } from 'react-phone-number-input';
+import 'react-phone-number-input/style.css';
 import { 
   CreateProveedorSchemaWithIdentificacionValidation, 
   type CreateProveedorSchemaData,
   VALIDATION_LIMITS,
   TIPOS_IDENTIFICACION_OPTIONS,
-  ESTADOS_PROVEEDOR_OPTIONS,
   IDENTIFICACION_PLACEHOLDERS,
   IDENTIFICACION_LIMITS_BY_TYPE
 } from '../Schema/Proveedores';
 import { useCreateProveedorFisico } from '../Hook/proveedoresFisicos';
 import type { CreateProveedorData } from '../Models/TablaProveedo/proveedorFisico';
+import { useAlerts } from '@/Modules/Global/context/AlertContext';
 
 interface CreateModalProveedorProps {
   onClose: () => void;
@@ -25,6 +27,9 @@ const CreateModalProveedor = ({ onClose, setShowCreateModal }: CreateModalProvee
     Telefono_Proveedor: 0,
     Identificacion: 0
   });
+
+  // Hook de alertas
+  const { showSuccess, showError, showWarning } = useAlerts();
 
   // Hook para crear proveedor físico
   const { 
@@ -98,9 +103,9 @@ const CreateModalProveedor = ({ onClose, setShowCreateModal }: CreateModalProvee
 
       case 'Telefono_Proveedor':
         if (value) {
-          const TELEFONO_REGEX = /^(\+?506[\s\-]?)?[0-9]{8}$|^(\+?506[\s\-]?)?[0-9]{4}[\s\-]?[0-9]{4}$/;
-          if (!TELEFONO_REGEX.test(value)) {
-            error = 'Formato de teléfono inválido. Ej: 88887777, 8888-7777 o +506-8888-7777';
+          // Validar usando libphonenumber-js para mayor precisión
+          if (!isValidPhoneNumber(value)) {
+            error = 'Número de teléfono inválido para el país seleccionado';
           }
         }
         break;
@@ -131,13 +136,54 @@ const CreateModalProveedor = ({ onClose, setShowCreateModal }: CreateModalProvee
     };
   };
 
+  // Función para manejar errores de API específicos
+  const handleApiError = (error: any) => {
+    console.error('Error creating proveedor:', error);
+    
+    // Manejar errores HTTP 409 (conflictos de duplicación) - ALERTAS AMARILLAS
+    if (error?.response?.status === 409) {
+      const errorMessage = error.response?.data?.message || error.message || '';
+      
+      if (errorMessage.toLowerCase().includes('nombre') || errorMessage.toLowerCase().includes('name')) {
+        showWarning('⚠️ Ya existe un proveedor con este nombre. Por favor, utiliza un nombre diferente.');
+        return;
+      }
+      
+      if (errorMessage.toLowerCase().includes('identificacion') || errorMessage.toLowerCase().includes('identification')) {
+        showWarning('⚠️ Ya existe un proveedor con esta identificación. Por favor, verifica el número de identificación.');
+        return;
+      }
+      
+      // Error 409 genérico - también amarillo
+      showWarning('⚠️ Ya existe un proveedor con esa identificación. Por favor, verifica la información ingresada.');
+      return;
+    }
+    
+    // Otros errores de validación del servidor
+    if (error?.response?.status === 400) {
+      const errorMessage = error.response?.data?.message || 'Datos inválidos';
+      showError(`Error de validación: ${errorMessage}`);
+      return;
+    }
+    
+    // Errores de red o servidor
+    if (error?.response?.status >= 500) {
+      showError('Error del servidor. Por favor, intenta nuevamente más tarde.');
+      return;
+    }
+    
+    // Error genérico
+    const errorMessage = error?.message || 'Error desconocido al crear el proveedor';
+    showError(`Error al crear el proveedor: ${errorMessage}`);
+  };
+
   const form = useForm({
     defaultValues: {
       Nombre_Proveedor: '',
       Telefono_Proveedor: '',
       Tipo_Identificacion: '' as any,
       Identificacion: '',
-      Id_Estado_Proveedor: 0,
+      Id_Estado_Proveedor: 1, // Siempre activo por defecto
     },
 
     onSubmit: async ({ value }: { value: CreateProveedorSchemaData }) => {
@@ -163,19 +209,17 @@ const CreateModalProveedor = ({ onClose, setShowCreateModal }: CreateModalProvee
           Telefono_Proveedor: validation.data.Telefono_Proveedor,
           Tipo_Identificacion: validation.data.Tipo_Identificacion,
           Identificacion: validation.data.Identificacion,
-          Id_Estado_Proveedor: validation.data.Id_Estado_Proveedor,
+          Id_Estado_Proveedor: 1, // Siempre activo al crear
         };
 
         // Usar el hook para crear el proveedor
         await createProveedorFisico(payload);
         
-        alert('Proveedor creado exitosamente');
+        showSuccess('¡Proveedor creado exitosamente!');
         handleClose();
         form.reset();
       } catch (error) {
-        console.error('Error creating proveedor:', error);
-        const errorMessage = error instanceof Error ? error.message : 'Error desconocido al crear el proveedor';
-        alert(`Error al crear el proveedor: ${errorMessage}`);
+        handleApiError(error);
       }
     },
   });
@@ -205,7 +249,7 @@ const CreateModalProveedor = ({ onClose, setShowCreateModal }: CreateModalProvee
   };
 
   return (
-    <div className="fixed inset-0 bg-white bg-opacity-95 flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-black/10 backdrop-blur-md flex items-center justify-center z-50">
       <div className="bg-white rounded-lg shadow-2xl border border-gray-200 w-full max-w-md mx-4 max-h-[90vh] overflow-hidden">
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <div className="flex items-center gap-3">
@@ -335,7 +379,7 @@ const CreateModalProveedor = ({ onClose, setShowCreateModal }: CreateModalProvee
                           <div className="mt-1">
                             <span className="text-xs text-blue-600">
                               {tipoSeleccionado === 'Cedula Nacional' && `Formato: exactamente ${IDENTIFICACION_LIMITS_BY_TYPE['Cedula Nacional']} dígitos, no puede empezar con 0`}
-                              {tipoSeleccionado === 'DIMEX' && `Formato: exactamente ${IDENTIFICACION_LIMITS_BY_TYPE['DIMEX']} dígitos, no puede empezar con 0`}
+                              {tipoSeleccionado === 'Dimex' && `Formato: exactamente ${IDENTIFICACION_LIMITS_BY_TYPE['Dimex']} dígitos, no puede empezar con 0`}
                               {tipoSeleccionado === 'Pasaporte' && `Formato: 6-${IDENTIFICACION_LIMITS_BY_TYPE['Pasaporte']} caracteres (obligatorio), al menos 1 letra, máximo 3 letras`}
                             </span>
                           </div>
@@ -367,63 +411,76 @@ const CreateModalProveedor = ({ onClose, setShowCreateModal }: CreateModalProvee
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Teléfono *
                   </label>
-                  <input
-                    type="tel"
+                  <PhoneInput
+                    defaultCountry="CR"
+                    international
+                    countryCallingCodeEditable={false}
                     value={field.state.value}
-                    onChange={createInputHandler('Telefono_Proveedor', field.handleChange, VALIDATION_LIMITS.TELEFONO_MAX_LENGTH)}
-                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-colors ${
+                    onChange={(value) => {
+                      const phoneValue = value || '';
+                      field.handleChange(phoneValue);
+                      setFieldCharCounts(prev => ({ 
+                        ...prev, 
+                        Telefono_Proveedor: phoneValue.length 
+                      }));
+                      validateFieldRealTime('Telefono_Proveedor', phoneValue);
+                    }}
+                    className={`react-phone-number-input ${
                       (formErrors.Telefono_Proveedor || field.state.meta.errors?.length) 
-                        ? 'border-red-300 focus:ring-red-500' 
-                        : 'border-gray-300 focus:ring-blue-500'
+                        ? 'react-phone-number-input--error' 
+                        : ''
                     }`}
-                    placeholder="Ej: 88887777, 8888-7777 o +506-8888-7777"
-                    maxLength={VALIDATION_LIMITS.TELEFONO_MAX_LENGTH}
+                    style={{
+                      '--PhoneInput-color--focus': '#3b82f6',
+                      '--PhoneInputCountrySelect-marginRight': '0.5rem',
+                      '--PhoneInputCountryFlag-aspectRatio': '1.5',
+                      '--PhoneInputCountryFlag-height': '1rem',
+                      '--PhoneInputCountrySelectArrow-color': '#6b7280',
+                      '--PhoneInputCountrySelectArrow-color--focus': '#3b82f6',
+                    } as React.CSSProperties}
+                    inputProps={{
+                      autoComplete: 'tel',
+                      'aria-label': 'Número de teléfono internacional',
+                      className: `w-full px-3 py-2 border rounded-r-lg focus:ring-2 focus:border-transparent transition-colors ${
+                        (formErrors.Telefono_Proveedor || field.state.meta.errors?.length) 
+                          ? 'border-red-300 focus:ring-red-500' 
+                          : 'border-gray-300 focus:ring-blue-500'
+                      }`,
+                      placeholder: 'Número de teléfono'
+                    }}
+                    countrySelectProps={{
+                      'aria-label': 'Seleccionar país',
+                      className: `border rounded-l-lg px-2 py-2 bg-white hover:bg-gray-50 focus:ring-2 focus:border-transparent transition-colors ${
+                        (formErrors.Telefono_Proveedor || field.state.meta.errors?.length) 
+                          ? 'border-red-300 focus:ring-red-500' 
+                          : 'border-gray-300 focus:ring-blue-500'
+                      }`
+                    }}
                   />
                   
-                  {renderCharCounter(
-                    fieldCharCounts.Telefono_Proveedor, 
-                    VALIDATION_LIMITS.TELEFONO_MAX_LENGTH, 
-                    !!(formErrors.Telefono_Proveedor || field.state.meta.errors?.length)
-                  )}
+                  <div className="flex justify-between items-center mt-1">
+                    <span className="text-xs text-gray-500">
+                      Seleccione país y ingrese su número
+                    </span>
+                    <span className={`text-xs ${
+                      field.state.value && isValidPhoneNumber(field.state.value) 
+                        ? 'text-green-600' 
+                        : field.state.value 
+                          ? 'text-red-600' 
+                          : 'text-gray-500'
+                    }`}>
+                      {field.state.value 
+                        ? (isValidPhoneNumber(field.state.value) ? '✓ Válido' : '✗ Inválido')
+                        : 'Pendiente'
+                      }
+                    </span>
+                  </div>
                   
                   {field.state.meta.errors?.map((err) => (
                     <p key={err} className="text-red-500 text-xs mt-1">{err}</p>
                   ))}
                   {formErrors.Telefono_Proveedor && (
                     <p className="text-red-500 text-xs mt-1">{formErrors.Telefono_Proveedor}</p>
-                  )}
-                </div>
-              )}
-            </form.Field>
-
-            {/* Estado del Proveedor */}
-            <form.Field name="Id_Estado_Proveedor">
-              {(field) => (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Estado del Proveedor *
-                  </label>
-                  <select
-                    value={field.state.value}
-                    onChange={(e) => field.handleChange(Number(e.target.value))}
-                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-colors ${
-                      (formErrors.Id_Estado_Proveedor || field.state.meta.errors?.length) 
-                        ? 'border-red-300 focus:ring-red-500' 
-                        : 'border-gray-300 focus:ring-blue-500'
-                    }`}
-                  >
-                    <option value={0}>Seleccionar estado</option>
-                    {ESTADOS_PROVEEDOR_OPTIONS.map((estado) => (
-                      <option key={estado.id} value={estado.id}>
-                        {estado.nombre}
-                      </option>
-                    ))}
-                  </select>
-                  {field.state.meta.errors?.map((err) => (
-                    <p key={err} className="text-red-500 text-xs mt-1">{err}</p>
-                  ))}
-                  {formErrors.Id_Estado_Proveedor && (
-                    <p className="text-red-500 text-xs mt-1">{formErrors.Id_Estado_Proveedor}</p>
                   )}
                 </div>
               )}

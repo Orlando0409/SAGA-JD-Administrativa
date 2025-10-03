@@ -15,7 +15,7 @@ export const getProveedoresFisicos = async (): Promise<ProveedorFisico[]> => {
 // Función para crear un proveedor físico
 export const createProveedorFisico = async (proveedor: CreateProveedorData): Promise<ProveedorFisico> => {
   try {
-    const response = await apiAuth.post('/Proveedores/fisico', proveedor);
+    const response = await apiAuth.post('/Proveedores/fisico/create', proveedor);
     return response.data;
   } catch (error) {
     console.error('Error al crear proveedor físico:', error);
@@ -53,6 +53,21 @@ export const deleteProveedorFisico = async (id: number): Promise<void> => {
     console.log(`✅ Proveedor físico ID: ${id} eliminado correctamente`);
   } catch (error) {
     console.error(`❌ Error al eliminar proveedor físico ID: ${id}`, error);
+    throw error;
+  }
+};
+
+// Función para cambiar el estado de un proveedor físico
+export const changeProveedorFisicoStatus = async (id: number, nuevoEstado: number): Promise<ProveedorFisico> => {
+  try {
+    console.log(`🔄 Cambiando estado del proveedor físico ID: ${id} al estado: ${nuevoEstado}`);
+    const response = await apiAuth.patch(`/Proveedores/Fisico/${id}/estado`, { 
+      Id_Estado_Proveedor: nuevoEstado 
+    });
+    console.log(`✅ Estado del proveedor físico ID: ${id} cambiado correctamente`);
+    return response.data;
+  } catch (error) {
+    console.error(`❌ Error al cambiar estado del proveedor físico ID: ${id}`, error);
     throw error;
   }
 };

@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { isValidPhoneNumber } from 'libphonenumber-js';
 
 // Expresiones regulares para validaciones
 const NOMBRE_REGEX = /^[a-zA-ZÀ-ÿ\u00f1\u00d1\s]+$/; // Solo letras, espacios y caracteres latinos (sin números)
@@ -14,12 +15,18 @@ function normalizeIdentificacion(value: string): string {
     return value.replace(/[\s\-]/g, '').toUpperCase();
 }
 
-// Validación de teléfono (específica para Costa Rica)
-const TELEFONO_REGEX = /^(\+?506[\s\-]?)?[0-9]{8}$|^(\+?506[\s\-]?)?[0-9]{4}[\s\-]?[0-9]{4}$/;
+// Validación de teléfono (formato internacional usando libphonenumber-js)
+const validatePhoneNumber = (value: string): boolean => {
+  try {
+    return isValidPhoneNumber(value);
+  } catch {
+    return false;
+  }
+};
 
 // Enum para tipos de identificación (valores que espera el backend)
-const TipoIdentificacionEnum = z.enum(['Cedula Nacional', 'DIMEX', 'Pasaporte'], {
-  errorMap: () => ({ message: 'Para proveedores físicos solo se permiten: Cedula Nacional, DIMEX, Pasaporte' })
+const TipoIdentificacionEnum = z.enum(['Cedula Nacional', 'Dimex', 'Pasaporte'], {
+  errorMap: () => ({ message: 'Para proveedores físicos solo se permiten: Cedula Nacional, Dimex, Pasaporte' })
 });
 
 export const CreateProveedorSchema = z.object({
@@ -44,8 +51,8 @@ export const CreateProveedorSchema = z.object({
   Telefono_Proveedor: z.string()
     .min(1, { message: 'El número de teléfono no puede estar vacío' })
     .transform((val) => val.trim())
-    .refine((val) => TELEFONO_REGEX.test(val), {
-      message: 'Formato de teléfono inválido. Ej: 8888-7777 o +506-8888-7777'
+    .refine((val) => validatePhoneNumber(val), {
+      message: 'Número de teléfono internacional inválido. Debe incluir código de país válido'
     }),
 
   Id_Estado_Proveedor: z.number()
@@ -70,8 +77,8 @@ export const EditProveedorSchema = z.object({
   Telefono_Proveedor: z.string()
     .min(1, { message: 'El número de teléfono no puede estar vacío' })
     .transform((val) => val.trim())
-    .refine((val) => TELEFONO_REGEX.test(val), {
-      message: 'Formato de teléfono inválido. Ej: 88887777, 8888-7777 o +506-8888-7777'
+    .refine((val) => validatePhoneNumber(val), {
+      message: 'Número de teléfono internacional inválido. Debe incluir código de país válido'
     })
 });
 
@@ -91,7 +98,7 @@ export const CreateProveedorSchemaWithIdentificacionValidation = CreateProveedor
         });
       }
       break;
-    case 'DIMEX':
+    case 'Dimex':
       if (!DIMEX_REGEX.test(Identificacion)) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
@@ -129,7 +136,7 @@ export const VALIDATION_LIMITS = {
 // Límites específicos por tipo de identificación
 export const IDENTIFICACION_LIMITS_BY_TYPE = {
   'Cedula Nacional': VALIDATION_LIMITS.CEDULA_LENGTH,
-  'DIMEX': VALIDATION_LIMITS.DIMEX_LENGTH,
+  'Dimex': VALIDATION_LIMITS.DIMEX_LENGTH,
   'Pasaporte': VALIDATION_LIMITS.PASAPORTE_MAX_LENGTH,
   default: VALIDATION_LIMITS.IDENTIFICACION_MAX_LENGTH
 } as const;
@@ -137,7 +144,7 @@ export const IDENTIFICACION_LIMITS_BY_TYPE = {
 // Formatos de placeholder para cada tipo de identificación
 export const IDENTIFICACION_PLACEHOLDERS = {
   'Cedula Nacional': '123456789',
-  'DIMEX': '123456789012', 
+  'Dimex': '123456789012', 
   'Pasaporte': 'ABC123456',
   default: 'Seleccione un tipo primero'
 } as const;
@@ -146,7 +153,7 @@ export const IDENTIFICACION_PLACEHOLDERS = {
 export const TIPOS_IDENTIFICACION_OPTIONS = [
   { value: 'Cedula Nacional' as const, label: 'Cédula Nacional' },
   { value: 'Pasaporte' as const, label: 'Pasaporte' },
-  { value: 'DIMEX' as const, label: 'DIMEX' },
+  { value: 'Dimex' as const, label: 'DIMEX' },
 ] as const;
 
 // Estados de proveedor (para usar en el frontend)
