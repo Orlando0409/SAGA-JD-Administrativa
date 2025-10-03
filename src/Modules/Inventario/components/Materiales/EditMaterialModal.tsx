@@ -11,6 +11,9 @@ import {
   type EditMaterialModalProps
 } from '../../types/MaterialTypes';
 import type { UpdateMaterialData } from '../../models/Material';
+import CreateCategoriaModal from '../Categorias/CreateCategoriaModal';
+import CreateUnidadMedicionModal from '../UnidadesMedicion/CreateUnidadMedicionModal';
+import { LuPlus } from 'react-icons/lu';
 
 
 const EditMaterialModal: React.FC<EditMaterialModalProps> = ({
@@ -22,7 +25,9 @@ const EditMaterialModal: React.FC<EditMaterialModalProps> = ({
   const updateMaterialMutation = useUpdateMaterial();
   const { data: categorias = [] } = useGetAllCategories();
   const { data: unidadesMedicion = [] } = useUnidadesMedicionSimple();
-  
+  const [isCreateCategoriaModalOpen, setIsCreateCategoriaModalOpen] = useState(false);
+  const [isCreateUnidadMedicionModalOpen, setIsCreateUnidadMedicionModalOpen] = useState(false);
+    
   const [formData, setFormData] = useState<UpdateMaterialData>({
     Nombre_Material: '',
     Descripcion: '',
@@ -44,11 +49,11 @@ const EditMaterialModal: React.FC<EditMaterialModalProps> = ({
       setFormData({
         Nombre_Material: material.Nombre_Material,
         Descripcion: material.Descripcion || '',
-        Id_Unidad_Medicion: material.Id_Unidad_Medicion,
+        Id_Unidad_Medicion: material.Unidad_Medicion.Id_Unidad_Medicion,
         Precio_Unitario: material.Precio_Unitario,
-        IDS_Categorias: material.Categorias?.map(cat => cat.Id_Categoria) || [],
+        IDS_Categorias: material.Categorias?.map(cat => cat.Categoria.Id_Categoria) || [],
       });
-      setSelectedCategorias(material.Categorias?.map(cat => cat.Id_Categoria) || []);
+      setSelectedCategorias(material.Categorias?.map(cat => cat.Categoria.Id_Categoria) || []);
       setFieldCharCounts({
         nombreMaterial: material.Nombre_Material.length,
         descripcion: (material.Descripcion || '').length
@@ -175,9 +180,16 @@ const EditMaterialModal: React.FC<EditMaterialModalProps> = ({
             </div>
 
             <div>
-              <label htmlFor="unidad" className="block text-sm flex gap-2 font-medium text-gray-700 mb-1">
-                Unidad de Medición
-                <p className="text-red-500">*</p>
+              <label htmlFor="unidad" className="block text-sm flex justify-between font-medium text-gray-700 mb-1">
+                <span className="flex gap-1 items-center justify-center">Unidad de Medición <p className="text-red-500">*</p></span>
+                <button
+                  type="button"
+                  onClick={() => setIsCreateUnidadMedicionModalOpen(true)}
+                  className="flex items-center gap-1 px-2 py-1 text-xs text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded transition-colors"
+                >
+                  <LuPlus className="w-3 h-3" />
+                  Nueva
+                </button>
               </label>
               <select
                 id="unidad"
@@ -266,8 +278,16 @@ const EditMaterialModal: React.FC<EditMaterialModalProps> = ({
           </div>
 
           <div>
-            <div className="block text-sm font-medium text-gray-700 mb-2">
-              Categorías (Opcional)
+            <div className="block text-sm font-medium flex justify-between text-gray-700 mb-2">
+              <span>Categorías (Opcional)</span>
+                <button
+                type="button"
+                onClick={() => setIsCreateCategoriaModalOpen(true)}
+                className="flex items-center gap-1 px-2 py-1 text-xs text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded transition-colors"
+              >
+                <LuPlus className="w-3 h-3" />
+                Nueva
+              </button>
             </div>
 
             <div className={`grid grid-cols-2 md:grid-cols-3 gap-2 max-h-40 overflow-y-auto border rounded-md p-3 ${
@@ -315,6 +335,15 @@ const EditMaterialModal: React.FC<EditMaterialModalProps> = ({
           </div>
         </form>
       </div>
+
+            <CreateCategoriaModal
+              isOpen={isCreateCategoriaModalOpen}
+              onClose={() => setIsCreateCategoriaModalOpen(false)}
+            />
+            <CreateUnidadMedicionModal
+              isOpen={isCreateUnidadMedicionModalOpen}
+              onClose={() => setIsCreateUnidadMedicionModalOpen(false)}
+            />
     </div>
   )
 }

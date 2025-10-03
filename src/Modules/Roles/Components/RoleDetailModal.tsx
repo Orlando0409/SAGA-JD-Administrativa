@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useActivateRole, useDeactivateRole, useRoleById } from '../Hooks/RoleHook';
 import { LuShield, LuUser, LuUserCheck, LuUserX, LuX } from 'react-icons/lu';
-import type { Permiso } from '@/Modules/Usuarios/Models/Usuario';
+import type { Permiso } from '@/Modules/Roles/Models/Role';
 
 import { getPermissionLabel } from '@/Modules/Usuarios/Helper/GroupPermiByModule';
 import type { RoleDetailModalProps } from '../Types/RoleTypes';
@@ -48,12 +48,12 @@ const RoleDetailModal: React.FC<RoleDetailModalProps> = ({ roleId, isOpen, onClo
 
   if (!isOpen) return null;
 
-    // Agrupar permisos por módulo
-   const groupedPermisos = role?.permisos?.reduce((acc: any, permiso: Permiso) => {
-    if (!acc[permiso.modulo]) {
-      acc[permiso.modulo] = [];
+  // Agrupar permisos por módulo
+  const groupedPermisos = role?.Permisos?.reduce((acc: any, permiso: Permiso) => {
+    if (!acc[permiso.Modulo]) {
+      acc[permiso.Modulo] = [];
     }
-    acc[permiso.modulo].push(permiso);
+    acc[permiso.Modulo].push(permiso);
     return acc;
   }, {});
 
@@ -62,7 +62,6 @@ const RoleDetailModal: React.FC<RoleDetailModalProps> = ({ roleId, isOpen, onClo
     <>
       <div className="fixed inset-0 bg-white bg-opacity-95 flex items-center justify-center z-50 p-4">
         <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
-          {/* Header */}
           <div className="flex items-center justify-between p-6 border-b border-gray-200">
             <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-3">
               <LuShield className="w-7 h-7 text-blue-600" />
@@ -76,7 +75,6 @@ const RoleDetailModal: React.FC<RoleDetailModalProps> = ({ roleId, isOpen, onClo
             </button>
           </div>
 
-          {/* Body */}
           <div className="p-6 overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100 max-h-[calc(90vh-140px)]">
             {isLoading ? (
               <div className="flex items-center justify-center h-64">
@@ -84,7 +82,6 @@ const RoleDetailModal: React.FC<RoleDetailModalProps> = ({ roleId, isOpen, onClo
               </div>
             ) : (
               <div className="space-y-8">
-                {/* Información básica del rol */}
                 <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
                   <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
                     <LuUser className="w-5 h-5 text-blue-600" />
@@ -92,15 +89,15 @@ const RoleDetailModal: React.FC<RoleDetailModalProps> = ({ roleId, isOpen, onClo
                   </h3>
                   <div className="grid grid-cols-2 md:grid-cols-2 gap-6">
                     <div>
-                      <label className="block text-sm font-medium text-gray-500 mb-1">Nombre del Rol</label>
+                      <label htmlFor='role-name' className="block text-sm font-medium text-gray-500 mb-1">Nombre del Rol</label>
                       <p className="text-gray-900 font-medium">{role?.Nombre_Rol}</p>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-500 mb-1">Total de Permisos</label>
-                      <p className="text-gray-900 font-medium">{role?.permisos?.length || 0} permisos asignados</p>
+                      <label htmlFor='role-permissions' className="block text-sm font-medium text-gray-500 mb-1">Total de Permisos</label>
+                      <p className="text-gray-900 font-medium">{role?.Permisos?.length || 0} permisos asignados</p>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-500 mb-2">Estado del Rol</label>
+                      <label htmlFor='role-status' className="block text-sm font-medium text-gray-500 mb-2">Estado del Rol</label>
                       <span className={`inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium border ${
                         isActive(role?.Fecha_Eliminacion)
                           ? 'bg-green-100 text-green-800 border-green-200' 
@@ -112,7 +109,6 @@ const RoleDetailModal: React.FC<RoleDetailModalProps> = ({ roleId, isOpen, onClo
                   </div>
                 </div>
 
-                {/* Permisos por módulo */}
                 <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
                   <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
                     <LuShield className="w-5 h-5 text-blue-600" />
@@ -139,7 +135,7 @@ const RoleDetailModal: React.FC<RoleDetailModalProps> = ({ roleId, isOpen, onClo
                             {permisos.map((permiso: Permiso) => {
                               const label = getPermissionLabel(permiso);
                               return (
-                                <div key={permiso.id} className="text-center">
+                                <div key={permiso.Id} className="text-center">
                                   <div className={`px-3 py-1 rounded-full text-xs font-medium ${label.className}`}>
                                     {label.text}
                                   </div>
@@ -155,7 +151,7 @@ const RoleDetailModal: React.FC<RoleDetailModalProps> = ({ roleId, isOpen, onClo
                 </div>
               </div>
             )}
-                      {/* Footer */}
+          
           <div className="flex justify-end gap-4 mt-8">
             {canEdit('usuarios') && (
               <Button
@@ -245,7 +241,6 @@ const RoleDetailModal: React.FC<RoleDetailModalProps> = ({ roleId, isOpen, onClo
           </div>
         </div>
       </div>
-      {/* Modal de edición */}
       {showEditModal && (
         <EditRoleModal
           roleId={roleId}

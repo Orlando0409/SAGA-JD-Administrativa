@@ -28,7 +28,7 @@ export const HomeLayout = ({ children }: { children: (allowedModules: any) => Re
               <SidebarInset className="flex flex-col h-full">
                 {!isLoading && canView('solicitudes') && (
                   <header className="flex-shrink-0 bg-white border-b border-gray-200 px-4 py-2 flex items-center justify-between">
-                    <SidebarTrigger className="md:hidden" />
+                    <SidebarTrigger className="md:hidden w-16 h-16 inline-flex items-center justify-center" />
                     <div className="ml-auto">
                       <BuzonNotificaciones onVerSolicitud={handleVerSolicitud} />
                     </div>

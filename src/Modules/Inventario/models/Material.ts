@@ -1,4 +1,4 @@
-import type { CategoriaMaterial, MaterialCategoria } from "./CategoriaMaterial";
+import type { CategoriaMaterial } from "./CategoriaMaterial";
 import type { UnidadMedicion } from "./UnidadMedicion";
 
 
@@ -12,12 +12,12 @@ export interface Material {
   Fecha_Actualizacion: Date | string;
   Fecha_Salida?: Date | string | null;
   Fecha_Baja?: Date | string | null;
-  Id_Estado_Material?: number;
   Estado_Material: EstadoMaterial;
-  Id_Unidad_Medicion: number;
   Unidad_Medicion: UnidadMedicion;
-  materialCategorias: MaterialCategoria[];
-  Categorias?: CategoriaMaterial[];
+  Categorias: {
+    Id_Material_Categoria: number;
+    Categoria: CategoriaMaterial;
+  }[];
 }
 
 export interface CreateMaterialData {

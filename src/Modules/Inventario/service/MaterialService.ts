@@ -5,10 +5,11 @@ import type {
   UpdateMaterialData, 
 } from '../models/Inventario';
 
-const transformMaterial = (material: Material) => {
+const transformMaterial = (material: any) => {
   return {
     ...material,
-    Categorias: material.Categorias?.map((catItem: any) => catItem.Categoria) || []
+    // Use the correct property name from backend
+    Categorias: material.Categorias || material.materialCategorias || []
   };
 };
 

@@ -6,7 +6,6 @@ import { CreateUserSchema, type CreateUserSchemaData } from '../Schema/CreateUse
 import type { Role } from '@/Modules/Roles/Models/Role';
 import { useRoles } from '@/Modules/Roles/Hooks/RoleHook';
 import { type CreateUserProps, NOMBRE_MAX_LENGTH, EMAIL_MAX_LENGTH, PASSWORD_MAX_LENGTH, PASSWORD_MIN_LENGTH } from '../Types/UserTypes';
-import { useAlerts } from '@/Modules/Global/context/AlertContext';
 
 
 
@@ -21,7 +20,6 @@ const CreateUserModal = ({ onClose, setShowCreateModal }: CreateUserProps) => {
     confirmPassword: 0
   });
 
-  // Función para manejar el cierre del modal
   const handleClose = () => {
     if (onClose) onClose();
     if (setShowCreateModal) setShowCreateModal(false);
@@ -33,12 +31,10 @@ const CreateUserModal = ({ onClose, setShowCreateModal }: CreateUserProps) => {
     return (e: React.ChangeEvent<HTMLInputElement>) => {
       const value = e.target.value;
       
-      // Limitar caracteres al máximo permitido
       if (value.length <= maxLength) {
         handleChange(value);
         setFieldCharCounts(prev => ({ ...prev, [fieldName]: value.length }));
         
-        // Limpiar errores de validación cuando el usuario empieza a escribir
         if (formErrors[fieldName]) {
           setFormErrors(prev => ({ ...prev, [fieldName]: '' }));
         }
@@ -131,10 +127,11 @@ const CreateUserModal = ({ onClose, setShowCreateModal }: CreateUserProps) => {
             <form.Field name="Nombre_Usuario">
               {(field) => (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="Nombre_Usuario" className="block text-sm font-medium text-gray-700 mb-1">
                     Nombre de Usuario
                   </label>
                   <input
+                    id="Nombre_Usuario"
                     type="text"
                     value={field.state.value}
                     onChange={createInputHandler('nombreUsuario', field.handleChange, NOMBRE_MAX_LENGTH)}
@@ -167,10 +164,11 @@ const CreateUserModal = ({ onClose, setShowCreateModal }: CreateUserProps) => {
             <form.Field name="Correo_Electronico">
               {(field) => (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="Correo_Electronico" className="block text-sm font-medium text-gray-700 mb-1">
                     Correo Electrónico
                   </label>
                   <input
+                    id="Correo_Electronico"
                     type="email"
                     value={field.state.value}
                     onChange={createInputHandler('email', field.handleChange, EMAIL_MAX_LENGTH)}
@@ -203,10 +201,11 @@ const CreateUserModal = ({ onClose, setShowCreateModal }: CreateUserProps) => {
             <form.Field name="Contraseña">
               {(field) => (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="Contraseña" className="block text-sm font-medium text-gray-700 mb-1">
                     Contraseña
                   </label>
                   <input
+                    id="Contraseña"
                     type="password"
                     value={field.state.value}
                     onChange={createInputHandler('password', field.handleChange, PASSWORD_MAX_LENGTH)}
@@ -239,10 +238,11 @@ const CreateUserModal = ({ onClose, setShowCreateModal }: CreateUserProps) => {
             <form.Field name="confirmarPassword">
               {(field) => (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="confirmarPassword" className="block text-sm font-medium text-gray-700 mb-1">
                     Confirme la Contraseña
                   </label>
                   <input
+                    id="confirmarPassword"
                     type="password"
                     value={field.state.value}
                     onChange={createInputHandler('confirmPassword', field.handleChange, PASSWORD_MAX_LENGTH)}
@@ -275,10 +275,11 @@ const CreateUserModal = ({ onClose, setShowCreateModal }: CreateUserProps) => {
             <form.Field name="Id_Rol">
               {(field) => (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="Id_Rol" className="block text-sm font-medium text-gray-700 mb-1">
                     Rol
                   </label>
                   <select
+                    id="Id_Rol"
                     value={field.state.value}
                     onChange={(e) => field.handleChange(Number(e.target.value))}
                     className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-colors ${

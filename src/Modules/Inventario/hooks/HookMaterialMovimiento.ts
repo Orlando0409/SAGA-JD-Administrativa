@@ -24,7 +24,7 @@ export const useIngresoMaterial = () => {
       queryClient.invalidateQueries({ queryKey: ['material'] });
     },
     onError: (error: any) => {
-      const errorMessage = error?.response?.data?.message || 'Error al registrar el ingreso de material';
+      const errorMessage = error?.response?.data?.message;
       showError('Error', errorMessage);
     },
   });

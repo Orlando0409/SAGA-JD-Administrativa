@@ -7,18 +7,16 @@ import {
   getPaginationRowModel,
   createColumnHelper,
 } from '@tanstack/react-table';
-import { LuPlus, LuSearch, LuPencil, LuEye, LuArrowLeft } from 'react-icons/lu';
+import { LuPlus, LuSearch, LuArrowLeft } from 'react-icons/lu';
 import { MdKeyboardArrowLeft, MdKeyboardArrowRight, MdKeyboardDoubleArrowLeft,
   MdKeyboardDoubleArrowRight, 
   MdKeyboardArrowDown,
   MdKeyboardArrowUp} from "react-icons/md";
-import { useGetAllCategories, useDeleteCategoria } from '../../hooks/useCategorias';
+import { useGetAllCategories, useUpdateEstadoCategoria } from '../../hooks/useCategorias';
 import CreateCategoriaModal from './CreateCategoriaModal';
 import EditCategoriaModal from './EditCategoriaModal';
 import DetailCategoriaModal from './DetailCategoriaModal';
 import type { CategoriaMaterial } from '../../models/Inventario';
-import { IoMdCheckmarkCircleOutline } from "react-icons/io";
-import { FiXCircle } from "react-icons/fi"; 
 
 interface CategoriasManagementProps {
   onBack?: () => void;
@@ -34,7 +32,7 @@ const CategoriasManagement: React.FC<CategoriasManagementProps> = ({ onBack }) =
 
   // Hooks
   const { data: categorias = [], isLoading, error } = useGetAllCategories();
-  const deleteMutation = useDeleteCategoria();
+  const updateEstadoMutation = useUpdateEstadoCategoria();
 
   // Configuración de columnas
   const columnHelper = createColumnHelper<CategoriaMaterial>();
@@ -51,52 +49,66 @@ const CategoriasManagement: React.FC<CategoriasManagementProps> = ({ onBack }) =
         </button>
       ),
     }),
-    columnHelper.display({
-      id: 'estado',
+    columnHelper.accessor('Estado_Categoria.Nombre_Estado_Categoria', {
       header: 'Estado',
-      cell: () => (
-        <div className="flex justify-center">
-          <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
-            Activa
-          </span>
-        </div>
-      ),
+      cell: info => {
+        const estado = info.getValue() || 'Activa';
+        const isActiva = estado === 'Activa';
+        return (
+          <div className="flex justify-start">
+            <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+              isActiva 
+                ? 'bg-green-100 text-green-800' 
+                : 'bg-red-100 text-red-800'
+            }`}>
+              {estado}
+            </span>
+          </div>
+        );
+      },
     }),
     columnHelper.display({
       id: 'acciones',
       header: 'Acciones',
       cell: info => (
-        <div className="flex justify-center gap-2">
+        <div className="flex justify-center gap-1">
           <button
-            className="p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-md transition-colors"
+            className="px-2 py-1 bg-gray-600 text-white text-xs rounded hover:bg-gray-700 transition-colors"
             onClick={() => handleViewDetail(info.row.original)}
             title="Ver detalles"
           >
-            <LuEye className="w-4 h-4" />
+            Ver
           </button>
           <button
-            className="p-2 text-green-600 hover:text-green-800 hover:bg-green-50 rounded-md transition-colors"
+            className="px-2 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition-colors"
             onClick={() => handleEdit(info.row.original)}
             title="Editar"
           >
-            <LuPencil className="w-4 h-4" />
+            Editar
           </button>
-          <button
-            className="p-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-md transition-colors"
-            onClick={() => handleDelete(info.row.original)}
-            disabled={deleteMutation.isPending}
-            title="desactivar"
-          >
-            {deleteMutation.isPending && deleteMutation.variables === info.row.original.Id_Categoria ? (
-              <IoMdCheckmarkCircleOutline className="w-4 h-4" />
+            {info.row.original.Estado_Categoria?.Nombre_Estado_Categoria === 'Activa' ? (
+            <button
+              className="px-2 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-700 transition-colors"
+              onClick={() => handleToggleEstado(info.row.original)}
+              disabled={updateEstadoMutation.isPending}
+              title="Desactivar"
+            >
+              Desactivar
+            </button>
             ) : (
-              <FiXCircle className="w-4 h-4" />
+            <button
+              className="px-2 py-1 bg-green-600 text-white text-xs rounded hover:bg-green-700 transition-colors"
+              onClick={() => handleToggleEstado(info.row.original)}
+              disabled={updateEstadoMutation.isPending}
+              title="Activar"
+            >
+              Activar
+            </button>
             )}
-          </button>
         </div>
       ),
     }),
-  ], [deleteMutation.isPending]);
+  ], [updateEstadoMutation.isPending]);
 
   // Configuración de la tabla
   const table = useReactTable({
@@ -128,14 +140,15 @@ const CategoriasManagement: React.FC<CategoriasManagementProps> = ({ onBack }) =
     setShowDetailModal(true);
   };
 
-  const handleDelete = async (categoria: CategoriaMaterial) => {
-    if (confirm(`¿Estás seguro de que quieres eliminar la categoría "${categoria.Nombre_Categoria}"?`)) {
+  const handleToggleEstado = async (categoria: CategoriaMaterial) => {
       try {
-        await deleteMutation.mutateAsync(categoria.Id_Categoria);
+        await updateEstadoMutation.mutateAsync({
+          id: categoria.Id_Categoria,
+          nuevoEstado: categoria.Estado_Categoria?.Id_Estado_Categoria === 1 ? 2 : 1
+        });
       } catch (error) {
-        console.error('Error al eliminar categoría:', error);
+        console.error('Error al cambiar estado de la categoría:', error);
       }
-    }
   };
 
   if (isLoading) {

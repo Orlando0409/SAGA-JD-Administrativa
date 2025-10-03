@@ -14,8 +14,8 @@ const FilterMaterialModal: React.FC<FilterMaterialModalProps> = ({
   const { data: categorias = [] } = useGetAllCategories();
   
   const estados = [
-    { id: 1, nombre: 'DISPONIBLE' },
-    { id: 2, nombre: 'AGOTADO' }
+    { id: 1, nombre: 'Disponible' },
+    { id: 2, nombre: 'Agotado' }
   ];
   
   const [filters, setFilters] = useState<MaterialFilterOptions>(currentFilters);
@@ -27,7 +27,7 @@ const FilterMaterialModal: React.FC<FilterMaterialModalProps> = ({
 
   const handleClear = () => {
     const clearFilters: MaterialFilterOptions = {
-      categoria: '',
+      categoria: [],
       estado: '',
       conStock: false,
       precioMin: undefined,
@@ -61,24 +61,127 @@ const FilterMaterialModal: React.FC<FilterMaterialModalProps> = ({
           </button>
         </div>
 
-        <div className="p-6 space-y-4 overflow-y-auto max-h-[calc(90vh-140px)]">
+        <div className="p-6 space-y-4 overflow-y-auto max-h-[calc(90vh-140px)] scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100">
           <div>
-            <label htmlFor="filter-categoria" className="block text-sm font-medium text-gray-700 mb-2">
-              Categoría
-            </label>
-            <select
-              id="filter-categoria"
-              value={filters.categoria || ''}
-              onChange={(e) => setFilters(prev => ({ ...prev, categoria: e.target.value || undefined }))}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-              <option value="">Todas las categorías</option>
-              {categorias.map((categoria) => (
-                <option key={categoria.Id_Categoria} value={categoria.Nombre_Categoria}>
-                  {categoria.Nombre_Categoria}
-                </option>
-              ))}
-            </select>
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm font-medium text-gray-700">
+                Categorías
+              </span>
+              <div className="flex gap-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setFilters(prev => ({
+                      ...prev,
+                      categoria: categorias.map(c => c.Id_Categoria)
+                    }));
+                  }}
+                  className="text-xs text-blue-600 hover:text-blue-700 font-medium"
+                >
+                  Todas
+                </button>
+                <span className="text-xs text-gray-400">|</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setFilters(prev => ({
+                      ...prev,
+                      categoria: []
+                    }));
+                  }}
+                  className="text-xs text-gray-600 hover:text-gray-700 font-medium"
+                >
+                  Ninguna
+                </button>
+              </div>
+            </div>
+            
+            {filters.categoria && filters.categoria.length > 0 && (
+              <div className="mb-3 p-2 bg-gray-50 rounded-lg">
+                <div className="text-xs text-gray-600 mb-2">
+                  Categorías seleccionadas ({filters.categoria.length}):
+                </div>
+                <div className="flex flex-wrap gap-1">
+                  {filters.categoria.map((categoriaId) => {
+                    const categoria = categorias.find(c => c.Id_Categoria === categoriaId);
+                    return categoria ? (
+                      <span
+                        key={categoriaId}
+                        className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full"
+                      >
+                        {categoria.Nombre_Categoria}
+                        <button
+                          onClick={() => {
+                            setFilters(prev => ({
+                              ...prev,
+                              categoria: prev.categoria?.filter(id => id !== categoriaId) || []
+                            }));
+                          }}
+                          className="text-blue-600 hover:text-blue-800 ml-1"
+                        >
+                          <LuX className="w-3 h-3" />
+                        </button>
+                      </span>
+                    ) : null;
+                  })}
+                </div>
+              </div>
+            )}
+
+            <div className="max-h-48 overflow-y-auto border border-gray-200 rounded-lg scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100">
+              {categorias.length > 0 ? (
+                <div className="divide-y divide-gray-100">
+                  {categorias.map((categoria) => {
+                    const isSelected = filters.categoria?.includes(categoria.Id_Categoria) || false;
+                    return (
+                      <label
+                        key={categoria.Id_Categoria}
+                        className={`flex items-center space-x-3 p-3 cursor-pointer transition-colors ${
+                          isSelected 
+                            ? 'bg-blue-50 border-l-2 border-l-blue-500' 
+                            : 'hover:bg-gray-50'
+                        }`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          onChange={(e) => {
+                            const currentCategorias = filters.categoria || [];
+                            if (e.target.checked) {
+                              // Agregar categoría
+                              setFilters(prev => ({
+                                ...prev,
+                                categoria: [...currentCategorias, categoria.Id_Categoria]
+                              }));
+                            } else {
+                              // Remover categoría
+                              setFilters(prev => ({
+                                ...prev,
+                                categoria: currentCategorias.filter(id => id !== categoria.Id_Categoria)
+                              }));
+                            }
+                          }}
+                          className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 focus:ring-offset-0"
+                        />
+                        <span className={`text-sm flex-1 ${
+                          isSelected ? 'text-blue-900 font-medium' : 'text-gray-700'
+                        }`}>
+                          {categoria.Nombre_Categoria}
+                        </span>
+                        {isSelected && (
+                          <span className="text-blue-600 text-xs">✓</span>
+                        )}
+                      </label>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="p-6 text-center text-gray-500 text-sm">
+                  <div className="mb-2">📂</div>
+                  No hay categorías disponibles
+                </div>
+              )}
+            </div>
           </div>
 
           <div>

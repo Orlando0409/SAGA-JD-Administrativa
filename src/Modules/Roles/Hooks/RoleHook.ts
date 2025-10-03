@@ -3,6 +3,7 @@ import { useAlerts } from "@/Modules/Global/context/AlertContext";
 import type { UpdateRoleData } from "../Models/Role";
 import { GetRoles, GetPermissions, GetRoleById, CreateRole, UpdateRole, deactivateRole, activateRole } from "../Services/RoleService";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { AxiosError } from "axios";
 
 export const useRoles = () => {
     return useQuery({
@@ -26,20 +27,38 @@ export const useRoleById = (id: number) => {
 
 export const useCreateRole = () => {
     const queryClient = useQueryClient();
+    const { showSuccess, showError } = useAlerts();
     return useMutation({
         mutationFn: CreateRole,
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['roles'] });
+            showSuccess('Rol creado', 'El rol se ha creado exitosamente');
+        },
+        onError: (error:any) => {
+            let errMsg = '';
+            if (error instanceof AxiosError) {
+                errMsg = error.response?.data?.message || error.message;
+            }
+            showError('Error', errMsg);
         }
     });
 };  
 
 export const useUpdateRole = () => {
     const queryClient = useQueryClient();
+    const { showSuccess, showError } = useAlerts();
     return useMutation({
         mutationFn: (data: { Id_Rol: number; roleData: UpdateRoleData }) => UpdateRole(data.Id_Rol, data.roleData),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['roles'] });
+            showSuccess('Rol actualizado', 'El rol se ha actualizado exitosamente');
+        },
+        onError: (error:any) => {
+            let errMsg = '';
+            if (error instanceof AxiosError) {
+                errMsg = error.response?.data?.message || error.message;
+            }
+            showError('Error', errMsg);
         }
     });
 };

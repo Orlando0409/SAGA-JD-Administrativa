@@ -7,13 +7,13 @@ import {
   getPaginationRowModel,
   createColumnHelper,
 } from '@tanstack/react-table';
-import { LuPlus, LuFilter, LuSearch, LuEye, LuPencil, LuArrowLeft } from 'react-icons/lu';
+import { LuPlus, LuFilter, LuSearch, LuArrowLeft } from 'react-icons/lu';
 import { 
   useGetAllMaterials, 
   useGetMaterialesConCategorias, 
   useGetMaterialesSinCategorias,
   useGetMaterialesPorDebajoDeStock,
-  useGetMaterialesPorEncimaDeStock
+  useGetMaterialesPorEncimaDeStock,
 } from '../../hooks/useMaterials';
 import { MdKeyboardArrowLeft, MdKeyboardArrowRight, MdKeyboardDoubleArrowLeft,
   MdKeyboardDoubleArrowRight, 
@@ -94,9 +94,18 @@ const CatalogoMateriales: React.FC<CatalogoMaterialesProps> = ({ onBack }) => {
     materialesDebajoStock, isLoadingBelow
   ]);
 
-  const filterByCategoria = (material: Material, categoria?: string) => {
-    if (!categoria) return true;
-    return material.Categorias?.some(cat => cat.Nombre_Categoria === categoria);
+  const filterByCategoria = (material: Material, categoria?: string | (string | number)[]) => {
+    if (!categoria || (Array.isArray(categoria) && categoria.length === 0)) return true;
+    if (Array.isArray(categoria)) {
+      return material.Categorias?.some(cat =>
+        categoria.includes(cat.Categoria.Nombre_Categoria) ||
+        categoria.includes(cat.Categoria.Id_Categoria)
+      );
+    }
+    return material.Categorias?.some(cat => 
+      cat.Categoria.Nombre_Categoria === categoria ||
+      String(cat.Categoria.Id_Categoria) === String(categoria)
+    );
   };
 
   const filterByEstado = (material: Material, estado?: string) => {
@@ -206,16 +215,28 @@ const CatalogoMateriales: React.FC<CatalogoMaterialesProps> = ({ onBack }) => {
         header: 'Categorías',
         cell: info => {
           const categorias = info.getValue() || [];
+          
+          if (!categorias || categorias.length === 0) {
+            return (
+              <span className="px-2 py-1 bg-gray-100 text-gray-600 rounded-full text-xs">
+                Sin categoría
+              </span>
+            );
+          }
+          
           return (
-            <div className="flex flex-wrap gap-1">
-              {categorias.slice(0, 2).map((categoria, index) => (
-                <span key={categoria.Id_Categoria || index} className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
-                  {categoria.Nombre_Categoria}
+            <div className="flex flex-wrap gap-1 max-w-xs">
+              {categorias.slice(0, 3).map((categoria, index) => (
+                <span 
+                  key={categoria.Id_Material_Categoria || index} 
+                  className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs whitespace-nowrap"
+                >
+                  {categoria.Categoria?.Nombre_Categoria || 'N/A'}
                 </span>
               ))}
-              {categorias.length > 2 && (
+              {categorias.length > 3 && (
                 <span className="px-2 py-1 bg-gray-100 text-gray-600 rounded-full text-xs">
-                  +{categorias.length - 2}
+                  +{categorias.length - 3}
                 </span>
               )}
             </div>
@@ -226,20 +247,20 @@ const CatalogoMateriales: React.FC<CatalogoMaterialesProps> = ({ onBack }) => {
         id: 'acciones',
         header: 'Acciones',
         cell: info => (
-          <div className="flex justify-center gap-2">
+          <div className="flex justify-start gap-1">
             <button
-              className="p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-md transition-colors"
+              className="px-2 py-1 bg-gray-600 text-white text-xs rounded hover:bg-gray-700 transition-colors"
               onClick={() => handleViewDetail(info.row.original)}
               title="Ver detalles"
             >
-              <LuEye className="w-4 h-4" />
+              Ver
             </button>
             <button
-              className="p-2 text-green-600 hover:text-green-800 hover:bg-green-50 rounded-md transition-colors"
+              className="px-2 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition-colors"
               onClick={() => handleEdit(info.row.original)}
               title="Editar"
             >
-              <LuPencil className="w-4 h-4" />
+              Editar
             </button>
           </div>
         ),
