@@ -1,5 +1,4 @@
 import React from 'react';
-import { LuX } from 'react-icons/lu';
 import type { UnidadMedicion } from '../../models/Inventario';
 
 interface DetailUnidadMedicionModalProps {
@@ -33,9 +32,6 @@ const DetailUnidadMedicionModal: React.FC<DetailUnidadMedicionModalProps> = ({ i
           <h2 className="text-xl font-semibold text-gray-900">
             Detalles de Unidad de Medición
           </h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors">
-            <LuX className="w-6 h-6" />
-          </button>
         </div>
 
         <div className="p-6 space-y-4">

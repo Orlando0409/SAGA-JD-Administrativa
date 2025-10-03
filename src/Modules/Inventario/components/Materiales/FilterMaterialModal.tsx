@@ -49,16 +49,10 @@ const FilterMaterialModal: React.FC<FilterMaterialModalProps> = ({
     <section className="fixed inset-0 flex items-start justify-end z-50">
       <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4 max-h-[90vh] overflow-hidden">
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
-          <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
+          <h2 className="text-xl font-semibold text-gray-900 flex items-center">
             <LuFilter className="w-5 h-5" />
             Filtros Avanzados
           </h2>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
-          >
-            <LuX className="w-6 h-6" />
-          </button>
         </div>
 
         <div className="p-6 space-y-4 overflow-y-auto max-h-[calc(90vh-140px)] scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100">
@@ -371,24 +365,24 @@ const FilterMaterialModal: React.FC<FilterMaterialModalProps> = ({
         </div>
 
         <div className="flex items-center justify-between p-6 border-t border-gray-200 bg-gray-50">
+          <div className="flex items-center ">
+            <button
+              onClick={handleApply}
+              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            >
+              Aplicar Filtros
+            </button>
           <button
             onClick={handleClear}
             className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
           >
             Limpiar Filtros
           </button>
-          <div className="flex gap-2">
             <button
               onClick={onClose}
               className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
             >
               Cancelar
-            </button>
-            <button
-              onClick={handleApply}
-              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-            >
-              Aplicar Filtros
             </button>
           </div>
         </div>

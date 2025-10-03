@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { LuX, LuTrendingUp } from 'react-icons/lu';
+import { LuTrendingUp } from 'react-icons/lu';
 import { useIngresoMaterial } from '../../hooks/HookMaterialMovimiento';
 import type { Material, IngresoEgresoMaterialData } from '../../models/Inventario';
 
@@ -64,9 +64,6 @@ const IngresoMaterialModal: React.FC<IngresoMaterialModalProps> = ({
               Ingreso de Material
             </h2>
           </div>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors">
-            <LuX className="w-6 h-6" />
-          </button>
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
@@ -108,18 +105,18 @@ const IngresoMaterialModal: React.FC<IngresoMaterialModalProps> = ({
 
           <div className="flex gap-3 pt-4 border-t">
             <button
-              type="button"
-              onClick={onClose}
-              className="flex-1 px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors"
-            >
-              Cancelar
-            </button>
-            <button
               type="submit"
               disabled={ingresoMutation.isPending}
               className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               {ingresoMutation.isPending ? 'Procesando...' : 'Realizar Ingreso'}
+            </button>
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex-1 px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors"
+            >
+              Cancelar
             </button>
           </div>
         </form>

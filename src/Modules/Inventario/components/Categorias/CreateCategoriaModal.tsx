@@ -2,16 +2,13 @@ import React, { useState } from 'react';
 import { LuX } from 'react-icons/lu';
 import { useCreateCategoria } from '../../hooks/useCategorias';
 import { useAuth } from '@/Modules/Auth/Context/AuthContext';
+import { CreateCategoriaMaterialSchema, type CreateCategoriaMaterialSchemaData } from '../../schema/CreateCategoriaMaterialSchema';
 
 interface CreateCategoriaModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-interface FormData {
-  Nombre_Categoria: string;
-  Descripcion_Categoria: string;
-}
 
 const CreateCategoriaModal: React.FC<CreateCategoriaModalProps> = ({ isOpen, onClose }) => {
   const createCategoriaMutation = useCreateCategoria();
@@ -21,7 +18,7 @@ const CreateCategoriaModal: React.FC<CreateCategoriaModalProps> = ({ isOpen, onC
   const MAX_LENGTH = 100;
   const MAX_DESC_LENGTH = 255;
   
-  const [formData, setFormData] = useState<FormData>({
+  const [formData, setFormData] = useState<CreateCategoriaMaterialSchemaData>({
     Nombre_Categoria: '',
     Descripcion_Categoria: ''
 
@@ -48,33 +45,30 @@ const CreateCategoriaModal: React.FC<CreateCategoriaModalProps> = ({ isOpen, onC
     e.preventDefault();
     setFormErrors({});
 
-    // Validar que el usuario esté autenticado
     if (!user?.Id_Usuario) {
       setFormErrors({ Nombre_Categoria: 'No se pudo obtener la información del usuario' });
       return;
     }
+    const dataToValidate = {
+      Nombre_Categoria: formData.Nombre_Categoria.trim(),
+      Descripcion_Categoria: formData.Descripcion_Categoria.trim()
+    };
 
-    if (!formData.Nombre_Categoria.trim()) {
-      setFormErrors({ Nombre_Categoria: 'El nombre de la categoría es requerido' });
-      return;
-    }
+    const validation = CreateCategoriaMaterialSchema.safeParse(dataToValidate);
 
-    if (formData.Nombre_Categoria.trim().length < 2) {
-      setFormErrors({ Nombre_Categoria: 'El nombre debe tener al menos 2 caracteres' });
-      return;
-    }
-
-    if (!formData.Descripcion_Categoria.trim()) {
-      setFormErrors({ Descripcion_Categoria: 'La descripción de la categoría es requerida' });
+    if (!validation.success) {
+      const fieldErrors: Record<string, string> = {};
+      validation.error.errors.forEach((err) => {
+        const field = err.path[0] as string;
+        fieldErrors[field] = err.message;
+      });
+      setFormErrors(fieldErrors);
       return;
     }
 
     try {
       await createCategoriaMutation.mutateAsync({
-        data: {
-          Nombre_Categoria: formData.Nombre_Categoria.trim(),
-          Descripcion_Categoria: formData.Descripcion_Categoria.trim()
-        },
+        data: validation.data,
         idUsuario: user.Id_Usuario
       });
       setFormData({ Nombre_Categoria: '', Descripcion_Categoria: '' });
@@ -163,18 +157,18 @@ const CreateCategoriaModal: React.FC<CreateCategoriaModalProps> = ({ isOpen, onC
 
             <div className="flex gap-3 pt-4 border-t">
               <button
-                type="button"
-                onClick={onClose}
-                className="flex-1 px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors"
-              >
-                Cancelar
-              </button>
-              <button
                 type="submit"
                 disabled={createCategoriaMutation.isPending}
                 className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 {createCategoriaMutation.isPending ? 'Creando...' : 'Crear Categoría'}
+              </button>
+              <button
+                type="button"
+                onClick={onClose}
+                className="flex-1 px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors"
+              >
+                Cancelar
               </button>
             </div>
           </form>

@@ -1,17 +1,12 @@
 import React, { useState } from 'react';
-import { LuX } from 'react-icons/lu';
 import { useCreateUnidadMedicion } from '../../hooks/HookUnidadMedicion';
+import type { CreateUnidadMedicionSchemaData } from '../../schema/CreateUnidadMedicionSchema';
 
 interface CreateUnidadMedicionModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-interface FormData {
-  Nombre_Unidad_Medicion: string;
-  Abreviatura: string;
-  Descripcion: string;
-}
 
 const CreateUnidadMedicionModal: React.FC<CreateUnidadMedicionModalProps> = ({
   isOpen,
@@ -20,13 +15,13 @@ const CreateUnidadMedicionModal: React.FC<CreateUnidadMedicionModalProps> = ({
   const createUnidadMedicionMutation = useCreateUnidadMedicion();
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   
-  const [formData, setFormData] = useState<FormData>({
+  const [formData, setFormData] = useState<CreateUnidadMedicionSchemaData>({
     Nombre_Unidad_Medicion: '',
     Abreviatura: '',
     Descripcion: '',
   });
 
-  const handleInputChange = (field: keyof FormData) => 
+  const handleInputChange = (field: keyof CreateUnidadMedicionSchemaData) => 
     (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
       setFormData(prev => ({ ...prev, [field]: e.target.value }));
       if (formErrors[field]) {
@@ -61,7 +56,7 @@ const CreateUnidadMedicionModal: React.FC<CreateUnidadMedicionModalProps> = ({
       await createUnidadMedicionMutation.mutateAsync({
         Nombre_Unidad_Medicion: formData.Nombre_Unidad_Medicion.trim(),
         Abreviatura: formData.Abreviatura.trim(),
-        Descripcion: formData.Descripcion.trim() || undefined,
+        Descripcion: formData.Descripcion?.trim() || undefined,
       });
       
       onClose();
@@ -83,12 +78,6 @@ const CreateUnidadMedicionModal: React.FC<CreateUnidadMedicionModalProps> = ({
       <div className="bg-white rounded-lg shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between p-6 border-b">
           <h2 className="text-xl font-semibold text-gray-900">Nueva Unidad de Medición</h2>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
-          >
-            <LuX className="w-6 h-6" />
-          </button>
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
@@ -151,18 +140,18 @@ const CreateUnidadMedicionModal: React.FC<CreateUnidadMedicionModalProps> = ({
 
           <div className="flex gap-3 pt-4 border-t">
             <button
-              type="button"
-              onClick={onClose}
-              className="flex-1 px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
-            >
-              Cancelar
-            </button>
-            <button
               type="submit"
               disabled={createUnidadMedicionMutation.isPending}
               className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {createUnidadMedicionMutation.isPending ? 'Creando...' : 'Crear'}
+            </button>
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex-1 px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+            >
+              Cancelar
             </button>
           </div>
         </form>

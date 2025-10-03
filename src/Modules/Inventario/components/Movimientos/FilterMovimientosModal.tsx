@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { LuX, LuCalendar, LuPackage, LuUser, LuFilter } from 'react-icons/lu';
+import { LuCalendar, LuPackage, LuUser, LuFilter } from 'react-icons/lu';
 import type { MovimientoFilterOptions } from '../../types/MovimientosTypes';
 import type { TipoMovimiento } from '../../models/MovimientoMaterial';
 
@@ -60,7 +60,6 @@ const FilterMovimientosModal: React.FC<FilterMovimientosModalProps> = ({
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4 max-h-[90vh] overflow-y-auto">
-        {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-blue-100 rounded-lg">
@@ -71,17 +70,9 @@ const FilterMovimientosModal: React.FC<FilterMovimientosModalProps> = ({
               <p className="text-sm text-gray-600">Refina tu búsqueda de movimientos</p>
             </div>
           </div>
-          <button
-            onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-          >
-            <LuX className="w-5 h-5 text-gray-500" />
-          </button>
         </div>
 
-        {/* Content */}
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
-          {/* Rango de Fechas */}
           <div className="space-y-4">
             <div className="flex items-center gap-2 text-sm font-medium text-gray-700">
               <LuCalendar className="w-4 h-4" />
@@ -117,7 +108,6 @@ const FilterMovimientosModal: React.FC<FilterMovimientosModalProps> = ({
             </div>
           </div>
 
-          {/* Tipo de Movimiento */}
           <div className="space-y-3">
             <div className="flex items-center gap-2 text-sm font-medium text-gray-700">
               <LuPackage className="w-4 h-4" />
@@ -166,7 +156,6 @@ const FilterMovimientosModal: React.FC<FilterMovimientosModalProps> = ({
             </div>
           </div>
 
-          {/* Material */}
           <div className="space-y-3">
             <div className="flex items-center gap-2 text-sm font-medium text-gray-700">
               <LuPackage className="w-4 h-4" />
@@ -182,7 +171,6 @@ const FilterMovimientosModal: React.FC<FilterMovimientosModalProps> = ({
             />
           </div>
 
-          {/* Usuario */}
           <div className="space-y-3">
             <div className="flex items-center gap-2 text-sm font-medium text-gray-700">
               <LuUser className="w-4 h-4" />
@@ -198,7 +186,6 @@ const FilterMovimientosModal: React.FC<FilterMovimientosModalProps> = ({
             />
           </div>
 
-          {/* Rango de Cantidad */}
           <div className="space-y-3">
             <div className="text-sm font-medium text-gray-700">
               Rango de Cantidad
@@ -245,8 +232,13 @@ const FilterMovimientosModal: React.FC<FilterMovimientosModalProps> = ({
             </div>
           </div>
 
-          {/* Actions */}
           <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-gray-200">
+            <button
+              type="submit"
+              className="flex-1 px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-lg font-medium transition-colors"
+            >
+              Aplicar Filtros
+            </button>
             <button
               type="button"
               onClick={handleReset}
@@ -260,12 +252,6 @@ const FilterMovimientosModal: React.FC<FilterMovimientosModalProps> = ({
               className="flex-1 px-4 py-2 text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 rounded-lg font-medium transition-colors"
             >
               Cancelar
-            </button>
-            <button
-              type="submit"
-              className="flex-1 px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-lg font-medium transition-colors"
-            >
-              Aplicar Filtros
             </button>
           </div>
         </form>

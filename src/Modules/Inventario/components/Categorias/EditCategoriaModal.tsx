@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { LuX } from 'react-icons/lu';
 import { useUpdateCategoria } from '../../hooks/useCategorias';
 import type { CategoriaMaterial } from '../../models/Inventario';
+import { UpdateCategoriaMaterialSchema, type UpdateCategoriaMaterialSchemaData } from '../../schema/UpdateCategoriaMaterialSchema';
 
 interface EditCategoriaModalProps {
   isOpen: boolean;
@@ -9,8 +10,7 @@ interface EditCategoriaModalProps {
   categoria: CategoriaMaterial;
 }
 
-interface FormData {
-  Nombre_Categoria: string;
+interface FormData extends UpdateCategoriaMaterialSchemaData {
   Descripcion_Categoria: string;
 }
 
@@ -61,26 +61,30 @@ const EditCategoriaModal: React.FC<EditCategoriaModalProps> = ({ isOpen, onClose
     e.preventDefault();
     setFormErrors({});
 
-    // Validación simple
-    if (!formData.Nombre_Categoria.trim()) {
-      setFormErrors({ Nombre_Categoria: 'El nombre de la categoría es requerido' });
-      return;
-    }
+    // Preparar datos para validación (solo campos que pueden cambiar)
+    const dataToValidate = {
+      Nombre_Categoria: formData.Nombre_Categoria?.trim(),
+      Descripcion_Categoria: formData.Descripcion_Categoria?.trim()
+    };
 
-    if (formData.Nombre_Categoria.trim().length < 2) {
-      setFormErrors({ Nombre_Categoria: 'El nombre debe tener al menos 2 caracteres' });
-      return;
-    }
+    // Validación con Zod
+    const validationResult = UpdateCategoriaMaterialSchema.safeParse(dataToValidate);
 
-    if (!formData.Descripcion_Categoria.trim()) {
-      setFormErrors({ Descripcion_Categoria: 'La descripción de la categoría es requerida' });
+    if (!validationResult.success) {
+      const errors: { [key: string]: string } = {};
+      validationResult.error.errors.forEach((error) => {
+        if (error.path[0]) {
+          errors[error.path[0] as string] = error.message;
+        }
+      });
+      setFormErrors(errors);
       return;
     }
 
     // Verificar si hay cambios
     const hasChanges = 
-      formData.Nombre_Categoria.trim() !== categoria.Nombre_Categoria ||
-      formData.Descripcion_Categoria.trim() !== (categoria.Descripcion_Categoria || '');
+      formData.Nombre_Categoria?.trim() !== categoria.Nombre_Categoria ||
+      formData.Descripcion_Categoria?.trim() !== (categoria.Descripcion_Categoria || '');
 
     if (!hasChanges) {
       onClose();
@@ -90,10 +94,7 @@ const EditCategoriaModal: React.FC<EditCategoriaModalProps> = ({ isOpen, onClose
     try {
       await updateCategoriaMutation.mutateAsync({
         id: categoria.Id_Categoria,
-        data: {
-          Nombre_Categoria: formData.Nombre_Categoria.trim(),
-          Descripcion_Categoria: formData.Descripcion_Categoria.trim()
-        }
+        data: validationResult.data
       });
       
       onClose();
@@ -181,18 +182,18 @@ const EditCategoriaModal: React.FC<EditCategoriaModalProps> = ({ isOpen, onClose
             </div>
             <div className="flex gap-3 pt-4 border-t">
               <button
-                type="button"
-                onClick={onClose}
-                className="flex-1 px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors"
-              >
-                Cancelar
-              </button>
-              <button
                 type="submit"
                 disabled={updateCategoriaMutation.isPending}
                 className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 {updateCategoriaMutation.isPending ? 'Actualizando...' : 'Actualizar'}
+              </button>
+              <button
+                type="button"
+                onClick={onClose}
+                className="flex-1 px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors"
+              >
+                Cancelar
               </button>
             </div>
           </form>
