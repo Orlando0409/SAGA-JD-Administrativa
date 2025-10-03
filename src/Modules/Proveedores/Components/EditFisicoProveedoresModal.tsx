@@ -5,7 +5,8 @@ import 'react-phone-number-input/style.css';
 import { 
   EditProveedorSchema, 
   type EditProveedorSchemaData,
-  VALIDATION_LIMITS
+  VALIDATION_LIMITS,
+  formatPhoneNumberInput
 } from '../Schema/SchemaFisicoProveedor';
 import type { ProveedorFisico, UpdateProveedorData } from '../Models/TablaProveedo/tablaFisicoProveedor';
 import { useUpdateProveedorFisico } from '../Hook/hookFisicoProveedor';
@@ -256,13 +257,14 @@ const EditProveedorModal: React.FC<EditProveedorModalProps> = ({ isOpen, onClose
                     countryCallingCodeEditable={false}
                     value={field.state.value}
                     onChange={(value) => {
-                      const phoneValue = value || '';
-                      field.handleChange(phoneValue);
+                      // Formatear el número en tiempo real
+                      const formattedValue = formatPhoneNumberInput(value || '');
+                      field.handleChange(formattedValue);
                       setFieldCharCounts(prev => ({ 
                         ...prev, 
-                        Telefono_Proveedor: phoneValue.length 
+                        Telefono_Proveedor: formattedValue.length 
                       }));
-                      validateFieldRealTime('Telefono_Proveedor', phoneValue);
+                      validateFieldRealTime('Telefono_Proveedor', value || '');
                     }}
                     className={`react-phone-number-input ${
                       (formErrors.Telefono_Proveedor || field.state.meta.errors?.length) 

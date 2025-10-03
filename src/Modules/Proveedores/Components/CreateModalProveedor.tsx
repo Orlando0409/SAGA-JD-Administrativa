@@ -11,12 +11,14 @@ import {
   VALIDATION_LIMITS,
   TIPOS_IDENTIFICACION_OPTIONS,
   IDENTIFICACION_PLACEHOLDERS,
-  IDENTIFICACION_LIMITS_BY_TYPE
+  IDENTIFICACION_LIMITS_BY_TYPE,
+  formatPhoneNumberInput
 } from '../Schema/SchemaFisicoProveedor';
 import {
   CreateProveedorJuridicoSchema,
   type CreateProveedorJuridicoSchemaData,
-  JURIDICO_VALIDATION_LIMITS
+  JURIDICO_VALIDATION_LIMITS,
+  formatPhoneNumberInput as formatPhoneNumberInputJuridico
 } from '../Schema/SchemaProveedorJuridico';
 import { useCreateProveedorFisico } from '../Hook/hookFisicoProveedor';
 import { useCreateProveedorJuridico } from '../Hook/hookjuridicoproveedor';
@@ -555,7 +557,9 @@ const CreateModalProveedor = ({ onClose, setShowCreateModal }: CreateModalProvee
                       <PhoneInput
                         value={field.state.value}
                         onChange={(value) => {
-                          field.handleChange(value || '');
+                          // Formatear el número en tiempo real
+                          const formattedValue = formatPhoneNumberInput(value || '');
+                          field.handleChange(formattedValue);
                           validateFieldRealTime('Telefono_Proveedor', value || '');
                         }}
                         defaultCountry="CR"
@@ -688,7 +692,9 @@ const CreateModalProveedor = ({ onClose, setShowCreateModal }: CreateModalProvee
                       <PhoneInput
                         value={field.state.value}
                         onChange={(value) => {
-                          field.handleChange(value || '');
+                          // Formatear el número en tiempo real
+                          const formattedValue = formatPhoneNumberInputJuridico(value || '');
+                          field.handleChange(formattedValue);
                           validateFieldRealTime('Telefono_Proveedor', value || '');
                         }}
                         defaultCountry="CR"

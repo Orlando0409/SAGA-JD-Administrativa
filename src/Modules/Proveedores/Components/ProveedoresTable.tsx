@@ -6,7 +6,7 @@ import { useProveedoresJuridicos } from '../Hook/hookjuridicoproveedor';
 import ProveedorDetailModal from './DetailFisicoProveedor';
 import ProveedorJuridicoDetailModal from './DetailJuridicoProveedor';
 import CreateModalProveedor from './CreateModalProveedor';
-import { formatCedulaJuridica } from '../Schema/SchemaProveedorJuridico';
+import { formatCedulaJuridica, formatPhoneNumberDisplay } from '../Schema/SchemaProveedorJuridico';
 import type { ProveedorFisico } from '../Models/TablaProveedo/tablaFisicoProveedor';
 import type { ProveedorJuridico } from '../Models/TablaProveedo/tablaJuridicoProveedor';
 
@@ -167,7 +167,11 @@ export default function ProveedoresTable() {
             header: 'Teléfono',
             cell: (info) => {
                 const telefono = info.getValue();
-                return telefono || 'Sin teléfono';
+                if (!telefono) return 'Sin teléfono';
+                
+                // Formatear el número para mejor visualización
+                const formattedPhone = formatPhoneNumberDisplay(telefono);
+                return formattedPhone;
             },
             size: 120
         }),

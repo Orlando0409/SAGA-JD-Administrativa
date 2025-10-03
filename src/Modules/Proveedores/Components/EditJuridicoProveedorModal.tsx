@@ -6,7 +6,8 @@ import { LuX } from 'react-icons/lu';
 import { 
   EditProveedorJuridicoSchema, 
   type EditProveedorJuridicoSchemaData,
-  JURIDICO_VALIDATION_LIMITS
+  JURIDICO_VALIDATION_LIMITS,
+  formatPhoneNumberInput
 } from '../Schema/SchemaProveedorJuridico';
 import type { ProveedorJuridico, UpdateProveedorJuridicoData } from '../Models/TablaProveedo/tablaJuridicoProveedor';
 import { useUpdateProveedorJuridico } from '../Hook/hookjuridicoproveedor';
@@ -311,13 +312,14 @@ const EditProveedorJuridicoModal: React.FC<EditProveedorJuridicoModalProps> = ({
                     defaultCountry="CR"
                     value={field.state.value}
                     onChange={(value) => {
-                      const phoneValue = value || '';
-                      field.handleChange(phoneValue);
+                      // Formatear el número en tiempo real
+                      const formattedValue = formatPhoneNumberInput(value || '');
+                      field.handleChange(formattedValue);
                       setFieldCharCounts(prev => ({ 
                         ...prev, 
-                        Telefono_Proveedor: phoneValue.length 
+                        Telefono_Proveedor: formattedValue.length 
                       }));
-                      validateFieldRealTime('Telefono_Proveedor', phoneValue);
+                      validateFieldRealTime('Telefono_Proveedor', value || '');
                     }}
                     className={`phone-input ${
                       (formErrors.Telefono_Proveedor || field.state.meta.errors?.length) 

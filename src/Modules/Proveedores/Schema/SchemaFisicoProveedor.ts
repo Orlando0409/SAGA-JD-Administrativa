@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { isValidPhoneNumber } from 'libphonenumber-js';
+import { isValidPhoneNumber, parsePhoneNumber, formatIncompletePhoneNumber } from 'libphonenumber-js';
 
 // Expresiones regulares para validaciones basadas en el backend
 const NOMBRE_NO_SOLO_ESPACIOS = /\S/; // No puede contener solo espacios (Matches(/\S/))
@@ -20,6 +20,37 @@ const validatePhoneNumber = (value: string): boolean => {
     return isValidPhoneNumber(value);
   } catch {
     return false;
+  }
+};
+
+// Función para formatear números de teléfono para visualización
+export const formatPhoneNumberDisplay = (phoneNumber: string): string => {
+  try {
+    if (!phoneNumber) return '';
+    
+    // Intentar parsear el número completo
+    const parsed = parsePhoneNumber(phoneNumber);
+    if (parsed && parsed.isValid()) {
+      // Retornar en formato internacional con espacios
+      return parsed.formatInternational();
+    }
+    
+    // Si no es válido como número completo, formatear como incompleto
+    return formatIncompletePhoneNumber(phoneNumber);
+  } catch {
+    return phoneNumber; // Retornar original si hay error
+  }
+};
+
+// Función para formatear teléfono en tiempo real mientras se escribe
+export const formatPhoneNumberInput = (value: string): string => {
+  try {
+    if (!value) return '';
+    
+    // Usar formatIncompletePhoneNumber para formateo en tiempo real
+    return formatIncompletePhoneNumber(value);
+  } catch {
+    return value;
   }
 };
 

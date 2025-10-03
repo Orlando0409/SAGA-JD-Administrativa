@@ -5,6 +5,7 @@ import { useProveedoresFisicos, useDeleteProveedorFisico, useChangeProveedorFisi
 import { Accordion, AccordionHeader, AccordionBody } from "@material-tailwind/react";
 import { FiChevronDown, FiChevronRight } from 'react-icons/fi';
 import EditProveedorModal from './EditFisicoProveedoresModal';
+import { formatPhoneNumberDisplay } from '../Schema/SchemaFisicoProveedor';
 import {
   AlertDialog,
   AlertDialogTrigger,
@@ -195,7 +196,9 @@ const ProveedorDetailModal: React.FC<ProveedorDetailModalProps> = ({ proveedor, 
                       <LuPhone className="w-4 h-4 text-gray-400" />
                       <div>
                         <label className="block text-sm font-medium text-gray-500 mb-1">Teléfono</label>
-                        <p className="text-gray-900 font-medium">{proveedor.Telefono_Proveedor || 'Sin teléfono'}</p>
+                        <p className="text-gray-900 font-medium">
+                          {proveedor.Telefono_Proveedor ? formatPhoneNumberDisplay(proveedor.Telefono_Proveedor) : 'Sin teléfono'}
+                        </p>
                       </div>
                     </div>
                     <div>
