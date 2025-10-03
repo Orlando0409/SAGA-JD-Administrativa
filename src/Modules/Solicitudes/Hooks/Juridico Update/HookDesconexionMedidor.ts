@@ -18,18 +18,28 @@ export const useMutateEstadoSolicitudDesconexionJuridicas = () => {
             return ServiceSolicitudDesconexionMedidorJuridicas.updateEstado(solicitudId, nuevoEstadoId);
         },
         onSuccess: (data, variables) => {
-            // 1. Actualizar la caché de la solicitud individual
-            queryClient.setQueryData(
-                ['solicitud-desconexion-juridica', { id: variables.solicitudId }], 
-                data
-            );
+            try {
+                // 1. Actualizar la caché de la solicitud individual
+                queryClient.setQueryData(
+                    ['solicitud-desconexion-juridica', { id: variables.solicitudId }], 
+                    data
+                );
 
-            // 2. Invalidar y refrescar la lista completa de solicitudes de desconexión
-            queryClient.invalidateQueries({ 
-                queryKey: ['solicitud-desconexion-juridica'] 
-            });
+                // 2. Cross-invalidation
+                queryClient.invalidateQueries({ 
+                    queryKey: ['solicitud-desconexion-juridica'] 
+                });
+                queryClient.invalidateQueries({ 
+                    queryKey: ['solicitudes-juridicas'] 
+                });
+                queryClient.invalidateQueries({ 
+                    queryKey: ['solicitudes-fisicas'] 
+                });
 
-            console.log('✅ Estado de desconexión actualizado exitosamente en caché:', data);
+                console.log('✅ Estado de desconexión jurídica actualizado exitosamente con cross-invalidation:', data);
+            } catch (error) {
+                console.error('❌ Error en onSuccess desconexión jurídica:', error);
+            }
         },
         onError: (error: any) => {
             console.error('Error al actualizar estado de desconexión:', error);
@@ -48,16 +58,28 @@ export const useAprobarSolicitudDesconexionJuridica = () => {
             return ServiceSolicitudDesconexionMedidorJuridicas.aprobar(solicitudId);
         },
         onSuccess: (data, solicitudId) => {
-            // Actualizar cachés
-            queryClient.setQueryData(
-                ['solicitud-desconexion-juridica', { id: solicitudId }], 
-                data
-            );
-            queryClient.invalidateQueries({ 
-                queryKey: ['solicitud-desconexion-juridica'] 
-            });
+            try {
+                // Actualizar caché individual
+                queryClient.setQueryData(
+                    ['solicitud-desconexion-juridica', { id: solicitudId }], 
+                    data
+                );
+                
+                // Cross-invalidation
+                queryClient.invalidateQueries({ 
+                    queryKey: ['solicitud-desconexion-juridica'] 
+                });
+                queryClient.invalidateQueries({ 
+                    queryKey: ['solicitudes-juridicas'] 
+                });
+                queryClient.invalidateQueries({ 
+                    queryKey: ['solicitudes-fisicas'] 
+                });
 
-            console.log('✅ Solicitud de desconexión aprobada exitosamente:', data);
+                console.log('✅ Solicitud de desconexión jurídica aprobada exitosamente con cross-invalidation:', data);
+            } catch (error) {
+                console.error('❌ Error en onSuccess aprobación desconexión jurídica:', error);
+            }
         },
         onError: (error: any) => {
             console.error(' Error al aprobar solicitud de desconexión:', error);
