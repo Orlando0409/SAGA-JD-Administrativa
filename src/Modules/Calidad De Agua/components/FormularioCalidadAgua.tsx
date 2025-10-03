@@ -106,7 +106,12 @@ export default function FormularioCalidadAgua({ onClose, refetch }: FormularioCa
                     </div>
                 </div>
 
-                <div className="flex justify-end gap-4">
+                {/* Nota: El archivo se crea como activo por defecto */}
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                    <p className="text-xs text-blue-700">
+                        <strong>Nota:</strong> Los archivos se crean como visibles por defecto. Puedes cambiar la visibilidad después de crear el archivo.
+                    </p>
+                </div>                <div className="flex justify-end gap-4">
                     <button
                         type="button"
                         onClick={onClose} // Oculta el modal

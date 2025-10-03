@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getArchivosCalidadAgua, uploadArchivoCalidadAgua, updateArchivoCalidadAgua, deleteArchivoCalidadAgua } from "../Service/ServiceCalidadAgua";
+import { getArchivosCalidadAgua, uploadArchivoCalidadAgua, updateArchivoCalidadAgua, deleteArchivoCalidadAgua, setEstadoArchivoCalidadAgua } from "../Service/ServiceCalidadAgua";
 import type { ArchivoCalidadAgua } from "../Models/CalidadDeAgua";
 
 // Obtener todos los registros
@@ -31,6 +31,18 @@ export const useUpdateCalidadAgua = () => {
     },
   });
 };
+
+export const useSetVisibleCalidadAgua = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, visible }: { id: number; visible: boolean }) => 
+      setEstadoArchivoCalidadAgua(id, visible),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["calidadAgua"] });
+    },
+  });
+};
+
 
 // Eliminar un archivo
 export const useDeleteCalidadAgua = () => {

@@ -60,14 +60,14 @@ export default function AbonadosTable() {
             Id: afiliado.Id_Afiliado,
             Nombre_Completo: afiliado.Razon_Social || 'Sin razón social',
             Cedula_Documento: afiliado.Cedula_Juridica || 'Sin cédula jurídica',
-            Identificacion: afiliado.Cedula_Juridica || 'Sin cédula jurídica', // <-- FIX: Añadido campo Identificacion
+            Identificacion: afiliado.Cedula_Juridica || 'Sin cédula jurídica',
             Estado: {
                 Id_Estado: afiliado.Estado?.Id_Estado_Afiliado || 0,
                 Nombre_Estado: afiliado.Estado?.Nombre_Estado || 'Sin estado'
             },
             Tipo_Persona: 'Jurídico' as const,
             Tipo_Afiliado: afiliado.Tipo_Afiliado?.Nombre_Tipo_Afiliado as 'Abonado' | 'Asociado' || 'Asociado',
-            Tipo_Identificacion: (afiliado as any).Tipo_Identificacion || 'Sin dato', // <-- CAMBIO: Mapeo del campo
+            Tipo_Identificacion: 'Cédula Jurídica', // ✅ CAMBIO: Siempre será "Cédula Jurídica" para jurídicos
             datos_originales: afiliado
         }));
 
@@ -206,7 +206,7 @@ export default function AbonadosTable() {
                         className="px-3 py-2 rounded-lg bg-sky-600 text-white hover:bg-sky-700 shadow-sm text-sm whitespace-nowrap"
                         onClick={() => setShowCreateModal(true)}
                     >
-                        + Nueva Solicitud
+                        + Nuevo Afiliado
                     </button>
                 </div>
             </div>

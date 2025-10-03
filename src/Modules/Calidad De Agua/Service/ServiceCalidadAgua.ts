@@ -1,23 +1,20 @@
 import apiAuth from "@/Api/apiAuth";
 import type { ArchivoCalidadAgua } from "../Models/CalidadDeAgua";
 
-// Obtener todos los registros de calidad de agua
 export const getArchivosCalidadAgua = async (): Promise<ArchivoCalidadAgua[]> => {
   const res = await apiAuth.get("/calidad-agua/all");
   return res.data;
 };
 
-// Subir un nuevo archivo
 export const uploadArchivoCalidadAgua = async (formData: FormData): Promise<ArchivoCalidadAgua> => {
   const res = await apiAuth.post("/calidad-agua/create", formData, {
     headers: {
-      "Content-Type": "multipart/form-data", // Asegura que se envíe como multipart/form-data
+      "Content-Type": "multipart/form-data",
     },
   });
   return res.data;
 };
 
-// Actualizar un archivo existente
 export const updateArchivoCalidadAgua = async (id: number, formData: FormData): Promise<ArchivoCalidadAgua> => {
   const res = await apiAuth.put(`/calidad-agua/update/${id}`, formData, {
     headers: {
@@ -27,10 +24,9 @@ export const updateArchivoCalidadAgua = async (id: number, formData: FormData): 
   return res.data;
 };
 
-// Eliminar un archivo
 export const deleteArchivoCalidadAgua = async (id: number): Promise<void> => {
     try {
-        const response = await apiAuth.delete(`/calidad-agua/delete/${id}`); // Asegúrate de que esta ruta sea correcta
+        const response = await apiAuth.delete(`/calidad-agua/delete/${id}`);
         if (response.status !== 200) {
             throw new Error("Error al eliminar el archivo en el backend.");
         }
@@ -38,4 +34,11 @@ export const deleteArchivoCalidadAgua = async (id: number): Promise<void> => {
         console.error("Error en el servicio al eliminar el archivo:", error);
         throw new Error("Error al eliminar el archivo.");
     }
+};
+
+// ✅ CORREGIDO: Usar la ruta correcta del controlador
+export const setEstadoArchivoCalidadAgua = async (id: number, esVisible: boolean): Promise<ArchivoCalidadAgua> => {
+  const estadoId = esVisible ? 1 : 2; // 1 = Activo/Visible, 2 = Inactivo/Oculto
+  const res = await apiAuth.patch(`/calidad-agua/update/estado/${id}/${estadoId}`);
+  return res.data;
 };

@@ -1,7 +1,34 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { SolicitudesJuridicasService } from '../Service/SolicitudesJuridicas';
 import type { SolicitudJuridica } from '../Models/ModelosJuridicos';
 
+/**
+ * 🔄 Función para refrescar todas las consultas de solicitudes jurídicas
+ * Útil para refresh manual después de operaciones CRUD
+ */
+export const useRefetchAllSolicitudesJuridicas = () => {
+    const queryClient = useQueryClient();
+    
+    const refetchAll = async () => {
+        try {
+            // Invalidar todas las queries relacionadas con solicitudes jurídicas
+            await queryClient.invalidateQueries({ 
+                queryKey: ['solicitudes-juridicas'] 
+            });
+            
+            // También invalidar solicitudes físicas para cross-invalidation
+            await queryClient.invalidateQueries({ 
+                queryKey: ['solicitudes-fisicas'] 
+            });
+            
+            console.log('✅ Todas las consultas de solicitudes jurídicas refrescadas');
+        } catch (error) {
+            console.error('❌ Error al refrescar consultas de solicitudes jurídicas:', error);
+        }
+    };
+    
+    return { refetchAll };
+};
 
 export const useSolicitudesJuridicas = () => {
     return useQuery<SolicitudJuridica[], Error>({
