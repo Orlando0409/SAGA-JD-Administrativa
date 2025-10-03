@@ -12,7 +12,7 @@ import {
   TIPOS_IDENTIFICACION_OPTIONS,
   IDENTIFICACION_PLACEHOLDERS,
   IDENTIFICACION_LIMITS_BY_TYPE
-} from '../Schema/Proveedores';
+} from '../Schema/SchemaFisicoProveedor';
 import {
   CreateProveedorJuridicoSchema,
   type CreateProveedorJuridicoSchemaData,

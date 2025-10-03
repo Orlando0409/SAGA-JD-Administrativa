@@ -6,7 +6,7 @@ import {
   updateProveedorJuridico,
   deleteProveedorJuridico,
   changeProveedorJuridicoStatus
-} from "../Services/proveedoresJuridicosService";
+} from "../Services/juridicoServiceProveedor";
 import type { ProveedorJuridico, CreateProveedorJuridicoData, UpdateProveedorJuridicoData } from "../Models/TablaProveedo/proveedorjuridico";
 
 export const useProveedoresJuridicos = () => {

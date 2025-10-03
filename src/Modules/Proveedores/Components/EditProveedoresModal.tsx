@@ -6,7 +6,7 @@ import {
   EditProveedorSchema, 
   type EditProveedorSchemaData,
   VALIDATION_LIMITS
-} from '../Schema/Proveedores';
+} from '../Schema/SchemaFisicoProveedor';
 import type { ProveedorFisico, UpdateProveedorData } from '../Models/TablaProveedo/proveedorFisico';
 import { useUpdateProveedorFisico } from '../Hook/proveedoresFisicos';
 import { useAlerts } from '@/Modules/Global/context/AlertContext';
