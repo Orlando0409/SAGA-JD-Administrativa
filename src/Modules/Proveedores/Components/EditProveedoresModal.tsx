@@ -8,7 +8,7 @@ import {
   VALIDATION_LIMITS
 } from '../Schema/SchemaFisicoProveedor';
 import type { ProveedorFisico, UpdateProveedorData } from '../Models/TablaProveedo/tablaFisicoProveedor';
-import { useUpdateProveedorFisico } from '../Hook/proveedoresFisicos';
+import { useUpdateProveedorFisico } from '../Hook/hookFisicoProveedor';
 import { useAlerts } from '@/Modules/Global/context/AlertContext';
 
 interface EditProveedorModalProps {

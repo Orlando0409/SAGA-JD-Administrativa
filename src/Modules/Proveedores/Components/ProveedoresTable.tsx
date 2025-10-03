@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { createColumnHelper, getCoreRowModel, getPaginationRowModel, useReactTable, flexRender, type ColumnDef } from '@tanstack/react-table';
 import { Building2 } from 'lucide-react';
-import { useProveedoresFisicos } from '../Hook/proveedoresFisicos';
+import { useProveedoresFisicos } from '../Hook/hookFisicoProveedor';
 import { useProveedoresJuridicos } from '../Hook/hookjuridicoproveedor';
 import ProveedorDetailModal from './proveedorDetailModal';
 import ProveedorJuridicoDetailModal from './ProveedorJuridicoDetailModal';

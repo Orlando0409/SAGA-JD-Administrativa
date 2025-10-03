@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { LuX, LuUserX, LuPhone, LuBuilding2, LuUserCheck, LuCalendar, LuIdCard , LuUserRound} from 'react-icons/lu';
 import { FaUserEdit } from "react-icons/fa";
-import { useProveedoresFisicos, useDeleteProveedorFisico, useChangeProveedorFisicoStatus } from '../Hook/proveedoresFisicos';
+import { useProveedoresFisicos, useDeleteProveedorFisico, useChangeProveedorFisicoStatus } from '../Hook/hookFisicoProveedor';
 import { Accordion, AccordionHeader, AccordionBody } from "@material-tailwind/react";
 import { FiChevronDown, FiChevronRight } from 'react-icons/fi';
 import EditProveedorModal from './EditProveedoresModal';

@@ -18,7 +18,7 @@ import {
   type CreateProveedorJuridicoSchemaData,
   JURIDICO_VALIDATION_LIMITS
 } from '../Schema/SchemaProveedorJuridico';
-import { useCreateProveedorFisico } from '../Hook/proveedoresFisicos';
+import { useCreateProveedorFisico } from '../Hook/hookFisicoProveedor';
 import { useCreateProveedorJuridico } from '../Hook/hookjuridicoproveedor';
 import type { CreateProveedorData } from '../Models/TablaProveedo/tablaFisicoProveedor';
 import type { CreateProveedorJuridicoData } from '../Models/TablaProveedo/tablaJuridicoProveedor';
