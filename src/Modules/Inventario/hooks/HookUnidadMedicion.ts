@@ -28,7 +28,8 @@ export const useCreateUnidadMedicion = () => {
   const { showSuccess, showError } = useAlerts();
   
   return useMutation({
-    mutationFn: (data: CreateUnidadMedicionData) => createUnidadMedicion(data),
+    mutationFn: ({ data, idUsuarioCreador }: { data: CreateUnidadMedicionData; idUsuarioCreador: number }) => 
+      createUnidadMedicion(data, idUsuarioCreador),
     onSuccess: () => {
       showSuccess('Éxito', 'Unidad de medición creada correctamente');
       queryClient.invalidateQueries({ queryKey: ['unidades-medicion'] });
@@ -63,16 +64,37 @@ export const useUpdateUnidadMedicion = () => {
 
 export const useUpdateEstadoUnidadMedicion = () => {
   const queryClient = useQueryClient();
+  const { showSuccessWithUndo, showError } = useAlerts();
 
   return useMutation({
     mutationFn: ({ unidadId, estadoUnidad }: { unidadId: number; estadoUnidad: number }) => updateEstadoUnidadMedicion(unidadId, estadoUnidad),
-    onSuccess: () => {
+    onSuccess: (_, { unidadId, estadoUnidad }) => {
       queryClient.invalidateQueries({ queryKey: ['unidades-medicion'] });
       queryClient.invalidateQueries({ queryKey: ['unidades-medicion-simple'] });
       queryClient.invalidateQueries({ queryKey: ['unidad-medicion'] });
+      const accion = estadoUnidad === 1 ? 'activada' : 'desactivada';
+      const estadoAnterior = estadoUnidad === 1 ? 2 : 1;
+      
+      const undoAction = async () => {
+        try {
+          await updateEstadoUnidadMedicion(unidadId, estadoAnterior);
+          queryClient.invalidateQueries({ queryKey: ['unidades-medicion'] });
+          queryClient.invalidateQueries({ queryKey: ['unidades-medicion-simple'] });
+          queryClient.invalidateQueries({ queryKey: ['unidad-medicion'] });
+        } catch (error) {
+          console.error('Error reverting unit measurement state in undo action:', error);
+        }
+      };
+
+      showSuccessWithUndo(
+        `Unidad de medición ${accion}`, 
+        `La unidad de medición se ha ${accion} exitosamente`,
+        undoAction
+      );
     },
-    onError: () => {
-      console.error('Error al actualizar el estado de la unidad de medición');
+    onError: (error: any) => {
+      const errorMessage = error?.response?.data?.message || 'Error al actualizar el estado de la unidad de medición';
+      showError('Error', errorMessage);
     },
   });
 };

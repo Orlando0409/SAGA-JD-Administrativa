@@ -56,9 +56,11 @@ export const useGetMaterialesPorDebajoDeStock = (threshold: number) => {
 
 export const useCreateMaterial = () => {
   const queryClient = useQueryClient();
-    const { showSuccess, showError } = useAlerts();
+  const { showSuccess, showError } = useAlerts();
+  
   return useMutation({
-    mutationFn: (data: CreateMaterialData) => MaterialService.createMaterial(data),
+    mutationFn: ({ data, idUsuarioCreador }: { data: CreateMaterialData; idUsuarioCreador: number }) => 
+      MaterialService.createMaterial(data, idUsuarioCreador),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['materials'] });
       showSuccess('Material creado exitosamente');

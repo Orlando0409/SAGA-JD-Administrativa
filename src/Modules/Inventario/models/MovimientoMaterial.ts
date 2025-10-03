@@ -1,17 +1,21 @@
 import type { Material } from './Material';
 
-export type TipoMovimiento = 'INGRESO' | 'EGRESO';
+export type TipoMovimiento = 'Entrada' | 'Salida';
 
 export interface MovimientoMaterial {
-  Id_Movimiento: number;
-  Id_Material: number;
+  Id_Ingreso_Egreso: number;
+  Id_Material?: number;
   Material?: Material;
   Tipo_Movimiento: TipoMovimiento;
   Cantidad: number;
   Cantidad_Anterior: number;
   Cantidad_Nueva: number;
   Motivo?: string;
-  Usuario?: string;
+  Usuario_Creador?: {
+    Id_Usuario: number;
+    Nombre_Usuario: string;
+    Id_Rol: number;
+  };
   Fecha_Movimiento: Date;
   Observaciones?: string;
 }

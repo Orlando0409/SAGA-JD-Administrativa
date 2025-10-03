@@ -1,6 +1,6 @@
 import React from 'react';
 import type { CreateMovimientoModalProps } from '../../types/MovimientoTypes';
-import { useMovimientoForm } from '../../hooks/useMovimientoForm';
+import { useMovimientoForm } from '../../hooks/useMovimientos';
 import MovimientoTypeSelector from './ui/MovimientoTypeSelector';
 import MaterialSelector from './ui/MaterialSelector';
 import CantidadControl from './ui/CantidadControl';

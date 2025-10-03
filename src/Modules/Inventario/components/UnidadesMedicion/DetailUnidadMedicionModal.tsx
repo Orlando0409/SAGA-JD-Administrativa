@@ -41,7 +41,7 @@ const DetailUnidadMedicionModal: React.FC<DetailUnidadMedicionModalProps> = ({ i
                 Nombre
               </div>
               <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded border break-words overflow-wrap-anywhere">
-                {unidad.Nombre_Unidad}
+                {unidad.Nombre_Unidad_Medicion || unidad.Nombre_Unidad}
               </p>
             </div>
 

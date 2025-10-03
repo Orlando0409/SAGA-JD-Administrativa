@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { LuTrendingUp } from 'react-icons/lu';
 import { useIngresoMaterial } from '../../hooks/HookMaterialMovimiento';
+import { IngresoEgresoMaterialSchema } from '../../schema/MaterialMovimientoSchema';
 import type { Material, IngresoEgresoMaterialData } from '../../models/Inventario';
+import { useAuth } from '@/Modules/Auth/Context/AuthContext';
 
 interface IngresoMaterialModalProps {
   isOpen: boolean;
@@ -14,8 +16,10 @@ const IngresoMaterialModal: React.FC<IngresoMaterialModalProps> = ({
   onClose,
   material
 }) => {
+  const { user } = useAuth();
   const ingresoMutation = useIngresoMaterial();
   const [formData, setFormData] = useState<IngresoEgresoMaterialData>({
+    Id_Material: material.Id_Material,
     Cantidad: 1
   });
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
@@ -23,7 +27,7 @@ const IngresoMaterialModal: React.FC<IngresoMaterialModalProps> = ({
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseInt(e.target.value) || 0;
     if (value >= 0) {
-      setFormData({ Cantidad: value });
+      setFormData(prev => ({ ...prev, Cantidad: value }));
       if (formErrors.Cantidad) {
         setFormErrors(prev => ({ ...prev, Cantidad: '' }));
       }
@@ -34,17 +38,30 @@ const IngresoMaterialModal: React.FC<IngresoMaterialModalProps> = ({
     e.preventDefault();
     setFormErrors({});
 
-    if (!formData.Cantidad || formData.Cantidad <= 0) {
-      setFormErrors({ Cantidad: 'La cantidad debe ser mayor a 0' });
+    // Use Zod schema validation
+    const validation = IngresoEgresoMaterialSchema.safeParse(formData);
+
+    if (!validation.success) {
+      const fieldErrors: Record<string, string> = {};
+      validation.error.errors.forEach((err) => {
+        const field = err.path[0] as string;
+        fieldErrors[field] = err.message;
+      });
+      setFormErrors(fieldErrors);
       return;
     }
 
     try {
+      if (!user?.Id_Usuario) {
+        console.error('Usuario no autenticado');
+        return;
+      }
+
       await ingresoMutation.mutateAsync({
-        materialId: material.Id_Material,
+        idUsuario: user.Id_Usuario,
         data: formData
       });
-      setFormData({ Cantidad: 1 });
+      setFormData({ Id_Material: material.Id_Material, Cantidad: 1 });
       onClose();
     } catch (error) {
       console.error('Error al realizar ingreso:', error);
@@ -71,7 +88,7 @@ const IngresoMaterialModal: React.FC<IngresoMaterialModalProps> = ({
             <h3 className="text-sm font-medium text-gray-700 mb-2">Material Seleccionado</h3>
             <p className="text-lg font-semibold text-gray-900">{material.Nombre_Material}</p>
             <p className="text-sm text-gray-600">
-              Stock actual: {material.Cantidad} {material.Unidad_Medicion.Nombre_Unidad}
+              Stock actual: {material.Cantidad} {material.Unidad_Medicion.Nombre_Unidad_Medicion || material.Unidad_Medicion.Nombre_Unidad}
             </p>
           </div>
 
@@ -99,7 +116,7 @@ const IngresoMaterialModal: React.FC<IngresoMaterialModalProps> = ({
           <div className="text-sm text-gray-600">
             <p>Nuevo stock después del ingreso:</p>
             <p className="font-semibold text-green-600">
-              {material.Cantidad + formData.Cantidad} {material.Unidad_Medicion.Nombre_Unidad}
+              {material.Cantidad + formData.Cantidad} {material.Unidad_Medicion.Nombre_Unidad_Medicion || material.Unidad_Medicion.Nombre_Unidad}
             </p>
           </div>
 

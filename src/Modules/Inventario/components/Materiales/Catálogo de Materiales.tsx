@@ -39,6 +39,7 @@ const CatalogoMateriales: React.FC<CatalogoMaterialesProps> = ({ onBack }) => {
   const [showFilterModal, setShowFilterModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [appliedFilters, setAppliedFilters] = useState<MaterialFilterOptions>({});
+  const [estadoFilter, setEstadoFilter] = useState<string>('Disponible'); // Por defecto mostrar solo activos
   const { data: allMaterials = [], isLoading: isLoadingAll, refetch: refetchAllMaterials } = useGetAllMaterials();
   const { data: materialesConCategorias = [], isLoading: isLoadingConCat, refetch: refetchConCat } = useGetMaterialesConCategorias();
   const { data: materialesSinCategorias = [], isLoading: isLoadingSinCat, refetch: refetchSinCat } = useGetMaterialesSinCategorias();
@@ -96,13 +97,17 @@ const CatalogoMateriales: React.FC<CatalogoMaterialesProps> = ({ onBack }) => {
 
   const filterByCategoria = (material: Material, categoria?: string | (string | number)[]) => {
     if (!categoria || (Array.isArray(categoria) && categoria.length === 0)) return true;
+    
+    // Get categories from either field for compatibility
+    const categorias = material.materialCategorias || material.Categorias || [];
+    
     if (Array.isArray(categoria)) {
-      return material.Categorias?.some(cat =>
+      return categorias.some(cat =>
         categoria.includes(cat.Categoria.Nombre_Categoria) ||
         categoria.includes(cat.Categoria.Id_Categoria)
       );
     }
-    return material.Categorias?.some(cat => 
+    return categorias.some(cat => 
       cat.Categoria.Nombre_Categoria === categoria ||
       String(cat.Categoria.Id_Categoria) === String(categoria)
     );
@@ -147,8 +152,17 @@ const CatalogoMateriales: React.FC<CatalogoMaterialesProps> = ({ onBack }) => {
   };
 
   const filteredMaterials = useMemo(() => {
-    return applyAdditionalFilters(materials, appliedFilters);
-  }, [materials, appliedFilters]);
+    let filtered = applyAdditionalFilters(materials, appliedFilters);
+    
+    // Aplicar filtro de estado
+    if (estadoFilter !== 'Todos') {
+      filtered = filtered.filter(material => 
+        material.Estado_Material?.Nombre_Estado_Material === estadoFilter
+      );
+    }
+    
+    return filtered;
+  }, [materials, appliedFilters, estadoFilter]);
 
   const columnHelper = createColumnHelper<Material>();
 
@@ -178,7 +192,7 @@ const CatalogoMateriales: React.FC<CatalogoMaterialesProps> = ({ onBack }) => {
           </div>
         ),
       }),
-      columnHelper.accessor('Unidad_Medicion.Nombre_Unidad', {
+      columnHelper.accessor((row) => row.Unidad_Medicion?.Nombre_Unidad_Medicion || row.Unidad_Medicion?.Nombre_Unidad, {
         header: 'Unidad de medida',
         cell: info => (
           <div className="text-sm text-gray-600">
@@ -335,6 +349,7 @@ const CatalogoMateriales: React.FC<CatalogoMaterialesProps> = ({ onBack }) => {
           </h1>
         </div>
       )}
+
       <div className="flex  sm:flex-row justify-between gap-4">
         <div className="flex-1 relative">
           <LuSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -424,6 +439,21 @@ const CatalogoMateriales: React.FC<CatalogoMaterialesProps> = ({ onBack }) => {
         </div>
 
         <div className="bg-white px-6 py-3 border-t border-gray-200 flex items-center justify-between">
+
+          <div className="flex items-center gap-4">
+            <label htmlFor="estado-filter-select" className="text-sm font-medium text-gray-700">Estado:</label>
+            <select
+              id="estado-filter-select"
+              value={estadoFilter}
+              onChange={(e) => setEstadoFilter(e.target.value)}
+              className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+            >
+              <option value="Todos">Todos los estados</option>
+              <option value="Disponible">Disponible</option>
+              <option value="Agotado">Agotado</option>
+            </select>
+          </div>
+
           <div className="flex items-center gap-2 text-sm text-gray-700">
             <span>Mostrar</span>
             <select

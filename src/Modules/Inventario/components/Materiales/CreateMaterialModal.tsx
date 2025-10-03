@@ -8,6 +8,7 @@ import type { CreateMaterialModalProps } from '../../types/MaterialTypes';
 import type { CreateMaterialData, CategoriaMaterial } from '../../models/Inventario';
 import CreateCategoriaModal from '../Categorias/CreateCategoriaModal';
 import CreateUnidadMedicionModal from '../UnidadesMedicion/CreateUnidadMedicionModal';
+import { useAuth } from '@/Modules/Auth/Context/AuthContext';
 import { 
   NOMBRE_MATERIAL_MAX_LENGTH, 
   DESCRIPCION_MAX_LENGTH, 
@@ -15,6 +16,7 @@ import {
 } from '../../types/MaterialTypes';
 
 const CreateMaterialModal: React.FC<CreateMaterialModalProps> = ({ isOpen, onClose }) => {
+  const { user } = useAuth();
   const createMaterialMutation = useCreateMaterial();
   const { data: categories = [] } = useGetAllCategories();
   const { data: unidadesMedicion = [] } = useUnidadesMedicionSimple();
@@ -72,6 +74,11 @@ const CreateMaterialModal: React.FC<CreateMaterialModalProps> = ({ isOpen, onClo
     }
 
     try {
+      if (!user?.Id_Usuario) {
+        console.error('Usuario no autenticado');
+        return;
+      }
+
       const payload: CreateMaterialData = {
         Nombre_Material: formData.Nombre_Material,
         Descripcion: formData.Descripcion,
@@ -81,7 +88,10 @@ const CreateMaterialModal: React.FC<CreateMaterialModalProps> = ({ isOpen, onClo
         IDS_Categorias: formData.IDS_Categorias ?? []
       };
 
-      await createMaterialMutation.mutateAsync(payload);
+      await createMaterialMutation.mutateAsync({
+        data: payload,
+        idUsuarioCreador: user.Id_Usuario
+      });
       onClose();
       setFormData({
         Nombre_Material: '',
@@ -207,7 +217,7 @@ const CreateMaterialModal: React.FC<CreateMaterialModalProps> = ({ isOpen, onClo
                 <option value="">Seleccionar unidad de medición</option>
                 {unidadesMedicion.map((unidad) => (
                   <option key={unidad.Id_Unidad_Medicion} value={unidad.Id_Unidad_Medicion}>
-                    {unidad.Nombre_Unidad_Medicion}
+                    {unidad.Nombre_Unidad || unidad.Nombre_Unidad_Medicion}
                   </option>
                 ))}
               </select>

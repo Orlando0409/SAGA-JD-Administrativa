@@ -14,7 +14,7 @@ import RoleDetailModal from './RoleDetailModal';
 import CreateRoleModal from './CreateRoleModal';
 import type { Role } from '../Models/Role';
 import { EditRoleModal } from './EditRolModal';
-import { getStatusClass, getStatusDisplay } from '@/Modules/Usuarios/Helper/utils';
+import { getStatusClass, getStatusDisplay, isActive } from '@/Modules/Usuarios/Helper/utils';
 import { useUserPermissions } from '@/Modules/Auth/Hooks/PermissionHook';
 
 
@@ -22,14 +22,26 @@ import { useUserPermissions } from '@/Modules/Auth/Hooks/PermissionHook';
 
 
 const Roles = ({ onClose }: { onClose: () => void }) => {
-  const { data: roles = [], isLoading } = useRoles();
+  const { data: allRoles = [], isLoading } = useRoles();
   const { canCreate } = useUserPermissions();
   const [globalFilter, setGlobalFilter] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [selectedRoleId, setSelectedRoleId] = useState<number | null>(null);
   const [showRoleDetail, setShowRoleDetail] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [estadoFilter, setEstadoFilter] = useState<string>('Activo'); // Por defecto mostrar solo activos
 
+  const roles = useMemo(() => {
+    if (estadoFilter === 'Todos') {
+      return allRoles;
+    }
+    return allRoles.filter(role => {
+      const roleIsActive = isActive(role.Fecha_Eliminacion);
+      if (estadoFilter === 'Activo') return roleIsActive;
+      if (estadoFilter === 'Inactivo') return !roleIsActive;
+      return true;
+    });
+  }, [allRoles, estadoFilter]);
 
   const columnHelper = createColumnHelper<Role>();
 
@@ -188,46 +200,65 @@ const Roles = ({ onClose }: { onClose: () => void }) => {
         </div>
 
         {/* Pagination */}
-        <div className="px-6 py-2 bg-white border-t flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <div className="text-sm text-gray-700">
-            Mostrando <span className="font-semibold">{table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1}</span> a{' '}
-            <span className="font-semibold">{Math.min((table.getState().pagination.pageIndex + 1) * table.getState().pagination.pageSize, table.getPrePaginationRowModel().rows.length)}</span> de{' '}
-            <span className="font-semibold">{table.getPrePaginationRowModel().rows.length}</span> resultados
-          </div>
-          <div className="flex items-center gap-2">
-            <label className="text-sm text-gray-700 flex items-center gap-2">
-              <span className="hidden md:inline">Tamaño de página:</span>
+        <div className="px-6 py-3 bg-gray-50 border-t border-gray-200">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <label htmlFor='estado-roles' className="text-sm font-medium text-gray-700">Estado:</label>
               <select
-                value={table.getState().pagination.pageSize}
-                onChange={e => table.setPageSize(Number(e.target.value))}
-                className="px-2 py-1 border border-gray-400 rounded-lg bg-white shadow min-w-[70px] text-sm "
+                id='estado-roles'
+                value={estadoFilter}
+                onChange={(e) => setEstadoFilter(e.target.value)}
+                className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
               >
-                {pageSizeOptions.map(size => (
-                  <option key={size} value={size}>
-                    {size}
-                  </option>
-                ))}
+                <option value="Todos">Todos los roles</option>
+                <option value="Activo">Activos</option>
+                <option value="Inactivo">Inactivos</option>
               </select>
-            </label>
-            <button
-              onClick={() => table.previousPage()}
-              disabled={!table.getCanPreviousPage()}
-              className="px-2 py-1 rounded-full border border-gray-300 bg-gray-50 text-gray-500 hover:bg-blue-100 hover:text-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
-              title="Página anterior"
-            >
-              <LuChevronLeft className="w-4 h-4" />
-            </button>
-            <span className="px-3 py-1 text-sm font-semibold text-blue-700 bg-blue-50 rounded-lg shadow">
-              {table.getState().pagination.pageIndex + 1} / {table.getPageCount()}
-            </span>
-            <button
-              onClick={() => table.nextPage()}
-              disabled={!table.getCanNextPage()}
-              className="px-2 py-1 rounded-full border border-gray-300 bg-gray-50 text-gray-500 hover:bg-blue-100 hover:text-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
-              title="Página siguiente"
-            >
-              <LuChevronRight className="w-4 h-4" />
-            </button>
+            </div>
+
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-gray-700">Filas por página:</span>
+                <select
+                  value={table.getState().pagination.pageSize}
+                  onChange={(e) => {
+                    table.setPageSize(Number(e.target.value));
+                  }}
+                  className="px-2 py-1 border border-gray-300 rounded-lg bg-white text-sm"
+                >
+                  {pageSizeOptions.map(size => (
+                    <option key={size} value={size}>
+                      {size}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+            </div>
+
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => table.previousPage()}
+                  disabled={!table.getCanPreviousPage()}
+                  className="px-2 py-1 rounded-full border border-gray-300 bg-gray-50 text-gray-500 hover:bg-blue-100 hover:text-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                  title="Página anterior"
+                >
+                  <LuChevronLeft className="w-4 h-4" />
+                </button>
+                <span className="px-3 py-1 text-sm font-semibold text-blue-700 bg-blue-50 rounded-lg">
+                  {table.getState().pagination.pageIndex + 1} / {table.getPageCount()}
+                </span>
+                <button
+                  onClick={() => table.nextPage()}
+                  disabled={!table.getCanNextPage()}
+                  className="px-2 py-1 rounded-full border border-gray-300 bg-gray-50 text-gray-500 hover:bg-blue-100 hover:text-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                  title="Página siguiente"
+                >
+                  <LuChevronRight className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>

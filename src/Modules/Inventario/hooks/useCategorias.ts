@@ -56,31 +56,38 @@ export const useUpdateCategoria = () => {
   });
 };
 
-export const useDeleteCategoria = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (id: number) => CategoriasService.deleteCategoria(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['categories'] });
-    },
-    onError: (error: any) => {
-      console.error('Error al eliminar la categoría:', error);
-    },
-  });
-};
 
 export const useUpdateEstadoCategoria = () => {
   const queryClient = useQueryClient();
+  const { showSuccessWithUndo, showError } = useAlerts();
 
   return useMutation({
     mutationFn: ({ id, nuevoEstado }: { id: number; nuevoEstado: number }) =>
       CategoriasService.updateEstadoCategoria(id, nuevoEstado),
-    onSuccess: () => {
+    onSuccess: (_, { id, nuevoEstado }) => {
       queryClient.invalidateQueries({ queryKey: ['categories'] });
+      const accion = nuevoEstado === 1 ? 'activada' : 'desactivada';
+      const estadoAnterior = nuevoEstado === 1 ? 2 : 1;
+      
+      const undoAction = async () => {
+        try {
+          await CategoriasService.updateEstadoCategoria(id, estadoAnterior);
+          queryClient.invalidateQueries({ queryKey: ['categories'] });
+        } catch (error) {
+          showError('Error', 'No se pudo revertir el cambio');
+          console.error('Error reverting category state in undo action:', error);
+        }
+      };
+
+      showSuccessWithUndo(
+        `Categoría ${accion}`, 
+        `La categoría se ha ${accion} exitosamente`,
+        undoAction
+      );
     },
-    onError: () => {
-      console.error('Error al actualizar el estado de la categoría');
+    onError: (error: any) => {
+      const errorMessage = error?.response?.data?.message || 'Error al actualizar el estado de la categoría';
+      showError('Error', errorMessage);
     },
   });
 };

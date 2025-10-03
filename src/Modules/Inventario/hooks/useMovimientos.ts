@@ -1,12 +1,27 @@
 import { useState, useCallback, useMemo } from 'react';
-import type { Material } from '../models/Inventario';
+import type { Material, MovimientoMaterial } from '../models/Inventario';
 import type { MovimientoType, MovimientoFormData } from '../types/MovimientoTypes';
 import { useGetAllMaterials } from './useMaterials';
 import { useIngresoMaterial, useEgresoMaterial } from './HookMaterialMovimiento';
 import { useAlerts } from '@/Modules/Global/context/AlertContext';
+import { useAuth } from '@/Modules/Auth/Context/AuthContext';
+import { getAllMovimientos } from '../service/MovimientosService';
+import { useQuery } from '@tanstack/react-query';
+
+
+
+
+export const useGetAllMovimientos = () => {
+  return useQuery<MovimientoMaterial[]>({
+    queryKey: ['movimientos'],
+    queryFn: getAllMovimientos,
+    staleTime: 1000 * 60 * 5, // 5 minutos
+    refetchOnWindowFocus: false,
+  });
+};
 
 export const useMovimientoForm = (initialMaterial?: Material) => {
-  // Estados principales
+  const { user } = useAuth();
   const [tipoMovimiento, setTipoMovimiento] = useState<MovimientoType>('entrada');
   const [selectedMaterial, setSelectedMaterial] = useState<Material | null>(initialMaterial || null);
   const [cantidad, setCantidad] = useState<number>(1);
@@ -14,13 +29,11 @@ export const useMovimientoForm = (initialMaterial?: Material) => {
   const [busquedaMaterial, setBusquedaMaterial] = useState<string>('');
   const [showMaterialSelector, setShowMaterialSelector] = useState<boolean>(!initialMaterial);
 
-  // Hooks
   const { data: materiales = [], isLoading: loadingMateriales, refetch: refetchMateriales } = useGetAllMaterials();
   const ingresoMutation = useIngresoMaterial();
   const egresoMutation = useEgresoMaterial();
   const { showError } = useAlerts();
 
-  // Filtro de materiales optimizado con useMemo
   const materialesFiltrados = useMemo(() => {
     if (!busquedaMaterial.trim()) return materiales;
     const termino = busquedaMaterial.toLowerCase().trim();
@@ -32,7 +45,7 @@ export const useMovimientoForm = (initialMaterial?: Material) => {
     );
   }, [materiales, busquedaMaterial]);
 
-  // Handlers optimizados con useCallback
+
   const handleSelectMaterial = useCallback((material: Material) => {
     setSelectedMaterial(material);
     setShowMaterialSelector(false);
@@ -76,24 +89,29 @@ export const useMovimientoForm = (initialMaterial?: Material) => {
 
   const handleSubmit = useCallback(async () => {
     if (!validateForm()) return;
+    
+    if (!user?.Id_Usuario) {
+      showError('Error', 'Usuario no autenticado');
+      return false;
+    }
 
     try {
       const movimientoData = {
+        Id_Material: selectedMaterial!.Id_Material,
         Cantidad: cantidad
       };
 
       if (tipoMovimiento === 'entrada') {
         await ingresoMutation.mutateAsync({
-          materialId: selectedMaterial!.Id_Material,
+          idUsuario: user.Id_Usuario,
           data: movimientoData
         });
       } else {
         await egresoMutation.mutateAsync({
-          materialId: selectedMaterial!.Id_Material,
+          idUsuario: user.Id_Usuario,
           data: movimientoData
         });
       }
-      
       await refetchMateriales();
       resetForm();
       return true; // Indica éxito
@@ -103,6 +121,8 @@ export const useMovimientoForm = (initialMaterial?: Material) => {
     }
   }, [
     validateForm, 
+    user?.Id_Usuario,
+    showError,
     cantidad, 
     tipoMovimiento, 
     selectedMaterial, 
