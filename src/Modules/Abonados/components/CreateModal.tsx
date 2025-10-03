@@ -528,7 +528,7 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                                     {field.state.value || 'Seleccionar archivo...'}
                                 </span>
                                 <span className="bg-blue-500 text-white px-3 py-1 rounded text-sm">
-                                    Archivo cargado
+                                    Subir Archivo
                                 </span>
                             </div>
                         </div>
@@ -566,7 +566,7 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                                     {field.state.value || 'Seleccionar archivo...'}
                                 </span>
                                 <span className="bg-blue-500 text-white px-3 py-1 rounded text-sm">
-                                    Archivo cargado
+                                    Subir Archivo
                                 </span>
                             </div>
                         </div>
@@ -792,7 +792,7 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                                     {field.state.value || 'Seleccionar archivo...'}
                                 </span>
                                 <span className="bg-blue-500 text-white px-3 py-1 rounded text-sm">
-                                    Archivo cargado
+                                    Subir Archivo
                                 </span>
                             </div>
                         </div>
@@ -830,7 +830,7 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                                     {field.state.value || 'Seleccionar archivo...'}
                                 </span>
                                 <span className="bg-blue-500 text-white px-3 py-1 rounded text-sm">
-                                    Archivo cargado
+                                    Subir Archivo
                                 </span>
                             </div>
                         </div>

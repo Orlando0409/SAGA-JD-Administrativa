@@ -206,7 +206,7 @@ export default function AbonadosTable() {
                         className="px-3 py-2 rounded-lg bg-sky-600 text-white hover:bg-sky-700 shadow-sm text-sm whitespace-nowrap"
                         onClick={() => setShowCreateModal(true)}
                     >
-                        + Nueva Solicitud
+                        + Nuevo Afiliado
                     </button>
                 </div>
             </div>
