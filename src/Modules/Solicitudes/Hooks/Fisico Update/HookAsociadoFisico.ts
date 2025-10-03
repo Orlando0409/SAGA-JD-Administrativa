@@ -17,18 +17,28 @@ export const useMutateEstadoSolicitudAsociado = () => {
             return ServiceSolicitudAsociado.updateEstado(solicitudId, nuevoEstadoId);
         },
         onSuccess: (data, variables) => {
-            // 1. Actualizar la caché de la solicitud individual
-            queryClient.setQueryData(
-                ['solicitud-asociado-fisica', { id: variables.solicitudId }], 
-                data
-            );
+            try {
+                // 1. Actualizar la caché de la solicitud individual
+                queryClient.setQueryData(
+                    ['solicitud-asociado-fisica', { id: variables.solicitudId }], 
+                    data
+                );
 
-            // 2. Invalidar y refrescar la lista completa de solicitudes de asociado
-            queryClient.invalidateQueries({ 
-                queryKey: ['solicitud-asociado-fisica'] 
-            });
+                // 2. Cross-invalidation: invalidar todas las consultas relacionadas
+                queryClient.invalidateQueries({ 
+                    queryKey: ['solicitud-asociado-fisica'] 
+                });
+                queryClient.invalidateQueries({ 
+                    queryKey: ['solicitudes-fisicas'] 
+                });
+                queryClient.invalidateQueries({ 
+                    queryKey: ['solicitudes-juridicas'] 
+                });
 
-            console.log(' Estado de asociado actualizado exitosamente en caché:', data);
+                console.log('✅ Estado de asociado actualizado exitosamente con cross-invalidation:', data);
+            } catch (error) {
+                console.error('❌ Error en onSuccess de asociado:', error);
+            }
         },
         onError: (error: any) => {
             console.error(' Error al actualizar estado de asociado:', error);
@@ -47,16 +57,28 @@ export const useAprobarSolicitudAsociado = () => {
             return ServiceSolicitudAsociado.aprobar(solicitudId);
         },
         onSuccess: (data, solicitudId) => {
-            // Actualizar cachés
-            queryClient.setQueryData(
-                ['solicitud-asociado-fisica', { id: solicitudId }], 
-                data
-            );
-            queryClient.invalidateQueries({ 
-                queryKey: ['solicitud-asociado-fisica'] 
-            });
+            try {
+                // Actualizar caché individual
+                queryClient.setQueryData(
+                    ['solicitud-asociado-fisica', { id: solicitudId }], 
+                    data
+                );
+                
+                // Cross-invalidation
+                queryClient.invalidateQueries({ 
+                    queryKey: ['solicitud-asociado-fisica'] 
+                });
+                queryClient.invalidateQueries({ 
+                    queryKey: ['solicitudes-fisicas'] 
+                });
+                queryClient.invalidateQueries({ 
+                    queryKey: ['solicitudes-juridicas'] 
+                });
 
-            console.log(' Solicitud de asociado aprobada exitosamente:', data);
+                console.log('✅ Solicitud de asociado aprobada exitosamente con cross-invalidation:', data);
+            } catch (error) {
+                console.error('❌ Error en onSuccess de aprobación asociado:', error);
+            }
         },
         onError: (error: any) => {
             console.error(' Error al aprobar solicitud de asociado:', error);
