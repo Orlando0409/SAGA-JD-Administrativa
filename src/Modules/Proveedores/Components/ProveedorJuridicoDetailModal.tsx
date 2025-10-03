@@ -19,7 +19,7 @@ import {
 } from "@/Modules/Global/components/Sidebar/ui/alert-dialog";
 import { Button } from '@/Modules/Global/components/Sidebar/ui/button';
 import { CUSTOM_ANIMATION } from '@/Modules/Global/types/Sections';
-import type { ProveedorJuridico } from '../Models/TablaProveedo/proveedorjuridico';
+import type { ProveedorJuridico } from '../Models/TablaProveedo/tablaJuridicoProveedor';
 import { useAlerts } from '@/Modules/Global/context/AlertContext';
 
 interface ProveedorJuridicoDetailModalProps {

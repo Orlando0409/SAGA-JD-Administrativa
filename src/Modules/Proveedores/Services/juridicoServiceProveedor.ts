@@ -1,5 +1,5 @@
 import apiAuth from '@/Api/apiAuth';
-import type { ProveedorJuridico, CreateProveedorJuridicoData, UpdateProveedorJuridicoData } from '../Models/TablaProveedo/proveedorjuridico';
+import type { ProveedorJuridico, CreateProveedorJuridicoData, UpdateProveedorJuridicoData } from '../Models/TablaProveedo/tablaJuridicoProveedor';
 
 // Función para obtener todos los proveedores jurídicos
 export const getProveedoresJuridicos = async (): Promise<ProveedorJuridico[]> => {

@@ -7,7 +7,7 @@ import {
   deleteProveedorJuridico,
   changeProveedorJuridicoStatus
 } from "../Services/juridicoServiceProveedor";
-import type { ProveedorJuridico, CreateProveedorJuridicoData, UpdateProveedorJuridicoData } from "../Models/TablaProveedo/proveedorjuridico";
+import type { ProveedorJuridico, CreateProveedorJuridicoData, UpdateProveedorJuridicoData } from "../Models/TablaProveedo/tablaJuridicoProveedor";
 
 export const useProveedoresJuridicos = () => {
   // Query para obtener todos los proveedores jurídicos

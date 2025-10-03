@@ -7,8 +7,8 @@ import ProveedorDetailModal from './proveedorDetailModal';
 import ProveedorJuridicoDetailModal from './ProveedorJuridicoDetailModal';
 import CreateModalProveedor from './CreateModalProveedor';
 import { formatCedulaJuridica } from '../Schema/SchemaProveedorJuridico';
-import type { ProveedorFisico } from '../Models/TablaProveedo/proveedorFisico';
-import type { ProveedorJuridico } from '../Models/TablaProveedo/proveedorjuridico';
+import type { ProveedorFisico } from '../Models/TablaProveedo/tablaFisicoProveedor';
+import type { ProveedorJuridico } from '../Models/TablaProveedo/tablaJuridicoProveedor';
 
 // Tipo unificado para la tabla (similar al patrón de AbonadosTable)
 type ProveedorUnificado = {

@@ -7,7 +7,7 @@ import {
   deleteProveedorFisico,
   changeProveedorFisicoStatus
 } from "../Services/fisicoServiceProveedor";
-import type { ProveedorFisico, CreateProveedorData, UpdateProveedorData } from "../Models/TablaProveedo/proveedorFisico";
+import type { ProveedorFisico, CreateProveedorData, UpdateProveedorData } from "../Models/TablaProveedo/tablaFisicoProveedor";
 
 export const useProveedoresFisicos = () => {
   // Query para obtener todos los proveedores físicos

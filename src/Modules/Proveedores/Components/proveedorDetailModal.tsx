@@ -18,7 +18,7 @@ import {
 } from "@/Modules/Global/components/Sidebar/ui/alert-dialog";
 import { Button } from '@/Modules/Global/components/Sidebar/ui/button';
 import { CUSTOM_ANIMATION } from '@/Modules/Global/types/Sections';
-import type { ProveedorFisico } from '../Models/TablaProveedo/proveedorFisico';
+import type { ProveedorFisico } from '../Models/TablaProveedo/tablaFisicoProveedor';
 import { useAlerts } from '@/Modules/Global/context/AlertContext';
 
 interface ProveedorDetailModalProps {

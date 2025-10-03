@@ -8,7 +8,7 @@ import {
   type EditProveedorJuridicoSchemaData,
   JURIDICO_VALIDATION_LIMITS
 } from '../Schema/SchemaProveedorJuridico';
-import type { ProveedorJuridico, UpdateProveedorJuridicoData } from '../Models/TablaProveedo/proveedorjuridico';
+import type { ProveedorJuridico, UpdateProveedorJuridicoData } from '../Models/TablaProveedo/tablaJuridicoProveedor';
 import { useUpdateProveedorJuridico } from '../Hook/hookjuridicoproveedor';
 import { useAlerts } from '@/Modules/Global/context/AlertContext';
 

@@ -20,8 +20,8 @@ import {
 } from '../Schema/SchemaProveedorJuridico';
 import { useCreateProveedorFisico } from '../Hook/proveedoresFisicos';
 import { useCreateProveedorJuridico } from '../Hook/hookjuridicoproveedor';
-import type { CreateProveedorData } from '../Models/TablaProveedo/proveedorFisico';
-import type { CreateProveedorJuridicoData } from '../Models/TablaProveedo/proveedorjuridico';
+import type { CreateProveedorData } from '../Models/TablaProveedo/tablaFisicoProveedor';
+import type { CreateProveedorJuridicoData } from '../Models/TablaProveedo/tablaJuridicoProveedor';
 import { useAlerts } from '@/Modules/Global/context/AlertContext';
 
 interface CreateModalProveedorProps {
