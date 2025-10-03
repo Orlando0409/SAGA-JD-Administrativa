@@ -3,7 +3,6 @@ import { useForm } from '@tanstack/react-form';
 import PhoneInput, { isValidPhoneNumber } from 'react-phone-number-input';
 import 'react-phone-number-input/style.css';
 import { LuX } from 'react-icons/lu';
-import { Button } from '@/Modules/Global/components/Sidebar/ui/button';
 import { 
   EditProveedorJuridicoSchema, 
   type EditProveedorJuridicoSchemaData,

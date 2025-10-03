@@ -6,7 +6,7 @@ import {
   updateProveedorFisico,
   deleteProveedorFisico,
   changeProveedorFisicoStatus
-} from "../Services/proveedorservice";
+} from "../Services/fisicoServiceProveedor";
 import type { ProveedorFisico, CreateProveedorData, UpdateProveedorData } from "../Models/TablaProveedo/proveedorFisico";
 
 export const useProveedoresFisicos = () => {
