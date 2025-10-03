@@ -30,7 +30,7 @@ const Usuarios = () => {
   const [showUserDetail, setShowUserDetail] = useState(false);
   const [showRolesTable, setShowRolesTable] = useState(false);
   const [showFilterModal, setShowFilterModal] = useState(false);
-  const [appliedFilters, setAppliedFilters] = useState<FilterOptions>({});
+  const [appliedFilters, setAppliedFilters] = useState<FilterOptions>({ estado: 'activo' }); // Por defecto solo activos
 
   const hasViewPermission = canView('usuarios');
   const hasEditPermission = canEdit('usuarios');
@@ -67,18 +67,18 @@ const Usuarios = () => {
   }, [users, hasEditPermission, hasViewPermission, currentUser?.Id_Usuario, isLoading]);
 
   const applyCustomFilters = (data: Usuario[], filters: FilterOptions): Usuario[] => {
-    if (!filters.rol && !filters.estado) return data;
-    
     return data.filter(user => {
+      // Aplicar filtro de rol si está definido
       if (filters.rol && user.Rol?.Nombre_Rol !== filters.rol) {
         return false;
       }
 
-      if (filters.estado) {
-        const userIsActive = isActive(user.Fecha_Eliminacion);
-        if (filters.estado === 'activo' && !userIsActive) return false;
-        if (filters.estado === 'inactivo' && userIsActive) return false;
-      }
+      // Aplicar filtro de estado
+      const userIsActive = isActive(user.Fecha_Eliminacion);
+      if (filters.estado === 'activo' && !userIsActive) return false;
+      if (filters.estado === 'inactivo' && userIsActive) return false;
+      if (filters.estado === 'todos') return true; // Mostrar todos
+      if (!filters.estado && !userIsActive) return false; // Si no hay filtro específico, ocultar inactivos
 
       return true;
     });
@@ -187,8 +187,7 @@ const Usuarios = () => {
             {(hasEditPermission || filteredUsers.length > 1) && (
               <div className="p-6 border-b bg-gray-50">
                 <div className="flex justify-between items-center gap-4">
-                  {/* Search - Solo si hay más de un usuario */}
-                  {filteredUsers.length > 1 && (
+
                     <div className="relative flex-1 max-w-md">
                       <LuSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                       <input
@@ -199,7 +198,6 @@ const Usuarios = () => {
                         className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       />
                     </div>
-                  )}
 
                   {hasEditPermission && (
                     <div className="flex gap-3">
@@ -239,39 +237,6 @@ const Usuarios = () => {
                     </div>
                   )}
                 </div>
-
-                {hasEditPermission && activeFiltersCount > 0 && (
-                  <div className="mt-4 flex flex-wrap gap-2">
-                    {appliedFilters.rol && (
-                      <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                        Rol: {appliedFilters.rol}
-                        <button
-                          onClick={() => handleApplyFilters({ ...appliedFilters, rol: '' })}
-                          className="ml-2 text-blue-600 hover:text-blue-800"
-                        >
-                          ×
-                        </button>
-                      </span>
-                    )}
-                    {appliedFilters.estado && (
-                      <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                        Estado: {appliedFilters.estado}
-                        <button
-                          onClick={() => handleApplyFilters({ ...appliedFilters, estado: '' })}
-                          className="ml-2 text-green-600 hover:text-green-800"
-                        >
-                          ×
-                        </button>
-                      </span>
-                    )}
-                    <button
-                      onClick={() => handleApplyFilters({})}
-                      className="text-xs text-red-600 hover:text-red-800 font-medium"
-                    >
-                      Limpiar todos los filtros
-                    </button>
-                  </div>
-                )}
               </div>
             )}
 

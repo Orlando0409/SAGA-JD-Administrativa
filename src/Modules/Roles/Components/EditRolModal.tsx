@@ -9,7 +9,18 @@ import {
   type PermissionLevel
 } from '@/Modules/Usuarios/Helper/GroupPermiByModule';
 import { RoleMAX_LENGTH, RoleMIN_LENGTH, type EditRoleModalProps } from '../Types/RoleTypes';
-import { useAlerts } from '@/Modules/Global/context/AlertContext';
+import {
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogHeader,
+  AlertDialogFooter
+} from "@/Modules/Global/components/Sidebar/ui/alert-dialog";
+import { Button } from '@/Modules/Global/components/Sidebar/ui/button';
 
 
 
@@ -17,7 +28,6 @@ export const EditRoleModal: React.FC<EditRoleModalProps> = ({ roleId, isOpen, on
   const { data: role, isLoading: roleLoading } = useRoleById(roleId);
   const { data: permisos = [], isLoading: permisosLoading } = usePermissions();
   const { mutateAsync } = useUpdateRole();
-  const {showSuccess, showError} = useAlerts();
   const [modulePermissions, setModulePermissions] = useState<ModulePermission[]>([]);
   const [nombreRol, setNombreRol] = useState('');
   const [errors, setErrors] = useState<{ nombreRol?: string }>({});
@@ -79,12 +89,10 @@ export const EditRoleModal: React.FC<EditRoleModalProps> = ({ roleId, isOpen, on
 
     try {
       await mutateAsync({ Id_Rol: roleId, roleData: { Nombre_Rol: nombreRol, permisosIds } });
-      showSuccess('Rol actualizado exitosamente');
+      onClose();
     } catch (error) {
       console.error('Error updating role:', error);
-      showError('Error al actualizar rol');
     }
-    onClose();
   };
 
   const remainingChars = RoleMAX_LENGTH - nombreRol.length;
@@ -250,17 +258,37 @@ export const EditRoleModal: React.FC<EditRoleModalProps> = ({ roleId, isOpen, on
               </div>
 
               <div className="flex gap-4 justify-end pt-4 border-t border-gray-200">
-                <button
-                  type="submit"
-                  disabled={hasError || nombreRol.length < RoleMIN_LENGTH}
-                  className={`px-6 py-2 rounded-lg transition-colors font-medium ${
-                    hasError || nombreRol.length < RoleMIN_LENGTH
-                      ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                      : 'bg-blue-600 text-white hover:bg-blue-700'
-                  }`}
-                >
-                  Guardar Cambios
-                </button>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button
+                      disabled={hasError || nombreRol.length < RoleMIN_LENGTH}
+                      className={`px-6 py-2 rounded-lg transition-colors font-medium ${
+                        hasError || nombreRol.length < RoleMIN_LENGTH
+                          ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                          : 'bg-blue-600 text-white hover:bg-blue-700'
+                      }`}
+                    >
+                      Guardar Cambios
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>¿Confirmar actualización?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        ¿Estás seguro de que deseas actualizar este rol? Esta acción modificará los permisos y el nombre del rol en el sistema.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={handleSubmit}
+                        disabled={hasError || nombreRol.length < RoleMIN_LENGTH}
+                      >
+                        Confirmar
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
                 <button
                   type="button"
                   onClick={onClose}

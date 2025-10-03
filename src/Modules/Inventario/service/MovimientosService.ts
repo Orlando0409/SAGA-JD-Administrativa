@@ -1,22 +1,21 @@
 import axiosPrivate from '@/Api/apiAuth';
 import type { 
-  Material, 
   IngresoEgresoMaterialData
 } from '../models/Inventario';
 
-const transformMaterial = (material: Material) => {
-  return {
-    ...material,
-    Categorias: material.Categorias?.map((catItem: any) => catItem.Categoria) || []
-  };
+// Updated to match backend controller endpoints
+export const ingresoMaterial = async (idUsuario: number, ingresoData: IngresoEgresoMaterialData): Promise<any> => {
+  const response = await axiosPrivate.post(`/Inventario/ingreso/material/${idUsuario}`, ingresoData);
+  return response.data;
 };
 
-export const ingresoMaterial = async (materialId: number, ingresoData: IngresoEgresoMaterialData): Promise<Material> => {
-  const response = await axiosPrivate.patch(`/Inventario/ingreso/material/${materialId}`, ingresoData);
-  return transformMaterial(response.data);
+export const egresoMaterial = async (idUsuario: number, egresoData: IngresoEgresoMaterialData): Promise<any> => {
+  const response = await axiosPrivate.post(`/Inventario/egreso/material/${idUsuario}`, egresoData);
+  return response.data;
 };
 
-export const egresoMaterial = async (materialId: number, egresoData: IngresoEgresoMaterialData): Promise<Material> => {
-  const response = await axiosPrivate.patch(`/Inventario/egreso/material/${materialId}`, egresoData);
-  return transformMaterial(response.data);
+// Add the new endpoint for getting all movements
+export const getAllMovimientos = async (): Promise<any[]> => {
+  const response = await axiosPrivate.get('/Inventario/all/movimientos');
+  return response.data;
 };

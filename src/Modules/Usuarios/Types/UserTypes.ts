@@ -21,7 +21,7 @@ export interface FilterModalProps {
 
 export interface FilterOptions {
   rol?: string;
-  estado?: 'activo' | 'inactivo' | '';
+  estado?: 'activo' | 'inactivo' | 'todos' | '';
 }
 
 export type CreateUserProps = {

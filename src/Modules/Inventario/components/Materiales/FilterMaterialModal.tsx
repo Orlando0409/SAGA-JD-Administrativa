@@ -13,11 +13,6 @@ const FilterMaterialModal: React.FC<FilterMaterialModalProps> = ({
 }) => {
   const { data: categorias = [] } = useGetAllCategories();
   
-  const estados = [
-    { id: 1, nombre: 'Disponible' },
-    { id: 2, nombre: 'Agotado' }
-  ];
-  
   const [filters, setFilters] = useState<MaterialFilterOptions>(currentFilters);
 
   const handleApply = () => {
@@ -28,7 +23,6 @@ const FilterMaterialModal: React.FC<FilterMaterialModalProps> = ({
   const handleClear = () => {
     const clearFilters: MaterialFilterOptions = {
       categoria: [],
-      estado: '',
       conStock: false,
       precioMin: undefined,
       precioMax: undefined,
@@ -176,25 +170,6 @@ const FilterMaterialModal: React.FC<FilterMaterialModalProps> = ({
                 </div>
               )}
             </div>
-          </div>
-
-          <div>
-            <label htmlFor="filter-estado" className="block text-sm font-medium text-gray-700 mb-2">
-              Estado
-            </label>
-            <select
-              id="filter-estado"
-              value={filters.estado || ''}
-              onChange={(e) => setFilters(prev => ({ ...prev, estado: e.target.value || undefined }))}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-              <option value="">Todos los estados</option>
-              {estados.map((estado) => (
-                <option key={estado.id} value={estado.nombre}>
-                  {estado.nombre}
-                </option>
-              ))}
-            </select>
           </div>
 
           <div>

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useCreateUnidadMedicion } from '../../hooks/HookUnidadMedicion';
-import type { CreateUnidadMedicionSchemaData } from '../../schema/CreateUnidadMedicionSchema';
+import { CreateUnidadMedicionSchema, type CreateUnidadMedicionSchemaData } from '../../schema/CreateUnidadMedicionSchema';
+import { useAuth } from '@/Modules/Auth/Context/AuthContext';
 
 interface CreateUnidadMedicionModalProps {
   isOpen: boolean;
@@ -12,6 +13,7 @@ const CreateUnidadMedicionModal: React.FC<CreateUnidadMedicionModalProps> = ({
   isOpen,
   onClose,
 }) => {
+  const { user } = useAuth();
   const createUnidadMedicionMutation = useCreateUnidadMedicion();
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   
@@ -33,30 +35,32 @@ const CreateUnidadMedicionModal: React.FC<CreateUnidadMedicionModalProps> = ({
     e.preventDefault();
     setFormErrors({});
 
-    const errors: Record<string, string> = {};
-    
-    if (!formData.Nombre_Unidad_Medicion.trim()) {
-      errors.Nombre_Unidad_Medicion = 'El nombre es requerido';
-    } else if (formData.Nombre_Unidad_Medicion.trim().length < 2) {
-      errors.Nombre_Unidad_Medicion = 'El nombre debe tener al menos 2 caracteres';
-    }
+    // Use Zod schema validation
+    const validation = CreateUnidadMedicionSchema.safeParse(formData);
 
-    if (!formData.Abreviatura.trim()) {
-      errors.Abreviatura = 'La abreviatura es requerida';
-    } else if (formData.Abreviatura.trim().length < 1) {
-      errors.Abreviatura = 'La abreviatura debe tener al menos 1 caracter';
-    }
-
-    if (Object.keys(errors).length > 0) {
-      setFormErrors(errors);
+    if (!validation.success) {
+      const fieldErrors: Record<string, string> = {};
+      validation.error.errors.forEach((err) => {
+        const field = err.path[0] as string;
+        fieldErrors[field] = err.message;
+      });
+      setFormErrors(fieldErrors);
       return;
     }
 
     try {
+      if (!user?.Id_Usuario) {
+        console.error('Usuario no autenticado');
+        return;
+      }
+
       await createUnidadMedicionMutation.mutateAsync({
-        Nombre_Unidad_Medicion: formData.Nombre_Unidad_Medicion.trim(),
-        Abreviatura: formData.Abreviatura.trim(),
-        Descripcion: formData.Descripcion?.trim() || undefined,
+        data: {
+          Nombre_Unidad_Medicion: formData.Nombre_Unidad_Medicion.trim(),
+          Abreviatura: formData.Abreviatura.trim(),
+          Descripcion: formData.Descripcion?.trim() || undefined,
+        },
+        idUsuarioCreador: user.Id_Usuario
       });
       
       onClose();

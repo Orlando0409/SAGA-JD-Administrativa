@@ -3,7 +3,8 @@ import { InventarioDashboard } from './InventarioDashboard';
 import CatalogoMateriales from '../Materiales/Catálogo de Materiales';
 import CatalogoCategorias from '../Categorias/Catálogo de Categorias';
 import CatalogoUnidadesMedicion from '../UnidadesMedicion/Catálogo de Unidades de medicion';
-import CatalogoMovimientos from '../Movimientos/Catálogo de movimientos';
+import CatalogoMovimientos from '../Movimientos/CatalogoMovimientos';
+
 
 export const InventarioWrapper: React.FC = () => {
   const [currentView, setCurrentView] = useState<string>('dashboard');

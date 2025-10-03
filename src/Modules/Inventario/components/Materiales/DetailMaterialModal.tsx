@@ -64,13 +64,16 @@ const DetailMaterialModal: React.FC<DetailMaterialModalProps> = ({
                 Categorías
               </label>
               <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded border break-words overflow-wrap-anywhere">
-                {material.Categorias && material.Categorias.length > 0
-                  ? material.Categorias.map(cat => (
-                    <li key={cat.Id_Material_Categoria} className="list-disc list-inside">
-                      {cat.Categoria.Nombre_Categoria}
-                    </li>
-                  ))
-                  : 'Sin categorías'}
+                {(() => {
+                  const categorias = material.materialCategorias || material.Categorias || [];
+                  return categorias.length > 0
+                    ? categorias.map(cat => (
+                      <li key={cat.Id_Material_Categoria} className="list-disc list-inside">
+                        {cat.Categoria.Nombre_Categoria}
+                      </li>
+                    ))
+                    : 'Sin categorías';
+                })()}
               </p>
             </div>
 

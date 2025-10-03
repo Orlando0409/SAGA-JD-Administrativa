@@ -8,7 +8,7 @@ export const useAlert = () => {
   const [remainingTime, setRemainingTime] = useState(0);
 
   const alertTimestamps = useRef<number[]>([]);
-  const MAX_ALERTS = 3;
+  const MAX_ALERTS = 4;
   const ALERT_LIMIT_TIME = 5000;
   const BLOCK_DURATION = 5000;
 
@@ -19,7 +19,7 @@ export const useAlert = () => {
 
 
   const showAlert = useCallback(
-    (type: AlertType, title: string, description?: string, duration: number = 4000) => {
+    (type: AlertType, title: string, description?: string, duration: number = 4000, actionButton?: { text: string; onClick: () => void }) => {
       // Si está bloqueado, no mostrar nuevas alertas normales
       if (isBlocked && type !== 'warning') return;
 
@@ -30,7 +30,6 @@ export const useAlert = () => {
         timestamp => now - timestamp < ALERT_LIMIT_TIME
       );
 
-      // Si hay spam, bloquear y mostrar advertencia
       if (alertTimestamps.current.length >= MAX_ALERTS && !isBlocked) {
         setIsBlocked(true);
         setRemainingTime(BLOCK_DURATION / 1000);
@@ -58,9 +57,8 @@ export const useAlert = () => {
         return warningId;
       }
 
-      // Mostrar alerta normal
       const id = generateUniqueId();
-      const newAlert: AlertState = { id, type, title, description, duration };
+      const newAlert: AlertState = { id, type, title, description, duration, actionButton };
       setAlerts(prev => [...prev, newAlert].slice(-MAX_ALERTS));
 
       if (duration > 0) {
@@ -102,6 +100,24 @@ export const useAlert = () => {
     [showAlert]
   );
 
+  const showSuccessWithUndo = useCallback(
+    (title: string, description: string, undoAction: () => void, duration: number = 6000) => {
+      let alertId: string = '';
+      const actionButton = {
+        text: 'Deshacer',
+        onClick: () => {
+          undoAction();
+          if (alertId) {
+            setAlerts(prev => prev.filter(alert => alert.id !== alertId));
+          }
+        }
+      };
+      const id = showAlert('success', title, description, duration, actionButton);
+      alertId = id || '';
+      return id;
+    },
+    [showAlert]
+  );
 
   return {
     alerts,
@@ -110,6 +126,7 @@ export const useAlert = () => {
     showError,
     showWarning,
     showInfo,
+    showSuccessWithUndo,
     removeAlert,
     clearAlerts,
     isBlocked,

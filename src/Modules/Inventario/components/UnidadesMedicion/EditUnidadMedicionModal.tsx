@@ -1,7 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { useUpdateUnidadMedicion } from '../../hooks/HookUnidadMedicion';
 import type { UnidadMedicion } from '../../models/Inventario';
-import type { UpdateUnidadMedicionSchemaData } from '../../schema/UpdateUnidadMedicionSchema';
+import { UpdateUnidadMedicionSchema, type UpdateUnidadMedicionSchemaData } from '../../schema/UpdateUnidadMedicionSchema';
+import {
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogHeader,
+  AlertDialogFooter
+} from "@/Modules/Global/components/Sidebar/ui/alert-dialog";
+import { Button } from '@/Modules/Global/components/Sidebar/ui/button';
 
 interface EditUnidadMedicionModalProps {
   isOpen: boolean;
@@ -23,7 +35,7 @@ const EditUnidadMedicionModal: React.FC<EditUnidadMedicionModalProps> = ({ isOpe
   useEffect(() => {
     if (unidad) {
       setFormData({
-        Nombre_Unidad_Medicion: unidad.Nombre_Unidad,
+        Nombre_Unidad_Medicion: unidad.Nombre_Unidad_Medicion || unidad.Nombre_Unidad || '',
         Abreviatura: unidad.Abreviatura,
         Descripcion: unidad.Descripcion || '',
       });
@@ -42,27 +54,21 @@ const EditUnidadMedicionModal: React.FC<EditUnidadMedicionModalProps> = ({ isOpe
     e.preventDefault();
     setFormErrors({});
 
-    const errors: Record<string, string> = {};
-    
-    if (!formData.Nombre_Unidad_Medicion?.trim()) {
-      errors.Nombre_Unidad_Medicion = 'El nombre es requerido';
-    } else if (formData.Nombre_Unidad_Medicion.trim().length < 2) {
-      errors.Nombre_Unidad_Medicion = 'El nombre debe tener al menos 2 caracteres';
-    }
+    // Use Zod schema validation
+    const validation = UpdateUnidadMedicionSchema.safeParse(formData);
 
-    if (!formData.Abreviatura?.trim()) {
-      errors.Abreviatura = 'La abreviatura es requerida';
-    } else if (formData.Abreviatura.trim().length < 1) {
-      errors.Abreviatura = 'La abreviatura debe tener al menos 1 caracter';
-    }
-
-    if (Object.keys(errors).length > 0) {
-      setFormErrors(errors);
+    if (!validation.success) {
+      const fieldErrors: Record<string, string> = {};
+      validation.error.errors.forEach((err) => {
+        const field = err.path[0] as string;
+        fieldErrors[field] = err.message;
+      });
+      setFormErrors(fieldErrors);
       return;
     }
 
     const hasChanges = 
-      formData.Nombre_Unidad_Medicion?.trim() !== unidad.Nombre_Unidad ||
+      formData.Nombre_Unidad_Medicion?.trim() !== (unidad.Nombre_Unidad_Medicion || unidad.Nombre_Unidad) ||
       formData.Abreviatura?.trim() !== unidad.Abreviatura ||
       (formData.Descripcion?.trim() || '') !== (unidad.Descripcion || '');
 
@@ -161,13 +167,33 @@ const EditUnidadMedicionModal: React.FC<EditUnidadMedicionModalProps> = ({ isOpe
             </div>
 
             <div className="flex gap-3 pt-4 border-t">
-              <button
-                type="submit"
-                disabled={updateUnidadMutation.isPending}
-                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                {updateUnidadMutation.isPending ? 'Actualizando...' : 'Actualizar'}
-              </button>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button
+                    disabled={updateUnidadMutation.isPending}
+                    className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  >
+                    {updateUnidadMutation.isPending ? 'Actualizando...' : 'Actualizar'}
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>¿Confirmar actualización?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      ¿Estás seguro de que deseas actualizar esta unidad de medición? Esta acción modificará la información de la unidad en el sistema.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogAction
+                      onClick={(e) => handleSubmit(e as any)}
+                      disabled={updateUnidadMutation.isPending}
+                    >
+                      {updateUnidadMutation.isPending ? 'Actualizando...' : 'Confirmar'}
+                    </AlertDialogAction>
+                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
               <button
                 type="button"
                 onClick={onClose}

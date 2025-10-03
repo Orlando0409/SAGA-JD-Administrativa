@@ -8,8 +8,8 @@ import type {
 const transformMaterial = (material: any) => {
   return {
     ...material,
-    // Use the correct property name from backend
-    Categorias: material.Categorias || material.materialCategorias || []
+    materialCategorias: material.materialCategorias || [],
+    Categorias: material.materialCategorias || material.Categorias || []
   };
 };
 
@@ -18,9 +18,16 @@ export const getAllMaterials = async (): Promise<Material[]> => {
   return response.data.map(transformMaterial);
 };
 
+// Note: Backend doesn't have individual material endpoint
+// This method might need to filter from getAllMaterials or backend needs to add the endpoint
 export const getMaterialById = async (id: number): Promise<Material> => {
-  const response = await axiosPrivate.get(`/Inventario/material/${id}`);
-  return transformMaterial(response.data);
+  // Temporary workaround: get all materials and filter
+  const allMaterials = await getAllMaterials();
+  const material = allMaterials.find(m => m.Id_Material === id);
+  if (!material) {
+    throw new Error(`Material with ID ${id} not found`);
+  }
+  return material;
 };
 
 export const getMaterialesConCategorias = async (): Promise<Material[]> => {
@@ -43,8 +50,8 @@ export const getMaterialesPorDebajoDeStock = async (threshold: number): Promise<
   return response.data.map(transformMaterial);
 };
 
-export const createMaterial = async (materialData: CreateMaterialData): Promise<Material> => {
-  const response = await axiosPrivate.post('/Inventario/create/material', materialData);
+export const createMaterial = async (materialData: CreateMaterialData, idUsuarioCreador: number): Promise<Material> => {
+  const response = await axiosPrivate.post(`/Inventario/create/material/${idUsuarioCreador}`, materialData);
   return transformMaterial(response.data);
 };
 

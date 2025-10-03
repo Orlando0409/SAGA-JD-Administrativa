@@ -3,6 +3,18 @@ import { LuX } from 'react-icons/lu';
 import { useUpdateCategoria } from '../../hooks/useCategorias';
 import type { CategoriaMaterial } from '../../models/Inventario';
 import { UpdateCategoriaMaterialSchema, type UpdateCategoriaMaterialSchemaData } from '../../schema/UpdateCategoriaMaterialSchema';
+import {
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogHeader,
+  AlertDialogFooter
+} from "@/Modules/Global/components/Sidebar/ui/alert-dialog";
+import { Button } from '@/Modules/Global/components/Sidebar/ui/button';
 
 interface EditCategoriaModalProps {
   isOpen: boolean;
@@ -96,7 +108,6 @@ const EditCategoriaModal: React.FC<EditCategoriaModalProps> = ({ isOpen, onClose
         id: categoria.Id_Categoria,
         data: validationResult.data
       });
-      
       onClose();
     } catch (error) {
       console.error('Error updating categoria:', error);
@@ -181,13 +192,33 @@ const EditCategoriaModal: React.FC<EditCategoriaModalProps> = ({ isOpen, onClose
               )}
             </div>
             <div className="flex gap-3 pt-4 border-t">
-              <button
-                type="submit"
-                disabled={updateCategoriaMutation.isPending}
-                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                {updateCategoriaMutation.isPending ? 'Actualizando...' : 'Actualizar'}
-              </button>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button
+                    disabled={updateCategoriaMutation.isPending}
+                    className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  >
+                    {updateCategoriaMutation.isPending ? 'Actualizando...' : 'Actualizar'}
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>¿Confirmar actualización?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      ¿Estás seguro de que deseas actualizar esta categoría? Esta acción modificará la información de la categoría en el sistema.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogAction
+                      onClick={(e) => handleSubmit(e as any)}
+                      disabled={updateCategoriaMutation.isPending}
+                    >
+                      {updateCategoriaMutation.isPending ? 'Actualizando...' : 'Confirmar'}
+                    </AlertDialogAction>
+                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
               <button
                 type="button"
                 onClick={onClose}

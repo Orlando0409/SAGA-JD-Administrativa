@@ -14,7 +14,7 @@ const DetailMovimientoModal: React.FC<DetailMovimientoModalProps> = ({
 }) => {
   if (!isOpen) return null;
 
-  const isIngreso = movimiento.Tipo_Movimiento === 'INGRESO';
+  const isIngreso = movimiento.Tipo_Movimiento === 'Entrada';
   const fechaMovimiento = new Date(movimiento.Fecha_Movimiento);
 
   return (
@@ -47,7 +47,7 @@ const DetailMovimientoModal: React.FC<DetailMovimientoModalProps> = ({
             <div>
               <div className="text-sm font-medium text-gray-700 mb-1">Cantidad</div>
               <p className="text-lg font-semibold text-gray-900">
-                {movimiento.Cantidad} {movimiento.Material?.Unidad_Medicion?.Nombre_Unidad}
+                {movimiento.Cantidad} {movimiento.Material?.Unidad_Medicion?.Nombre_Unidad_Medicion || movimiento.Material?.Unidad_Medicion?.Nombre_Unidad}
               </p>
             </div>
 
@@ -71,10 +71,10 @@ const DetailMovimientoModal: React.FC<DetailMovimientoModalProps> = ({
               </div>
             )}
 
-            {movimiento.Usuario && (
+            {movimiento.Usuario_Creador && (
               <div>
                 <div className="text-sm font-medium text-gray-700 mb-1">Usuario</div>
-                <p className="text-gray-700">{movimiento.Usuario}</p>
+                <p className="text-gray-700">{movimiento.Usuario_Creador.Nombre_Usuario}</p>
               </div>
             )}
 
@@ -82,7 +82,7 @@ const DetailMovimientoModal: React.FC<DetailMovimientoModalProps> = ({
               <div>
                 <div className="text-sm font-medium text-gray-700 mb-1">Cantidad Anterior</div>
                 <p className="text-sm text-gray-600">
-                  {movimiento.Cantidad_Anterior} {movimiento.Material?.Unidad_Medicion?.Nombre_Unidad}
+                  {movimiento.Cantidad_Anterior} {movimiento.Material?.Unidad_Medicion?.Nombre_Unidad_Medicion || movimiento.Material?.Unidad_Medicion?.Nombre_Unidad}
                 </p>
               </div>
               
@@ -91,14 +91,14 @@ const DetailMovimientoModal: React.FC<DetailMovimientoModalProps> = ({
                 <p className={`text-sm font-semibold ${
                   isIngreso ? 'text-green-600' : 'text-red-600'
                 }`}>
-                  {isIngreso ? '+' : '-'}{movimiento.Cantidad} {movimiento.Material?.Unidad_Medicion?.Nombre_Unidad}
+                  {isIngreso ? '+' : '-'}{movimiento.Cantidad} {movimiento.Material?.Unidad_Medicion?.Nombre_Unidad_Medicion || movimiento.Material?.Unidad_Medicion?.Nombre_Unidad}
                 </p>
               </div>
               
               <div>
                 <div className="text-sm font-medium text-gray-700 mb-1">Cantidad Nueva</div>
                 <p className="text-sm text-gray-600">
-                  {movimiento.Cantidad_Nueva} {movimiento.Material?.Unidad_Medicion?.Nombre_Unidad}
+                  {movimiento.Cantidad_Nueva} {movimiento.Material?.Unidad_Medicion?.Nombre_Unidad_Medicion || movimiento.Material?.Unidad_Medicion?.Nombre_Unidad}
                 </p>
               </div>
             </div>
