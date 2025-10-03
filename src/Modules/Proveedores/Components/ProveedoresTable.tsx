@@ -1,13 +1,14 @@
 import { useMemo, useState } from 'react';
 import { createColumnHelper, getCoreRowModel, getPaginationRowModel, useReactTable, flexRender, type ColumnDef } from '@tanstack/react-table';
 import { Building2 } from 'lucide-react';
-import { useProveedoresFisicos } from '../Hook/proveedoresFisicos';
+import { useProveedoresFisicos } from '../Hook/hookFisicoProveedor';
 import { useProveedoresJuridicos } from '../Hook/hookjuridicoproveedor';
-import ProveedorDetailModal from './proveedorDetailModal';
-import ProveedorJuridicoDetailModal from './ProveedorJuridicoDetailModal';
+import ProveedorDetailModal from './DetailFisicoProveedor';
+import ProveedorJuridicoDetailModal from './DetailJuridicoProveedor';
 import CreateModalProveedor from './CreateModalProveedor';
-import type { ProveedorFisico } from '../Models/TablaProveedo/proveedorFisico';
-import type { ProveedorJuridico } from '../Models/TablaProveedo/proveedorjuridico';
+import { formatCedulaJuridica, formatPhoneNumberDisplay } from '../Schema/SchemaProveedorJuridico';
+import type { ProveedorFisico } from '../Models/TablaProveedo/tablaFisicoProveedor';
+import type { ProveedorJuridico } from '../Models/TablaProveedo/tablaJuridicoProveedor';
 
 // Tipo unificado para la tabla (similar al patrón de AbonadosTable)
 type ProveedorUnificado = {
@@ -62,8 +63,8 @@ export default function ProveedoresTable() {
             Id_Proveedor: proveedor.Id_Proveedor,
             Nombre_Proveedor: proveedor.Razon_Social || proveedor.Nombre_Proveedor, // Usar Razón Social como nombre principal para la tabla
             Telefono_Proveedor: proveedor.Telefono_Proveedor,
-            Identificacion_Unificada: proveedor.Cedula_Juridica || 'Sin cédula jurídica', // Campo corregido
-            Tipo_Identificacion_Unificado: proveedor.Tipo_identificacion || 'Sin tipo',
+            Identificacion_Unificada: formatCedulaJuridica(proveedor.Cedula_Juridica || ''), // Aplicar formato
+            Tipo_Identificacion_Unificado: 'Cédula Jurídica',
             Estado_Proveedor: proveedor.Estado_Proveedor,
             Tipo_Proveedor: 'Jurídico' as const,
             Razon_Social: proveedor.Razon_Social,
@@ -166,7 +167,11 @@ export default function ProveedoresTable() {
             header: 'Teléfono',
             cell: (info) => {
                 const telefono = info.getValue();
-                return telefono || 'Sin teléfono';
+                if (!telefono) return 'Sin teléfono';
+                
+                // Formatear el número para mejor visualización
+                const formattedPhone = formatPhoneNumberDisplay(telefono);
+                return formattedPhone;
             },
             size: 120
         }),
