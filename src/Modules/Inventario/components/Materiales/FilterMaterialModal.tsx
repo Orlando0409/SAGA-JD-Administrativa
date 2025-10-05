@@ -136,13 +136,11 @@ const FilterMaterialModal: React.FC<FilterMaterialModalProps> = ({
                           onChange={(e) => {
                             const currentCategorias = filters.categoria || [];
                             if (e.target.checked) {
-                              // Agregar categoría
                               setFilters(prev => ({
                                 ...prev,
                                 categoria: [...currentCategorias, categoria.Id_Categoria]
                               }));
                             } else {
-                              // Remover categoría
                               setFilters(prev => ({
                                 ...prev,
                                 categoria: currentCategorias.filter(id => id !== categoria.Id_Categoria)
@@ -339,8 +337,8 @@ const FilterMaterialModal: React.FC<FilterMaterialModalProps> = ({
           </div>
         </div>
 
-        <div className="flex items-center justify-between p-6 border-t border-gray-200 bg-gray-50">
-          <div className="flex items-center ">
+        <div className="flex items-center justify-end p-6 border-t border-gray-200 bg-gray-50">
+          <div className="flex gap-3">
             <button
               onClick={handleApply}
               className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"

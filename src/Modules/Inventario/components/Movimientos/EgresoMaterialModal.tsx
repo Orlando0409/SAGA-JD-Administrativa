@@ -38,7 +38,7 @@ const EgresoMaterialModal: React.FC<EgresoMaterialModalProps> = ({
     e.preventDefault();
     setFormErrors({});
 
-    // Use Zod schema validation
+   
     const validation = IngresoEgresoMaterialSchema.safeParse(formData);
 
     if (!validation.success) {
@@ -51,7 +51,7 @@ const EgresoMaterialModal: React.FC<EgresoMaterialModalProps> = ({
       return;
     }
 
-    // Additional business logic validation for egreso
+   
     if (formData.Cantidad > material.Cantidad) {
       setFormErrors({ Cantidad: 'La cantidad no puede ser mayor al stock disponible' });
       return;

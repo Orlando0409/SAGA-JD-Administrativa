@@ -12,7 +12,6 @@ import {
 } from '@tanstack/react-table';
 import { 
   LuSearch, 
-  LuEye, 
   LuChevronUp, 
   LuChevronDown,
   LuTrendingUp,
@@ -21,7 +20,8 @@ import {
   LuUser,
   LuPackage,
   LuArrowLeft,
-  LuPlus
+  LuPlus,
+  LuFilter
 } from 'react-icons/lu';
 import { 
   MdKeyboardArrowLeft, 
@@ -32,7 +32,10 @@ import {
 import { useGetAllMovimientos } from '../../hooks/HookMaterialMovimiento';
 import DetailMovimientoModal from './DetailMovimientoModal';
 import CreateMovimientoModal from './CreateMovimientoModal';
+import FilterMovimientosModal from './FilterMovimientosModal';
 import type { MovimientoMaterial } from '../../models/Inventario';
+import type { MovimientoFilterOptions } from '../../types/MovimientosTypes';
+import type { TipoMovimiento } from '../../models/MovimientoMaterial';
 
 interface CatalogoMovimientosProps {
   onBack?: () => void;
@@ -45,10 +48,12 @@ const CatalogoMovimientos: React.FC<CatalogoMovimientosProps> = ({ onBack }) => 
   const [selectedMovimiento, setSelectedMovimiento] = useState<MovimientoMaterial | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
+  const [appliedFilters, setAppliedFilters] = useState<MovimientoFilterOptions>({});
 
   const pageSizeOptions = [5, 10, 20, 50];
   const [pagination, setPagination] = useState({
-    pageSize: 10,
+    pageSize: 5,
     pageIndex: 0,
   });
 
@@ -60,6 +65,93 @@ const CatalogoMovimientos: React.FC<CatalogoMovimientosProps> = ({ onBack }) => 
     window.addEventListener('refreshInventario', handler);
     return () => window.removeEventListener('refreshInventario', handler);
   }, [refetch]);
+
+
+  const handleApplyFilters = (filters: MovimientoFilterOptions) => {
+    setAppliedFilters(filters);
+  };
+
+
+  const activeFiltersCount = Object.values(appliedFilters).filter(value => {
+    if (typeof value === 'boolean') return value;
+    if (typeof value === 'string') return value.length > 0;
+    if (typeof value === 'number') return value > 0;
+    if (Array.isArray(value)) return value.length > 0;
+    return value !== undefined && value !== null;
+  }).length;
+
+ 
+  const filteredMovimientos = React.useMemo(() => {
+    let filtered = [...movimientos];
+
+ 
+    if (appliedFilters.fechaInicio) {
+      filtered = filtered.filter(mov => {
+        const fechaMovimiento = new Date(mov.Fecha_Movimiento);
+        const fechaInicio = new Date(appliedFilters.fechaInicio!);
+        return fechaMovimiento >= fechaInicio;
+      });
+    }
+
+    
+    if (appliedFilters.fechaFin) {
+      filtered = filtered.filter(mov => {
+        const fechaMovimiento = new Date(mov.Fecha_Movimiento);
+        const fechaFin = new Date(appliedFilters.fechaFin!);
+        return fechaMovimiento <= fechaFin;
+      });
+    }
+
+ 
+    if (appliedFilters.tipoMovimiento) {
+      filtered = filtered.filter(mov => 
+        mov.Tipo_Movimiento === appliedFilters.tipoMovimiento
+      );
+    }
+
+ 
+    if (appliedFilters.soloIngresos) {
+      filtered = filtered.filter(mov => 
+        mov.Tipo_Movimiento?.includes('Entrada')
+      );
+    }
+
+    if (appliedFilters.soloEgresos) {
+      filtered = filtered.filter(mov => 
+        mov.Tipo_Movimiento?.includes('Salida')
+      );
+    }
+
+ 
+    if (appliedFilters.materialNombre) {
+      filtered = filtered.filter(mov => 
+        mov.Material?.Nombre_Material?.toLowerCase().includes(appliedFilters.materialNombre!.toLowerCase())
+      );
+    }
+
+   
+    if (appliedFilters.usuario) {
+      filtered = filtered.filter(mov => 
+        mov.Usuario?.Nombre_Usuario?.toLowerCase().includes(appliedFilters.usuario!.toLowerCase())
+      );
+    }
+
+ 
+    if (appliedFilters.cantidadMinima) {
+      filtered = filtered.filter(mov => 
+        mov.Cantidad >= appliedFilters.cantidadMinima!
+      );
+    }
+
+    
+    if (appliedFilters.cantidadMaxima) {
+      filtered = filtered.filter(mov => 
+        mov.Cantidad <= appliedFilters.cantidadMaxima!
+      );
+    }
+
+    return filtered;
+  }, [movimientos, appliedFilters]);
 
   const columnHelper = createColumnHelper<MovimientoMaterial>();
 
@@ -194,11 +286,11 @@ const CatalogoMovimientos: React.FC<CatalogoMovimientosProps> = ({ onBack }) => 
       cell: ({ row }) => (
         <div className="flex items-center gap-2">
           <button
+            className="px-4 py-1 bg-gray-600 text-white text-xs rounded hover:bg-gray-700 transition-colors"
             onClick={() => handleViewDetails(row.original)}
-            className="p-1.5 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-md transition-colors"
             title="Ver detalles"
           >
-            <LuEye size={16} />
+            Ver
           </button>
         </div>
       ),
@@ -208,7 +300,7 @@ const CatalogoMovimientos: React.FC<CatalogoMovimientosProps> = ({ onBack }) => 
   ];
 
   const table = useReactTable({
-    data: movimientos,
+    data: filteredMovimientos,
     columns,
     state: {
       sorting,
@@ -226,7 +318,7 @@ const CatalogoMovimientos: React.FC<CatalogoMovimientosProps> = ({ onBack }) => 
     getFilteredRowModel: getFilteredRowModel(),
     initialState: {
       pagination: {
-        pageSize: 10,
+        pageSize: 5,
       },
     },
   });
@@ -268,7 +360,6 @@ const CatalogoMovimientos: React.FC<CatalogoMovimientosProps> = ({ onBack }) => 
 
   return (
     <div className="space-y-4">
-      {/* Header y búsqueda */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div className="flex items-center gap-4">
           {onBack && (
@@ -288,33 +379,60 @@ const CatalogoMovimientos: React.FC<CatalogoMovimientosProps> = ({ onBack }) => 
       </div>
 
       
-        {/* Controles */}
-        <div className="flex items-center justify-between gap-4">
 
-          {/* Barra de búsqueda */}
-          <div className="flex-1 relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <LuSearch className="h-5 w-5 text-gray-400" />
-            </div>
-            <input
-              type="text"
-              value={globalFilter ?? ''}
-              onChange={(e) => setGlobalFilter(String(e.target.value))}
-              className="block w-[30vw] pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-              placeholder="Buscar movimientos..."
-            />
+      <div className="bg-white rounded-lg p-3">
+        <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
+          <div className="flex items-center gap-4">
+            <label htmlFor="tipo-movimiento-filter-select" className="text-sm font-medium text-gray-700">Tipo:</label>
+            <select
+              id="tipo-movimiento-filter-select"
+              value={appliedFilters.tipoMovimiento || "todos"}
+              onChange={(e) => handleApplyFilters({ ...appliedFilters, tipoMovimiento: e.target.value === "todos" ? undefined : e.target.value as TipoMovimiento })}
+              className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+            >
+              <option value="todos">Todos los tipos</option>
+              <option value="Entrada">Entrada</option>
+              <option value="Salida">Salida</option>
+            </select>
           </div>
-
-          <button
-            onClick={() => setIsCreateModalOpen(true)}
-            className="inline-flex items-center gap-2 px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
-          >
-            <LuPlus className="h-4 w-4" />
-            Nuevo Movimiento
-          </button>
+          <div className="flex items-center gap-4 w-full sm:w-auto">
+            <div className="relative flex-1 max-w-md">
+              <LuSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <input
+                type="text"
+                placeholder="Buscar movimientos..."
+                value={globalFilter ?? ''}
+                onChange={(e) => setGlobalFilter(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+            <button
+              onClick={() => setIsFilterModalOpen(true)}
+              className={`px-4 py-2 border rounded-md flex items-center gap-2 transition-colors ${
+                activeFiltersCount > 0
+                  ? 'border-blue-500 bg-blue-50 text-blue-700'
+                  : 'border-gray-300 hover:bg-gray-50'
+              }`}
+            >
+              <LuFilter className="w-4 h-4" />
+              Filtros
+              {activeFiltersCount > 0 && (
+                <span className="bg-blue-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                  {activeFiltersCount}
+                </span>
+              )}
+            </button>
+            <button 
+              onClick={() => setIsCreateModalOpen(true)}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md flex items-center gap-2 transition-colors"
+            >
+              <LuPlus className="w-4 h-4" />
+              Nuevo Movimiento
+            </button>
+          </div>
         </div>
+      </div>
 
-      {/* Tabla */}
       <div className="bg-white shadow-sm rounded-lg border border-gray-200 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
@@ -376,7 +494,7 @@ const CatalogoMovimientos: React.FC<CatalogoMovimientosProps> = ({ onBack }) => 
           <div className="flex flex-col sm:flex-row items-center gap-4">
 
             <div className="flex items-center gap-2">
-              <span className="text-sm text-gray-700">Mostrar:</span>
+              <span className="text-sm text-gray-700">Filas por página</span>
               <select
                 value={table.getState().pagination.pageSize}
                 onChange={(e) => {
@@ -390,12 +508,10 @@ const CatalogoMovimientos: React.FC<CatalogoMovimientosProps> = ({ onBack }) => 
                   </option>
                 ))}
               </select>
-              <span className="text-sm text-gray-700">elementos</span>
             </div>
 
           </div>
 
-          {/* Controles de navegación */}
           <div className="flex items-center gap-1">
             <button
               onClick={() => table.setPageIndex(0)}
@@ -445,7 +561,7 @@ const CatalogoMovimientos: React.FC<CatalogoMovimientosProps> = ({ onBack }) => 
         )}
       </div>
 
-      {/* Modal de detalles */}
+
       {selectedMovimiento && (
         <DetailMovimientoModal
           isOpen={isDetailModalOpen}
@@ -454,10 +570,16 @@ const CatalogoMovimientos: React.FC<CatalogoMovimientosProps> = ({ onBack }) => 
         />
       )}
 
-      {/* Modal de crear movimiento */}
       <CreateMovimientoModal
         isOpen={isCreateModalOpen}
         onClose={handleCloseCreateModal}
+      />
+
+      <FilterMovimientosModal
+        isOpen={isFilterModalOpen}
+        onClose={() => setIsFilterModalOpen(false)}
+        onApplyFilters={handleApplyFilters}
+        currentFilters={appliedFilters}
       />
     </div>
   );

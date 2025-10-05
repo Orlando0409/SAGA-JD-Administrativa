@@ -63,18 +63,25 @@ const DetailMaterialModal: React.FC<DetailMaterialModalProps> = ({
               <label htmlFor="categorias" className="block text-sm font-medium text-gray-700 mb-1">
                 Categorías
               </label>
-              <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded border break-words overflow-wrap-anywhere">
+              <div className="text-sm text-gray-900 bg-gray-50 p-2 rounded border break-words overflow-wrap-anywhere">
                 {(() => {
-                  const categorias = material.materialCategorias || material.Categorias || [];
-                  return categorias.length > 0
-                    ? categorias.map(cat => (
-                      <li key={cat.Id_Material_Categoria} className="list-disc list-inside">
-                        {cat.Categoria.Nombre_Categoria}
-                      </li>
-                    ))
-                    : 'Sin categorías';
+                  const categorias = (material.materialCategorias && material.materialCategorias.length > 0) 
+                    ? material.materialCategorias 
+                    : (material.Categorias || []);
+                  
+                  return categorias.length > 0 ? (
+                    <ul className="list-disc list-inside space-y-1">
+                      {categorias.map(cat => (
+                        <li key={cat.Id_Material_Categoria || (cat as any).Id_Categoria}>
+                          {cat.Categoria?.Nombre_Categoria || (cat as any).Nombre_Categoria}
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <span>Sin categorías</span>
+                  );
                 })()}
-              </p>
+              </div>
             </div>
 
             <div>
