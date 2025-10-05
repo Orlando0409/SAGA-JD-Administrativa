@@ -116,47 +116,64 @@ const Roles = ({ onClose }: { onClose: () => void }) => {
   return (
     <div className="w-full flex flex-col items-start h-full">
       <div className="w-full bg-white rounded-lg shadow-lg overflow-hidden">
-        {/* Controls */}
+   
         <div className="p-6 border-b bg-gray-50">
           <div className="flex justify-between items-center gap-4">
-            {/* Search */}
-            <div className="relative flex-1 max-w-md">
-              <LuSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-              <input
-                type="text"
-                placeholder="Buscar roles..."
-                value={globalFilter ?? ''}
-                onChange={(e) => setGlobalFilter(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
+
+            <div className="flex items-center gap-4">
+              <label htmlFor='estado-roles' className="text-sm font-medium text-gray-700">Estado:</label>
+              <select
+                id='estado-roles'
+                value={estadoFilter}
+                onChange={(e) => setEstadoFilter(e.target.value)}
+                className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+              >
+                <option value="Todos">Todos los roles</option>
+                <option value="Activo">Activos</option>
+                <option value="Inactivo">Inactivos</option>
+              </select>
             </div>
 
-            {/* Buttons */}
-            <div className="flex gap-3">
-              {canCreate('usuarios') && (
-                <button
-                  onClick={() => setShowCreateModal(true)}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center gap-2"
-                >
-                  <LuPlus className="w-4 h-4" />
-                  Nuevo Rol
-                </button>
-              )}
-                <button
-                  onClick={() => {
-                    // Dispara un evento personalizado para actualizar usuarios
-                    window.dispatchEvent(new CustomEvent('refreshUsuarios'));
-                    onClose();
-                  }}
-                  className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition"
-                >
-                  Usuarios
-                </button>
+            <div className='flex items-center gap-4 w-full sm:w-auto'>
+              <div className="relative flex-1 max-w-md">
+                <LuSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <input
+                  type="text"
+                  placeholder="Buscar roles..."
+                  value={globalFilter ?? ''}
+                  onChange={(e) => setGlobalFilter(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+
+          
+              <div className="flex gap-3">
+                {canCreate('usuarios') && (
+                  <button
+                    onClick={() => setShowCreateModal(true)}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center gap-2"
+                  >
+                    <LuPlus className="w-4 h-4" />
+                    Nuevo Rol
+                  </button>
+                )}
+                  <button
+                    onClick={() => {
+                      // Dispara un evento personalizado para actualizar usuarios
+                      window.dispatchEvent(new CustomEvent('refreshUsuarios'));
+                      onClose();
+                    }}
+                    className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition"
+                  >
+                    Usuarios
+                  </button>
+              </div>
             </div>
+
           </div>
         </div>
 
-        {/* Table */}
+       
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead className="bg-gray-100">
@@ -199,23 +216,9 @@ const Roles = ({ onClose }: { onClose: () => void }) => {
           </table>
         </div>
 
-        {/* Pagination */}
+     
         <div className="px-6 py-3 bg-gray-50 border-t border-gray-200">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <label htmlFor='estado-roles' className="text-sm font-medium text-gray-700">Estado:</label>
-              <select
-                id='estado-roles'
-                value={estadoFilter}
-                onChange={(e) => setEstadoFilter(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-              >
-                <option value="Todos">Todos los roles</option>
-                <option value="Activo">Activos</option>
-                <option value="Inactivo">Inactivos</option>
-              </select>
-            </div>
-
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2">
                 <span className="text-sm text-gray-700">Filas por página:</span>
@@ -263,12 +266,12 @@ const Roles = ({ onClose }: { onClose: () => void }) => {
         </div>
       </div>
 
-      {/* Create Role Modal */}
+   
       {showCreateModal && (
         <CreateRoleModal onClose={() => setShowCreateModal(false)} />
       )}
 
-      {/* Edit Role Modal */}
+   
       {showEditModal && selectedRoleId && (
         <EditRoleModal
           roleId={selectedRoleId}
@@ -280,7 +283,7 @@ const Roles = ({ onClose }: { onClose: () => void }) => {
         />
       )}
 
-      {/* Role Detail Modal */}
+   
       {showRoleDetail && selectedRoleId && (
         <RoleDetailModal
           roleId={selectedRoleId}

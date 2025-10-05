@@ -58,20 +58,25 @@ const EditMaterialModal: React.FC<EditMaterialModalProps> = ({
 
   useEffect(() => {
     if (isOpen && material) {
+      const categorias = (material.materialCategorias && material.materialCategorias.length > 0) 
+        ? material.materialCategorias 
+        : (material.Categorias || []);
+      
+      const categoriaIds = categorias.map(cat => {
+        if (cat.Categoria) {
+          return cat.Categoria.Id_Categoria;
+        }
+        return (cat as any).Id_Categoria;
+      });
+
       setFormData({
         Nombre_Material: material.Nombre_Material,
         Descripcion: material.Descripcion || '',
         Id_Unidad_Medicion: material.Unidad_Medicion.Id_Unidad_Medicion,
         Precio_Unitario: material.Precio_Unitario,
-        IDS_Categorias: (() => {
-          const categorias = material.materialCategorias || material.Categorias || [];
-          return categorias.map(cat => cat.Categoria.Id_Categoria);
-        })(),
+        IDS_Categorias: categoriaIds,
       });
-      setSelectedCategorias((() => {
-        const categorias = material.materialCategorias || material.Categorias || [];
-        return categorias.map(cat => cat.Categoria.Id_Categoria);
-      })());
+      setSelectedCategorias(categoriaIds);
       setFieldCharCounts({
         nombreMaterial: material.Nombre_Material.length,
         descripcion: (material.Descripcion || '').length

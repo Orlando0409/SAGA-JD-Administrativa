@@ -196,7 +196,7 @@ export const EditRoleModal: React.FC<EditRoleModalProps> = ({ roleId, isOpen, on
                                 checked={mp.level === 'view' || mp.level === 'edit'}
                                 onChange={(e) => {
                                   if (e.target.checked) {
-                                    // Si no tiene permiso de editar o ya está en edit, solo activar view
+                                  
                                     if (!hasEditPermission(mp.Modulo) || mp.level !== 'edit') {
                                       handlePermissionChange(mp.Modulo, 'view');
                                     }
@@ -216,25 +216,23 @@ export const EditRoleModal: React.FC<EditRoleModalProps> = ({ roleId, isOpen, on
                             </label>
                           </div>
 
-                          {/* Toggle Editar */}
+
                           <div className="flex flex-col items-center gap-2">
                             <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Editar</span>
-                            <label htmlFor={`edit-permission`} className={`cursor-pointer ${!hasEditPermission(mp.Modulo) ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                            <label htmlFor={`edit-permission-${mp.Modulo}`} className={`cursor-pointer ${!hasEditPermission(mp.Modulo) ? 'opacity-50 cursor-not-allowed' : ''}`}>
                               <span className="sr-only">Permiso de editar para {mp.Modulo}</span>
                               <input
-                                id={`edit-permission`}
+                                id={`edit-permission-${mp.Modulo}`}
                                 type="checkbox"
                                 checked={mp.level === 'edit'}
                                 onChange={(e) => {
                                   if (hasEditPermission(mp.Modulo)) {
                                     if (e.target.checked) {
                                       handlePermissionChange(mp.Modulo, 'edit');
-                                    } else 
-                                      // Si desactiva editar pero ver está activo, mantener view
-                                      if (mp.level === 'edit') {
-                                        handlePermissionChange(mp.Modulo, 'view');
-                                      }
+                                    } else if (mp.level === 'edit') {
                                     
+                                      handlePermissionChange(mp.Modulo, 'view');
+                                    }
                                   }
                                 }}
                                 disabled={!hasEditPermission(mp.Modulo)}

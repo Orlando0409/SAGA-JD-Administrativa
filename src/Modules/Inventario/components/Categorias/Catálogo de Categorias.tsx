@@ -23,7 +23,6 @@ import {
   AlertDialogHeader,
   AlertDialogFooter
 } from "@/Modules/Global/components/Sidebar/ui/alert-dialog";
-import { Button } from '@/Modules/Global/components/Sidebar/ui/button';
 import { useGetAllCategories, useUpdateEstadoCategoria } from '../../hooks/useCategorias';
 import CreateCategoriaModal from './CreateCategoriaModal';
 import EditCategoriaModal from './EditCategoriaModal';
@@ -107,7 +106,7 @@ const CategoriasManagement: React.FC<CategoriasManagementProps> = ({ onBack }) =
       cell: info => (
         <div className="flex justify-center gap-1">
           <button
-            className="px-2 py-1 bg-gray-600 text-white text-xs rounded hover:bg-gray-700 transition-colors"
+            className="px-4 py-1 bg-gray-600 text-white text-xs rounded hover:bg-gray-700 transition-colors"
             onClick={() => handleViewDetail(info.row.original)}
             title="Ver detalles"
           >
@@ -194,7 +193,7 @@ const CategoriasManagement: React.FC<CategoriasManagementProps> = ({ onBack }) =
     }),
   ], [updateEstadoMutation.isPending]);
 
-  // Configuración de la tabla
+ 
   const table = useReactTable({
     data: categorias,
     columns,
@@ -210,13 +209,13 @@ const CategoriasManagement: React.FC<CategoriasManagementProps> = ({ onBack }) =
     onPaginationChange: setPagination,
     initialState: {
       pagination: {
-        pageSize: 10,
+        pageSize: 5,
         pageIndex: 0,
       },
     },
   });
 
-  // Handlers
+  
   const handleEdit = (categoria: CategoriaMaterial) => {
     setSelectedCategoria(categoria);
     setShowEditModal(true);
@@ -257,7 +256,6 @@ const CategoriasManagement: React.FC<CategoriasManagementProps> = ({ onBack }) =
 
   return (
     <div className="space-y-6">
-      {/* Header con botón de regreso */}
       {onBack && (
         <div className="flex items-center gap-4">
           <button
@@ -274,30 +272,45 @@ const CategoriasManagement: React.FC<CategoriasManagementProps> = ({ onBack }) =
         </div>
       )}
 
-      {/* Filtros y búsqueda */}
+ 
       <div className="bg-white rounded-lg p-3">
         <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
-          <div className="relative flex-1 max-w-md">
-            <LuSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-            <input
-              type="text"
-              placeholder="Buscar categorías..."
-              value={globalFilter ?? ''}
-              onChange={(e) => setGlobalFilter(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            />
+          <div className="flex items-center gap-4">
+            <label htmlFor='estado' className="text-sm font-medium text-gray-700">Estado:</label>
+            <select
+              id='estado'
+              value={estadoFilter}
+              onChange={(e) => setEstadoFilter(e.target.value)}
+              className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+            >
+              <option value="Todas">Todas las categorías</option>
+              <option value="Activa">Activas</option>
+              <option value="Inactiva">Inactivas</option>
+            </select>
           </div>
+          <div className="flex items-center gap-4 w-full sm:w-auto">
+            <div className="relative flex-1 max-w-md">
+              <LuSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <input
+                type="text"
+                placeholder="Buscar categorías..."
+                value={globalFilter ?? ''}
+                onChange={(e) => setGlobalFilter(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
             <button 
-             onClick={() => setShowCreateModal(true)}
-             className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md flex items-center gap-2 transition-colors"
-              >
-            <LuPlus className="w-4 h-4" />
-            Nueva Categoría
-         </button>
+              onClick={() => setShowCreateModal(true)}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md flex items-center gap-2 transition-colors"
+            >
+              <LuPlus className="w-4 h-4" />
+              Nueva Categoría
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* Tabla */}
+      
       <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
@@ -373,23 +386,9 @@ const CategoriasManagement: React.FC<CategoriasManagementProps> = ({ onBack }) =
           </table>
         </div>
 
-        {/* Paginación */}
+  
         <div className="px-6 py-3 bg-gray-50 border-t border-gray-200">
           <div className="flex items-center justify-between">
-
-          <div className="flex items-center gap-4">
-            <label htmlFor="estado-filter" className="text-sm font-medium text-gray-700">Estado:</label>
-            <select
-              id="estado-filter"
-              value={estadoFilter}
-              onChange={(e) => setEstadoFilter(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-            >
-              <option value="Todas">Todas las categorías</option>
-              <option value="Activa">Activas</option>
-              <option value="Inactiva">Inactivas</option>
-            </select>
-          </div>
 
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2">
@@ -450,7 +449,7 @@ const CategoriasManagement: React.FC<CategoriasManagementProps> = ({ onBack }) =
         </div>
       </div>
 
-      {/* Modales */}
+   
       <CreateCategoriaModal
         isOpen={showCreateModal}
         onClose={() => setShowCreateModal(false)}

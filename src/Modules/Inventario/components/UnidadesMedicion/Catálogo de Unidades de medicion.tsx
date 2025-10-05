@@ -23,7 +23,6 @@ import {
   AlertDialogHeader,
   AlertDialogFooter
 } from "@/Modules/Global/components/Sidebar/ui/alert-dialog";
-import { Button } from '@/Modules/Global/components/Sidebar/ui/button';
 import { useUnidadesMedicion, useUpdateEstadoUnidadMedicion } from '../../hooks/HookUnidadMedicion';
 import CreateUnidadMedicionModal from './CreateUnidadMedicionModal';
 import EditUnidadMedicionModal from './EditUnidadMedicionModal';
@@ -108,7 +107,7 @@ const UnidadesMedicionManagement: React.FC<UnidadesMedicionManagementProps> = ({
       cell: info => (
      <div className="flex justify-center gap-1">
           <button
-            className="px-2 py-1 bg-gray-600 text-white text-xs rounded hover:bg-gray-700 transition-colors"
+            className="px-4 py-1 bg-gray-600 text-white text-xs rounded hover:bg-gray-700 transition-colors"
             onClick={() => handleViewDetail(info.row.original)}
             title="Ver detalles"
           >
@@ -210,7 +209,7 @@ const UnidadesMedicionManagement: React.FC<UnidadesMedicionManagementProps> = ({
     onPaginationChange: setPagination,
     initialState: {
       pagination: {
-        pageSize: 10,
+        pageSize: 5,
         pageIndex: 0,
       },
     },
@@ -278,6 +277,20 @@ const UnidadesMedicionManagement: React.FC<UnidadesMedicionManagementProps> = ({
 
       <div className="bg-white rounded-lg p-3">
         <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
+          <div className="flex items-center gap-4">
+            <label htmlFor='estado' className="text-sm font-medium text-gray-700">Estado:</label>
+            <select
+              id='estado'
+              value={estadoFilter}
+              onChange={(e) => setEstadoFilter(e.target.value)}
+              className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+            >
+              <option value="Todas">Todas las unidades</option>
+              <option value="Activo">Activas</option>
+              <option value="Inactivo">Inactivas</option>
+            </select>
+          </div>
+          <div className="flex items-center gap-4 w-full sm:w-auto">
           <div className="relative flex-1 max-w-md">
             <LuSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
             <input
@@ -295,6 +308,7 @@ const UnidadesMedicionManagement: React.FC<UnidadesMedicionManagementProps> = ({
           <LuPlus className="w-4 h-4" />
           Nueva Unidad
          </button>
+          </div>
         </div>
       </div>
 
@@ -381,24 +395,9 @@ const UnidadesMedicionManagement: React.FC<UnidadesMedicionManagementProps> = ({
           </table>
         </div>
 
-        {/* Paginación */}
+    
         <div className="px-6 py-3 bg-gray-50 border-t border-gray-200">
           <div className="flex items-center justify-between">
-
-            <div className="flex items-center gap-4">
-              <label htmlFor='estado' className="text-sm font-medium text-gray-700">Estado:</label>
-              <select
-                id='estado'
-                value={estadoFilter}
-                onChange={(e) => setEstadoFilter(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-              >
-                <option value="Todas">Todas las unidades</option>
-                <option value="Activo">Activas</option>
-                <option value="Inactivo">Inactivas</option>
-              </select>
-            </div>
-
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2">
                 <span className="text-sm text-gray-700">Filas por página:</span>

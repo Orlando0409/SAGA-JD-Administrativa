@@ -24,6 +24,7 @@ const RoleDetailModal: React.FC<RoleDetailModalProps> = ({ roleId, isOpen, onClo
     const handleDeactivate = async () => {
       try {
         await deactivateRoleMutation.mutateAsync(roleId);
+        onClose();
       } catch (error) {
         console.error('Error deactivating role:', error);
       }
@@ -34,6 +35,7 @@ const RoleDetailModal: React.FC<RoleDetailModalProps> = ({ roleId, isOpen, onClo
    
       try {
         await activateRoleMutation.mutateAsync(roleId);
+        onClose();
       } catch (error) {
         console.error('Error activating role:', error);
       }
@@ -245,7 +247,10 @@ const RoleDetailModal: React.FC<RoleDetailModalProps> = ({ roleId, isOpen, onClo
         <EditRoleModal
           roleId={roleId}
           isOpen={showEditModal}
-          onClose={() => setShowEditModal(false)}
+          onClose={() => {
+            setShowEditModal(false);
+            onClose(); 
+          }}
         />
       )}
     </>
