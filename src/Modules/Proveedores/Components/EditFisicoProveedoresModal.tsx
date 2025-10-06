@@ -1,12 +1,16 @@
 import { useForm } from '@tanstack/react-form';
 import { useState } from 'react';
+import PhoneInput, { isValidPhoneNumber } from 'react-phone-number-input';
+import 'react-phone-number-input/style.css';
 import { 
   EditProveedorSchema, 
   type EditProveedorSchemaData,
-  VALIDATION_LIMITS
-} from '../Schema/Proveedores';
-import type { ProveedorFisico, UpdateProveedorData } from '../Models/TablaProveedo/proveedorFisico';
-import { useUpdateProveedorFisico } from '../Hook/proveedoresFisicos';
+  VALIDATION_LIMITS,
+  formatPhoneNumberInput
+} from '../Schema/SchemaFisicoProveedor';
+import type { ProveedorFisico, UpdateProveedorData } from '../Models/TablaProveedo/tablaFisicoProveedor';
+import { useUpdateProveedorFisico } from '../Hook/hookFisicoProveedor';
+import { useAlerts } from '@/Modules/Global/context/AlertContext';
 
 interface EditProveedorModalProps {
   isOpen: boolean;
@@ -15,6 +19,9 @@ interface EditProveedorModalProps {
 }
 
 const EditProveedorModal: React.FC<EditProveedorModalProps> = ({ isOpen, onClose, proveedor }) => {
+  // Hook de alertas
+  const { showSuccess, showError, showWarning } = useAlerts();
+  
   // Hook para actualizar proveedor físico
   const { 
     updateProveedorFisico, 
@@ -44,9 +51,9 @@ const EditProveedorModal: React.FC<EditProveedorModalProps> = ({ isOpen, onClose
 
       case 'Telefono_Proveedor':
         if (value) {
-          const TELEFONO_REGEX = /^(\+?506[\s\-]?)?[0-9]{8}$|^(\+?506[\s\-]?)?[0-9]{4}[\s\-]?[0-9]{4}$/;
-          if (!TELEFONO_REGEX.test(value)) {
-            error = 'Formato de teléfono inválido. Ej: 88887777, 8888-7777 o +506-8888-7777';
+          // Validar usando libphonenumber-js para mayor precisión
+          if (!isValidPhoneNumber(value)) {
+            error = 'Número de teléfono inválido para el país seleccionado';
           }
         }
         break;
@@ -75,6 +82,47 @@ const EditProveedorModal: React.FC<EditProveedorModalProps> = ({ isOpen, onClose
         validateFieldRealTime(fieldName, value);
       }
     };
+  };
+
+  // Función para manejar errores de API específicos
+  const handleApiError = (error: any) => {
+    console.error('❌ Error al actualizar proveedor:', error);
+    
+    // Manejar errores HTTP 409 (conflictos de duplicación) - ALERTAS AMARILLAS
+    if (error?.response?.status === 409) {
+      const errorMessage = error.response?.data?.message || error.message || '';
+      
+      if (errorMessage.toLowerCase().includes('nombre') || errorMessage.toLowerCase().includes('name')) {
+        showWarning('⚠️ Ya existe un proveedor con este nombre. Por favor, utiliza un nombre diferente.');
+        return;
+      }
+      
+      if (errorMessage.toLowerCase().includes('identificacion') || errorMessage.toLowerCase().includes('identification')) {
+        showWarning('⚠️ Ya existe un proveedor con esta identificación. Por favor, verifica el número de identificación.');
+        return;
+      }
+      
+      // Error 409 genérico - también amarillo
+      showWarning('⚠️ Ya existe un proveedor con esa identificación. Por favor, verifica la información ingresada.');
+      return;
+    }
+    
+    // Otros errores de validación del servidor
+    if (error?.response?.status === 400) {
+      const errorMessage = error.response?.data?.message || 'Datos inválidos';
+      showError(`Error de validación: ${errorMessage}`);
+      return;
+    }
+    
+    // Errores de red o servidor
+    if (error?.response?.status >= 500) {
+      showError('Error del servidor. Por favor, intenta nuevamente más tarde.');
+      return;
+    }
+    
+    // Error genérico
+    const errorMessage = error?.message || 'Error desconocido al actualizar el proveedor';
+    showError(`Error al actualizar el proveedor: ${errorMessage}`);
   };
 
   const form = useForm({
@@ -111,12 +159,10 @@ const EditProveedorModal: React.FC<EditProveedorModalProps> = ({ isOpen, onClose
           data: payload 
         });
         
-        alert('Proveedor actualizado exitosamente');
+        showSuccess('¡Proveedor actualizado exitosamente!');
         onClose();
       } catch (error) {
-        console.error('❌ Error al actualizar proveedor:', error);
-        const errorMessage = error instanceof Error ? error.message : 'Error desconocido al actualizar el proveedor';
-        alert(`Error al actualizar el proveedor: ${errorMessage}`);
+        handleApiError(error);
       }
     },
   });
@@ -148,34 +194,13 @@ const EditProveedorModal: React.FC<EditProveedorModalProps> = ({ isOpen, onClose
   if (!isOpen) return null;
 
   return (
-    <div className="absolute inset-0 bg-black/40 flex items-center justify-center z-50">
+    <div className="absolute inset-0 bg-black/10 backdrop-blur-md flex items-center justify-center z-50">
       <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4 max-h-[90vh] overflow-hidden">
         <div className="flex items-center justify-between p-6 border-b">
           <h2 className="text-xl font-semibold text-gray-900">Editar Proveedor</h2>
         </div>
 
         <div className="p-6 overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100 max-h-[calc(90vh-140px)]">
-          {/* Información de campos no editables */}
-          <div className="mb-6 p-4 bg-gray-50 rounded-lg border">
-            <h3 className="text-sm font-medium text-gray-700 mb-3">Información no editable:</h3>
-            <div className="grid grid-cols-1 gap-2 text-sm">
-              <div>
-                <span className="font-medium text-gray-600">Tipo de Identificación:</span>
-                <span className="ml-2 text-gray-800">{proveedor.Tipo_Identificacion}</span>
-              </div>
-              <div>
-                <span className="font-medium text-gray-600">Identificación:</span>
-                <span className="ml-2 text-gray-800">{proveedor.Identificacion}</span>
-              </div>
-              <div>
-                <span className="font-medium text-gray-600">Estado:</span>
-                <span className="ml-2 text-gray-800">
-                  {proveedor.Estado_Proveedor?.Estado_Proveedor || 'Activo'}
-                </span>
-              </div>
-            </div>
-          </div>
-
           <form
             onSubmit={(e) => {
               e.preventDefault();
@@ -226,24 +251,71 @@ const EditProveedorModal: React.FC<EditProveedorModalProps> = ({ isOpen, onClose
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Teléfono *
                   </label>
-                  <input
-                    type="tel"
+                  <PhoneInput
+                    defaultCountry="CR"
+                    international
+                    countryCallingCodeEditable={false}
                     value={field.state.value}
-                    onChange={createInputHandler('Telefono_Proveedor', field.handleChange, VALIDATION_LIMITS.TELEFONO_MAX_LENGTH)}
-                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-colors ${
+                    onChange={(value) => {
+                      // Formatear el número en tiempo real
+                      const formattedValue = formatPhoneNumberInput(value || '');
+                      field.handleChange(formattedValue);
+                      setFieldCharCounts(prev => ({ 
+                        ...prev, 
+                        Telefono_Proveedor: formattedValue.length 
+                      }));
+                      validateFieldRealTime('Telefono_Proveedor', value || '');
+                    }}
+                    className={`react-phone-number-input ${
                       (formErrors.Telefono_Proveedor || field.state.meta.errors?.length) 
-                        ? 'border-red-300 focus:ring-red-500' 
-                        : 'border-gray-300 focus:ring-blue-500'
+                        ? 'react-phone-number-input--error' 
+                        : ''
                     }`}
-                    placeholder="Ej: 88887777, 8888-7777 o +506-8888-7777"
-                    maxLength={VALIDATION_LIMITS.TELEFONO_MAX_LENGTH}
+                    style={{
+                      '--PhoneInput-color--focus': '#3b82f6',
+                      '--PhoneInputCountrySelect-marginRight': '0.5rem',
+                      '--PhoneInputCountryFlag-aspectRatio': '1.5',
+                      '--PhoneInputCountryFlag-height': '1rem',
+                      '--PhoneInputCountrySelectArrow-color': '#6b7280',
+                      '--PhoneInputCountrySelectArrow-color--focus': '#3b82f6',
+                    } as React.CSSProperties}
+                    inputProps={{
+                      autoComplete: 'tel',
+                      'aria-label': 'Número de teléfono internacional',
+                      className: `w-full px-3 py-2 border rounded-r-lg focus:ring-2 focus:border-transparent transition-colors ${
+                        (formErrors.Telefono_Proveedor || field.state.meta.errors?.length) 
+                          ? 'border-red-300 focus:ring-red-500' 
+                          : 'border-gray-300 focus:ring-blue-500'
+                      }`,
+                      placeholder: 'Número de teléfono'
+                    }}
+                    countrySelectProps={{
+                      'aria-label': 'Seleccionar país',
+                      className: `border rounded-l-lg px-2 py-2 bg-white hover:bg-gray-50 focus:ring-2 focus:border-transparent transition-colors ${
+                        (formErrors.Telefono_Proveedor || field.state.meta.errors?.length) 
+                          ? 'border-red-300 focus:ring-red-500' 
+                          : 'border-gray-300 focus:ring-blue-500'
+                      }`
+                    }}
                   />
                   
-                  {renderCharCounter(
-                    fieldCharCounts.Telefono_Proveedor, 
-                    VALIDATION_LIMITS.TELEFONO_MAX_LENGTH, 
-                    !!(formErrors.Telefono_Proveedor || field.state.meta.errors?.length)
-                  )}
+                  <div className="flex justify-between items-center mt-1">
+                    <span className="text-xs text-gray-500">
+                      Seleccione país y ingrese su número
+                    </span>
+                    <span className={`text-xs ${
+                      field.state.value && isValidPhoneNumber(field.state.value) 
+                        ? 'text-green-600' 
+                        : field.state.value 
+                          ? 'text-red-600' 
+                          : 'text-gray-500'
+                    }`}>
+                      {field.state.value 
+                        ? (isValidPhoneNumber(field.state.value) ? '✓ Válido' : '✗ Inválido')
+                        : 'Pendiente'
+                      }
+                    </span>
+                  </div>
                   
                   {field.state.meta.errors?.map((err) => (
                     <p key={err} className="text-red-500 text-xs mt-1">{err}</p>

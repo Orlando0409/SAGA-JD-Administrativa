@@ -6,6 +6,18 @@ import { EMAIL_MAX_LENGTH, NOMBRE_MAX_LENGTH, type EditUserModalProps } from '..
 import { useState } from 'react';
 import { UpdateUserSchema, type UpdateUserSchemaData } from '../Schema/UpdateUserSchema';
 import type { Role } from '@/Modules/Roles/Models/Role';
+import {
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogHeader,
+  AlertDialogFooter
+} from "@/Modules/Global/components/Sidebar/ui/alert-dialog";
+import { Button } from '@/Modules/Global/components/Sidebar/ui/button';
 
 const EditUserModal: React.FC<EditUserModalProps> = ({ isOpen, onClose, user }) => {
   const updateUserMutation = useUpdateUser();
@@ -215,23 +227,43 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ isOpen, onClose, user }) 
           </form.Field>
 
           <div className="flex justify-end gap-3 pt-4">
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button
+                  disabled={updateUserMutation.isPending}
+                  className={`px-4 py-2 text-white rounded-lg transition-colors ${
+                    updateUserMutation.isPending 
+                        ? 'bg-blue-300 cursor-not-allowed' 
+                        : 'bg-blue-600 hover:bg-blue-700' 
+                  }`}
+                >
+                  {updateUserMutation.isPending ? 'Actualizando...' : 'Actualizar Usuario'}
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>¿Confirmar actualización?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    ¿Estás seguro de que deseas actualizar este usuario? Esta acción modificará la información del usuario en el sistema.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogAction
+                    onClick={() => form.handleSubmit()}
+                    disabled={updateUserMutation.isPending}
+                  >
+                    {updateUserMutation.isPending ? 'Actualizando...' : 'Confirmar'}
+                  </AlertDialogAction>
+                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
             <button
               type="button"
               onClick={onClose}
               className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
             >
               Cancelar
-            </button>
-            <button
-              type="submit"
-              disabled={updateUserMutation.isPending}
-              className={`px-4 py-2 text-white rounded-lg transition-colors ${
-                updateUserMutation.isPending 
-                    ? 'bg-blue-300 cursor-not-allowed' 
-                    : 'bg-blue-600 hover:bg-blue-700' 
-              }`}
-            >
-              {updateUserMutation.isPending ? 'Actualizando...' : 'Actualizar Usuario'}
             </button>
           </div>
         </form>

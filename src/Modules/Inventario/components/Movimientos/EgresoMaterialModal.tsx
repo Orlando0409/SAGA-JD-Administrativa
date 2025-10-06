@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
-import { LuX, LuTrendingDown, LuTriangleAlert } from 'react-icons/lu';
+import { LuTrendingDown, LuTriangleAlert } from 'react-icons/lu';
 import { useEgresoMaterial } from '../../hooks/HookMaterialMovimiento';
+import { IngresoEgresoMaterialSchema } from '../../schema/MaterialMovimientoSchema';
 import type { Material, IngresoEgresoMaterialData } from '../../models/Inventario';
+import { useAuth } from '@/Modules/Auth/Context/AuthContext';
 
 interface EgresoMaterialModalProps {
   isOpen: boolean;
@@ -14,8 +16,10 @@ const EgresoMaterialModal: React.FC<EgresoMaterialModalProps> = ({
   onClose,
   material
 }) => {
+  const { user } = useAuth();
   const egresoMutation = useEgresoMaterial();
   const [formData, setFormData] = useState<IngresoEgresoMaterialData>({
+    Id_Material: material.Id_Material,
     Cantidad: 1
   });
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
@@ -23,7 +27,7 @@ const EgresoMaterialModal: React.FC<EgresoMaterialModalProps> = ({
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseInt(e.target.value) || 0;
     if (value >= 0) {
-      setFormData({ Cantidad: value });
+      setFormData(prev => ({ ...prev, Cantidad: value }));
       if (formErrors.Cantidad) {
         setFormErrors(prev => ({ ...prev, Cantidad: '' }));
       }
@@ -34,22 +38,36 @@ const EgresoMaterialModal: React.FC<EgresoMaterialModalProps> = ({
     e.preventDefault();
     setFormErrors({});
 
-    if (!formData.Cantidad || formData.Cantidad <= 0) {
-      setFormErrors({ Cantidad: 'La cantidad debe ser mayor a 0' });
+   
+    const validation = IngresoEgresoMaterialSchema.safeParse(formData);
+
+    if (!validation.success) {
+      const fieldErrors: Record<string, string> = {};
+      validation.error.errors.forEach((err) => {
+        const field = err.path[0] as string;
+        fieldErrors[field] = err.message;
+      });
+      setFormErrors(fieldErrors);
       return;
     }
 
+   
     if (formData.Cantidad > material.Cantidad) {
       setFormErrors({ Cantidad: 'La cantidad no puede ser mayor al stock disponible' });
       return;
     }
 
     try {
+      if (!user?.Id_Usuario) {
+        console.error('Usuario no autenticado');
+        return;
+      }
+
       await egresoMutation.mutateAsync({
-        materialId: material.Id_Material,
+        idUsuario: user.Id_Usuario,
         data: formData
       });
-      setFormData({ Cantidad: 1 });
+      setFormData({ Id_Material: material.Id_Material, Cantidad: 1 });
       onClose();
     } catch (error) {
       console.error('Error al realizar egreso:', error);
@@ -73,9 +91,6 @@ const EgresoMaterialModal: React.FC<EgresoMaterialModalProps> = ({
               Egreso de Material
             </h2>
           </div>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors">
-            <LuX className="w-6 h-6" />
-          </button>
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
@@ -83,7 +98,7 @@ const EgresoMaterialModal: React.FC<EgresoMaterialModalProps> = ({
             <h3 className="text-sm font-medium text-gray-700 mb-2">Material Seleccionado</h3>
             <p className="text-lg font-semibold text-gray-900">{material.Nombre_Material}</p>
             <p className="text-sm text-gray-600">
-              Stock actual: {material.Cantidad} {material.Unidad_Medicion.Nombre_Unidad}
+              Stock actual: {material.Cantidad} {material.Unidad_Medicion.Nombre_Unidad_Medicion || material.Unidad_Medicion.Nombre_Unidad}
             </p>
           </div>
 
@@ -125,7 +140,7 @@ const EgresoMaterialModal: React.FC<EgresoMaterialModalProps> = ({
             <div className="text-sm text-gray-600">
               <p>Stock después del egreso:</p>
               <p className={`font-semibold ${seAgotara ? 'text-red-600' : 'text-orange-600'}`}>
-                {stockRestante} {material.Unidad_Medicion.Nombre_Unidad}
+                {stockRestante} {material.Unidad_Medicion.Nombre_Unidad_Medicion || material.Unidad_Medicion.Nombre_Unidad}
                 {seAgotara && ' (Material se agotará)'}
               </p>
             </div>
@@ -133,18 +148,18 @@ const EgresoMaterialModal: React.FC<EgresoMaterialModalProps> = ({
 
           <div className="flex gap-3 pt-4 border-t">
             <button
-              type="button"
-              onClick={onClose}
-              className="flex-1 px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors"
-            >
-              Cancelar
-            </button>
-            <button
               type="submit"
               disabled={egresoMutation.isPending || stockInsuficiente}
               className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               {egresoMutation.isPending ? 'Procesando...' : 'Realizar Egreso'}
+            </button>
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex-1 px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors"
+            >
+              Cancelar
             </button>
           </div>
         </form>

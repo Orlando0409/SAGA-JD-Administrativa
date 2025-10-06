@@ -1,6 +1,8 @@
 export interface UnidadMedicion {
   Id_Unidad_Medicion: number;
-  Nombre_Unidad: string; // Backend field name from UnidadMedicion entity
+  // Support both field names for compatibility
+  Nombre_Unidad_Medicion?: string; // For DTO operations (create/update)
+  Nombre_Unidad?: string; // For display from database entity
   Abreviatura: string;
   Descripcion?: string;
   Estado_Unidad_Medicion: EstadoUnidadMedicion;
@@ -14,23 +16,32 @@ export interface EstadoUnidadMedicion {
 }
 
 export interface CreateUnidadMedicionData {
-  Nombre_Unidad_Medicion: string;
+  Nombre_Unidad_Medicion: string; 
   Abreviatura: string;
   Descripcion?: string;
 }
 
 export interface UpdateUnidadMedicionData {
-  Nombre_Unidad_Medicion?: string;
+  Nombre_Unidad_Medicion?: string; // Match backend DTO field name
   Abreviatura?: string;
   Descripcion?: string;
 }
 
 export interface UnidadMedicionSimple {
   Id_Unidad_Medicion: number;
-  Nombre_Unidad_Medicion: string; // This gets normalized in backend service
+  // Support both field names for compatibility
+  Nombre_Unidad_Medicion?: string; // For DTO operations
+  Nombre_Unidad?: string; // For display from database entity
 }
 
-// DTO para ingreso/egreso de materiales
+// DTO para ingreso/egreso de materiales - Updated to match backend DTO
 export interface IngresoEgresoMaterialData {
+  Id_Material: number;
   Cantidad: number;
 }
+
+// Helper function to get the unit name consistently
+export const getUnidadMedicionNombre = (unidad: UnidadMedicion | UnidadMedicionSimple | undefined | null): string => {
+  if (!unidad) return '';
+  return unidad.Nombre_Unidad_Medicion || unidad.Nombre_Unidad || '';
+};

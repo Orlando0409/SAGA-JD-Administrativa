@@ -12,6 +12,17 @@ import { MdKeyboardArrowLeft, MdKeyboardArrowRight, MdKeyboardDoubleArrowLeft,
   MdKeyboardDoubleArrowRight, 
   MdKeyboardArrowDown,
   MdKeyboardArrowUp} from "react-icons/md";
+import {
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogHeader,
+  AlertDialogFooter
+} from "@/Modules/Global/components/Sidebar/ui/alert-dialog";
 import { useGetAllCategories, useUpdateEstadoCategoria } from '../../hooks/useCategorias';
 import CreateCategoriaModal from './CreateCategoriaModal';
 import EditCategoriaModal from './EditCategoriaModal';
@@ -28,13 +39,27 @@ const CategoriasManagement: React.FC<CategoriasManagementProps> = ({ onBack }) =
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [selectedCategoria, setSelectedCategoria] = useState<CategoriaMaterial | null>(null);
+  const [estadoFilter, setEstadoFilter] = useState<string>('Activa'); // Por defecto mostrar solo activas
 
+  const pageSizeOptions = [5, 10, 20, 50];
+  const [pagination, setPagination] = useState({
+    pageSize: 5,
+    pageIndex: 0,
+  });
 
-  // Hooks
-  const { data: categorias = [], isLoading, error } = useGetAllCategories();
+  const { data: allCategorias = [], isLoading, error } = useGetAllCategories();
   const updateEstadoMutation = useUpdateEstadoCategoria();
 
-  // Configuración de columnas
+  const categorias = useMemo(() => {
+    if (estadoFilter === 'Todas') {
+      return allCategorias;
+    }
+    return allCategorias.filter(categoria => 
+      categoria.Estado_Categoria?.Nombre_Estado_Categoria === estadoFilter
+    );
+  }, [allCategorias, estadoFilter]);
+
+
   const columnHelper = createColumnHelper<CategoriaMaterial>();
   
   const columns = useMemo(() => [
@@ -47,6 +72,14 @@ const CategoriasManagement: React.FC<CategoriasManagementProps> = ({ onBack }) =
         >
           {info.getValue()}
         </button>
+      ),
+    }),
+    columnHelper.accessor('Descripcion_Categoria', {
+      header: 'Descripción',
+      cell: info => (
+        <div className="text-gray-600 text-left max-w-xs truncate">
+          {info.getValue() || 'Sin descripción'}
+        </div>
       ),
     }),
     columnHelper.accessor('Estado_Categoria.Nombre_Estado_Categoria', {
@@ -73,7 +106,7 @@ const CategoriasManagement: React.FC<CategoriasManagementProps> = ({ onBack }) =
       cell: info => (
         <div className="flex justify-center gap-1">
           <button
-            className="px-2 py-1 bg-gray-600 text-white text-xs rounded hover:bg-gray-700 transition-colors"
+            className="px-4 py-1 bg-gray-600 text-white text-xs rounded hover:bg-gray-700 transition-colors"
             onClick={() => handleViewDetail(info.row.original)}
             title="Ver detalles"
           >
@@ -87,30 +120,80 @@ const CategoriasManagement: React.FC<CategoriasManagementProps> = ({ onBack }) =
             Editar
           </button>
             {info.row.original.Estado_Categoria?.Nombre_Estado_Categoria === 'Activa' ? (
-            <button
-              className="px-2 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-700 transition-colors"
-              onClick={() => handleToggleEstado(info.row.original)}
-              disabled={updateEstadoMutation.isPending}
-              title="Desactivar"
-            >
-              Desactivar
-            </button>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <button
+                    className="px-2 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-700 transition-colors"
+                    disabled={updateEstadoMutation.isPending}
+                    title="Desactivar"
+                  >
+                    Desactivar
+                  </button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>
+                      <span>¿Desactivar categoría?</span>
+                    </AlertDialogTitle>
+                    <AlertDialogDescription>
+                      <span>¿Estás seguro de que deseas desactivar la categoría "{info.row.original.Nombre_Categoria}"?</span>
+                      <br />
+                      <span>Esta acción puede revertirse posteriormente.</span>
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogAction
+                      onClick={() => handleToggleEstado(info.row.original)}
+                      disabled={updateEstadoMutation.isPending}
+                    >
+                      <span>Desactivar</span>
+                    </AlertDialogAction>
+                    <AlertDialogCancel>
+                      <span>Cancelar</span>
+                    </AlertDialogCancel>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             ) : (
-            <button
-              className="px-2 py-1 bg-green-600 text-white text-xs rounded hover:bg-green-700 transition-colors"
-              onClick={() => handleToggleEstado(info.row.original)}
-              disabled={updateEstadoMutation.isPending}
-              title="Activar"
-            >
-              Activar
-            </button>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <button
+                    className="px-2 py-1 bg-green-600 text-white text-xs rounded hover:bg-green-700 transition-colors"
+                    disabled={updateEstadoMutation.isPending}
+                    title="Activar"
+                  >
+                    Activar
+                  </button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>
+                      <span>¿Activar categoría?</span>
+                    </AlertDialogTitle>
+                    <AlertDialogDescription>
+                      <span>¿Estás seguro de que deseas activar la categoría "{info.row.original.Nombre_Categoria}"?</span>
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogAction
+                      onClick={() => handleToggleEstado(info.row.original)}
+                      disabled={updateEstadoMutation.isPending}
+                    >
+                      <span>Activar</span>
+                    </AlertDialogAction>
+                    <AlertDialogCancel>
+                      <span>Cancelar</span>
+                    </AlertDialogCancel>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             )}
         </div>
       ),
     }),
   ], [updateEstadoMutation.isPending]);
 
-  // Configuración de la tabla
+ 
   const table = useReactTable({
     data: categorias,
     columns,
@@ -120,16 +203,19 @@ const CategoriasManagement: React.FC<CategoriasManagementProps> = ({ onBack }) =
     getPaginationRowModel: getPaginationRowModel(),
     state: {
       globalFilter,
+      pagination,
     },
     onGlobalFilterChange: setGlobalFilter,
+    onPaginationChange: setPagination,
     initialState: {
       pagination: {
-        pageSize: 10,
+        pageSize: 5,
+        pageIndex: 0,
       },
     },
   });
 
-  // Handlers
+  
   const handleEdit = (categoria: CategoriaMaterial) => {
     setSelectedCategoria(categoria);
     setShowEditModal(true);
@@ -170,7 +256,6 @@ const CategoriasManagement: React.FC<CategoriasManagementProps> = ({ onBack }) =
 
   return (
     <div className="space-y-6">
-      {/* Header con botón de regreso */}
       {onBack && (
         <div className="flex items-center gap-4">
           <button
@@ -187,30 +272,45 @@ const CategoriasManagement: React.FC<CategoriasManagementProps> = ({ onBack }) =
         </div>
       )}
 
-      {/* Filtros y búsqueda */}
+ 
       <div className="bg-white rounded-lg p-3">
         <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
-          <div className="relative flex-1 max-w-md">
-            <LuSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-            <input
-              type="text"
-              placeholder="Buscar categorías..."
-              value={globalFilter ?? ''}
-              onChange={(e) => setGlobalFilter(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            />
+          <div className="flex items-center gap-4">
+            <label htmlFor='estado' className="text-sm font-medium text-gray-700">Estado:</label>
+            <select
+              id='estado'
+              value={estadoFilter}
+              onChange={(e) => setEstadoFilter(e.target.value)}
+              className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+            >
+              <option value="Todas">Todas las categorías</option>
+              <option value="Activa">Activas</option>
+              <option value="Inactiva">Inactivas</option>
+            </select>
           </div>
+          <div className="flex items-center gap-4 w-full sm:w-auto">
+            <div className="relative flex-1 max-w-md">
+              <LuSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <input
+                type="text"
+                placeholder="Buscar categorías..."
+                value={globalFilter ?? ''}
+                onChange={(e) => setGlobalFilter(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
             <button 
-             onClick={() => setShowCreateModal(true)}
-             className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md flex items-center gap-2 transition-colors"
-              >
-            <LuPlus className="w-4 h-4" />
-            Nueva Categoría
-         </button>
+              onClick={() => setShowCreateModal(true)}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md flex items-center gap-2 transition-colors"
+            >
+              <LuPlus className="w-4 h-4" />
+              Nueva Categoría
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* Tabla */}
+      
       <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
@@ -286,56 +386,70 @@ const CategoriasManagement: React.FC<CategoriasManagementProps> = ({ onBack }) =
           </table>
         </div>
 
-        {/* Paginación */}
-        {table.getPageCount() > 1 && (
-          <div className="px-6 py-3 bg-gray-50 border-t border-gray-200">
-            <div className="flex items-center justify-between">
+  
+        <div className="px-6 py-3 bg-gray-50 border-t border-gray-200">
+          <div className="flex items-center justify-between">
+
+            <div className="flex items-center gap-4">
               <div className="flex items-center gap-2">
-                <span className="text-sm text-gray-700">
-                  Mostrando {table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1} a{' '}
-                  {Math.min((table.getState().pagination.pageIndex + 1) * table.getState().pagination.pageSize, table.getFilteredRowModel().rows.length)} de{' '}
-                  {table.getFilteredRowModel().rows.length} resultados
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => table.setPageIndex(0)}
-                  disabled={!table.getCanPreviousPage()}
-                  className="p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                <span className="text-sm text-gray-700">Filas por página:</span>
+                <select
+                  value={table.getState().pagination.pageSize}
+                  onChange={(e) => {
+                    table.setPageSize(Number(e.target.value));
+                  }}
+                  className="px-3 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
-                  <MdKeyboardDoubleArrowLeft className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={() => table.previousPage()}
-                  disabled={!table.getCanPreviousPage()}
-                  className="p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <MdKeyboardArrowLeft className="w-4 h-4" />
-                </button>
-                <span className="text-sm text-gray-700">
-                  Página {table.getState().pagination.pageIndex + 1} de {table.getPageCount()}
-                </span>
-                <button
-                  onClick={() => table.nextPage()}
-                  disabled={!table.getCanNextPage()}
-                  className="p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <MdKeyboardArrowRight className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={() => table.setPageIndex(table.getPageCount() - 1)}
-                  disabled={!table.getCanNextPage()}
-                  className="p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <MdKeyboardDoubleArrowRight className="w-4 h-4" />
-                </button>
+                  {pageSizeOptions.map((pageSize) => (
+                    <option key={pageSize} value={pageSize}>
+                      {pageSize}
+                    </option>
+                  ))}
+                </select>
               </div>
             </div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => table.setPageIndex(0)}
+                disabled={!table.getCanPreviousPage()}
+                className="p-2 rounded-md border text-gray-600 hover:text-gray-900 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                title="Primera página"
+              >
+                <MdKeyboardDoubleArrowLeft className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => table.previousPage()}
+                disabled={!table.getCanPreviousPage()}
+                className="p-2 rounded-md border text-gray-600 hover:text-gray-900 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                title="Página anterior"
+              >
+                <MdKeyboardArrowLeft className="w-4 h-4" />
+              </button>
+              <span className="text-sm text-gray-700">
+                Página {table.getState().pagination.pageIndex + 1} de {table.getPageCount()}
+              </span>
+              <button
+                onClick={() => table.nextPage()}
+                disabled={!table.getCanNextPage()}
+                className="p-2 rounded-md border text-gray-600 hover:text-gray-900 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                title="Página siguiente"
+              >
+                <MdKeyboardArrowRight className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => table.setPageIndex(table.getPageCount() - 1)}
+                disabled={!table.getCanNextPage()}
+                className="p-2 rounded-md border text-gray-600 hover:text-gray-900 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                title="Última página"
+              >
+                <MdKeyboardDoubleArrowRight className="w-4 h-4" />
+              </button>
+            </div>
           </div>
-        )}
+        </div>
       </div>
 
-      {/* Modales */}
+   
       <CreateCategoriaModal
         isOpen={showCreateModal}
         onClose={() => setShowCreateModal(false)}

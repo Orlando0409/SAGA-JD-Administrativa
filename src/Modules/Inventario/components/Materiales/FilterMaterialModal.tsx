@@ -13,11 +13,6 @@ const FilterMaterialModal: React.FC<FilterMaterialModalProps> = ({
 }) => {
   const { data: categorias = [] } = useGetAllCategories();
   
-  const estados = [
-    { id: 1, nombre: 'Disponible' },
-    { id: 2, nombre: 'Agotado' }
-  ];
-  
   const [filters, setFilters] = useState<MaterialFilterOptions>(currentFilters);
 
   const handleApply = () => {
@@ -28,7 +23,6 @@ const FilterMaterialModal: React.FC<FilterMaterialModalProps> = ({
   const handleClear = () => {
     const clearFilters: MaterialFilterOptions = {
       categoria: [],
-      estado: '',
       conStock: false,
       precioMin: undefined,
       precioMax: undefined,
@@ -49,16 +43,10 @@ const FilterMaterialModal: React.FC<FilterMaterialModalProps> = ({
     <section className="fixed inset-0 flex items-start justify-end z-50">
       <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4 max-h-[90vh] overflow-hidden">
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
-          <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
+          <h2 className="text-xl font-semibold text-gray-900 flex items-center">
             <LuFilter className="w-5 h-5" />
             Filtros Avanzados
           </h2>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
-          >
-            <LuX className="w-6 h-6" />
-          </button>
         </div>
 
         <div className="p-6 space-y-4 overflow-y-auto max-h-[calc(90vh-140px)] scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100">
@@ -148,13 +136,11 @@ const FilterMaterialModal: React.FC<FilterMaterialModalProps> = ({
                           onChange={(e) => {
                             const currentCategorias = filters.categoria || [];
                             if (e.target.checked) {
-                              // Agregar categoría
                               setFilters(prev => ({
                                 ...prev,
                                 categoria: [...currentCategorias, categoria.Id_Categoria]
                               }));
                             } else {
-                              // Remover categoría
                               setFilters(prev => ({
                                 ...prev,
                                 categoria: currentCategorias.filter(id => id !== categoria.Id_Categoria)
@@ -182,25 +168,6 @@ const FilterMaterialModal: React.FC<FilterMaterialModalProps> = ({
                 </div>
               )}
             </div>
-          </div>
-
-          <div>
-            <label htmlFor="filter-estado" className="block text-sm font-medium text-gray-700 mb-2">
-              Estado
-            </label>
-            <select
-              id="filter-estado"
-              value={filters.estado || ''}
-              onChange={(e) => setFilters(prev => ({ ...prev, estado: e.target.value || undefined }))}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-              <option value="">Todos los estados</option>
-              {estados.map((estado) => (
-                <option key={estado.id} value={estado.nombre}>
-                  {estado.nombre}
-                </option>
-              ))}
-            </select>
           </div>
 
           <div>
@@ -370,25 +337,25 @@ const FilterMaterialModal: React.FC<FilterMaterialModalProps> = ({
           </div>
         </div>
 
-        <div className="flex items-center justify-between p-6 border-t border-gray-200 bg-gray-50">
+        <div className="flex items-center justify-end p-6 border-t border-gray-200 bg-gray-50">
+          <div className="flex gap-3">
+            <button
+              onClick={handleApply}
+              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            >
+              Aplicar Filtros
+            </button>
           <button
             onClick={handleClear}
             className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
           >
             Limpiar Filtros
           </button>
-          <div className="flex gap-2">
             <button
               onClick={onClose}
               className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
             >
               Cancelar
-            </button>
-            <button
-              onClick={handleApply}
-              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-            >
-              Aplicar Filtros
             </button>
           </div>
         </div>

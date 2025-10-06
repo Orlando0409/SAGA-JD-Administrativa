@@ -70,13 +70,28 @@ export const useUpdateUser = () => {
 
 export const useDeactivateUser = () => {
   const queryClient = useQueryClient();
-  const { showSuccess, showError } = useAlerts();
+  const { showSuccessWithUndo, showError } = useAlerts();
 
   return useMutation({
     mutationFn: deactivateUser,
-    onSuccess: () => {
+    onSuccess: (_, userId) => {
       queryClient.invalidateQueries({ queryKey: ['users'] });
-      showSuccess('Usuario desactivado', 'El usuario se ha desactivado exitosamente');
+      
+      const undoAction = async () => {
+        try {
+          await activateUser(userId);
+          queryClient.invalidateQueries({ queryKey: ['users'] });
+        } catch (error) {
+          showError('Error', 'No se pudo revertir el cambio');
+          console.error('Error activating user in undo action:', error);
+        }
+      };
+
+      showSuccessWithUndo(
+        'Usuario desactivado', 
+        'El usuario se ha desactivado exitosamente',
+        undoAction
+      );
     },
     onError: () => {
       showError('Error', 'No se pudo desactivar el usuario');
@@ -86,13 +101,28 @@ export const useDeactivateUser = () => {
 
 export const useActivateUser = () => {
   const queryClient = useQueryClient();
-  const { showSuccess, showError, showWarning } = useAlerts();
+  const { showSuccessWithUndo, showError, showWarning } = useAlerts();
 
   return useMutation({
     mutationFn: activateUser,
-    onSuccess: () => {
+    onSuccess: (_, userId) => {
       queryClient.invalidateQueries({ queryKey: ['users'] });
-      showSuccess('Usuario activado', 'El usuario se ha activado exitosamente');
+      
+      const undoAction = async () => {
+        try {
+          await deactivateUser(userId);
+          queryClient.invalidateQueries({ queryKey: ['users'] });
+        } catch (error) {
+          showError('Error', 'No se pudo revertir el cambio');
+          console.error('Error deactivating user in undo action:', error);
+        }
+      };
+
+      showSuccessWithUndo(
+        'Usuario activado', 
+        'El usuario se ha activado exitosamente',
+        undoAction
+      );
     },
     onError: (err: unknown) => {
       let errorMsg = '';

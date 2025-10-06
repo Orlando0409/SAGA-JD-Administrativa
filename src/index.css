@@ -133,3 +133,61 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Estilos personalizados para react-phone-number-input */
+.react-phone-number-input {
+  @apply w-full;
+}
+
+.react-phone-number-input__input {
+  @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors text-sm;
+}
+
+.react-phone-number-input--error .react-phone-number-input__input {
+  @apply border-red-300 focus:ring-red-500;
+}
+
+.react-phone-number-input__country-select {
+  @apply border border-gray-300 rounded-l-lg px-2 py-2 bg-white hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors;
+}
+
+.react-phone-number-input--error .react-phone-number-input__country-select {
+  @apply border-red-300 focus:ring-red-500;
+}
+
+.react-phone-number-input__country-select-arrow {
+  @apply text-gray-400;
+}
+
+.react-phone-number-input__flag {
+  @apply w-5 h-4;
+}
+
+.react-phone-number-input__country-select:focus + .react-phone-number-input__input {
+  @apply border-l-transparent;
+}
+
+/* Estilos específicos para formularios de proveedores */
+.phone-input-success .react-phone-number-input__input {
+  @apply border-gray-300 focus:ring-blue-500 focus:border-transparent;
+}
+
+.phone-input-success-juridico .react-phone-number-input__input {
+  @apply border-gray-300 focus:ring-green-500 focus:border-transparent;
+}
+
+.phone-input-error .react-phone-number-input__input {
+  @apply border-red-300 focus:ring-red-500 focus:border-transparent;
+}
+
+.phone-input-success .react-phone-number-input__country-select {
+  @apply border-gray-300 focus:ring-blue-500 focus:border-transparent;
+}
+
+.phone-input-success-juridico .react-phone-number-input__country-select {
+  @apply border-gray-300 focus:ring-green-500 focus:border-transparent;
+}
+
+.phone-input-error .react-phone-number-input__country-select {
+  @apply border-red-300 focus:ring-red-500 focus:border-transparent;
+}

@@ -29,7 +29,7 @@ export function AppSidebar({ allowedModules }: Readonly<AppSidebarProps>) {
   const [openSections, setOpenSections] = useState<number[]>([])
   const location = useLocation()
   const logoutMutation = useLogout()
-  const { state, setOpen: setSidebarOpen } = useSidebar()
+  const { setOpen: setSidebarOpen } = useSidebar()
   const { showSuccess } = useAlerts()
   const [showChangePasswordModal, setShowChangePasswordModal] = useState(false)
   const { totalPendientes } = useNotificacionesSolicitudes()
@@ -106,11 +106,13 @@ export function AppSidebar({ allowedModules }: Readonly<AppSidebarProps>) {
                 open={isOpen}
                 animate={CUSTOM_ANIMATION}
                 className="border-none shadow-none bg-transparent"
+                placeholder=""
                 {...({} as any)}
               >
                 <AccordionHeader
                   onClick={() => handleAccordion(section.id)}
                   className="text-base font-semibold px-2 py-1 group-data-[collapsible=icon]:hidden"
+                  placeholder=""
                   {...({} as any)}
                 >
                   <div className="flex items-center justify-between pl-2 w-full">

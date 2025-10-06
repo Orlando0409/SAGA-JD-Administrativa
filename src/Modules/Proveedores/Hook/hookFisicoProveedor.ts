@@ -4,9 +4,10 @@ import {
   getProveedorFisicoById,
   createProveedorFisico,
   updateProveedorFisico,
-  deleteProveedorFisico
-} from "../Services/proveedorservice";
-import type { ProveedorFisico, CreateProveedorData, UpdateProveedorData } from "../Models/TablaProveedo/proveedorFisico";
+  deleteProveedorFisico,
+  changeProveedorFisicoStatus
+} from "../Services/fisicoServiceProveedor";
+import type { ProveedorFisico, CreateProveedorData, UpdateProveedorData } from "../Models/TablaProveedo/tablaFisicoProveedor";
 
 export const useProveedoresFisicos = () => {
   // Query para obtener todos los proveedores físicos
@@ -120,5 +121,36 @@ export const useDeleteProveedorFisico = () => {
     isError: deleteMutation.isError,
     error: deleteMutation.error,
     isSuccess: deleteMutation.isSuccess,
+  };
+};
+
+// Hook para cambiar el estado de un proveedor físico (Activo/Inactivo)
+export const useChangeProveedorFisicoStatus = () => {
+  const queryClient = useQueryClient();
+  
+  const changeStatusMutation = useMutation({
+    mutationFn: ({ id, nuevoEstado }: { id: number; nuevoEstado: number }) => 
+      changeProveedorFisicoStatus(id, nuevoEstado),
+    onSuccess: (updatedProveedor, { id }) => {
+      // Invalidar la lista de proveedores para refrescar la tabla
+      queryClient.invalidateQueries({ queryKey: ["proveedoresFisicos"] });
+      
+      // Actualizar el cache del proveedor específico si existe
+      queryClient.setQueryData(['proveedorFisico', id], updatedProveedor);
+      
+      console.log("Estado del proveedor físico cambiado con éxito");
+    },
+    onError: (error) => {
+      console.error("Error al cambiar el estado del proveedor físico:", error);
+    },
+  });
+   
+  return {
+    changeStatus: changeStatusMutation.mutateAsync,
+    changeStatusSync: changeStatusMutation.mutate,
+    isChangingStatus: changeStatusMutation.isPending,
+    isError: changeStatusMutation.isError,
+    error: changeStatusMutation.error,
+    isSuccess: changeStatusMutation.isSuccess,
   };
 };

@@ -14,7 +14,11 @@ export interface Material {
   Fecha_Baja?: Date | string | null;
   Estado_Material: EstadoMaterial;
   Unidad_Medicion: UnidadMedicion;
-  Categorias: {
+  materialCategorias: {
+    Id_Material_Categoria: number;
+    Categoria: CategoriaMaterial;
+  }[];
+  Categorias?: {
     Id_Material_Categoria: number;
     Categoria: CategoriaMaterial;
   }[];

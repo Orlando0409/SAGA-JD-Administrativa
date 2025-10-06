@@ -37,6 +37,7 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({ userId, isOpen, onClo
   const handleDeactivate = async () => {
       try {
         await deactivateUserMutation.mutateAsync(userId);
+        onClose(); // Cerrar el modal después de desactivar
       } catch (error) {
         console.error('Error deactivating user:', error);
       }
@@ -47,6 +48,7 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({ userId, isOpen, onClo
    
       try {
         await activateUserMutation.mutateAsync(userId);
+        onClose(); // Cerrar el modal después de activar
       } catch (error) {
         console.error('Error activating user:', error);
       }
@@ -101,7 +103,6 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({ userId, isOpen, onClo
   return (
     <div className="fixed inset-0 bg-white bg-opacity-95 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg shadow-2xl border border-gray-200 w-full max-w-4xl max-h-[90vh] overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100">
-        {/* Header */}
         <div className="sticky top-0 bg-white border-b border-gray-200 p-6 z-10">
           <div className="flex items-center justify-between">
             <h1 className="text-3xl font-bold text-gray-900">Detalle del Usuario</h1>
@@ -111,9 +112,7 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({ userId, isOpen, onClo
           </div>
         </div>
 
-        {/* Content */}
         <div className="p-6">
-          {/* User Header Card */}
           <div className="bg-gradient-to-r from-blue-600 to-blue-700 p-6 rounded-lg mb-6">
             <div className="flex items-center gap-4">
               <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center">
@@ -355,7 +354,10 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({ userId, isOpen, onClo
         {showEditModal && (
           <EditUserModal
             isOpen={showEditModal}
-            onClose={() => setShowEditModal(false)}
+            onClose={() => {
+              setShowEditModal(false);
+              onClose(); 
+            }}
             user={user}
           />
         )}

@@ -25,11 +25,6 @@ export const updateCategoria = async (id: number, categoriaData: UpdateCategoria
   return response.data;
 };
 
-export const deleteCategoria = async (id: number): Promise<{ message: string }> => {
-  const response = await axiosPrivate.delete(`/Inventario/delete/categoria/${id}`);
-  return response.data;
-};
-
 export const updateEstadoCategoria = async (id: number, estadoId: number): Promise<CategoriaMaterial> => {
   const response = await axiosPrivate.patch(`/Inventario/update/estado/categoria/${id}/${estadoId}`);
   return response.data;

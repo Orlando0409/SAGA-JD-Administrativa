@@ -1,13 +1,13 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAlerts } from '@/Modules/Global/context/AlertContext';
 import type { 
   IngresoEgresoMaterialData 
-} from '../models/UnidadMedicion';
-import { ingresoMaterial, egresoMaterial } from '../service/MovimientosService';
+} from '../models/Inventario';
+import { ingresoMaterial, egresoMaterial, getAllMovimientos } from '../service/MovimientosService';
 
 
 interface MaterialMovimientoPayload {
-  materialId: number;
+  idUsuario: number;
   data: IngresoEgresoMaterialData;
 }
 
@@ -16,11 +16,11 @@ export const useIngresoMaterial = () => {
   const { showSuccess, showError } = useAlerts();
   
   return useMutation({
-    mutationFn: ({ materialId, data }: MaterialMovimientoPayload) => 
-      ingresoMaterial(materialId, data),
+    mutationFn: ({ idUsuario, data }: MaterialMovimientoPayload) => 
+      ingresoMaterial(idUsuario, data),
     onSuccess: () => {
       showSuccess('Éxito', 'Ingreso de material registrado correctamente');
-      queryClient.invalidateQueries({ queryKey: ['materiales'] });
+      queryClient.invalidateQueries({ queryKey: ['materials'] });
       queryClient.invalidateQueries({ queryKey: ['material'] });
     },
     onError: (error: any) => {
@@ -35,16 +35,23 @@ export const useEgresoMaterial = () => {
   const { showSuccess, showError } = useAlerts();
   
   return useMutation({
-    mutationFn: ({ materialId, data }: MaterialMovimientoPayload) => 
-      egresoMaterial(materialId, data),
+    mutationFn: ({ idUsuario, data }: MaterialMovimientoPayload) => 
+      egresoMaterial(idUsuario, data),
     onSuccess: () => {
       showSuccess('Éxito', 'Egreso de material registrado correctamente');
-      queryClient.invalidateQueries({ queryKey: ['materiales'] });
+      queryClient.invalidateQueries({ queryKey: ['materials'] });
       queryClient.invalidateQueries({ queryKey: ['material'] });
     },
     onError: (error: any) => {
       const errorMessage = error?.response?.data?.message || 'Error al registrar el egreso de material';
       showError('Error', errorMessage);
     },
+  });
+};
+
+export const useGetAllMovimientos = () => {
+  return useQuery({
+    queryKey: ['movimientos'],
+    queryFn: getAllMovimientos,
   });
 };

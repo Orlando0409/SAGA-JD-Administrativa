@@ -39,6 +39,7 @@ const CatalogoMateriales: React.FC<CatalogoMaterialesProps> = ({ onBack }) => {
   const [showFilterModal, setShowFilterModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [appliedFilters, setAppliedFilters] = useState<MaterialFilterOptions>({});
+  const [estadoFilter, setEstadoFilter] = useState<string>('Disponible'); // Por defecto mostrar solo activos
   const { data: allMaterials = [], isLoading: isLoadingAll, refetch: refetchAllMaterials } = useGetAllMaterials();
   const { data: materialesConCategorias = [], isLoading: isLoadingConCat, refetch: refetchConCat } = useGetMaterialesConCategorias();
   const { data: materialesSinCategorias = [], isLoading: isLoadingSinCat, refetch: refetchSinCat } = useGetMaterialesSinCategorias();
@@ -96,13 +97,18 @@ const CatalogoMateriales: React.FC<CatalogoMaterialesProps> = ({ onBack }) => {
 
   const filterByCategoria = (material: Material, categoria?: string | (string | number)[]) => {
     if (!categoria || (Array.isArray(categoria) && categoria.length === 0)) return true;
+    
+    const categorias = (material.materialCategorias && material.materialCategorias.length > 0) 
+      ? material.materialCategorias 
+      : (material.Categorias || []);
+    
     if (Array.isArray(categoria)) {
-      return material.Categorias?.some(cat =>
+      return categorias.some(cat =>
         categoria.includes(cat.Categoria.Nombre_Categoria) ||
         categoria.includes(cat.Categoria.Id_Categoria)
       );
     }
-    return material.Categorias?.some(cat => 
+    return categorias.some(cat => 
       cat.Categoria.Nombre_Categoria === categoria ||
       String(cat.Categoria.Id_Categoria) === String(categoria)
     );
@@ -147,8 +153,17 @@ const CatalogoMateriales: React.FC<CatalogoMaterialesProps> = ({ onBack }) => {
   };
 
   const filteredMaterials = useMemo(() => {
-    return applyAdditionalFilters(materials, appliedFilters);
-  }, [materials, appliedFilters]);
+    let filtered = applyAdditionalFilters(materials, appliedFilters);
+    
+    
+    if (estadoFilter !== 'Todos') {
+      filtered = filtered.filter(material => 
+        material.Estado_Material?.Nombre_Estado_Material === estadoFilter
+      );
+    }
+    
+    return filtered;
+  }, [materials, appliedFilters, estadoFilter]);
 
   const columnHelper = createColumnHelper<Material>();
 
@@ -178,7 +193,7 @@ const CatalogoMateriales: React.FC<CatalogoMaterialesProps> = ({ onBack }) => {
           </div>
         ),
       }),
-      columnHelper.accessor('Unidad_Medicion.Nombre_Unidad', {
+      columnHelper.accessor((row) => row.Unidad_Medicion?.Nombre_Unidad_Medicion || row.Unidad_Medicion?.Nombre_Unidad, {
         header: 'Unidad de medida',
         cell: info => (
           <div className="text-sm text-gray-600">
@@ -319,7 +334,6 @@ const CatalogoMateriales: React.FC<CatalogoMaterialesProps> = ({ onBack }) => {
 
     return (
     <div className="space-y-6">
-      {/* Header con botón de regreso */}
       {onBack && (
         <div className="flex items-center gap-4">
           <button
@@ -335,42 +349,57 @@ const CatalogoMateriales: React.FC<CatalogoMaterialesProps> = ({ onBack }) => {
           </h1>
         </div>
       )}
-      <div className="flex  sm:flex-row justify-between gap-4">
-        <div className="flex-1 relative">
-          <LuSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-          <input
-            type="text"
-            placeholder="Buscar materiales..."
-            value={globalFilter ?? ''}
-            onChange={(e) => setGlobalFilter(e.target.value)}
-            className="w-[30vw] pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          />
-        </div>
 
-        <div className="flex items-center gap-3">
-        <button
-          onClick={() => setShowFilterModal(true)}
-          className={`px-4 py-2 border rounded-lg flex items-center gap-2 transition-colors ${
-            activeFiltersCount > 0
-              ? 'border-blue-500 bg-blue-50 text-blue-700'
-              : 'border-gray-300 hover:bg-gray-50'
-          }`}
-        >
-          <LuFilter className="w-4 h-4" />
-          Filtros
-          {activeFiltersCount > 0 && (
-            <span className="bg-blue-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-              {activeFiltersCount}
-            </span>
-          )}
-        </button>
-          <button
-            onClick={() => setShowCreateModal(true)}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
-          >
-            <LuPlus className="w-4 h-4" />
-            Nuevo Material
-          </button>
+      <div className="bg-white rounded-lg p-3">
+        <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
+          <div className="flex items-center gap-4">
+            <label htmlFor="estado-filter-select" className="text-sm font-medium text-gray-700">Estado:</label>
+            <select
+              id="estado-filter-select"
+              value={estadoFilter}
+              onChange={(e) => setEstadoFilter(e.target.value)}
+              className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+            >
+              <option value="Todos">Todos los estados</option>
+              <option value="Disponible">Disponible</option>
+              <option value="Agotado">Agotado</option>
+            </select>
+          </div>
+          <div className="flex items-center gap-4 w-full sm:w-auto">
+            <div className="relative flex-1 max-w-md">
+              <LuSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <input
+                type="text"
+                placeholder="Buscar materiales..."
+                value={globalFilter ?? ''}
+                onChange={(e) => setGlobalFilter(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+            <button
+              onClick={() => setShowFilterModal(true)}
+              className={`px-4 py-2 border rounded-md flex items-center gap-2 transition-colors ${
+                activeFiltersCount > 0
+                  ? 'border-blue-500 bg-blue-50 text-blue-700'
+                  : 'border-gray-300 hover:bg-gray-50'
+              }`}
+            >
+              <LuFilter className="w-4 h-4" />
+              Filtros
+              {activeFiltersCount > 0 && (
+                <span className="bg-blue-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                  {activeFiltersCount}
+                </span>
+              )}
+            </button>
+            <button 
+              onClick={() => setShowCreateModal(true)}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md flex items-center gap-2 transition-colors"
+            >
+              <LuPlus className="w-4 h-4" />
+              Nuevo Material
+            </button>
+          </div>
         </div>
       </div>
 
@@ -424,8 +453,9 @@ const CatalogoMateriales: React.FC<CatalogoMaterialesProps> = ({ onBack }) => {
         </div>
 
         <div className="bg-white px-6 py-3 border-t border-gray-200 flex items-center justify-between">
+
           <div className="flex items-center gap-2 text-sm text-gray-700">
-            <span>Mostrar</span>
+            <span>Filas por página</span>
             <select
               value={table.getState().pagination.pageSize}
               onChange={(e) => {
@@ -439,7 +469,6 @@ const CatalogoMateriales: React.FC<CatalogoMaterialesProps> = ({ onBack }) => {
                 </option>
               ))}
             </select>
-            <span>de {table.getFilteredRowModel().rows.length} resultados</span>
           </div>
 
           <div className="flex items-center gap-2">

@@ -10,6 +10,10 @@ export interface AlertProps {
   description?: string;
   onClose?: () => void;
   className?: string;
+  actionButton?: {
+    text: string;
+    onClick: () => void;
+  };
 }
 
 export interface AlertState {
@@ -18,6 +22,10 @@ export interface AlertState {
   title: string;
   description?: string;
   duration?: number;
+  actionButton?: {
+    text: string;
+    onClick: () => void;
+  };
 }
 
 

@@ -3,7 +3,6 @@ import { useCreateRole, usePermissions } from '../Hooks/RoleHook';
 import { LuShield } from 'react-icons/lu';
 import { groupPermissionsByModule, getPermissionIdByLevel, type ModulePermission, type PermissionLevel } from '@/Modules/Usuarios/Helper/GroupPermiByModule';
 import { RoleMAX_LENGTH, RoleMIN_LENGTH, type CreateRoleModalProps } from '../Types/RoleTypes';
-import { useAlerts } from '@/Modules/Global/context/AlertContext';
 
 
 const CreateRoleModal: React.FC<CreateRoleModalProps> = ({ onClose }) => {
@@ -11,7 +10,6 @@ const CreateRoleModal: React.FC<CreateRoleModalProps> = ({ onClose }) => {
   const [modulePermissions, setModulePermissions] = useState<ModulePermission[]>([]);
   const { data: permisos = [], isLoading } = usePermissions();
   const { mutateAsync } = useCreateRole();
-  const { showSuccess, showError } = useAlerts();
   const [errors, setErrors] = useState<{ nombreRol?: string }>({});
   
     // Función para validar el nombre
@@ -78,10 +76,8 @@ const CreateRoleModal: React.FC<CreateRoleModalProps> = ({ onClose }) => {
     
       try {
         await mutateAsync({ Nombre_Rol: nombreRol, permisosIds });
-        showSuccess('Rol creado exitosamente');
       } catch (error) {
         console.error('Error creating role:', error);
-        showError('Error al crear rol');
       }
     onClose();
   };
