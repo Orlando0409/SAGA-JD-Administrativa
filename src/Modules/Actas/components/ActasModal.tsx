@@ -18,7 +18,7 @@ const ActasModal = ({ isOpen, onClose, acta, onEliminar }: ActasModalProps) => {
     const [isEditing, setIsEditing] = useState(false); // Controla el modo de edición
     const [titulo, setTitulo] = useState(acta.Titulo);
     const [descripcion, setDescripcion] = useState(acta.Descripcion);
-    const [file, setFile] = useState<File | null>(null);
+    const [files, setFiles] = useState<File[]>([]);
     const [tituloError, setTituloError] = useState(""); // Validación de título
     const [descripcionError, setDescripcionError] = useState(""); // Validación de descripción
 
@@ -63,9 +63,9 @@ const ActasModal = ({ isOpen, onClose, acta, onEliminar }: ActasModalProps) => {
             formData.append("Id_Usuario", "1"); // Incluye el ID del usuario (puedes reemplazar "1" con el ID dinámico)
             formData.append("Titulo", titulo.trim());
             formData.append("Descripcion", descripcion.trim());
-            if (file) {
-                formData.append("Archivo", file); // Solo se envía si hay un archivo nuevo
-            }
+            files.forEach((file) => {
+                formData.append("Archivo", file); // El backend espera "Archivo" para cada archivo
+            });
 
             await updateActaMutation.mutateAsync({ id: acta.Id_Acta, formData });
             alert("Acta actualizada con éxito.");
@@ -151,28 +151,32 @@ const ActasModal = ({ isOpen, onClose, acta, onEliminar }: ActasModalProps) => {
                                 )}
                             </div>
 
-                            {/* Campo de Archivo */}
+                            {/* Campo de Archivos */}
                             <div>
-                                <label className="block text-sm font-medium text-gray-700">Archivo</label>
+                                <label className="block text-sm font-medium text-gray-700">Archivos</label>
                                 <div className="relative">
                                     <input
-                                        id="archivo"
+                                        id="archivos"
                                         type="file"
                                         accept="application/pdf"
+                                        multiple
                                         onChange={(e) => {
-                                            const selectedFile = e.target.files?.[0];
-                                            if (selectedFile) {
-                                                setFile(selectedFile);
-                                            } else {
-                                                setFile(null);
-                                            }
+                                            const selectedFiles = e.target.files ? Array.from(e.target.files) : [];
+                                            setFiles(selectedFiles);
                                         }}
                                         className="absolute inset-0 opacity-0 w-full h-full cursor-pointer"
                                     />
                                     <div className="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm text-gray-500 bg-white cursor-pointer">
-                                        {file ? file.name : "Seleccionar Archivo"}
+                                        {files.length > 0
+                                            ? files.map((f) => f.name).join(", ")
+                                            : "Seleccionar Archivos"}
                                     </div>
                                 </div>
+                                {files.length > 0 && (
+                                    <div className="mt-2 text-xs text-gray-600">
+                                        {files.length} archivo{files.length > 1 ? 's' : ''} seleccionado{files.length > 1 ? 's' : ''}
+                                    </div>
+                                )}
                             </div>
                         </>
                     ) : (
