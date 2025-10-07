@@ -7,6 +7,8 @@ import { useAfiliadosFisicos } from '../Hook/HookAfiliadoFisico';
 import { useAfiliadosJuridicos } from '../Hook/HookAfiliadoJuridico';
 import PhoneInput from "react-phone-number-input";
 import "react-phone-number-input/style.css";
+import { AfiliadoFisicoEditSchema } from '../Schemas/AfiliadoFisico';
+import { AfiliacionJuridicaEditSchema } from '../Schemas/AfiliadoJuridico';
 
 // Tipo unificado para identificar qué estamos editando
 type PersonaParaEditar = {
@@ -24,8 +26,30 @@ interface EditModalProps {
 const NOMBRE_MAX_LENGTH = 50;
 const APELLIDO_MAX_LENGTH = 50;
 const EMAIL_MAX_LENGTH = 100;
-const CEDULA_MAX_LENGTH = 20;
 const DIRECCION_MAX_LENGTH = 200;
+
+// Función de validación usando Zod schemas
+const validateField = (fieldName: string, value: any, tipoPersona: 'afiliado-fisico' | 'afiliado-juridico'): string | undefined => {
+    try {
+        if (tipoPersona === 'afiliado-fisico') {
+            const fieldSchema = AfiliadoFisicoEditSchema.shape[fieldName as keyof typeof AfiliadoFisicoEditSchema.shape];
+            if (fieldSchema) {
+                fieldSchema.parse(value);
+            }
+        } else {
+            const fieldSchema = AfiliacionJuridicaEditSchema.shape[fieldName as keyof typeof AfiliacionJuridicaEditSchema.shape];
+            if (fieldSchema) {
+                fieldSchema.parse(value);
+            }
+        }
+        return undefined;
+    } catch (error: any) {
+        if (error?.issues?.[0]?.message) {
+            return error.issues[0].message;
+        }
+        return 'Valor inválido';
+    }
+};
 
 const EditModal: React.FC<EditModalProps> = ({ isOpen, onClose, persona }) => {
     const { showSuccess, showError } = useAlerts();
@@ -56,7 +80,11 @@ const EditModal: React.FC<EditModalProps> = ({ isOpen, onClose, persona }) => {
                 handleChange(value);
                 setFieldCharCounts(prev => ({ ...prev, [fieldName]: value.length }));
 
-                if (formErrors[fieldName]) {
+                // Validación en tiempo real con Zod
+                const validationError = validateField(fieldName, value, persona.tipo);
+                if (validationError) {
+                    setFormErrors(prev => ({ ...prev, [fieldName]: validationError }));
+                } else {
                     setFormErrors(prev => ({ ...prev, [fieldName]: '' }));
                 }
             }
@@ -78,8 +106,8 @@ const EditModal: React.FC<EditModalProps> = ({ isOpen, onClose, persona }) => {
                 Correo: afiliado.Correo,
                 Direccion_Exacta: afiliado.Direccion_Exacta || '',
                 Edad: afiliado.Edad,
-                Escritura_Terreno: '',
-                Planos_Terreno: '',
+                Escritura_Terreno: afiliado.Escritura_Terreno || '',
+                Planos_Terreno: afiliado.Planos_Terreno || '',
             };
         } else { // afiliado-juridico
             const afiliado = datos as AfiliadoJuridico;
@@ -111,12 +139,11 @@ const EditModal: React.FC<EditModalProps> = ({ isOpen, onClose, persona }) => {
                 if (persona.tipo === 'afiliado-fisico') {
                     const afiliadoFisico = persona.datos as AfiliadoFisico;
 
-                    // Agregar campos de afiliado físico
+                    // Agregar campos editables de afiliado físico (excluir Identificacion y Tipo_Identificacion)
                     formData.append('Nombre', value.Nombre || '');
                     formData.append('Apellido1', value.Apellido1 || '');
                     formData.append('Apellido2', value.Apellido2 || '');
-                    formData.append('Tipo_Identificacion', value.Tipo_Identificacion || 'Cedula Nacional');
-                    formData.append('Identificacion', value.Identificacion || '');
+                    // Tipo_Identificacion no se envía en actualización
                     formData.append('Numero_Telefono', value.Numero_Telefono || '');
                     formData.append('Correo', value.Correo || '');
                     formData.append('Direccion_Exacta', value.Direccion_Exacta || '');
@@ -133,9 +160,8 @@ const EditModal: React.FC<EditModalProps> = ({ isOpen, onClose, persona }) => {
                 } else {
                     const afiliadoJuridico = persona.datos as AfiliadoJuridico;
 
-                    // Agregar campos de afiliado jurídico
+                    // Agregar campos editables de afiliado jurídico (no incluir Cedula_Juridica)
                     formData.append('Razon_Social', value.Razon_Social || '');
-                    formData.append('Cedula_Juridica', value.Cedula_Juridica || '');
                     formData.append('Numero_Telefono', value.Numero_Telefono || '');
                     formData.append('Correo', value.Correo || '');
                     formData.append('Direccion_Exacta', value.Direccion_Exacta || '');
@@ -148,7 +174,8 @@ const EditModal: React.FC<EditModalProps> = ({ isOpen, onClose, persona }) => {
                     const cedulaJuridica = afiliadoJuridico.Cedula_Juridica || '';
                     await updateAfiliadoJuridico({ cedulaJuridica, data: formData });
                     showSuccess('Afiliado jurídico actualizado exitosamente');
-                } onClose();
+                }
+                onClose();
             } catch (error) {
                 console.error('Error actualizando:', error);
                 showError('Error al actualizar el registro. Por favor intente nuevamente.');
@@ -178,6 +205,51 @@ const EditModal: React.FC<EditModalProps> = ({ isOpen, onClose, persona }) => {
                 </span>
             </div>
         );
+    };
+
+    // Función para extraer el nombre del archivo de una URL
+    const extractFileNameFromUrl = (url: string): string => {
+        if (!url) return '';
+
+        try {
+            // Si es una URL de Dropbox u otro servicio
+            if (url.includes('dropbox.com') || url.includes('http')) {
+                // Buscar el parámetro que contiene el nombre del archivo
+                const urlParts = url.split('/');
+                const lastPart = urlParts[urlParts.length - 1];
+
+                // Si tiene parámetros, buscar el nombre del archivo
+                if (lastPart.includes('?')) {
+                    const params = new URLSearchParams(lastPart.split('?')[1]);
+                    // Buscar en diferentes parámetros comunes
+                    const fileName = params.get('filename') || params.get('name') || params.get('file');
+                    if (fileName) return decodeURIComponent(fileName);
+                }
+
+                // Si no hay parámetros, intentar extraer del path
+                const fileNameFromPath = urlParts.find(part =>
+                    part.includes('.pdf') ||
+                    part.includes('.doc') ||
+                    part.includes('.docx') ||
+                    part.includes('.jpg') ||
+                    part.includes('.jpeg') ||
+                    part.includes('.png')
+                );
+
+                if (fileNameFromPath) {
+                    return decodeURIComponent(fileNameFromPath.split('?')[0]);
+                }
+
+                // Como último recurso, mostrar "Archivo adjunto"
+                return 'Archivo adjunto';
+            }
+
+            // Si no es una URL, asumir que ya es un nombre de archivo
+            return url;
+        } catch (error) {
+            console.error('Error extrayendo nombre de archivo:', error);
+            return 'Archivo adjunto';
+        }
     };
 
     const getModalTitle = () => {
@@ -226,7 +298,7 @@ const EditModal: React.FC<EditModalProps> = ({ isOpen, onClose, persona }) => {
                                             <input
                                                 type="text"
                                                 value={field.state.value}
-                                                onChange={createInputHandler('nombre', field.handleChange, NOMBRE_MAX_LENGTH)}
+                                                onChange={createInputHandler('Nombre', field.handleChange, NOMBRE_MAX_LENGTH)}
                                                 className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-colors ${(formErrors.Nombre || field.state.meta.errors?.length)
                                                     ? 'border-red-300 focus:ring-red-500'
                                                     : 'border-gray-300 focus:ring-blue-500'
@@ -235,6 +307,9 @@ const EditModal: React.FC<EditModalProps> = ({ isOpen, onClose, persona }) => {
                                                 maxLength={NOMBRE_MAX_LENGTH}
                                             />
                                             {renderCharCounter(fieldCharCounts.nombre, NOMBRE_MAX_LENGTH, !!(formErrors.Nombre || field.state.meta.errors?.length))}
+                                            {formErrors.Nombre && (
+                                                <p className="text-red-500 text-xs mt-1">{formErrors.Nombre}</p>
+                                            )}
                                             {field.state.meta.errors?.map((err) => (
                                                 <p key={err} className="text-red-500 text-xs mt-1">{err}</p>
                                             ))}
@@ -286,18 +361,20 @@ const EditModal: React.FC<EditModalProps> = ({ isOpen, onClose, persona }) => {
                                     {(field) => (
                                         <div>
                                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                Tipo de Identificación *
+                                                Tipo de Identificación * (No editable)
                                             </label>
                                             <select
                                                 value={field.state.value}
-                                                onChange={(e) => field.handleChange(e.target.value as 'Cedula Nacional' | 'Dimex' | 'Pasaporte')}
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                                required
+                                                disabled
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-600 cursor-not-allowed"
                                             >
                                                 <option value="Cedula Nacional">Cédula Nacional</option>
                                                 <option value="DIMEX">DIMEX</option>
                                                 <option value="Pasaporte">Pasaporte</option>
                                             </select>
+                                            <p className="text-xs text-gray-500 mt-1">
+                                                Este campo no puede ser modificado
+                                            </p>
                                         </div>
                                     )}
                                 </form.Field>
@@ -306,18 +383,18 @@ const EditModal: React.FC<EditModalProps> = ({ isOpen, onClose, persona }) => {
                                     {(field) => (
                                         <div>
                                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                Número de Identificación *
+                                                Número de Identificación * (No editable)
                                             </label>
                                             <input
                                                 type="text"
                                                 value={field.state.value}
-                                                onChange={createInputHandler('cedula', field.handleChange, CEDULA_MAX_LENGTH)}
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                                placeholder="Ingrese el número de identificación"
-                                                maxLength={CEDULA_MAX_LENGTH}
-                                                required
+                                                readOnly
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-600 cursor-not-allowed"
+                                                placeholder="Número de identificación"
                                             />
-                                            {renderCharCounter(fieldCharCounts.cedula, CEDULA_MAX_LENGTH, false)}
+                                            <p className="text-xs text-gray-500 mt-1">
+                                                Este campo no puede ser modificado
+                                            </p>
                                         </div>
                                     )}
                                 </form.Field>
@@ -333,12 +410,27 @@ const EditModal: React.FC<EditModalProps> = ({ isOpen, onClose, persona }) => {
                                                 <input
                                                     type="number"
                                                     value={field.state.value}
-                                                    onChange={(e) => field.handleChange(parseInt(e.target.value) || 0)}
-                                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                    onChange={(e) => {
+                                                        const value = parseInt(e.target.value) || 0;
+                                                        field.handleChange(value);
+
+                                                        // Validación en tiempo real
+                                                        const validationError = validateField('Edad', value, persona.tipo);
+                                                        if (validationError) {
+                                                            setFormErrors(prev => ({ ...prev, Edad: validationError }));
+                                                        } else {
+                                                            setFormErrors(prev => ({ ...prev, Edad: '' }));
+                                                        }
+                                                    }}
+                                                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-colors ${formErrors.Edad ? 'border-red-300 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'
+                                                        }`}
                                                     placeholder="25"
-                                                    min="0"
+                                                    min="18"
                                                     max="120"
                                                 />
+                                                {formErrors.Edad && (
+                                                    <p className="text-red-500 text-xs mt-1">{formErrors.Edad}</p>
+                                                )}
                                             </div>
                                         )}
                                     </form.Field>
@@ -358,12 +450,16 @@ const EditModal: React.FC<EditModalProps> = ({ isOpen, onClose, persona }) => {
                                             <input
                                                 type="text"
                                                 value={field.state.value}
-                                                onChange={createInputHandler('razonSocial', field.handleChange, NOMBRE_MAX_LENGTH)}
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                onChange={createInputHandler('Razon_Social', field.handleChange, NOMBRE_MAX_LENGTH)}
+                                                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-colors ${formErrors.Razon_Social ? 'border-red-300 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'
+                                                    }`}
                                                 placeholder="Empresa S.A."
                                                 maxLength={NOMBRE_MAX_LENGTH}
                                             />
-                                            {renderCharCounter(fieldCharCounts.razonSocial, NOMBRE_MAX_LENGTH, false)}
+                                            {renderCharCounter(fieldCharCounts.razonSocial, NOMBRE_MAX_LENGTH, !!formErrors.Razon_Social)}
+                                            {formErrors.Razon_Social && (
+                                                <p className="text-red-500 text-xs mt-1">{formErrors.Razon_Social}</p>
+                                            )}
                                         </div>
                                     )}
                                 </form.Field>
@@ -372,17 +468,18 @@ const EditModal: React.FC<EditModalProps> = ({ isOpen, onClose, persona }) => {
                                     {(field) => (
                                         <div>
                                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                Cédula Jurídica *
+                                                Cédula Jurídica * (No editable)
                                             </label>
                                             <input
                                                 type="text"
                                                 value={field.state.value}
-                                                onChange={createInputHandler('cedula', field.handleChange, CEDULA_MAX_LENGTH)}
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                                placeholder="3-101-123456"
-                                                maxLength={CEDULA_MAX_LENGTH}
+                                                readOnly
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-600 cursor-not-allowed"
+                                                placeholder="Cédula jurídica"
                                             />
-                                            {renderCharCounter(fieldCharCounts.cedula, CEDULA_MAX_LENGTH, false)}
+                                            <p className="text-xs text-gray-500 mt-1">
+                                                Este campo no puede ser modificado
+                                            </p>
                                         </div>
                                     )}
                                 </form.Field>
@@ -399,14 +496,28 @@ const EditModal: React.FC<EditModalProps> = ({ isOpen, onClose, persona }) => {
                                         </label>
                                         <PhoneInput
                                             value={field.state.value as any}
-                                            onChange={(value) => field.handleChange(value || '')}
+                                            onChange={(value) => {
+                                                field.handleChange(value || '');
+
+                                                // Validación en tiempo real
+                                                const validationError = validateField('Numero_Telefono', value || '', persona.tipo);
+                                                if (validationError) {
+                                                    setFormErrors(prev => ({ ...prev, Numero_Telefono: validationError }));
+                                                } else {
+                                                    setFormErrors(prev => ({ ...prev, Numero_Telefono: '' }));
+                                                }
+                                            }}
                                             defaultCountry="CR"
                                             placeholder="Ingrese número de teléfono"
                                             className="w-full"
                                             numberInputProps={{
-                                                className: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                className: `w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-colors ${formErrors.Numero_Telefono ? 'border-red-300 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'
+                                                    }`
                                             }}
                                         />
+                                        {formErrors.Numero_Telefono && (
+                                            <p className="text-red-500 text-xs mt-1">{formErrors.Numero_Telefono}</p>
+                                        )}
                                     </div>
                                 )}
                             </form.Field>
@@ -420,12 +531,16 @@ const EditModal: React.FC<EditModalProps> = ({ isOpen, onClose, persona }) => {
                                         <input
                                             type="email"
                                             value={field.state.value}
-                                            onChange={createInputHandler('correo', field.handleChange, EMAIL_MAX_LENGTH)}
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                            onChange={createInputHandler('Correo', field.handleChange, EMAIL_MAX_LENGTH)}
+                                            className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-colors ${formErrors.Correo ? 'border-red-300 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'
+                                                }`}
                                             placeholder="ejemplo@email.com"
                                             maxLength={EMAIL_MAX_LENGTH}
                                         />
-                                        {renderCharCounter(fieldCharCounts.correo, EMAIL_MAX_LENGTH, false)}
+                                        {renderCharCounter(fieldCharCounts.correo, EMAIL_MAX_LENGTH, !!formErrors.Correo)}
+                                        {formErrors.Correo && (
+                                            <p className="text-red-500 text-xs mt-1">{formErrors.Correo}</p>
+                                        )}
                                     </div>
                                 )}
                             </form.Field>
@@ -439,13 +554,17 @@ const EditModal: React.FC<EditModalProps> = ({ isOpen, onClose, persona }) => {
                                     </label>
                                     <textarea
                                         value={field.state.value}
-                                        onChange={createInputHandler('direccion', field.handleChange, DIRECCION_MAX_LENGTH)}
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        onChange={createInputHandler('Direccion_Exacta', field.handleChange, DIRECCION_MAX_LENGTH)}
+                                        className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-colors ${formErrors.Direccion_Exacta ? 'border-red-300 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'
+                                            }`}
                                         placeholder="Dirección exacta de la propiedad"
                                         rows={3}
                                         maxLength={DIRECCION_MAX_LENGTH}
                                     />
-                                    {renderCharCounter(fieldCharCounts.direccion, DIRECCION_MAX_LENGTH, false)}
+                                    {renderCharCounter(fieldCharCounts.direccion, DIRECCION_MAX_LENGTH, !!formErrors.Direccion_Exacta)}
+                                    {formErrors.Direccion_Exacta && (
+                                        <p className="text-red-500 text-xs mt-1">{formErrors.Direccion_Exacta}</p>
+                                    )}
                                 </div>
                             )}
                         </form.Field>
@@ -477,10 +596,11 @@ const EditModal: React.FC<EditModalProps> = ({ isOpen, onClose, persona }) => {
                                                 />
                                                 <div className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 flex items-center justify-between cursor-pointer hover:bg-gray-100 transition-colors">
                                                     <span className="text-gray-700">
-                                                        {field.state.value || 'Seleccionar archivo...'}
+                                                        {escrituraFile?.name ||
+                                                            (field.state.value ? extractFileNameFromUrl(field.state.value) : 'No hay archivo seleccionado')}
                                                     </span>
                                                     <span className="bg-blue-500 text-white px-3 py-1 rounded text-sm">
-                                                        Examinar
+                                                        Subir archivo
                                                     </span>
                                                 </div>
                                             </div>
@@ -515,10 +635,11 @@ const EditModal: React.FC<EditModalProps> = ({ isOpen, onClose, persona }) => {
                                                 />
                                                 <div className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 flex items-center justify-between cursor-pointer hover:bg-gray-100 transition-colors">
                                                     <span className="text-gray-700">
-                                                        {field.state.value || 'Seleccionar archivo...'}
+                                                        {planosFile?.name ||
+                                                            (field.state.value ? extractFileNameFromUrl(field.state.value) : 'No hay archivo seleccionado')}
                                                     </span>
                                                     <span className="bg-blue-500 text-white px-3 py-1 rounded text-sm">
-                                                        Examinar
+                                                        Subir archivo
                                                     </span>
                                                 </div>
                                             </div>
