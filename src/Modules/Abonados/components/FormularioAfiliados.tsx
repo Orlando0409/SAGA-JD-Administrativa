@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useForm } from '@tanstack/react-form';
 import { useAfiliadosFisicos } from '../Hook/HookAfiliadoFisico';
 import { useAfiliadosJuridicos } from '../Hook/HookAfiliadoJuridico';
-import { User } from 'lucide-react';
+import { User, X, Building2 } from 'lucide-react';
 
 interface FormularioAfiliadosProps {
   isOpen: boolean;
@@ -89,7 +89,7 @@ export default function FormularioAfiliados({ isOpen, onClose, onSuccess }: Form
 
     onSubmit: async ({ value }) => {
       // DEBUGGING TEMPORAL
- 
+
       setFormErrors({});
 
       //  VALIDAR ANTES DE ENVIAR
@@ -168,7 +168,7 @@ export default function FormularioAfiliados({ isOpen, onClose, onSuccess }: Form
           }
         });
 
-        // 🚨 VERIFICACIÓN ADICIONAL: Contar el número de entradas
+        // VERIFICACION ADICIONAL: Contar el número de entradas
         const totalEntries = formDataEntries.length;
         const fileEntries = formDataEntries.filter(([, val]) => val instanceof File).length;
         console.log(` Total entradas: ${totalEntries}, Archivos: ${fileEntries}`);
@@ -297,9 +297,9 @@ export default function FormularioAfiliados({ isOpen, onClose, onSuccess }: Form
           </h2>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 text-2xl font-bold transition-colors"
+            className="text-gray-400 hover:text-gray-600 p-2 rounded-full hover:bg-gray-100 transition-colors"
           >
-            ✕
+            <X size={24} />
           </button>
         </div>
 
@@ -339,7 +339,7 @@ export default function FormularioAfiliados({ isOpen, onClose, onSuccess }: Form
                   : 'border-gray-300 bg-white text-gray-600 hover:border-purple-300'
                   }`}
               >
-                <User size={24} />
+                <Building2 size={24} />
                 <span className="font-medium">Persona Jurídica</span>
               </button>
             </div>
@@ -837,7 +837,7 @@ export default function FormularioAfiliados({ isOpen, onClose, onSuccess }: Form
                         disabled={!!archivosJuridico.Planos_Terreno}
                         onChange={(e) => {
                           const file = e.target.files?.[0];
-                          console.log("📐 Archivo Planos seleccionado (jurídico):", file);
+                          console.log("Archivo Planos seleccionado (jurídico):", file);
                           if (file) {
                             setArchivosJuridico(prev => ({
                               ...prev,

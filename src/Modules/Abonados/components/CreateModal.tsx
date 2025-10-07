@@ -7,19 +7,12 @@ import { useAfiliadosFisicos } from '../Hook/HookAfiliadoFisico';
 import { useAfiliadosJuridicos } from '../Hook/HookAfiliadoJuridico';
 import PhoneInput from "react-phone-number-input";
 import "react-phone-number-input/style.css";
+import { User, Building2 } from 'lucide-react';
 
 interface CreateModalProps {
     isOpen: boolean;
     onClose: () => void;
 }
-type AxiosError = {
-    response?: {
-        data?: {
-            message?: string;
-        };
-    };
-    message: string;
-};
 
 type TipoFormulario = 'afiliado-fisico' | 'afiliado-juridico';
 
@@ -33,8 +26,8 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
     const { createAfiliadoJuridico } = useAfiliadosJuridicos();
 
     const tabs = [
-        { id: 'afiliado-fisico', label: '👤 Afiliado Físico', icon: '👤' },
-        { id: 'afiliado-juridico', label: '🏢 Afiliado Jurídico', icon: '🏢' },
+        { id: 'afiliado-fisico', label: 'Afiliado Físico', icon: User },
+        { id: 'afiliado-juridico', label: 'Afiliado Jurídico', icon: Building2 },
     ] as const;
 
     const getDefaultValues = () => {
@@ -879,11 +872,12 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                                     setEscrituraFile(null);
                                     setPlanosFile(null);
                                 }}
-                                className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${tipoActivo === tab.id
+                                className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${tipoActivo === tab.id
                                     ? 'border-blue-500 text-blue-600 bg-blue-50'
                                     : 'border-transparent text-gray-600 hover:text-gray-800 hover:bg-gray-50'
                                     }`}
                             >
+                                <tab.icon size={18} />
                                 {tab.label}
                             </button>
                         ))}
