@@ -1,10 +1,8 @@
 import { useState } from 'react';
-import { LuX, LuUserX, LuMail, LuUser, LuShield, LuUserCheck } from 'react-icons/lu';
+import { LuX, LuUserX, LuUser, LuShield, LuUserCheck } from 'react-icons/lu';
 import { FaUserEdit } from "react-icons/fa";
 import { useUser, useDeactivateUser, useActivateUser } from '../Hooks/userHook';
 import EditUserModal from './EditUserModal';
-import { Accordion, AccordionHeader, AccordionBody } from "@material-tailwind/react"
-import { FiChevronDown, FiChevronRight } from 'react-icons/fi'
 import {
   AlertDialog,
   AlertDialogTrigger,
@@ -17,7 +15,6 @@ import {
   AlertDialogFooter
 } from "@/Modules/Global/components/Sidebar/ui/alert-dialog";
 import { Button } from '@/Modules/Global/components/Sidebar/ui/button';
-import { CUSTOM_ANIMATION } from '@/Modules/Global/types/Sections';
 import type { UserDetailModalProps } from '../Types/UserTypes';
 import type { Permiso } from '../../Roles/Models/Role';
 import { getPermissionLabel } from '../Helper/GroupPermiByModule';
@@ -32,50 +29,43 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({ userId, isOpen, onClo
   const deactivateUserMutation = useDeactivateUser();
   const activateUserMutation = useActivateUser();
   const [showEditModal, setShowEditModal] = useState(false);
-  const [openSections, setOpenSections] = useState<number[]>([1, 2, 3]); // Abrir por defecto
 
   const handleDeactivate = async () => {
-      try {
-        await deactivateUserMutation.mutateAsync(userId);
-        onClose(); // Cerrar el modal después de desactivar
-      } catch (error) {
-        console.error('Error deactivating user:', error);
-      }
-    
+    try {
+      await deactivateUserMutation.mutateAsync(userId);
+      onClose(); // Cerrar el modal después de desactivar
+    } catch (error) {
+      console.error('Error deactivating user:', error);
+    }
+
   };
 
   const handleActivate = async () => {
-   
-      try {
-        await activateUserMutation.mutateAsync(userId);
-        onClose(); // Cerrar el modal después de activar
-      } catch (error) {
-        console.error('Error activating user:', error);
-      }
-    
+
+    try {
+      await activateUserMutation.mutateAsync(userId);
+      onClose(); // Cerrar el modal después de activar
+    } catch (error) {
+      console.error('Error activating user:', error);
+    }
+
   };
 
-  const handleAccordion = (id: number) => {
-    setOpenSections(prev =>
-      prev.includes(id)
-        ? prev.filter(sectionId => sectionId !== id)
-        : [...prev, id]
-    )
-  }
+
 
 
   const getStatusDisplay = (Fecha_Eliminacion: Date | string | null) => {
     return isActive(Fecha_Eliminacion) ? 'Activo' : 'Inactivo';
   };
 
-      // Agrupar permisos por módulo
-     const groupedPermisos = user?.Rol.Permisos?.reduce((acc: Record<string, Permiso[]>, permiso: Permiso) => {
-      if (!acc[permiso.Modulo]) {
-        acc[permiso.Modulo] = [];
-      }
-      acc[permiso.Modulo].push(permiso);
-      return acc;
-    }, {});
+  // Agrupar permisos por módulo
+  const groupedPermisos = user?.Rol.Permisos?.reduce((acc: Record<string, Permiso[]>, permiso: Permiso) => {
+    if (!acc[permiso.Modulo]) {
+      acc[permiso.Modulo] = [];
+    }
+    acc[permiso.Modulo].push(permiso);
+    return acc;
+  }, {});
 
   if (!isOpen) return null;
 
@@ -112,146 +102,115 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({ userId, isOpen, onClo
           </div>
         </div>
 
-        <div className="p-6">
-          <div className="bg-gradient-to-r from-blue-600 to-blue-700 p-6 rounded-lg mb-6">
-            <div className="flex items-center gap-4">
-              <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center">
-                <LuUser className="w-8 h-8 text-blue-600" />
+        <div className="p-8">
+          {/* Header Card del Usuario */}
+          <div className="bg-gradient-to-r from-blue-600 to-blue-700 p-8 rounded-xl mb-8 shadow-lg">
+            <div className="flex items-center gap-6">
+              <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-md">
+                <LuUser className="w-10 h-10 text-blue-600" />
               </div>
               <div>
-                <h2 className="text-2xl font-bold text-white">{user.Nombre_Usuario}</h2>
-                <p className="text-blue-100">{user.Correo_Electronico}</p>
+                <h2 className="text-3xl font-bold text-white mb-1">{user.Nombre_Usuario}</h2>
+                <p className="text-blue-100 text-lg">{user.Correo_Electronico}</p>
               </div>
             </div>
           </div>
 
-
-          <div className="space-y-4">
-            <Accordion
-              open={openSections.includes(1)}
-              animate={CUSTOM_ANIMATION}
-              className="border border-gray-200 rounded-lg shadow-sm bg-white"
-              {...({} as any)}
-            >
-              <AccordionHeader
-                onClick={() => handleAccordion(1)}
-                className="text-base font-semibold px-6 py-4 border-b-0 hover:bg-gray-50"
-                {...({} as any)}
-              >
-                <div className="flex items-center justify-between w-full">
-                  <div className="flex items-center gap-3">
-                    <LuUser className="w-5 h-5 text-blue-600" />
-                    <span className="text-gray-900">Información Básica</span>
+          <div className="space-y-8">
+            {/* Información Personal */}
+            <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+              <div className="bg-gradient-to-r from-gray-50 to-gray-100 px-8 py-6 border-b border-gray-200">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center shadow-sm">
+                    <LuUser className="w-6 h-6 text-blue-600" />
                   </div>
-                  <span className="text-gray-500">
-                    {openSections.includes(1) ? <FiChevronDown size={20} /> : <FiChevronRight size={20} />}
-                  </span>
+                  <h3 className="text-xl font-bold text-gray-900">Información Personal</h3>
                 </div>
-              </AccordionHeader>
-              <AccordionBody className="px-6 pb-6" placeholder="">
-                <div className="grid grid-cols-2 md:grid-cols-2 gap-6">
-                  <div className="space-y-4">
-                    <div>
-                      <label
-                        className="block text-sm font-medium text-gray-500 mb-1"
-                        id="nombre-usuario-label"
-                        htmlFor="nombre-usuario"
-                      >
-                        Nombre de Usuario
+              </div>
+
+              <div className="p-8">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                  {/* Columna izquierda */}
+                  <div className="space-y-8">
+                    <div className="bg-gray-50 p-6 rounded-xl">
+                      <label className="block text-sm font-semibold text-gray-600 uppercase tracking-wider mb-3">
+                        Nombre Completo
                       </label>
-                      <p
-                        className="text-gray-900 font-medium"
-                        id="nombre-usuario"
-                        aria-labelledby="nombre-usuario-label"
-                      >
-                        {user.Nombre_Usuario}
-                      </p>
+                      <p className="text-lg font-medium text-gray-900">{user.Nombre_Usuario}</p>
                     </div>
-                  </div>
-                  <div className="space-y-4">
-                    <div className="flex items-center gap-2">
-                      <LuMail className="w-4 h-4 text-gray-400" />
-                      <div>
-                        <label htmlFor="correo-electronico" className="block text-sm font-medium text-gray-500 mb-1">Correo Electrónico</label>
-                        <p className="text-gray-900 font-medium">{user.Correo_Electronico}</p>
-                      </div>
-                    </div>
-                  </div>
-                    <div className="space-y-4">
-                      <div>
-                      <label htmlFor="estado-usuario" className="block text-sm font-medium text-gray-500 mb-2">Estado del Usuario</label>
-                      <span className={`inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium border ${
-                        isActive(user.Fecha_Eliminacion)
-                          ? 'bg-green-100 text-green-800 border-green-200' 
-                          : 'bg-red-100 text-red-800 border-red-200'
-                      }`}>
+
+                    <div className="bg-gray-50 p-6 rounded-xl">
+                      <label className="block text-sm font-semibold text-gray-600 uppercase tracking-wider mb-3">
+                        Estado del Usuario
+                      </label>
+                      <span className={`inline-flex items-center px-4 py-2 rounded-xl text-base font-semibold shadow-sm ${isActive(user.Fecha_Eliminacion)
+                        ? 'bg-green-100 text-green-800 border border-green-200'
+                        : 'bg-red-100 text-red-800 border border-red-200'
+                        }`}>
                         {getStatusDisplay(user.Fecha_Eliminacion)}
                       </span>
                     </div>
+                  </div>
+
+                  {/* Columna derecha */}
+                  <div className="space-y-8">
+                    <div className="bg-gray-50 p-6 rounded-xl">
+                      <label className="block text-sm font-semibold text-gray-600 uppercase tracking-wider mb-3">
+                        Correo Electrónico
+                      </label>
+                      <p className="text-lg text-gray-900 break-all">{user.Correo_Electronico}</p>
                     </div>
 
-                  <div className="space-y-4">
-                    <div>
-                      <label htmlFor="rol-asignado" className="block text-sm font-medium text-gray-500 mb-2">Rol Asignado</label>
-                      <span className="inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium bg-blue-100 text-blue-800 border border-blue-200">
-                        <LuShield className="w-4 h-4 mr-2" />
+                    <div className="bg-gray-50 p-6 rounded-xl">
+                      <label className="block text-sm font-semibold text-gray-600 uppercase tracking-wider mb-3">
+                        Rol Asignado
+                      </label>
+                      <span className="inline-flex items-center px-4 py-2 rounded-xl text-base font-semibold bg-blue-100 text-blue-800 border border-blue-200 shadow-sm">
+                        <LuShield className="w-5 h-5 mr-3" />
                         {user.Rol?.Nombre_Rol}
                       </span>
                     </div>
                   </div>
                 </div>
-              </AccordionBody>
-            </Accordion>
+              </div>
+            </div>
 
-            {/* Permisos */}
+            {/* Permisos del Rol */}
             {user.Rol?.Permisos && user.Rol.Permisos.length > 0 && (
-              <Accordion
-                open={openSections.includes(3)}
-                animate={CUSTOM_ANIMATION}
-                className="border border-gray-200 rounded-lg shadow-sm bg-white "
-                {...({} as any)}
-              >
-                <AccordionHeader
-                  onClick={() => handleAccordion(3)}
-                  className="text-base font-semibold px-6 py-4 border-b-0 hover:bg-gray-50"
-                  {...({} as any)}
-                >
-                  <div className="flex items-center justify-between w-full">
-                    <div className="flex items-center gap-3">
-                      <LuShield className="w-5 h-5 text-blue-600" />
-                      <span className="text-gray-900">
-                        Permisos del Rol ({user.Rol.Permisos.length})
-                      </span>
+              <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+                <div className="bg-gradient-to-r from-gray-50 to-gray-100 px-8 py-6 border-b border-gray-200">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center shadow-sm">
+                      <LuShield className="w-6 h-6 text-blue-600" />
                     </div>
-                    <span className="text-gray-500">
-                      {openSections.includes(3) ? <FiChevronDown size={20} /> : <FiChevronRight size={20} />}
-                    </span>
-                  </div> 
-                </AccordionHeader>
-                <AccordionBody className="px-6 pb-6 " placeholder="">
-                  <div className="space-y-4">
+                    <h3 className="text-xl font-bold text-gray-900">
+                      Permisos del Rol ({user.Rol.Permisos.length})
+                    </h3>
+                  </div>
+                </div>
+
+                <div className="p-8">
+                  <div className="space-y-6">
                     {Object.entries(groupedPermisos || {}).map(([modulo, permisos]: [string, any]) => (
-                      <div key={modulo} className="bg-white border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                              <LuShield className="w-5 h-5 text-blue-600" />
+                      <div key={modulo} className="bg-gradient-to-r from-gray-50 to-gray-100 border border-gray-200 rounded-xl p-6 hover:shadow-sm transition-all">
+                        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                          <div className="flex items-center gap-4">
+                            <div className="w-14 h-14 bg-blue-100 rounded-xl flex items-center justify-center shadow-sm">
+                              <LuShield className="w-7 h-7 text-blue-600" />
                             </div>
                             <div>
-                              <h4 className="font-semibold text-gray-900 text-lg capitalize">{modulo}</h4>
+                              <h4 className="font-bold text-gray-900 text-lg capitalize">{modulo}</h4>
+                              <p className="text-sm text-gray-600 mt-1">{permisos.length} permiso{permisos.length !== 1 ? 's' : ''} asignado{permisos.length !== 1 ? 's' : ''}</p>
                             </div>
                           </div>
-                          
-                          <div className="flex items-center gap-4">
+
+                          <div className="flex items-center gap-3 flex-wrap">
                             {permisos.map((permiso: Permiso) => {
                               const label = getPermissionLabel(permiso);
                               return (
-                                <div key={permiso.Id} className="text-center">
-                                  <div className={`px-3 py-1 rounded-full text-xs font-medium ${label.className}`}>
-                                    {label.text}
-                                  </div>
-                                
-                                </div>
+                                <span key={permiso.Id} className={`px-4 py-2 rounded-xl text-sm font-semibold shadow-sm border ${label.className}`}>
+                                  {label.text}
+                                </span>
                               );
                             })}
                           </div>
@@ -259,95 +218,99 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({ userId, isOpen, onClo
                       </div>
                     ))}
                   </div>
-                </AccordionBody>
-              </Accordion>
+                </div>
+              </div>
             )}
           </div>
 
-          <div className="flex justify-end gap-4 mt-8">
-            {canEdit('usuarios') && (
-              <Button
-                size="xl"
-                className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center gap-2"
-                onClick={() => setShowEditModal(true)}
-              >
-                <FaUserEdit className="w-5 h-5" />
-                Editar Usuario
-              </Button>
-            )}
-
-
-          {canActivateDeactivate('usuarios') && (
-            <>
-            {isActive(user.Fecha_Eliminacion) ? (
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button
-                    variant='destructive'
-                    size={'xl'}
-                  >
-                    <LuUserX className="w-5 h-5" />
-                    <span className="ml-2">Desactivar Usuario</span>
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>
-                      <span>¿Desactivar usuario?</span>
-                    </AlertDialogTitle>
-                    <AlertDialogDescription>
-                      <span>¿Estás seguro de que deseas desactivar este usuario?</span>
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogAction
-                      onClick={handleDeactivate}
-                      disabled={deactivateUserMutation.isPending}
-                    >
-                      <span>Desactivar</span>
-                    </AlertDialogAction>
-                    <AlertDialogCancel>
-                      <span>Cancelar</span>
-                    </AlertDialogCancel>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            ) : (
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button
-                    variant='create'
-                    size={'xl'}
-                  >
-                    <LuUserCheck className="w-5 h-5" />
-                    <span className="ml-2">Activar Usuario</span>
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>
-                      <span>¿Activar usuario?</span>
-                    </AlertDialogTitle>
-                    <AlertDialogDescription>
-                      <span>¿Estás seguro de que deseas activar este usuario?</span>
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogAction
-                      onClick={handleActivate}
-                      disabled={activateUserMutation.isPending}
-                    >
-                      <span>Activar</span>
-                    </AlertDialogAction>
-                    <AlertDialogCancel>
-                      <span>Cancelar</span>
-                    </AlertDialogCancel>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
+          {/* Botones de Acción */}
+          <div className="border-t border-gray-200 pt-8 mt-12">
+            <div className="flex flex-col sm:flex-row justify-end gap-4">
+              {canEdit('usuarios') && (
+                <Button
+                  size="xl"
+                  className="px-8 py-4 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all shadow-md hover:shadow-lg flex items-center gap-3 font-semibold"
+                  onClick={() => setShowEditModal(true)}
+                >
+                  <FaUserEdit className="w-5 h-5" />
+                  Editar Usuario
+                </Button>
               )}
-            </>
-          )}
+
+              {canActivateDeactivate('usuarios') && (
+                <>
+                  {isActive(user.Fecha_Eliminacion) ? (
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button
+                          variant='destructive'
+                          size={'xl'}
+                          className="px-8 py-4 rounded-xl shadow-md hover:shadow-lg font-semibold"
+                        >
+                          <LuUserX className="w-5 h-5" />
+                          <span className="ml-3">Desactivar Usuario</span>
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>
+                            <span>¿Desactivar usuario?</span>
+                          </AlertDialogTitle>
+                          <AlertDialogDescription>
+                            <span>¿Estás seguro de que deseas desactivar este usuario?</span>
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogAction
+                            onClick={handleDeactivate}
+                            disabled={deactivateUserMutation.isPending}
+                          >
+                            <span>Desactivar</span>
+                          </AlertDialogAction>
+                          <AlertDialogCancel>
+                            <span>Cancelar</span>
+                          </AlertDialogCancel>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  ) : (
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button
+                          variant='create'
+                          size={'xl'}
+                          className="px-8 py-4 rounded-xl shadow-md hover:shadow-lg font-semibold"
+                        >
+                          <LuUserCheck className="w-5 h-5" />
+                          <span className="ml-3">Activar Usuario</span>
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>
+                            <span>¿Activar usuario?</span>
+                          </AlertDialogTitle>
+                          <AlertDialogDescription>
+                            <span>¿Estás seguro de que deseas activar este usuario?</span>
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogAction
+                            onClick={handleActivate}
+                            disabled={activateUserMutation.isPending}
+                          >
+                            <span>Activar</span>
+                          </AlertDialogAction>
+                          <AlertDialogCancel>
+                            <span>Cancelar</span>
+                          </AlertDialogCancel>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  )}
+                </>
+              )}
+            </div>
           </div>
         </div>
 
@@ -356,7 +319,7 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({ userId, isOpen, onClo
             isOpen={showEditModal}
             onClose={() => {
               setShowEditModal(false);
-              onClose(); 
+              onClose();
             }}
             user={user}
           />

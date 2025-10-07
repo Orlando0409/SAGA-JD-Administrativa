@@ -3,7 +3,7 @@ import { useState } from 'react';
 import type { SolicitudFisica } from '../Models/ModelosFisicas';
 import type { SolicitudJuridica } from '../Models/ModelosJuridicos';
 import { useAlerts } from '@/Modules/Global/context/AlertContext';
-
+//funciona 
 // Tipo unificado para identificar qué estamos editando
 type SolicitudParaEditar = {
     tipo: 'solicitud-fisica' | 'solicitud-juridica';
