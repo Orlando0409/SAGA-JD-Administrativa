@@ -77,4 +77,34 @@ export const AfiliadoFisicoSchema = BaseAfiliadoSchema.extend({
   return { message: 'Número de identificación no válido', path: ['Identificacion'] };
 })
 
+// Schema para edición (campos de identificación no editables y archivos opcionales)
+export const AfiliadoFisicoEditSchema = BaseAfiliadoSchema.extend({
+  Tipo_Identificacion: z.enum(['Cedula Nacional', 'DIMEX', 'Pasaporte'], {
+    errorMap: () => ({ message: 'El tipo de identificación debe ser uno de los siguientes: Cedula Nacional, DIMEX, Pasaporte' })
+  }),
+
+  Nombre: z.string()
+    .min(2, 'El nombre debe tener al menos 2 caracteres')
+    .max(50, 'El nombre no puede tener más de 50 caracteres')
+    .regex(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/, 'El nombre solo puede contener letras y espacios'),
+
+  Apellido1: z.string()
+    .min(2, 'El primer apellido debe tener al menos 2 caracteres')
+    .max(50, 'El primer apellido no puede tener más de 50 caracteres')
+    .regex(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/, 'El primer apellido solo puede contener letras y espacios'),
+
+  Apellido2: z.string()
+    .max(50, 'El segundo apellido no puede tener más de 50 caracteres')
+    .optional(),
+
+  Edad: z.coerce.number()
+    .min(18, 'La edad mínima es 18 años')
+    .max(120, 'La edad máxima es 120 años'),
+
+  // Archivos opcionales en edición
+  Planos_Terreno: z.union([z.instanceof(File), z.string()]).optional(),
+  Escritura_Terreno: z.union([z.instanceof(File), z.string()]).optional(),
+});
+
 export type AfiliadoFisico = z.infer<typeof AfiliadoFisicoSchema>
+export type AfiliadoFisicoEdit = z.infer<typeof AfiliadoFisicoEditSchema>

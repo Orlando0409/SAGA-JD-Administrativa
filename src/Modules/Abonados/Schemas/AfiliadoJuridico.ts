@@ -38,3 +38,18 @@ export const AfiliacionJuridicaSchema = BaseAfiliadoSchema.extend({
   Planos_Terreno: z.instanceof(File, { message: "Debe subir el plano del terreno" }),
   Escritura_Terreno: z.instanceof(File, { message: "Debe subir la escritura del terreno" }),
 });
+
+// Schema para edición (campo de cédula no editable y archivos opcionales)
+export const AfiliacionJuridicaEditSchema = BaseAfiliadoSchema.extend({
+  Razon_Social: z.string()
+    .min(2, 'La razón social debe tener al menos 2 caracteres')
+    .max(100, 'La razón social no puede tener más de 100 caracteres')
+    .regex(/^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\s.,&()-]+$/, 'La razón social solo puede contener letras, números, espacios y los caracteres .,&()-'),
+    
+  // Archivos opcionales en edición
+  Planos_Terreno: z.union([z.instanceof(File), z.string()]).optional(),
+  Escritura_Terreno: z.union([z.instanceof(File), z.string()]).optional(),
+});
+
+export type AfiliadoJuridico = z.infer<typeof AfiliacionJuridicaSchema>
+export type AfiliadoJuridicoEdit = z.infer<typeof AfiliacionJuridicaEditSchema>
