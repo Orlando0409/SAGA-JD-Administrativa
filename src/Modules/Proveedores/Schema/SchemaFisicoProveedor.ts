@@ -1,12 +1,11 @@
 import { z } from 'zod';
-import { isValidPhoneNumber } from 'libphonenumber-js';
+import { isValidPhoneNumber, parsePhoneNumber, formatIncompletePhoneNumber } from 'libphonenumber-js';
 
-// Expresiones regulares para validaciones
-const NOMBRE_REGEX = /^[a-zA-ZÀ-ÿ\u00f1\u00d1\s]+$/; // Solo letras, espacios y caracteres latinos (sin números)
-const NOMBRE_NO_SOLO_ESPACIOS = /\S/; // No puede contener solo espacios
+// Expresiones regulares para validaciones basadas en el backend
+const NOMBRE_NO_SOLO_ESPACIOS = /\S/; // No puede contener solo espacios (Matches(/\S/))
 
 // Validaciones de identificación más específicas según backend
-const CEDULA_REGEX = /^[1-9]\d{8}$/; // 9 dígitos, no puede empezar con 0
+const CEDULA_REGEX = /^[1-7]\d{8}$/; // 9 dígitos, debe empezar con 1-7
 const DIMEX_REGEX = /^[1-9]\d{11}$/; // 12 dígitos, no puede empezar con 0
 const PASAPORTE_REGEX = /^(?=.*[A-Z])(?![A-Z]{4,})[A-Z0-9]{6,12}$/; // 6-12 caracteres, al menos 1 letra, máximo 3 letras
 
@@ -24,61 +23,87 @@ const validatePhoneNumber = (value: string): boolean => {
   }
 };
 
+// Función para formatear números de teléfono para visualización
+export const formatPhoneNumberDisplay = (phoneNumber: string): string => {
+  try {
+    if (!phoneNumber) return '';
+    
+    // Intentar parsear el número completo
+    const parsed = parsePhoneNumber(phoneNumber);
+    if (parsed && parsed.isValid()) {
+      // Retornar en formato internacional con espacios
+      return parsed.formatInternational();
+    }
+    
+    // Si no es válido como número completo, formatear como incompleto
+    return formatIncompletePhoneNumber(phoneNumber);
+  } catch {
+    return phoneNumber; // Retornar original si hay error
+  }
+};
+
+// Función para formatear teléfono en tiempo real mientras se escribe
+export const formatPhoneNumberInput = (value: string): string => {
+  try {
+    if (!value) return '';
+    
+    // Usar formatIncompletePhoneNumber para formateo en tiempo real
+    return formatIncompletePhoneNumber(value);
+  } catch {
+    return value;
+  }
+};
+
 // Enum para tipos de identificación (valores que espera el backend)
 const TipoIdentificacionEnum = z.enum(['Cedula Nacional', 'Dimex', 'Pasaporte'], {
   errorMap: () => ({ message: 'Para proveedores físicos solo se permiten: Cedula Nacional, Dimex, Pasaporte' })
 });
 
+// Schema basado en CreateProveedorFisicoDto del backend
 export const CreateProveedorSchema = z.object({
-  Nombre_Proveedor: z.string()
+  Nombre_Proveedor: z.string({ message: "El nombre debe ser un texto" })
     .min(1, { message: 'El nombre no puede estar vacío' })
     .min(2, { message: 'El nombre debe tener al menos 2 caracteres' })
-    .max(50, { message: 'El nombre no debe superar los 50 caracteres' })
+    .max(40, { message: 'El nombre no debe superar los 40 caracteres' })
     .transform((val) => val.trim())
     .refine((val) => NOMBRE_NO_SOLO_ESPACIOS.test(val), {
       message: 'El nombre no puede contener solo espacios'
-    })
-    .refine((val) => NOMBRE_REGEX.test(val), {
-      message: 'El nombre solo puede contener letras y espacios'
     }),
 
   Tipo_Identificacion: TipoIdentificacionEnum,
 
-  Identificacion: z.string()
+  Identificacion: z.string({ message: 'La identificación debe ser un string' })
     .min(1, { message: 'La identificación no puede estar vacía' })
     .transform((val) => normalizeIdentificacion(val)),
 
-  Telefono_Proveedor: z.string()
+  Telefono_Proveedor: z.string({ message: 'El número de teléfono debe ser un string' })
     .min(1, { message: 'El número de teléfono no puede estar vacío' })
     .transform((val) => val.trim())
     .refine((val) => validatePhoneNumber(val), {
-      message: 'Número de teléfono internacional inválido. Debe incluir código de país válido'
+      message: 'Número de teléfono inválido'
     }),
 
-  Id_Estado_Proveedor: z.number()
-    .positive({ message: 'El estado debe ser mayor a 0' })
-    .int({ message: 'El estado debe ser un número entero' })
+  Id_Estado_Proveedor: z.number({ message: "El estado debe ser un número" })
+    .positive({ message: "El estado debe ser mayor a 0" })
+    .int({ message: "El estado debe ser un número entero" })
 });
 
 // Schema simplificado para edición (solo campos permitidos)
 export const EditProveedorSchema = z.object({
-  Nombre_Proveedor: z.string()
+  Nombre_Proveedor: z.string({ message: "El nombre debe ser un texto" })
     .min(1, { message: 'El nombre no puede estar vacío' })
     .min(2, { message: 'El nombre debe tener al menos 2 caracteres' })
-    .max(50, { message: 'El nombre no debe superar los 50 caracteres' })
+    .max(40, { message: 'El nombre no debe superar los 40 caracteres' })
     .transform((val) => val.trim())
     .refine((val) => NOMBRE_NO_SOLO_ESPACIOS.test(val), {
       message: 'El nombre no puede contener solo espacios'
-    })
-    .refine((val) => NOMBRE_REGEX.test(val), {
-      message: 'El nombre solo puede contener letras y espacios'
     }),
 
-  Telefono_Proveedor: z.string()
+  Telefono_Proveedor: z.string({ message: 'El número de teléfono debe ser un string' })
     .min(1, { message: 'El número de teléfono no puede estar vacío' })
     .transform((val) => val.trim())
     .refine((val) => validatePhoneNumber(val), {
-      message: 'Número de teléfono internacional inválido. Debe incluir código de país válido'
+      message: 'Número de teléfono inválido'
     })
 });
 
@@ -93,7 +118,7 @@ export const CreateProveedorSchemaWithIdentificacionValidation = CreateProveedor
       if (!CEDULA_REGEX.test(Identificacion)) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          message: 'La cédula nacional debe tener 9 dígitos numéricos y no puede comenzar con 0',
+          message: 'La cédula nacional debe tener 9 dígitos numéricos y debe comenzar con un número del 1 al 7',
           path: ['Identificacion'],
         });
       }
@@ -121,10 +146,10 @@ export const CreateProveedorSchemaWithIdentificacionValidation = CreateProveedor
 
 export type CreateProveedorSchemaData = z.infer<typeof CreateProveedorSchema>;
 
-// Constantes para límites de caracteres (para usar en el frontend)
+// Constantes para límites de caracteres (basado en el backend CreateProveedorFisicoDto)
 export const VALIDATION_LIMITS = {
-  NOMBRE_MIN_LENGTH: 2,
-  NOMBRE_MAX_LENGTH: 50,
+  NOMBRE_MIN_LENGTH: 2, // MinLength(2)
+  NOMBRE_MAX_LENGTH: 40, // Actualizado a 40 caracteres
   TELEFONO_MAX_LENGTH: 20,
   IDENTIFICACION_MAX_LENGTH: 20,
   CEDULA_LENGTH: 9,
@@ -143,7 +168,7 @@ export const IDENTIFICACION_LIMITS_BY_TYPE = {
 
 // Formatos de placeholder para cada tipo de identificación
 export const IDENTIFICACION_PLACEHOLDERS = {
-  'Cedula Nacional': '123456789',
+  'Cedula Nacional': '123456789 (1-7)',
   'Dimex': '123456789012', 
   'Pasaporte': 'ABC123456',
   default: 'Seleccione un tipo primero'
@@ -161,3 +186,5 @@ export const ESTADOS_PROVEEDOR_OPTIONS = [
   { id: 1, nombre: 'Activo' },
   { id: 2, nombre: 'Inactivo' },
 ] as const;
+
+

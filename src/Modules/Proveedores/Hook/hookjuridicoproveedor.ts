@@ -6,8 +6,8 @@ import {
   updateProveedorJuridico,
   deleteProveedorJuridico,
   changeProveedorJuridicoStatus
-} from "../Services/proveedoresJuridicosService";
-import type { ProveedorJuridico, CreateProveedorJuridicoData, UpdateProveedorJuridicoData } from "../Models/TablaProveedo/proveedorjuridico";
+} from "../Services/juridicoServiceProveedor";
+import type { ProveedorJuridico, CreateProveedorJuridicoData, UpdateProveedorJuridicoData } from "../Models/TablaProveedo/tablaJuridicoProveedor";
 
 export const useProveedoresJuridicos = () => {
   // Query para obtener todos los proveedores jurídicos
@@ -78,7 +78,7 @@ export const useUpdateProveedorJuridico = () => {
   });
 
   return {
-    updateProveedorJuridico: updateMutation.mutate,
+    updateProveedorJuridico: updateMutation.mutateAsync,
     isUpdating: updateMutation.isPending,
     updateError: updateMutation.error,
     updateSuccess: updateMutation.isSuccess,

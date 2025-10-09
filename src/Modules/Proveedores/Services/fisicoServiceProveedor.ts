@@ -1,5 +1,5 @@
 import apiAuth from '@/Api/apiAuth';
-import type { ProveedorFisico, CreateProveedorData, UpdateProveedorData } from '../Models/TablaProveedo/proveedorFisico';
+import type { ProveedorFisico, CreateProveedorData, UpdateProveedorData } from '../Models/TablaProveedo/tablaFisicoProveedor';
 
 // Función para obtener todos los proveedores físicos
 export const getProveedoresFisicos = async (): Promise<ProveedorFisico[]> => {

@@ -1,5 +1,5 @@
 import React from 'react';
-import { useDeleteProveedorFisico } from '../Hook/proveedoresFisicos';
+import { useDeleteProveedorFisico } from '../Hook/hookFisicoProveedor';
 
 interface DeleteProveedorButtonProps {
   proveedorId: number;
