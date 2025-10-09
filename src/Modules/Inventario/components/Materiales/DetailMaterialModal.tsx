@@ -111,6 +111,17 @@ const DetailMaterialModal: React.FC<DetailMaterialModalProps> = ({
               </p>
             </div>
 
+            {material.Proveedor && (
+              <div>
+                <label htmlFor="proveedor" className="block text-sm font-medium text-gray-700 mb-1">
+                  Proveedor
+                </label>
+                <p id="proveedor" className="text-sm text-gray-900 bg-gray-50 p-2 rounded border">
+                  {material.Proveedor.Razon_Social || material.Proveedor.Nombre || 'No especificado'}
+                </p>
+              </div>
+            )}
+
             <div>
               <label htmlFor="fecha-entrada" className="block text-sm font-medium text-gray-700 mb-1">
                 Fecha de Entrada

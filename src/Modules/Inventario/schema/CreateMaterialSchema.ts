@@ -24,6 +24,12 @@ export const CreateMaterialSchema = z.object({
     .max(10000000, "El precio unitario no puede ser mayor a 10,000,000"),
   
   IDS_Categorias: z.array(z.number())
+    .optional(),
+
+  Id_Tipo_Proveedor: z.number()
+    .optional(),
+
+  Id_Proveedor: z.number()
     .optional()
 });
 

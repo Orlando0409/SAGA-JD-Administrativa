@@ -159,7 +159,6 @@ const Roles = ({ onClose }: { onClose: () => void }) => {
                 )}
                   <button
                     onClick={() => {
-                      // Dispara un evento personalizado para actualizar usuarios
                       window.dispatchEvent(new CustomEvent('refreshUsuarios'));
                       onClose();
                     }}
