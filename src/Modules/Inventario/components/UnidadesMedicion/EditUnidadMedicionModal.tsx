@@ -197,7 +197,7 @@ const EditUnidadMedicionModal: React.FC<EditUnidadMedicionModalProps> = ({ isOpe
               <button
                 type="button"
                 onClick={onClose}
-                className="flex-1 px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors"
+                className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors"
               >
                 Cancelar
               </button>

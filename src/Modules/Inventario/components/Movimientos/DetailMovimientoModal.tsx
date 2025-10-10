@@ -1,5 +1,6 @@
 import React from 'react';
 import type { MovimientoMaterial } from '../../models/MovimientoMaterial';
+import { LuX } from 'react-icons/lu';
 
 interface DetailMovimientoModalProps {
   movimiento: MovimientoMaterial;
@@ -24,6 +25,12 @@ const DetailMovimientoModal: React.FC<DetailMovimientoModalProps> = ({
           <h2 className="text-xl font-semibold text-gray-900">
             Detalle del Movimiento
           </h2>
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-600 transition-colors"
+          >
+            <LuX size={24} />
+          </button>
         </div>
 
         <div className="p-6 space-y-6">
@@ -110,8 +117,8 @@ const DetailMovimientoModal: React.FC<DetailMovimientoModalProps> = ({
               </div>
             )}
           </div>
-
-          <div className="flex justify-end pt-6 border-t">
+        </div>
+          <div className="flex justify-end gap-3 p-6 border-t bg-gray-50">
             <button
               onClick={onClose}
               className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors"
@@ -119,7 +126,6 @@ const DetailMovimientoModal: React.FC<DetailMovimientoModalProps> = ({
               Cerrar
             </button>
           </div>
-        </div>
       </div>
     </div>
   );
