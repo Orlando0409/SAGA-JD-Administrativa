@@ -126,6 +126,27 @@ const DetailMaterialModal: React.FC<DetailMaterialModalProps> = ({
                   {material?.Proveedor?.Razon_Social || material?.Proveedor?.Nombre_Proveedor || 'No especificado'}
                 </p>
               </div>
+
+              <div>
+                <label htmlFor="tipo-proveedor" className="block text-sm font-medium text-gray-700 mb-1">
+                  Tipo de Proveedor
+                </label>
+                <p id="tipo-proveedor" className="text-sm text-gray-900">
+                  <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                    material?.Proveedor?.Id_Tipo_Proveedor === 1 
+                      ? 'bg-blue-100 text-blue-700 border border-blue-300' 
+                      : material?.Proveedor?.Id_Tipo_Proveedor === 2
+                      ? 'bg-purple-100 text-purple-700 border border-purple-300'
+                      : 'bg-gray-100 text-gray-700 border border-gray-300'
+                  }`}>
+                    {material?.Proveedor?.Id_Tipo_Proveedor === 1 
+                      ? 'Físico' 
+                      : material?.Proveedor?.Id_Tipo_Proveedor === 2
+                      ? 'Jurídico'
+                      : 'No especificado'}
+                  </span>
+                </p>
+              </div>
           
 
             <div>
