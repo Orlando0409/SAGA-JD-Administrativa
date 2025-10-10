@@ -184,7 +184,7 @@ const CatalogoMateriales: React.FC<CatalogoMaterialesProps> = ({ onBack }) => {
       columnHelper.accessor('Nombre_Material', {
         header: 'Material',
         cell: info => (
-          <div className="font-medium text-gray-900">
+          <div className="text-gray-600">
             {info.getValue()}
           </div>
         ),
@@ -200,7 +200,7 @@ const CatalogoMateriales: React.FC<CatalogoMaterialesProps> = ({ onBack }) => {
       columnHelper.accessor('Cantidad', {
         header: 'Cantidad',
         cell: info => (
-          <div className={`font-semibold ${info.getValue() <= 0 ? 'text-red-600' : 'text-green-600'}`}>
+          <div className={` ${info.getValue() <= 0 ? 'text-red-600' : 'text-green-600'}`}>
             {info.getValue()}
           </div>
         ),
