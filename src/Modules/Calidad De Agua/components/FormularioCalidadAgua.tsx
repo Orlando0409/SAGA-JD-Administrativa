@@ -12,10 +12,11 @@ interface FormularioCalidadAguaProps {
 export default function FormularioCalidadAgua({ onClose, refetch }: FormularioCalidadAguaProps) {
     const { user } = useAuth(); // Obtener usuario autenticado
     const uploadCalidadAguaMutation = useUploadCalidadAgua(); // Subir un nuevo archivo
-
+    const [descripcion, setDescripcion] = useState("");
     const [titulo, setTitulo] = useState("");
     const [file, setFile] = useState<File | null>(null);
     const [tituloError, setTituloError] = useState(""); // Validación de título
+    const [descripcionError, setDescripcionError] = useState(""); // Validación de descripción
 
     const handleTituloChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
@@ -28,7 +29,17 @@ export default function FormularioCalidadAgua({ onClose, refetch }: FormularioCa
             setTituloError("");
         }
     };
-
+    const handleDescripcionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+        const value = e.target.value;
+        setDescripcion(value);
+        if (value.length < 10) {
+            setDescripcionError("La descripción debe tener al menos 10 caracteres.");
+        } else if (value.length > 200) {
+            setDescripcionError("La descripción no puede exceder los 200 caracteres.");
+        } else {
+            setDescripcionError("");
+        }
+    };
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
@@ -90,6 +101,25 @@ export default function FormularioCalidadAgua({ onClose, refetch }: FormularioCa
                     </div>
                     {tituloError && (
                         <p className="text-xs text-red-500 mt-1">{tituloError}</p>
+                    )}
+                </div>
+                <div>
+                    <label className="block text-sm font-medium text-gray-700">Descripción</label>
+                    <textarea
+                        placeholder="Descripción"
+                        value={descripcion}
+                        onChange={handleDescripcionChange}
+                        maxLength={200}
+                        className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-sky-500 text-sm break-words"
+                        style={{ whiteSpace: "normal", overflowWrap: "break-word" }}
+                        rows={3}
+                        required
+                    />
+                    <div className="text-right text-xs text-gray-500 mt-1">
+                        {descripcion.length}/200
+                    </div>
+                    {descripcionError && (
+                        <p className="text-xs text-red-500 mt-1">{descripcionError}</p>
                     )}
                 </div>
 

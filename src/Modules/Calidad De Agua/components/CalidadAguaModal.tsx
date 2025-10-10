@@ -13,6 +13,7 @@ interface CalidadAguaModalProps {
         Url_Archivo: string;
         Fecha_Creacion: string;
         Fecha_Actualizacion?: string;
+        Descripcion: string;
         Visible: boolean; //  Visible en lugar de Estado
         Usuario_Creador: {
             Id_Usuario: number;
@@ -29,10 +30,11 @@ const CalidadAguaModal = ({ isOpen, onClose, archivo, refetch }: CalidadAguaModa
     const [titulo, setTitulo] = useState(archivo.Titulo);
     const [file, setFile] = useState<File | null>(null);
     const [tituloError, setTituloError] = useState(""); // Validación de título
+    const [descripcionError, setDescripcionError] = useState(""); // Validación de descripción
 
     const updateCalidadAguaMutation = useUpdateCalidadAgua(); // Actualizar un archivo existente
     const toggleVisibilidad = useToggleVisibilidadCalidadAgua(); // Cambiar visibilidad
-
+    const [descripcion, setDescripcion] = useState("");
     if (!isOpen) return null; // Si el modal no está abierto, no renderiza nada
 
     const handleTituloChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -47,6 +49,20 @@ const CalidadAguaModal = ({ isOpen, onClose, archivo, refetch }: CalidadAguaModa
         }
     };
 
+    const handleDescripcionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+        const value = e.target.value;
+        setDescripcion(value);
+        if (value.length < 10) {
+            setDescripcionError("La descripción debe tener al menos 10 caracteres.");
+        } else if (value.length > 200) {
+            setDescripcionError("La descripción no puede exceder los 200 caracteres.");
+        } else {
+            setDescripcionError("");
+        }
+    };
+
+
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
@@ -54,6 +70,7 @@ const CalidadAguaModal = ({ isOpen, onClose, archivo, refetch }: CalidadAguaModa
             // Validar los datos con el esquema
             CalidadAguaSchema.parse({
                 Titulo: titulo.trim(),
+                Descripcion: descripcion.trim(),
             });
 
             const formData = new FormData();
@@ -75,6 +92,10 @@ const CalidadAguaModal = ({ isOpen, onClose, archivo, refetch }: CalidadAguaModa
             }
         }
     };
+
+
+    //descripcion 
+    
 
     const handleToggleVisibility = () => {
         toggleVisibilidad.mutate(archivo.Id_Calidad_Agua, {
@@ -125,9 +146,33 @@ const CalidadAguaModal = ({ isOpen, onClose, archivo, refetch }: CalidadAguaModa
                                     <p className="text-xs text-red-500 mt-1">{tituloError}</p>
                                 )}
                             </div>
+
+
+                            {/* descripcion */}
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">Descripción</label>
+                                <textarea
+                                    placeholder="Descripción"
+                                    value={descripcion}
+                                    onChange={handleDescripcionChange}
+                                    maxLength={200}
+                                    className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-sky-500 text-sm break-words"
+                                    style={{ whiteSpace: "normal", overflowWrap: "break-word" }}
+                                    rows={3}
+                                    required
+                                />
+                                <div className="text-right text-xs text-gray-500 mt-1">
+                                    {descripcion.length}/200
+                                </div>
+                                {descripcionError && (
+                                    <p className="text-xs text-red-500 mt-1">{descripcionError}</p>
+                                )}
+                            </div>
+
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">Archivo PDF</label>
-                                
+
                                 {/* Mostrar archivo actual con botón de reemplazar */}
                                 <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border">
                                     <FileText size={16} className="text-blue-600" />
@@ -192,6 +237,8 @@ const CalidadAguaModal = ({ isOpen, onClose, archivo, refetch }: CalidadAguaModa
                                 >
                                     {archivo.Titulo}
                                 </div>
+
+                               
                                 <a
                                     href={archivo.Url_Archivo}
                                     target="_blank"
@@ -203,6 +250,15 @@ const CalidadAguaModal = ({ isOpen, onClose, archivo, refetch }: CalidadAguaModa
                                 </a>
                             </div>
 
+                              <div className="bg-gray-100 p-4 rounded-lg shadow-sm">
+                             <div
+                                    className="text-lg font-bold text-gray-800 break-words"
+                                    style={{ whiteSpace: "normal", overflowWrap: "break-word" }}
+                                >
+                                    {archivo.Descripcion}
+                                </div>
+                             </div>
+                              
                             {/* Estado de visibilidad */}
                             <div className="bg-white border border-gray-300 rounded-lg p-4 shadow-sm">
                                 <div className="flex items-center justify-between">
