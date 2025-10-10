@@ -3,12 +3,12 @@ import { createColumnHelper, getCoreRowModel, getPaginationRowModel, useReactTab
 import { Building2 } from 'lucide-react';
 import { useProveedoresFisicos } from '../Hook/hookFisicoProveedor';
 import { useProveedoresJuridicos } from '../Hook/hookjuridicoproveedor';
-import ProveedorDetailModal from './DetailFisicoProveedor';
-import ProveedorJuridicoDetailModal from './DetailJuridicoProveedor';
-import CreateModalProveedor from './CreateModalProveedor';
 import { formatCedulaJuridica, formatPhoneNumberDisplay } from '../Schema/SchemaProveedorJuridico';
 import type { ProveedorFisico } from '../Models/TablaProveedo/tablaFisicoProveedor';
 import type { ProveedorJuridico } from '../Models/TablaProveedo/tablaJuridicoProveedor';
+import CreateModalProveedor from './CreateModalProveedor';
+import ProveedorDetailModal from './DetailFisicoProveedor';
+import ProveedorJuridicoDetailModal from './DetailJuridicoProveedor';
 
 // Tipo unificado para la tabla (similar al patrón de AbonadosTable)
 type ProveedorUnificado = {

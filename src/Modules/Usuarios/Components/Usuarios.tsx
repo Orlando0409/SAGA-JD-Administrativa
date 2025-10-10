@@ -170,11 +170,11 @@ const Usuarios = () => {
     <div className="w-full flex flex-col items-start h-full p-2">
       <div className="w-full bg-white rounded-lg shadow-lg overflow-hidden">
         {/* Título principal */}
-        <div className="p-6 border-b bg-gradient-to-r from-blue-600 to-blue-700">
-          <h1 className="text-2xl font-bold text-white">
+        <div className="p-6 ">
+          <h1 className="text-2xl font-bold text-gray-800">
             {showRolesTable ? 'Gestión de Roles' : 'Gestión de Usuarios'}
           </h1>
-          <p className="text-blue-100 text-sm mt-1">
+          <p className="text-gray-600 text-sm mt-1">
             {showRolesTable 
               ? 'Administra los roles y permisos del sistema' 
               : 'Administra los usuarios y sus accesos al sistema'
@@ -183,7 +183,7 @@ const Usuarios = () => {
         </div>
 
         {hasViewPermission && !hasEditPermission && (
-          <div className="p-4 bg-blue-50 border-l-4 border-blue-400">
+          <div className="p-4 bg-blue-50">
             <div className="flex">
               <div className="ml-3">
                 <p className="text-sm text-blue-700">
@@ -199,7 +199,7 @@ const Usuarios = () => {
         ) : (
           <>
             {(hasEditPermission || filteredUsers.length > 1) && (
-              <div className="p-6 border-b bg-gray-50">
+              <div className="p-6 bg-white">
                 <div className="flex justify-between items-center gap-4">
 
                     <div className="relative flex-1 max-w-md">
@@ -303,23 +303,17 @@ const Usuarios = () => {
               </table>
             </div>
 
-            {table.getPageCount() > 1 && (
-              <div className="px-6 py-2 bg-white border-t flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                <div className="text-sm text-gray-700">
-                  Mostrando <span className="font-semibold">{table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1}</span> a{' '}
-                  <span className="font-semibold">{Math.min((table.getState().pagination.pageIndex + 1) * table.getState().pagination.pageSize, table.getPrePaginationRowModel().rows.length)}</span> de{' '}
-                  <span className="font-semibold">{table.getPrePaginationRowModel().rows.length}</span> resultados
-                  {activeFiltersCount > 0 && hasEditPermission && (
-                    <span className="text-blue-600 ml-2">(filtrados de {usersToShow.length} total)</span>
-                  )}
-                </div>
-                <div className="flex items-center gap-2">
-                  <label className="text-sm text-gray-700 flex items-center gap-2">
-                    <span className="hidden md:inline">Tamaño de página:</span>
+            <div className="px-6 py-3 bg-white ">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-gray-700">Filas por página:</span>
                     <select
                       value={table.getState().pagination.pageSize}
-                      onChange={e => table.setPageSize(Number(e.target.value))}
-                      className="px-2 py-1 border border-gray-400 rounded-lg bg-white shadow min-w-[70px] text-sm"
+                      onChange={(e) => {
+                        table.setPageSize(Number(e.target.value));
+                      }}
+                      className="px-2 py-1 border border-gray-300 rounded-lg bg-white text-sm"
                     >
                       {pageSizeOptions.map(size => (
                         <option key={size} value={size}>
@@ -327,29 +321,34 @@ const Usuarios = () => {
                         </option>
                       ))}
                     </select>
-                  </label>
-                  <button
-                    onClick={() => table.previousPage()}
-                    disabled={!table.getCanPreviousPage()}
-                    className="px-2 py-1 rounded-full border border-gray-300 bg-gray-50 text-gray-500 hover:bg-blue-100 hover:text-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
-                    title="Página anterior"
-                  >
-                    <LuChevronLeft className="w-4 h-4" />
-                  </button>
-                  <span className="px-3 py-1 text-sm font-semibold text-blue-700 bg-blue-50 rounded-lg shadow">
-                    {table.getState().pagination.pageIndex + 1} / {table.getPageCount()}
-                  </span>
-                  <button
-                    onClick={() => table.nextPage()}
-                    disabled={!table.getCanNextPage()}
-                    className="px-2 py-1 rounded-full border border-gray-300 bg-gray-50 text-gray-500 hover:bg-blue-100 hover:text-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
-                    title="Página siguiente"
-                  >
-                    <LuChevronRight className="w-4 h-4" />
-                  </button>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => table.previousPage()}
+                      disabled={!table.getCanPreviousPage()}
+                      className="px-2 py-1 rounded-full border border-gray-300 bg-gray-50 text-gray-500 hover:bg-blue-100 hover:text-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                      title="Página anterior"
+                    >
+                      <LuChevronLeft className="w-4 h-4" />
+                    </button>
+                    <span className="px-3 py-1 text-sm font-semibold text-blue-700 bg-blue-50 rounded-lg">
+                      {table.getState().pagination.pageIndex + 1} / {table.getPageCount()}
+                    </span>
+                    <button
+                      onClick={() => table.nextPage()}
+                      disabled={!table.getCanNextPage()}
+                      className="px-2 py-1 rounded-full border border-gray-300 bg-gray-50 text-gray-500 hover:bg-blue-100 hover:text-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                      title="Página siguiente"
+                    >
+                      <LuChevronRight className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
               </div>
-            )}
+            </div>
           </>
         )}
 

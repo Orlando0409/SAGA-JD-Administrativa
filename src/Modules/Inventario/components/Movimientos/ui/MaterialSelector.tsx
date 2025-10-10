@@ -1,7 +1,8 @@
-import React from 'react';
-import { LuSearch, LuPackage } from 'react-icons/lu';
+import React, { useState } from 'react';
+import { LuSearch, LuPackage, LuPlus } from 'react-icons/lu';
 import type { MaterialSelectorProps } from '../../../types/MovimientoTypes';
 import { MaterialInfo } from '@/Modules/Inventario/helper/Movimientos';
+import CreateMaterialModal from '../../Materiales/CreateMaterialModal';
 
 
 
@@ -15,12 +16,24 @@ const MaterialSelector: React.FC<MaterialSelectorProps> = ({
   busquedaMaterial,
   setBusquedaMaterial,
   handleSelectMaterial
-}) => (
-  <div>
-    <div className="block text-sm font-medium text-gray-700 mb-3">
-      Selección de Material
-    </div>
-    {selectedMaterial && !showMaterialSelector ? (
+}) => {
+
+    const [showCreateModal, setShowCreateModal] = useState(false);
+
+  return (
+    <div>
+      <div className="block text-sm font-medium flex justify-between text-gray-700 mb-3">
+        <span>Selección de Material</span>
+        <button
+        type="button"
+        onClick={() => setShowCreateModal(true)}
+        className="flex items-center gap-1 px-2 py-1 text-xs text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded transition-colors"
+      >
+        <LuPlus className="w-3 h-3" />
+        Nuevo Material
+      </button>
+      </div>
+      {selectedMaterial && !showMaterialSelector ? (
       <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border">
         <div className="flex items-center gap-3">
           <LuPackage className="w-5 h-5 text-gray-600" />
@@ -83,7 +96,12 @@ const MaterialSelector: React.FC<MaterialSelectorProps> = ({
         )}
       </div>
     )}
+    <CreateMaterialModal
+      isOpen={showCreateModal}
+      onClose={() => setShowCreateModal(false)}
+    />
   </div>
 );
+}
 
 export default MaterialSelector;

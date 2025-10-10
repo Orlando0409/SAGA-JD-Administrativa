@@ -85,18 +85,6 @@ const ContactoDetailModal = ({ item, isOpen, onClose }: ContactoDetailModalProps
     }
   };
 
-  const handleChangeEstado = async (nuevoEstado: string) => {
-    if (item.tipo === 'Reporte') {
-      try {
-        await updateReporteEstadoMutation.mutateAsync({
-          id: item.id,
-          estado: nuevoEstado
-        });
-      } catch (error) {
-        console.error('Error actualizando estado:', error);
-      }
-    }
-  };
 
   const config = getTipoConfig(item.tipo);
   const IconComponent = config.icon;
@@ -230,16 +218,20 @@ const ContactoDetailModal = ({ item, isOpen, onClose }: ContactoDetailModalProps
                   </div>
 
                   {/* Adjunto */}
-                  {item.adjunto && (
-                    <div>
-                      <label className="block text-sm font-medium text-gray-500 mb-2">Archivo Adjunto</label>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-500 mb-2">Archivo Adjunto</label>
+                    {item.adjunto ? (
                       <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
                         <p className="text-blue-800 text-sm flex items-center gap-2">
                           📎 <span>Archivo adjunto disponible</span>
                         </p>
                       </div>
-                    </div>
-                  )}
+                    ) : (
+                      <div className="bg-gray-50 p-3 rounded-lg border border-gray-200">
+                        <p className="text-gray-500 text-sm">Sin adjuntos</p>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </AccordionBody>
             </Accordion>
@@ -268,33 +260,6 @@ const ContactoDetailModal = ({ item, isOpen, onClose }: ContactoDetailModalProps
               </AccordionHeader>
               <AccordionBody className="px-6 pb-6" placeholder="">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* Estado (solo para reportes) */}
-                  {item.tipo === 'Reporte' && (
-                    <div>
-                      <label className="block text-sm font-medium text-gray-500 mb-2">Estado del Reporte</label>
-                      <div className="flex items-center gap-3">
-                        <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                          item.estado === 'Pendiente' ? 'bg-yellow-100 text-yellow-800' :
-                          item.estado === 'En Proceso' ? 'bg-blue-100 text-blue-800' :
-                          'bg-green-100 text-green-800'
-                        }`}>
-                          {item.estado}
-                        </span>
-                        
-                        {/* Selector de estado */}
-                        <select
-                          value={item.estado || 'Pendiente'}
-                          onChange={(e) => handleChangeEstado(e.target.value)}
-                          className="px-2 py-1 text-xs border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
-                          disabled={updateReporteEstadoMutation.isPending}
-                        >
-                          <option value="Pendiente">Pendiente</option>
-                          <option value="En Proceso">En Proceso</option>
-                          <option value="Resuelto">Resuelto</option>
-                        </select>
-                      </div>
-                    </div>
-                  )}
 
                   {/* Fecha */}
                   <div>

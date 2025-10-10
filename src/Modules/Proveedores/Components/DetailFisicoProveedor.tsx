@@ -4,7 +4,6 @@ import { FaUserEdit } from "react-icons/fa";
 import { useProveedoresFisicos, useDeleteProveedorFisico, useChangeProveedorFisicoStatus } from '../Hook/hookFisicoProveedor';
 import { Accordion, AccordionHeader, AccordionBody } from "@material-tailwind/react";
 import { FiChevronDown, FiChevronRight } from 'react-icons/fi';
-import EditProveedorModal from './EditFisicoProveedoresModal';
 import { formatPhoneNumberDisplay } from '../Schema/SchemaFisicoProveedor';
 import {
   AlertDialog,
@@ -21,6 +20,7 @@ import { Button } from '@/Modules/Global/components/Sidebar/ui/button';
 import { CUSTOM_ANIMATION } from '@/Modules/Global/types/Sections';
 import type { ProveedorFisico } from '../Models/TablaProveedo/tablaFisicoProveedor';
 import { useAlerts } from '@/Modules/Global/context/AlertContext';
+import EditProveedorModal from './EditFisicoProveedoresModal';
 
 interface ProveedorDetailModalProps {
   proveedor: ProveedorFisico | null;

@@ -12,9 +12,9 @@ import {
   eliminarSugerencia,
   eliminarReporte,
 } from '../service/ContactoService';
-import type { Queja } from '../models/Quejas';
-import type { Sugerencia } from '../models/Sugerencias';
-import type { Reporte } from '../models/Reportes';
+import type { Queja, CreateQuejaData } from '../models/Quejas';
+import type { Sugerencia, CreateSugerenciaData } from '../models/Sugerencias';
+import type { Reporte, CreateReporteData } from '../models/Reportes';
 
 // ======================== QUERIES ========================
 export const useQuejas = () => {
@@ -46,7 +46,7 @@ export const useCreateQueja = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: (queja: Omit<Queja, 'id' | 'fechaCreacion'>) => crearQueja(queja),
+    mutationFn: ({ data, adjunto }: { data: CreateQuejaData; adjunto?: File }) => crearQueja(data, adjunto),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['quejas'] });
     },
@@ -57,7 +57,7 @@ export const useCreateSugerencia = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: (sugerencia: Omit<Sugerencia, 'id' | 'fechaCreacion'>) => crearSugerencia(sugerencia),
+    mutationFn: ({ data, adjunto }: { data: CreateSugerenciaData; adjunto?: File }) => crearSugerencia(data, adjunto),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['sugerencias'] });
     },
@@ -68,7 +68,7 @@ export const useCreateReporte = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: (reporte: Omit<Reporte, 'id' | 'fechaCreacion' | 'estado'>) => crearReporte(reporte),
+    mutationFn: ({ data, adjunto }: { data: CreateReporteData; adjunto?: File }) => crearReporte(data, adjunto),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['reportes'] });
     },

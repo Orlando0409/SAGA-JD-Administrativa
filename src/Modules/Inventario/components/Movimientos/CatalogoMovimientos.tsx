@@ -474,6 +474,14 @@ const CatalogoMovimientos: React.FC<CatalogoMovimientosProps> = ({ onBack }) => 
           </table>
         </div>
 
+          {movimientos.length === 0 && (
+          <div className="text-center py-12">
+            <div className="text-gray-500 text-lg font-medium mb-2">No hay movimientos registrados</div>
+            <div className="text-gray-400">Los movimientos de inventario aparecerán aquí</div>
+          </div>
+        )}
+
+
         <div className="bg-white px-4 py-3 flex flex-col sm:flex-row items-center justify-between border-t border-gray-200 sm:px-6 gap-4">
           <div className="flex flex-col sm:flex-row items-center gap-4">
 
@@ -536,13 +544,6 @@ const CatalogoMovimientos: React.FC<CatalogoMovimientosProps> = ({ onBack }) => 
             </button>
           </div>
         </div>
-
-        {movimientos.length === 0 && (
-          <div className="text-center py-12">
-            <div className="text-gray-500 text-lg font-medium mb-2">No hay movimientos registrados</div>
-            <div className="text-gray-400">Los movimientos de inventario aparecerán aquí</div>
-          </div>
-        )}
       </div>
 
 

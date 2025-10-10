@@ -13,21 +13,15 @@ import {
 } from '@tanstack/react-table';
 import { 
   LuSearch, 
-  LuCalendar,
-  LuUser,
-  LuFileText,
-  LuLightbulb,
-  LuTriangle,
   LuFilter,
   LuPlus,
-  LuPaperclip
+  LuChevronLeft,
+  LuChevronRight
 } from 'react-icons/lu';
 import { 
-  MdKeyboardArrowLeft, 
-  MdKeyboardArrowRight, 
-  MdKeyboardDoubleArrowLeft,
-  MdKeyboardDoubleArrowRight 
-} from "react-icons/md";
+  MdKeyboardArrowUp, 
+  MdKeyboardArrowDown 
+} from 'react-icons/md';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useQuejas, useSugerencias, useReportes } from '../hook/HookContacto';
@@ -89,41 +83,41 @@ const ContactoTable = () => {
     // Agregar quejas
     quejas?.forEach((queja: Queja) => {
       data.push({
-        id: queja.id,
+        id: queja.Id_Queja,
         tipo: 'Queja',
-        nombre: queja.nombre,
-        primerApellido: queja.primerApellido,
-        segundoApellido: queja.segundoApellido,
-        mensaje: queja.mensaje,
-        fechaCreacion: queja.fechaCreacion,
-        adjunto: queja.adjunto,
+        nombre: queja.name,
+        primerApellido: queja.Papellido,
+        segundoApellido: queja.Sapellido,
+        mensaje: queja.descripcion,
+        fechaCreacion: queja.Fecha_Queja,
+        adjunto: queja.Adjunto && queja.Adjunto.length > 0 ? ({} as File) : null,
       });
     });
 
     // Agregar sugerencias
     sugerencias?.forEach((sugerencia: Sugerencia) => {
       data.push({
-        id: sugerencia.id,
+        id: sugerencia.Id_Sugerencia,
         tipo: 'Sugerencia',
-        mensaje: sugerencia.mensaje,
-        fechaCreacion: sugerencia.fechaCreacion,
-        adjunto: sugerencia.adjunto,
+        mensaje: sugerencia.Mensaje,
+        fechaCreacion: sugerencia.Fecha_Sugerencia,
+        adjunto: sugerencia.Adjunto && sugerencia.Adjunto.length > 0 ? ({} as File) : null,
       });
     });
 
     // Agregar reportes
     reportes?.forEach((reporte: Reporte) => {
       data.push({
-        id: reporte.id,
+        id: reporte.IdReporte,
         tipo: 'Reporte',
-        nombre: reporte.nombre,
-        primerApellido: reporte.primerApellido,
-        segundoApellido: reporte.segundoApellido,
+        nombre: reporte.name,
+        primerApellido: reporte.Papellido,
+        segundoApellido: reporte.Sapellido,
         ubicacion: reporte.ubicacion,
-        mensaje: reporte.mensaje,
-        fechaCreacion: reporte.fechaCreacion,
-        estado: reporte.estado,
-        adjunto: reporte.adjunto,
+        mensaje: reporte.descripcion || '',
+        fechaCreacion: reporte.Fecha_Reporte,
+        estado: reporte.Estado.Estado_Reporte as 'Pendiente' | 'En Proceso' | 'Resuelto',
+        adjunto: reporte.Adjunto && reporte.Adjunto.length > 0 ? ({} as File) : null,
       });
     });
 
@@ -208,39 +202,32 @@ const ContactoTable = () => {
       header: 'Tipo',
       cell: ({ row }) => {
         const item = row.original;
-        let icon;
         let colorClass;
 
         switch (item.tipo) {
           case 'Queja':
-            icon = <LuTriangle className="text-red-600" size={16} />;
             colorClass = 'text-red-700';
             break;
           case 'Sugerencia':
-            icon = <LuLightbulb className="text-yellow-600" size={16} />;
             colorClass = 'text-yellow-700';
             break;
           case 'Reporte':
-            icon = <LuFileText className="text-blue-600" size={16} />;
             colorClass = 'text-blue-700';
             break;
         }
 
         return (
-          <div className="flex items-center gap-2">
-            {icon}
-            <span className={`text-sm font-medium ${colorClass}`}>
-              {item.tipo}
-            </span>
-          </div>
+          <span className={`text-sm font-medium ${colorClass}`}>
+            {item.tipo}
+          </span>
         );
       },
       size: 130,
     }),
 
     columnHelper.display({
-      id: 'identificacion',
-      header: 'Identificación',
+      id: 'persona',
+      header: 'Persona',
       cell: ({ row }) => {
         const item = row.original;
         const nombreCompleto = [item.nombre, item.primerApellido, item.segundoApellido]
@@ -248,12 +235,9 @@ const ContactoTable = () => {
           .join(' ');
 
         return (
-          <div className="flex items-center gap-2">
-            <LuUser className="text-gray-400" size={14} />
-            <span className="text-sm">
-              {nombreCompleto || <span className="text-gray-400 italic">Anónimo</span>}
-            </span>
-          </div>
+          <span className="text-sm">
+            {nombreCompleto || <span className="text-gray-400 italic">Anónimo</span>}
+          </span>
         );
       },
       size: 200,
@@ -264,7 +248,9 @@ const ContactoTable = () => {
       header: 'Mensaje',
       cell: ({ getValue }) => {
         const mensaje = getValue();
-        const truncated = mensaje.length > 60 ? mensaje.substring(0, 60) + '...' : mensaje;
+        if (!mensaje) return <span className="text-gray-400 text-sm">-</span>;
+        
+        const truncated = mensaje.length > 80 ? mensaje.substring(0, 80) + '...' : mensaje;
         
         return (
           <span className="text-sm text-gray-700" title={mensaje}>
@@ -272,21 +258,7 @@ const ContactoTable = () => {
           </span>
         );
       },
-      size: 300,
-    }),
-
-    columnHelper.display({
-      id: 'ubicacion',
-      header: 'Ubicación',
-      cell: ({ row }) => {
-        const item = row.original;
-        return (
-          <span className="text-sm text-gray-600">
-            {item.ubicacion || <span className="text-gray-400">-</span>}
-          </span>
-        );
-      },
-      size: 150,
+      size: 350,
     }),
 
     columnHelper.display({
@@ -330,34 +302,12 @@ const ContactoTable = () => {
         
         const fechaObj = new Date(fecha);
         return (
-          <div className="flex items-center gap-2">
-            <LuCalendar className="text-gray-400" size={14} />
-            <span className="text-sm">
-              {format(fechaObj, 'dd/MM/yyyy', { locale: es })}
-            </span>
-          </div>
+          <span className="text-sm">
+            {format(fechaObj, 'dd/MM/yyyy', { locale: es })}
+          </span>
         );
       },
       size: 120,
-    }),
-
-    columnHelper.display({
-      id: 'adjunto',
-      header: 'Adjunto',
-      cell: ({ row }) => {
-        const item = row.original;
-        
-        return (
-          <div className="flex items-center justify-center">
-            {item.adjunto ? (
-              <LuPaperclip className="text-blue-600" size={16} title="Tiene adjunto" />
-            ) : (
-              <span className="text-gray-300">-</span>
-            )}
-          </div>
-        );
-      },
-      size: 80,
     }),
 
     columnHelper.display({
@@ -426,8 +376,9 @@ const ContactoTable = () => {
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Quejas, Sugerencias y Reportes</h2>
-          <p className="text-sm text-gray-600 mt-1">Gestión de contacto con usuarios</p>
+          <h2 className="text-3xl font-bold text-gray-900">
+            Gestión de Quejas, Sugerencias y Reportes
+          </h2>
         </div>
       </div>
 
@@ -503,34 +454,38 @@ const ContactoTable = () => {
                       style={{ width: header.getSize() }}
                       onClick={header.column.getToggleSortingHandler()}
                     >
-                      <div className="flex items-center space-x-1">
-                        <span>
-                          {header.isPlaceholder
-                            ? null
-                            : flexRender(header.column.columnDef.header, header.getContext())}
-                        </span>
-                        {header.column.getCanSort() && (
-                          <span>
-                            {header.column.getIsSorted() === 'asc' && ' ↑'}
-                            {header.column.getIsSorted() === 'desc' && ' ↓'}
-                          </span>
-                        )}
-                      </div>
+                      <span className="flex items-center gap-1">
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(header.column.columnDef.header, header.getContext())}
+                        {header.column.getIsSorted() === 'asc' && <MdKeyboardArrowUp className="inline" />}
+                        {header.column.getIsSorted() === 'desc' && <MdKeyboardArrowDown className="inline" />}
+                      </span>
                     </th>
                   ))}
                 </tr>
               ))}
             </thead>
             <tbody className="bg-white divide-y divide-sky-50">
-              {table.getRowModel().rows.map((row) => (
-                <tr key={row.id} className="hover:bg-sky-50 cursor-pointer transition-colors">
-                  {row.getVisibleCells().map((cell) => (
-                    <td key={cell.id} className="px-2 sm:px-4 py-3 text-xs sm:text-sm text-slate-700 align-top">
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </td>
-                  ))}
+              {table.getRowModel().rows.length > 0 ? (
+                table.getRowModel().rows.map((row) => (
+                  <tr key={row.id} className="hover:bg-sky-50 cursor-pointer transition-colors">
+                    {row.getVisibleCells().map((cell) => (
+                      <td key={cell.id} className="px-2 sm:px-4 py-3 text-xs sm:text-sm text-slate-700 align-top">
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      </td>
+                    ))}
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={6} className="px-2 sm:px-4 py-8 text-center text-slate-500">
+                    {globalFilter 
+                      ? 'No se encontraron registros que coincidan con la búsqueda' 
+                      : 'No hay registros de quejas, sugerencias o reportes'}
+                  </td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
         </div>
@@ -554,55 +509,36 @@ const ContactoTable = () => {
                 ))}
               </select>
             </div>
+            <span className="text-sm text-gray-700">
+              Mostrando {table.getRowModel().rows.length > 0 ? table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1 : 0} a{' '}
+              {Math.min((table.getState().pagination.pageIndex + 1) * table.getState().pagination.pageSize, filteredData.length)} de {filteredData.length} registros
+            </span>
           </div>
 
-          <div className="flex items-center gap-1">
-            <button
-              onClick={() => table.setPageIndex(0)}
-              disabled={!table.getCanPreviousPage()}
-              className="p-2 border border-gray-300 rounded-md text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              title="Primera página"
-            >
-              <MdKeyboardDoubleArrowLeft className="w-4 h-4" />
-            </button>
+          <div className="flex items-center gap-2">
             <button
               onClick={() => table.previousPage()}
               disabled={!table.getCanPreviousPage()}
-              className="p-2 border border-gray-300 rounded-md text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="p-2 border border-gray-300 rounded-md text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               title="Página anterior"
             >
-              <MdKeyboardArrowLeft className="w-4 h-4" />
+              <LuChevronLeft className="w-4 h-4" />
             </button>
             
-            <span className="px-3 py-2 text-sm font-medium text-gray-700 bg-gray-50 border border-gray-300 rounded-md">
-              Página {table.getState().pagination.pageIndex + 1} de {table.getPageCount()}
+            <span className="px-3 py-2 text-sm font-medium text-gray-700">
+              Página {table.getState().pagination.pageIndex + 1} de {table.getPageCount() || 1}
             </span>
 
             <button
               onClick={() => table.nextPage()}
               disabled={!table.getCanNextPage()}
-              className="p-2 border border-gray-300 rounded-md text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="p-2 border border-gray-300 rounded-md text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               title="Página siguiente"
             >
-              <MdKeyboardArrowRight className="w-4 h-4" />
-            </button>
-            <button
-              onClick={() => table.setPageIndex(table.getPageCount() - 1)}
-              disabled={!table.getCanNextPage()}
-              className="p-2 border border-gray-300 rounded-md text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              title="Última página"
-            >
-              <MdKeyboardDoubleArrowRight className="w-4 h-4" />
+              <LuChevronRight className="w-4 h-4" />
             </button>
           </div>
         </div>
-
-        {unifiedData.length === 0 && (
-          <div className="text-center py-12">
-            <div className="text-gray-500 text-lg font-medium mb-2">No hay registros</div>
-            <div className="text-gray-400">Las quejas, sugerencias y reportes aparecerán aquí</div>
-          </div>
-        )}
       </div>
 
       {/* Modals */}

@@ -118,7 +118,7 @@ const Roles = ({ onClose }: { onClose: () => void }) => {
     <div className="w-full flex flex-col items-start h-full">
       <div className="w-full bg-white rounded-lg shadow-lg overflow-hidden">
    
-        <div className="p-6 border-b bg-gray-50">
+        <div className="p-6 bg-white">
           <div className="flex justify-between items-center gap-4">
 
             <div className="flex items-center gap-4">
@@ -225,7 +225,7 @@ const Roles = ({ onClose }: { onClose: () => void }) => {
         </div>
 
      
-        <div className="px-6 py-3 bg-gray-50 border-t border-gray-200">
+        <div className="px-6 py-3 bg-white">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2">

@@ -1,7 +1,7 @@
 // src/Modules/QuejasSugerenciasReportes/service/ContactoService.ts
-import type { Queja } from '../models/Quejas';
-import type { Sugerencia } from '../models/Sugerencias';
-import type { Reporte } from '../models/Reportes';
+import type { Queja, CreateQuejaData } from '../models/Quejas';
+import type { Sugerencia, CreateSugerenciaData } from '../models/Sugerencias';
+import type { Reporte, CreateReporteData } from '../models/Reportes';
 import axiosPrivate from '@/Api/apiAuth';
 
 // ======================== QUEJAS ========================
@@ -15,16 +15,18 @@ export async function obtenerQueja(id: number): Promise<Queja> {
   return response.data;
 }
 
-export async function crearQueja(queja: Omit<Queja, 'id' | 'fechaCreacion'>): Promise<Queja> {
+export async function crearQueja(queja: CreateQuejaData, adjunto?: File): Promise<Queja> {
   const formData = new FormData();
-  formData.append('Nombre', queja.nombre);
-  formData.append('Primer_Apellido', queja.primerApellido);
-  if (queja.segundoApellido) {
-    formData.append('Segundo_Apellido', queja.segundoApellido);
+  formData.append('name', queja.name);
+  if (queja.Papellido) {
+    formData.append('Papellido', queja.Papellido);
   }
-  formData.append('Mensaje', queja.mensaje);
-  if (queja.adjunto) {
-    formData.append('Imagen', queja.adjunto);
+  if (queja.Sapellido) {
+    formData.append('Sapellido', queja.Sapellido);
+  }
+  formData.append('descripcion', queja.descripcion);
+  if (adjunto) {
+    formData.append('Imagen', adjunto);
   }
 
   const response = await axiosPrivate.post('/quejas', formData, {
@@ -64,11 +66,11 @@ export async function obtenerSugerencia(id: number): Promise<Sugerencia> {
   return response.data;
 }
 
-export async function crearSugerencia(sugerencia: Omit<Sugerencia, 'id' | 'fechaCreacion'>): Promise<Sugerencia> {
+export async function crearSugerencia(sugerencia: CreateSugerenciaData, adjunto?: File): Promise<Sugerencia> {
   const formData = new FormData();
-  formData.append('Mensaje', sugerencia.mensaje);
-  if (sugerencia.adjunto) {
-    formData.append('Imagen', sugerencia.adjunto);
+  formData.append('Mensaje', sugerencia.Mensaje);
+  if (adjunto) {
+    formData.append('Adjunto', adjunto);
   }
 
   const response = await axiosPrivate.post('/sugerencias', formData, {
@@ -108,17 +110,15 @@ export async function obtenerReporte(id: number): Promise<Reporte> {
   return response.data;
 }
 
-export async function crearReporte(reporte: Omit<Reporte, 'id' | 'fechaCreacion' | 'estado'>): Promise<Reporte> {
+export async function crearReporte(reporte: CreateReporteData, adjunto?: File): Promise<Reporte> {
   const formData = new FormData();
-  formData.append('Nombre', reporte.nombre);
-  formData.append('Primer_Apellido', reporte.primerApellido);
-  if (reporte.segundoApellido) {
-    formData.append('Segundo_Apellido', reporte.segundoApellido);
-  }
-  formData.append('Ubicacion', reporte.ubicacion);
-  formData.append('Mensaje', reporte.mensaje);
-  if (reporte.adjunto) {
-    formData.append('Imagen', reporte.adjunto);
+  formData.append('name', reporte.name);
+  formData.append('Papellido', reporte.Papellido);
+  formData.append('Sapellido', reporte.Sapellido);
+  formData.append('ubicacion', reporte.ubicacion);
+  formData.append('descripcion', reporte.descripcion);
+  if (adjunto) {
+    formData.append('Imagen', adjunto);
   }
 
   const response = await axiosPrivate.post('/reportes', formData, {

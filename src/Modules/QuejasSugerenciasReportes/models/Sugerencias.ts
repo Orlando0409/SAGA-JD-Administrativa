@@ -1,6 +1,18 @@
+export interface EstadoSugerencia {
+    Id_EstadoSugerencia: number;
+    Estado_Sugerencia: string;
+}
+
 export interface Sugerencia {
-    id: number;
-    mensaje: string;
-    fechaCreacion: Date | string | null 
-    adjunto?: File  | null;
+    Id_Sugerencia: number;
+    Fecha_Sugerencia: Date | string;
+    Mensaje: string;
+    Adjunto?: string[] | null;
+    RespuestasSugerencia?: string | null;
+    Estado: EstadoSugerencia;
+}
+
+// Interfaz para crear una sugerencia
+export interface CreateSugerenciaData {
+    Mensaje: string;
 }
