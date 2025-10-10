@@ -25,14 +25,31 @@ const ActasModal = ({ isOpen, onClose, acta, onEliminar }: ActasModalProps) => {
     const handleTituloChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
         setTitulo(value);
-        if (!value.trim()) {
-            setTituloError("Debe ingresar un título.");
-        } else if (value.length < 5) {
-            setTituloError("El título debe tener al menos 5 caracteres.");
-        } else if (value.length > 100) {
-            setTituloError("El título no puede exceder los 100 caracteres.");
+
+        if (acta && isEditing) {
+            // Durante la edición, validar que el título sea diferente al original
+            if (value.trim() === "") {
+                setTituloError("El título es obligatorio");
+            } else if (value.trim() === acta.Titulo) {
+                setTituloError("Debes cambiar el título para poder actualizar");
+            } else if (value.length < 5) {
+                setTituloError("El título debe tener al menos 5 caracteres");
+            } else if (value.length > 100) {
+                setTituloError("El título no puede exceder los 100 caracteres");
+            } else {
+                setTituloError("");
+            }
         } else {
-            setTituloError("");
+            // Durante la creación
+            if (value.trim() === "") {
+                setTituloError("El título es obligatorio");
+            } else if (value.length < 5) {
+                setTituloError("El título debe tener al menos 5 caracteres");
+            } else if (value.length > 100) {
+                setTituloError("El título no puede exceder los 100 caracteres");
+            } else {
+                setTituloError("");
+            }
         }
     };
 
@@ -52,6 +69,12 @@ const ActasModal = ({ isOpen, onClose, acta, onEliminar }: ActasModalProps) => {
 
     const handleActualizar = async () => {
         try {
+            // Validar que el título haya cambiado
+            if (titulo.trim() === "" || titulo.trim() === acta.Titulo) {
+                setTituloError(titulo.trim() === "" ? "El título es obligatorio" : "Debes cambiar el título para poder actualizar");
+                return;
+            }
+
             // Validar los datos con Zod
             ActaSchema.parse({
                 Titulo: titulo.trim(),
@@ -154,27 +177,70 @@ const ActasModal = ({ isOpen, onClose, acta, onEliminar }: ActasModalProps) => {
                             {/* Campo de Archivos */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">Archivos</label>
-                                <div className="relative">
-                                    <input
-                                        id="archivos"
-                                        type="file"
-                                        accept="application/pdf"
-                                        multiple
-                                        onChange={(e) => {
-                                            const selectedFiles = e.target.files ? Array.from(e.target.files) : [];
-                                            setFiles(selectedFiles);
-                                        }}
-                                        className="absolute inset-0 opacity-0 w-full h-full cursor-pointer"
-                                    />
-                                    <div className="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm text-gray-500 bg-white cursor-pointer">
-                                        {files.length > 0
-                                            ? files.map((f) => f.name).join(", ")
-                                            : "Seleccionar Archivos"}
+
+                                {/* Mostrar archivo actual y opción de reemplazar */}
+                                {acta.Archivos.length > 0 ? (
+                                    <div className="space-y-2">
+                                        {acta.Archivos.map((archivo: ArchivoActa, index) => (
+                                            <div key={archivo.Id_Archivo_Acta} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border">
+                                                <FileText size={16} className="text-blue-600" />
+                                                <div className="flex-1">
+                                                    <p className="text-sm font-medium text-gray-700">
+                                                        Archivo_{index + 1}.pdf
+                                                    </p>
+                                                    <a
+                                                        href={archivo.Url_Archivo}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="text-xs text-blue-600 hover:underline"
+                                                    >
+                                                        Ver archivo actual
+                                                    </a>
+                                                </div>
+                                                <div className="relative">
+                                                    <input
+                                                        type="file"
+                                                        accept="application/pdf"
+                                                        onChange={(e) => {
+                                                            const selectedFiles = e.target.files ? Array.from(e.target.files) : [];
+                                                            setFiles(selectedFiles);
+                                                        }}
+                                                        className="absolute inset-0 opacity-0 w-full h-full cursor-pointer"
+                                                    />
+                                                    <button
+                                                        type="button"
+                                                        className="px-3 py-1.5 bg-blue-500 text-white text-xs rounded hover:bg-blue-600 transition-colors"
+                                                    >
+                                                        Reemplazar
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        ))}
+                                        {files.length > 0 && (
+                                            <div className="mt-2 text-xs text-green-600 bg-green-50 p-2 rounded">
+                                                {files.length} nuevo{files.length > 1 ? 's' : ''} archivo{files.length > 1 ? 's' : ''} seleccionado{files.length > 1 ? 's' : ''}: {files.map(f => f.name).join(', ')}
+                                            </div>
+                                        )}
                                     </div>
-                                </div>
-                                {files.length > 0 && (
-                                    <div className="mt-2 text-xs text-gray-600">
-                                        {files.length} archivo{files.length > 1 ? 's' : ''} seleccionado{files.length > 1 ? 's' : ''}
+                                ) : (
+                                    /* Si no hay archivos actuales, mostrar selector normal */
+                                    <div className="relative">
+                                        <input
+                                            id="archivos"
+                                            type="file"
+                                            accept="application/pdf"
+                                            multiple
+                                            onChange={(e) => {
+                                                const selectedFiles = e.target.files ? Array.from(e.target.files) : [];
+                                                setFiles(selectedFiles);
+                                            }}
+                                            className="absolute inset-0 opacity-0 w-full h-full cursor-pointer"
+                                        />
+                                        <div className="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm text-gray-500 bg-white cursor-pointer">
+                                            {files.length > 0
+                                                ? files.map((f) => f.name).join(", ")
+                                                : "Seleccionar archivos"}
+                                        </div>
                                     </div>
                                 )}
                             </div>
@@ -189,7 +255,7 @@ const ActasModal = ({ isOpen, onClose, acta, onEliminar }: ActasModalProps) => {
                                 >
                                     {acta.Titulo}
                                 </div>
-                                <p 
+                                <p
                                     className="text-gray-600 mt-2 break-words"
                                     style={{ whiteSpace: "normal", overflowWrap: "break-word" }}
                                 >

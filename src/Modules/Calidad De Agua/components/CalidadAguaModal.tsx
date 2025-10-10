@@ -127,18 +127,43 @@ const CalidadAguaModal = ({ isOpen, onClose, archivo, refetch }: CalidadAguaModa
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">Archivo PDF</label>
-                                <div className="relative">
-                                    <input
-                                        id="archivo"
-                                        type="file"
-                                        accept="application/pdf"
-                                        onChange={(e) => setFile(e.target.files?.[0] || null)}
-                                        className="absolute inset-0 opacity-0 w-full h-full cursor-pointer"
-                                    />
-                                    <div className="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm text-gray-500 bg-white cursor-pointer">
-                                        {file ? file.name : "Seleccionar Archivo"}
+                                
+                                {/* Mostrar archivo actual con botón de reemplazar */}
+                                <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border">
+                                    <FileText size={16} className="text-blue-600" />
+                                    <div className="flex-1">
+                                        <p className="text-sm font-medium text-gray-700">
+                                            Archivo_1.pdf
+                                        </p>
+                                        <a
+                                            href={archivo.Url_Archivo}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="text-xs text-blue-600 hover:underline"
+                                        >
+                                            Ver archivo actual
+                                        </a>
+                                    </div>
+                                    <div className="relative">
+                                        <input
+                                            type="file"
+                                            accept="application/pdf"
+                                            onChange={(e) => setFile(e.target.files?.[0] || null)}
+                                            className="absolute inset-0 opacity-0 w-full h-full cursor-pointer"
+                                        />
+                                        <button
+                                            type="button"
+                                            className="px-3 py-1.5 bg-orange-500 text-white text-xs rounded hover:bg-orange-600 transition-colors"
+                                        >
+                                            Reemplazar
+                                        </button>
                                     </div>
                                 </div>
+                                {file && (
+                                    <div className="mt-2 text-xs text-green-600 bg-green-50 p-2 rounded">
+                                        ✅ Nuevo archivo seleccionado: {file.name}
+                                    </div>
+                                )}
                             </div>
                             <div className="flex justify-end gap-4">
                                 <button
