@@ -153,7 +153,7 @@ const CalidadAguaModal = ({ isOpen, onClose, archivo, refetch }: CalidadAguaModa
                                         />
                                         <button
                                             type="button"
-                                            className="px-3 py-1.5 bg-orange-500 text-white text-xs rounded hover:bg-orange-600 transition-colors"
+                                            className="px-3 py-1.5 bg-blue-500 text-white text-xs rounded hover:bg-blue-600 transition-colors"
                                         >
                                             Reemplazar
                                         </button>
@@ -161,7 +161,7 @@ const CalidadAguaModal = ({ isOpen, onClose, archivo, refetch }: CalidadAguaModa
                                 </div>
                                 {file && (
                                     <div className="mt-2 text-xs text-green-600 bg-green-50 p-2 rounded">
-                                        ✅ Nuevo archivo seleccionado: {file.name}
+                                        Nuevo archivo seleccionado: {file.name}
                                     </div>
                                 )}
                             </div>
