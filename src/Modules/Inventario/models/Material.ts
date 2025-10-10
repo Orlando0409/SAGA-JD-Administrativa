@@ -4,7 +4,7 @@ import type { UnidadMedicion } from "./UnidadMedicion";
 // Tipo para representar un proveedor (físico o jurídico)
 export interface Proveedor {
   Id_Proveedor: number;
-  Nombre?: string; // Proveedor Físico
+  Nombre_Proveedor?: string; // Proveedor Físico
   Primer_Apellido?: string; // Proveedor Físico
   Segundo_Apellido?: string; // Proveedor Físico
   Razon_Social?: string; // Proveedor Jurídico
@@ -29,6 +29,8 @@ export interface Material {
   Estado_Material: EstadoMaterial;
   Unidad_Medicion: UnidadMedicion;
   Proveedor?: Proveedor;
+  Id_Tipo_Proveedor?: number;
+  Id_Proveedor?: number;
   materialCategorias: {
     Id_Material_Categoria: number;
     Categoria: CategoriaMaterial;
@@ -61,8 +63,6 @@ export interface UpdateMaterialData {
   Id_Unidad_Medicion?: number;
   Precio_Unitario?: number;
   IDS_Categorias?: number[];
-  Id_Tipo_Proveedor?: number;
-  Id_Proveedor?: number;
 }
 
 export interface EstadoMaterial {

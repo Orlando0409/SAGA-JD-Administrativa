@@ -9,6 +9,7 @@ import {
   useReactTable,
 } from '@tanstack/react-table';
 import { LuSearch, LuFilter, LuPlus, LuChevronLeft, LuChevronRight } from 'react-icons/lu';
+import { MdKeyboardArrowUp, MdKeyboardArrowDown } from 'react-icons/md';
 import { useUsers } from '../Hooks/userHook';
 import type { Usuario } from '../Models/Usuario';
 import CreateUserModal from './CreateUserModal';
@@ -168,6 +169,19 @@ const Usuarios = () => {
   return (
     <div className="w-full flex flex-col items-start h-full p-2">
       <div className="w-full bg-white rounded-lg shadow-lg overflow-hidden">
+        {/* Título principal */}
+        <div className="p-6 border-b bg-gradient-to-r from-blue-600 to-blue-700">
+          <h1 className="text-2xl font-bold text-white">
+            {showRolesTable ? 'Gestión de Roles' : 'Gestión de Usuarios'}
+          </h1>
+          <p className="text-blue-100 text-sm mt-1">
+            {showRolesTable 
+              ? 'Administra los roles y permisos del sistema' 
+              : 'Administra los usuarios y sus accesos al sistema'
+            }
+          </p>
+        </div>
+
         {hasViewPermission && !hasEditPermission && (
           <div className="p-4 bg-blue-50 border-l-4 border-blue-400">
             <div className="flex">
@@ -240,43 +254,51 @@ const Usuarios = () => {
               </div>
             )}
 
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-gray-100">
+            <div className="overflow-x-auto rounded-2xl border border-sky-100 shadow-sm bg-white">
+              <table className="min-w-full table-auto">
+                <thead className="bg-sky-50">
                   {table.getHeaderGroups().map((headerGroup) => (
-                    <tr key={headerGroup.id}>
+                    <tr key={headerGroup.id} className="text-left text-xs sm:text-sm text-sky-700">
                       {headerGroup.headers.map((header) => (
                         <th
                           key={header.id}
-                          className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-gray-200"
+                          className="px-2 sm:px-4 py-3 font-medium border-b border-sky-100 cursor-pointer"
                           onClick={header.column.getToggleSortingHandler()}
                         >
-                          {header.isPlaceholder
-                            ? null
-                            : flexRender(header.column.columnDef.header, header.getContext())}
-                          {{
-                            asc: ' ↑',
-                            desc: ' ↓',
-                          }[header.column.getIsSorted() as string] ?? null}
+                          <span className="flex items-center gap-1">
+                            {header.isPlaceholder
+                              ? null
+                              : flexRender(header.column.columnDef.header, header.getContext())}
+                            {header.column.getIsSorted() === 'asc' && <MdKeyboardArrowUp className="inline" />}
+                            {header.column.getIsSorted() === 'desc' && <MdKeyboardArrowDown className="inline" />}
+                          </span>
                         </th>
                       ))}
                     </tr>
                   ))}
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {table.getRowModel().rows.map((row) => (
-                    <tr 
-                      key={row.id} 
-                      className="hover:bg-gray-50 transition-colors cursor-pointer"
-                      onClick={() => handleRowClick(row.original)}
-                    >
-                      {row.getVisibleCells().map((cell) => (
-                        <td key={cell.id} className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                        </td>
-                      ))}
+                <tbody className="bg-white divide-y divide-sky-50">
+                  {table.getRowModel().rows.length === 0 ? (
+                    <tr>
+                      <td colSpan={4} className="px-2 sm:px-4 py-8 text-center text-slate-500">
+                        {globalFilter ? 'No se encontraron usuarios que coincidan con la búsqueda' : 'No hay usuarios registrados'}
+                      </td>
                     </tr>
-                  ))}
+                  ) : (
+                    table.getRowModel().rows.map((row) => (
+                      <tr 
+                        key={row.id} 
+                        className="hover:bg-sky-50 cursor-pointer transition-colors"
+                        onClick={() => handleRowClick(row.original)}
+                      >
+                        {row.getVisibleCells().map((cell) => (
+                          <td key={cell.id} className="px-2 sm:px-4 py-3 text-xs sm:text-sm text-slate-700 align-top">
+                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                          </td>
+                        ))}
+                      </tr>
+                    ))
+                  )}
                 </tbody>
               </table>
             </div>

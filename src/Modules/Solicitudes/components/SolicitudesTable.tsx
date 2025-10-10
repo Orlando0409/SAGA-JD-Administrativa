@@ -354,27 +354,19 @@ export default function SolicitudesTable() {
                         ))}
                     </thead>
                     <tbody className="bg-white divide-y divide-sky-50">
-                        {table.getRowModel().rows.length === 0 ? (
-                            <tr>
-                                <td colSpan={columns.length} className="px-2 sm:px-4 py-8 text-center text-slate-500 text-sm">
-                                    No se encontraron solicitudes
-                                </td>
+                        {table.getRowModel().rows.map((row) => (
+                            <tr
+                                key={row.original.id}
+                                className="hover:bg-sky-50 cursor-pointer transition-colors"
+                                onClick={() => handleViewDetail(row.original)}
+                            >
+                                {row.getVisibleCells().map((cell) => (
+                                    <td key={cell.id} className="px-2 sm:px-4 py-4 whitespace-nowrap text-xs sm:text-sm">
+                                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                    </td>
+                                ))}
                             </tr>
-                        ) : (
-                            table.getRowModel().rows.map((row) => (
-                                <tr
-                                    key={row.original.id}
-                                    className="hover:bg-sky-50 cursor-pointer transition-colors"
-                                    onClick={() => handleViewDetail(row.original)}
-                                >
-                                    {row.getVisibleCells().map((cell) => (
-                                        <td key={cell.id} className="px-2 sm:px-4 py-4 whitespace-nowrap text-xs sm:text-sm">
-                                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                                        </td>
-                                    ))}
-                                </tr>
-                            ))
-                        )}
+                        ))}
                     </tbody>
                 </table>
             </div>

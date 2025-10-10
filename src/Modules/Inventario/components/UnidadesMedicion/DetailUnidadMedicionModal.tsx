@@ -22,6 +22,9 @@ const DetailUnidadMedicionModal: React.FC<DetailUnidadMedicionModalProps> = ({ i
 
        const estado = unidad.Estado_Unidad_Medicion?.Nombre_Estado_Unidad_Medicion || 'Activo';
        const isActiva = estado === 'Activo';
+       const colorClass = isActiva 
+         ? 'bg-emerald-100 text-emerald-700 border border-emerald-300'
+         : 'bg-slate-200 text-slate-700 border border-slate-400';
 
   if (!isOpen) return null;
 
@@ -40,7 +43,7 @@ const DetailUnidadMedicionModal: React.FC<DetailUnidadMedicionModalProps> = ({ i
               <div className="block text-sm font-medium text-gray-700 mb-1">
                 Nombre
               </div>
-              <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded border break-words overflow-wrap-anywhere">
+              <p className="text-sm text-gray-900">
                 {unidad.Nombre_Unidad_Medicion || unidad.Nombre_Unidad}
               </p>
             </div>
@@ -49,7 +52,7 @@ const DetailUnidadMedicionModal: React.FC<DetailUnidadMedicionModalProps> = ({ i
               <div className="block text-sm font-medium text-gray-700 mb-1">
                 Abreviatura
               </div>
-              <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded border">
+              <p className="text-sm text-gray-900">
                 {unidad.Abreviatura}
               </p>
             </div>
@@ -58,8 +61,10 @@ const DetailUnidadMedicionModal: React.FC<DetailUnidadMedicionModalProps> = ({ i
               <div className="block text-sm font-medium text-gray-700 mb-1">
                 Estado
               </div>
-               <p className='text-sm text-gray-900 bg-gray-50 p-2 rounded border '>
-                <span  className={`inline-flex px-2 py-1 rounded-full break-words overflow-wrap-anywhere ${isActiva ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>{estado}</span>
+               <p className='text-sm text-gray-900'>
+                <span className={`px-3 py-1 text-xs font-semibold rounded-full ${colorClass}`}>
+                  {estado}
+                </span>
               </p>
             </div>
 
@@ -67,7 +72,7 @@ const DetailUnidadMedicionModal: React.FC<DetailUnidadMedicionModalProps> = ({ i
               <div className="block text-sm font-medium text-gray-700 mb-1">
                 Descripción
               </div>
-              <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded border break-words overflow-wrap-anywhere">
+              <p className="text-sm text-gray-900">
                 {unidad.Descripcion || 'Sin descripción'}
               </p>
             </div>
@@ -76,7 +81,7 @@ const DetailUnidadMedicionModal: React.FC<DetailUnidadMedicionModalProps> = ({ i
               <div className="block text-sm font-medium text-gray-700 mb-1">
                 Fecha de Creación
               </div>
-              <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded border">
+              <p className="text-sm text-gray-900">
                 {formatDate(unidad.Fecha_Creacion)}
               </p>
             </div>
@@ -85,7 +90,7 @@ const DetailUnidadMedicionModal: React.FC<DetailUnidadMedicionModalProps> = ({ i
               <div className="block text-sm font-medium text-gray-700 mb-1">
                 Última Actualización
               </div>
-              <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded border">
+              <p className="text-sm text-gray-900">
                 {formatDate(unidad.Fecha_Actualizacion)}
               </p>
             </div>

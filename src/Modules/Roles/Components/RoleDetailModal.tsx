@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useActivateRole, useDeactivateRole, useRoleById } from '../Hooks/RoleHook';
-import { LuShield, LuUser, LuUserCheck, LuUserX, LuX } from 'react-icons/lu';
+import { LuShield, LuUser, LuUserCheck, LuUserX, LuX, LuLock, LuFolderTree } from 'react-icons/lu';
 import type { Permiso } from '@/Modules/Roles/Models/Role';
 
 import { getPermissionLabel } from '@/Modules/Usuarios/Helper/GroupPermiByModule';
@@ -113,7 +113,7 @@ const RoleDetailModal: React.FC<RoleDetailModalProps> = ({ roleId, isOpen, onClo
 
                 <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
                   <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                    <LuShield className="w-5 h-5 text-blue-600" />
+                    <LuLock className="w-5 h-5 text-blue-600" />
                     Permisos por Módulo
                   </h3>
                   
@@ -123,7 +123,7 @@ const RoleDetailModal: React.FC<RoleDetailModalProps> = ({ roleId, isOpen, onClo
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
                             <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                              <LuShield className="w-5 h-5 text-blue-600" />
+                              <LuFolderTree className="w-5 h-5 text-blue-600" />
                             </div>
                             <div>
                               <h4 className="font-semibold text-gray-900 text-lg capitalize">{modulo}</h4>

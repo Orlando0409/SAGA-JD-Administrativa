@@ -22,12 +22,6 @@ export const UpdateMaterialSchema = z.object({
     .optional(),
   
   IDS_Categorias: z.array(z.number())
-    .optional(),
-
-  Id_Tipo_Proveedor: z.number()
-    .optional(),
-
-  Id_Proveedor: z.number()
     .optional()
 });
 

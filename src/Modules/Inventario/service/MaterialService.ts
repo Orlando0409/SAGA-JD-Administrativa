@@ -64,3 +64,8 @@ export const removeCategoriaFromMaterial = async (materialId: number, categoriaI
   const response = await axiosPrivate.delete(`/Inventario/material/${materialId}/categoria/${categoriaId}`);
   return transformMaterial(response.data);
 };
+
+export const updateEstadoMaterial = async (materialId: number, estadoMaterialId: number): Promise<Material> => {
+  const response = await axiosPrivate.patch(`/Inventario/update/estado/material/${materialId}/${estadoMaterialId}`);
+  return transformMaterial(response.data);
+};

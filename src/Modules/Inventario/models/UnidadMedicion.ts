@@ -38,6 +38,7 @@ export interface UnidadMedicionSimple {
 export interface IngresoEgresoMaterialData {
   Id_Material: number;
   Cantidad: number;
+  Observaciones?: string;
 }
 
 // Helper function to get the unit name consistently
