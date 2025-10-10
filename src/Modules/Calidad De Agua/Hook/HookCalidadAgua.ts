@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getArchivosCalidadAgua, uploadArchivoCalidadAgua, updateArchivoCalidadAgua, deleteArchivoCalidadAgua, setEstadoArchivoCalidadAgua } from "../Service/ServiceCalidadAgua";
+import { getArchivosCalidadAgua, uploadArchivoCalidadAgua, updateArchivoCalidadAgua, deleteArchivoCalidadAgua, toggleVisibilidadArchivoCalidadAgua } from "../Service/ServiceCalidadAgua";
 import type { ArchivoCalidadAgua } from "../Models/CalidadDeAgua";
 
 // Obtener todos los registros
@@ -14,7 +14,8 @@ export const useGetCalidadAgua = () => {
 export const useUploadCalidadAgua = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (formData: FormData) => uploadArchivoCalidadAgua(formData),
+    mutationFn: ({ formData, idUsuarioCreador }: { formData: FormData; idUsuarioCreador: number }) => 
+      uploadArchivoCalidadAgua(formData, idUsuarioCreador),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["calidadAgua"] });
     },
@@ -32,11 +33,11 @@ export const useUpdateCalidadAgua = () => {
   });
 };
 
-export const useSetVisibleCalidadAgua = () => {
+//  visibilidad
+export const useToggleVisibilidadCalidadAgua = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, visible }: { id: number; visible: boolean }) => 
-      setEstadoArchivoCalidadAgua(id, visible),
+    mutationFn: (id: number) => toggleVisibilidadArchivoCalidadAgua(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["calidadAgua"] });
     },

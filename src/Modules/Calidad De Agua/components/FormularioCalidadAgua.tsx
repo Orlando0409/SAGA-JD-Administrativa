@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useUploadCalidadAgua } from "../Hook/HookCalidadAgua";
+import { useAuth } from "@/Modules/Auth/Context/AuthContext";
 
 interface FormularioCalidadAguaProps {
     id: number; // Agregada la propiedad id
@@ -9,6 +10,7 @@ interface FormularioCalidadAguaProps {
 }
 
 export default function FormularioCalidadAgua({ onClose, refetch }: FormularioCalidadAguaProps) {
+    const { user } = useAuth(); // Obtener usuario autenticado
     const uploadCalidadAguaMutation = useUploadCalidadAgua(); // Subir un nuevo archivo
 
     const [titulo, setTitulo] = useState("");
@@ -39,7 +41,16 @@ export default function FormularioCalidadAgua({ onClose, refetch }: FormularioCa
         formData.append("Titulo", titulo.trim());
         formData.append("Archivo_Calidad_Agua", file);
 
-        uploadCalidadAguaMutation.mutate(formData, {
+        // Verificar que el usuario esté disponible
+        if (!user?.Id_Usuario) {
+            alert("Error: Usuario no autenticado.");
+            return;
+        }
+
+        uploadCalidadAguaMutation.mutate({
+            formData,
+            idUsuarioCreador: user.Id_Usuario
+        }, {
             onSuccess: () => {
                 setTitulo("");
                 setFile(null);

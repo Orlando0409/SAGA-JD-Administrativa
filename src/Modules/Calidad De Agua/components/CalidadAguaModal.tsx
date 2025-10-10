@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useUpdateCalidadAgua, useSetVisibleCalidadAgua } from "../Hook/HookCalidadAgua";
+import { useUpdateCalidadAgua, useToggleVisibilidadCalidadAgua } from "../Hook/HookCalidadAgua";
 import { CalidadAguaSchema } from "../schemas/CalidadDeAgua";
 import { z } from "zod";
 import { FileText, Calendar, RefreshCcw, Eye, EyeOff } from "lucide-react";
@@ -13,9 +13,12 @@ interface CalidadAguaModalProps {
         Url_Archivo: string;
         Fecha_Creacion: string;
         Fecha_Actualizacion?: string;
-        Estado: {
-            Id_Estado_Calidad_Agua: number;
-            Nombre_Estado: string;
+        Visible: boolean; //  Visible en lugar de Estado
+        Usuario_Creador: {
+            Id_Usuario: number;
+            Nombre_Usuario: string;
+            Id_Rol: number;
+            Nombre_Rol: string;
         };
     };
     refetch: () => void; // Función para refrescar la tabla
@@ -28,7 +31,7 @@ const CalidadAguaModal = ({ isOpen, onClose, archivo, refetch }: CalidadAguaModa
     const [tituloError, setTituloError] = useState(""); // Validación de título
 
     const updateCalidadAguaMutation = useUpdateCalidadAgua(); // Actualizar un archivo existente
-    const setVisible = useSetVisibleCalidadAgua(); // Cambiar visibilidad
+    const toggleVisibilidad = useToggleVisibilidadCalidadAgua(); // Cambiar visibilidad
 
     if (!isOpen) return null; // Si el modal no está abierto, no renderiza nada
 
@@ -74,11 +77,7 @@ const CalidadAguaModal = ({ isOpen, onClose, archivo, refetch }: CalidadAguaModa
     };
 
     const handleToggleVisibility = () => {
-        const isCurrentlyVisible = archivo.Estado.Id_Estado_Calidad_Agua === 1;
-        setVisible.mutate({
-            id: archivo.Id_Calidad_Agua,
-            visible: !isCurrentlyVisible
-        }, {
+        toggleVisibilidad.mutate(archivo.Id_Calidad_Agua, {
             onSuccess: () => {
                 refetch(); // Actualizar la tabla
             }
@@ -183,36 +182,36 @@ const CalidadAguaModal = ({ isOpen, onClose, archivo, refetch }: CalidadAguaModa
                             <div className="bg-white border border-gray-300 rounded-lg p-4 shadow-sm">
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-2">
-                                        {archivo.Estado.Id_Estado_Calidad_Agua === 1 ? (
+                                        {archivo.Visible ? (
                                             <>
                                                 <Eye size={18} className="text-green-600" />
-                                                <span className="text-sm font-semibold text-green-700">{archivo.Estado.Nombre_Estado}</span>
+                                                <span className="text-sm font-semibold text-green-700">Visible</span>
                                             </>
                                         ) : (
                                             <>
                                                 <EyeOff size={18} className="text-red-600" />
-                                                <span className="text-sm font-semibold text-red-700">{archivo.Estado.Nombre_Estado}</span>
+                                                <span className="text-sm font-semibold text-red-700">Oculto</span>
                                             </>
                                         )}
                                     </div>
                                     <button
                                         onClick={handleToggleVisibility}
-                                        className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${archivo.Estado.Id_Estado_Calidad_Agua === 1
+                                        className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${archivo.Visible
                                             ? 'bg-red-100 text-red-700 hover:bg-red-200'
                                             : 'bg-green-100 text-green-700 hover:bg-green-200'
                                             }`}
-                                        disabled={setVisible.isPending}
+                                        disabled={toggleVisibilidad.isPending}
                                     >
-                                        {setVisible.isPending
+                                        {toggleVisibilidad.isPending
                                             ? 'Cambiando...'
-                                            : archivo.Estado.Id_Estado_Calidad_Agua === 1
+                                            : archivo.Visible
                                                 ? 'Ocultar'
                                                 : 'Mostrar'
                                         }
                                     </button>
                                 </div>
                                 <p className="text-xs text-gray-600 mt-2">
-                                    {archivo.Estado.Id_Estado_Calidad_Agua === 1
+                                    {archivo.Visible
                                         ? 'Este archivo es visible para los usuarios públicos'
                                         : 'Este archivo está oculto y no aparece en la vista pública'
                                     }

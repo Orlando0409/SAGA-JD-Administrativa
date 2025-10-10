@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useGetCalidadAgua, useSetVisibleCalidadAgua } from "../Hook/HookCalidadAgua";
+import { useGetCalidadAgua, useToggleVisibilidadCalidadAgua } from "../Hook/HookCalidadAgua";
 import CalidadAguaModal from "./CalidadAguaModal";
 import FormularioCalidadAgua from "./FormularioCalidadAgua";
 import { FileText, Plus, Eye, EyeOff } from "lucide-react";
@@ -7,7 +7,7 @@ import type { ArchivoCalidadAgua } from "../Models/CalidadDeAgua";
 
 export default function CalidadAguaTable() {
   const { data: archivos, isLoading, isError, refetch } = useGetCalidadAgua(); // Obtener los archivos
-  const setVisible = useSetVisibleCalidadAgua(); // Hook para cambiar visibilidad
+  const toggleVisibilidad = useToggleVisibilidadCalidadAgua(); // Hook para cambiar visibilidad
 
   const [modalOpen, setModalOpen] = useState(false); // Controla la visibilidad del modal para editar
   const [formVisible, setFormVisible] = useState(false); // Controla la visibilidad del formulario para crear
@@ -23,13 +23,9 @@ export default function CalidadAguaTable() {
     setArchivoSeleccionado(null);
   };
 
-  const handleToggleVisible = (e: React.MouseEvent, id: number, currentEstado: { Id_Estado_Calidad_Agua: number }) => {
+  const handleToggleVisible = (e: React.MouseEvent, id: number) => {
     e.stopPropagation(); // Evitar que se abra el modal
-    const isCurrentlyVisible = currentEstado.Id_Estado_Calidad_Agua === 1;
-    setVisible.mutate({
-      id,
-      visible: !isCurrentlyVisible
-    });
+    toggleVisibilidad.mutate(id);
   };
 
   return (
@@ -97,22 +93,22 @@ export default function CalidadAguaTable() {
                   </td>
                   <td className="px-2 sm:px-4 py-3 text-xs sm:text-sm text-slate-700 align-top">
                     <button
-                      onClick={(e) => handleToggleVisible(e, archivo.Id_Calidad_Agua, archivo.Estado)}
-                      className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium transition-colors ${archivo.Estado.Id_Estado_Calidad_Agua === 1
+                      onClick={(e) => handleToggleVisible(e, archivo.Id_Calidad_Agua)}
+                      className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium transition-colors ${archivo.Visible
                         ? 'bg-green-100 text-green-700 hover:bg-green-200'
                         : 'bg-red-100 text-red-700 hover:bg-red-200'
                         }`}
-                      disabled={setVisible.isPending}
+                      disabled={toggleVisibilidad.isPending}
                     >
-                      {archivo.Estado.Id_Estado_Calidad_Agua === 1 ? (
+                      {archivo.Visible ? (
                         <>
                           <Eye size={14} />
-                          {archivo.Estado.Nombre_Estado}
+                          Visible
                         </>
                       ) : (
                         <>
                           <EyeOff size={14} />
-                          {archivo.Estado.Nombre_Estado}
+                          Oculto
                         </>
                       )}
                     </button>

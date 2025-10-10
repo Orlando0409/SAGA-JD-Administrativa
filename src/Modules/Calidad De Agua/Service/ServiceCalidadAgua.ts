@@ -6,8 +6,8 @@ export const getArchivosCalidadAgua = async (): Promise<ArchivoCalidadAgua[]> =>
   return res.data;
 };
 
-export const uploadArchivoCalidadAgua = async (formData: FormData): Promise<ArchivoCalidadAgua> => {
-  const res = await apiAuth.post("/calidad-agua/create", formData, {
+export const uploadArchivoCalidadAgua = async (formData: FormData, idUsuarioCreador: number): Promise<ArchivoCalidadAgua> => {
+  const res = await apiAuth.post(`/calidad-agua/create/${idUsuarioCreador}`, formData, {
     headers: {
       "Content-Type": "multipart/form-data",
     },
@@ -36,9 +36,8 @@ export const deleteArchivoCalidadAgua = async (id: number): Promise<void> => {
     }
 };
 
-// ✅ CORREGIDO: Usar la ruta correcta del controlador
-export const setEstadoArchivoCalidadAgua = async (id: number, esVisible: boolean): Promise<ArchivoCalidadAgua> => {
-  const estadoId = esVisible ? 1 : 2; // 1 = Activo/Visible, 2 = Inactivo/Oculto
-  const res = await apiAuth.patch(`/calidad-agua/update/estado/${id}/${estadoId}`);
+// Función para cambiar visibilidad
+export const toggleVisibilidadArchivoCalidadAgua = async (id: number): Promise<ArchivoCalidadAgua> => {
+  const res = await apiAuth.patch(`/calidad-agua/update/visibilidad/${id}`);
   return res.data;
 };

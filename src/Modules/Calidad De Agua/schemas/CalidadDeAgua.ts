@@ -20,7 +20,7 @@ export const CalidadAguaSchema = z.object({
     }, "El archivo no puede ser mayor a 10MB")
 });
 
-// ✅ Esquema para actualización (todos los campos opcionales excepto ID)
+// Esquema para actualización (todos los campos opcionales excepto ID)
 export const CalidadAguaUpdateSchema = z.object({
   Id_Calidad_Agua: z.number(),
   Titulo: z
@@ -43,6 +43,6 @@ export const CalidadAguaUpdateSchema = z.object({
     }, "El archivo no puede ser mayor a 10MB")
 });
 
-// ✅ Tipos TypeScript inferidos de los esquemas
+//  Tipos TypeScript inferidos de los esquemas
 export type CalidadAguaFormType = z.infer<typeof CalidadAguaSchema>;
 export type CalidadAguaUpdateType = z.infer<typeof CalidadAguaUpdateSchema>;

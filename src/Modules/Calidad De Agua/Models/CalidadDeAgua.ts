@@ -4,32 +4,31 @@ export interface ArchivoCalidadAgua {
   Titulo: string;          // Título del archivo
   Url_Archivo: string;     // URL del archivo subido
   Fecha_Creacion: string;  
-  Fecha_Actualizacion: string; // Fecha de creación
-  Estado: {
-    Id_Estado_Calidad_Agua: number;
-    Nombre_Estado: string;
-  }; // Estado de visibilidad mediante relación
+  Fecha_Actualizacion: string; // Fecha de actualización
+  Visible: boolean;        // Campo de visibilidad (true = visible, false = oculto)
+  Usuario_Creador: {       // Usuario que creó el registro
+    Id_Usuario: number;
+    Nombre_Usuario: string;
+    Id_Rol: number;
+    Nombre_Rol: string;
+  };
 }
 
 export const ArchivoCalidadAguaInicial: ArchivoCalidadAgua = {
     Id_Calidad_Agua: 0,
     Titulo: '',
-    Url_Archivo: '', // URL del archivo PDF en el servidor
+    Url_Archivo: '', 
     Fecha_Creacion: '',
-    Fecha_Actualizacion: '', // Fecha de creación
-    Estado: {
-        Id_Estado_Calidad_Agua: 1, // Estado activo por defecto
-        Nombre_Estado: 'Activo'
+    Fecha_Actualizacion: '',
+    Visible: false, // Por defecto oculto hasta que se active
+    Usuario_Creador: {
+        Id_Usuario: 0,
+        Nombre_Usuario: '',
+        Id_Rol: 0,
+        Nombre_Rol: ''
     }
 }
 export interface CalidadAguaFormData {
-   Id_Calidad_Agua: number;
   Titulo: string;
-  Url_Archivo: string; // URL del archivo PDF en el servidor
-  Fecha_Creacion: string;
-  Fecha_Actualizacion: string; // Fecha de actualización
-  Estado: {
-    Id_Estado_Calidad_Agua: number;
-    Nombre_Estado: string;
-  }; // Estado mediante relación
+  Archivo_Calidad_Agua: File | null; // Archivo a subir
 }
