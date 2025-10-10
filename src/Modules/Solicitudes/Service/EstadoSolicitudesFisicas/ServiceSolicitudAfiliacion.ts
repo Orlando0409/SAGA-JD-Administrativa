@@ -4,6 +4,10 @@ import type { SolicitudFisica } from "../../Models/ModelosFisicas";
 
 export class ServiceSolicitudAfiliacion {
     
+
+
+
+    
     
      // PUT - Actualizar estado de una solicitud de afiliación física
      

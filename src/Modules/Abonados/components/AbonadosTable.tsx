@@ -10,6 +10,9 @@ import type { AfiliadoJuridico } from '../Models/TablaAfiliados/ModeloAfiliadoJu
 import FormularioAfiliados from './FormularioAfiliados';
 
 // Tipo unificado para la tabla
+
+
+
 type AfiliadoUnificado = {
     Id: number;
     Nombre_Completo: string;

@@ -20,6 +20,9 @@ export default function FormularioAfiliados({ isOpen, onClose, onSuccess }: Form
     Planos_Terreno?: File;
   }>({});
 
+
+
+  
   const [archivosJuridico, setArchivosJuridico] = useState<{
     Escritura_Terreno?: File;
     Planos_Terreno?: File;

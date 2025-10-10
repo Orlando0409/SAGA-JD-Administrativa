@@ -6,6 +6,10 @@ export interface AfiliadoFisico {
     Apellido1: string
     Apellido2?: string
   
+
+
+
+    
     Numero_Telefono: string
      Identificacion: string;
     Correo: string

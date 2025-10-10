@@ -16,6 +16,8 @@ interface CreateModalProps {
 
 type TipoFormulario = 'afiliado-fisico' | 'afiliado-juridico';
 
+
+
 const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
     const [tipoActivo, setTipoActivo] = useState<TipoFormulario>('afiliado-fisico');
     const [isSubmitting, setIsSubmitting] = useState(false);

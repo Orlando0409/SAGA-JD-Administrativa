@@ -4,6 +4,9 @@ export interface AfiliadoJuridico {
     Cedula_Juridica: string
     Numero_Telefono: string
    
+
+
+    
     Correo: string
     Direccion_Exacta?: string
     Estado: {

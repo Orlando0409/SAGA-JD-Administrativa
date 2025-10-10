@@ -9,6 +9,9 @@ import type { SolicitudFisica } from '../Models/ModelosFisicas';
 export const useRefetchAllSolicitudesFisicas = () => {
     const queryClient = useQueryClient();
     
+
+
+    
     const refetchAll = async () => {
         try {
             // Invalidar todas las queries relacionadas con solicitudes físicas

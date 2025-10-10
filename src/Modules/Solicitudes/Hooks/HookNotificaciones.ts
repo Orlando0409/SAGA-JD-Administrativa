@@ -10,6 +10,9 @@ import type { SolicitudJuridica } from '../Models/ModelosJuridicos';
  * 🔄 Hook para refrescar todas las notificaciones de solicitudes
  * Útil para refresh manual después de operaciones CRUD
  */
+
+
+
 export const useRefreshNotificaciones = () => {
     const queryClient = useQueryClient();
     

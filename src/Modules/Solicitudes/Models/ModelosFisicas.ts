@@ -22,6 +22,9 @@ export interface SolicitudFisicaBase {
    
 }
 
+
+
+
 export interface SolicitudAfiliacionFisica extends SolicitudFisicaBase {
     Direccion_Exacta: string;
     Edad: number;

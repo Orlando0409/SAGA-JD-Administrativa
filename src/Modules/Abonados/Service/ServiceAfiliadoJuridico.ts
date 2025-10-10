@@ -7,6 +7,10 @@ export async function getAfiliadosJuridicos(): Promise<AfiliadoJuridico[]> {
     return response.data;
 }
 
+
+
+
+
 export const createAfiliadoJuridico = async (formData: FormData) => {
     console.log("🚀 Hook - Enviando FormData:", formData);
 

@@ -15,6 +15,9 @@ export interface SolicitudJuridicaBase {
 }
 
 
+
+
+
 export interface SolicitudAfiliacionJuridica extends SolicitudJuridicaBase {
     Direccion_Exacta: string;
     Planos_Terreno: File | string;

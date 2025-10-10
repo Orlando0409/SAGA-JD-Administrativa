@@ -10,6 +10,10 @@ type SolicitudParaEditar = {
     datos: SolicitudFisica | SolicitudJuridica;
 };
 
+
+
+
+
 interface EditSolicitudModalProps {
     isOpen: boolean;
     onClose: () => void;

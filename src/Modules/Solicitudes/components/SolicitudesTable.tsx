@@ -70,6 +70,9 @@ export default function SolicitudesTable() {
     const datosUnificados = useMemo((): SolicitudUnificada[] => {
       
 
+
+        
+
         // Validar que los datos sean arrays
         const solicitudesFisicasArray = Array.isArray(solicitudesFisicas) ? solicitudesFisicas : [];
         const solicitudesJuridicasArray = Array.isArray(solicitudesJuridicas) ? solicitudesJuridicas : [];
@@ -332,6 +335,10 @@ export default function SolicitudesTable() {
 
                 </div>
             </div>
+
+
+
+            
 
             <div className="overflow-x-auto rounded-2xl border border-sky-100 shadow-sm bg-white">
                 <table className="min-w-full table-auto">

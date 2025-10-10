@@ -6,6 +6,8 @@ const Abonados = () => {
     navigate({ to: '/Home' });
   }
 
+
+// Componente Abonados
   return (
     <div className='w-full flex flex-col items-start h-full'>
       <div className="w-full mt-4">

@@ -9,6 +9,10 @@ import type {
     SolicitudAsociadoFisica
 } from "../Models/ModelosFisicas";
 
+
+
+
+
 //Servicio para gestionar solicitudes de personas físicas
 
 export class SolicitudesFisicasService {

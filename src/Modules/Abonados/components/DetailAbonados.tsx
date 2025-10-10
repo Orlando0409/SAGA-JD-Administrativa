@@ -35,6 +35,9 @@ const DetailAbonados: React.FC<DetailAbonadosProps> = ({ persona, isOpen, onClos
         )
     }
 
+
+
+    
     const handleDelete = async () => {
         const personaInfo = getPersonaInfo();
         const nombreCompleto = personaInfo.nombre;

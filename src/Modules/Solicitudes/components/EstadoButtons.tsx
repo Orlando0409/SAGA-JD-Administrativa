@@ -13,6 +13,9 @@ import { useAprobarSolicitudAsociadoJuridico, useRechazarSolicitudAsociadoJuridi
 import { useAprobarSolicitudCambioMedidorJuridica, useRechazarSolicitudCambioMedidorJuridica } from '../Hooks/Juridico Update/HookCambioMedidorJuridico';
 import { useAprobarSolicitudDesconexionJuridica, useRechazarSolicitudDesconexionJuridica } from '../Hooks/Juridico Update/HookDesconexionMedidor';
 
+
+
+
 interface EstadoButtonsProps {
     solicitudId: string | number;
     estadoActual?: string;

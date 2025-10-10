@@ -29,6 +29,9 @@ export const AfiliadoFisicoInicialState: AfiliadoFisico = {
     Tipo_Identificacion: "Cedula Nacional"
 }
 
+
+
+
 export interface AfiliacionFisicaFormData {
     Nombre: string;
     Apellido1: string;

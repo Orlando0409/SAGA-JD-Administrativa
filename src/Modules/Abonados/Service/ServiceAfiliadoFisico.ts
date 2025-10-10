@@ -7,6 +7,9 @@ export async function getAfiliadosFisicos(): Promise<AfiliadoFisico[]> {
     return response.data;
 }
 
+
+
+
 // En tu Hook o Service
 export const createAfiliadoFisico = async (formData: FormData) => {
     console.log("🚀 Hook - Enviando FormData:", formData);

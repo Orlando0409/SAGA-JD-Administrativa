@@ -99,6 +99,9 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
                 solicitudId = datos.Cedula_Juridica || `temp-${Date.now()}`;
             }
 
+
+            
+
             return {
                 id: solicitudId,
                 nombre: datos.Razon_Social || 'Sin razón social',

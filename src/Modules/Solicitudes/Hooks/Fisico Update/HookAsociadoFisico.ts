@@ -9,6 +9,9 @@ import { ServiceSolicitudAsociado } from '../../Service/EstadoSolicitudesFisicas
 export const useMutateEstadoSolicitudAsociado = () => {
     const queryClient = useQueryClient();
 
+
+
+    
     return useMutation({
         mutationFn: ({ solicitudId, nuevoEstadoId }: { 
             solicitudId: string | number; 

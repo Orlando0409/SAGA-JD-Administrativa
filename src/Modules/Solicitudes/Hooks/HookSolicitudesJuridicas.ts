@@ -9,6 +9,9 @@ import type { SolicitudJuridica } from '../Models/ModelosJuridicos';
 export const useRefetchAllSolicitudesJuridicas = () => {
     const queryClient = useQueryClient();
     
+
+
+    
     const refetchAll = async () => {
         try {
             // Invalidar todas las queries relacionadas con solicitudes jurídicas

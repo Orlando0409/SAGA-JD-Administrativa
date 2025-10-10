@@ -23,6 +23,9 @@ const FilterModal: React.FC<FilterModalProps> = ({ isOpen, onClose, onApplyFilte
         onClose();
     };
 
+
+
+    
     const handleClear = () => {
         const clearFilters: FilterOptions = {
             estado: '',

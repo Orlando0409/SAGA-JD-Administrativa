@@ -10,6 +10,9 @@ import "react-phone-number-input/style.css";
 import { AfiliadoFisicoEditSchema } from '../Schemas/AfiliadoFisico';
 import { AfiliacionJuridicaEditSchema } from '../Schemas/AfiliadoJuridico';
 
+
+
+
 // Tipo unificado para identificar qué estamos editando
 type PersonaParaEditar = {
     tipo: 'afiliado-fisico' | 'afiliado-juridico';

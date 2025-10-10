@@ -10,6 +10,10 @@ import type {
 } from "../Models/ModelosJuridicos";
 
 
+
+
+
+
 export class SolicitudesJuridicasService {
     
    

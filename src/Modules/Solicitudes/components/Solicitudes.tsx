@@ -7,6 +7,9 @@ const Solicitudes = () => {
     navigate({ to: '/Home' });
   }
 
+
+  
+
   return (
     <div className='w-full flex flex-col items-start h-full'>
       <SolicitudesTable />

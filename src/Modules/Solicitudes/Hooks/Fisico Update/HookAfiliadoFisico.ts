@@ -8,6 +8,8 @@ import { ServiceSolicitudAfiliacion } from '../../Service/EstadoSolicitudesFisic
 export const useMutateEstadoSolicitud = () => {
     const queryClient = useQueryClient();
 
+
+    
     return useMutation({
         mutationFn: ({ solicitudId, nuevoEstadoId }: { 
             solicitudId: string | number; 

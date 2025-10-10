@@ -8,6 +8,9 @@ import { ServiceSolicitudDesconexionMedidor } from '../../Service/EstadoSolicitu
 export const useMutateEstadoSolicitudDesconexion = () => {
     const queryClient = useQueryClient();
 
+
+
+    
     return useMutation({
         mutationFn: ({ solicitudId, nuevoEstadoId }: { 
             solicitudId: string | number; 

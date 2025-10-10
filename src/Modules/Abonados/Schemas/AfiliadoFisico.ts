@@ -9,6 +9,9 @@ const BaseAfiliadoSchema = z.object({
     .email('El correo electrónico debe tener un formato válido')
     .regex(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/, 'El formato del correo electrónico no es válido'),
 
+
+
+    
   Numero_Telefono: z.string()
     .min(1, 'El número de teléfono no puede estar vacío')
     .refine(
