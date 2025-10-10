@@ -3,6 +3,7 @@ import { LuX, LuPlus } from 'react-icons/lu';
 import {  useGetAllCategories } from '../../hooks/useCategorias';
 import { useCreateMaterial } from '../../hooks/useMaterials';
 import { useUnidadesMedicionSimple } from '../../hooks/HookUnidadMedicion';
+import { useProveedoresJuridicos } from '@/Modules/Proveedores/Hook/hookjuridicoproveedor';
 import { CreateMaterialSchema, type CreateMaterialSchemaData } from '../../schema/CreateMaterialSchema';
 import type { CreateMaterialModalProps } from '../../types/MaterialTypes';
 import type { CreateMaterialData, CategoriaMaterial } from '../../models/Inventario';
@@ -14,12 +15,15 @@ import {
   DESCRIPCION_MAX_LENGTH, 
   PRECIO_MIN 
 } from '../../types/MaterialTypes';
+import { useProveedoresFisicos } from '@/Modules/Proveedores/Hook/hookFisicoProveedor';
 
 const CreateMaterialModal: React.FC<CreateMaterialModalProps> = ({ isOpen, onClose }) => {
   const { user } = useAuth();
   const createMaterialMutation = useCreateMaterial();
   const { data: categories = [] } = useGetAllCategories();
   const { data: unidadesMedicion = [] } = useUnidadesMedicionSimple();
+  const { proveedoresFisicos = [] } = useProveedoresFisicos();
+  const { proveedoresJuridicos = [] } = useProveedoresJuridicos();
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [fieldCharCounts, setFieldCharCounts] = useState({
     nombreMaterial: 0,
@@ -35,6 +39,8 @@ const CreateMaterialModal: React.FC<CreateMaterialModalProps> = ({ isOpen, onClo
     Cantidad: 1,
     Precio_Unitario: 5,
     IDS_Categorias: [],
+    Id_Tipo_Proveedor: undefined,
+    Id_Proveedor: undefined,
   });
 
   const createInputHandler = (fieldName: keyof CreateMaterialSchemaData, maxLength: number) => {
@@ -85,7 +91,9 @@ const CreateMaterialModal: React.FC<CreateMaterialModalProps> = ({ isOpen, onClo
         Id_Unidad_Medicion: formData.Id_Unidad_Medicion,
         Cantidad: formData.Cantidad,
         Precio_Unitario: formData.Precio_Unitario,
-        IDS_Categorias: formData.IDS_Categorias ?? []
+        IDS_Categorias: formData.IDS_Categorias ?? [],
+        Id_Tipo_Proveedor: formData.Id_Tipo_Proveedor,
+        Id_Proveedor: formData.Id_Proveedor,
       };
 
       await createMaterialMutation.mutateAsync({
@@ -100,6 +108,8 @@ const CreateMaterialModal: React.FC<CreateMaterialModalProps> = ({ isOpen, onClo
         Cantidad: 1,
         Precio_Unitario: 5,
         IDS_Categorias: [],
+        Id_Tipo_Proveedor: undefined,
+        Id_Proveedor: undefined,
       });
       setFieldCharCounts({ nombreMaterial: 0, descripcion: 0 });
     } catch (error) {
@@ -143,7 +153,7 @@ const CreateMaterialModal: React.FC<CreateMaterialModalProps> = ({ isOpen, onClo
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-white bg-opacity-95 flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-opacity-10 backdrop-blur-sm flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg shadow-2xl border border-gray-200 w-full max-w-md mx-4 max-h-[90vh] overflow-hidden">
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <h2 className="text-xl font-semibold text-gray-900">Crear Nuevo Material</h2>
@@ -264,6 +274,58 @@ const CreateMaterialModal: React.FC<CreateMaterialModalProps> = ({ isOpen, onClo
                 <p className="text-red-500 text-xs mt-1">{formErrors.Precio_Unitario}</p>
               )}
             </div>
+
+            <div>
+              <label htmlFor="tipo-proveedor" className="block text-sm font-medium text-gray-700 mb-1">
+                Tipo de Proveedor (Opcional)
+              </label>
+              <select
+                id="tipo-proveedor"
+                value={formData.Id_Tipo_Proveedor || ''}
+                onChange={(e) => {
+                  const tipoProveedor = e.target.value ? parseInt(e.target.value) : undefined;
+                  setFormData(prev => ({ 
+                    ...prev, 
+                    Id_Tipo_Proveedor: tipoProveedor,
+                    Id_Proveedor: undefined // Resetear proveedor cuando cambia el tipo
+                  }));
+                }}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="">Sin proveedor</option>
+                <option value="1">Proveedor Físico</option>
+                <option value="2">Proveedor Jurídico</option>
+              </select>
+            </div>
+
+            {formData.Id_Tipo_Proveedor && (
+              <div>
+                <label htmlFor="proveedor" className="block text-sm font-medium text-gray-700 mb-1">
+                  Proveedor <span className="text-red-500">*</span>
+                </label>
+                <select
+                  id="proveedor"
+                  value={formData.Id_Proveedor || ''}
+                  onChange={(e) => setFormData(prev => ({ 
+                    ...prev, 
+                    Id_Proveedor: e.target.value ? parseInt(e.target.value) : undefined 
+                  }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="">Seleccionar proveedor</option>
+                  {formData.Id_Tipo_Proveedor === 1 && proveedoresFisicos.map((proveedor) => (
+                    <option key={proveedor.Id_Proveedor} value={proveedor.Id_Proveedor}>
+                      {proveedor.Nombre_Proveedor}
+                    </option>
+                  ))}
+                  {formData.Id_Tipo_Proveedor === 2 && proveedoresJuridicos.map((proveedor) => (
+                    <option key={proveedor.Id_Proveedor} value={proveedor.Id_Proveedor}>
+                      {proveedor.Razon_Social}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
 
             <div>
               <div className="flex items-center justify-between mb-1">

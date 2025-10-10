@@ -98,7 +98,8 @@ export const useMovimientoForm = (initialMaterial?: Material) => {
     try {
       const movimientoData = {
         Id_Material: selectedMaterial!.Id_Material,
-        Cantidad: cantidad
+        Cantidad: cantidad,
+        Observaciones: descripcion
       };
 
       if (tipoMovimiento === 'entrada') {

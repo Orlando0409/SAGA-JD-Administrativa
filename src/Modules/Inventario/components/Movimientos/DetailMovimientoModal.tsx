@@ -30,8 +30,8 @@ const DetailMovimientoModal: React.FC<DetailMovimientoModalProps> = ({
           <div className="space-y-4">
             <div>
               <div className="text-sm font-medium text-gray-700 mb-1">Tipo de Movimiento</div>
-              <span className={`inline-flex px-2 py-1 text-sm font-semibold rounded-full ${
-                isIngreso ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+              <span className={`inline-flex px-3 py-2 text-sm font-semibold rounded-lg ${
+                isIngreso ? 'text-green-600' : 'text-red-600'
               }`}>
                 {movimiento.Tipo_Movimiento}
               </span>
@@ -39,21 +39,21 @@ const DetailMovimientoModal: React.FC<DetailMovimientoModalProps> = ({
 
             <div>
               <div className="text-sm font-medium text-gray-700 mb-1">Material</div>
-              <p className="text-lg font-semibold text-gray-900">
+              <p className="text-sm text-gray-900">
                 {movimiento.Material?.Nombre_Material || 'Material no disponible'}
               </p>
             </div>
 
             <div>
               <div className="text-sm font-medium text-gray-700 mb-1">Cantidad</div>
-              <p className="text-lg font-semibold text-gray-900">
+              <p className="text-sm text-gray-900">
                 {movimiento.Cantidad} {movimiento.Material?.Unidad_Medicion?.Nombre_Unidad_Medicion || movimiento.Material?.Unidad_Medicion?.Nombre_Unidad}
               </p>
             </div>
 
             <div>
               <div className="text-sm font-medium text-gray-700 mb-1">Fecha</div>
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-gray-900">
                 {fechaMovimiento.toLocaleDateString('es-ES', {
                   year: 'numeric',
                   month: 'long',
@@ -67,21 +67,21 @@ const DetailMovimientoModal: React.FC<DetailMovimientoModalProps> = ({
             {movimiento.Motivo && (
               <div>
                 <div className="text-sm font-medium text-gray-700 mb-1">Motivo</div>
-                <p className="text-gray-700">{movimiento.Motivo}</p>
+                <p className="text-sm text-gray-900">{movimiento.Motivo}</p>
               </div>
             )}
 
             {movimiento.Usuario_Creador && (
               <div>
                 <div className="text-sm font-medium text-gray-700 mb-1">Usuario</div>
-                <p className="text-gray-700">{movimiento.Usuario_Creador.Nombre_Usuario}</p>
+                <p className="text-sm text-gray-900">{movimiento.Usuario_Creador.Nombre_Usuario}</p>
               </div>
             )}
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <div className="text-sm font-medium text-gray-700 mb-1">Cantidad Anterior</div>
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-gray-900">
                   {movimiento.Cantidad_Anterior} {movimiento.Material?.Unidad_Medicion?.Nombre_Unidad_Medicion || movimiento.Material?.Unidad_Medicion?.Nombre_Unidad}
                 </p>
               </div>
@@ -97,7 +97,7 @@ const DetailMovimientoModal: React.FC<DetailMovimientoModalProps> = ({
               
               <div>
                 <div className="text-sm font-medium text-gray-700 mb-1">Cantidad Nueva</div>
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-gray-900">
                   {movimiento.Cantidad_Nueva} {movimiento.Material?.Unidad_Medicion?.Nombre_Unidad_Medicion || movimiento.Material?.Unidad_Medicion?.Nombre_Unidad}
                 </p>
               </div>
@@ -106,7 +106,7 @@ const DetailMovimientoModal: React.FC<DetailMovimientoModalProps> = ({
             {movimiento.Observaciones && (
               <div>
                 <div className="text-sm font-medium text-gray-700 mb-1">Observaciones</div>
-                <p className="text-gray-700">{movimiento.Observaciones}</p>
+                <p className="text-sm text-gray-900">{movimiento.Observaciones}</p>
               </div>
             )}
           </div>

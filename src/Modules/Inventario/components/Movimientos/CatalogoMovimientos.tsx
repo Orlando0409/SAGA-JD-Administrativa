@@ -12,13 +12,10 @@ import {
 } from '@tanstack/react-table';
 import { 
   LuSearch, 
-  LuChevronUp, 
-  LuChevronDown,
   LuTrendingUp,
   LuTrendingDown,
   LuCalendar,
   LuUser,
-  LuPackage,
   LuArrowLeft,
   LuPlus,
   LuFilter
@@ -27,7 +24,9 @@ import {
   MdKeyboardArrowLeft, 
   MdKeyboardArrowRight, 
   MdKeyboardDoubleArrowLeft,
-  MdKeyboardDoubleArrowRight 
+  MdKeyboardDoubleArrowRight,
+  MdKeyboardArrowUp,
+  MdKeyboardArrowDown
 } from "react-icons/md";
 import { useGetAllMovimientos } from '../../hooks/HookMaterialMovimiento';
 import DetailMovimientoModal from './DetailMovimientoModal';
@@ -185,10 +184,7 @@ const CatalogoMovimientos: React.FC<CatalogoMovimientosProps> = ({ onBack }) => 
       id: 'material',
       header: 'Material',
       cell: ({ getValue }) => (
-        <div className="flex items-center gap-2">
-          <LuPackage className="text-gray-400" size={14} />
-          <span className="text-sm font-medium">{getValue() || 'N/A'}</span>
-        </div>
+        <span className="text-sm font-medium">{getValue() || 'N/A'}</span>
       ),
       size: 200,
     }),
@@ -433,16 +429,16 @@ const CatalogoMovimientos: React.FC<CatalogoMovimientosProps> = ({ onBack }) => 
         </div>
       </div>
 
-      <div className="bg-white shadow-sm rounded-lg border border-gray-200 overflow-hidden">
+      <div className="bg-white shadow-sm rounded-2xl border border-sky-100 overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+          <table className="min-w-full table-auto">
+            <thead className="bg-sky-50">
               {table.getHeaderGroups().map((headerGroup) => (
-                <tr key={headerGroup.id}>
+                <tr key={headerGroup.id} className="text-left text-xs sm:text-sm text-sky-700">
                   {headerGroup.headers.map((header) => (
                     <th
                       key={header.id}
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                      className="px-2 sm:px-4 py-3 font-medium border-b border-sky-100 cursor-pointer"
                       style={{ width: header.getSize() }}
                       onClick={header.column.getToggleSortingHandler()}
                     >
@@ -453,22 +449,10 @@ const CatalogoMovimientos: React.FC<CatalogoMovimientosProps> = ({ onBack }) => 
                             : flexRender(header.column.columnDef.header, header.getContext())}
                         </span>
                         {header.column.getCanSort() && (
-                          <div className="flex flex-col">
-                            <LuChevronUp
-                              className={`h-3 w-3 ${
-                                header.column.getIsSorted() === 'asc'
-                                  ? 'text-blue-600'
-                                  : 'text-gray-400'
-                              }`}
-                            />
-                            <LuChevronDown
-                              className={`h-3 w-3 -mt-1 ${
-                                header.column.getIsSorted() === 'desc'
-                                  ? 'text-blue-600'
-                                  : 'text-gray-400'
-                              }`}
-                            />
-                          </div>
+                          <span>
+                            {header.column.getIsSorted() === 'asc' && <MdKeyboardArrowUp className="inline" />}
+                            {header.column.getIsSorted() === 'desc' && <MdKeyboardArrowDown className="inline" />}
+                          </span>
                         )}
                       </div>
                     </th>
@@ -476,11 +460,11 @@ const CatalogoMovimientos: React.FC<CatalogoMovimientosProps> = ({ onBack }) => 
                 </tr>
               ))}
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="bg-white divide-y divide-sky-50">
               {table.getRowModel().rows.map((row) => (
-                <tr key={row.id} className="hover:bg-gray-50 transition-colors">
+                <tr key={row.id} className="hover:bg-sky-50 cursor-pointer transition-colors">
                   {row.getVisibleCells().map((cell) => (
-                    <td key={cell.id} className="px-6 py-4 whitespace-nowrap">
+                    <td key={cell.id} className="px-2 sm:px-4 py-3 text-xs sm:text-sm text-slate-700 align-top">
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </td>
                   ))}

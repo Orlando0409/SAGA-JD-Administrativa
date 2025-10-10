@@ -89,3 +89,75 @@ export const useUpdateMaterial = () => {
     },
   });
 };
+
+export const useUpdateEstadoMaterial = () => {
+  const queryClient = useQueryClient();
+  const { showSuccessWithUndo, showError } = useAlerts();
+
+  return useMutation({
+    mutationFn: ({ materialId, estadoMaterialId }: { materialId: number; estadoMaterialId: number }) =>
+      MaterialService.updateEstadoMaterial(materialId, estadoMaterialId),
+    onSuccess: (updatedMaterial, { materialId, estadoMaterialId }) => {
+      queryClient.invalidateQueries({ queryKey: ['materials'] });
+      queryClient.invalidateQueries({ queryKey: ['material', materialId] });
+      
+      // Determinar la acción realizada basándose en el estado enviado
+      let accion = 'actualizado';
+      let estadoAnterior = 1; // Por defecto
+      
+      if (estadoMaterialId === 1) {
+        // Intentó activar (De baja → Disponible)
+        accion = 'activado';
+        estadoAnterior = 3; // Para el undo vuelve a De baja
+      } else if (estadoMaterialId === 3) {
+        // Intentó dar de baja
+        // Puede resultar en "De baja" (3) o "Agotado y de baja" (4) según backend
+        const estadoFinal = updatedMaterial?.Estado_Material?.Id_Estado_Material;
+        if (estadoFinal === 4) {
+          accion = 'marcado como agotado y de baja';
+          estadoAnterior = 2; // Volver a Agotado
+        } else {
+          accion = 'dado de baja';
+          estadoAnterior = 1; // Volver a Disponible
+        }
+      } else if (estadoMaterialId === 2) {
+        // Quitó el estado de baja (Agotado y de baja → Agotado)
+        accion = 'marcado como agotado';
+        estadoAnterior = 4; // Volver a Agotado y de baja
+      }
+      
+      const undoAction = async () => {
+        try {
+          await MaterialService.updateEstadoMaterial(materialId, estadoAnterior);
+          queryClient.invalidateQueries({ queryKey: ['materials'] });
+          queryClient.invalidateQueries({ queryKey: ['material', materialId] });
+        } catch (error) {
+          showError('Error', 'No se pudo revertir el cambio');
+          console.error('Error reverting material state in undo action:', error);
+        }
+      };
+
+      showSuccessWithUndo(
+        `Material ${accion}`, 
+        `El material se ha ${accion} exitosamente`,
+        undoAction
+      );
+    },
+    onError: (error: any) => {
+      const errorMessage = error?.response?.data?.message || 'Error al actualizar el estado del material';
+      
+      // Mensaje específico para el error de cantidad 0
+      if (errorMessage.includes('cantidad en stock es 0') || errorMessage.includes('Disponible')) {
+        showError(
+          'No se puede activar', 
+          'No se puede activar un material con cantidad 0 en stock. Realice un movimiento de ingreso primero.'
+        );
+      } else {
+        showError('Error', errorMessage);
+      }
+      
+      console.error('Error updating material state:', error);
+    },
+  });
+};
+

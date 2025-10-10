@@ -87,13 +87,13 @@ const CategoriasManagement: React.FC<CategoriasManagementProps> = ({ onBack }) =
       cell: info => {
         const estado = info.getValue() || 'Activa';
         const isActiva = estado === 'Activa';
+        const colorClass = isActiva 
+          ? 'bg-emerald-100 text-emerald-700 border border-emerald-300'
+          : 'bg-slate-200 text-slate-700 border border-slate-400';
+        
         return (
           <div className="flex justify-start">
-            <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-              isActiva 
-                ? 'bg-green-100 text-green-800' 
-                : 'bg-red-100 text-red-800'
-            }`}>
+            <span className={`px-3 py-1 text-xs font-semibold rounded-full ${colorClass}`}>
               {estado}
             </span>
           </div>
@@ -311,14 +311,14 @@ const CategoriasManagement: React.FC<CategoriasManagementProps> = ({ onBack }) =
       </div>
 
       
-      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+      <div className="bg-white rounded-2xl shadow-sm border border-sky-100 overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50 justify-between">
+          <table className="min-w-full table-auto">
+            <thead className="bg-sky-50">
               {table.getHeaderGroups().map(headerGroup => (
-                <tr key={headerGroup.id}>
+                <tr key={headerGroup.id} className="text-left text-xs sm:text-sm text-sky-700">
                   {headerGroup.headers.map((header, index) => (
-                    <th key={header.id} className={`px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider ${
+                    <th key={header.id} className={`px-2 sm:px-4 py-3 font-medium border-b border-sky-100 ${
                       index === 0 ? 'text-left' : 'text-center'
                     }`}>
                       {(() => {
@@ -342,9 +342,11 @@ const CategoriasManagement: React.FC<CategoriasManagementProps> = ({ onBack }) =
                               tabIndex={0}
                               aria-label={`Ordenar por ${header.column.columnDef.header as string}`}
                             >
-                              {header.column.columnDef.header as string}
-                              {header.column.getIsSorted() === 'asc' && <MdKeyboardArrowUp className="w-4 h-4" />}
-                              {header.column.getIsSorted() === 'desc' && <MdKeyboardArrowDown className="w-4 h-4" />}
+                              <span className="flex items-center gap-1">
+                                {header.column.columnDef.header as string}
+                                {header.column.getIsSorted() === 'asc' && <MdKeyboardArrowUp className="inline" />}
+                                {header.column.getIsSorted() === 'desc' && <MdKeyboardArrowDown className="inline" />}
+                              </span>
                             </button>
                           );
                         }
@@ -359,18 +361,18 @@ const CategoriasManagement: React.FC<CategoriasManagementProps> = ({ onBack }) =
                 </tr>
               ))}
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="bg-white divide-y divide-sky-50">
               {table.getRowModel().rows.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="px-6 py-8 text-center text-gray-500">
+                  <td colSpan={4} className="px-2 sm:px-4 py-8 text-center text-slate-500">
                     {globalFilter ? 'No se encontraron categorías que coincidan con la búsqueda' : 'No hay categorías registradas'}
                   </td>
                 </tr>
               ) : (
                 table.getRowModel().rows.map(row => (
-                  <tr key={row.id} className="hover:bg-gray-50">
+                  <tr key={row.id} className="hover:bg-sky-50 cursor-pointer transition-colors">
                     {row.getVisibleCells().map((cell, index) => (
-                      <td key={cell.id} className={`px-6 py-4 whitespace-nowrap ${
+                      <td key={cell.id} className={`px-2 sm:px-4 py-3 text-xs sm:text-sm text-slate-700 align-top ${
                         index === 0 ? 'text-left' : 'text-center'
                       }`}>
                         {cell.column.columnDef.cell ? 

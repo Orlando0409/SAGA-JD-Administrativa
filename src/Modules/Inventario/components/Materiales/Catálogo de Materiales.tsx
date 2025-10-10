@@ -6,6 +6,7 @@ import {
   getSortedRowModel,
   getPaginationRowModel,
   createColumnHelper,
+  flexRender,
 } from '@tanstack/react-table';
 import { LuPlus, LuFilter, LuSearch, LuArrowLeft } from 'react-icons/lu';
 import { 
@@ -14,11 +15,21 @@ import {
   useGetMaterialesSinCategorias,
   useGetMaterialesPorDebajoDeStock,
   useGetMaterialesPorEncimaDeStock,
+  useUpdateEstadoMaterial,
 } from '../../hooks/useMaterials';
 import { MdKeyboardArrowLeft, MdKeyboardArrowRight, MdKeyboardDoubleArrowLeft,
-  MdKeyboardDoubleArrowRight, 
-  MdKeyboardArrowDown,
-  MdKeyboardArrowUp} from "react-icons/md";
+  MdKeyboardDoubleArrowRight, MdKeyboardArrowUp, MdKeyboardArrowDown} from "react-icons/md";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/Modules/Global/components/Sidebar/ui/alert-dialog';
 
 import type { Material } from '../../models/Inventario';
 import type { MaterialFilterOptions } from '../../types/MaterialTypes';
@@ -40,6 +51,7 @@ const CatalogoMateriales: React.FC<CatalogoMaterialesProps> = ({ onBack }) => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [appliedFilters, setAppliedFilters] = useState<MaterialFilterOptions>({});
   const [estadoFilter, setEstadoFilter] = useState<string>('Disponible'); // Por defecto mostrar solo activos
+  const updateEstadoMutation = useUpdateEstadoMaterial();
   const { data: allMaterials = [], isLoading: isLoadingAll, refetch: refetchAllMaterials } = useGetAllMaterials();
   const { data: materialesConCategorias = [], isLoading: isLoadingConCat, refetch: refetchConCat } = useGetMaterialesConCategorias();
   const { data: materialesSinCategorias = [], isLoading: isLoadingSinCat, refetch: refetchSinCat } = useGetMaterialesSinCategorias();
@@ -172,7 +184,7 @@ const CatalogoMateriales: React.FC<CatalogoMaterialesProps> = ({ onBack }) => {
       columnHelper.accessor('Nombre_Material', {
         header: 'Material',
         cell: info => (
-          <div className="font-medium text-gray-900">
+          <div className="text-gray-600">
             {info.getValue()}
           </div>
         ),
@@ -188,7 +200,7 @@ const CatalogoMateriales: React.FC<CatalogoMaterialesProps> = ({ onBack }) => {
       columnHelper.accessor('Cantidad', {
         header: 'Cantidad',
         cell: info => (
-          <div className={`font-semibold ${info.getValue() <= 0 ? 'text-red-600' : 'text-green-600'}`}>
+          <div className={` ${info.getValue() <= 0 ? 'text-red-600' : 'text-green-600'}`}>
             {info.getValue()}
           </div>
         ),
@@ -214,13 +226,19 @@ const CatalogoMateriales: React.FC<CatalogoMaterialesProps> = ({ onBack }) => {
         cell: info => {
           const estado = info.getValue();
           let colorClass = '';
+          
           if (estado === 'Disponible') {
-            colorClass = 'bg-green-100 text-green-800';
+            colorClass = 'bg-emerald-100 text-emerald-700 border border-emerald-300';
           } else if (estado === 'Agotado') {
-            colorClass = 'bg-red-100 text-red-800';
-          } 
+            colorClass = 'bg-red-100 text-red-700 border border-red-300';
+          } else if (estado === 'De baja') {
+            colorClass = 'bg-slate-200 text-slate-700 border border-slate-400';
+          } else if (estado === 'Agotado y de baja') {
+            colorClass = 'bg-amber-100 text-amber-700 border border-amber-300';
+          }
+          
           return (
-            <span className={`px-2 py-1 rounded-full text-sm font-medium ${colorClass}`}>
+            <span className={`px-3 py-1 rounded-full text-xs font-semibold ${colorClass}`}>
               {estado}
             </span>
           );
@@ -277,12 +295,190 @@ const CatalogoMateriales: React.FC<CatalogoMaterialesProps> = ({ onBack }) => {
             >
               Editar
             </button>
+            {(() => {
+              const estadoNombre = info.row.original.Estado_Material?.Nombre_Estado_Material;
+              const cantidad = info.row.original.Cantidad;
+              
+              // Estado 1: Disponible → Mostrar botón "Dar de baja"
+              if (estadoNombre === 'Disponible') {
+                return (
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <button
+                        className="px-2 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-700 transition-colors"
+                        disabled={updateEstadoMutation.isPending}
+                        title="Dar de baja"
+                      >
+                        Dar de baja
+                      </button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>
+                          <span>¿Dar de baja material?</span>
+                        </AlertDialogTitle>
+                        <AlertDialogDescription>
+                          <span>¿Estás seguro de que deseas dar de baja el material "{info.row.original.Nombre_Material}"?</span>
+                          <br />
+                          <span>Esta acción puede revertirse posteriormente.</span>
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogAction
+                          onClick={() => handleToggleEstado(info.row.original)}
+                          disabled={updateEstadoMutation.isPending}
+                        >
+                          <span>Dar de baja</span>
+                        </AlertDialogAction>
+                        <AlertDialogCancel>
+                          <span>Cancelar</span>
+                        </AlertDialogCancel>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                );
+              }
+              
+              // Estado 3: De baja → Mostrar botón "Activar" (solo si cantidad > 0)
+              if (estadoNombre === 'De baja') {
+                return (
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <button
+                        className={`px-2 py-1 text-white text-xs rounded transition-colors ${
+                          cantidad === 0
+                            ? 'bg-gray-400 cursor-not-allowed'
+                            : 'bg-green-600 hover:bg-green-700'
+                        }`}
+                        disabled={updateEstadoMutation.isPending || cantidad === 0}
+                        title={cantidad === 0 
+                          ? 'No se puede activar un material con cantidad 0. Realice un movimiento de ingreso primero.' 
+                          : 'Activar material'}
+                      >
+                        Activar
+                      </button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>
+                          <span>¿Activar material?</span>
+                        </AlertDialogTitle>
+                        <AlertDialogDescription>
+                          {cantidad === 0 ? (
+                            <>
+                              <span className="text-amber-600 font-semibold">⚠️ Advertencia:</span>
+                              <br />
+                              <span>No se puede activar el material "{info.row.original.Nombre_Material}" porque tiene cantidad 0 en stock.</span>
+                              <br />
+                              <span>Para activarlo, primero debe realizar un movimiento de ingreso.</span>
+                            </>
+                          ) : (
+                            <span>¿Estás seguro de que deseas activar el material "{info.row.original.Nombre_Material}"?</span>
+                          )}
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogAction
+                          onClick={() => handleToggleEstado(info.row.original)}
+                          disabled={updateEstadoMutation.isPending || cantidad === 0}
+                        >
+                          <span>Activar</span>
+                        </AlertDialogAction>
+                        <AlertDialogCancel>
+                          <span>Cancelar</span>
+                        </AlertDialogCancel>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                );
+              }
+              
+              // Estado 2: Agotado → Mostrar botón "Dar de baja"
+              if (estadoNombre === 'Agotado') {
+                return (
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <button
+                        className="px-2 py-1 bg-amber-600 text-white text-xs rounded hover:bg-amber-700 transition-colors"
+                        disabled={updateEstadoMutation.isPending}
+                        title="Dar de baja material agotado"
+                      >
+                        Dar de baja
+                      </button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>
+                          <span>¿Dar de baja material agotado?</span>
+                        </AlertDialogTitle>
+                        <AlertDialogDescription>
+                          <span>¿Estás seguro de que deseas dar de baja el material "{info.row.original.Nombre_Material}"?</span>
+                          <br />
+                          <span className="text-amber-600">El material está agotado y pasará al estado "Agotado y de baja".</span>
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogAction
+                          onClick={() => handleToggleEstado(info.row.original)}
+                          disabled={updateEstadoMutation.isPending}
+                        >
+                          <span>Dar de baja</span>
+                        </AlertDialogAction>
+                        <AlertDialogCancel>
+                          <span>Cancelar</span>
+                        </AlertDialogCancel>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                );
+              }
+              
+              // Estado 4: Agotado y de baja → Mostrar botón "Quitar de baja" 
+              if (estadoNombre === 'Agotado y de baja') {
+                return (
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <button
+                        className="px-2 py-1 bg-purple-600 text-white text-xs rounded hover:bg-purple-700 transition-colors"
+                        disabled={updateEstadoMutation.isPending}
+                        title="Quitar estado de baja (quedará como Agotado)"
+                      >
+                        Quitar de baja
+                      </button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>
+                          <span>¿Quitar estado de baja?</span>
+                        </AlertDialogTitle>
+                        <AlertDialogDescription>
+                          <span>¿Estás seguro de que deseas quitar el estado de baja del material "{info.row.original.Nombre_Material}"?</span>
+                          <br />
+                          <span className="text-purple-600">El material quedará en estado "Agotado".</span>
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogAction
+                          onClick={() => handleToggleEstado(info.row.original)}
+                          disabled={updateEstadoMutation.isPending}
+                        >
+                          <span>Quitar de baja</span>
+                        </AlertDialogAction>
+                        <AlertDialogCancel>
+                          <span>Cancelar</span>
+                        </AlertDialogCancel>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                );
+              }
+              
+              return null;
+            })()}
           </div>
         ),
       }),
-    ],
-    []
-  );
+    ], [updateEstadoMutation.isPending]);
 
   const table = useReactTable({
     data: filteredMaterials,
@@ -311,6 +507,40 @@ const CatalogoMateriales: React.FC<CatalogoMaterialesProps> = ({ onBack }) => {
   const handleViewDetail = (material: Material) => {
     setSelectedMaterial(material);
     setShowDetailModal(true);
+  };
+
+  const handleToggleEstado = (material: Material) => {
+    const estadoActualId = material.Estado_Material.Id_Estado_Material;
+    
+    // Lógica de cambio de estados:
+    // 1 (Disponible) → 3 (De baja)
+    // 3 (De baja) → 1 (Disponible) - solo si Cantidad > 0
+    // 2 (Agotado) → 3 (De baja) - backend auto-cambia a 4 si corresponde
+    // 4 (Agotado y de baja) → 2 (Agotado) - para quitar el estado de baja
+    
+    let nuevoEstadoId: number;
+    
+    if (estadoActualId === 1) {
+      // Disponible → De baja
+      nuevoEstadoId = 3;
+    } else if (estadoActualId === 3) {
+      // De baja → Disponible (solo si cantidad > 0, validado por backend)
+      nuevoEstadoId = 1;
+    } else if (estadoActualId === 2) {
+      // Agotado → De baja (backend lo cambiará a Agotado y de baja automáticamente)
+      nuevoEstadoId = 3;
+    } else if (estadoActualId === 4) {
+      // Agotado y de baja → Agotado (quita el estado de baja)
+      nuevoEstadoId = 2;
+    } else {
+      // Fallback
+      nuevoEstadoId = estadoActualId === 1 ? 3 : 1;
+    }
+    
+    updateEstadoMutation.mutate({
+      materialId: material.Id_Material,
+      estadoMaterialId: nuevoEstadoId,
+    });
   };
 
 
@@ -363,6 +593,8 @@ const CatalogoMateriales: React.FC<CatalogoMaterialesProps> = ({ onBack }) => {
               <option value="Todos">Todos los estados</option>
               <option value="Disponible">Disponible</option>
               <option value="Agotado">Agotado</option>
+              <option value="De baja">De baja</option>
+              <option value="Agotado y de baja">Agotado y de baja</option>
             </select>
           </div>
           <div className="flex items-center gap-4 w-full sm:w-auto">
@@ -403,51 +635,53 @@ const CatalogoMateriales: React.FC<CatalogoMaterialesProps> = ({ onBack }) => {
         </div>
       </div>
 
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+      <div className="bg-white rounded-2xl shadow-sm border border-sky-100 overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50 border-b border-gray-200">
+          <table className="min-w-full table-auto">
+            <thead className="bg-sky-50">
               {table.getHeaderGroups().map((headerGroup) => (
-                <tr key={headerGroup.id}>
+                <tr key={headerGroup.id} className="text-left text-xs sm:text-sm text-sky-700">
                   {headerGroup.headers.map((header) => (
                     <th
                       key={header.id}
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                      className="px-2 sm:px-4 py-3 font-medium border-b border-sky-100 cursor-pointer"
                       onClick={header.column.getToggleSortingHandler()}
                     >
-                      <div className="flex items-center gap-2">
-                        {header.isPlaceholder ? null : (
-                          <>
-                            {typeof header.column.columnDef.header === 'function'
-                              ? header.column.columnDef.header(header.getContext())
-                              : header.column.columnDef.header}
-                            {{
-                              asc: <MdKeyboardArrowUp />,
-                              desc: <MdKeyboardArrowDown />,
-                            }[header.column.getIsSorted() as string] ?? null}
-                          </>
-                        )}
-                      </div>
+                      <span className="flex items-center gap-1">
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(header.column.columnDef.header, header.getContext())}
+                        {header.column.getIsSorted() === 'asc' && <MdKeyboardArrowUp className="inline" />}
+                        {header.column.getIsSorted() === 'desc' && <MdKeyboardArrowDown className="inline" />}
+                      </span>
                     </th>
                   ))}
                 </tr>
               ))}
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {table.getRowModel().rows.map((row) => (
-                <tr
-                  key={row.id}
-                  className="hover:bg-gray-50 cursor-pointer transition-colors"
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <td key={cell.id} className="px-6 py-4 whitespace-nowrap text-sm">
-                      {typeof cell.column.columnDef.cell === 'function'
-                        ? cell.column.columnDef.cell(cell.getContext())
-                        : cell.getValue() as React.ReactNode}
-                    </td>
-                  ))}
+            <tbody className="bg-white divide-y divide-sky-50">
+              {table.getRowModel().rows.length === 0 ? (
+                <tr>
+                  <td colSpan={9} className="px-2 sm:px-4 py-8 text-center text-slate-500">
+                    {globalFilter ? 'No se encontraron materiales que coincidan con la búsqueda' : 'No hay materiales registrados'}
+                  </td>
                 </tr>
-              ))}
+              ) : (
+                table.getRowModel().rows.map((row) => (
+                  <tr
+                    key={row.id}
+                    className="hover:bg-sky-50 cursor-pointer transition-colors"
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <td key={cell.id} className="px-2 sm:px-4 py-3 text-xs sm:text-sm text-slate-700 align-top">
+                        {typeof cell.column.columnDef.cell === 'function'
+                          ? cell.column.columnDef.cell(cell.getContext())
+                          : cell.getValue() as React.ReactNode}
+                      </td>
+                    ))}
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>

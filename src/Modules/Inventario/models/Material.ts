@@ -1,6 +1,19 @@
 import type { CategoriaMaterial } from "./CategoriaMaterial";
 import type { UnidadMedicion } from "./UnidadMedicion";
 
+// Tipo para representar un proveedor (físico o jurídico)
+export interface Proveedor {
+  Id_Proveedor: number;
+  Nombre_Proveedor?: string; // Proveedor Físico
+  Primer_Apellido?: string; // Proveedor Físico
+  Segundo_Apellido?: string; // Proveedor Físico
+  Razon_Social?: string; // Proveedor Jurídico
+  Cedula_Juridica?: string; // Proveedor Jurídico
+  Cedula?: string; // Proveedor Físico
+  Numero_Telefono?: string;
+  Correo_Electronico?: string;
+  Direccion?: string;
+}
 
 export interface Material {
   Id_Material: number;
@@ -12,8 +25,12 @@ export interface Material {
   Fecha_Actualizacion: Date | string;
   Fecha_Salida?: Date | string | null;
   Fecha_Baja?: Date | string | null;
+  Ultima_Fecha_Baja?: Date | string | null;
   Estado_Material: EstadoMaterial;
   Unidad_Medicion: UnidadMedicion;
+  Proveedor?: Proveedor;
+  Id_Tipo_Proveedor?: number;
+  Id_Proveedor?: number;
   materialCategorias: {
     Id_Material_Categoria: number;
     Categoria: CategoriaMaterial;
@@ -22,6 +39,11 @@ export interface Material {
     Id_Material_Categoria: number;
     Categoria: CategoriaMaterial;
   }[];
+  Usuario_Creador?: {
+    Id_Usuario: number;
+    Nombre_Usuario: string;
+    Id_Rol: number;
+  };
 }
 
 export interface CreateMaterialData {
@@ -31,6 +53,8 @@ export interface CreateMaterialData {
   Cantidad: number;
   Precio_Unitario: number;
   IDS_Categorias?: number[];
+  Id_Tipo_Proveedor?: number;
+  Id_Proveedor?: number;
 }
 
 export interface UpdateMaterialData {

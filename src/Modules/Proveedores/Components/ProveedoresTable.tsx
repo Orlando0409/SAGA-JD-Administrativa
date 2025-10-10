@@ -254,12 +254,6 @@ export default function ProveedoresTable() {
                                     Error al cargar los proveedores: {error?.message || 'Error desconocido'}
                                 </td>
                             </tr>
-                        ) : table.getRowModel().rows.length === 0 ? (
-                            <tr>
-                                <td colSpan={columns.length} className="p-4 sm:p-6 text-center text-slate-500 text-sm">
-                                    No se encontraron proveedores.
-                                </td>
-                            </tr>
                         ) : (
                             table.getRowModel().rows.map((row) => (
                                 <tr

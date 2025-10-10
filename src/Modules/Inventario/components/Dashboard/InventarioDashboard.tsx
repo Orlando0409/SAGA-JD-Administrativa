@@ -1,6 +1,6 @@
 import React from 'react';
 import { LuPackage, LuTags, LuRuler, LuActivity } from 'react-icons/lu';
-import { MdInventory } from 'react-icons/md';
+import { FaBoxes } from 'react-icons/fa';
 
 interface InventarioDashboardProps {
   onNavigate: (section: string) => void;
@@ -12,7 +12,7 @@ export const InventarioDashboard: React.FC<InventarioDashboardProps> = ({ onNavi
       <div className="text-center">
         <div className="flex items-center justify-center mb-4">
           <div className="p-3 bg-blue-100 rounded-full">
-            <MdInventory className="w-12 h-12 text-blue-600" />
+            <FaBoxes className="w-12 h-12 text-blue-600" />
           </div>
         </div>
         <h1 className="text-3xl font-bold text-gray-900 mb-2">

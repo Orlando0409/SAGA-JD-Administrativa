@@ -16,11 +16,16 @@ const DetailMaterialModal: React.FC<DetailMaterialModalProps> = ({
 
     const estado = material.Estado_Material?.Nombre_Estado_Material || 'N/A';
     let colorClass = '';
+    
     if (estado === 'Disponible') {
-      colorClass = 'bg-green-100 text-green-800';
+      colorClass = 'bg-emerald-100 text-emerald-700 border border-emerald-300';
     } else if (estado === 'Agotado') {
-      colorClass = 'bg-red-100 text-red-800';
-    } 
+      colorClass = 'bg-red-100 text-red-700 border border-red-300';
+    } else if (estado === 'De baja') {
+      colorClass = 'bg-slate-200 text-slate-700 border border-slate-400';
+    } else if (estado === 'Agotado y de baja') {
+      colorClass = 'bg-amber-100 text-amber-700 border border-amber-300';
+    }
 
   if (!isOpen) return null;
 
@@ -45,7 +50,7 @@ const DetailMaterialModal: React.FC<DetailMaterialModalProps> = ({
               <label htmlFor="nombre" className="block text-sm font-medium text-gray-700 mb-1">
                 Nombre del Material
               </label>
-              <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded border break-words overflow-wrap-anywhere">
+              <p className="text-sm text-gray-900">
                 {material.Nombre_Material}
               </p>
             </div>
@@ -54,7 +59,7 @@ const DetailMaterialModal: React.FC<DetailMaterialModalProps> = ({
               <label htmlFor="descripcion" className="block text-sm font-medium text-gray-700 mb-1">
                 Descripción
               </label>
-              <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded border break-words overflow-wrap-anywhere">
+              <p className="text-sm text-gray-900">
                 {material.Descripcion || 'Sin descripción'}
               </p>
             </div>
@@ -63,7 +68,7 @@ const DetailMaterialModal: React.FC<DetailMaterialModalProps> = ({
               <label htmlFor="categorias" className="block text-sm font-medium text-gray-700 mb-1">
                 Categorías
               </label>
-              <div className="text-sm text-gray-900 bg-gray-50 p-2 rounded border break-words overflow-wrap-anywhere">
+              <div className="text-sm text-gray-900">
                 {(() => {
                   const categorias = (material.materialCategorias && material.materialCategorias.length > 0) 
                     ? material.materialCategorias 
@@ -88,8 +93,10 @@ const DetailMaterialModal: React.FC<DetailMaterialModalProps> = ({
               <label htmlFor="estado" className="block text-sm font-medium text-gray-700 mb-1">
                 Estado
               </label>
-              <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded border">
-                <span className={` px-2 py-1 rounded-full text-sm font-mediu ${colorClass}`}>{estado}</span>
+              <p className="text-sm text-gray-900">
+                <span className={`px-3 py-1 rounded-full text-xs font-semibold ${colorClass}`}>
+                  {estado}
+                </span>
               </p>
             </div>
 
@@ -97,7 +104,7 @@ const DetailMaterialModal: React.FC<DetailMaterialModalProps> = ({
               <label htmlFor="cantidad-stock" className="block text-sm font-medium text-gray-700 mb-1">
               Cantidad en Stock
               </label>
-              <p id="cantidad-stock" className="text-sm text-gray-900 bg-gray-50 p-2 rounded border">
+              <p id="cantidad-stock" className="text-sm text-gray-900">
               {material.Cantidad} unidades
               </p>
             </div>
@@ -106,16 +113,47 @@ const DetailMaterialModal: React.FC<DetailMaterialModalProps> = ({
               <label htmlFor="precio-unitario" className="block text-sm font-medium text-gray-700 mb-1">
                 Precio Unitario
               </label>
-              <p id="precio-unitario" className="text-sm text-gray-900 bg-gray-50 p-2 rounded border">
+              <p id="precio-unitario" className="text-sm text-gray-900">
                 ₡{material.Precio_Unitario?.toLocaleString() || '0'}
               </p>
             </div>
+
+              <div>
+                <label htmlFor="proveedor" className="block text-sm font-medium text-gray-700 mb-1">
+                  Proveedor
+                </label>
+                <p id="proveedor" className="text-sm text-gray-900">
+                  {material?.Proveedor?.Razon_Social || material?.Proveedor?.Nombre_Proveedor || 'No especificado'}
+                </p>
+              </div>
+
+              <div>
+                <label htmlFor="tipo-proveedor" className="block text-sm font-medium text-gray-700 mb-1">
+                  Tipo de Proveedor
+                </label>
+                <p id="tipo-proveedor" className="text-sm text-gray-900">
+                  <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                    material?.Proveedor?.Id_Tipo_Proveedor === 1 
+                      ? 'bg-blue-100 text-blue-700 border border-blue-300' 
+                      : material?.Proveedor?.Id_Tipo_Proveedor === 2
+                      ? 'bg-purple-100 text-purple-700 border border-purple-300'
+                      : 'bg-gray-100 text-gray-700 border border-gray-300'
+                  }`}>
+                    {material?.Proveedor?.Id_Tipo_Proveedor === 1 
+                      ? 'Físico' 
+                      : material?.Proveedor?.Id_Tipo_Proveedor === 2
+                      ? 'Jurídico'
+                      : 'No especificado'}
+                  </span>
+                </p>
+              </div>
+          
 
             <div>
               <label htmlFor="fecha-entrada" className="block text-sm font-medium text-gray-700 mb-1">
                 Fecha de Entrada
               </label>
-              <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded border">
+              <p className="text-sm text-gray-900">
                 {new Date(material.Fecha_Entrada).toLocaleDateString()}
               </p>
             </div>
@@ -124,7 +162,7 @@ const DetailMaterialModal: React.FC<DetailMaterialModalProps> = ({
               <label htmlFor="fecha-actualizacion" className="block text-sm font-medium text-gray-700 mb-1">
                 Fecha de Actualización
               </label>
-              <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded border">
+              <p className="text-sm text-gray-900">
                 {new Date(material.Fecha_Actualizacion).toLocaleDateString()}
               </p>
             </div>
@@ -134,7 +172,7 @@ const DetailMaterialModal: React.FC<DetailMaterialModalProps> = ({
                 <label htmlFor="fecha-salida" className="block text-sm font-medium text-gray-700 mb-1">
                   Fecha de Salida
                 </label>
-                <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded border">
+                <p className="text-sm text-gray-900">
                   {new Date(material.Fecha_Salida).toLocaleDateString()}
                 </p>
               </div>
@@ -145,7 +183,7 @@ const DetailMaterialModal: React.FC<DetailMaterialModalProps> = ({
                 <span className="block text-sm font-medium text-gray-700 mb-1">
                   Fecha de Baja
                 </span>
-                <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded border">
+                <p className="text-sm text-gray-900">
                   {new Date(material.Fecha_Baja).toLocaleDateString()}
                 </p>
               </div>
