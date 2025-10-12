@@ -4,7 +4,7 @@ import type {
   CreateUnidadMedicionData, 
   UpdateUnidadMedicionData 
 } from '../models/UnidadMedicion';
-import { getAllUnidadesMedicion, getAllUnidadesMedicionSimple, createUnidadMedicion, updateUnidadMedicion, updateEstadoUnidadMedicion, deleteUnidadMedicion } from '../service/UnidadesMedicionService';
+import { getAllUnidadesMedicion, getAllUnidadesMedicionSimple, getUnidadesMedicionActivas, getUnidadesMedicionInactivas, createUnidadMedicion, updateUnidadMedicion, updateEstadoUnidadMedicion, deleteUnidadMedicion } from '../service/UnidadesMedicionService';
 
 
 export const useUnidadesMedicion = () => {
@@ -20,6 +20,22 @@ export const useUnidadesMedicionSimple = () => {
     queryKey: ['unidades-medicion-simple'],
     queryFn: getAllUnidadesMedicionSimple,
     staleTime: 10 * 60 * 1000, // 10 minutos
+  });
+};
+
+export const useUnidadesMedicionActivas = () => {
+  return useQuery({
+    queryKey: ['unidades-medicion', 'activas'],
+    queryFn: getUnidadesMedicionActivas,
+    staleTime: 5 * 60 * 1000,
+  });
+};
+
+export const useUnidadesMedicionInactivas = () => {
+  return useQuery({
+    queryKey: ['unidades-medicion', 'inactivas'],
+    queryFn: getUnidadesMedicionInactivas,
+    staleTime: 5 * 60 * 1000,
   });
 };
 

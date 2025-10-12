@@ -1,6 +1,12 @@
 import React from 'react';
 import { LuX } from 'react-icons/lu';
 import type { Material } from '../../models/Inventario';
+import { 
+  getEstadoMaterialColorClass, 
+  getProveedorNombre, 
+  getProveedorTipo, 
+  getProveedorTipoColorClass 
+} from '../../helper/MaterialesHelpers';
 
 interface DetailMaterialModalProps {
   material: Material;
@@ -13,24 +19,13 @@ const DetailMaterialModal: React.FC<DetailMaterialModalProps> = ({
   isOpen,
   onClose,
 }) => {
-
-    const estado = material.Estado_Material?.Nombre_Estado_Material || 'N/A';
-    let colorClass = '';
-    
-    if (estado === 'Disponible') {
-      colorClass = 'bg-emerald-100 text-emerald-700 border border-emerald-300';
-    } else if (estado === 'Agotado') {
-      colorClass = 'bg-red-100 text-red-700 border border-red-300';
-    } else if (estado === 'De baja') {
-      colorClass = 'bg-slate-200 text-slate-700 border border-slate-400';
-    } else if (estado === 'Agotado y de baja') {
-      colorClass = 'bg-amber-100 text-amber-700 border border-amber-300';
-    }
+  const estado = material.Estado_Material?.Nombre_Estado_Material || 'N/A';
+  const colorClass = getEstadoMaterialColorClass(estado);
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-white bg-opacity-95 flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 bg-opacity-10 backdrop-blur-sm flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between p-6 border-b">
           <h2 className="text-xl font-semibold text-gray-900">
@@ -123,7 +118,7 @@ const DetailMaterialModal: React.FC<DetailMaterialModalProps> = ({
                   Proveedor
                 </label>
                 <p id="proveedor" className="text-sm text-gray-900">
-                  {material?.Proveedor?.Razon_Social || material?.Proveedor?.Nombre_Proveedor || 'No especificado'}
+                  {getProveedorNombre(material)}
                 </p>
               </div>
 
@@ -132,18 +127,8 @@ const DetailMaterialModal: React.FC<DetailMaterialModalProps> = ({
                   Tipo de Proveedor
                 </label>
                 <p id="tipo-proveedor" className="text-sm text-gray-900">
-                  <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                    material?.Proveedor?.Id_Tipo_Proveedor === 1 
-                      ? 'bg-blue-100 text-blue-700 border border-blue-300' 
-                      : material?.Proveedor?.Id_Tipo_Proveedor === 2
-                      ? 'bg-purple-100 text-purple-700 border border-purple-300'
-                      : 'bg-gray-100 text-gray-700 border border-gray-300'
-                  }`}>
-                    {material?.Proveedor?.Id_Tipo_Proveedor === 1 
-                      ? 'Físico' 
-                      : material?.Proveedor?.Id_Tipo_Proveedor === 2
-                      ? 'Jurídico'
-                      : 'No especificado'}
+                  <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getProveedorTipoColorClass(material?.Proveedor?.Id_Tipo_Proveedor)}`}>
+                    {getProveedorTipo(material?.Proveedor?.Id_Tipo_Proveedor)}
                   </span>
                 </p>
               </div>

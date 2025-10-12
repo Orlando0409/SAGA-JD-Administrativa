@@ -1,18 +1,20 @@
 import type { CategoriaMaterial } from "./CategoriaMaterial";
 import type { UnidadMedicion } from "./UnidadMedicion";
 
-// Tipo para representar un proveedor (físico o jurídico)
+// Tipo para representar un proveedor (físico o jurídico) según estructura del backend
 export interface Proveedor {
   Id_Proveedor: number;
-  Nombre_Proveedor?: string; // Proveedor Físico
-  Primer_Apellido?: string; // Proveedor Físico
-  Segundo_Apellido?: string; // Proveedor Físico
-  Razon_Social?: string; // Proveedor Jurídico
-  Cedula_Juridica?: string; // Proveedor Jurídico
-  Cedula?: string; // Proveedor Físico
-  Numero_Telefono?: string;
-  Correo_Electronico?: string;
-  Direccion?: string;
+  Id_Tipo_Proveedor: number; // 1 = Físico, 2 = Jurídico
+  Nombre_Proveedor: string; // Presente en ambos tipos
+  Telefono_Proveedor: string;
+  
+  // Campos específicos de Proveedor Físico (Id_Tipo_Proveedor = 1)
+  Tipo_Identificacion?: string; // "Cédula", "Pasaporte", etc.
+  Identificacion?: string;
+  
+  // Campos específicos de Proveedor Jurídico (Id_Tipo_Proveedor = 2)
+  Cedula_Juridica?: string;
+  Razon_Social?: string;
 }
 
 export interface Material {

@@ -23,7 +23,7 @@ import {
   AlertDialogHeader,
   AlertDialogFooter
 } from "@/Modules/Global/components/Sidebar/ui/alert-dialog";
-import { useUnidadesMedicion, useUpdateEstadoUnidadMedicion } from '../../hooks/HookUnidadMedicion';
+import { useUnidadesMedicion, useUnidadesMedicionActivas, useUnidadesMedicionInactivas, useUpdateEstadoUnidadMedicion } from '../../hooks/HookUnidadMedicion';
 import CreateUnidadMedicionModal from './CreateUnidadMedicionModal';
 import EditUnidadMedicionModal from './EditUnidadMedicionModal';
 import DetailUnidadMedicionModal from './DetailUnidadMedicionModal';
@@ -39,7 +39,7 @@ const UnidadesMedicionManagement: React.FC<UnidadesMedicionManagementProps> = ({
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [selectedUnidad, setSelectedUnidad] = useState<UnidadMedicion | null>(null);
-  const [estadoFilter, setEstadoFilter] = useState<string>('Activo'); // Por defecto mostrar solo activas
+  const [estadoFilter, setEstadoFilter] = useState<string>('Todas'); // Por defecto mostrar todas
 
   const pageSizeOptions = [5, 10, 20, 50];
   const [pagination, setPagination] = useState({
@@ -47,17 +47,41 @@ const UnidadesMedicionManagement: React.FC<UnidadesMedicionManagementProps> = ({
     pageIndex: 0,
   });
 
-  const { data: allUnidades = [], isLoading, error } = useUnidadesMedicion();
+  // Usar diferentes hooks según el filtro de estado
+  const { data: todasUnidades = [], isLoading: isLoadingTodas, error: errorTodas } = useUnidadesMedicion();
+  const { data: unidadesActivas = [], isLoading: isLoadingActivas, error: errorActivas } = useUnidadesMedicionActivas();
+  const { data: unidadesInactivas = [], isLoading: isLoadingInactivas, error: errorInactivas } = useUnidadesMedicionInactivas();
   const updateEstadoMutation = useUpdateEstadoUnidadMedicion();
 
+  // Seleccionar los datos según el filtro
   const unidades = useMemo(() => {
     if (estadoFilter === 'Todas') {
-      return allUnidades;
+      return todasUnidades;
+    } else if (estadoFilter === 'Activo') {
+      return unidadesActivas;
+    } else {
+      return unidadesInactivas;
     }
-    return allUnidades.filter(unidad => 
-      unidad.Estado_Unidad_Medicion?.Nombre_Estado_Unidad_Medicion === estadoFilter
-    );
-  }, [allUnidades, estadoFilter]);
+  }, [estadoFilter, todasUnidades, unidadesActivas, unidadesInactivas]);
+
+  // Determinar el estado de carga y error
+  let isLoading: boolean;
+  if (estadoFilter === 'Todas') {
+    isLoading = isLoadingTodas;
+  } else if (estadoFilter === 'Activo') {
+    isLoading = isLoadingActivas;
+  } else {
+    isLoading = isLoadingInactivas;
+  }
+
+  let error: unknown;
+  if (estadoFilter === 'Todas') {
+    error = errorTodas;
+  } else if (estadoFilter === 'Activo') {
+    error = errorActivas;
+  } else {
+    error = errorInactivas;
+  }
 
 
   const columnHelper = createColumnHelper<UnidadMedicion>();

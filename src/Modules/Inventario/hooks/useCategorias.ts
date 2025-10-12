@@ -12,6 +12,24 @@ export const useGetAllCategories = () => {
   });
 };
 
+export const useGetCategoriasActivas = () => {
+  return useQuery({
+    queryKey: ['categories', 'activas'],
+    queryFn: CategoriasService.getCategoriasActivas,
+    staleTime: 1000 * 60 * 5,
+    refetchOnWindowFocus: false,
+  });
+};
+
+export const useGetCategoriasInactivas = () => {
+  return useQuery({
+    queryKey: ['categories', 'inactivas'],
+    queryFn: CategoriasService.getCategoriasInactivas,
+    staleTime: 1000 * 60 * 5,
+    refetchOnWindowFocus: false,
+  });
+};
+
 export const useGetCategoriaById = (id: number) => {
   return useQuery({
     queryKey: ['category', id],

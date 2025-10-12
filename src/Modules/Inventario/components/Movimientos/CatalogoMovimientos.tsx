@@ -28,7 +28,13 @@ import {
   MdKeyboardArrowUp,
   MdKeyboardArrowDown
 } from "react-icons/md";
-import { useGetAllMovimientos } from '../../hooks/HookMaterialMovimiento';
+import { 
+  useGetAllMovimientos, 
+  useGetMovimientosEntradas, 
+  useGetMovimientosSalidas,
+  useGetMovimientosEntreFechas 
+} from '../../hooks/useMovimientos';
+import { getMovimientosLoadingState, getMovimientosErrorState } from '../../helper/MovimientosHelpers';
 import DetailMovimientoModal from './DetailMovimientoModal';
 import CreateMovimientoModal from './CreateMovimientoModal';
 import FilterMovimientosModal from './FilterMovimientosModal';
@@ -56,7 +62,74 @@ const CatalogoMovimientos: React.FC<CatalogoMovimientosProps> = ({ onBack }) => 
     pageIndex: 0,
   });
 
-  const { data: movimientos = [], isLoading, error, refetch } = useGetAllMovimientos();
+  // Hooks para obtener movimientos según el tipo
+  const { data: todosMovimientos = [], isLoading: isLoadingTodos, error: errorTodos, refetch: refetchTodos } = useGetAllMovimientos();
+  const { data: movimientosEntradas = [], isLoading: isLoadingEntradas, error: errorEntradas, refetch: refetchEntradas } = useGetMovimientosEntradas();
+  const { data: movimientosSalidas = [], isLoading: isLoadingSalidas, error: errorSalidas, refetch: refetchSalidas } = useGetMovimientosSalidas();
+  
+  // Hook para filtro por fechas - solo se habilita cuando hay fechas aplicadas
+  const hasFechas = !!appliedFilters.fechaInicio && !!appliedFilters.fechaFin;
+  const { data: movimientosPorFechas = [], isLoading: isLoadingFechas, error: errorFechas, refetch: refetchFechas } = useGetMovimientosEntreFechas(
+    appliedFilters.fechaInicio || '',
+    appliedFilters.fechaFin || '',
+    hasFechas
+  );
+
+  // Seleccionar los datos según los filtros aplicados 
+  const movimientos = React.useMemo(() => {
+    // Prioridad 1: Filtro por fechas
+    if (hasFechas) {
+      return movimientosPorFechas;
+    }
+    
+    // Prioridad 2: Filtro por tipo de movimiento
+    if (appliedFilters.soloIngresos) {
+      return movimientosEntradas;
+    }
+    if (appliedFilters.soloEgresos) {
+      return movimientosSalidas;
+    }
+    
+    // Default: todos los movimientos
+    return todosMovimientos;
+  }, [
+    hasFechas, 
+    movimientosPorFechas,
+    appliedFilters.soloIngresos, 
+    appliedFilters.soloEgresos, 
+    todosMovimientos, 
+    movimientosEntradas, 
+    movimientosSalidas
+  ]);
+
+  const isLoading = getMovimientosLoadingState(
+    appliedFilters,
+    hasFechas,
+    {
+      todos: isLoadingTodos,
+      entradas: isLoadingEntradas,
+      salidas: isLoadingSalidas,
+      fechas: isLoadingFechas
+    }
+  );
+  
+  const error = getMovimientosErrorState(
+    appliedFilters,
+    hasFechas,
+    {
+      todos: errorTodos,
+      entradas: errorEntradas,
+      salidas: errorSalidas,
+      fechas: errorFechas
+    }
+  );
+
+  const refetch = () => {
+    refetchTodos();
+    refetchEntradas();
+    refetchSalidas();
+    if (hasFechas) refetchFechas();
+  };
 
   // Refetch data cuando se actualice
   useEffect(() => {
@@ -83,66 +156,33 @@ const CatalogoMovimientos: React.FC<CatalogoMovimientosProps> = ({ onBack }) => 
   const filteredMovimientos = React.useMemo(() => {
     let filtered = [...movimientos];
 
- 
-    if (appliedFilters.fechaInicio) {
-      filtered = filtered.filter(mov => {
-        const fechaMovimiento = new Date(mov.Fecha_Movimiento);
-        const fechaInicio = new Date(appliedFilters.fechaInicio!);
-        return fechaMovimiento >= fechaInicio;
-      });
-    }
 
-    
-    if (appliedFilters.fechaFin) {
-      filtered = filtered.filter(mov => {
-        const fechaMovimiento = new Date(mov.Fecha_Movimiento);
-        const fechaFin = new Date(appliedFilters.fechaFin!);
-        return fechaMovimiento <= fechaFin;
-      });
-    }
-
- 
-    if (appliedFilters.tipoMovimiento) {
+    // Filtro por tipo de movimiento específico 
+    if (appliedFilters.tipoMovimiento && !appliedFilters.soloIngresos && !appliedFilters.soloEgresos && !hasFechas) {
       filtered = filtered.filter(mov => 
         mov.Tipo_Movimiento === appliedFilters.tipoMovimiento
       );
     }
 
- 
-    if (appliedFilters.soloIngresos) {
-      filtered = filtered.filter(mov => 
-        mov.Tipo_Movimiento?.includes('Entrada')
-      );
-    }
-
-    if (appliedFilters.soloEgresos) {
-      filtered = filtered.filter(mov => 
-        mov.Tipo_Movimiento?.includes('Salida')
-      );
-    }
-
- 
+    // Filtros secundarios que NO existen en el backend (material nombre, usuario nombre, cantidad)
     if (appliedFilters.materialNombre) {
       filtered = filtered.filter(mov => 
         mov.Material?.Nombre_Material?.toLowerCase().includes(appliedFilters.materialNombre!.toLowerCase())
       );
     }
 
-   
     if (appliedFilters.usuario) {
       filtered = filtered.filter(mov => 
-        mov.Usuario?.Nombre_Usuario?.toLowerCase().includes(appliedFilters.usuario!.toLowerCase())
+        mov.Usuario_Creador?.Nombre_Usuario?.toLowerCase().includes(appliedFilters.usuario!.toLowerCase())
       );
     }
 
- 
     if (appliedFilters.cantidadMinima) {
       filtered = filtered.filter(mov => 
         mov.Cantidad >= appliedFilters.cantidadMinima!
       );
     }
 
-    
     if (appliedFilters.cantidadMaxima) {
       filtered = filtered.filter(mov => 
         mov.Cantidad <= appliedFilters.cantidadMaxima!
@@ -482,7 +522,7 @@ const CatalogoMovimientos: React.FC<CatalogoMovimientosProps> = ({ onBack }) => 
         )}
 
 
-        <div className="bg-white px-4 py-3 flex flex-col sm:flex-row items-center justify-between border-t border-gray-200 sm:px-6 gap-4">
+        <div className="bg-gray-50 px-4 py-3 flex flex-col sm:flex-row items-center justify-between border-t border-gray-200 sm:px-6 gap-4">
           <div className="flex flex-col sm:flex-row items-center gap-4">
 
             <div className="flex items-center gap-2">
@@ -522,8 +562,8 @@ const CatalogoMovimientos: React.FC<CatalogoMovimientosProps> = ({ onBack }) => 
               <MdKeyboardArrowLeft className="w-4 h-4" />
             </button>
             
-            <span className="px-3 py-2 text-sm font-medium text-gray-700 bg-gray-50 border border-gray-300 rounded-md">
-              Página {table.getState().pagination.pageIndex + 1} de {table.getPageCount()}
+            <span className="text-sm text-gray-700">
+              Página {table.getState().pagination.pageIndex + 1} de {table.getPageCount() + 1}
             </span>
 
             <button

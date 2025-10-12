@@ -109,7 +109,7 @@ const CreateUserModal = ({ onClose, setShowCreateModal }: CreateUserProps) => {
 
 
   return (
-    <div className="fixed inset-0 bg-white bg-opacity-95 flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-opacity-10 backdrop-blur-sm flex items-center justify-center z-50">
       <div className="bg-white rounded-lg shadow-2xl border border-gray-200 w-full max-w-md mx-4 max-h-[90vh] overflow-hidden">
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <h2 className="text-xl font-semibold text-gray-900">Registrar un nuevo usuario</h2>
@@ -304,29 +304,28 @@ const CreateUserModal = ({ onClose, setShowCreateModal }: CreateUserProps) => {
                 </div>
               )}
             </form.Field>
-
-            <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
-              <button
-                type="submit"
-                disabled={createUserMutation.isPending}
-                className={`px-4 py-2 text-white rounded-lg transition-colors ${
-                  createUserMutation.isPending 
-                    ? 'bg-blue-300 cursor-not-allowed' 
-                    : 'bg-blue-600 hover:bg-blue-700' 
-                }`}
-              >
-                {createUserMutation.isPending ? 'Creando...' : 'Crear Usuario'}
-              </button>
+          </form>
+        </div>
+        
+            <div className="sticky bottom-0 flex justify-end gap-3 p-6 border-t bg-gray-50 z-10">
+                <button
+                  disabled={createUserMutation.isPending}
+                  className={`flex-1 px-4 py-2 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors ${
+                    createUserMutation.isPending 
+                        ? 'bg-blue-300 cursor-not-allowed' 
+                        : 'bg-blue-600 hover:bg-blue-700' 
+                  }`}
+                >
+                  {createUserMutation.isPending ? 'Creando...' : 'Crear Usuario'}
+                </button>
               <button
                 type="button"
                 onClick={handleClose}
-                className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors"
               >
                 Cancelar
               </button>
             </div>
-          </form>
-        </div>
       </div>
     </div>
   );

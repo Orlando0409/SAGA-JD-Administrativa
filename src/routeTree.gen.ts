@@ -12,10 +12,8 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as NotFoundRouteImport } from './routes/NotFound'
 import { Route as HomeRouteImport } from './routes/Home'
 import { Route as appSeguridadBitacoraRouteImport } from './routes/(app)/(Seguridad)/Bitacora'
-import { Route as appGestionUsuariosRouteImport } from './routes/(app)/(Gestion)/Usuarios'
 import { Route as appGestionSolicitudesRouteImport } from './routes/(app)/(Gestion)/Solicitudes'
 import { Route as appGestionProveedoresRouteImport } from './routes/(app)/(Gestion)/Proveedores'
-import { Route as appGestionInventarioRouteImport } from './routes/(app)/(Gestion)/Inventario'
 import { Route as appGestionContactoRouteImport } from './routes/(app)/(Gestion)/Contacto'
 import { Route as appGestionCalidadAguaRouteImport } from './routes/(app)/(Gestion)/CalidadAgua'
 import { Route as appGestionActasRouteImport } from './routes/(app)/(Gestion)/Actas'
@@ -28,6 +26,13 @@ import { Route as appAuthUnauthorizedRouteImport } from './routes/(app)/(Auth)/U
 import { Route as appAuthResetPasswordRouteImport } from './routes/(app)/(Auth)/ResetPassword'
 import { Route as appAuthLoginRouteImport } from './routes/(app)/(Auth)/Login'
 import { Route as appAuthForgotPasswordRouteImport } from './routes/(app)/(Auth)/ForgotPassword'
+import { Route as appGestionUsuariosIndexRouteImport } from './routes/(app)/(Gestion)/Usuarios/index'
+import { Route as appGestionInventarioIndexRouteImport } from './routes/(app)/(Gestion)/Inventario/index'
+import { Route as appGestionUsuariosRolesRouteImport } from './routes/(app)/(Gestion)/Usuarios/Roles'
+import { Route as appGestionInventarioUnidadesMedicionRouteImport } from './routes/(app)/(Gestion)/Inventario/UnidadesMedicion'
+import { Route as appGestionInventarioMovimientosRouteImport } from './routes/(app)/(Gestion)/Inventario/Movimientos'
+import { Route as appGestionInventarioMaterialesRouteImport } from './routes/(app)/(Gestion)/Inventario/Materiales'
+import { Route as appGestionInventarioCategoriasRouteImport } from './routes/(app)/(Gestion)/Inventario/Categorias'
 
 const NotFoundRoute = NotFoundRouteImport.update({
   id: '/NotFound',
@@ -44,11 +49,6 @@ const appSeguridadBitacoraRoute = appSeguridadBitacoraRouteImport.update({
   path: '/Bitacora',
   getParentRoute: () => rootRouteImport,
 } as any)
-const appGestionUsuariosRoute = appGestionUsuariosRouteImport.update({
-  id: '/(app)/(Gestion)/Usuarios',
-  path: '/Usuarios',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const appGestionSolicitudesRoute = appGestionSolicitudesRouteImport.update({
   id: '/(app)/(Gestion)/Solicitudes',
   path: '/Solicitudes',
@@ -57,11 +57,6 @@ const appGestionSolicitudesRoute = appGestionSolicitudesRouteImport.update({
 const appGestionProveedoresRoute = appGestionProveedoresRouteImport.update({
   id: '/(app)/(Gestion)/Proveedores',
   path: '/Proveedores',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const appGestionInventarioRoute = appGestionInventarioRouteImport.update({
-  id: '/(app)/(Gestion)/Inventario',
-  path: '/Inventario',
   getParentRoute: () => rootRouteImport,
 } as any)
 const appGestionContactoRoute = appGestionContactoRouteImport.update({
@@ -124,6 +119,46 @@ const appAuthForgotPasswordRoute = appAuthForgotPasswordRouteImport.update({
   path: '/ForgotPassword',
   getParentRoute: () => rootRouteImport,
 } as any)
+const appGestionUsuariosIndexRoute = appGestionUsuariosIndexRouteImport.update({
+  id: '/(app)/(Gestion)/Usuarios/',
+  path: '/Usuarios/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const appGestionInventarioIndexRoute =
+  appGestionInventarioIndexRouteImport.update({
+    id: '/(app)/(Gestion)/Inventario/',
+    path: '/Inventario/',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const appGestionUsuariosRolesRoute = appGestionUsuariosRolesRouteImport.update({
+  id: '/(app)/(Gestion)/Usuarios/Roles',
+  path: '/Usuarios/Roles',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const appGestionInventarioUnidadesMedicionRoute =
+  appGestionInventarioUnidadesMedicionRouteImport.update({
+    id: '/(app)/(Gestion)/Inventario/UnidadesMedicion',
+    path: '/Inventario/UnidadesMedicion',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const appGestionInventarioMovimientosRoute =
+  appGestionInventarioMovimientosRouteImport.update({
+    id: '/(app)/(Gestion)/Inventario/Movimientos',
+    path: '/Inventario/Movimientos',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const appGestionInventarioMaterialesRoute =
+  appGestionInventarioMaterialesRouteImport.update({
+    id: '/(app)/(Gestion)/Inventario/Materiales',
+    path: '/Inventario/Materiales',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const appGestionInventarioCategoriasRoute =
+  appGestionInventarioCategoriasRouteImport.update({
+    id: '/(app)/(Gestion)/Inventario/Categorias',
+    path: '/Inventario/Categorias',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/Home': typeof HomeRoute
@@ -140,11 +175,16 @@ export interface FileRoutesByFullPath {
   '/Actas': typeof appGestionActasRoute
   '/CalidadAgua': typeof appGestionCalidadAguaRoute
   '/Contacto': typeof appGestionContactoRoute
-  '/Inventario': typeof appGestionInventarioRoute
   '/Proveedores': typeof appGestionProveedoresRoute
   '/Solicitudes': typeof appGestionSolicitudesRoute
-  '/Usuarios': typeof appGestionUsuariosRoute
   '/Bitacora': typeof appSeguridadBitacoraRoute
+  '/Inventario/Categorias': typeof appGestionInventarioCategoriasRoute
+  '/Inventario/Materiales': typeof appGestionInventarioMaterialesRoute
+  '/Inventario/Movimientos': typeof appGestionInventarioMovimientosRoute
+  '/Inventario/UnidadesMedicion': typeof appGestionInventarioUnidadesMedicionRoute
+  '/Usuarios/Roles': typeof appGestionUsuariosRolesRoute
+  '/Inventario': typeof appGestionInventarioIndexRoute
+  '/Usuarios': typeof appGestionUsuariosIndexRoute
 }
 export interface FileRoutesByTo {
   '/Home': typeof HomeRoute
@@ -161,11 +201,16 @@ export interface FileRoutesByTo {
   '/Actas': typeof appGestionActasRoute
   '/CalidadAgua': typeof appGestionCalidadAguaRoute
   '/Contacto': typeof appGestionContactoRoute
-  '/Inventario': typeof appGestionInventarioRoute
   '/Proveedores': typeof appGestionProveedoresRoute
   '/Solicitudes': typeof appGestionSolicitudesRoute
-  '/Usuarios': typeof appGestionUsuariosRoute
   '/Bitacora': typeof appSeguridadBitacoraRoute
+  '/Inventario/Categorias': typeof appGestionInventarioCategoriasRoute
+  '/Inventario/Materiales': typeof appGestionInventarioMaterialesRoute
+  '/Inventario/Movimientos': typeof appGestionInventarioMovimientosRoute
+  '/Inventario/UnidadesMedicion': typeof appGestionInventarioUnidadesMedicionRoute
+  '/Usuarios/Roles': typeof appGestionUsuariosRolesRoute
+  '/Inventario': typeof appGestionInventarioIndexRoute
+  '/Usuarios': typeof appGestionUsuariosIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -183,11 +228,16 @@ export interface FileRoutesById {
   '/(app)/(Gestion)/Actas': typeof appGestionActasRoute
   '/(app)/(Gestion)/CalidadAgua': typeof appGestionCalidadAguaRoute
   '/(app)/(Gestion)/Contacto': typeof appGestionContactoRoute
-  '/(app)/(Gestion)/Inventario': typeof appGestionInventarioRoute
   '/(app)/(Gestion)/Proveedores': typeof appGestionProveedoresRoute
   '/(app)/(Gestion)/Solicitudes': typeof appGestionSolicitudesRoute
-  '/(app)/(Gestion)/Usuarios': typeof appGestionUsuariosRoute
   '/(app)/(Seguridad)/Bitacora': typeof appSeguridadBitacoraRoute
+  '/(app)/(Gestion)/Inventario/Categorias': typeof appGestionInventarioCategoriasRoute
+  '/(app)/(Gestion)/Inventario/Materiales': typeof appGestionInventarioMaterialesRoute
+  '/(app)/(Gestion)/Inventario/Movimientos': typeof appGestionInventarioMovimientosRoute
+  '/(app)/(Gestion)/Inventario/UnidadesMedicion': typeof appGestionInventarioUnidadesMedicionRoute
+  '/(app)/(Gestion)/Usuarios/Roles': typeof appGestionUsuariosRolesRoute
+  '/(app)/(Gestion)/Inventario/': typeof appGestionInventarioIndexRoute
+  '/(app)/(Gestion)/Usuarios/': typeof appGestionUsuariosIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -206,11 +256,16 @@ export interface FileRouteTypes {
     | '/Actas'
     | '/CalidadAgua'
     | '/Contacto'
-    | '/Inventario'
     | '/Proveedores'
     | '/Solicitudes'
-    | '/Usuarios'
     | '/Bitacora'
+    | '/Inventario/Categorias'
+    | '/Inventario/Materiales'
+    | '/Inventario/Movimientos'
+    | '/Inventario/UnidadesMedicion'
+    | '/Usuarios/Roles'
+    | '/Inventario'
+    | '/Usuarios'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/Home'
@@ -227,11 +282,16 @@ export interface FileRouteTypes {
     | '/Actas'
     | '/CalidadAgua'
     | '/Contacto'
-    | '/Inventario'
     | '/Proveedores'
     | '/Solicitudes'
-    | '/Usuarios'
     | '/Bitacora'
+    | '/Inventario/Categorias'
+    | '/Inventario/Materiales'
+    | '/Inventario/Movimientos'
+    | '/Inventario/UnidadesMedicion'
+    | '/Usuarios/Roles'
+    | '/Inventario'
+    | '/Usuarios'
   id:
     | '__root__'
     | '/Home'
@@ -248,11 +308,16 @@ export interface FileRouteTypes {
     | '/(app)/(Gestion)/Actas'
     | '/(app)/(Gestion)/CalidadAgua'
     | '/(app)/(Gestion)/Contacto'
-    | '/(app)/(Gestion)/Inventario'
     | '/(app)/(Gestion)/Proveedores'
     | '/(app)/(Gestion)/Solicitudes'
-    | '/(app)/(Gestion)/Usuarios'
     | '/(app)/(Seguridad)/Bitacora'
+    | '/(app)/(Gestion)/Inventario/Categorias'
+    | '/(app)/(Gestion)/Inventario/Materiales'
+    | '/(app)/(Gestion)/Inventario/Movimientos'
+    | '/(app)/(Gestion)/Inventario/UnidadesMedicion'
+    | '/(app)/(Gestion)/Usuarios/Roles'
+    | '/(app)/(Gestion)/Inventario/'
+    | '/(app)/(Gestion)/Usuarios/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -270,11 +335,16 @@ export interface RootRouteChildren {
   appGestionActasRoute: typeof appGestionActasRoute
   appGestionCalidadAguaRoute: typeof appGestionCalidadAguaRoute
   appGestionContactoRoute: typeof appGestionContactoRoute
-  appGestionInventarioRoute: typeof appGestionInventarioRoute
   appGestionProveedoresRoute: typeof appGestionProveedoresRoute
   appGestionSolicitudesRoute: typeof appGestionSolicitudesRoute
-  appGestionUsuariosRoute: typeof appGestionUsuariosRoute
   appSeguridadBitacoraRoute: typeof appSeguridadBitacoraRoute
+  appGestionInventarioCategoriasRoute: typeof appGestionInventarioCategoriasRoute
+  appGestionInventarioMaterialesRoute: typeof appGestionInventarioMaterialesRoute
+  appGestionInventarioMovimientosRoute: typeof appGestionInventarioMovimientosRoute
+  appGestionInventarioUnidadesMedicionRoute: typeof appGestionInventarioUnidadesMedicionRoute
+  appGestionUsuariosRolesRoute: typeof appGestionUsuariosRolesRoute
+  appGestionInventarioIndexRoute: typeof appGestionInventarioIndexRoute
+  appGestionUsuariosIndexRoute: typeof appGestionUsuariosIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -300,13 +370,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof appSeguridadBitacoraRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/(app)/(Gestion)/Usuarios': {
-      id: '/(app)/(Gestion)/Usuarios'
-      path: '/Usuarios'
-      fullPath: '/Usuarios'
-      preLoaderRoute: typeof appGestionUsuariosRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/(app)/(Gestion)/Solicitudes': {
       id: '/(app)/(Gestion)/Solicitudes'
       path: '/Solicitudes'
@@ -319,13 +382,6 @@ declare module '@tanstack/react-router' {
       path: '/Proveedores'
       fullPath: '/Proveedores'
       preLoaderRoute: typeof appGestionProveedoresRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/(app)/(Gestion)/Inventario': {
-      id: '/(app)/(Gestion)/Inventario'
-      path: '/Inventario'
-      fullPath: '/Inventario'
-      preLoaderRoute: typeof appGestionInventarioRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/(app)/(Gestion)/Contacto': {
@@ -412,6 +468,55 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof appAuthForgotPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/(app)/(Gestion)/Usuarios/': {
+      id: '/(app)/(Gestion)/Usuarios/'
+      path: '/Usuarios'
+      fullPath: '/Usuarios'
+      preLoaderRoute: typeof appGestionUsuariosIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/(app)/(Gestion)/Inventario/': {
+      id: '/(app)/(Gestion)/Inventario/'
+      path: '/Inventario'
+      fullPath: '/Inventario'
+      preLoaderRoute: typeof appGestionInventarioIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/(app)/(Gestion)/Usuarios/Roles': {
+      id: '/(app)/(Gestion)/Usuarios/Roles'
+      path: '/Usuarios/Roles'
+      fullPath: '/Usuarios/Roles'
+      preLoaderRoute: typeof appGestionUsuariosRolesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/(app)/(Gestion)/Inventario/UnidadesMedicion': {
+      id: '/(app)/(Gestion)/Inventario/UnidadesMedicion'
+      path: '/Inventario/UnidadesMedicion'
+      fullPath: '/Inventario/UnidadesMedicion'
+      preLoaderRoute: typeof appGestionInventarioUnidadesMedicionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/(app)/(Gestion)/Inventario/Movimientos': {
+      id: '/(app)/(Gestion)/Inventario/Movimientos'
+      path: '/Inventario/Movimientos'
+      fullPath: '/Inventario/Movimientos'
+      preLoaderRoute: typeof appGestionInventarioMovimientosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/(app)/(Gestion)/Inventario/Materiales': {
+      id: '/(app)/(Gestion)/Inventario/Materiales'
+      path: '/Inventario/Materiales'
+      fullPath: '/Inventario/Materiales'
+      preLoaderRoute: typeof appGestionInventarioMaterialesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/(app)/(Gestion)/Inventario/Categorias': {
+      id: '/(app)/(Gestion)/Inventario/Categorias'
+      path: '/Inventario/Categorias'
+      fullPath: '/Inventario/Categorias'
+      preLoaderRoute: typeof appGestionInventarioCategoriasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -430,11 +535,17 @@ const rootRouteChildren: RootRouteChildren = {
   appGestionActasRoute: appGestionActasRoute,
   appGestionCalidadAguaRoute: appGestionCalidadAguaRoute,
   appGestionContactoRoute: appGestionContactoRoute,
-  appGestionInventarioRoute: appGestionInventarioRoute,
   appGestionProveedoresRoute: appGestionProveedoresRoute,
   appGestionSolicitudesRoute: appGestionSolicitudesRoute,
-  appGestionUsuariosRoute: appGestionUsuariosRoute,
   appSeguridadBitacoraRoute: appSeguridadBitacoraRoute,
+  appGestionInventarioCategoriasRoute: appGestionInventarioCategoriasRoute,
+  appGestionInventarioMaterialesRoute: appGestionInventarioMaterialesRoute,
+  appGestionInventarioMovimientosRoute: appGestionInventarioMovimientosRoute,
+  appGestionInventarioUnidadesMedicionRoute:
+    appGestionInventarioUnidadesMedicionRoute,
+  appGestionUsuariosRolesRoute: appGestionUsuariosRolesRoute,
+  appGestionInventarioIndexRoute: appGestionInventarioIndexRoute,
+  appGestionUsuariosIndexRoute: appGestionUsuariosIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

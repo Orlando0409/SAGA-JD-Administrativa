@@ -19,3 +19,23 @@ export const getAllMovimientos = async (): Promise<any[]> => {
   const response = await axiosPrivate.get('/Inventario/all/movimientos');
   return response.data;
 };
+
+export const getMovimientosEntradas = async (): Promise<any[]> => {
+  const response = await axiosPrivate.get('/Inventario/movimientos/entradas');
+  return response.data;
+};
+
+export const getMovimientosSalidas = async (): Promise<any[]> => {
+  const response = await axiosPrivate.get('/Inventario/movimientos/salidas');
+  return response.data;
+};
+
+export const getMovimientosEntreFechas = async (startDate: string, endDate: string): Promise<any[]> => {
+  const response = await axiosPrivate.get(`/Inventario/movimientos/entre/fechas/${startDate}/${endDate}`);
+  return response.data;
+};
+
+export const getMovimientosPorUsuarioCreador = async (idUsuarioCreador: number): Promise<any[]> => {
+  const response = await axiosPrivate.get(`/Inventario/movimientos/${idUsuarioCreador}`);
+  return response.data;
+};

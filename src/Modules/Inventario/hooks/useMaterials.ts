@@ -54,6 +54,47 @@ export const useGetMaterialesPorDebajoDeStock = (threshold: number) => {
   });
 };
 
+export const useGetMaterialesDisponibles = () => {
+  return useQuery({
+    queryKey: ['materials', 'disponibles'],
+    queryFn: MaterialService.getMaterialesDisponibles,
+    staleTime: 1000 * 60 * 5,
+  });
+};
+
+export const useGetMaterialesAgotados = () => {
+  return useQuery({
+    queryKey: ['materials', 'agotados'],
+    queryFn: MaterialService.getMaterialesAgotados,
+    staleTime: 1000 * 60 * 5,
+  });
+};
+
+export const useGetMaterialesDeBaja = () => {
+  return useQuery({
+    queryKey: ['materials', 'de-baja'],
+    queryFn: MaterialService.getMaterialesDeBaja,
+    staleTime: 1000 * 60 * 5,
+  });
+};
+
+export const useGetMaterialesAgotadosYDeBaja = () => {
+  return useQuery({
+    queryKey: ['materials', 'agotados-de-baja'],
+    queryFn: MaterialService.getMaterialesAgotadosYDeBaja,
+    staleTime: 1000 * 60 * 5,
+  });
+};
+
+export const useGetMaterialesEntreRangoPrecio = (min: number, max: number) => {
+  return useQuery({
+    queryKey: ['materials', 'price-range', min, max],
+    queryFn: () => MaterialService.getMaterialesEntreRangoPrecio(min, max),
+    enabled: min > 0 && max > 0 && min <= max,
+    staleTime: 1000 * 60 * 5,
+  });
+};
+
 export const useCreateMaterial = () => {
   const queryClient = useQueryClient();
   const { showSuccess, showError } = useAlerts();

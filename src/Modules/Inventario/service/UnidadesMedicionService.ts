@@ -35,6 +35,16 @@ export const getAllUnidadesMedicionSimple = async (): Promise<UnidadMedicionSimp
   return response.data.map(transformUnidadMedicionSimple);
 };
 
+export const getUnidadesMedicionActivas = async (): Promise<UnidadMedicion[]> => {
+  const response = await axiosPrivate.get('/Inventario/unidades-medicion/activas');
+  return response.data.map(transformUnidadMedicion);
+};
+
+export const getUnidadesMedicionInactivas = async (): Promise<UnidadMedicion[]> => {
+  const response = await axiosPrivate.get('/Inventario/unidades-medicion/inactivas');
+  return response.data.map(transformUnidadMedicion);
+};
+
 export const getUnidadMedicionById = async (id: number): Promise<UnidadMedicion> => {
   const response = await axiosPrivate.get(`/Inventario/unidad-medicion/${id}`);
   return transformUnidadMedicion(response.data);

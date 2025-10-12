@@ -11,10 +11,15 @@ import {
 import { LuPlus, LuFilter, LuSearch, LuArrowLeft } from 'react-icons/lu';
 import { 
   useGetAllMaterials, 
+  useGetMaterialesDisponibles,
+  useGetMaterialesAgotados,
+  useGetMaterialesDeBaja,
+  useGetMaterialesAgotadosYDeBaja,
   useGetMaterialesConCategorias, 
   useGetMaterialesSinCategorias,
   useGetMaterialesPorDebajoDeStock,
   useGetMaterialesPorEncimaDeStock,
+  useGetMaterialesEntreRangoPrecio,
   useUpdateEstadoMaterial,
 } from '../../hooks/useMaterials';
 import { MdKeyboardArrowLeft, MdKeyboardArrowRight, MdKeyboardDoubleArrowLeft,
@@ -33,6 +38,7 @@ import {
 
 import type { Material } from '../../models/Inventario';
 import type { MaterialFilterOptions } from '../../types/MaterialTypes';
+import { getMaterialLoadingState } from '../../helper/MaterialesHelpers';
 import CreateMaterialModal from './CreateMaterialModal';
 import DetailMaterialModal from './DetailMaterialModal';
 import FilterMaterialModal from './FilterMaterialModal';
@@ -50,9 +56,16 @@ const CatalogoMateriales: React.FC<CatalogoMaterialesProps> = ({ onBack }) => {
   const [showFilterModal, setShowFilterModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [appliedFilters, setAppliedFilters] = useState<MaterialFilterOptions>({});
-  const [estadoFilter, setEstadoFilter] = useState<string>('Disponible'); // Por defecto mostrar solo activos
+  const [estadoFilter, setEstadoFilter] = useState<string>('Todos'); // Por defecto mostrar todos
   const updateEstadoMutation = useUpdateEstadoMaterial();
-  const { data: allMaterials = [], isLoading: isLoadingAll, refetch: refetchAllMaterials } = useGetAllMaterials();
+
+  // Hooks para obtener materiales según el estado
+  const { data: todosMateriales = [], isLoading: isLoadingTodos, refetch: refetchTodos } = useGetAllMaterials();
+  const { data: materialesDisponibles = [], isLoading: isLoadingDisponibles, refetch: refetchDisponibles } = useGetMaterialesDisponibles();
+  const { data: materialesAgotados = [], isLoading: isLoadingAgotados, refetch: refetchAgotados } = useGetMaterialesAgotados();
+  const { data: materialesDeBaja = [], isLoading: isLoadingDeBaja, refetch: refetchDeBaja } = useGetMaterialesDeBaja();
+  const { data: materialesAgotadosYDeBaja = [], isLoading: isLoadingAgotadosYDeBaja, refetch: refetchAgotadosYDeBaja } = useGetMaterialesAgotadosYDeBaja();
+  
   const { data: materialesConCategorias = [], isLoading: isLoadingConCat, refetch: refetchConCat } = useGetMaterialesConCategorias();
   const { data: materialesSinCategorias = [], isLoading: isLoadingSinCat, refetch: refetchSinCat } = useGetMaterialesSinCategorias();
   const { data: materialesEncimaStock = [], isLoading: isLoadingAbove, refetch: refetchAbove } = useGetMaterialesPorEncimaDeStock(
@@ -62,6 +75,13 @@ const CatalogoMateriales: React.FC<CatalogoMaterialesProps> = ({ onBack }) => {
   const { data: materialesDebajoStock = [], isLoading: isLoadingBelow, refetch: refetchBelow } = useGetMaterialesPorDebajoDeStock(
     appliedFilters.stockMaximo || 0, 
   );
+  
+  // Hook para filtro de rango de precio - solo se habilita cuando hay ambos valores
+  const hasRangoPrecio = !!(appliedFilters.precioMin && appliedFilters.precioMax);
+  const { data: materialesPorPrecio = [], isLoading: isLoadingPrecio, refetch: refetchPrecio } = useGetMaterialesEntreRangoPrecio(
+    appliedFilters.precioMin || 0,
+    appliedFilters.precioMax || 0
+  );
 
   const pageSizeOptions = [5, 10, 20, 50];
   const [pagination, setPagination] = useState({
@@ -70,11 +90,16 @@ const CatalogoMateriales: React.FC<CatalogoMaterialesProps> = ({ onBack }) => {
   });
 
   const refetchAllData = () => {
-    refetchAllMaterials();
+    refetchTodos();
+    refetchDisponibles();
+    refetchAgotados();
+    refetchDeBaja();
+    refetchAgotadosYDeBaja();
     refetchConCat();
     refetchSinCat();
     refetchAbove();
     refetchBelow();
+    if (hasRangoPrecio) refetchPrecio();
   };
 
   useEffect(() => {
@@ -83,7 +108,19 @@ const CatalogoMateriales: React.FC<CatalogoMaterialesProps> = ({ onBack }) => {
     return () => window.removeEventListener('refreshInventario', handler);
   }, []);
 
+  const materialesPorEstado = useMemo(() => {
+    if (estadoFilter === 'Disponible') return materialesDisponibles;
+    if (estadoFilter === 'Agotado') return materialesAgotados;
+    if (estadoFilter === 'De baja') return materialesDeBaja;
+    if (estadoFilter === 'Agotado y De baja') return materialesAgotadosYDeBaja;
+    return todosMateriales; 
+  }, [estadoFilter, todosMateriales, materialesDisponibles, materialesAgotados, materialesDeBaja, materialesAgotadosYDeBaja]);
+
   const { materials, isLoading } = useMemo(() => {
+    if (hasRangoPrecio) {
+      return { materials: materialesPorPrecio, isLoading: isLoadingPrecio };
+    }
+    
     if (appliedFilters.soloConCategorias) {
       return { materials: materialesConCategorias, isLoading: isLoadingConCat };
     }
@@ -97,10 +134,26 @@ const CatalogoMateriales: React.FC<CatalogoMaterialesProps> = ({ onBack }) => {
       return { materials: materialesDebajoStock, isLoading: isLoadingBelow };
     }
     
-    return { materials: allMaterials, isLoading: isLoadingAll };
+    const loading = getMaterialLoadingState(estadoFilter, {
+      todos: isLoadingTodos,
+      disponibles: isLoadingDisponibles,
+      agotados: isLoadingAgotados,
+      deBaja: isLoadingDeBaja,
+      agotadosYDeBaja: isLoadingAgotadosYDeBaja
+    });
+    
+    return { materials: materialesPorEstado, isLoading: loading };
   }, [
+    hasRangoPrecio,
+    materialesPorPrecio, isLoadingPrecio,
     appliedFilters, 
-    allMaterials, isLoadingAll,
+    estadoFilter,
+    materialesPorEstado,
+    todosMateriales, isLoadingTodos,
+    materialesDisponibles, isLoadingDisponibles,
+    materialesAgotados, isLoadingAgotados,
+    materialesDeBaja, isLoadingDeBaja,
+    materialesAgotadosYDeBaja, isLoadingAgotadosYDeBaja,
     materialesConCategorias, isLoadingConCat,
     materialesSinCategorias, isLoadingSinCat,
     materialesEncimaStock, isLoadingAbove,
@@ -126,24 +179,9 @@ const CatalogoMateriales: React.FC<CatalogoMaterialesProps> = ({ onBack }) => {
     );
   };
 
-  const filterByEstado = (material: Material, estado?: string) => {
-    if (!estado) return true;
-    return material.Estado_Material.Nombre_Estado_Material === estado;
-  };
-
   const filterByStock = (material: Material, conStock?: boolean) => {
     if (!conStock) return true;
     return material.Cantidad > 0;
-  };
-
-  const filterByPrecioMin = (material: Material, precioMin?: number) => {
-    if (!precioMin) return true;
-    return material.Precio_Unitario >= precioMin;
-  };
-
-  const filterByPrecioMax = (material: Material, precioMax?: number) => {
-    if (!precioMax) return true;
-    return material.Precio_Unitario <= precioMax;
   };
 
   const filterByStockEntre = (material: Material, tipoFiltroStock?: string, stockMinimo?: number, stockMaximo?: number) => {
@@ -156,26 +194,14 @@ const CatalogoMateriales: React.FC<CatalogoMaterialesProps> = ({ onBack }) => {
   const applyAdditionalFilters = (data: Material[], filters: MaterialFilterOptions): Material[] => {
     return data.filter(material =>
       filterByCategoria(material, filters.categoria) &&
-      filterByEstado(material, filters.estado) &&
       filterByStock(material, filters.conStock) &&
-      filterByPrecioMin(material, filters.precioMin) &&
-      filterByPrecioMax(material, filters.precioMax) &&
       filterByStockEntre(material, filters.tipoFiltroStock, filters.stockMinimo, filters.stockMaximo)
     );
   };
 
   const filteredMaterials = useMemo(() => {
-    let filtered = applyAdditionalFilters(materials, appliedFilters);
-    
-    
-    if (estadoFilter !== 'Todos') {
-      filtered = filtered.filter(material => 
-        material.Estado_Material?.Nombre_Estado_Material === estadoFilter
-      );
-    }
-    
-    return filtered;
-  }, [materials, appliedFilters, estadoFilter]);
+    return applyAdditionalFilters(materials, appliedFilters);
+  }, [materials, appliedFilters]);
 
   const columnHelper = createColumnHelper<Material>();
 
@@ -355,7 +381,7 @@ const CatalogoMateriales: React.FC<CatalogoMaterialesProps> = ({ onBack }) => {
                           ? 'No se puede activar un material con cantidad 0. Realice un movimiento de ingreso primero.' 
                           : 'Activar material'}
                       >
-                        Activar
+                        Quitar de baja
                       </button>
                     </AlertDialogTrigger>
                     <AlertDialogContent>
@@ -399,7 +425,7 @@ const CatalogoMateriales: React.FC<CatalogoMaterialesProps> = ({ onBack }) => {
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
                       <button
-                        className="px-2 py-1 bg-amber-600 text-white text-xs rounded hover:bg-amber-700 transition-colors"
+                        className="px-2 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-700 transition-colors"
                         disabled={updateEstadoMutation.isPending}
                         title="Dar de baja material agotado"
                       >
@@ -414,7 +440,7 @@ const CatalogoMateriales: React.FC<CatalogoMaterialesProps> = ({ onBack }) => {
                         <AlertDialogDescription>
                           <span>¿Estás seguro de que deseas dar de baja el material "{info.row.original.Nombre_Material}"?</span>
                           <br />
-                          <span className="text-amber-600">El material está agotado y pasará al estado "Agotado y de baja".</span>
+                          <span>El material está agotado y pasará al estado "Agotado y de baja".</span>
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
@@ -433,15 +459,21 @@ const CatalogoMateriales: React.FC<CatalogoMaterialesProps> = ({ onBack }) => {
                 );
               }
               
-              // Estado 4: Agotado y de baja → Mostrar botón "Quitar de baja" 
+              // Estado 4: Agotado y de baja → Mostrar botón "Quitar de baja" (solo si cantidad > 0)
               if (estadoNombre === 'Agotado y de baja') {
                 return (
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
                       <button
-                        className="px-2 py-1 bg-purple-600 text-white text-xs rounded hover:bg-purple-700 transition-colors"
-                        disabled={updateEstadoMutation.isPending}
-                        title="Quitar estado de baja (quedará como Agotado)"
+                        className={`px-2 py-1 text-white text-xs rounded transition-colors ${
+                          cantidad === 0
+                            ? 'bg-gray-400 cursor-not-allowed'
+                            : 'bg-green-600 hover:bg-green-700'
+                        }`}
+                        disabled={updateEstadoMutation.isPending || cantidad === 0}
+                        title={cantidad === 0 
+                          ? 'No se puede quitar de baja un material con cantidad 0. Realice un movimiento de ingreso primero.' 
+                          : 'Quitar estado de baja (quedará como Agotado)'}
                       >
                         Quitar de baja
                       </button>
@@ -452,15 +484,27 @@ const CatalogoMateriales: React.FC<CatalogoMaterialesProps> = ({ onBack }) => {
                           <span>¿Quitar estado de baja?</span>
                         </AlertDialogTitle>
                         <AlertDialogDescription>
-                          <span>¿Estás seguro de que deseas quitar el estado de baja del material "{info.row.original.Nombre_Material}"?</span>
-                          <br />
-                          <span className="text-purple-600">El material quedará en estado "Agotado".</span>
+                          {cantidad === 0 ? (
+                            <>
+                              <span className="text-amber-600 font-semibold">⚠️ Advertencia:</span>
+                              <br />
+                              <span>No se puede quitar de baja el material "{info.row.original.Nombre_Material}" porque tiene cantidad 0 en stock.</span>
+                              <br />
+                              <span>Para quitarlo de baja, primero debe realizar un movimiento de ingreso.</span>
+                            </>
+                          ) : (
+                            <>
+                              <span>¿Estás seguro de que deseas quitar el estado de baja del material "{info.row.original.Nombre_Material}"?</span>
+                              <br />
+                              <span>El material quedará en estado "Agotado".</span>
+                            </>
+                          )}
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
                         <AlertDialogAction
                           onClick={() => handleToggleEstado(info.row.original)}
-                          disabled={updateEstadoMutation.isPending}
+                          disabled={updateEstadoMutation.isPending || cantidad === 0}
                         >
                           <span>Quitar de baja</span>
                         </AlertDialogAction>
@@ -686,16 +730,16 @@ const CatalogoMateriales: React.FC<CatalogoMaterialesProps> = ({ onBack }) => {
           </table>
         </div>
 
-        <div className="bg-white px-6 py-3 border-t border-gray-200 flex items-center justify-between">
+        <div className="bg-gray-50 px-6 py-3 border-t border-gray-200 flex items-center justify-between">
 
-          <div className="flex items-center gap-2 text-sm text-gray-700">
-            <span>Filas por página</span>
+          <div className="flex items-center gap-2">
+            <span className='text-sm text-gray-700'>Filas por página</span>
             <select
               value={table.getState().pagination.pageSize}
               onChange={(e) => {
                 table.setPageSize(Number(e.target.value));
               }}
-              className="border border-gray-300 rounded px-2 py-1"
+              className="border border-gray-300 rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
             >
               {pageSizeOptions.map((pageSize) => (
                 <option key={pageSize} value={pageSize}>
@@ -705,18 +749,20 @@ const CatalogoMateriales: React.FC<CatalogoMaterialesProps> = ({ onBack }) => {
             </select>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
             <button
               onClick={() => table.setPageIndex(0)}
               disabled={!table.getCanPreviousPage()}
-              className="px-2 py-1 text-sm border border-gray-300 rounded disabled:opacity-50"
+              className="p-2 border border-gray-300 rounded-md text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              title="Primera página"
             >
               <MdKeyboardDoubleArrowLeft />
             </button>
             <button
               onClick={() => table.previousPage()}
               disabled={!table.getCanPreviousPage()}
-              className="px-2 py-1 text-sm border border-gray-300 rounded disabled:opacity-50"
+              className="p-2 border border-gray-300 rounded-md text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              title="Página anterior"
             >
               <MdKeyboardArrowLeft />
             </button>
@@ -727,14 +773,16 @@ const CatalogoMateriales: React.FC<CatalogoMaterialesProps> = ({ onBack }) => {
             <button
               onClick={() => table.nextPage()}
               disabled={!table.getCanNextPage()}
-              className="px-2 py-1 text-sm border border-gray-300 rounded disabled:opacity-50"
+              className="p-2 border border-gray-300 rounded-md text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              title="Página siguiente"
             >
               <MdKeyboardArrowRight />
             </button>
             <button
               onClick={() => table.setPageIndex(table.getPageCount() - 1)}
               disabled={!table.getCanNextPage()}
-              className="px-2 py-1 text-sm border border-gray-300 rounded disabled:opacity-50"
+              className="p-2 border border-gray-300 rounded-md text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              title="Última página"
             >
               <MdKeyboardDoubleArrowRight />
             </button>

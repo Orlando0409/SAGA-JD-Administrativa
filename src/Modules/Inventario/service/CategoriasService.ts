@@ -10,6 +10,16 @@ export const getAllCategories = async (): Promise<CategoriaMaterial[]> => {
   return response.data;
 };
 
+export const getCategoriasActivas = async (): Promise<CategoriaMaterial[]> => {
+  const response = await axiosPrivate.get('/Inventario/categorias/activas');
+  return response.data;
+};
+
+export const getCategoriasInactivas = async (): Promise<CategoriaMaterial[]> => {
+  const response = await axiosPrivate.get('/Inventario/categorias/inactivas');
+  return response.data;
+};
+
 export const getCategoriaById = async (id: number): Promise<CategoriaMaterial> => {
   const response = await axiosPrivate.get(`/Inventario/categoria/${id}`);
   return response.data;

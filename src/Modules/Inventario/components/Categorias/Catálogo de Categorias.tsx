@@ -23,7 +23,8 @@ import {
   AlertDialogHeader,
   AlertDialogFooter
 } from "@/Modules/Global/components/Sidebar/ui/alert-dialog";
-import { useGetAllCategories, useUpdateEstadoCategoria } from '../../hooks/useCategorias';
+import { useGetAllCategories, useGetCategoriasActivas, useGetCategoriasInactivas, useUpdateEstadoCategoria } from '../../hooks/useCategorias';
+import { getCategoriasLoadingState, getCategoriasErrorState } from '../../helper/CategoriasHelpers';
 import CreateCategoriaModal from './CreateCategoriaModal';
 import EditCategoriaModal from './EditCategoriaModal';
 import DetailCategoriaModal from './DetailCategoriaModal';
@@ -39,25 +40,42 @@ const CategoriasManagement: React.FC<CategoriasManagementProps> = ({ onBack }) =
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [selectedCategoria, setSelectedCategoria] = useState<CategoriaMaterial | null>(null);
-  const [estadoFilter, setEstadoFilter] = useState<string>('Activa'); // Por defecto mostrar solo activas
+  const [estadoFilter, setEstadoFilter] = useState<string>('Todas'); // Por defecto mostrar todas
 
   const pageSizeOptions = [5, 10, 20, 50];
   const [pagination, setPagination] = useState({
     pageSize: 5,
     pageIndex: 0,
   });
-
-  const { data: allCategorias = [], isLoading, error } = useGetAllCategories();
+  
+  const { data: todasCategorias = [], isLoading: isLoadingTodas, error: errorTodas } = useGetAllCategories();
+  const { data: categoriasActivas = [], isLoading: isLoadingActivas, error: errorActivas } = useGetCategoriasActivas();
+  const { data: categoriasInactivas = [], isLoading: isLoadingInactivas, error: errorInactivas } = useGetCategoriasInactivas();
   const updateEstadoMutation = useUpdateEstadoCategoria();
 
+  // Seleccionar los datos según el filtro
   const categorias = useMemo(() => {
     if (estadoFilter === 'Todas') {
-      return allCategorias;
+      return todasCategorias;
+    } else if (estadoFilter === 'Activa') {
+      return categoriasActivas;
+    } else {
+      return categoriasInactivas;
     }
-    return allCategorias.filter(categoria => 
-      categoria.Estado_Categoria?.Nombre_Estado_Categoria === estadoFilter
-    );
-  }, [allCategorias, estadoFilter]);
+  }, [estadoFilter, todasCategorias, categoriasActivas, categoriasInactivas]);
+
+  // Determinar el estado de carga y error 
+  const isLoading = getCategoriasLoadingState(estadoFilter, {
+    todas: isLoadingTodas,
+    activas: isLoadingActivas,
+    inactivas: isLoadingInactivas
+  });
+  
+  const error = getCategoriasErrorState(estadoFilter, {
+    todas: errorTodas,
+    activas: errorActivas,
+    inactivas: errorInactivas
+  });
 
 
   const columnHelper = createColumnHelper<CategoriaMaterial>();
@@ -371,16 +389,27 @@ const CategoriasManagement: React.FC<CategoriasManagementProps> = ({ onBack }) =
               ) : (
                 table.getRowModel().rows.map(row => (
                   <tr key={row.id} className="hover:bg-sky-50 cursor-pointer transition-colors">
-                    {row.getVisibleCells().map((cell, index) => (
-                      <td key={cell.id} className={`px-2 sm:px-4 py-3 text-xs sm:text-sm text-slate-700 align-top ${
-                        index === 0 ? 'text-left' : 'text-center'
-                      }`}>
-                        {cell.column.columnDef.cell ? 
-                          (typeof cell.column.columnDef.cell === 'function' ? cell.column.columnDef.cell(cell.getContext()) : cell.column.columnDef.cell) :
-                          cell.getValue() as React.ReactNode
+                    {row.getVisibleCells().map((cell, index) => {
+                      let cellContent: React.ReactNode;
+                      
+                      if (cell.column.columnDef.cell) {
+                        if (typeof cell.column.columnDef.cell === 'function') {
+                          cellContent = cell.column.columnDef.cell(cell.getContext());
+                        } else {
+                          cellContent = cell.column.columnDef.cell;
                         }
-                      </td>
-                    ))}
+                      } else {
+                        cellContent = cell.getValue() as React.ReactNode;
+                      }
+                      
+                      return (
+                        <td key={cell.id} className={`px-2 sm:px-4 py-3 text-xs sm:text-sm text-slate-700 align-top ${
+                          index === 0 ? 'text-left' : 'text-center'
+                        }`}>
+                          {cellContent}
+                        </td>
+                      );
+                    })}
                   </tr>
                 ))
               )}

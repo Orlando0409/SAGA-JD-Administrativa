@@ -50,6 +50,31 @@ export const getMaterialesPorDebajoDeStock = async (threshold: number): Promise<
   return response.data.map(transformMaterial);
 };
 
+export const getMaterialesDisponibles = async (): Promise<Material[]> => {
+  const response = await axiosPrivate.get('/Inventario/materiales/disponibles');
+  return response.data.map(transformMaterial);
+};
+
+export const getMaterialesAgotados = async (): Promise<Material[]> => {
+  const response = await axiosPrivate.get('/Inventario/materiales/agotados');
+  return response.data.map(transformMaterial);
+};
+
+export const getMaterialesDeBaja = async (): Promise<Material[]> => {
+  const response = await axiosPrivate.get('/Inventario/materiales/de-baja');
+  return response.data.map(transformMaterial);
+};
+
+export const getMaterialesAgotadosYDeBaja = async (): Promise<Material[]> => {
+  const response = await axiosPrivate.get('/Inventario/materiales/agotados-de-baja');
+  return response.data.map(transformMaterial);
+};
+
+export const getMaterialesEntreRangoPrecio = async (min: number, max: number): Promise<Material[]> => {
+  const response = await axiosPrivate.get(`/Inventario/materiales/between/priceRange/${min}/${max}`);
+  return response.data.map(transformMaterial);
+};
+
 export const createMaterial = async (materialData: CreateMaterialData, idUsuarioCreador: number): Promise<Material> => {
   const response = await axiosPrivate.post(`/Inventario/create/material/${idUsuarioCreador}`, materialData);
   return transformMaterial(response.data);

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useCreateRole, usePermissions } from '../Hooks/RoleHook';
-import { LuShield } from 'react-icons/lu';
+import { LuShield, LuX, LuLock, LuFolderTree } from 'react-icons/lu';
 import { groupPermissionsByModule, getPermissionIdByLevel, type ModulePermission, type PermissionLevel } from '@/Modules/Usuarios/Helper/GroupPermiByModule';
 import { RoleMAX_LENGTH, RoleMIN_LENGTH, type CreateRoleModalProps } from '../Types/RoleTypes';
 
@@ -93,16 +93,35 @@ const CreateRoleModal: React.FC<CreateRoleModalProps> = ({ onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-white bg-opacity-30 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
-          <h2 className="text-2xl font-bold text-gray-900">Crear Nuevo Rol</h2>
+    <div className="fixed inset-0 bg-opacity-10 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-lg shadow-2xl border border-gray-200 w-full max-w-3xl max-h-[90vh] overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100">
+        <div className="sticky top-0 bg-white border-b border-gray-200 p-4 z-10">
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-bold text-gray-900 flex items-center gap-3">
+              Crear Nuevo Rol
+            </h2>
+            <button
+              onClick={onClose}
+              className="text-gray-400 hover:text-gray-600 transition-colors"
+              type="button"
+            >
+              <LuX className="w-5 h-5" />
+            </button>
+          </div>
         </div>
 
-        <div className="p-6 overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100 max-h-[calc(90vh-140px)]">
-          <form onSubmit={handleSubmit} className="space-y-8">
-              <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Información del Rol</h3>
+        <div className="p-6">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
+              <div className="bg-gray-50 px-5 py-3 border-b border-gray-200">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                      <LuShield className="w-6 h-6 text-blue-600" />
+                  </div>
+                  <h3 className="text-base font-bold text-gray-900">Información del Rol</h3>
+                </div>
+              </div>
+              <div className="p-5">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <label htmlFor='role-name' className="block text-sm font-medium text-gray-500 mb-2">
@@ -145,33 +164,39 @@ const CreateRoleModal: React.FC<CreateRoleModalProps> = ({ onClose }) => {
                   </div>
                 </div>
               </div>
+            </div>
 
-            <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                <LuShield className="w-5 h-5 text-blue-600" />
-                Permisos por Módulo ({modulePermissions.length})
-              </h3>
+            <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
+              <div className="bg-gray-50 px-5 py-3 border-b border-gray-200">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                    <LuLock className="w-4 h-4 text-blue-600" />
+                  </div>
+                  <h3 className="text-base font-bold text-gray-900">Permisos por Módulo ({modulePermissions.length})</h3>
+                </div>
+              </div>
               
-              {isLoading ? (
-                <div className="text-center py-8">Cargando permisos...</div>
-              ) : (
-                <div className="space-y-4">
-                  {modulePermissions.map((mp) => (
-                    <div key={mp.Modulo} className="bg-white border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                            <LuShield className="w-5 h-5 text-blue-600" />
+              <div className="p-5">
+                {isLoading ? (
+                  <div className="text-center py-8">Cargando permisos...</div>
+                ) : (
+                  <div className="space-y-4">
+                    {modulePermissions.map((mp) => (
+                      <div key={mp.Modulo} className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                              <LuFolderTree className="w-5 h-5 text-blue-600" />
+                            </div>
+                            <div>
+                              <h4 className="font-bold text-gray-900 text-sm capitalize">{mp.Modulo}</h4>
+                              <p className="text-xs text-gray-600">
+                                {hasEditPermission(mp.Modulo) ? 'Módulo del sistema' : 'Solo lectura disponible'}
+                              </p>
+                            </div>
                           </div>
-                          <div>
-                            <h4 className="font-semibold text-gray-900 text-lg capitalize">{mp.Modulo}</h4>
-                            <p className="text-sm text-gray-500">
-                              {hasEditPermission(mp.Modulo) ? 'Módulo del sistema' : 'Solo lectura disponible'}
-                            </p>
-                          </div>
-                        </div>
-                        
-                        <div className="flex items-center gap-8">
+                          
+                          <div className="flex items-center gap-8">
       
                           <div className="flex flex-col items-center gap-2">
                             <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Ver</span>
@@ -240,29 +265,31 @@ const CreateRoleModal: React.FC<CreateRoleModalProps> = ({ onClose }) => {
                 </div>
               )}
             </div>
-
-            <div className="flex gap-4 items-end justify-end pt-4 border-t border-gray-200">
-                <button
-                  type="submit"
-                  disabled={hasError || nombreRol.length < RoleMIN_LENGTH}
-                  className={`px-6 py-2 rounded-lg transition-colors font-medium ${
-                    hasError || nombreRol.length < RoleMIN_LENGTH
-                      ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                      : 'bg-blue-600 text-white hover:bg-blue-700'
-                  }`}
-                >
+          </div>
+        </form>
+      </div>
+                        <div className="sticky bottom-0 flex justify-end gap-3 p-6 border-t bg-gray-50 z-10">
+            <div className="flex justify-end gap-3">
+              <button
+                type="submit"
+                disabled={hasError || nombreRol.length < RoleMIN_LENGTH}
+                className={`px-6 py-2 rounded-lg transition-colors font-medium ${
+                  hasError || nombreRol.length < RoleMIN_LENGTH
+                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    : 'bg-blue-600 text-white hover:bg-blue-700'
+                }`}
+              >
                 Crear Rol
               </button>
               <button
                 type="button"
                 onClick={onClose}
-                className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium"
+                className="px-6 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium"
               >
                 Cancelar
               </button>
             </div>
-          </form>
-        </div>
+          </div>
       </div>
     </div>
   );

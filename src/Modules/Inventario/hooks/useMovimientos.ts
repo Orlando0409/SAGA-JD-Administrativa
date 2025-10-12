@@ -5,7 +5,7 @@ import { useGetAllMaterials } from './useMaterials';
 import { useIngresoMaterial, useEgresoMaterial } from './HookMaterialMovimiento';
 import { useAlerts } from '@/Modules/Global/context/AlertContext';
 import { useAuth } from '@/Modules/Auth/Context/AuthContext';
-import { getAllMovimientos } from '../service/MovimientosService';
+import { getAllMovimientos, getMovimientosEntradas, getMovimientosSalidas, getMovimientosEntreFechas, getMovimientosPorUsuarioCreador } from '../service/MovimientosService';
 import { useQuery } from '@tanstack/react-query';
 
 
@@ -16,6 +16,44 @@ export const useGetAllMovimientos = () => {
     queryKey: ['movimientos'],
     queryFn: getAllMovimientos,
     staleTime: 1000 * 60 * 5, // 5 minutos
+    refetchOnWindowFocus: false,
+  });
+};
+
+export const useGetMovimientosEntradas = () => {
+  return useQuery<MovimientoMaterial[]>({
+    queryKey: ['movimientos', 'entradas'],
+    queryFn: getMovimientosEntradas,
+    staleTime: 1000 * 60 * 5,
+    refetchOnWindowFocus: false,
+  });
+};
+
+export const useGetMovimientosSalidas = () => {
+  return useQuery<MovimientoMaterial[]>({
+    queryKey: ['movimientos', 'salidas'],
+    queryFn: getMovimientosSalidas,
+    staleTime: 1000 * 60 * 5,
+    refetchOnWindowFocus: false,
+  });
+};
+
+export const useGetMovimientosEntreFechas = (startDate: string, endDate: string, enabled: boolean = true) => {
+  return useQuery<MovimientoMaterial[]>({
+    queryKey: ['movimientos', 'fechas', startDate, endDate],
+    queryFn: () => getMovimientosEntreFechas(startDate, endDate),
+    enabled: enabled && !!startDate && !!endDate,
+    staleTime: 1000 * 60 * 5,
+    refetchOnWindowFocus: false,
+  });
+};
+
+export const useGetMovimientosPorUsuario = (idUsuarioCreador: number, enabled: boolean = true) => {
+  return useQuery<MovimientoMaterial[]>({
+    queryKey: ['movimientos', 'usuario', idUsuarioCreador],
+    queryFn: () => getMovimientosPorUsuarioCreador(idUsuarioCreador),
+    enabled: enabled && !!idUsuarioCreador,
+    staleTime: 1000 * 60 * 5,
     refetchOnWindowFocus: false,
   });
 };
