@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { LuSearch, LuPackage, LuPlus } from 'react-icons/lu';
+import { LuSearch, LuPlus } from 'react-icons/lu';
 import type { MaterialSelectorProps } from '../../../types/MovimientoTypes';
 import { MaterialInfo } from '@/Modules/Inventario/helper/Movimientos';
 import CreateMaterialModal from '../../Materiales/CreateMaterialModal';
@@ -36,7 +36,6 @@ const MaterialSelector: React.FC<MaterialSelectorProps> = ({
       {selectedMaterial && !showMaterialSelector ? (
       <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border">
         <div className="flex items-center gap-3">
-          <LuPackage className="w-5 h-5 text-gray-600" />
           <MaterialInfo material={selectedMaterial} />
         </div>
         <button
@@ -73,7 +72,6 @@ const MaterialSelector: React.FC<MaterialSelectorProps> = ({
                   className="w-full p-3 text-left hover:bg-gray-50 border-b border-gray-100 last:border-b-0 transition-colors"
                 >
                   <div className="flex items-center gap-3">
-                    <LuPackage className="w-4 h-4 text-gray-600 flex-shrink-0" />
                     <div className="flex-1 min-w-0">
                       <MaterialInfo
                         material={material}

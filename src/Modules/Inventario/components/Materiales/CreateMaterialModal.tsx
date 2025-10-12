@@ -9,6 +9,7 @@ import type { CreateMaterialModalProps } from '../../types/MaterialTypes';
 import type { CreateMaterialData, CategoriaMaterial } from '../../models/Inventario';
 import CreateCategoriaModal from '../Categorias/CreateCategoriaModal';
 import CreateUnidadMedicionModal from '../UnidadesMedicion/CreateUnidadMedicionModal';
+import CreateModalProveedor from '@/Modules/Proveedores/Components/CreateModalProveedor';
 import { useAuth } from '@/Modules/Auth/Context/AuthContext';
 import { 
   NOMBRE_MATERIAL_MAX_LENGTH, 
@@ -31,6 +32,7 @@ const CreateMaterialModal: React.FC<CreateMaterialModalProps> = ({ isOpen, onClo
   });
   const [isCreateCategoriaModalOpen, setIsCreateCategoriaModalOpen] = useState(false);
   const [isCreateUnidadMedicionModalOpen, setIsCreateUnidadMedicionModalOpen] = useState(false);
+  const [isCreateProveedorModalOpen, setIsCreateProveedorModalOpen] = useState(false);
   
   const [formData, setFormData] = useState<CreateMaterialSchemaData>({
     Nombre_Material: '',
@@ -300,8 +302,16 @@ const CreateMaterialModal: React.FC<CreateMaterialModalProps> = ({ isOpen, onClo
 
             {formData.Id_Tipo_Proveedor && (
               <div>
-                <label htmlFor="proveedor" className="block text-sm font-medium text-gray-700 mb-1">
-                  Proveedor <span className="text-red-500">*</span>
+                <label htmlFor="proveedor" className="block text-sm flex justify-between font-medium text-gray-700 mb-1">
+                  <span>Proveedor <span className="text-red-500">*</span></span>
+                  <button
+                    type="button"
+                    onClick={() => setIsCreateProveedorModalOpen(true)}
+                    className="flex items-center gap-1 px-2 py-1 text-xs text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded transition-colors"
+                  >
+                    <LuPlus className="w-3 h-3" />
+                    Nuevo
+                  </button>
                 </label>
                 <select
                   id="proveedor"
@@ -393,6 +403,12 @@ const CreateMaterialModal: React.FC<CreateMaterialModalProps> = ({ isOpen, onClo
         isOpen={isCreateUnidadMedicionModalOpen}
         onClose={() => setIsCreateUnidadMedicionModalOpen(false)}
       />
+      {isCreateProveedorModalOpen && (
+        <CreateModalProveedor
+          onClose={() => setIsCreateProveedorModalOpen(false)}
+          setShowCreateModal={setIsCreateProveedorModalOpen}
+        />
+      )}
     </div>
   )
 }
