@@ -14,10 +14,7 @@ export const CalidadAguaSchema = z.object({
       if (!file) return true; // Opcional para edición
       return file.type === 'application/pdf';
     }, "Solo se permiten archivos PDF")
-    .refine((file) => {
-      if (!file) return true;
-      return file.size <= 10 * 1024 * 1024; // 10MB máximo
-    }, "El archivo no puede ser mayor a 10MB")
+    
 });
 
 // Esquema para actualización (todos los campos opcionales excepto ID)

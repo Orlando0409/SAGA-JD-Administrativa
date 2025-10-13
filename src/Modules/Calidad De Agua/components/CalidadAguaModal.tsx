@@ -1,12 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useUpdateCalidadAgua, useToggleVisibilidadCalidadAgua } from "../Hook/HookCalidadAgua";
 import { CalidadAguaSchema } from "../schemas/CalidadDeAgua";
 import { z } from "zod";
 import { FileText, Calendar, RefreshCcw, Eye, EyeOff } from "lucide-react";
 
 interface CalidadAguaModalProps {
-    isOpen: boolean; // Controla si el modal está abierto
-    onClose: () => void; // Función para cerrar el modal
+    isOpen: boolean;
+    onClose: () => void;
     archivo: {
         Id_Calidad_Agua: number;
         Titulo: string;
@@ -27,14 +27,27 @@ interface CalidadAguaModalProps {
 
 const CalidadAguaModal = ({ isOpen, onClose, archivo, refetch }: CalidadAguaModalProps) => {
     const [isEditing, setIsEditing] = useState(false); // Controla el modo de edición
-    const [titulo, setTitulo] = useState(archivo.Titulo);
+    const [titulo, setTitulo] = useState(archivo.Titulo || "");
+    const [descripcion, setDescripcion] = useState(archivo.Descripcion || "");
     const [file, setFile] = useState<File | null>(null);
     const [tituloError, setTituloError] = useState(""); // Validación de título
     const [descripcionError, setDescripcionError] = useState(""); // Validación de descripción
 
     const updateCalidadAguaMutation = useUpdateCalidadAgua(); // Actualizar un archivo existente
     const toggleVisibilidad = useToggleVisibilidadCalidadAgua(); // Cambiar visibilidad
-    const [descripcion, setDescripcion] = useState("");
+
+    // Actualizar los estados cuando cambie el archivo
+    useEffect(() => {
+        console.log("Datos del archivo:", archivo); // Para debug
+        console.log("Descripción:", archivo.Descripcion); // Para debug
+        setTitulo(archivo.Titulo || "");
+        setDescripcion(archivo.Descripcion || "");
+        setTituloError("");
+        setDescripcionError("");
+        setFile(null);
+        setIsEditing(false);
+    }, [archivo]);
+
     if (!isOpen) return null; // Si el modal no está abierto, no renderiza nada
 
     const handleTituloChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -50,7 +63,7 @@ const CalidadAguaModal = ({ isOpen, onClose, archivo, refetch }: CalidadAguaModa
     };
 
     const handleDescripcionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-        const value = e.target.value;
+        const value = e.target.value || "";
         setDescripcion(value);
         if (value.length < 10) {
             setDescripcionError("La descripción debe tener al menos 10 caracteres.");
@@ -75,6 +88,7 @@ const CalidadAguaModal = ({ isOpen, onClose, archivo, refetch }: CalidadAguaModa
 
             const formData = new FormData();
             formData.append("Titulo", titulo.trim());
+            formData.append("Descripcion", descripcion.trim());
             if (file) {
                 formData.append("Archivo_Calidad_Agua", file); // Reemplaza el archivo existente solo si se selecciona uno nuevo
             }
@@ -95,7 +109,7 @@ const CalidadAguaModal = ({ isOpen, onClose, archivo, refetch }: CalidadAguaModa
 
 
     //descripcion 
-    
+
 
     const handleToggleVisibility = () => {
         toggleVisibilidad.mutate(archivo.Id_Calidad_Agua, {
@@ -163,7 +177,7 @@ const CalidadAguaModal = ({ isOpen, onClose, archivo, refetch }: CalidadAguaModa
                                     required
                                 />
                                 <div className="text-right text-xs text-gray-500 mt-1">
-                                    {descripcion.length}/200
+                                    {(descripcion || "").length}/200
                                 </div>
                                 {descripcionError && (
                                     <p className="text-xs text-red-500 mt-1">{descripcionError}</p>
@@ -238,7 +252,7 @@ const CalidadAguaModal = ({ isOpen, onClose, archivo, refetch }: CalidadAguaModa
                                     {archivo.Titulo}
                                 </div>
 
-                               
+
                                 <a
                                     href={archivo.Url_Archivo}
                                     target="_blank"
@@ -250,16 +264,20 @@ const CalidadAguaModal = ({ isOpen, onClose, archivo, refetch }: CalidadAguaModa
                                 </a>
                             </div>
 
-                              <div className="bg-gray-100 p-4 rounded-lg shadow-sm">
-                             <div
-                                    className="text-lg font-bold text-gray-800 break-words"
+                            <div className="bg-gray-100 p-4 rounded-lg shadow-sm">
+                                <h4 className="text-sm font-semibold text-gray-700 mb-2">Descripción</h4>
+                                <div
+                                    className="text-sm text-gray-800 break-words"
                                     style={{ whiteSpace: "normal", overflowWrap: "break-word" }}
                                 >
-                                    {archivo.Descripcion}
+                                    {descripcion && descripcion.trim() !== ""
+                                        ? descripcion
+                                        : archivo.Descripcion && archivo.Descripcion.trim() !== ""
+                                            ? archivo.Descripcion
+                                            : "Sin descripción disponible"
+                                    }
                                 </div>
-                             </div>
-                              
-                            {/* Estado de visibilidad */}
+                            </div>                            {/* Estado de visibilidad */}
                             <div className="bg-white border border-gray-300 rounded-lg p-4 shadow-sm">
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-2">
