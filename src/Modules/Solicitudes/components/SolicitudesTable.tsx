@@ -36,6 +36,7 @@ type SolicitudUnificada = {
     Fecha_Creacion: string;
     // Datos originales para acciones
     datos_originales: SolicitudFisica | SolicitudJuridica;
+
 };
 
 export default function SolicitudesTable() {
@@ -43,6 +44,8 @@ export default function SolicitudesTable() {
     const { data: solicitudesFisicas, isLoading: loadingFisicas, isError: errorFisicos } = useSolicitudesFisicas();
     const { data: solicitudesJuridicas, isLoading: loadingJuridicas, isError: errorJuridicos } = useSolicitudesJuridicas();
 
+    // Debug INMEDIATO al cargar el componente
+  
     const [globalFilter, setGlobalFilter] = useState('');
 
     // Estados para el modal de edición
@@ -65,31 +68,30 @@ export default function SolicitudesTable() {
 
     // Función para unificar los datos de solicitudes
     const datosUnificados = useMemo((): SolicitudUnificada[] => {
-        // Debug: verificar qué datos están llegando
-        console.log('Solicitudes Físicas:', solicitudesFisicas);
-        console.log('Solicitudes Jurídicas:', solicitudesJuridicas);
+      
+
+
+        
 
         // Validar que los datos sean arrays
         const solicitudesFisicasArray = Array.isArray(solicitudesFisicas) ? solicitudesFisicas : [];
         const solicitudesJuridicasArray = Array.isArray(solicitudesJuridicas) ? solicitudesJuridicas : [];
 
-        console.log('Arrays validados - Físicas:', solicitudesFisicasArray.length, 'Jurídicas:', solicitudesJuridicasArray.length);
+       
 
         // Solicitudes Físicas
         const solicitudesFisicasUnificadas: SolicitudUnificada[] = solicitudesFisicasArray.map((solicitud: SolicitudFisica, index: number) => {
-            console.log(' Procesando solicitud física completa:', solicitud);
-            console.log(' Propiedades disponibles en solicitud física:', Object.keys(solicitud));
 
-            // Buscar ID real en la solicitud
+
+            // Buscar ID real en la solicitud (backend usa Id_Solicitud)
             const solicitudConId = solicitud as any;
-            const idReal = solicitudConId.id || solicitudConId.Id || solicitudConId.ID || solicitudConId.solicitudId;
-            console.log(' ID real encontrado en solicitud física:', idReal);
-
+            const idReal = solicitudConId.Id_Solicitud || solicitudConId.id || solicitudConId.Id || solicitudConId.ID;
+            
             return {
                 id: `fisico-${index}`, // ID interno único para la tabla
                 Id: idReal || (index + 1), // Usar ID real del backend o secuencial como fallback
                 Nombre_Completo: `${solicitud.Nombre || ''} ${solicitud.Apellido1 || ''} ${solicitud.Apellido2 || ''}`.trim() || 'Sin nombre',
-                Cedula_Documento: solicitud.Cedula || 'Sin cédula',
+                Cedula_Documento: solicitud.Identificacion  || 'Sin identificación',
                 Tipo_Solicitud: solicitud.Tipo_Solicitud,
                 Estado: {
                     Id_Estado: solicitud.Estado?.Id_Estado_Solicitud || 0,
@@ -103,14 +105,11 @@ export default function SolicitudesTable() {
 
         // Solicitudes Jurídicas
         const solicitudesJuridicasUnificadas: SolicitudUnificada[] = solicitudesJuridicasArray.map((solicitud: SolicitudJuridica, index: number) => {
-            console.log(' Procesando solicitud jurídica completa:', solicitud);
-            console.log(' Propiedades disponibles en solicitud jurídica:', Object.keys(solicitud));
-
-            // Buscar ID real en la solicitud
+      
+            // Buscar ID real en la solicitud (backend usa Id_Solicitud)
             const solicitudConId = solicitud as any;
-            const idReal = solicitudConId.id || solicitudConId.Id || solicitudConId.ID || solicitudConId.solicitudId;
-            console.log(' ID real encontrado en solicitud jurídica:', idReal);
-
+            const idReal = solicitudConId.Id_Solicitud || solicitudConId.id || solicitudConId.Id || solicitudConId.ID;
+       
             return {
                 id: `juridico-${index}`, // ID interno único para la tabla
                 Id: idReal || (solicitudesFisicasUnificadas.length + index + 1), // Usar ID real del backend o continuar secuencia
@@ -143,7 +142,7 @@ export default function SolicitudesTable() {
         const tipo = solicitud.Tipo_Persona === 'Físico' ? 'solicitud-fisica' : 'solicitud-juridica';
 
         setSelectedSolicitudForGestion({
-            tipo: tipo as 'solicitud-fisica' | 'solicitud-juridica',
+            tipo: tipo,
             datos: solicitud.datos_originales
         });
         setShowGestionModal(true);
@@ -193,13 +192,12 @@ export default function SolicitudesTable() {
             }
         }),
         columnHelper.accessor('Cedula_Documento', {
-            header: 'Cédula / Cédula Jurídica',
+            header: 'Número Identificación / Cédula Jurídica', // <-- CAMBIO: Nuevo encabezado
             cell: (info) => {
                 const fila = info.row.original;
-
                 if (fila.Tipo_Persona === 'Físico') {
                     const datosOriginales = fila.datos_originales as SolicitudFisica;
-                    return datosOriginales.Cedula || 'Sin cédula';
+                    return datosOriginales.Identificacion || 'Sin número de identificación'; // <-- CAMBIO: usa Identificacion
                 } else {
                     const datosOriginales = fila.datos_originales as SolicitudJuridica;
                     return datosOriginales.Cedula_Juridica || 'Sin cédula jurídica';
@@ -338,6 +336,10 @@ export default function SolicitudesTable() {
                 </div>
             </div>
 
+
+
+            
+
             <div className="overflow-x-auto rounded-2xl border border-sky-100 shadow-sm bg-white">
                 <table className="min-w-full table-auto">
                     <thead className="bg-sky-50 border-b border-sky-100">
@@ -359,27 +361,19 @@ export default function SolicitudesTable() {
                         ))}
                     </thead>
                     <tbody className="bg-white divide-y divide-sky-50">
-                        {table.getRowModel().rows.length === 0 ? (
-                            <tr>
-                                <td colSpan={columns.length} className="px-2 sm:px-4 py-8 text-center text-slate-500 text-sm">
-                                    No se encontraron solicitudes
-                                </td>
+                        {table.getRowModel().rows.map((row) => (
+                            <tr
+                                key={row.original.id}
+                                className="hover:bg-sky-50 cursor-pointer transition-colors"
+                                onClick={() => handleViewDetail(row.original)}
+                            >
+                                {row.getVisibleCells().map((cell) => (
+                                    <td key={cell.id} className="px-2 sm:px-4 py-4 whitespace-nowrap text-xs sm:text-sm">
+                                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                    </td>
+                                ))}
                             </tr>
-                        ) : (
-                            table.getRowModel().rows.map((row) => (
-                                <tr
-                                    key={row.original.id}
-                                    className="hover:bg-sky-50 cursor-pointer transition-colors"
-                                    onClick={() => handleViewDetail(row.original)}
-                                >
-                                    {row.getVisibleCells().map((cell) => (
-                                        <td key={cell.id} className="px-2 sm:px-4 py-4 whitespace-nowrap text-xs sm:text-sm">
-                                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                                        </td>
-                                    ))}
-                                </tr>
-                            ))
-                        )}
+                        ))}
                     </tbody>
                 </table>
             </div>

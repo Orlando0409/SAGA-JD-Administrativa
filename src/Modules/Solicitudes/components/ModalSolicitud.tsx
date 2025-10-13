@@ -1,5 +1,5 @@
 import React from 'react';
-import { Building, User, X } from 'lucide-react';
+import { X, User, Check, XCircle } from 'lucide-react';
 import { useAprobarSolicitudAfiliacion, useRechazarSolicitudAfiliacion } from '../Hooks/Fisico Update/HookAfiliadoFisico';
 import type { SolicitudFisica } from '../Models/ModelosFisicas';
 import type { SolicitudJuridica } from '../Models/ModelosJuridicos';
@@ -22,7 +22,6 @@ interface ModalSolicitudProps {
 }
 
 //Modal simple para gestionar estados de solicitudes
-
 const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solicitud }) => {
     // Hooks para manejar los cambios de estado
     const aprobarAfiliacionMutation = useAprobarSolicitudAfiliacion();
@@ -84,8 +83,6 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
                 // Campos específicos para diferentes tipos de solicitud
                 Numero_Medidor_Actual: datos.Numero_Medidor_Actual || 'No especificado',
 
-
-
             };
         } else {
             const datos = solicitud.datos as any; // Usamos any para acceder a propiedades no tipadas
@@ -101,6 +98,9 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
                 console.warn(' No se encontró ID real, usando cédula jurídica como fallback');
                 solicitudId = datos.Cedula_Juridica || `temp-${Date.now()}`;
             }
+
+
+            
 
             return {
                 id: solicitudId,
@@ -272,244 +272,242 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 bg-white bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
+        <div className="fixed inset-0 bg-white bg-opacity-95 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-lg shadow-xl border border-gray-200 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
                 {/* Header */}
-                <div className="flex items-center justify-between p-6 border-b border-gray-200">
-                    <h2 className="text-xl font-semibold text-gray-800">
-                        Gestionar Solicitud
-                    </h2>
-                    <button
-                        onClick={onClose}
-                        disabled={isLoading}
-                        className="p-1 hover:bg-gray-100 rounded-full transition-colors disabled:opacity-50"
-                    >
-                        <div className="w-5 h-5 text-gray-500 flex items-center justify-center">
-                            <X size={20} />
-                        </div>
-                    </button>
+                <div className="sticky top-0 bg-white border-b border-gray-200 p-4 z-10">
+                    <div className="flex items-center justify-between">
+                        <h1 className="text-xl font-semibold text-gray-900">Gestionar Solicitud</h1>
+                        <button
+                            onClick={onClose}
+                            disabled={isLoading}
+                            className="text-gray-400 hover:text-gray-600 transition-colors disabled:opacity-50"
+                        >
+                            <X className="w-5 h-5" />
+                        </button>
+                    </div>
                 </div>
 
                 {/* Contenido */}
-                <div className="p-6 overflow-y-auto max-h-[calc(90vh-200px)]">
-                    {/* Información completa de la solicitud */}
-                    <div className="mb-6">
-                        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-                            {/* Header con información básica */}
-                            <div className="flex justify-between items-start mb-6 pb-4 border-b border-gray-300">
-                                <div className="flex-1">
-
-                                </div>
-                                <div className="text-right">
-                                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${info.estado === 'Pendiente' ? 'bg-amber-100 text-amber-800 border border-amber-300' :
-                                        info.estado === 'Aprobada' ? 'bg-green-100 text-green-800 border border-green-300' :
-                                            info.estado === 'Rechazada' ? 'bg-red-100 text-red-800 border border-red-300' :
-                                                'bg-gray-100 text-gray-800 border border-gray-300'
-                                        }`}>
-                                        {info.estado}
-                                    </span>
-                                </div>
+                <div className="p-4">
+                    {/* Header Card de la Solicitud */}
+                    <div className="bg-gradient-to-r from-blue-600 to-blue-700 p-4 rounded-lg mb-6 shadow-md">
+                        <div className="flex items-center gap-4">
+                            <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm">
+                                <User className="w-6 h-6 text-blue-600" />
                             </div>
-
-                            {/* Avatar y título */}
-                            <div className="text-center mb-6">
-                                <div className={`inline-flex items-center justify-center w-16 h-16 rounded-full mb-3 ${info.tipo === 'Física'
-                                    ? 'bg-blue-100 text-blue-600'
-                                    : 'bg-purple-100 text-purple-600'
+                            <div className="flex-1">
+                                <p className="text-blue-100 text-sm mb-1">{info.tipoSolicitud}</p>
+                            </div>
+                            <div>
+                                <span className={`inline-flex items-center px-2 py-1 rounded-lg text-xs font-medium shadow-sm ${info.estado === 'Pendiente' ? 'bg-white text-orange-600 border border-orange-300' :
+                                    info.estado === 'Aprobada' ? 'bg-green-100 text-green-800 border border-green-300' :
+                                        info.estado === 'Rechazada' ? 'bg-red-100 text-red-800 border border-red-300' :
+                                            'bg-gray-100 text-gray-800 border border-gray-300'
                                     }`}>
-                                    {info.tipo === 'Física' ? <User size={24} /> : <Building size={24} />}
-                                </div>
-                                <h4 className="text-xl font-semibold text-gray-800 mb-1">{info.nombre}</h4>
-                                <p className="text-sm text-gray-500 mb-2">{info.tipo === 'Física' ? 'Persona Física' : 'Persona Jurídica'}</p>
-                                <span className="inline-block bg-blue-50 px-4 py-1 rounded-full text-sm font-medium text-blue-800">
-                                    {info.tipoSolicitud.replace('_', ' ')}
+                                    {info.estado}
                                 </span>
-                            </div>
-
-                            {/* Información completa en un solo grid */}
-                            <div className="space-y-6">
-                                {/* Información Personal/Empresarial */}
-                                <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
-                                    <h3 className="text-sm font-semibold text-gray-600 uppercase tracking-wide mb-4">Información del Solicitante</h3>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        {info.tipo === 'Física' ? (
-                                            <>
-                                                <div>
-                                                    <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Nombre</label>
-                                                    <div className="text-sm text-gray-800">{info.Nombre}</div>
-                                                </div>
-                                                <div>
-                                                    <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Primer Apellido</label>
-                                                    <div className="text-sm text-gray-800">{info.Apellido1}</div>
-                                                </div>
-                                                <div>
-                                                    <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Segundo Apellido</label>
-                                                    <div className="text-sm text-gray-800">{info.Apellido2}</div>
-                                                </div>
-                                                <div>
-                                                    <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Número de Cédula</label>
-                                                    <div className="text-sm text-gray-800">{info.Cedula}</div>
-                                                </div>
-
-                                                <div>
-                                                    <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Edad</label>
-                                                    <div className="text-sm text-gray-800">{info.Edad}</div>
-                                                </div>
-                                                <div>
-                                                    <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Número de Teléfono</label>
-                                                    <div className="text-sm text-gray-800">{info.Numero_Telefono}</div>
-                                                </div>
-                                                <div className="md:col-span-2">
-                                                    <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Correo Electrónico</label>
-                                                    <div className="text-sm text-gray-800">{info.Correo}</div>
-                                                </div>
-                                                <div className="md:col-span-2">
-                                                    <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Direccion Exacta</label>
-                                                    <div className="text-sm text-gray-800">{info.Direccion_Exacta}</div>
-                                                </div>
-                                                <div className="md:col-span-2">
-                                                    <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Motivo Solicitud</label>
-                                                    <div className="text-sm text-gray-800">{info.Motivo_Solicitud}</div>
-                                                </div>
-
-
-                                            </>
-                                        ) : (
-                                            <>
-                                                <div>
-                                                    <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Razón Social</label>
-                                                    <div className="text-sm text-gray-800">{info.Razon_Social}</div>
-                                                </div>
-                                                <div>
-                                                    <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Cédula Jurídica</label>
-                                                    <div className="text-sm text-gray-800">{info.Cedula_Juridica}</div>
-                                                </div>
-
-                                                <div>
-                                                    <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Teléfono</label>
-                                                    <div className="text-sm text-gray-800">{info.Numero_Telefono}</div>
-                                                </div>
-                                                <div>
-                                                    <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Correo Electrónico</label>
-                                                    <div className="text-sm text-gray-800">{info.Correo}</div>
-                                                </div>
-                                                <div>
-                                                    <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Dirección Exacta</label>
-                                                    <div className="text-sm text-gray-800">{info.Direccion_Exacta}</div>
-                                                </div>
-
-
-                                            </>
-                                        )}
-                                    </div>
-                                </div>
-
-                                {/* Documentos */}
-                                <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
-                                    <h3 className="text-sm font-semibold text-gray-600 uppercase tracking-wide mb-4">Documentos Adjuntos</h3>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div>
-                                            <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Escritura del Terreno</label>
-                                            {info.Escritura_Terreno && info.Escritura_Terreno !== 'No proporcionada' ? (
-                                                <a href={info.Escritura_Terreno} target="_blank" rel="noopener noreferrer"
-                                                    className="text-sm text-blue-600 hover:text-blue-800 underline">
-                                                    Ver documento
-                                                </a>
-                                            ) : (
-                                                <div className="text-sm text-gray-500">No proporcionada</div>
-                                            )}
-                                        </div>
-                                        <div>
-                                            <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Planos del Terreno</label>
-                                            {info.Planos_Terreno && info.Planos_Terreno !== 'No proporcionados' ? (
-                                                <a href={info.Planos_Terreno} target="_blank" rel="noopener noreferrer"
-                                                    className="text-sm text-blue-600 hover:text-blue-800 underline">
-                                                    Ver documento
-                                                </a>
-                                            ) : (
-                                                <div className="text-sm text-gray-500">No proporcionados</div>
-                                            )}
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Información específica según el tipo de solicitud */}
-                                {info.tipoSolicitud !== 'Afiliacion' && info.tipoSolicitud !== 'Sin tipo' && (
-
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        {info.tipoSolicitud === 'Cambio de Medidor' && (
-                                            <>
-                                                <div>
-                                                    <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Número de Medidor Actual</label>
-                                                    <div className="text-sm font-mono text-gray-800 bg-gray-50 px-3 py-2 rounded">{info.Numero_Medidor_Actual}</div>
-                                                </div>
-
-                                            </>
-                                        )}
-                                        {info.tipoSolicitud === 'Desconexion' && (
-                                            <>
-
-                                            </>
-                                        )}
-                                        {info.tipoSolicitud === 'Asociado' && (
-                                            <div className="md:col-span-2">
-                                                <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Motivo de la Solicitud</label>
-                                                <div className="text-sm text-gray-800 bg-gray-50 p-3 rounded">{info.Motivo_Solicitud}</div>
-                                            </div>
-                                        )}
-                                    </div>
-
-                                )}
-
                             </div>
                         </div>
                     </div>
 
-                    {/* Botones de acción */}
-                    <div className="flex gap-3 pt-6 border-t border-gray-200">
-                        <button
-                            onClick={handleAprobar}
-                            disabled={isLoading || info.estado === 'Aprobada' || info.estado === 'Rechazada'}
-                            className="flex-1 px-4 py-3 bg-green-400 hover:bg-green-500 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
-                        >
-                            {isLoading ? (
-                                <span className="flex items-center justify-center gap-2">
-                                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                                    Aprobando...
-                                </span>
-                            ) : (
-                                <span className="flex items-center justify-center  gap-2">
-                                    {info.estado === 'Aprobada' ? 'Aprobada' : info.estado === 'Rechazada' ? 'No Disponible' : 'Aprobar'}
-                                </span>
-                            )}
-                        </button>
+                    <div className="space-y-6">
 
-                        <button
-                            onClick={handleRechazar}
-                            disabled={isLoading || info.estado === 'Aprobada' || info.estado === 'Rechazada'}
-                            className="flex-1 px-4 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
-                        >
-                            {isLoading ? (
-                                <span className="flex items-center justify-center gap-2">
-                                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                                    Rechazando...
-                                </span>
-                            ) : (
-                                <span className="flex items-center justify-center gap-2">
-                                    {info.estado === 'Rechazada' ? 'Rechazada' : info.estado === 'Aprobada' ? 'No Disponible' : 'Rechazar'}
-                                </span>
-                            )}
-                        </button>
+                        {/* Información del Solicitante */}
+                        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
+                            <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-3">
+                                <div className="flex items-center gap-2">
+                                    <h3 className="text-sm font-semibold text-white">Información del Solicitante</h3>
+                                </div>
+                            </div>
+
+                            <div className="p-4">
+                                <div className="grid grid-cols-2 gap-4">
+                                    {/* Columna izquierda */}
+                                    <div className="space-y-3">
+                                        <div className="bg-gray-50 p-3 rounded-lg">
+                                            <label className="block text-xs font-medium text-gray-600 uppercase tracking-wide mb-1">
+                                                Nombre Completo
+                                            </label>
+                                            <p className="text-sm font-medium text-gray-900">{info.nombre}</p>
+                                        </div>
+
+                                        <div className="bg-gray-50 p-3 rounded-lg">
+                                            <label className="block text-xs font-medium text-gray-600 uppercase tracking-wide mb-1">
+                                                {info.tipo === 'Física' ? 'Cédula' : 'Cédula Jurídica'}
+                                            </label>
+                                            <p className="text-sm text-gray-900">{info.documento}</p>
+                                        </div>
+
+                                        <div className="bg-gray-50 p-3 rounded-lg">
+                                            <label className="block text-xs font-medium text-gray-600 uppercase tracking-wide mb-1">
+                                                Tipo de Persona
+                                            </label>
+                                            <span className={`inline-flex items-center px-2 py-1 rounded-lg text-xs font-medium ${info.tipo === 'Física'
+                                                ? 'bg-blue-100 text-blue-800'
+                                                : 'bg-purple-100 text-purple-800'
+                                                }`}>
+                                                {info.tipo === 'Física' ? 'Persona Física' : 'Persona Jurídica'}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    {/* Columna derecha */}
+                                    <div className="space-y-3">
+                                        {info.Numero_Telefono && (
+                                            <div className="bg-gray-50 p-3 rounded-lg">
+                                                <label className="block text-xs font-medium text-gray-600 uppercase tracking-wide mb-1">
+                                                    Teléfono
+                                                </label>
+                                                <p className="text-sm text-gray-900">{info.Numero_Telefono}</p>
+                                            </div>
+                                        )}
+
+                                        {info.Correo && (
+                                            <div className="bg-gray-50 p-3 rounded-lg">
+                                                <label className="block text-xs font-medium text-gray-600 uppercase tracking-wide mb-1">
+                                                    Correo Electrónico
+                                                </label>
+                                                <p className="text-sm text-gray-900 break-all">{info.Correo}</p>
+                                            </div>
+                                        )}
+
+                                        {info.Direccion_Exacta && (
+                                            <div className="bg-gray-50 p-3 rounded-lg">
+                                                <label className="block text-xs font-medium text-gray-600 uppercase tracking-wide mb-1">
+                                                    Dirección
+                                                </label>
+                                                <p className="text-sm text-gray-900">{info.Direccion_Exacta}</p>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Detalles de la Solicitud */}
+                        {(info.Numero_Medidor_Actual || info.Motivo_Solicitud) && (
+                            <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
+                                <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-3">
+                                    <div className="flex items-center gap-2">
+                                        <h3 className="text-sm font-semibold text-white">Detalles de la Solicitud</h3>
+                                    </div>
+                                </div>
+
+                                <div className="p-4">
+                                    <div className="grid grid-cols-1 gap-3">
+                                        {info.Numero_Medidor_Actual && (
+                                            <div className="bg-gray-50 p-3 rounded-lg">
+                                                <label className="block text-xs font-medium text-gray-600 uppercase tracking-wide mb-1">
+                                                    Número de Medidor Actual
+                                                </label>
+                                                <p className="text-sm font-medium text-gray-900">{info.Numero_Medidor_Actual}</p>
+                                            </div>
+                                        )}
+
+                                        {info.Motivo_Solicitud && (
+                                            <div className="bg-gray-50 p-3 rounded-lg">
+                                                <label className="block text-xs font-medium text-gray-600 uppercase tracking-wide mb-1">
+                                                    Motivo de la Solicitud
+                                                </label>
+                                                <p className="text-sm text-gray-900">{info.Motivo_Solicitud}</p>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Documentos Adjuntos */}
+                        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
+                            <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-3">
+                                <div className="flex items-center gap-2">
+                                    <h3 className="text-sm font-semibold text-white">Documentos Adjuntos</h3>
+                                </div>
+                            </div>
+
+                            <div className="p-4">
+                                <div className="grid grid-cols-2 gap-3">
+                                    <div className="bg-gray-50 p-3 rounded-lg">
+                                        <label className="block text-xs font-medium text-gray-600 uppercase tracking-wide mb-1">
+                                            Escritura del Terreno
+                                        </label>
+                                        {info.Escritura_Terreno && info.Escritura_Terreno !== 'No proporcionada' ? (
+                                            <a href={info.Escritura_Terreno} target="_blank" rel="noopener noreferrer"
+                                                className="text-sm text-blue-600 hover:text-blue-800 underline font-medium">
+                                                Ver documento
+                                            </a>
+                                        ) : (
+                                            <p className="text-sm text-gray-500">No proporcionada</p>
+                                        )}
+                                    </div>
+
+                                    <div className="bg-gray-50 p-3 rounded-lg">
+                                        <label className="block text-xs font-medium text-gray-600 uppercase tracking-wide mb-1">
+                                            Planos del Terreno
+                                        </label>
+                                        {info.Planos_Terreno && info.Planos_Terreno !== 'No proporcionados' ? (
+                                            <a href={info.Planos_Terreno} target="_blank" rel="noopener noreferrer"
+                                                className="text-sm text-blue-600 hover:text-blue-800 underline font-medium">
+                                                Ver documento
+                                            </a>
+                                        ) : (
+                                            <p className="text-sm text-gray-500">No proporcionados</p>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
-                    {/* Botón cancelar */}
-                    <button
-                        onClick={onClose}
-                        disabled={isLoading}
-                        className="w-full mt-3 px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors disabled:opacity-50 font-medium"
-                    >
-                        Cancelar
-                    </button>
+                    {/* Botones de Acción */}
+                    <div className="border-t border-gray-200 pt-4 mt-6">
+                        <div className="flex flex-col sm:flex-row justify-end gap-3">
+                            <button
+                                onClick={handleAprobar}
+                                disabled={isLoading || info.estado === 'Aprobada'}
+                                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm hover:shadow-md flex items-center gap-2 text-sm font-medium"
+                            >
+                                {isLoading ? (
+                                    <>
+                                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                        Aprobando...
+                                    </>
+                                ) : (
+                                    <>
+                                        <Check className="w-4 h-4" />
+                                        Aprobar Solicitud
+                                    </>
+                                )}
+                            </button>
+
+                            <button
+                                onClick={handleRechazar}
+                                disabled={isLoading || info.estado === 'Aprobada' || info.estado === 'Rechazada'}
+                                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm hover:shadow-md flex items-center gap-2 text-sm font-medium"
+                            >
+                                {isLoading ? (
+                                    <>
+                                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                        Rechazando...
+                                    </>
+                                ) : (
+                                    <>
+                                        <XCircle className="w-4 h-4" />
+                                        Rechazar Solicitud
+                                    </>
+                                )}
+                            </button>
+
+                            <button
+                                onClick={onClose}
+                                disabled={isLoading}
+                                className="px-4 py-2 text-gray-600 hover:text-gray-800 bg-gray-100 hover:bg-gray-200 rounded-lg transition-all disabled:opacity-50 text-sm font-medium shadow-sm hover:shadow-md"
+                            >
+                                Cancelar
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

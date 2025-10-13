@@ -1,10 +1,10 @@
-import type { Permiso } from "../Models/Usuario";
+import type { Permiso } from "../../Roles/Models/Role";
 
 // Tipos para los radio buttons
 export type PermissionLevel = 'none' | 'view' | 'edit';
 
 export interface ModulePermission {
-  modulo: string;
+  Modulo: string;
   level: PermissionLevel;
   selectedId: number;
 }
@@ -16,10 +16,10 @@ export const groupPermissionsByModule = (permisos: Permiso[]) => {
   const modules: { [key: string]: Permiso[] } = {};
   
   permisos.forEach(permiso => {
-    if (!modules[permiso.modulo]) {
-      modules[permiso.modulo] = [];
+    if (!modules[permiso.Modulo]) {
+      modules[permiso.Modulo] = [];
     }
-    modules[permiso.modulo].push(permiso);
+    modules[permiso.Modulo].push(permiso);
   });
   
   return modules;
@@ -35,7 +35,7 @@ export const getPermissionIdByLevel = (modulePermisos: Permiso[], level: Permiss
       default: return false;
     }
   });
-  return permiso?.id || modulePermisos[0]?.id;
+  return permiso?.Id || modulePermisos[0]?.Id;
 };
 
 // Determina el nivel actual basado en un permiso
@@ -56,18 +56,18 @@ export const convertRolePermissionsToModuleState = (
   
   Object.keys(moduleGroups).forEach(modulo => {
     const modulePermisos = moduleGroups[modulo];
-    const activePermiso = rolePermisos.find(rp => rp.modulo === modulo);
+    const activePermiso = rolePermisos.find(rp => rp.Modulo === modulo);
     
     if (activePermiso) {
       result.push({
-        modulo,
+        Modulo: modulo,
         level: getLevelFromPermission(activePermiso),
-        selectedId: activePermiso.id
+        selectedId: activePermiso.Id
       });
     } else {
       // Default a 'none' si no hay permiso asignado
       result.push({
-        modulo,
+        Modulo: modulo,
         level: 'none',
         selectedId: getPermissionIdByLevel(modulePermisos, 'none')
       });

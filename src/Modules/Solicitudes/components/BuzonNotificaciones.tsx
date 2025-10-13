@@ -10,6 +10,9 @@ import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 
 
+
+
+
 interface BuzonNotificacionesProps {
   onVerSolicitud?: (notificacion: NotificacionSolicitud) => void;
 }

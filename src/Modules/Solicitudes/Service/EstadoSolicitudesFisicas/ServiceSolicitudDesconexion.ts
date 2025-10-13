@@ -4,6 +4,10 @@ import type { SolicitudFisica } from "../../Models/ModelosFisicas";
 
 export class ServiceSolicitudDesconexionMedidor {
     
+
+
+
+    
     
     static async updateEstado(solicitudId: string | number, nuevoEstadoId: string | number): Promise<SolicitudFisica> {
         try {

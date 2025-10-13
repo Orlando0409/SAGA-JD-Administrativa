@@ -7,6 +7,9 @@ export async function getAfiliadosFisicos(): Promise<AfiliadoFisico[]> {
     return response.data;
 }
 
+
+
+
 // En tu Hook o Service
 export const createAfiliadoFisico = async (formData: FormData) => {
     console.log("🚀 Hook - Enviando FormData:", formData);
@@ -14,6 +17,18 @@ export const createAfiliadoFisico = async (formData: FormData) => {
     const response = await apiAuth.post("/afiliados/fisico/create", formData, {
         headers: {
             'Content-Type': 'multipart/form-data', // ✅ Importante
+        },
+    });
+
+    return response.data;
+};
+
+export const updateAfiliadoFisico = async (cedula: string, formData: FormData) => {
+    console.log("🔄 Hook - Actualizando FormData:", formData);
+
+    const response = await apiAuth.put(`/afiliados/update/fisico/${cedula}`, formData, {
+        headers: {
+            'Content-Type': 'multipart/form-data',
         },
     });
 

@@ -1,7 +1,37 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { SolicitudesFisicasService } from '../Service/SolicitudesFisicas';
 import type { SolicitudFisica } from '../Models/ModelosFisicas';
 
+/**
+ * 🔄 Función para refrescar todas las consultas de solicitudes físicas
+ * Útil para refresh manual después de operaciones CRUD
+ */
+export const useRefetchAllSolicitudesFisicas = () => {
+    const queryClient = useQueryClient();
+    
+
+
+    
+    const refetchAll = async () => {
+        try {
+            // Invalidar todas las queries relacionadas con solicitudes físicas
+            await queryClient.invalidateQueries({ 
+                queryKey: ['solicitudes-fisicas'] 
+            });
+            
+            // También invalidar solicitudes jurídicas para cross-invalidation
+            await queryClient.invalidateQueries({ 
+                queryKey: ['solicitudes-juridicas'] 
+            });
+            
+            console.log('✅ Todas las consultas de solicitudes físicas refrescadas');
+        } catch (error) {
+            console.error('❌ Error al refrescar consultas de solicitudes físicas:', error);
+        }
+    };
+    
+    return { refetchAll };
+};
 
 export const useSolicitudesFisicas = () => {
     return useQuery<SolicitudFisica[], Error>({

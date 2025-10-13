@@ -9,7 +9,8 @@ export const Alert: React.FC<AlertProps> = ({
   title, 
   description, 
   onClose, 
-  className = '' 
+  className = '',
+  actionButton
 }) => {
   const config = alertConfig[type];
   const IconComponent = config.icon;
@@ -31,6 +32,16 @@ export const Alert: React.FC<AlertProps> = ({
             <p className={`mt-1 text-sm ${config.textColor}`}>
               {description}
             </p>
+          )}
+          {actionButton && (
+            <div className="mt-3 flex gap-2">
+              <button
+                onClick={actionButton.onClick}
+                className={`px-3 py-1 text-xs font-medium rounded-md ${config.titleColor} border border-current hover:bg-white/10 transition-colors`}
+              >
+                {actionButton.text}
+              </button>
+            </div>
           )}
         </div>
         {onClose && (

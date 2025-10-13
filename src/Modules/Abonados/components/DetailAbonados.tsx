@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { LuX, LuUser, LuMail, LuPhone, LuMapPin, LuCalendar, LuBuilding, LuFileText, LuMap, LuInfo } from 'react-icons/lu';
 import { FaUserEdit } from "react-icons/fa";
-import { Trash } from 'lucide-react';
 import { Accordion, AccordionHeader, AccordionBody } from "@material-tailwind/react"
 import { FiChevronDown, FiChevronRight } from 'react-icons/fi'
 
@@ -35,22 +34,8 @@ const DetailAbonados: React.FC<DetailAbonadosProps> = ({ persona, isOpen, onClos
         )
     }
 
-    const handleDelete = async () => {
-        const personaInfo = getPersonaInfo();
-        const nombreCompleto = personaInfo.nombre;
-        const tipoPersona = persona.tipo === 'afiliado-fisico' ? 'físico' : 'jurídico';
 
-        if (confirm(`¿Está seguro de eliminar al afiliado ${tipoPersona} ${nombreCompleto}?`)) {
-            try {
-                // Aquí puedes implementar la lógica de eliminación cuando esté disponible
-                alert(`La funcionalidad de eliminar estará disponible próximamente`);
-                onClose(); // Cerrar el modal después de eliminar
-            } catch (error) {
-                alert(`Error al eliminar el afiliado`);
-                console.error('Error:', error);
-            }
-        }
-    };
+
 
     const getPersonaInfo = () => {
         const { tipo, datos } = persona;
@@ -60,8 +45,8 @@ const DetailAbonados: React.FC<DetailAbonadosProps> = ({ persona, isOpen, onClos
             return {
                 id: afiliado.Id_Afiliado,
                 nombre: `${afiliado.Nombre} ${afiliado.Apellido1} ${afiliado.Apellido2 || ''}`.trim(),
-                documento: afiliado.Cedula,
-                tipoDocumento: 'Cédula',
+                documento: afiliado.Identificacion,
+                
                 telefono: afiliado.Numero_Telefono,
                 correo: afiliado.Correo,
                 direccion: afiliado.Direccion_Exacta,
@@ -234,27 +219,27 @@ const DetailAbonados: React.FC<DetailAbonadosProps> = ({ persona, isOpen, onClos
 
                                     {personaInfo.edad && (
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-500 mb-1">Edad</label>
+                                            <label htmlFor='Edad' className="block text-sm font-medium text-gray-500 mb-1">Edad</label>
                                             <p className="text-gray-900 font-medium">{personaInfo.edad} años</p>
                                         </div>
                                     )}
 
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-500 mb-2">Estado</label>
+                                        <label htmlFor='Estado' className="block text-sm font-medium text-gray-500 mb-2">Estado</label>
                                         <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${getStatusColor(personaInfo.estadoId)}`}>
                                             {personaInfo.estado}
                                         </span>
                                     </div>
 
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-500 mb-2">Tipo de Persona</label>
+                                        <label htmlFor='TipoPersona' className="block text-sm font-medium text-gray-500 mb-2">Tipo de Persona</label>
                                         <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800 border border-gray-200">
                                             {personaInfo.tipoPersona}
                                         </span>
                                     </div>
 
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-500 mb-2">Tipo de Afiliado</label>
+                                        <label htmlFor='TipoAfiliado' className="block text-sm font-medium text-gray-500 mb-2">Tipo de Afiliado</label>
                                         <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${getTipoAfiliadoColor(personaInfo.tipoAfiliado)}`}>
                                             {personaInfo.tipoAfiliado}
                                         </span>
@@ -290,7 +275,7 @@ const DetailAbonados: React.FC<DetailAbonadosProps> = ({ persona, isOpen, onClos
                                     <div className="flex items-center gap-3">
                                         <LuPhone className="w-5 h-5 text-gray-400" />
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-500 mb-1">Teléfono</label>
+                                            <label htmlFor='Telefono' className="block text-sm font-medium text-gray-500 mb-1">Teléfono</label>
                                             <p className="text-gray-900 font-medium">{personaInfo.telefono}</p>
                                         </div>
                                     </div>
@@ -298,7 +283,7 @@ const DetailAbonados: React.FC<DetailAbonadosProps> = ({ persona, isOpen, onClos
                                     <div className="flex items-center gap-3">
                                         <LuMail className="w-5 h-5 text-gray-400" />
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-500 mb-1">Correo Electrónico</label>
+                                            <label htmlFor='Correo' className="block text-sm font-medium text-gray-500 mb-1">Correo Electrónico</label>
                                             <p className="text-gray-900 font-medium">{personaInfo.correo}</p>
                                         </div>
                                     </div>
@@ -307,7 +292,7 @@ const DetailAbonados: React.FC<DetailAbonadosProps> = ({ persona, isOpen, onClos
                                         <div className="md:col-span-2 flex items-start gap-3">
                                             <LuMapPin className="w-5 h-5 text-gray-400 mt-1" />
                                             <div>
-                                                <label className="block text-sm font-medium text-gray-500 mb-1">Dirección Exacta</label>
+                                                <label htmlFor='Direccion' className="block text-sm font-medium text-gray-500 mb-1">Dirección Exacta</label>
                                                 <p className="text-gray-900 font-medium">{personaInfo.direccion}</p>
                                             </div>
                                         </div>
@@ -344,7 +329,7 @@ const DetailAbonados: React.FC<DetailAbonadosProps> = ({ persona, isOpen, onClos
                                         <div className="flex items-center gap-3">
                                             <LuFileText className="w-5 h-5 text-gray-400" />
                                             <div>
-                                                <label className="block text-sm font-medium text-gray-500 mb-1">Escritura del Terreno</label>
+                                                <label htmlFor='EscrituraTerreno' className="block text-sm font-medium text-gray-500 mb-1">Escritura del Terreno</label>
                                                 {personaInfo.escritura ? (
                                                     <a
                                                         href={personaInfo.escritura}
@@ -363,7 +348,7 @@ const DetailAbonados: React.FC<DetailAbonadosProps> = ({ persona, isOpen, onClos
                                         <div className="flex items-center gap-3">
                                             <LuMap className="w-5 h-5 text-gray-400" />
                                             <div>
-                                                <label className="block text-sm font-medium text-gray-500 mb-1">Planos del Terreno</label>
+                                                <label htmlFor='PlanosTerreno' className="block text-sm font-medium text-gray-500 mb-1">Planos del Terreno</label>
                                                 {personaInfo.planos ? (
                                                     <a
                                                         href={personaInfo.planos}
@@ -383,7 +368,7 @@ const DetailAbonados: React.FC<DetailAbonadosProps> = ({ persona, isOpen, onClos
                                             <div className="md:col-span-2 flex items-start gap-3">
                                                 <LuInfo className="w-5 h-5 text-gray-400 mt-1" />
                                                 <div>
-                                                    <label className="block text-sm font-medium text-gray-500 mb-1">Motivo de Afiliación</label>
+                                                    <label htmlFor='MotivoAfiliacion' className="block text-sm font-medium text-gray-500 mb-1">Motivo de Afiliación</label>
                                                     <p className="text-gray-900 font-medium">{personaInfo.motivo}</p>
                                                 </div>
                                             </div>
@@ -420,7 +405,7 @@ const DetailAbonados: React.FC<DetailAbonadosProps> = ({ persona, isOpen, onClos
                                     <div className="flex items-center gap-3">
                                         <LuCalendar className="w-5 h-5 text-gray-400" />
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-500 mb-1">Fecha de Creación</label>
+                                            <label htmlFor='FechaCreacion' className="block text-sm font-medium text-gray-500 mb-1">Fecha de Creación</label>
                                             <p className="text-gray-900 font-medium">{formatDate(personaInfo.fechaCreacion)}</p>
                                         </div>
                                     </div>
@@ -428,7 +413,7 @@ const DetailAbonados: React.FC<DetailAbonadosProps> = ({ persona, isOpen, onClos
                                     <div className="flex items-center gap-3">
                                         <LuCalendar className="w-5 h-5 text-gray-400" />
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-500 mb-1">Última Actualización</label>
+                                            <label htmlFor='FechaActualizacion' className="block text-sm font-medium text-gray-500 mb-1">Última Actualización</label>
                                             <p className="text-gray-900 font-medium">{formatDate(personaInfo.fechaActualizacion)}</p>
                                         </div>
                                     </div>

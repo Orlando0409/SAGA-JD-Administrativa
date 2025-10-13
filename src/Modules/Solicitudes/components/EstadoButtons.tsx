@@ -13,6 +13,9 @@ import { useAprobarSolicitudAsociadoJuridico, useRechazarSolicitudAsociadoJuridi
 import { useAprobarSolicitudCambioMedidorJuridica, useRechazarSolicitudCambioMedidorJuridica } from '../Hooks/Juridico Update/HookCambioMedidorJuridico';
 import { useAprobarSolicitudDesconexionJuridica, useRechazarSolicitudDesconexionJuridica } from '../Hooks/Juridico Update/HookDesconexionMedidor';
 
+
+
+
 interface EstadoButtonsProps {
     solicitudId: string | number;
     estadoActual?: string;
@@ -22,7 +25,7 @@ interface EstadoButtonsProps {
 }
 
 /**
- * 🎛️ Componente de botones para cambiar estados de solicitudes
+ *  Componente de botones para cambiar estados de solicitudes
  * Ejemplo de uso de los hooks de mutación
  */
 const EstadoButtons: React.FC<EstadoButtonsProps> = ({

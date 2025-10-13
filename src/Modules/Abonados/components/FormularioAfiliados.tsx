@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useForm } from '@tanstack/react-form';
 import { useAfiliadosFisicos } from '../Hook/HookAfiliadoFisico';
 import { useAfiliadosJuridicos } from '../Hook/HookAfiliadoJuridico';
-import { User } from 'lucide-react';
+import { User, X, Building2 } from 'lucide-react';
 
 interface FormularioAfiliadosProps {
   isOpen: boolean;
@@ -20,6 +20,9 @@ export default function FormularioAfiliados({ isOpen, onClose, onSuccess }: Form
     Planos_Terreno?: File;
   }>({});
 
+
+
+  
   const [archivosJuridico, setArchivosJuridico] = useState<{
     Escritura_Terreno?: File;
     Planos_Terreno?: File;
@@ -89,13 +92,6 @@ export default function FormularioAfiliados({ isOpen, onClose, onSuccess }: Form
 
     onSubmit: async ({ value }) => {
       // DEBUGGING TEMPORAL
-      console.log("🔍 Estado completo antes de validar:");
-      console.log("value:", value);
-      console.log("archivosFisico:", archivosFisico);
-      console.log("typeof Escritura_Terreno:", typeof archivosFisico.Escritura_Terreno);
-      console.log("typeof Planos_Terreno:", typeof archivosFisico.Planos_Terreno);
-      console.log("Es Escritura_Terreno un File?", archivosFisico.Escritura_Terreno instanceof File);
-      console.log("Es Planos_Terreno un File?", archivosFisico.Planos_Terreno instanceof File);
 
       setFormErrors({});
 
@@ -175,7 +171,7 @@ export default function FormularioAfiliados({ isOpen, onClose, onSuccess }: Form
           }
         });
 
-        // 🚨 VERIFICACIÓN ADICIONAL: Contar el número de entradas
+        // VERIFICACION ADICIONAL: Contar el número de entradas
         const totalEntries = formDataEntries.length;
         const fileEntries = formDataEntries.filter(([, val]) => val instanceof File).length;
         console.log(` Total entradas: ${totalEntries}, Archivos: ${fileEntries}`);
@@ -214,11 +210,6 @@ export default function FormularioAfiliados({ isOpen, onClose, onSuccess }: Form
 
     onSubmit: async ({ value }) => {
       // DEBUGGING TEMPORAL
-      console.log(" Estado completo antes de validar jurídico:");
-      console.log("value:", value);
-      console.log("archivosJuridico:", archivosJuridico);
-      console.log("Es Escritura_Terreno un File?", archivosJuridico.Escritura_Terreno instanceof File);
-      console.log("Es Planos_Terreno un File?", archivosJuridico.Planos_Terreno instanceof File);
 
       setFormErrors({});
 
@@ -229,8 +220,7 @@ export default function FormularioAfiliados({ isOpen, onClose, onSuccess }: Form
         return;
       }
 
-      console.log(" Enviando formulario jurídico:", value);
-      console.log(" Archivos jurídico:", archivosJuridico);
+
 
       try {
         const formData = new FormData();
@@ -253,9 +243,6 @@ export default function FormularioAfiliados({ isOpen, onClose, onSuccess }: Form
         }
 
         //  VERIFICACIÓN CRÍTICA: SOLO AGREGAR ARCHIVOS SI SON REALMENTE ARCHIVOS
-        console.log(" Verificando archivos jurídicos antes de agregar:");
-        console.log("Escritura_Terreno:", archivosJuridico.Escritura_Terreno);
-        console.log("Planos_Terreno:", archivosJuridico.Planos_Terreno);
 
         if (archivosJuridico.Escritura_Terreno && archivosJuridico.Escritura_Terreno instanceof File) {
           formData.append('Escritura_Terreno', archivosJuridico.Escritura_Terreno);
@@ -309,13 +296,13 @@ export default function FormularioAfiliados({ isOpen, onClose, onSuccess }: Form
       <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
         <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-gradient-to-r from-sky-50 to-blue-50">
           <h2 className="text-2xl font-bold text-sky-800">
-            Nueva Solicitud de Afiliación
+            Nuevo Afiliado
           </h2>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 text-2xl font-bold transition-colors"
+            className="text-gray-400 hover:text-gray-600 p-2 rounded-full hover:bg-gray-100 transition-colors"
           >
-            ✕
+            <X size={24} />
           </button>
         </div>
 
@@ -344,7 +331,7 @@ export default function FormularioAfiliados({ isOpen, onClose, onSuccess }: Form
                   : 'border-gray-300 bg-white text-gray-600 hover:border-sky-300'
                   }`}
               >
-               <User size={24} />
+                <User size={24} />
                 <span className="font-medium">Persona Física</span>
               </button>
               <button
@@ -355,7 +342,7 @@ export default function FormularioAfiliados({ isOpen, onClose, onSuccess }: Form
                   : 'border-gray-300 bg-white text-gray-600 hover:border-purple-300'
                   }`}
               >
-               <User size={24} />
+                <Building2 size={24} />
                 <span className="font-medium">Persona Jurídica</span>
               </button>
             </div>
@@ -677,7 +664,7 @@ export default function FormularioAfiliados({ isOpen, onClose, onSuccess }: Form
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                     Escritura del Terreno *
+                    Escritura del Terreno *
                   </label>
                   {tipoFormulario === 'fisico' ? (
                     <div>
@@ -790,7 +777,7 @@ export default function FormularioAfiliados({ isOpen, onClose, onSuccess }: Form
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                     Planos del Terreno *
+                    Planos del Terreno *
                   </label>
                   {tipoFormulario === 'fisico' ? (
                     <div>
@@ -853,7 +840,7 @@ export default function FormularioAfiliados({ isOpen, onClose, onSuccess }: Form
                         disabled={!!archivosJuridico.Planos_Terreno}
                         onChange={(e) => {
                           const file = e.target.files?.[0];
-                          console.log("📐 Archivo Planos seleccionado (jurídico):", file);
+                          console.log("Archivo Planos seleccionado (jurídico):", file);
                           if (file) {
                             setArchivosJuridico(prev => ({
                               ...prev,
@@ -901,7 +888,7 @@ export default function FormularioAfiliados({ isOpen, onClose, onSuccess }: Form
                   )}
                 </div>
               </div>
-            </div>
+            </div> {/* Espacio para más secciones si es necesario */}
           </div>
 
           <div className="flex justify-end gap-4 mt-8 pt-6 border-t border-gray-200">

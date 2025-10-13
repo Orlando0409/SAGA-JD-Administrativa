@@ -1,9 +1,45 @@
 // src/Modules/Solicitudes/Hooks/useNotificacionesSolicitudes.ts
 import { useMemo } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { useSolicitudesFisicas } from './HookSolicitudesFisicas';
 import { useSolicitudesJuridicas } from './HookSolicitudesJuridicas';
 import type { SolicitudFisica } from '../Models/ModelosFisicas';
 import type { SolicitudJuridica } from '../Models/ModelosJuridicos';
+
+/**
+ * 🔄 Hook para refrescar todas las notificaciones de solicitudes
+ * Útil para refresh manual después de operaciones CRUD
+ */
+
+
+
+export const useRefreshNotificaciones = () => {
+    const queryClient = useQueryClient();
+    
+    const refreshNotificaciones = async () => {
+        try {
+            // Invalidar todas las queries relacionadas con solicitudes
+            await Promise.all([
+                queryClient.invalidateQueries({ queryKey: ['solicitudes-fisicas'] }),
+                queryClient.invalidateQueries({ queryKey: ['solicitudes-juridicas'] }),
+                queryClient.invalidateQueries({ queryKey: ['solicitud-afiliacion-fisica'] }),
+                queryClient.invalidateQueries({ queryKey: ['solicitud-afiliacion-juridica'] }),
+                queryClient.invalidateQueries({ queryKey: ['solicitud-asociado-fisica'] }),
+                queryClient.invalidateQueries({ queryKey: ['solicitud-asociado-juridica'] }),
+                queryClient.invalidateQueries({ queryKey: ['solicitud-cambio-medidor-fisica'] }),
+                queryClient.invalidateQueries({ queryKey: ['solicitud-cambio-medidor-juridica'] }),
+                queryClient.invalidateQueries({ queryKey: ['solicitud-desconexion-fisica'] }),
+                queryClient.invalidateQueries({ queryKey: ['solicitud-desconexion-juridica'] })
+            ]);
+            
+            console.log('✅ Todas las notificaciones de solicitudes refrescadas');
+        } catch (error) {
+            console.error(' Error al refrescar notificaciones:', error);
+        }
+    };
+    
+    return { refreshNotificaciones };
+};
 
 export interface NotificacionSolicitud {
   id: string;
@@ -34,7 +70,7 @@ export const useNotificacionesSolicitudes = () => {
           tipo: 'fisica',
           tipoSolicitud: solicitud.Tipo_Solicitud,
           nombre: nombreCompleto,
-          cedula: solicitud.Cedula,
+          cedula: solicitud.Tipo_Identificacion,
           fechaCreacion: solicitud.Fecha_Creacion,
           mensaje: `Nueva solicitud de ${solicitud.Tipo_Solicitud.toLowerCase()} de ${nombreCompleto}`,
           solicitudOriginal: solicitud
@@ -70,10 +106,14 @@ export const useNotificacionesSolicitudes = () => {
   const totalPendientes = notificaciones.length;
   const isLoading = loadingFisicas || loadingJuridicas;
 
+  // Hook para refresh manual
+  const { refreshNotificaciones } = useRefreshNotificaciones();
+  
   return {
     notificaciones,
     totalPendientes,
     isLoading,
+    refreshNotificaciones, // ✅ Función para refrescar manualmente
     // Helpers por tipo
     solicitudesFisicasPendientes: notificaciones.filter(n => n.tipo === 'fisica'),
     solicitudesJuridicasPendientes: notificaciones.filter(n => n.tipo === 'juridica'),

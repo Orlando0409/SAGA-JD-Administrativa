@@ -11,7 +11,7 @@ import {
   AlertDialogCancel,
 } from "@/Modules/Global/components/Sidebar/ui/alert-dialog"
 import { Link, useLocation } from '@tanstack/react-router'
-import { useAuthUser, useLogout } from '../../../Auth/Hooks/AuthHook'
+import { useLogout } from '../../../Auth/Hooks/AuthHook'
 import { Accordion, AccordionHeader, AccordionBody } from "@material-tailwind/react"
 import { useState } from "react"
 import { HiLogout } from 'react-icons/hi'
@@ -21,22 +21,20 @@ import { Button } from "./ui/button"
 import { useAlerts } from "../../context/AlertContext"
 import { LuKey } from "react-icons/lu"
 import { ChangePasswordModal } from "@/Modules/Auth/Components/ChangePassword"
-import { useNotificacionesSolicitudes } from "@/Modules/Solicitudes/Hooks/HookNotificaciones"
+import { useAuth } from "@/Modules/Auth/Context/AuthContext"
+import { useNotificacionesSolicitudes } from '../../../Solicitudes/Hooks/HookNotificaciones'
 
-
-
-export function AppSidebar({allowedModules}: Readonly<AppSidebarProps>) {
-  const [hovered, setHovered] = useState(false)
+export function AppSidebar({ allowedModules }: Readonly<AppSidebarProps>) {
+  const [_hovered, setHovered] = useState(false)
   const [openSections, setOpenSections] = useState<number[]>([])
   const location = useLocation()
   const logoutMutation = useLogout()
-  const { state, setOpen: setSidebarOpen } = useSidebar()
-  const { showSuccess } = useAlerts();
-  const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
-  const { totalPendientes } = useNotificacionesSolicitudes();
+  const { setOpen: setSidebarOpen } = useSidebar()
+  const { showSuccess } = useAlerts()
+  const [showChangePasswordModal, setShowChangePasswordModal] = useState(false)
+  const { totalPendientes } = useNotificacionesSolicitudes()
 
-
-  const { user, isLoading } = useAuthUser()
+  const { user, isLoading } = useAuth()
   const currentUser = {
     id: user?.Id_Usuario,
     name: user?.Nombre_Usuario,
@@ -47,40 +45,45 @@ export function AppSidebar({allowedModules}: Readonly<AppSidebarProps>) {
 
   const handleLogout = () => {
     logoutMutation.mutate()
-    showSuccess('Sesión cerrada exitosamente');
+    showSuccess('Sesión cerrada exitosamente')
   }
 
-   const handleAccordion = (id: number) => {
+  const handleAccordion = (id: number) => {
     setOpenSections(prev =>
       prev.includes(id)
         ? prev.filter(sectionId => sectionId !== id)
         : [...prev, id]
     )
   }
+
+  const sectionsWithModules = sections.filter(section => {
+    const sectionModules = allowedModules.filter(mod => mod.section === section.key)
+    return sectionModules.length > 0
+  })
+
   return (
     <section
-          aria-hidden="true"
-          className="relative"
-          onMouseEnter={() => {
-            setHovered(true)
-            window.setTimeout(() => {
-              setSidebarOpen(true)
-            }, 200)
-          }}
-          onMouseLeave={() => {
-            setHovered(false)
-            window.setTimeout(() => {
-              setSidebarOpen(false)
-            }, 200)
-          }}
-        >
+      aria-hidden="true"
+      className="relative"
+      onMouseEnter={() => {
+        setHovered(true)
+        window.setTimeout(() => {
+          setSidebarOpen(true)
+        }, 200)
+      }}
+      onMouseLeave={() => {
+        setHovered(false)
+        window.setTimeout(() => {
+          setSidebarOpen(false)
+        }, 200)
+      }}
+    >
       <Sidebar
         variant="sidebar"
         collapsible="icon"
         className="transition-all duration-300 z-40"
       >
         <SidebarHeader className="border-b border-sidebar-border">
-          
           <div className="flex flex-col items-center p-2">    
             <Link to={'/Home'} className='w-15 h-15 rounded-lg flex items-center justify-center text-white font-bold'>
               <img src="/Logo_ASADA_Juan_Díaz.png" alt='logo' className='w-15 h-15 rounded-full group-data-[collapsible=icon]:h-8 group-data-[collapsible=icon]:w-8' />
@@ -92,72 +95,63 @@ export function AppSidebar({allowedModules}: Readonly<AppSidebarProps>) {
           </div>
         </SidebarHeader>
 
-     <SidebarContent   className="
-    scrollbar-thin
-    scrollbar-thumb-blue-600
-    scrollbar-track-blue-100
-    max-h-[calc(100vh-180px)]
-  " >
-          {/* Acordeón por sección */}
-         {sections.map(section => {
-           const isOpen = openSections.includes(section.id)
-           return (
-            <Accordion
-               key={section.id}
-               open={isOpen}
-              animate={CUSTOM_ANIMATION}
-              className="border-none shadow-none bg-transparent"
-              {...({} as any)}
+        <SidebarContent className="scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100 max-h-[calc(100vh-180px)]">
+          {sectionsWithModules.map(section => {
+            const isOpen = openSections.includes(section.id)
+            const sectionModules = allowedModules.filter(mod => mod.section === section.key)
 
-            >
-
-            <AccordionHeader
-              onClick={() => handleAccordion(section.id)}
-              className="text-base font-semibold px-2 py-1 group-data-[collapsible=icon]:hidden"
-              {...({} as any)}
-            >
-              <div className="flex items-center justify-between pl-2 w-full">
-                {section.title}
-                <span>
-                  {isOpen ? <FiChevronDown size={20} /> : <FiChevronRight size={20} />}
-                </span>
-              </div>
-            </AccordionHeader>
-            <AccordionBody className="p-0" placeholder="">
-              <ul>
-                {allowedModules
-                  .filter(mod => mod.section === section.key)
-                  .map(mod => (
-                    <li key={mod.name}>
-                      <Link
-                        to={mod.path}
-                        className={`flex items-center px-4 py-2 rounded-lg transition-colors
-                          ${isActive(mod.path)
-                            ? 'bg-blue-100 text-blue-600'
-                            : 'text-gray-700 hover:bg-blue-50 hover:text-blue-600'}
-                        `}
-                      >
-                        <span className="w-6 h-6 flex items-center justify-center">{mod.icon}</span>
-                        <span className="ml-2 group-data-[collapsible=icon]:hidden">{mod.name}</span>
-                            {/* Badge de notificaciones para Solicitudes */}
-                            {mod.name === 'Solicitudes' && totalPendientes > 0 && (
-                              <span className="ml-auto bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-medium">
-                                {totalPendientes > 9 ? '9+' : totalPendientes}
-                              </span>
-                            )}
-                      </Link>
-                          </li>
-                        ))}
-                        
-                    </ul>
-            </AccordionBody>
-          </Accordion>
-        )
-      })}
-        <div className="overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100 h-full">
-    {/* ...Acordeón por sección... */}
-  </div>
-    </SidebarContent>
+            return (
+              <Accordion
+                key={`section-${section.id}`} 
+                open={isOpen}
+                animate={CUSTOM_ANIMATION}
+                className="border-none shadow-none bg-transparent"
+                placeholder=""
+                {...({} as any)}
+              >
+                <AccordionHeader
+                  onClick={() => handleAccordion(section.id)}
+                  className="text-base font-semibold px-2 py-1 group-data-[collapsible=icon]:hidden"
+                  placeholder=""
+                  {...({} as any)}
+                >
+                  <div className="flex items-center justify-between pl-2 w-full">
+                    {section.title}
+                    <span>
+                      {isOpen ? <FiChevronDown size={20} /> : <FiChevronRight size={20} />}
+                    </span>
+                  </div>
+                </AccordionHeader>
+                
+                <AccordionBody className="p-0" placeholder="">
+                  <ul>
+                    {sectionModules.map((mod, index) => (
+                      <li key={`${mod.name}-${mod.path}-${index}`}> {/* ✅ Key única */}
+                        <Link
+                          to={mod.path}
+                          className={`flex items-center px-4 py-2 rounded-lg transition-colors
+                            ${isActive(mod.path)
+                              ? 'bg-blue-100 text-blue-600'
+                              : 'text-gray-700 hover:bg-blue-50 hover:text-blue-600'}
+                          `}
+                        >
+                          <span className="w-6 h-6 flex items-center justify-center">{mod.icon}</span>
+                          <span className="ml-2 group-data-[collapsible=icon]:hidden">{mod.name}</span>
+                          {/* ✅ Badge de notificaciones para Solicitudes */}
+                          {(mod.name === 'Revisión de Solicitudes' || mod.path === '/Solicitudes') && totalPendientes > 0 && (
+                            <span className="ml-auto bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-medium group-data-[collapsible=icon]:hidden">
+                              {totalPendientes > 9 ? '9+' : totalPendientes}
+                            </span>
+                          )}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </AccordionBody>
+              </Accordion>
+            )
+          })}
+        </SidebarContent>
 
         <SidebarFooter className="border-t border-sidebar-border">
           <div className="flex items-center space-x-3 p-2 group-data-[collapsible=icon]:justify-center">
@@ -177,61 +171,62 @@ export function AppSidebar({allowedModules}: Readonly<AppSidebarProps>) {
           </div>
 
           <SidebarSeparator />
-        <ul className="p-2 space-y-1">
-          <li>
+          <ul className="p-2 space-y-1">
+            <li>
               <Button
-                  variant="outline"
-                  onClick={() => setShowChangePasswordModal(true)}
-                  className="flex items-center w-full px-4 py-2 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors"
+                variant="outline"
+                onClick={() => setShowChangePasswordModal(true)}
+                className="flex items-center w-full px-4 py-2 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors"
               >
-                  <LuKey className="w-4 h-4" />
-                  <span className="ml-2 group-data-[collapsible=icon]:hidden">
-                      Cambiar Contraseña
-                  </span>
+                <LuKey className="w-4 h-4" />
+                <span className="ml-2 group-data-[collapsible=icon]:hidden">
+                  Cambiar Contraseña
+                </span>
               </Button>
-          </li>
-          <li>
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button
-                  variant="celeste"
-                  className="flex items-center w-full px-4 py-2 rounded-lg"
-                >
-                  <HiLogout className="w-4 h-4" />
-                  <span className="ml-2 group-data-[collapsible=icon]:hidden">
-                    {logoutMutation.isPending ? 'Cerrando...' : 'Cerrar Sesión'}
-                  </span>
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>
-                    <span>¿Cerrar sesión?</span>
-                  </AlertDialogTitle>
-                  <AlertDialogDescription>
-                <span>¿Estás seguro de que deseas cerrar sesión?</span>
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogAction
-                    onClick={handleLogout}
-                    disabled={logoutMutation.isPending}
+            </li>
+            <li>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button
+                    variant="celeste"
+                    className="flex items-center w-full px-4 py-2 rounded-lg"
                   >
-                   <span>Cerrar sesión</span>
-                  </AlertDialogAction>
-                  <AlertDialogCancel><span>Cancelar</span></AlertDialogCancel>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          </li>
-        </ul>
+                    <HiLogout className="w-4 h-4" />
+                    <span className="ml-2 group-data-[collapsible=icon]:hidden">
+                      {logoutMutation.isPending ? 'Cerrando...' : 'Cerrar Sesión'}
+                    </span>
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>
+                      <span>¿Cerrar sesión?</span>
+                    </AlertDialogTitle>
+                    <AlertDialogDescription>
+                      <span>¿Estás seguro de que deseas cerrar sesión?</span>
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogAction
+                      onClick={handleLogout}
+                      disabled={logoutMutation.isPending}
+                    >
+                      <span>Cerrar sesión</span>
+                    </AlertDialogAction>
+                    <AlertDialogCancel><span>Cancelar</span></AlertDialogCancel>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </li>
+          </ul>
         </SidebarFooter>
       </Sidebar>
-        <ChangePasswordModal
-          open={showChangePasswordModal}
-          onClose={() => setShowChangePasswordModal(false)}
-          userId={currentUser.id!}
-        />
+      
+      <ChangePasswordModal
+        open={showChangePasswordModal}
+        onClose={() => setShowChangePasswordModal(false)}
+        userId={currentUser.id!}
+      />
     </section>
   )
 }

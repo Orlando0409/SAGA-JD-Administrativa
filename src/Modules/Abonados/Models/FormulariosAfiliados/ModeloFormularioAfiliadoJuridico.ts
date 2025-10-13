@@ -9,6 +9,9 @@ export interface AfiliadoJuridico {
     Escritura_Terreno?: File | string;
 }
 
+
+
+
 export const AfiliadoJuridicoInicialState: AfiliadoJuridico = {
 
     Razon_Social: '',

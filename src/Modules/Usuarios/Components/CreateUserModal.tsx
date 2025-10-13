@@ -6,7 +6,6 @@ import { CreateUserSchema, type CreateUserSchemaData } from '../Schema/CreateUse
 import type { Role } from '@/Modules/Roles/Models/Role';
 import { useRoles } from '@/Modules/Roles/Hooks/RoleHook';
 import { type CreateUserProps, NOMBRE_MAX_LENGTH, EMAIL_MAX_LENGTH, PASSWORD_MAX_LENGTH, PASSWORD_MIN_LENGTH } from '../Types/UserTypes';
-import { useAlerts } from '@/Modules/Global/context/AlertContext';
 
 
 
@@ -14,7 +13,6 @@ const CreateUserModal = ({ onClose, setShowCreateModal }: CreateUserProps) => {
   const createUserMutation = useCreateUser();
   const { data: roles = [] } = useRoles();
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
-  const {showSuccess, showError} = useAlerts();
   const [fieldCharCounts, setFieldCharCounts] = useState({
     nombreUsuario: 0,
     email: 0,
@@ -22,7 +20,6 @@ const CreateUserModal = ({ onClose, setShowCreateModal }: CreateUserProps) => {
     confirmPassword: 0
   });
 
-  // Función para manejar el cierre del modal
   const handleClose = () => {
     if (onClose) onClose();
     if (setShowCreateModal) setShowCreateModal(false);
@@ -34,12 +31,10 @@ const CreateUserModal = ({ onClose, setShowCreateModal }: CreateUserProps) => {
     return (e: React.ChangeEvent<HTMLInputElement>) => {
       const value = e.target.value;
       
-      // Limitar caracteres al máximo permitido
       if (value.length <= maxLength) {
         handleChange(value);
         setFieldCharCounts(prev => ({ ...prev, [fieldName]: value.length }));
         
-        // Limpiar errores de validación cuando el usuario empieza a escribir
         if (formErrors[fieldName]) {
           setFormErrors(prev => ({ ...prev, [fieldName]: '' }));
         }
@@ -80,12 +75,10 @@ const CreateUserModal = ({ onClose, setShowCreateModal }: CreateUserProps) => {
         };
 
         await createUserMutation.mutateAsync(payload);
-        showSuccess('Usuario creado exitosamente');
         handleClose();
         form.reset();
       } catch (error) {
         console.error('Error creating user:', error);
-        showError('Error al crear usuario');
       }
     },
   });
@@ -116,7 +109,7 @@ const CreateUserModal = ({ onClose, setShowCreateModal }: CreateUserProps) => {
 
 
   return (
-    <div className="fixed inset-0 bg-white bg-opacity-95 flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-opacity-10 backdrop-blur-sm flex items-center justify-center z-50">
       <div className="bg-white rounded-lg shadow-2xl border border-gray-200 w-full max-w-md mx-4 max-h-[90vh] overflow-hidden">
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <h2 className="text-xl font-semibold text-gray-900">Registrar un nuevo usuario</h2>
@@ -134,10 +127,11 @@ const CreateUserModal = ({ onClose, setShowCreateModal }: CreateUserProps) => {
             <form.Field name="Nombre_Usuario">
               {(field) => (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="Nombre_Usuario" className="block text-sm font-medium text-gray-700 mb-1">
                     Nombre de Usuario
                   </label>
                   <input
+                    id="Nombre_Usuario"
                     type="text"
                     value={field.state.value}
                     onChange={createInputHandler('nombreUsuario', field.handleChange, NOMBRE_MAX_LENGTH)}
@@ -170,10 +164,11 @@ const CreateUserModal = ({ onClose, setShowCreateModal }: CreateUserProps) => {
             <form.Field name="Correo_Electronico">
               {(field) => (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="Correo_Electronico" className="block text-sm font-medium text-gray-700 mb-1">
                     Correo Electrónico
                   </label>
                   <input
+                    id="Correo_Electronico"
                     type="email"
                     value={field.state.value}
                     onChange={createInputHandler('email', field.handleChange, EMAIL_MAX_LENGTH)}
@@ -206,10 +201,11 @@ const CreateUserModal = ({ onClose, setShowCreateModal }: CreateUserProps) => {
             <form.Field name="Contraseña">
               {(field) => (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="Contraseña" className="block text-sm font-medium text-gray-700 mb-1">
                     Contraseña
                   </label>
                   <input
+                    id="Contraseña"
                     type="password"
                     value={field.state.value}
                     onChange={createInputHandler('password', field.handleChange, PASSWORD_MAX_LENGTH)}
@@ -242,10 +238,11 @@ const CreateUserModal = ({ onClose, setShowCreateModal }: CreateUserProps) => {
             <form.Field name="confirmarPassword">
               {(field) => (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="confirmarPassword" className="block text-sm font-medium text-gray-700 mb-1">
                     Confirme la Contraseña
                   </label>
                   <input
+                    id="confirmarPassword"
                     type="password"
                     value={field.state.value}
                     onChange={createInputHandler('confirmPassword', field.handleChange, PASSWORD_MAX_LENGTH)}
@@ -278,10 +275,11 @@ const CreateUserModal = ({ onClose, setShowCreateModal }: CreateUserProps) => {
             <form.Field name="Id_Rol">
               {(field) => (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="Id_Rol" className="block text-sm font-medium text-gray-700 mb-1">
                     Rol
                   </label>
                   <select
+                    id="Id_Rol"
                     value={field.state.value}
                     onChange={(e) => field.handleChange(Number(e.target.value))}
                     className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-colors ${
@@ -306,29 +304,28 @@ const CreateUserModal = ({ onClose, setShowCreateModal }: CreateUserProps) => {
                 </div>
               )}
             </form.Field>
-
-            <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
+          </form>
+        </div>
+        
+            <div className="sticky bottom-0 flex justify-end gap-3 p-6 border-t bg-gray-50 z-10">
+                <button
+                  disabled={createUserMutation.isPending}
+                  className={`flex-1 px-4 py-2 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors ${
+                    createUserMutation.isPending 
+                        ? 'bg-blue-300 cursor-not-allowed' 
+                        : 'bg-blue-600 hover:bg-blue-700' 
+                  }`}
+                >
+                  {createUserMutation.isPending ? 'Creando...' : 'Crear Usuario'}
+                </button>
               <button
                 type="button"
                 onClick={handleClose}
-                className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors"
               >
                 Cancelar
               </button>
-              <button
-                type="submit"
-                disabled={createUserMutation.isPending}
-                className={`px-4 py-2 text-white rounded-lg transition-colors ${
-                  createUserMutation.isPending 
-                    ? 'bg-blue-300 cursor-not-allowed' 
-                    : 'bg-blue-600 hover:bg-blue-700' 
-                }`}
-              >
-                {createUserMutation.isPending ? 'Creando...' : 'Crear Usuario'}
-              </button>
             </div>
-          </form>
-        </div>
       </div>
     </div>
   );

@@ -8,6 +8,9 @@ import { ServiceSolicitudDesconexionMedidor } from '../../Service/EstadoSolicitu
 export const useMutateEstadoSolicitudDesconexion = () => {
     const queryClient = useQueryClient();
 
+
+
+    
     return useMutation({
         mutationFn: ({ solicitudId, nuevoEstadoId }: { 
             solicitudId: string | number; 
@@ -16,18 +19,28 @@ export const useMutateEstadoSolicitudDesconexion = () => {
             return ServiceSolicitudDesconexionMedidor.updateEstado(solicitudId, nuevoEstadoId);
         },
         onSuccess: (data, variables) => {
-            // 1. Actualizar la caché de la solicitud individual
-            queryClient.setQueryData(
-                ['solicitud-desconexion-fisica', { id: variables.solicitudId }], 
-                data
-            );
+            try {
+                // 1. Actualizar la caché de la solicitud individual
+                queryClient.setQueryData(
+                    ['solicitud-desconexion-fisica', { id: variables.solicitudId }], 
+                    data
+                );
 
-            // 2. Invalidar y refrescar la lista completa de solicitudes de desconexión
-            queryClient.invalidateQueries({ 
-                queryKey: ['solicitud-desconexion-fisica'] 
-            });
+                // 2. Cross-invalidation: invalidar todas las consultas relacionadas
+                queryClient.invalidateQueries({ 
+                    queryKey: ['solicitud-desconexion-fisica'] 
+                });
+                queryClient.invalidateQueries({ 
+                    queryKey: ['solicitudes-fisicas'] 
+                });
+                queryClient.invalidateQueries({ 
+                    queryKey: ['solicitudes-juridicas'] 
+                });
 
-            console.log(' Estado de desconexión actualizado exitosamente en caché:', data);
+                console.log('✅ Estado de desconexión actualizado exitosamente con cross-invalidation:', data);
+            } catch (error) {
+                console.error('❌ Error en onSuccess de desconexión:', error);
+            }
         },
         onError: (error: any) => {
             console.error(' Error al actualizar estado de desconexión:', error);
@@ -46,16 +59,28 @@ export const useAprobarSolicitudDesconexion = () => {
             return ServiceSolicitudDesconexionMedidor.aprobar(solicitudId);
         },
         onSuccess: (data, solicitudId) => {
-            // Actualizar cachés
-            queryClient.setQueryData(
-                ['solicitud-desconexion-fisica', { id: solicitudId }], 
-                data
-            );
-            queryClient.invalidateQueries({ 
-                queryKey: ['solicitud-desconexion-fisica'] 
-            });
+            try {
+                // Actualizar caché individual
+                queryClient.setQueryData(
+                    ['solicitud-desconexion-fisica', { id: solicitudId }], 
+                    data
+                );
+                
+                // Cross-invalidation
+                queryClient.invalidateQueries({ 
+                    queryKey: ['solicitud-desconexion-fisica'] 
+                });
+                queryClient.invalidateQueries({ 
+                    queryKey: ['solicitudes-fisicas'] 
+                });
+                queryClient.invalidateQueries({ 
+                    queryKey: ['solicitudes-juridicas'] 
+                });
 
-            console.log(' Solicitud de desconexión aprobada exitosamente:', data);
+                console.log('✅ Solicitud de desconexión aprobada exitosamente con cross-invalidation:', data);
+            } catch (error) {
+                console.error('❌ Error en onSuccess de aprobación desconexión:', error);
+            }
         },
         onError: (error: any) => {
             console.error(' Error al aprobar solicitud de desconexión:', error);

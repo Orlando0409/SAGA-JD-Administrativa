@@ -14,6 +14,7 @@ export const AlertContainer: React.FC = () => {
           title={alert.title}
           description={alert.description}
           onClose={() => removeAlert(alert.id)}
+          actionButton={alert.actionButton}
         />
       ))}
     </div>

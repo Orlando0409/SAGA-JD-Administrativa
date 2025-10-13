@@ -1,6 +1,7 @@
 import { useNavigate } from '@tanstack/react-router';
+import ProveedoresTable from './ProveedoresTable';
 
-const Inventario = () => {
+const Proveedores = () => {
   const navigate = useNavigate();
     const handleButtonClick = () => {
         navigate({ to: '/Home' });
@@ -14,10 +15,12 @@ const Inventario = () => {
         >
             Volver
         </button>
-        <h1>Inventario</h1>
+        <div className="w-full mt-4">
+            <ProveedoresTable />
+        </div>
     </div>
   )
 
 }
 
-export default Inventario
+export default Proveedores

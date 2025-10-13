@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useRoleById, usePermissions, useUpdateRole } from '../Hooks/RoleHook';
-import { LuShield } from 'react-icons/lu';
+import { LuShield, LuX, LuLock, LuFolderTree } from 'react-icons/lu';
 import { 
   convertRolePermissionsToModuleState, 
   groupPermissionsByModule, 
@@ -9,7 +9,18 @@ import {
   type PermissionLevel
 } from '@/Modules/Usuarios/Helper/GroupPermiByModule';
 import { RoleMAX_LENGTH, RoleMIN_LENGTH, type EditRoleModalProps } from '../Types/RoleTypes';
-import { useAlerts } from '@/Modules/Global/context/AlertContext';
+import {
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogHeader,
+  AlertDialogFooter
+} from "@/Modules/Global/components/Sidebar/ui/alert-dialog";
+import { Button } from '@/Modules/Global/components/Sidebar/ui/button';
 
 
 
@@ -17,12 +28,10 @@ export const EditRoleModal: React.FC<EditRoleModalProps> = ({ roleId, isOpen, on
   const { data: role, isLoading: roleLoading } = useRoleById(roleId);
   const { data: permisos = [], isLoading: permisosLoading } = usePermissions();
   const { mutateAsync } = useUpdateRole();
-  const {showSuccess, showError} = useAlerts();
   const [modulePermissions, setModulePermissions] = useState<ModulePermission[]>([]);
   const [nombreRol, setNombreRol] = useState('');
   const [errors, setErrors] = useState<{ nombreRol?: string }>({});
 
-  // Función para validar el nombre
   const validateNombreRol = (value: string) => {
     if (value.length < RoleMIN_LENGTH) {
       return `El nombre debe tener al menos ${RoleMIN_LENGTH} caracteres`;
@@ -37,7 +46,7 @@ export const EditRoleModal: React.FC<EditRoleModalProps> = ({ roleId, isOpen, on
   useEffect(() => {
     if (role && permisos.length > 0) {
       setNombreRol(role.Nombre_Rol);
-      const moduleState = convertRolePermissionsToModuleState(role.permisos, permisos);
+      const moduleState = convertRolePermissionsToModuleState(role.Permisos, permisos);
       setModulePermissions(moduleState);
     }
   }, [role, permisos]);
@@ -48,20 +57,17 @@ export const EditRoleModal: React.FC<EditRoleModalProps> = ({ roleId, isOpen, on
     
     setModulePermissions(prev =>
       prev.map(mp =>
-        mp.modulo === modulo ? { ...mp, level, selectedId: newId } : mp
+        mp.Modulo === modulo ? { ...mp, level, selectedId: newId } : mp
       )
     );
   };
 
-    // Manejar cambios en el input con validación
   const handleNombreChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     
-    // Limitar caracteres al máximo permitido
     if (value.length <= RoleMAX_LENGTH) {
       setNombreRol(value);
       
-      // Validar en tiempo real
       const error = validateNombreRol(value);
       setErrors(prev => ({ ...prev, nombreRol: error }));
     }
@@ -83,15 +89,12 @@ export const EditRoleModal: React.FC<EditRoleModalProps> = ({ roleId, isOpen, on
 
     try {
       await mutateAsync({ Id_Rol: roleId, roleData: { Nombre_Rol: nombreRol, permisosIds } });
-      showSuccess('Rol actualizado exitosamente');
+      onClose();
     } catch (error) {
       console.error('Error updating role:', error);
-      showError('Error al actualizar rol');
     }
-    onClose();
   };
 
-// Calcular caracteres restantes
   const remainingChars = RoleMAX_LENGTH - nombreRol.length;
   const isNearLimit = remainingChars <= 10;
   const hasError = !!errors.nombreRol;
@@ -104,25 +107,41 @@ export const EditRoleModal: React.FC<EditRoleModalProps> = ({ roleId, isOpen, on
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-white bg-opacity-30 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
-        {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
-          <h2 className="text-2xl font-bold text-gray-900">Editar Permisos del Rol</h2>
+    <div className="fixed inset-0 bg-opacity-10 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-lg shadow-2xl border border-gray-200 w-full max-w-3xl max-h-[90vh] overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100">
+        <div className="sticky top-0 bg-white border-b border-gray-200 p-4 z-10">
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-bold text-gray-900 flex items-center gap-3">
+              Editar Permisos del Rol
+            </h2>
+            <button
+              onClick={onClose}
+              className="text-gray-400 hover:text-gray-600 transition-colors"
+              type="button"
+            >
+              <LuX className="w-5 h-5" />
+            </button>
+          </div>
         </div>
 
-        {/* Body */}
-        <div className="p-6 overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100 max-h-[calc(90vh-140px)]">
+        <div className="p-6">
           {roleLoading || permisosLoading ? (
             <div className="text-center py-8">Cargando...</div>
           ) : (
-            <form onSubmit={handleSubmit} className="space-y-8">
-              {/* Información básica */}
-              <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Información del Rol</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
+                <div className="bg-gray-50 px-5 py-3 border-b border-gray-200">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                      <LuShield className="w-6 h-6 text-blue-600" />
+                    </div>
+                    <h3 className="text-base font-bold text-gray-900">Información del Rol</h3>
+                  </div>
+                </div>
+                <div className="p-5">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
-                    <label className="block text-sm font-medium text-gray-500 mb-2">
+                    <label htmlFor="role-name" className="block text-sm font-medium text-gray-500 mb-2">
                       Nombre del Rol
                     </label>
                     <div className="relative">
@@ -141,7 +160,6 @@ export const EditRoleModal: React.FC<EditRoleModalProps> = ({ roleId, isOpen, on
                       />
                     </div>
                     
-                    {/* Contador de caracteres y errores */}
                     <div className="flex justify-between items-center">
                       {hasError ? (
                         <p className="text-red-600 text-xs">
@@ -163,46 +181,52 @@ export const EditRoleModal: React.FC<EditRoleModalProps> = ({ roleId, isOpen, on
                   </div>
                 </div>
               </div>
+            </div>
 
-              {/* Permisos por módulo */}
-              <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                  <LuShield className="w-5 h-5 text-blue-600" />
-                  Permisos por Módulo ({modulePermissions.length})
-                </h3>
-                
+            <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
+              <div className="bg-gray-50 px-5 py-3 border-b border-gray-200">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                    <LuLock className="w-4 h-4 text-blue-600" />
+                  </div>
+                  <h3 className="text-base font-bold text-gray-900">Permisos por Módulo ({modulePermissions.length})</h3>
+                </div>
+              </div>
+              
+              <div className="p-5">
                 <div className="space-y-4">
                   {modulePermissions.map((mp) => (
-                    <div key={mp.modulo} className="bg-white border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors">
-                      <div className="flex items-center justify-between">
+                    <div key={mp.Modulo} className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                            <LuShield className="w-5 h-5 text-blue-600" />
+                            <LuFolderTree className="w-5 h-5 text-blue-600" />
                           </div>
                           <div>
-                            <h4 className="font-semibold text-gray-900 text-lg capitalize">{mp.modulo}</h4>
-                            <p className="text-sm text-gray-500">
-                              {hasEditPermission(mp.modulo) ? 'Módulo del sistema' : 'Solo lectura disponible'}
+                            <h4 className="font-bold text-gray-900 text-sm capitalize">{mp.Modulo}</h4>
+                            <p className="text-xs text-gray-600">
+                              {hasEditPermission(mp.Modulo) ? 'Módulo del sistema' : 'Solo lectura disponible'}
                             </p>
                           </div>
                         </div>
                         
                         <div className="flex items-center gap-8">
-                          {/* Toggle Ver */}
                           <div className="flex flex-col items-center gap-2">
                             <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Ver</span>
-                            <label className="cursor-pointer">
+                            <label htmlFor={`view-permission-${mp.Modulo}`} className="cursor-pointer">
+                              <span className="sr-only">Permiso de ver para {mp.Modulo}</span>
                               <input
+                                id={`view-permission-${mp.Modulo}`}
                                 type="checkbox"
                                 checked={mp.level === 'view' || mp.level === 'edit'}
                                 onChange={(e) => {
                                   if (e.target.checked) {
-                                    // Si no tiene permiso de editar o ya está en edit, solo activar view
-                                    if (!hasEditPermission(mp.modulo) || mp.level !== 'edit') {
-                                      handlePermissionChange(mp.modulo, 'view');
+                                  
+                                    if (!hasEditPermission(mp.Modulo) || mp.level !== 'edit') {
+                                      handlePermissionChange(mp.Modulo, 'view');
                                     }
                                   } else {
-                                    handlePermissionChange(mp.modulo, 'none');
+                                    handlePermissionChange(mp.Modulo, 'none');
                                   }
                                 }}
                                 className="sr-only"
@@ -217,26 +241,26 @@ export const EditRoleModal: React.FC<EditRoleModalProps> = ({ roleId, isOpen, on
                             </label>
                           </div>
 
-                          {/* Toggle Editar */}
+
                           <div className="flex flex-col items-center gap-2">
                             <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Editar</span>
-                            <label className={`cursor-pointer ${!hasEditPermission(mp.modulo) ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                            <label htmlFor={`edit-permission-${mp.Modulo}`} className={`cursor-pointer ${!hasEditPermission(mp.Modulo) ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                              <span className="sr-only">Permiso de editar para {mp.Modulo}</span>
                               <input
+                                id={`edit-permission-${mp.Modulo}`}
                                 type="checkbox"
                                 checked={mp.level === 'edit'}
                                 onChange={(e) => {
-                                  if (hasEditPermission(mp.modulo)) {
+                                  if (hasEditPermission(mp.Modulo)) {
                                     if (e.target.checked) {
-                                      handlePermissionChange(mp.modulo, 'edit');
-                                    } else {
-                                      // Si desactiva editar pero ver está activo, mantener view
-                                      if (mp.level === 'edit') {
-                                        handlePermissionChange(mp.modulo, 'view');
-                                      }
+                                      handlePermissionChange(mp.Modulo, 'edit');
+                                    } else if (mp.level === 'edit') {
+                                    
+                                      handlePermissionChange(mp.Modulo, 'view');
                                     }
                                   }
                                 }}
-                                disabled={!hasEditPermission(mp.modulo)}
+                                disabled={!hasEditPermission(mp.Modulo)}
                                 className="sr-only"
                               />
                               <div className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
@@ -255,31 +279,53 @@ export const EditRoleModal: React.FC<EditRoleModalProps> = ({ roleId, isOpen, on
                   ))}
                 </div>
               </div>
-
-              {/* Footer */}
-              <div className="flex gap-4 justify-end pt-4 border-t border-gray-200">
-                <button
-                  type="submit"
-                  disabled={hasError || nombreRol.length < RoleMIN_LENGTH}
-                  className={`px-6 py-2 rounded-lg transition-colors font-medium ${
-                    hasError || nombreRol.length < RoleMIN_LENGTH
-                      ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                      : 'bg-blue-600 text-white hover:bg-blue-700'
-                  }`}
-                >
-                  Guardar Cambios
-                </button>
-                <button
+            </div>
+          </form>
+          )}
+        </div>
+                    {/* Botones */}
+            <div className="sticky bottom-0 flex justify-end gap-3 p-6 border-t bg-gray-50 z-10">
+              <div className="flex justify-end gap-3">
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button
+                      disabled={hasError || nombreRol.length < RoleMIN_LENGTH}
+                      className={`px-6 py-2 rounded-lg transition-colors font-medium ${
+                        hasError || nombreRol.length < RoleMIN_LENGTH
+                          ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                          : 'bg-blue-600 text-white hover:bg-blue-700'
+                      }`}
+                    >
+                      Guardar Cambios
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>¿Confirmar actualización?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        ¿Estás seguro de que deseas actualizar este rol? Esta acción modificará los permisos y el nombre del rol en el sistema.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogAction
+                        onClick={handleSubmit}
+                        disabled={hasError || nombreRol.length < RoleMIN_LENGTH}
+                      >
+                        Confirmar
+                      </AlertDialogAction>
+                      <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+                  <button
                   type="button"
                   onClick={onClose}
-                  className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium"
+                  className="px-6 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium"
                 >
                   Cancelar
                 </button>
               </div>
-            </form>
-          )}
-        </div>
+            </div>
       </div>
     </div>
   );

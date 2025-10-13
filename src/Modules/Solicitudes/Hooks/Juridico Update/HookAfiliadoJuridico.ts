@@ -16,18 +16,28 @@ export const useMutateEstadoSolicitudJuridica = () => {
             return ServiceSolicitudAfiliacionJuridicas.updateEstado(solicitudId, nuevoEstadoId);
         },
         onSuccess: (data, variables) => {
-            // 1. Actualizar la caché de la solicitud individual
-            queryClient.setQueryData(
-                ['solicitud-afiliacion-juridica', { id: variables.solicitudId }], 
-                data
-            );
+            try {
+                // 1. Actualizar la caché de la solicitud individual
+                queryClient.setQueryData(
+                    ['solicitud-afiliacion-juridica', { id: variables.solicitudId }], 
+                    data
+                );
 
-            // 2. Invalidar y refrescar la lista completa de solicitudes
-            queryClient.invalidateQueries({ 
-                queryKey: ['solicitud-afiliacion-juridica'] 
-            });
+                // 2. Cross-invalidation: invalidar todas las consultas relacionadas
+                queryClient.invalidateQueries({ 
+                    queryKey: ['solicitud-afiliacion-juridica'] 
+                });
+                queryClient.invalidateQueries({ 
+                    queryKey: ['solicitudes-juridicas'] 
+                });
+                queryClient.invalidateQueries({ 
+                    queryKey: ['solicitudes-fisicas'] 
+                });
 
-            console.log(' Estado actualizado exitosamente en caché:', data);
+                console.log('✅ Estado jurídico actualizado exitosamente con cross-invalidation:', data);
+            } catch (error) {
+                console.error('❌ Error en onSuccess jurídico:', error);
+            }
         },
         onError: (error: any) => {
             console.error(' Error al actualizar estado:', error);
@@ -46,16 +56,28 @@ export const useAprobarSolicitudAfiliacionJuridica = () => {
             return ServiceSolicitudAfiliacionJuridicas.aprobar(solicitudId);
         },
         onSuccess: (data, solicitudId) => {
-            // Actualizar cachés
-            queryClient.setQueryData(
-                ['solicitud-afiliacion-juridica', { id: solicitudId }], 
-                data
-            );
-            queryClient.invalidateQueries({ 
-                queryKey: ['solicitud-afiliacion-juridica'] 
-            });
+            try {
+                // Actualizar caché individual
+                queryClient.setQueryData(
+                    ['solicitud-afiliacion-juridica', { id: solicitudId }], 
+                    data
+                );
+                
+                // Cross-invalidation
+                queryClient.invalidateQueries({ 
+                    queryKey: ['solicitud-afiliacion-juridica'] 
+                });
+                queryClient.invalidateQueries({ 
+                    queryKey: ['solicitudes-juridicas'] 
+                });
+                queryClient.invalidateQueries({ 
+                    queryKey: ['solicitudes-fisicas'] 
+                });
 
-            console.log('✅ Solicitud jurídica aprobada exitosamente:', data);
+                console.log('✅ Solicitud jurídica aprobada exitosamente con cross-invalidation:', data);
+            } catch (error) {
+                console.error('❌ Error en onSuccess aprobación jurídica:', error);
+            }
         },
         onError: (error: any) => {
             console.error('❌ Error al aprobar solicitud jurídica:', error);

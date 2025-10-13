@@ -6,19 +6,28 @@ import { EMAIL_MAX_LENGTH, NOMBRE_MAX_LENGTH, type EditUserModalProps } from '..
 import { useState } from 'react';
 import { UpdateUserSchema, type UpdateUserSchemaData } from '../Schema/UpdateUserSchema';
 import type { Role } from '@/Modules/Roles/Models/Role';
-import { useAlerts } from '@/Modules/Global/context/AlertContext';
-
+import {
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogHeader,
+  AlertDialogFooter
+} from "@/Modules/Global/components/Sidebar/ui/alert-dialog";
+import { Button } from '@/Modules/Global/components/Sidebar/ui/button';
 
 const EditUserModal: React.FC<EditUserModalProps> = ({ isOpen, onClose, user }) => {
   const updateUserMutation = useUpdateUser();
   const { data: roles = [] } = useRoles();
   const activeRoles = roles.filter((rol: Role) => rol.Fecha_Eliminacion === null);
-  const {showSuccess, showError} = useAlerts();
-    const [formErrors, setFormErrors] = useState<Record<string, string>>({});
-    const [fieldCharCounts, setFieldCharCounts] = useState({
-      nombreUsuario: 0,
-      email: 0
-    });
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+  const [fieldCharCounts, setFieldCharCounts] = useState({
+    nombreUsuario: 0,
+    email: 0
+  });
 
       const createInputHandler = (fieldName: string, handleChange: (value: string) => void, maxLength: number) => {
     return (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -29,7 +38,6 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ isOpen, onClose, user }) 
         handleChange(value);
         setFieldCharCounts(prev => ({ ...prev, [fieldName]: value.length }));
         
-        // Limpiar errores de validación cuando el usuario empieza a escribir
         if (formErrors[fieldName]) {
           setFormErrors(prev => ({ ...prev, [fieldName]: '' }));
         }
@@ -66,11 +74,9 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ isOpen, onClose, user }) 
         };
 
         await updateUserMutation.mutateAsync({ Id_Usuario: user.Id_Usuario, userData: updateData });
-        showSuccess('Usuario actualizado exitosamente');
         onClose();
       } catch (error) {
         console.error('Error updating user:', error);
-        showError('Error al actualizar usuario');
       }
     },
   });
@@ -102,7 +108,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ isOpen, onClose, user }) 
   if (!isOpen) return null;
 
   return (
-    <div className="absolute inset-0 bg-black/40 flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-opacity-10 backdrop-blur-sm flex items-center justify-center z-50">
       <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4">
         <div className="flex items-center justify-between p-6 border-b">
           <h2 className="text-xl font-semibold text-gray-900">Editar Usuario</h2>
@@ -118,10 +124,11 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ isOpen, onClose, user }) 
           <form.Field name="Nombre_Usuario">
             {(field) => (
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor='Nombre_Usuario' className="block text-sm font-medium text-gray-700 mb-1">
                   Nombre de Usuario
                 </label>
                 <input
+                  id='Nombre_Usuario'
                   type="text"
                   value={field.state.value}
                   onChange={createInputHandler('nombreUsuario', field.handleChange, NOMBRE_MAX_LENGTH)}
@@ -153,10 +160,11 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ isOpen, onClose, user }) 
           <form.Field name="Correo_Electronico">
             {(field) => (
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor='Correo_Electronico' className="block text-sm font-medium text-gray-700 mb-1">
                   Correo Electrónico
                 </label>
                 <input
+                  id='Correo_Electronico'
                   type="email"
                   value={field.state.value}
                   onChange={createInputHandler('email', field.handleChange, EMAIL_MAX_LENGTH)}
@@ -188,10 +196,11 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ isOpen, onClose, user }) 
           <form.Field name="Id_Rol">
             {(field) => (
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor='Id_Rol' className="block text-sm font-medium text-gray-700 mb-1">
                   Rol
                 </label>
                 <select
+                  id='Id_Rol'
                   value={field.state.value}
                   onChange={(e) => field.handleChange(Number(e.target.value))}
                   className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-colors ${
@@ -216,28 +225,47 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ isOpen, onClose, user }) 
               </div>
             )}
           </form.Field>
-
-          <div className="flex justify-end gap-3 pt-4">
+        </form>
+          <div className="sticky bottom-0 flex justify-end gap-3 p-6 border-t bg-gray-50 z-10">
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button
+                  disabled={updateUserMutation.isPending}
+                  className={`flex-1 px-4 py-2 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors ${
+                    updateUserMutation.isPending 
+                        ? 'bg-blue-300 cursor-not-allowed' 
+                        : 'bg-blue-600 hover:bg-blue-700' 
+                  }`}
+                >
+                  {updateUserMutation.isPending ? 'Actualizando...' : 'Actualizar Usuario'}
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>¿Confirmar actualización?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    ¿Estás seguro de que deseas actualizar este usuario? Esta acción modificará la información del usuario en el sistema.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogAction
+                    onClick={() => form.handleSubmit()}
+                    disabled={updateUserMutation.isPending}
+                  >
+                    {updateUserMutation.isPending ? 'Actualizando...' : 'Confirmar'}
+                  </AlertDialogAction>
+                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+              className="flex-1 px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors"
             >
               Cancelar
             </button>
-            <button
-              type="submit"
-              disabled={updateUserMutation.isPending}
-              className={`px-4 py-2 text-white rounded-lg transition-colors ${
-                updateUserMutation.isPending 
-                    ? 'bg-blue-300 cursor-not-allowed' 
-                    : 'bg-blue-600 hover:bg-blue-700' 
-              }`}
-            >
-              {updateUserMutation.isPending ? 'Actualizando...' : 'Actualizar Usuario'}
-            </button>
           </div>
-        </form>
       </div>
     </div>
   );

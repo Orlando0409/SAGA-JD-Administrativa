@@ -8,91 +8,50 @@ import {
   getSortedRowModel,
   useReactTable,
 } from '@tanstack/react-table';
-import { LuSearch, LuFilter, LuPlus, LuChevronLeft, LuChevronRight } from 'react-icons/lu';
-import { useUsers } from '../Hooks/userHook';
+import { LuSearch, LuFilter, LuPlus } from 'react-icons/lu';
+import { MdKeyboardArrowUp, MdKeyboardArrowDown, MdKeyboardArrowLeft, MdKeyboardArrowRight, MdKeyboardDoubleArrowLeft, MdKeyboardDoubleArrowRight } from 'react-icons/md';
+import { useUsers, useDeactivateUser, useActivateUser } from '../Hooks/userHook';
 import type { Usuario } from '../Models/Usuario';
 import CreateUserModal from './CreateUserModal';
 import UserDetailModal from './UserDetailModal';
-import { NombreUsuarioCell, getStatusClass, getStatusDisplay, isActive } from '../Helper/utils';
-import RolesTable from '../../Roles/Components/RolesTable';
+import EditUserModal from './EditUserModal';
+import { isActive } from '../Helper/utils';
 import type { FilterOptions } from '../Types/UserTypes';
 import FilterUserModal from './FilterUserModal';
 import { useUserPermissions } from '@/Modules/Auth/Hooks/PermissionHook';
+import { useAuth } from '@/Modules/Auth/Context/AuthContext';
+import { useNavigate } from '@tanstack/react-router';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/Modules/Global/components/Sidebar/ui/alert-dialog';
 
 const Usuarios = () => {
   const { data: users = [], isLoading, refetch } = useUsers();
-  const { canCreate, canEdit } = useUserPermissions();
+  const {canEdit, canView } = useUserPermissions();
+  const { user: currentUser } = useAuth();
+  const navigate = useNavigate();
   const [globalFilter, setGlobalFilter] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
   const [showUserDetail, setShowUserDetail] = useState(false);
-  const [showRolesTable, setShowRolesTable] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
   const [showFilterModal, setShowFilterModal] = useState(false);
-  const [appliedFilters, setAppliedFilters] = useState<FilterOptions>({});
+  const [appliedFilters, setAppliedFilters] = useState<FilterOptions>({ estado: 'todos' }); // Por defecto solo activos
+  const [selectedUser, setSelectedUser] = useState<Usuario | null>(null);
+  
+  const deactivateUserMutation = useDeactivateUser();
+  const activateUserMutation = useActivateUser();
 
-
-    useEffect(() => {
-    const handler = () => {
-      refetch(); // Actualiza los usuarios desde el backend
-    };
-    window.addEventListener('refreshUsuarios', handler);
-    return () => window.removeEventListener('refreshUsuarios', handler);
-  }, [refetch]);
-
-  // Función para aplicar filtros personalizados
-  const applyCustomFilters = (data: Usuario[], filters: FilterOptions): Usuario[] => {
-    return data.filter(user => {
-      // Filtro por rol
-      if (filters.rol && user.rol?.Nombre_Rol !== filters.rol) {
-        return false;
-      }
-
-      // Filtro por estado
-      if (filters.estado) {
-        const userIsActive = isActive(user.Fecha_Eliminacion);
-        if (filters.estado === 'activo' && !userIsActive) return false;
-        if (filters.estado === 'inactivo' && userIsActive) return false;
-      }
-
-      return true;
-    });
-  };
-
-  // Aplicar filtros personalizados a los datos
-  const filteredUsers = useMemo(() => {
-    return applyCustomFilters(users, appliedFilters);
-  }, [users, appliedFilters]);
-
-  const columnHelper = createColumnHelper<Usuario>();
-
-  const columns = useMemo(
-    () => [
-      columnHelper.accessor('Nombre_Usuario', {
-        header: 'Nombre de Usuario',
-        cell: info => <NombreUsuarioCell value={info.getValue()} />,
-      }),
-      columnHelper.accessor('Correo_Electronico', {
-        header: 'Correo Electrónico',
-      }),
-      columnHelper.accessor('rol.Nombre_Rol', {
-        header: 'Rol',
-        cell: info => (
-          <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
-            {info.getValue()}
-          </span>
-        ),
-      }),
-      columnHelper.accessor('Fecha_Eliminacion', { 
-        header: 'Estado',
-        cell: info => (
-          <span className={`px-2 py-1 rounded-full text-xs ${getStatusClass(info.getValue())}`}>
-            {getStatusDisplay(info.getValue())}
-          </span>
-        ),
-      }),
-    ],
-    []
-  );
+  const hasViewPermission = canView('usuarios');
+  const hasEditPermission = canEdit('usuarios');
 
   const pageSizeOptions = [5, 10, 20, 50];
   const [pagination, setPagination] = useState({
@@ -100,8 +59,237 @@ const Usuarios = () => {
     pageIndex: 0,
   });
 
+  useEffect(() => {
+    const handler = () => {
+      refetch(); 
+    };
+    window.addEventListener('refreshUsuarios', handler);
+    return () => window.removeEventListener('refreshUsuarios', handler);
+  }, [refetch]);
+
+  const usersToShow = useMemo(() => {
+    if (isLoading || !users?.length) return [];
+
+    if (hasEditPermission) {
+      return users;
+    }
+    
+    // Si solo puede ver, mostrar solo su usuario
+    if (hasViewPermission && currentUser?.Id_Usuario) {
+      const myUser = users.find(user => user.Id_Usuario === currentUser.Id_Usuario);
+      return myUser ? [myUser] : [];
+    }
+    
+    return [];
+  }, [users, hasEditPermission, hasViewPermission, currentUser?.Id_Usuario, isLoading]);
+
+  const applyCustomFilters = (data: Usuario[], filters: FilterOptions): Usuario[] => {
+    return data.filter(user => {
+      // Aplicar filtro de rol si está definido
+      if (filters.rol && user.Rol?.Nombre_Rol !== filters.rol) {
+        return false;
+      }
+
+      // Aplicar filtro de estado
+      const userIsActive = isActive(user.Fecha_Eliminacion);
+      if (filters.estado === 'activo' && !userIsActive) return false;
+      if (filters.estado === 'inactivo' && userIsActive) return false;
+      if (filters.estado === 'todos') return true; // Mostrar todos
+      if (!filters.estado && !userIsActive) return false; // Si no hay filtro específico, ocultar inactivos
+
+      return true;
+    });
+  };
+
+  const filteredUsers = useMemo(() => {
+    return applyCustomFilters(usersToShow, appliedFilters);
+  }, [usersToShow, appliedFilters]);
+
+  const columnHelper = createColumnHelper<Usuario>();
+
+  const handleViewDetail = (user: Usuario) => {
+    setSelectedUserId(user.Id_Usuario);
+    setShowUserDetail(true);
+  };
+
+  const handleEdit = (user: Usuario) => {
+    setSelectedUser(user);
+    setShowEditModal(true);
+  };
+
+  const handleDeactivate = async (userId: number) => {
+    try {
+      await deactivateUserMutation.mutateAsync(userId);
+    } catch (error) {
+      console.error('Error deactivating user:', error);
+    }
+  };
+
+  const handleActivate = async (userId: number) => {
+    try {
+      await activateUserMutation.mutateAsync(userId);
+    } catch (error) {
+      console.error('Error activating user:', error);
+    }
+  };
+
+  const columns = useMemo(
+    () => [
+      columnHelper.accessor('Nombre_Usuario', {
+        header: 'Nombre de Usuario',
+        cell: info => (
+          <span className="font-medium transition-colors text-left w-full">
+            {info.getValue()}
+          </span>
+        ),
+      }),
+      columnHelper.accessor('Correo_Electronico', {
+        header: 'Correo Electrónico',
+        cell: info => (
+          <div className="flex justify-start">
+            <div className="text-gray-600 max-w-xs truncate">
+              {info.getValue()}
+            </div>
+          </div>
+        ),
+      }),
+      columnHelper.accessor('Rol.Nombre_Rol', {
+        header: 'Rol',
+        cell: info => (
+          <div className="flex justify-start">
+            <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-semibold">
+              {info.getValue()}
+            </span>
+          </div>
+        ),
+      }),
+      columnHelper.accessor('Fecha_Eliminacion', { 
+        header: 'Estado',
+        cell: info => {
+          const activo = isActive(info.getValue());
+          return (
+            <div className="flex justify-start">
+              <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                activo 
+                  ? 'bg-emerald-100 text-emerald-700 border border-emerald-300' 
+                  : 'bg-red-100 text-red-700 border border-red-300'
+              }`}>
+                {activo ? 'Activo' : 'Inactivo'}
+              </span>
+            </div>
+          );
+        },
+      }),
+      columnHelper.display({
+        id: 'acciones',
+        header: 'Acciones',
+        cell: info => {
+          const userIsActive = isActive(info.row.original.Fecha_Eliminacion);
+          const canViewDetails = hasEditPermission || info.row.original.Id_Usuario === currentUser?.Id_Usuario;
+          
+          return (
+            <div className="flex justify-center gap-1">
+              {canViewDetails && (
+                <button
+                  className="px-2 py-1 bg-gray-600 text-white text-xs rounded hover:bg-gray-700 transition-colors"
+                  onClick={() => handleViewDetail(info.row.original)}
+                  title="Ver detalles"
+                >
+                  Ver
+                </button>
+              )}
+              {hasEditPermission && (
+                <button
+                  className="px-2 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition-colors"
+                  onClick={() => handleEdit(info.row.original)}
+                  title="Editar"
+                >
+                  Editar
+                </button>
+              )}
+              {hasEditPermission && (
+                <>
+                  {userIsActive ? (
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <button
+                          className="px-2 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-700 transition-colors"
+                          disabled={deactivateUserMutation.isPending}
+                          title="Desactivar usuario"
+                        >
+                          Desactivar
+                        </button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>
+                            <span>¿Desactivar usuario?</span>
+                          </AlertDialogTitle>
+                          <AlertDialogDescription>
+                            <span>¿Estás seguro de que deseas desactivar el usuario "{info.row.original.Nombre_Usuario}"?</span>
+                            <br />
+                            <span>Esta acción puede revertirse posteriormente.</span>
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogAction
+                            onClick={() => handleDeactivate(info.row.original.Id_Usuario)}
+                            disabled={deactivateUserMutation.isPending}
+                          >
+                            <span>Desactivar</span>
+                          </AlertDialogAction>
+                          <AlertDialogCancel>
+                            <span>Cancelar</span>
+                          </AlertDialogCancel>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  ) : (
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <button
+                          className="px-2 py-1 bg-green-600 text-white text-xs rounded hover:bg-green-700 transition-colors"
+                          disabled={activateUserMutation.isPending}
+                          title="Activar usuario"
+                        >
+                          Activar
+                        </button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>
+                            <span>¿Activar usuario?</span>
+                          </AlertDialogTitle>
+                          <AlertDialogDescription>
+                            <span>¿Estás seguro de que deseas activar el usuario "{info.row.original.Nombre_Usuario}"?</span>
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogAction
+                            onClick={() => handleActivate(info.row.original.Id_Usuario)}
+                            disabled={activateUserMutation.isPending}
+                          >
+                            <span>Activar</span>
+                          </AlertDialogAction>
+                          <AlertDialogCancel>
+                            <span>Cancelar</span>
+                          </AlertDialogCancel>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  )}
+                </>
+              )}
+            </div>
+          );
+        },
+      }),
+    ],
+    [deactivateUserMutation.isPending, activateUserMutation.isPending, hasEditPermission, currentUser?.Id_Usuario]
+  );
+
   const table = useReactTable({
-    data: filteredUsers, // Usar los datos filtrados
+    data: filteredUsers, 
     columns,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
@@ -120,18 +308,12 @@ const Usuarios = () => {
     },
   });
 
-  const handleRowClick = (user: Usuario) => {
-    setSelectedUserId(user.Id_Usuario);
-    setShowUserDetail(true);
-  };
 
   const handleApplyFilters = (filters: FilterOptions) => {
     setAppliedFilters(filters);
-    // Resetear a la primera página cuando se aplican filtros
     setPagination(prev => ({ ...prev, pageIndex: 0 }));
   };
 
-  // Contador de filtros activos
   const activeFiltersCount = Object.values(appliedFilters).filter(v => v && v !== '').length;
 
   if (isLoading) {
@@ -142,217 +324,264 @@ const Usuarios = () => {
     );
   }
 
-return (
-  <div className="w-full flex flex-col items-start h-full p-2">
-    <div className="w-full bg-white rounded-lg shadow-lg overflow-hidden">
-      {/* Mostrar solo la tabla de roles si está activa */}
-      {showRolesTable ? (
-        <RolesTable onClose={() => setShowRolesTable(false)} />
-      ) : (
-        <>
-          {/* Controls */}
-          <div className="p-6 border-b bg-gray-50">
-            <div className="flex justify-between items-center gap-4">
-              {/* Search */}
-              <div className="relative flex-1 max-w-md">
-                <LuSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                <input
-                  type="text"
-                  placeholder="Buscar usuarios..."
-                  value={globalFilter ?? ''}
-                  onChange={(e) => setGlobalFilter(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
+  return (
+    <div className="w-full flex flex-col items-start h-full p-2">
+      <div className="w-full overflow-hidden">
 
-              {/* Buttons */}
-              <div className="flex gap-3">
-                <button 
-                  onClick={() => setShowFilterModal(true)}
-                  className={`px-4 py-2 rounded-lg hover:bg-gray-200 transition flex items-center gap-2 ${
-                    activeFiltersCount > 0 
-                      ? 'bg-blue-100 text-blue-700 border border-blue-300' 
-                      : 'bg-gray-100 text-gray-700'
-                  }`}
-                >
-                  <LuFilter className="w-4 h-4" />
-                  Filtros
-                  {activeFiltersCount > 0 && (
-                    <span className="bg-blue-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                      {activeFiltersCount}
-                    </span>
-                  )}
-                </button>
-                {canCreate('usuarios') && (
-                  <button
-                    onClick={() => setShowCreateModal(true)}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center gap-2"
-                  >
-                    <LuPlus className="w-4 h-4" />
-                    Nuevo
-                  </button>
-                )}
-
-                {canEdit('usuarios') && (
-                  <button
-                    onClick={() => setShowRolesTable(true)}
-                    className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition"
-                  >
-                    Roles
-                  </button>
-                )}
+        {hasViewPermission && !hasEditPermission && (
+          <div className="p-4 bg-blue-50">
+            <div className="flex">
+              <div className="ml-3">
+                <p className="text-sm text-blue-700">
+                  <strong>Modo de solo lectura:</strong> Solo puedes ver tu información de usuario.
+                </p>
               </div>
             </div>
-
-            {/* Mostrar filtros activos */}
-            {activeFiltersCount > 0 && (
-              <div className="mt-4 flex flex-wrap gap-2">
-                {appliedFilters.rol && (
-                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                    Rol: {appliedFilters.rol}
-                    <button
-                      onClick={() => handleApplyFilters({ ...appliedFilters, rol: '' })}
-                      className="ml-2 text-blue-600 hover:text-blue-800"
-                    >
-                      ×
-                    </button>
-                  </span>
-                )}
-                {appliedFilters.estado && (
-                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                    Estado: {appliedFilters.estado}
-                    <button
-                      onClick={() => handleApplyFilters({ ...appliedFilters, estado: '' })}
-                      className="ml-2 text-green-600 hover:text-green-800"
-                    >
-                      ×
-                    </button>
-                  </span>
-                )}
-                <button
-                  onClick={() => handleApplyFilters({})}
-                  className="text-xs text-red-600 hover:text-red-800 font-medium"
-                >
-                  Limpiar todos los filtros
-                </button>
-              </div>
-            )}
+          </div>
+        )}
+          <div className="flex pl-6 items-center gap-4 ">
+            <h1 className="text-2xl font-bold text-gray-800">
+              Gestión de Usuarios
+            </h1>
           </div>
 
-          {/* Table */}
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-100">
-                {table.getHeaderGroups().map((headerGroup) => (
-                  <tr key={headerGroup.id}>
-                    {headerGroup.headers.map((header) => (
-                      <th
-                        key={header.id}
-                        className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-gray-200"
-                        onClick={header.column.getToggleSortingHandler()}
+          {(hasEditPermission || filteredUsers.length > 1) && (
+            <div className="p-6">
+              <div className="flex justify-between items-center gap-4">
+
+                  <div className="relative flex-1 max-w-md">
+                    <LuSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                    <input
+                      type="text"
+                      placeholder="Buscar usuarios..."
+                      value={globalFilter ?? ''}
+                      onChange={(e) => setGlobalFilter(e.target.value)}
+                      className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+
+                {hasEditPermission && (
+                  <div className="flex gap-3">
+                    <button 
+                      onClick={() => setShowFilterModal(true)}
+                      className={`px-4 py-2 rounded-lg hover:bg-gray-200 transition flex items-center gap-2 ${
+                        activeFiltersCount > 0 
+                          ? 'bg-blue-100 text-blue-700 border border-blue-300' 
+                          : 'bg-gray-100 text-gray-700'
+                      }`}
+                    >
+                      <LuFilter className="w-4 h-4" />
+                      Filtros
+                      {activeFiltersCount > 0 && (
+                        <span className="bg-blue-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                          {activeFiltersCount}
+                        </span>
+                      )}
+                    </button>
+
+                    {hasEditPermission && (
+                      <button
+                        onClick={() => setShowCreateModal(true)}
+                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center gap-2"
                       >
-                        {header.isPlaceholder
-                          ? null
-                          : flexRender(header.column.columnDef.header, header.getContext())}
-                        {{
-                          asc: ' ↑',
-                          desc: ' ↓',
-                        }[header.column.getIsSorted() as string] ?? null}
-                      </th>
-                    ))}
-                  </tr>
-                ))}
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {table.getRowModel().rows.map((row) => (
-                  <tr 
-                    key={row.id} 
-                    className="hover:bg-gray-50 transition-colors cursor-pointer"
-                    onClick={() => handleRowClick(row.original)}
-                  >
-                    {row.getVisibleCells().map((cell) => (
-                      <td key={cell.id} className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                      </td>
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                        <LuPlus className="w-4 h-4" />
+                        Nuevo
+                      </button>
+                    )}
 
-          {/* Pagination */}
-          <div className="px-6 py-2 bg-white border-t flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <div className="text-sm text-gray-700">
-              Mostrando <span className="font-semibold">{table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1}</span> a{' '}
-              <span className="font-semibold">{Math.min((table.getState().pagination.pageIndex + 1) * table.getState().pagination.pageSize, table.getPrePaginationRowModel().rows.length)}</span> de{' '}
-              <span className="font-semibold">{table.getPrePaginationRowModel().rows.length}</span> resultados
-              {activeFiltersCount > 0 && (
-                <span className="text-blue-600 ml-2">(filtrados de {users.length} total)</span>
-              )}
+                    <button
+                      onClick={() => navigate({ to: '/Usuarios/Roles' })}
+                      className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition"
+                    >
+                      Roles
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
-            <div className="flex items-center gap-2">
-              <label className="text-sm text-gray-700 flex items-center gap-2">
-                <span className="hidden md:inline">Tamaño de página:</span>
-                <select
-                  value={table.getState().pagination.pageSize}
-                  onChange={e => table.setPageSize(Number(e.target.value))}
-                  className="px-2 py-1 border border-gray-400 rounded-lg bg-white shadow min-w-[70px] text-sm"
-                >
-                  {pageSizeOptions.map(size => (
-                    <option key={size} value={size}>
-                      {size}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <button
-                onClick={() => table.previousPage()}
-                disabled={!table.getCanPreviousPage()}
-                className="px-2 py-1 rounded-full border border-gray-300 bg-gray-50 text-gray-500 hover:bg-blue-100 hover:text-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
-                title="Página anterior"
-              >
-                <LuChevronLeft className="w-4 h-4" />
-              </button>
-              <span className="px-3 py-1 text-sm font-semibold text-blue-700 bg-blue-50 rounded-lg shadow">
-                {table.getState().pagination.pageIndex + 1} / {table.getPageCount()}
-              </span>
-              <button
-                onClick={() => table.nextPage()}
-                disabled={!table.getCanNextPage()}
-                className="px-2 py-1 rounded-full border border-gray-300 bg-gray-50 text-gray-500 hover:bg-blue-100 hover:text-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
-                title="Página siguiente"
-              >
-                <LuChevronRight className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-        </>
-      )}
+          )}
 
-      {/* Modals */}
-      {showCreateModal && (
-        <CreateUserModal onClose={() => setShowCreateModal(false)} />
-      )}
-      {showUserDetail && selectedUserId && (
-        <UserDetailModal
-          userId={selectedUserId}
-          isOpen={showUserDetail}
-          onClose={() => {
-            setShowUserDetail(false);
-            setSelectedUserId(null);
-          }}
-        />
-      )}
-      <FilterUserModal
-        isOpen={showFilterModal}
-        onClose={() => setShowFilterModal(false)}
-        onApplyFilters={handleApplyFilters}
-        currentFilters={appliedFilters}
-      />
+          <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="min-w-full table-auto">
+                  <thead className="bg-sky-50">
+                    {table.getHeaderGroups().map((headerGroup) => (
+                      <tr key={headerGroup.id} className="text-left text-xs sm:text-sm text-sky-700">
+                        {headerGroup.headers.map((header, index) => (
+                          <th
+                            key={header.id}
+                            className={`px-2 sm:px-4 py-3 font-medium border-b border-sky-100 ${
+                              index === 0 ? 'text-left' : 'text-center'
+                            }`}
+                          >
+                            {(() => {
+                              if (header.isPlaceholder) {
+                                return null;
+                              }
+                              if (header.column.getCanSort()) {
+                                return (
+                                  <button
+                                    type="button"
+                                    className={`cursor-pointer select-none flex items-center gap-2 bg-transparent border-none p-0 ${
+                                      index === 0 ? 'justify-start' : 'justify-center'
+                                    }`}
+                                    onClick={header.column.getToggleSortingHandler()}
+                                    onKeyDown={e => {
+                                      if (e.key === 'Enter' || e.key === ' ') {
+                                        e.preventDefault();
+                                        header.column.getToggleSortingHandler()?.(e);
+                                      }
+                                    }}
+                                    tabIndex={0}
+                                    aria-label={`Ordenar por ${header.column.columnDef.header as string}`}
+                                  >
+                                    <span className="flex items-center gap-1">
+                                      {header.column.columnDef.header as string}
+                                      {header.column.getIsSorted() === 'asc' && <MdKeyboardArrowUp className="inline" />}
+                                      {header.column.getIsSorted() === 'desc' && <MdKeyboardArrowDown className="inline" />}
+                                    </span>
+                                  </button>
+                                );
+                              }
+                              return (
+                                <span className={index === 0 ? 'text-left' : 'text-center'}>
+                                  {header.column.columnDef.header as string}
+                                </span>
+                              );
+                            })()}
+                          </th>
+                        ))}
+                      </tr>
+                    ))}
+                  </thead>
+                  <tbody className="bg-white divide-y divide-sky-50">
+                    {table.getRowModel().rows.length === 0 ? (
+                      <tr>
+                        <td colSpan={5} className="px-2 sm:px-4 py-8 text-center text-slate-500">
+                          {globalFilter ? 'No se encontraron usuarios que coincidan con la búsqueda' : 'No hay usuarios registrados'}
+                        </td>
+                      </tr>
+                    ) : (
+                      table.getRowModel().rows.map((row) => (
+                        <tr 
+                          key={row.id} 
+                          className="hover:bg-sky-50 cursor-pointer transition-colors"
+                        >
+                          {row.getVisibleCells().map((cell, index) => (
+                            <td key={cell.id} className={`px-2 sm:px-4 py-3 text-xs sm:text-sm text-slate-700 align-top ${
+                              index === 0 ? 'text-left' : 'text-center'
+                            }`}>
+                              {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                            </td>
+                          ))}
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="px-6 py-3 bg-white border-t border-gray-200">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm text-gray-700">Filas por página:</span>
+                      <select
+                        value={table.getState().pagination.pageSize}
+                        onChange={(e) => {
+                          table.setPageSize(Number(e.target.value));
+                        }}
+                        className="px-2 py-1 border border-gray-300 rounded-lg bg-white text-sm"
+                      >
+                        {pageSizeOptions.map(size => (
+                          <option key={size} value={size}>
+                            {size}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => table.setPageIndex(0)}
+                        disabled={!table.getCanPreviousPage()}
+                        className="p-1 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                        title="Primera página"
+                      >
+                        <MdKeyboardDoubleArrowLeft className="w-5 h-5 text-gray-600" />
+                      </button>
+                      <button
+                        onClick={() => table.previousPage()}
+                        disabled={!table.getCanPreviousPage()}
+                        className="p-1 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                        title="Página anterior"
+                      >
+                        <MdKeyboardArrowLeft className="w-5 h-5 text-gray-600" />
+                      </button>
+                      <span className="text-sm text-gray-700 min-w-[120px] text-center">
+                        Página {table.getState().pagination.pageIndex + 1} de {table.getPageCount()}
+                      </span>
+                      <button
+                        onClick={() => table.nextPage()}
+                        disabled={!table.getCanNextPage()}
+                        className="p-1 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                        title="Página siguiente"
+                      >
+                        <MdKeyboardArrowRight className="w-5 h-5 text-gray-600" />
+                      </button>
+                      <button
+                        onClick={() => table.setPageIndex(table.getPageCount() - 1)}
+                        disabled={!table.getCanNextPage()}
+                        className="p-1 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                        title="Última página"
+                      >
+                        <MdKeyboardDoubleArrowRight className="w-5 h-5 text-gray-600" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+        {showCreateModal && hasEditPermission && (
+          <CreateUserModal onClose={() => setShowCreateModal(false)} />
+        )}
+        
+        {showUserDetail && selectedUserId && (
+          <UserDetailModal
+            userId={selectedUserId}
+            isOpen={showUserDetail}
+            onClose={() => {
+              setShowUserDetail(false);
+              setSelectedUserId(null);
+            }}
+          />
+        )}
+
+        {showEditModal && selectedUser && (
+          <EditUserModal
+            isOpen={showEditModal}
+            onClose={() => {
+              setShowEditModal(false);
+              setSelectedUser(null);
+            }}
+            user={selectedUser}
+          />
+        )}
+
+        {hasEditPermission && (
+          <FilterUserModal
+            isOpen={showFilterModal}
+            onClose={() => setShowFilterModal(false)}
+            onApplyFilters={handleApplyFilters}
+            currentFilters={appliedFilters}
+          />
+        )}
+      </div>
     </div>
-  </div>
-);
+  );
 };
 
 export default Usuarios;

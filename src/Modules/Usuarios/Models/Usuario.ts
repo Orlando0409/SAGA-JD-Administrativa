@@ -4,17 +4,10 @@ export interface Usuario {
   Id_Usuario: number;
   Nombre_Usuario: string;
   Correo_Electronico: string;
-  Contraseña: string;
   Refresh_Token?: string;
   Fecha_Eliminacion: Date | string | null;
   Id_Rol: number;
-  rol: Role;
-}
-export interface Permiso {
-    id: number;
-    modulo: string;
-    Ver: boolean;
-    Editar: boolean;
+  Rol: Role;
 }
 export interface CreateUserData {
   Nombre_Usuario: string;

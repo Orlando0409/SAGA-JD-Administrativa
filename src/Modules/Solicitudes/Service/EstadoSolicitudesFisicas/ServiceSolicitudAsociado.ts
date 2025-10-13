@@ -6,6 +6,10 @@ import type { SolicitudFisica } from "../../Models/ModelosFisicas";
 
 export class ServiceSolicitudAsociado {
     
+
+
+
+    
     
      // PUT - Actualizar estado de una solicitud de desconexión 
     

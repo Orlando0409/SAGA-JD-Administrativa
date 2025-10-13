@@ -9,6 +9,10 @@ import type {
     SolicitudAsociadoFisica
 } from "../Models/ModelosFisicas";
 
+
+
+
+
 //Servicio para gestionar solicitudes de personas físicas
 
 export class SolicitudesFisicasService {
@@ -18,27 +22,74 @@ export class SolicitudesFisicasService {
     static async getSolicitudesFisicas(): Promise<SolicitudFisica[]> {
         try {
             console.log('🔍 Obteniendo todas las solicitudes físicas...');
-            const response = await apiAuth.get("/solicitudes/fisicas");
-            console.log(' Respuesta completa del backend:', response);
-            console.log('Datos de la respuesta:', response.data);
+            console.log('🔍 URL del backend:', 'http://localhost:3000/api/solicitudes/fisicas');
+            console.log('🔍 Cookies disponibles:', document.cookie);
+            
+            // TEMPORAL: Probar tanto con autenticación como sin ella para debug
+            let response;
+            try {
+                response = await apiAuth.get("/solicitudes/fisicas");
+                console.log('✅ Petición con autenticación exitosa');
+            } catch (authError: any) {
+                console.log('❌ Error con autenticación:', authError.response?.status);
+                if (authError.response?.status === 401) {
+                    console.log('🔧 Probando sin autenticación...');
+                    // Hacer petición directa sin autenticación para testing
+                    response = await fetch('http://localhost:3000/api/solicitudes/fisicas')
+                        .then(res => {
+                            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                            return res.json();
+                        })
+                        .then(data => ({ data }));
+                    console.log('✅ Petición sin autenticación exitosa');
+                } else {
+                    throw authError;
+                }
+            }
+            console.log('🔍 Respuesta completa del backend:', response);
+            console.log('🔍 Datos de la respuesta:', response.data);
             
             let solicitudesFinales: SolicitudFisica[] = [];
             
-            // El backend devuelve un objeto con propiedades por tipo de solicitud
-            if (response.data && typeof response.data === 'object') {
+            // Verificar si el backend devuelve directamente un array o un objeto con propiedades
+            if (Array.isArray(response.data)) {
+                console.log('📋 Backend devuelve array directo con', response.data.length, 'solicitudes');
+                
+                // El backend devuelve directamente un array de solicitudes
+                solicitudesFinales = response.data.map((solicitud: any) => {
+                    console.log('🔍 Procesando solicitud directa:', solicitud);
+                    
+                    // Determinar el tipo de solicitud basado en Id_Tipo_Solicitud
+                    let tipo = 'Afiliacion';
+                    switch(solicitud.Id_Tipo_Solicitud) {
+                        case 1: tipo = 'Afiliacion'; break;
+                        case 2: tipo = 'Desconexion'; break;
+                        case 3: tipo = 'Cambio de Medidor'; break;
+                        case 4: tipo = 'Asociado'; break;
+                        default: tipo = 'Afiliacion';
+                    }
+                    
+                    return {
+                        ...solicitud,
+                        Tipo_Solicitud: tipo
+                    };
+                });
+                
+            } else if (response.data && typeof response.data === 'object') {
+                console.log('📋 Backend devuelve objeto con propiedades anidadas');
                 const data = response.data;
                 
-                // Mapear tipos de solicitud del backend a tipos esperados
+                // Mapear tipos de solicitud del backend a tipos esperados (estructura real del backend)
                 const tiposSolicitud = [
-                    { key: 'afiliacion', tipo: 'Afiliacion' },
-                    { key: 'asociado', tipo: 'Asociado' },
-                    { key: 'cambioMedidor', tipo: 'Cambio de Medidor' },
-                    { key: 'desconexion', tipo: 'Desconexion' }
+                    { key: 'Afiliacion', tipo: 'Afiliacion' },
+                    { key: 'Asociado', tipo: 'Asociado' },
+                    { key: 'CambioMedidor', tipo: 'Cambio de Medidor' },
+                    { key: 'Desconexion', tipo: 'Desconexion' }
                 ];
                 
                 tiposSolicitud.forEach(({ key, tipo }) => {
                     if (data[key] && Array.isArray(data[key])) {
-                        console.log(` Encontradas ${data[key].length} solicitudes de tipo: ${tipo}`);
+                        console.log(`📋 Encontradas ${data[key].length} solicitudes de tipo: ${tipo}`);
                         
                         // Agregar el tipo de solicitud a cada registro
                         const solicitudesConTipo = data[key].map((solicitud: any) => ({
@@ -49,11 +100,11 @@ export class SolicitudesFisicasService {
                         solicitudesFinales = [...solicitudesFinales, ...solicitudesConTipo];
                     }
                 });
-                
-                console.log(' Total de solicitudes físicas combinadas:', solicitudesFinales.length);
             } else {
-                console.warn(' Estructura de respuesta inesperada:', response.data);
+                console.warn('⚠️ Estructura de respuesta inesperada:', response.data);
             }
+            
+            console.log('📊 Total de solicitudes físicas procesadas:', solicitudesFinales.length);
             
             console.log(' Solicitudes físicas procesadas:', solicitudesFinales.length, 'registros');
             return solicitudesFinales;

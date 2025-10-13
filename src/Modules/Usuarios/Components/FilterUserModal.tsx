@@ -18,7 +18,7 @@ const FilterUserModal: React.FC<FilterModalProps> = ({ isOpen, onClose, onApplyF
   const handleClear = () => {
     const clearFilters: FilterOptions = {
       rol: '',
-      estado: '',
+      estado: 'activo', // Por defecto volver a solo activos
     };
     setFilters(clearFilters);
     onApplyFilters(clearFilters);
@@ -30,7 +30,6 @@ const FilterUserModal: React.FC<FilterModalProps> = ({ isOpen, onClose, onApplyF
   return (
     <div className="fixed inset-0 flex items-start justify-end z-50">
       <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4 max-h-[90vh] overflow-hidden">
-        {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
             <LuFilter className="w-5 h-5" />
@@ -44,14 +43,13 @@ const FilterUserModal: React.FC<FilterModalProps> = ({ isOpen, onClose, onApplyF
           </button>
         </div>
 
-        {/* Body */}
         <div className="p-6 space-y-4 overflow-y-auto max-h-[calc(90vh-140px)]">
-          {/* Filtro por Rol */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor='rol' className="block text-sm font-medium text-gray-700 mb-2">
               Filtrar por Rol
             </label>
             <select
+              id='rol'
               value={filters.rol || ''}
               onChange={(e) => setFilters(prev => ({ ...prev, rol: e.target.value }))}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -65,24 +63,23 @@ const FilterUserModal: React.FC<FilterModalProps> = ({ isOpen, onClose, onApplyF
             </select>
           </div>
 
-          {/* Filtro por Estado */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor='estado' className="block text-sm font-medium text-gray-700 mb-2">
               Estado del Usuario
             </label>
             <select
+              id='estado'
               value={filters.estado || ''}
-              onChange={(e) => setFilters(prev => ({ ...prev, estado: e.target.value as 'activo' | 'inactivo' | '' }))}
+              onChange={(e) => setFilters(prev => ({ ...prev, estado: e.target.value as 'activo' | 'inactivo' | 'todos' | '' }))}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
-              <option value="">Todos los estados</option>
-              <option value="activo">Activo</option>
-              <option value="inactivo">Inactivo</option>
+              <option value="activo">Solo Activos</option>
+              <option value="inactivo">Solo Inactivos</option>
+              <option value="todos">Todos los usuarios</option>
             </select>
           </div>
         </div>
 
-        {/* Footer */}
         <div className="flex gap-3 p-6 border-t border-gray-200">
           <button
             onClick={handleClear}
