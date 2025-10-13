@@ -242,20 +242,28 @@ export default function ProveedoresTable() {
                         ))}
                     </thead>
                     <tbody className="bg-white divide-y divide-sky-50">
-                        {isLoading ? (
-                            <tr>
-                                <td colSpan={columns.length} className="p-4 sm:p-6 text-center text-slate-500 text-sm">
-                                    Cargando proveedores...
-                                </td>
-                            </tr>
-                        ) : isError ? (
-                            <tr>
-                                <td colSpan={columns.length} className="p-4 sm:p-6 text-center text-red-500 text-sm">
-                                    Error al cargar los proveedores: {error?.message || 'Error desconocido'}
-                                </td>
-                            </tr>
-                        ) : (
-                            table.getRowModel().rows.map((row) => (
+                        {(() => {
+                            if (isLoading) {
+                                return (
+                                    <tr>
+                                        <td colSpan={columns.length} className="p-4 sm:p-6 text-center text-slate-500 text-sm">
+                                            Cargando proveedores...
+                                        </td>
+                                    </tr>
+                                );
+                            }
+                            
+                            if (isError) {
+                                return (
+                                    <tr>
+                                        <td colSpan={columns.length} className="p-4 sm:p-6 text-center text-red-500 text-sm">
+                                            Error al cargar los proveedores: {error?.message || 'Error desconocido'}
+                                        </td>
+                                    </tr>
+                                );
+                            }
+                            
+                            return table.getRowModel().rows.map((row) => (
                                 <tr
                                     key={row.id}
                                     className="hover:bg-sky-50 cursor-pointer transition-colors"
@@ -267,8 +275,8 @@ export default function ProveedoresTable() {
                                         </td>
                                     ))}
                                 </tr>
-                            ))
-                        )}
+                            ));
+                        })()}
                     </tbody>
                 </table>
             </div>

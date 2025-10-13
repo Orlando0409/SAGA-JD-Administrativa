@@ -58,20 +58,28 @@ export default function CalidadAguaTable() {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-sky-50">
-            {isLoading ? (
-              <tr>
-                <td colSpan={4} className="p-4 sm:p-6 text-center text-slate-500 text-sm">
-                  Cargando...
-                </td>
-              </tr>
-            ) : archivos?.length === 0 ? (
-              <tr>
-                <td colSpan={4} className="p-4 sm:p-6 text-center text-slate-500 text-sm">
-                  No se encontraron registros.
-                </td>
-              </tr>
-            ) : (
-              archivos?.map((archivo) => (
+            {(() => {
+              if (isLoading) {
+                return (
+                  <tr>
+                    <td colSpan={4} className="p-4 sm:p-6 text-center text-slate-500 text-sm">
+                      Cargando...
+                    </td>
+                  </tr>
+                );
+              }
+
+              if (archivos?.length === 0) {
+                return (
+                  <tr>
+                    <td colSpan={4} className="p-4 sm:p-6 text-center text-slate-500 text-sm">
+                      No se encontraron registros.
+                    </td>
+                  </tr>
+                );
+              }
+
+              return archivos?.map((archivo) => (
                 <tr
                   key={archivo.Id_Calidad_Agua}
                   className="hover:bg-sky-50 cursor-pointer transition-colors"
@@ -114,8 +122,8 @@ export default function CalidadAguaTable() {
                     </button>
                   </td>
                 </tr>
-              ))
-            )}
+              ));
+            })()}
           </tbody>
         </table>
       </div>

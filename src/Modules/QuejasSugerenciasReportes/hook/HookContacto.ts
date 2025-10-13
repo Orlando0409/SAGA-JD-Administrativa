@@ -12,9 +12,9 @@ import {
   eliminarSugerencia,
   eliminarReporte,
 } from '../service/ContactoService';
-import type { Queja, CreateQuejaData } from '../models/Quejas';
-import type { Sugerencia, CreateSugerenciaData } from '../models/Sugerencias';
-import type { Reporte, CreateReporteData } from '../models/Reportes';
+import type { CreateQuejaData } from '../models/Quejas';
+import type { CreateSugerenciaData } from '../models/Sugerencias';
+import type { CreateReporteData } from '../models/Reportes';
 
 // ======================== QUERIES ========================
 export const useQuejas = () => {

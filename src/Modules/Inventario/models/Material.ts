@@ -1,6 +1,9 @@
 import type { CategoriaMaterial } from "./CategoriaMaterial";
 import type { UnidadMedicion } from "./UnidadMedicion";
 
+
+type NullableDate = Date | string | null;
+
 // Tipo para representar un proveedor (físico o jurídico) según estructura del backend
 export interface Proveedor {
   Id_Proveedor: number;
@@ -23,11 +26,11 @@ export interface Material {
   Descripcion?: string;
   Cantidad: number;
   Precio_Unitario: number;
-  Fecha_Entrada: Date | string;
-  Fecha_Actualizacion: Date | string;
-  Fecha_Salida?: Date | string | null;
-  Fecha_Baja?: Date | string | null;
-  Ultima_Fecha_Baja?: Date | string | null;
+  Fecha_Entrada: NullableDate;
+  Fecha_Actualizacion: NullableDate;
+  Fecha_Salida?: NullableDate;
+  Fecha_Baja?: NullableDate;
+  Ultima_Fecha_Baja?: NullableDate;
   Estado_Material: EstadoMaterial;
   Unidad_Medicion: UnidadMedicion;
   Proveedor?: Proveedor;

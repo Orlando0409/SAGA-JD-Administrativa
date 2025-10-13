@@ -241,7 +241,7 @@ const DetailMaterialModal: React.FC<DetailMaterialModalProps> = ({
                 Fecha de Entrada
               </label>
               <p className="text-sm text-gray-900">
-                {new Date(material.Fecha_Entrada).toLocaleDateString()}
+                {material.Fecha_Entrada ? new Date(material.Fecha_Entrada).toLocaleDateString() : 'N/A'}
               </p>
             </div>
 
@@ -250,7 +250,7 @@ const DetailMaterialModal: React.FC<DetailMaterialModalProps> = ({
                 Fecha de Actualización
               </label>
               <p className="text-sm text-gray-900">
-                {new Date(material.Fecha_Actualizacion).toLocaleDateString()}
+                {material.Fecha_Actualizacion ? new Date(material.Fecha_Actualizacion).toLocaleDateString() : 'N/A'}
               </p>
             </div>
 

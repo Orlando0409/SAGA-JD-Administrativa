@@ -7,7 +7,6 @@ import DetailAbonados from './DetailAbonados';
 import CreateModal from './CreateModal';
 import type { AfiliadoFisico } from '../Models/TablaAfiliados/ModeloAfiliadoFisico';
 import type { AfiliadoJuridico } from '../Models/TablaAfiliados/ModeloAfiliadoJuridico';
-import FormularioAfiliados from './FormularioAfiliados';
 
 // Tipo unificado para la tabla
 
@@ -227,26 +226,38 @@ export default function AbonadosTable() {
                         ))}
                     </thead>
                     <tbody className="bg-white divide-y divide-sky-50">
-                        {isLoading ? (
-                            <tr>
-                                <td colSpan={columns.length} className="p-4 sm:p-6 text-center text-slate-500 text-sm">
-                                    Cargando...
-                                </td>
-                            </tr>
-                        ) : isError ? (
-                            <tr>
-                                <td colSpan={columns.length} className="p-4 sm:p-6 text-center text-red-500 text-sm">
-                                    Error al cargar los datos
-                                </td>
-                            </tr>
-                        ) : table.getRowModel().rows.length === 0 ? (
-                            <tr>
-                                <td colSpan={columns.length} className="p-4 sm:p-6 text-center text-slate-500 text-sm">
-                                    No se encontraron registros.
-                                </td>
-                            </tr>
-                        ) : (
-                            table.getRowModel().rows.map((row) => (
+                        {(() => {
+                            if (isLoading) {
+                                return (
+                                    <tr>
+                                        <td colSpan={columns.length} className="p-4 sm:p-6 text-center text-slate-500 text-sm">
+                                            Cargando...
+                                        </td>
+                                    </tr>
+                                );
+                            }
+                            
+                            if (isError) {
+                                return (
+                                    <tr>
+                                        <td colSpan={columns.length} className="p-4 sm:p-6 text-center text-red-500 text-sm">
+                                            Error al cargar los datos
+                                        </td>
+                                    </tr>
+                                );
+                            }
+                            
+                            if (table.getRowModel().rows.length === 0) {
+                                return (
+                                    <tr>
+                                        <td colSpan={columns.length} className="p-4 sm:p-6 text-center text-slate-500 text-sm">
+                                            No se encontraron registros.
+                                        </td>
+                                    </tr>
+                                );
+                            }
+                            
+                            return table.getRowModel().rows.map((row) => (
                                 <tr
                                     key={row.id}
                                     className="hover:bg-sky-50 cursor-pointer transition-colors"
@@ -258,8 +269,8 @@ export default function AbonadosTable() {
                                         </td>
                                     ))}
                                 </tr>
-                            ))
-                        )}
+                            ));
+                        })()}
                     </tbody>
                 </table>
             </div>

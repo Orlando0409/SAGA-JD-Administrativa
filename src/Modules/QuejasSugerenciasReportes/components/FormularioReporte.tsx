@@ -48,7 +48,7 @@ const FormularioReporte = () => {
       }
 
       try {
-        await mutation.mutateAsync(value as any);
+        await mutation.mutateAsync(value);
         setFormKey((prev) => prev + 1);
         setArchivoSeleccionado(null);
       } catch (error) {
@@ -78,7 +78,7 @@ const FormularioReporte = () => {
           {(field) => (
             <div className="mb-4">
               <div className="flex gap-2">
-                <label className="block mb-1 font-medium">Nombre completo</label>
+                <label htmlFor={field.name} className="block mb-1 font-medium">Nombre completo</label>
                 <p className="inline text-red-500">*</p>
               </div>
               <input
@@ -101,7 +101,7 @@ const FormularioReporte = () => {
           {(field) => (
             <div className="mb-4">
               <div className="flex gap-2">
-                <label className="block mb-1 font-medium">Primer apellido</label>
+                <label htmlFor={field.name} className="block mb-1 font-medium">Primer apellido</label>
                 <p className="inline text-red-500">*</p>
               </div>
               <input
@@ -123,7 +123,7 @@ const FormularioReporte = () => {
         <form.Field name="segundoApellido">
           {(field) => (
             <div className="mb-4">
-              <label className="block mb-1 font-medium">Segundo apellido</label>
+              <label htmlFor={field.name} className="block mb-1 font-medium">Segundo apellido</label>
               <input
                 id={field.name}
                 type="text"
@@ -141,7 +141,7 @@ const FormularioReporte = () => {
           {(field) => (
             <div className="mb-4">
               <div className="flex gap-2">
-                <label className="block mb-1 font-medium">Ubicación del lugar afectado</label>
+                <label htmlFor={field.name} className="block mb-1 font-medium">Ubicación del lugar afectado</label>
                 <p className="inline text-red-500">*</p>
               </div>
               <input
@@ -164,7 +164,7 @@ const FormularioReporte = () => {
           {(field) => (
             <div className="mb-4">
               <div className="flex gap-2">
-                <label className="block mb-1 font-medium">Descripción del reporte</label>
+                <label htmlFor={field.name} className="block mb-1 font-medium">Descripción del reporte</label>
                 <p className="inline text-red-500">*</p>
               </div>
               <textarea

@@ -41,8 +41,8 @@ type SolicitudUnificada = {
 
 export default function SolicitudesTable() {
     // Hooks para ambos tipos de solicitudes
-    const { data: solicitudesFisicas, isLoading: loadingFisicas, isError: errorFisicos, error: errorDetalleFisicos } = useSolicitudesFisicas();
-    const { data: solicitudesJuridicas, isLoading: loadingJuridicas, isError: errorJuridicos, error: errorDetalleJuridicos } = useSolicitudesJuridicas();
+    const { data: solicitudesFisicas, isLoading: loadingFisicas, isError: errorFisicos } = useSolicitudesFisicas();
+    const { data: solicitudesJuridicas, isLoading: loadingJuridicas, isError: errorJuridicos } = useSolicitudesJuridicas();
 
     // Debug INMEDIATO al cargar el componente
   
@@ -142,7 +142,7 @@ export default function SolicitudesTable() {
         const tipo = solicitud.Tipo_Persona === 'Físico' ? 'solicitud-fisica' : 'solicitud-juridica';
 
         setSelectedSolicitudForGestion({
-            tipo: tipo as 'solicitud-fisica' | 'solicitud-juridica',
+            tipo: tipo,
             datos: solicitud.datos_originales
         });
         setShowGestionModal(true);

@@ -83,7 +83,7 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({ userId, isOpen, onClo
                     </div>
 
                     <div className="bg-gray-50 p-4 rounded-lg">
-                      <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
+                      <label htmlFor='EstadoUsuario' className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
                         Estado del Usuario
                       </label>
                       <span className={`inline-flex items-center px-3 py-1 rounded-lg text-xs font-semibold ${isActive(user.Fecha_Eliminacion)
@@ -98,14 +98,14 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({ userId, isOpen, onClo
                   {/* Columna derecha */}
                   <div className="space-y-4">
                     <div className="bg-gray-50 p-4 rounded-lg">
-                      <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
+                      <label htmlFor='CorreoElectronico' className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
                         Correo Electrónico
                       </label>
                       <p className="text-sm text-gray-900 break-all">{user.Correo_Electronico}</p>
                     </div>
 
                     <div className="bg-gray-50 p-4 rounded-lg">
-                      <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
+                      <label htmlFor='RolAsignado' className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
                         Rol Asignado
                       </label>
                       <span className="inline-flex items-center px-3 py-1 rounded-lg text-xs font-semibold bg-blue-100 text-blue-800 border border-blue-200">

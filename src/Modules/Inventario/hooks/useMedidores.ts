@@ -22,10 +22,14 @@ export const useMedidores = () => {
 
 // Hook para obtener medidores por estado
 export const useMedidoresPorEstado = (estado: 'no-instalados' | 'instalados' | 'averiados') => {
-  const queryFn = 
-    estado === 'no-instalados' ? getMedidoresNoInstalados :
-    estado === 'instalados' ? getMedidoresInstalados :
-    getMedidoresAveriados;
+  let queryFn;
+  if (estado === 'no-instalados') {
+    queryFn = getMedidoresNoInstalados;
+  } else if (estado === 'instalados') {
+    queryFn = getMedidoresInstalados;
+  } else {
+    queryFn = getMedidoresAveriados;
+  }
 
   return useQuery({
     queryKey: ['medidores', estado],
@@ -54,6 +58,7 @@ export const useCreateMedidor = () => {
     },
     onError: (error: any) => {
       const errorMessage = error.response?.data?.message || 'Error al crear el medidor';
+        console.error(errorMessage);
     },
   });
 };

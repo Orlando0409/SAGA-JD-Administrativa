@@ -46,7 +46,7 @@ const FormularioQueja = () => {
       }
 
       try {
-        await mutation.mutateAsync(value as any);
+        await mutation.mutateAsync(value);
         setFormKey((prev) => prev + 1);
         setArchivoSeleccionado(null);
       } catch (error) {
@@ -76,7 +76,7 @@ const FormularioQueja = () => {
           {(field) => (
             <div className="mb-4">
               <div className="flex gap-2">
-                <label className="block mb-1 font-medium">Nombre completo</label>
+                <label htmlFor={field.name} className="block mb-1 font-medium">Nombre completo</label>
                 <p className="inline text-red-500">*</p>
               </div>
               <input
@@ -99,7 +99,7 @@ const FormularioQueja = () => {
           {(field) => (
             <div className="mb-4">
               <div className="flex gap-2">
-                <label className="block mb-1 font-medium">Primer apellido</label>
+                <label htmlFor={field.name} className="block mb-1 font-medium">Primer apellido</label>
                 <p className="inline text-red-500">*</p>
               </div>
               <input
@@ -121,7 +121,7 @@ const FormularioQueja = () => {
         <form.Field name="segundoApellido">
           {(field) => (
             <div className="mb-4">
-              <label className="block mb-1 font-medium">Segundo apellido</label>
+              <label htmlFor={field.name} className="block mb-1 font-medium">Segundo apellido</label>
               <input
                 id={field.name}
                 type="text"
@@ -139,7 +139,7 @@ const FormularioQueja = () => {
           {(field) => (
             <div className="mb-4">
               <div className="flex gap-2">
-                <label className="block mb-1 font-medium">Descripción de tu queja</label>
+                <label htmlFor='mensaje' className="block mb-1 font-medium">Descripción de tu queja</label>
                 <p className="inline text-red-500">*</p>
               </div>
               <textarea

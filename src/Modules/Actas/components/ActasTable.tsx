@@ -1,19 +1,19 @@
 import { useMemo, useState } from "react";
 import { useGetActas, useDeleteActa } from "../Hook/hookActas";
-import { FileText, Plus, Search, X, ChevronLeft, ChevronRight } from "lucide-react";
+import { FileText, ChevronLeft, ChevronRight } from "lucide-react";
 import type { Acta } from "../Models/ActasModels";
 import FormularioCrearActas from "./FormularioCrearActas";
 import ActasModal from "./ActasModal";
 //funciona 
 export default function ActasTable() {
-    const { data: actas, isLoading, isError, refetch } = useGetActas(); // Obtener todas las actas
+    const { data: actas, isLoading, refetch } = useGetActas(); // Obtener todas las actas
     const deleteActaMutation = useDeleteActa(); // Eliminar una acta
 
     const [modalVisible, setModalVisible] = useState(false); // Controla la visibilidad del modal de creación
     const [actaSeleccionada, setActaSeleccionada] = useState<Acta | null>(null); // Acta seleccionada para el modal de detalles
 
     // Estados para búsqueda y paginación
-    const [searchText, setSearchText] = useState("");
+    const [searchText] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(10);
 
@@ -59,12 +59,6 @@ export default function ActasTable() {
         setCurrentPage(1); // Reset a la primera página
     };
 
-    // Reset página cuando cambie la búsqueda
-    const handleSearchChange = (newSearchText: string) => {
-        setSearchText(newSearchText);
-        setCurrentPage(1); // Reset a la primera página cuando se busca
-    };
-
     const handleEliminarActa = async (id: number) => {
         deleteActaMutation.mutate(id, {
             onSuccess: () => {
@@ -85,54 +79,64 @@ export default function ActasTable() {
         setActaSeleccionada(null); // Cierra el modal de detalles
     };
 
+    // Renderiza el contenido de la tabla según el estado
+    const renderTableContent = () => {
+        if (isLoading) {
+            return (
+                <tr>
+                    <td colSpan={4} className="p-4 sm:p-6 text-center text-slate-500 text-sm">
+                        Cargando...
+                    </td>
+                </tr>
+            );
+        }
+
+        if (paginationData.currentItems.length === 0) {
+            return (
+                <tr>
+                    <td colSpan={4} className="p-4 sm:p-6 text-center text-slate-500 text-sm">
+                        {(actas ?? []).length > 0
+                            ? `No se encontraron actas con el título "${searchText}".`
+                            : "No se encontraron registros."
+                        }
+                    </td>
+                </tr>
+            );
+        }
+
+        return paginationData.currentItems.map((acta) => (
+            <tr
+                key={acta.Id_Acta}
+                className="hover:bg-sky-50 cursor-pointer transition-colors"
+                onClick={() => handleOpenModalDetalles(acta)} // Abre el modal de detalles al hacer clic en la fila
+            >
+                <td className="px-2 sm:px-4 py-3 text-xs sm:text-sm text-slate-700 align-top flex items-center gap-2">
+                    <FileText size={18} className="text-sky-600" />
+                    {acta.Titulo.length > 20
+                        ? `${acta.Titulo.slice(0, 20)}...`
+                        : acta.Titulo}
+                </td>
+                <td className="px-2 sm:px-4 py-3 text-xs sm:text-sm text-slate-700 align-top">
+                    {acta.Descripcion.length > 20
+                        ? `${acta.Descripcion.slice(0, 20)}...`
+                        : acta.Descripcion}
+                </td>
+                <td className="px-2 sm:px-4 py-3 text-xs sm:text-sm text-slate-700 align-top">
+                    {new Date(acta.Fecha_Creacion).toLocaleDateString("es-ES")}
+                </td>
+                <td className="px-2 sm:px-4 py-3 text-xs sm:text-sm text-slate-700 align-top">
+                    {acta.Fecha_Actualizacion
+                        ? new Date(acta.Fecha_Actualizacion).toLocaleDateString("es-ES")
+                        : "Sin actualizar"}
+                </td>
+            </tr>
+        ));
+    };
+
     return (
-        <div className="w-full relative">
-            {/* Header con título, búsqueda y botón crear */}
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
-                <div className="flex items-center gap-3">
-                    <h2 className="text-lg sm:text-xl font-semibold text-sky-800">Gestión de Actas</h2>
-                   
-                </div>
-
-                {/* Campo de búsqueda y botón crear */}
-                <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
-                    {/* Campo de búsqueda */}
-                    <div className="relative">
-                        <Search size={18} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                        <input
-                            type="text"
-                            placeholder="Buscar por título..."
-                            value={searchText}
-                            onChange={(e) => handleSearchChange(e.target.value)}
-                            className="w-full sm:w-64 pl-10 pr-10 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-transparent text-sm"
-                        />
-                        {/* Botón para limpiar búsqueda */}
-                        {searchText && (
-                            <button
-                                onClick={() => handleSearchChange("")}
-                                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-                            >
-                                <X size={16} />
-                            </button>
-                        )}
-                    </div>
-
-                    <button
-                        onClick={() => setModalVisible(true)} // Muestra el modal de creación
-                        className="px-4 py-2 rounded-lg bg-sky-600 text-white hover:bg-sky-700 shadow-sm text-sm flex items-center gap-2"
-                    >
-                        <Plus size={18} />
-                        Crear Acta
-                    </button>
-                </div>
-            </div>
-
-          
-            {isError && <div className="text-red-600 mb-4">Error al cargar las actas.</div>}
-
-            {/*  Tabla  */}
-            <div className="overflow-x-auto rounded-2xl border border-sky-100 shadow-sm bg-white">
-                <table className="min-w-full table-auto">
+        <div className="w-full">
+            <div className="overflow-x-auto shadow-md rounded-lg">
+                <table className="min-w-full divide-y divide-sky-100">
                     <thead className="bg-sky-50">
                         <tr className="text-left text-xs sm:text-sm text-sky-700">
                             <th className="px-2 sm:px-4 py-3 font-medium border-b border-sky-100">Título</th>
@@ -142,50 +146,7 @@ export default function ActasTable() {
                         </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-sky-50">
-                        {isLoading ? (
-                            <tr>
-                                <td colSpan={4} className="p-4 sm:p-6 text-center text-slate-500 text-sm">
-                                    Cargando...
-                                </td>
-                            </tr>
-                        ) : paginationData.currentItems.length === 0 ? (
-                            <tr>
-                                <td colSpan={4} className="p-4 sm:p-6 text-center text-slate-500 text-sm">
-                                    {actas && actas.length > 0
-                                        ? `No se encontraron actas con el título "${searchText}".`
-                                        : "No se encontraron registros."
-                                    }
-                                </td>
-                            </tr>
-                        ) : (
-                            paginationData.currentItems.map((acta) => (
-                                <tr
-                                    key={acta.Id_Acta}
-                                    className="hover:bg-sky-50 cursor-pointer transition-colors"
-                                    onClick={() => handleOpenModalDetalles(acta)} // Abre el modal de detalles al hacer clic en la fila
-                                >
-                                    <td className="px-2 sm:px-4 py-3 text-xs sm:text-sm text-slate-700 align-top flex items-center gap-2">
-                                        <FileText size={18} className="text-sky-600" />
-                                        {acta.Titulo.length > 20
-                                            ? `${acta.Titulo.slice(0, 20)}...`
-                                            : acta.Titulo}
-                                    </td>
-                                    <td className="px-2 sm:px-4 py-3 text-xs sm:text-sm text-slate-700 align-top">
-                                        {acta.Descripcion.length > 20
-                                            ? `${acta.Descripcion.slice(0, 20)}...`
-                                            : acta.Descripcion}
-                                    </td>
-                                    <td className="px-2 sm:px-4 py-3 text-xs sm:text-sm text-slate-700 align-top">
-                                        {new Date(acta.Fecha_Creacion).toLocaleDateString("es-ES")}
-                                    </td>
-                                    <td className="px-2 sm:px-4 py-3 text-xs sm:text-sm text-slate-700 align-top">
-                                        {acta.Fecha_Actualizacion
-                                            ? new Date(acta.Fecha_Actualizacion).toLocaleDateString("es-ES")
-                                            : "Sin actualizar"}
-                                    </td>
-                                </tr>
-                            ))
-                        )}
+                        {renderTableContent()}
                     </tbody>
                 </table>
             </div>
@@ -195,7 +156,7 @@ export default function ActasTable() {
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mt-4">
                     {/* Selector de elementos por página (lado izquierdo) */}
                     <div className="flex items-center gap-2 text-sm text-gray-600">
-                        <label>Mostrar:</label>
+                        <label htmlFor="Mostrar">Mostrar:</label>
                         <select
                             value={itemsPerPage}
                             onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}

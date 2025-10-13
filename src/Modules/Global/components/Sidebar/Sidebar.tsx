@@ -25,7 +25,7 @@ import { useAuth } from "@/Modules/Auth/Context/AuthContext"
 import { useNotificacionesSolicitudes } from '../../../Solicitudes/Hooks/HookNotificaciones'
 
 export function AppSidebar({ allowedModules }: Readonly<AppSidebarProps>) {
-  const [hovered, setHovered] = useState(false)
+  const [_hovered, setHovered] = useState(false)
   const [openSections, setOpenSections] = useState<number[]>([])
   const location = useLocation()
   const logoutMutation = useLogout()

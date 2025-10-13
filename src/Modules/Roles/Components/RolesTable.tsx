@@ -38,7 +38,7 @@ const Roles = () => {
   const [showRoleDetail, setShowRoleDetail] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [estadoFilter, setEstadoFilter] = useState<string>('Todos'); // Por defecto mostrar todos los roles
-  const [selectedRole, setSelectedRole] = useState<Role | null>(null);
+  const [_selectedRole, setSelectedRole] = useState<Role | null>(null);
   const deactivateRoleMutation = useDeactivateRole();
   const activateRoleMutation = useActivateRole();
 

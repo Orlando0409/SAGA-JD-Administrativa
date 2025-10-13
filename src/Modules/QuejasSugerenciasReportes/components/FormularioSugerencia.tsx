@@ -40,7 +40,7 @@ const FormularioSugerencia = () => {
       }
 
       try {
-        await mutation.mutateAsync(value as any);
+        await mutation.mutateAsync(value);
         setFormKey((prev) => prev + 1);
         setArchivoSeleccionado(null);
       } catch (error) {
@@ -70,7 +70,7 @@ const FormularioSugerencia = () => {
           {(field) => (
             <div className="mb-4">
               <div className="flex gap-2">
-                <label className="block mb-1 font-medium">Descripción de tu sugerencia</label>
+                <label htmlFor={field.name} className="block mb-1 font-medium">Descripción de tu sugerencia</label>
                 <p className="inline text-red-500">*</p>
               </div>
               <textarea

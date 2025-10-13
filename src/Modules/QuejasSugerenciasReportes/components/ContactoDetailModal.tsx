@@ -30,7 +30,7 @@ import {
 import { Button } from '@/Modules/Global/components/Sidebar/ui/button';
 import { CUSTOM_ANIMATION } from '@/Modules/Global/types/Sections';
 import type { ContactoItem } from './ContactoTable';
-import { useDeleteQueja, useDeleteSugerencia, useDeleteReporte, useUpdateReporteEstado } from '../hook/HookContacto';
+import { useDeleteQueja, useDeleteSugerencia, useDeleteReporte } from '../hook/HookContacto';
 
 interface ContactoDetailModalProps {
   item: ContactoItem;
@@ -45,7 +45,7 @@ const ContactoDetailModal = ({ item, isOpen, onClose }: ContactoDetailModalProps
   const deleteQuejaMutation = useDeleteQueja();
   const deleteSugerenciaMutation = useDeleteSugerencia();
   const deleteReporteMutation = useDeleteReporte();
-  const updateReporteEstadoMutation = useUpdateReporteEstado();
+
 
   if (!isOpen) return null;
 
@@ -153,19 +153,19 @@ const ContactoDetailModal = ({ item, isOpen, onClose }: ContactoDetailModalProps
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     {item.nombre && (
                       <div>
-                        <label className="block text-sm font-medium text-gray-500 mb-1">Nombre</label>
+                        <span className="block text-sm font-medium text-gray-500 mb-1">Nombre</span>
                         <p className="text-gray-900 font-medium">{item.nombre}</p>
                       </div>
                     )}
                     {item.primerApellido && (
                       <div>
-                        <label className="block text-sm font-medium text-gray-500 mb-1">Primer Apellido</label>
+                        <span className="block text-sm font-medium text-gray-500 mb-1">Primer Apellido</span>
                         <p className="text-gray-900 font-medium">{item.primerApellido}</p>
                       </div>
                     )}
                     {item.segundoApellido && (
                       <div>
-                        <label className="block text-sm font-medium text-gray-500 mb-1">Segundo Apellido</label>
+                        <span className="block text-sm font-medium text-gray-500 mb-1">Segundo Apellido</span>
                         <p className="text-gray-900 font-medium">{item.segundoApellido}</p>
                       </div>
                     )}
@@ -201,7 +201,7 @@ const ContactoDetailModal = ({ item, isOpen, onClose }: ContactoDetailModalProps
                   {/* Ubicación */}
                   {item.ubicacion && (
                     <div>
-                      <label className="block text-sm font-medium text-gray-500 mb-2">Ubicación</label>
+                      <span className="block text-sm font-medium text-gray-500 mb-2">Ubicación</span>
                       <div className="flex items-start gap-2 bg-gray-50 p-3 rounded-lg">
                         <LuMapPin className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
                         <p className="text-gray-800">{item.ubicacion}</p>
@@ -211,7 +211,7 @@ const ContactoDetailModal = ({ item, isOpen, onClose }: ContactoDetailModalProps
 
                   {/* Mensaje */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-500 mb-2">Mensaje</label>
+                    <span className="block text-sm font-medium text-gray-500 mb-2">Mensaje</span>
                     <div className="bg-gray-50 p-4 rounded-lg">
                       <p className="text-gray-800 whitespace-pre-wrap leading-relaxed">{item.mensaje}</p>
                     </div>
@@ -219,7 +219,7 @@ const ContactoDetailModal = ({ item, isOpen, onClose }: ContactoDetailModalProps
 
                   {/* Adjunto */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-500 mb-2">Archivo Adjunto</label>
+                    <span className="block text-sm font-medium text-gray-500 mb-2">Archivo Adjunto</span>
                     {item.adjunto ? (
                       <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
                         <p className="text-blue-800 text-sm flex items-center gap-2">
@@ -263,7 +263,7 @@ const ContactoDetailModal = ({ item, isOpen, onClose }: ContactoDetailModalProps
 
                   {/* Fecha */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-500 mb-2">Fecha de Creación</label>
+                    <span className="block text-sm font-medium text-gray-500 mb-2">Fecha de Creación</span>
                     <p className="text-gray-800 flex items-center gap-2">
                       <LuCalendar className="w-4 h-4 text-gray-400" />
                       {item.fechaCreacion ? 
