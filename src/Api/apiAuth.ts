@@ -2,7 +2,10 @@ import axios from 'axios'
 import { cookieUtils } from '../Modules/Global/utils/CookieUtils'
 
 const axiosPrivate = axios.create({
-  baseURL: 'http://localhost:3000/api',
+  //Url local=http://localhost:3000/api
+  //Url render=https://saga-jd-back-end-1.onrender.com/api
+  
+  baseURL: 'https://saga-jd-back-end-1.onrender.com/api',
   headers: { 'Content-Type': 'application/json' },
   withCredentials: true, 
 })
