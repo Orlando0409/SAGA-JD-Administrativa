@@ -15,8 +15,8 @@ const CreateCategoriaModal: React.FC<CreateCategoriaModalProps> = ({ isOpen, onC
   const { user } = useAuth();
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [charCount, setCharCount] = useState({ name: 0, description: 0 });
-  const MAX_LENGTH = 100;
-  const MAX_DESC_LENGTH = 255;
+  const MAX_NAME_LENGTH = 30;
+  const MAX_DESC_LENGTH = 100;
   
   const [formData, setFormData] = useState<CreateCategoriaMaterialSchemaData>({
     Nombre_Categoria: '',
@@ -26,7 +26,7 @@ const CreateCategoriaModal: React.FC<CreateCategoriaModalProps> = ({ isOpen, onC
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    const maxLength = name === 'Nombre_Categoria' ? MAX_LENGTH : MAX_DESC_LENGTH;
+    const maxLength = name === 'Nombre_Categoria' ? MAX_NAME_LENGTH : MAX_DESC_LENGTH;
     
     if (value.length <= maxLength) {
       setFormData(prev => ({ ...prev, [name]: value }));
@@ -51,7 +51,7 @@ const CreateCategoriaModal: React.FC<CreateCategoriaModalProps> = ({ isOpen, onC
     }
     const dataToValidate = {
       Nombre_Categoria: formData.Nombre_Categoria.trim(),
-      Descripcion_Categoria: formData.Descripcion_Categoria.trim()
+      Descripcion_Categoria: formData.Descripcion_Categoria?.trim()
     };
 
     const validation = CreateCategoriaMaterialSchema.safeParse(dataToValidate);
@@ -128,7 +128,7 @@ const CreateCategoriaModal: React.FC<CreateCategoriaModalProps> = ({ isOpen, onC
                 placeholder="Ej: Tuberías, Herramientas, Químicos"
                 autoComplete="off"
               />
-              {renderCharCounter(charCount.name, MAX_LENGTH, !!formErrors.Nombre_Categoria)}
+              {renderCharCounter(charCount.name, MAX_NAME_LENGTH, !!formErrors.Nombre_Categoria)}
               {formErrors.Nombre_Categoria && (
                 <p className="text-red-500 text-sm mt-1">{formErrors.Nombre_Categoria}</p>
               )}
@@ -136,7 +136,7 @@ const CreateCategoriaModal: React.FC<CreateCategoriaModalProps> = ({ isOpen, onC
 
             <div>
               <label htmlFor="descripcion-categoria" className="block text-sm font-medium text-gray-700 mb-1">
-                Descripción de la Categoría <span className="text-red-500">*</span>
+                Descripción de la Categoría
               </label>
               <textarea
                 id="descripcion-categoria"

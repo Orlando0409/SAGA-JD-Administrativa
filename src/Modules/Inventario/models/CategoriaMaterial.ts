@@ -27,7 +27,7 @@ export interface MaterialCategoria {
 
 export interface CreateCategoriaMaterialData {
   Nombre_Categoria: string;
-  Descripcion_Categoria: string;
+  Descripcion_Categoria?: string;
 }
 
 export interface UpdateCategoriaMaterialData {

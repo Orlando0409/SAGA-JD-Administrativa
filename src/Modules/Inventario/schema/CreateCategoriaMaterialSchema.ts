@@ -6,8 +6,9 @@ export const CreateCategoriaMaterialSchema = z.object({
     .max(30, "La categoría no puede tener más de 30 caracteres")
     .regex(/^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\s!?¿¡().,-]+$/, "La categoría solo puede contener letras, números, espacios y los caracteres !?¿¡().,-"),
   Descripcion_Categoria: z.string()
-    .min(1, "La descripción es requerida")
-    .max(500, "La descripción no puede tener más de 500 caracteres")
+    .max(100, "La descripción no puede tener más de 100 caracteres")
+    .regex(/^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\s!?¿¡().,-]*$/, "La descripción solo puede contener letras, números, espacios y los caracteres !?¿¡().,-")
+    .optional()
 });
 
 export type CreateCategoriaMaterialSchemaData = z.infer<typeof CreateCategoriaMaterialSchema>;

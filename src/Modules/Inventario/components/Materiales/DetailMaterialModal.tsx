@@ -1,12 +1,13 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { LuX } from 'react-icons/lu';
-import type { Material } from '../../models/Inventario';
+import type { Material, Medidor } from '../../models/Inventario';
 import { 
   getEstadoMaterialColorClass, 
   getProveedorNombre, 
   getProveedorTipo, 
   getProveedorTipoColorClass 
 } from '../../helper/MaterialesHelpers';
+import { getAllMedidores } from '../../service/MaterialService';
 
 interface DetailMaterialModalProps {
   material: Material;
@@ -19,8 +20,44 @@ const DetailMaterialModal: React.FC<DetailMaterialModalProps> = ({
   isOpen,
   onClose,
 }) => {
+  const [medidor, setMedidor] = useState<Medidor | null>(null);
+  const [loadingMedidor, setLoadingMedidor] = useState(false);
+  
   const estado = material.Estado_Material?.Nombre_Estado_Material || 'N/A';
   const colorClass = getEstadoMaterialColorClass(estado);
+
+  const getMedidorEstadoColorClass = (estadoNombre: string): string => {
+    if (estadoNombre === 'No Instalado') {
+      return 'bg-gray-100 text-gray-700';
+    }
+    if (estadoNombre === 'Instalado') {
+      return 'bg-green-100 text-green-700';
+    }
+    return 'bg-red-100 text-red-700';
+  };
+
+  // Cargar información del medidor si existe
+  useEffect(() => {
+    if (!isOpen || !material.Id_Material) return;
+    
+    const loadMedidor = async () => {
+      setLoadingMedidor(true);
+      try {
+        const medidores = await getAllMedidores();
+        const medidorEncontrado = medidores.find(
+          m => m.Usuario_Creador?.Id_Usuario === material.Id_Material
+        );
+        setMedidor(medidorEncontrado || null);
+      } catch (error) {
+        console.error('Error al cargar medidor:', error);
+        setMedidor(null);
+      } finally {
+        setLoadingMedidor(false);
+      }
+    };
+
+    loadMedidor();
+  }, [isOpen, material.Id_Material]);
 
   if (!isOpen) return null;
 
@@ -58,6 +95,71 @@ const DetailMaterialModal: React.FC<DetailMaterialModalProps> = ({
                 {material.Descripcion || 'Sin descripción'}
               </p>
             </div>
+
+            {!loadingMedidor && medidor && (
+              <>
+                <div>
+                  <label htmlFor="tipo-material" className="block text-sm font-medium text-gray-700 mb-1">
+                    Tipo de Material
+                  </label>
+                  <span className="px-3 py-1 bg-purple-100 text-purple-700 border border-purple-300 rounded-full text-xs font-semibold inline-flex items-center gap-1">
+                    <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z"/>
+                    </svg>
+                    Medidor
+                  </span>
+                </div>
+
+                <div>
+                  <label htmlFor="numero-medidor" className="block text-sm font-medium text-gray-700 mb-1">
+                    Número de Medidor
+                  </label>
+                  <p className="text-sm text-gray-900">
+                    {medidor.Numero_Medidor}
+                  </p>
+                </div>
+
+                <div>
+                  <label htmlFor="estado-medidor" className="block text-sm font-medium text-gray-700 mb-1">
+                    Estado del Medidor
+                  </label>
+                  <p className="text-sm text-gray-900">
+                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getMedidorEstadoColorClass(medidor.Estado_Medidor.Nombre_Estado_Medidor)}`}>
+                      {medidor.Estado_Medidor.Nombre_Estado_Medidor}
+                    </span>
+                  </p>
+                </div>
+
+                {medidor.Afiliado && (
+                  <div>
+                    <label htmlFor="medidor-asignado" className="block text-sm font-medium text-gray-700 mb-1">
+                      Medidor Asignado a
+                    </label>
+                    <p className="text-sm text-gray-900">
+                      {medidor.Afiliado.Nombre_Completo_Afiliado || medidor.Afiliado.Razon_Social}
+                    </p>
+                  </div>
+                )}
+
+                <div>
+                  <label htmlFor="fecha-creacion" className="block text-sm font-medium text-gray-700 mb-1">
+                    Fecha Creación Medidor
+                  </label>
+                  <p className="text-sm text-gray-900">
+                    {new Date(medidor.Fecha_Creacion).toLocaleDateString()}
+                  </p>
+                </div>
+
+                <div>
+                  <label htmlFor="ultima-actualizacion" className="block text-sm font-medium text-gray-700 mb-1">
+                    Última Actualización Medidor
+                  </label>
+                  <p className="text-sm text-gray-900">
+                    {new Date(medidor.Fecha_Actualizacion).toLocaleDateString()}
+                  </p>
+                </div>
+              </>
+            )}
 
             <div>
               <label htmlFor="categorias" className="block text-sm font-medium text-gray-700 mb-1">

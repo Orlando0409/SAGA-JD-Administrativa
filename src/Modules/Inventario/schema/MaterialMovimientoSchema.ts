@@ -8,7 +8,11 @@ export const IngresoEgresoMaterialSchema = z.object({
   Cantidad: z.number()
     .min(1, "La cantidad debe ser al menos 1")
     .max(100000, "La cantidad no puede ser mayor a 100,000")
-    .int("La cantidad debe ser un número entero")
+    .int("La cantidad debe ser un número entero"),
+  
+  Observaciones: z.string()
+    .max(250, "Las observaciones no pueden tener más de 250 caracteres")
+    .optional()
 });
 
 // Kept for backward compatibility

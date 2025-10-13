@@ -9,7 +9,7 @@ import {
   flexRender,
 } from '@tanstack/react-table';
 import { LuPlus, LuFilter, LuSearch, LuArrowLeft } from 'react-icons/lu';
-import { 
+import {
   useGetAllMaterials, 
   useGetMaterialesDisponibles,
   useGetMaterialesAgotados,
@@ -22,6 +22,8 @@ import {
   useGetMaterialesEntreRangoPrecio,
   useUpdateEstadoMaterial,
 } from '../../hooks/useMaterials';
+import { getAllMedidores } from '../../service/MaterialService';
+import { useQuery } from '@tanstack/react-query';
 import { MdKeyboardArrowLeft, MdKeyboardArrowRight, MdKeyboardDoubleArrowLeft,
   MdKeyboardDoubleArrowRight, MdKeyboardArrowUp, MdKeyboardArrowDown} from "react-icons/md";
 import {
@@ -36,7 +38,7 @@ import {
   AlertDialogTrigger,
 } from '@/Modules/Global/components/Sidebar/ui/alert-dialog';
 
-import type { Material } from '../../models/Inventario';
+import type { Material, Medidor } from '../../models/Inventario';
 import type { MaterialFilterOptions } from '../../types/MaterialTypes';
 import { getMaterialLoadingState } from '../../helper/MaterialesHelpers';
 import CreateMaterialModal from './CreateMaterialModal';
@@ -58,6 +60,24 @@ const CatalogoMateriales: React.FC<CatalogoMaterialesProps> = ({ onBack }) => {
   const [appliedFilters, setAppliedFilters] = useState<MaterialFilterOptions>({});
   const [estadoFilter, setEstadoFilter] = useState<string>('Todos'); // Por defecto mostrar todos
   const updateEstadoMutation = useUpdateEstadoMaterial();
+
+  // Obtener todos los medidores para mostrar en la tabla
+  const { data: medidores = [] } = useQuery<Medidor[]>({
+    queryKey: ['medidores'],
+    queryFn: getAllMedidores,
+    staleTime: 1000 * 60 * 5, // 5 minutos
+  });
+
+  // Crear un mapa de Id_Material -> Medidor para búsqueda rápida
+  const medidoresMap = useMemo(() => {
+    const map = new Map<number, Medidor>();
+    medidores.forEach(medidor => {
+      if (medidor.Usuario_Creador?.Id_Usuario) {
+        map.set(medidor.Usuario_Creador.Id_Usuario, medidor);
+      }
+    });
+    return map;
+  }, [medidores]);
 
   // Hooks para obtener materiales según el estado
   const { data: todosMateriales = [], isLoading: isLoadingTodos, refetch: refetchTodos } = useGetAllMaterials();
@@ -214,6 +234,28 @@ const CatalogoMateriales: React.FC<CatalogoMaterialesProps> = ({ onBack }) => {
             {info.getValue()}
           </div>
         ),
+      }),
+      columnHelper.display({
+        id: 'tipo',
+        header: 'Tipo',
+        cell: info => {
+          const material = info.row.original;
+          const medidor = medidoresMap.get(material.Id_Material);
+          
+          if (medidor) {
+            return (
+                <span className="px-2 py-1 bg-purple-100 text-purple-700 border border-purple-300 rounded-full text-xs font-semibold inline-flex items-center gap-1 w-fit">
+                  Medidor
+                </span>
+            );
+          }
+          
+          return (
+            <span className="px-2 py-1 bg-gray-100 text-gray-600 rounded-full text-xs font-medium">
+              Material
+            </span>
+          );
+        },
       }),
       columnHelper.accessor('Descripcion', {
         header: 'Descripción',
@@ -522,7 +564,7 @@ const CatalogoMateriales: React.FC<CatalogoMaterialesProps> = ({ onBack }) => {
           </div>
         ),
       }),
-    ], [updateEstadoMutation.isPending]);
+    ], [updateEstadoMutation.isPending, medidoresMap]);
 
   const table = useReactTable({
     data: filteredMaterials,

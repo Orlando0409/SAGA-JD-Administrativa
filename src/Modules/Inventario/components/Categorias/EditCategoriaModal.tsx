@@ -30,8 +30,8 @@ const EditCategoriaModal: React.FC<EditCategoriaModalProps> = ({ isOpen, onClose
   const updateCategoriaMutation = useUpdateCategoria();
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [charCount, setCharCount] = useState({ name: 0, description: 0 });
-  const MAX_LENGTH = 100;
-  const MAX_DESC_LENGTH = 255;
+  const MAX_NAME_LENGTH = 30;
+  const MAX_DESC_LENGTH = 100;
   
   const [formData, setFormData] = useState<FormData>({
     Nombre_Categoria: '',
@@ -54,7 +54,7 @@ const EditCategoriaModal: React.FC<EditCategoriaModalProps> = ({ isOpen, onClose
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    const maxLength = name === 'Nombre_Categoria' ? MAX_LENGTH : MAX_DESC_LENGTH;
+    const maxLength = name === 'Nombre_Categoria' ? MAX_NAME_LENGTH : MAX_DESC_LENGTH;
     
     if (value.length <= maxLength) {
       setFormData(prev => ({ ...prev, [name]: value }));
@@ -165,7 +165,7 @@ const EditCategoriaModal: React.FC<EditCategoriaModalProps> = ({ isOpen, onClose
                 placeholder="Ej: Tuberías, Herramientas, Químicos"
                 autoComplete="off"
               />
-              {renderCharCounter(charCount.name, MAX_LENGTH, !!formErrors.Nombre_Categoria)}
+              {renderCharCounter(charCount.name, MAX_NAME_LENGTH, !!formErrors.Nombre_Categoria)}
               {formErrors.Nombre_Categoria && (
                 <p className="text-red-500 text-sm mt-1">{formErrors.Nombre_Categoria}</p>
               )}
@@ -173,7 +173,7 @@ const EditCategoriaModal: React.FC<EditCategoriaModalProps> = ({ isOpen, onClose
 
             <div>
               <label htmlFor="descripcion-categoria" className="block text-sm font-medium text-gray-700 mb-1">
-                Descripción de la Categoría <span className="text-red-500">*</span>
+                Descripción de la Categoría
               </label>
               <textarea
                 id="descripcion-categoria"

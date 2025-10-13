@@ -7,8 +7,8 @@ export const UpdateCategoriaMaterialSchema = z.object({
     .regex(/^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\s!?¿¡().,-]+$/, "La categoría solo puede contener letras, números, espacios y los caracteres !?¿¡().,-")
     .optional(),
   Descripcion_Categoria: z.string()
-    .min(1, "La descripción es requerida")
-    .max(500, "La descripción no puede tener más de 500 caracteres")
+    .max(100, "La descripción no puede tener más de 100 caracteres")
+    .regex(/^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\s!?¿¡().,-]*$/, "La descripción solo puede contener letras, números, espacios y los caracteres !?¿¡().,-")
     .optional()
 });
 

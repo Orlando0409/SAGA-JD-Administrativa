@@ -5,6 +5,7 @@ import { useCreateMaterial } from '../../hooks/useMaterials';
 import { useUnidadesMedicionSimple } from '../../hooks/HookUnidadMedicion';
 import { useProveedoresJuridicos } from '@/Modules/Proveedores/Hook/hookjuridicoproveedor';
 import { CreateMaterialSchema, type CreateMaterialSchemaData } from '../../schema/CreateMaterialSchema';
+import { CreateMedidorSchema, type CreateMedidorSchemaData } from '../../schema/MedidorSchemas';
 import type { CreateMaterialModalProps } from '../../types/MaterialTypes';
 import type { CreateMaterialData, CategoriaMaterial } from '../../models/Inventario';
 import CreateCategoriaModal from '../Categorias/CreateCategoriaModal';
@@ -17,6 +18,7 @@ import {
   PRECIO_MIN 
 } from '../../types/MaterialTypes';
 import { useProveedoresFisicos } from '@/Modules/Proveedores/Hook/hookFisicoProveedor';
+import { createMedidor } from '../../service/MaterialService';
 
 const CreateMaterialModal: React.FC<CreateMaterialModalProps> = ({ isOpen, onClose }) => {
   const { user } = useAuth();
@@ -33,6 +35,10 @@ const CreateMaterialModal: React.FC<CreateMaterialModalProps> = ({ isOpen, onClo
   const [isCreateCategoriaModalOpen, setIsCreateCategoriaModalOpen] = useState(false);
   const [isCreateUnidadMedicionModalOpen, setIsCreateUnidadMedicionModalOpen] = useState(false);
   const [isCreateProveedorModalOpen, setIsCreateProveedorModalOpen] = useState(false);
+  const [isMedidor, setIsMedidor] = useState(false);
+  const [medidorData, setMedidorData] = useState<CreateMedidorSchemaData>({
+    Numero_Medidor: 0
+  });
   
   const [formData, setFormData] = useState<CreateMaterialSchemaData>({
     Nombre_Material: '',
@@ -69,6 +75,7 @@ const CreateMaterialModal: React.FC<CreateMaterialModalProps> = ({ isOpen, onClo
     e.preventDefault();
     setFormErrors({});
 
+    // Validar datos del material
     const validation = CreateMaterialSchema.safeParse(formData);
 
     if (!validation.success) {
@@ -79,6 +86,20 @@ const CreateMaterialModal: React.FC<CreateMaterialModalProps> = ({ isOpen, onClo
       });
       setFormErrors(fieldErrors);
       return;
+    }
+
+    // Si es medidor, validar número de medidor
+    if (isMedidor) {
+      const medidorValidation = CreateMedidorSchema.safeParse(medidorData);
+      if (!medidorValidation.success) {
+        const fieldErrors: Record<string, string> = {};
+        medidorValidation.error.errors.forEach((err) => {
+          const field = err.path[0] as string;
+          fieldErrors[`medidor_${field}`] = err.message;
+        });
+        setFormErrors(fieldErrors);
+        return;
+      }
     }
 
     try {
@@ -98,10 +119,17 @@ const CreateMaterialModal: React.FC<CreateMaterialModalProps> = ({ isOpen, onClo
         Id_Proveedor: formData.Id_Proveedor,
       };
 
+      // Crear el material
       await createMaterialMutation.mutateAsync({
         data: payload,
         idUsuarioCreador: user.Id_Usuario
       });
+
+      // Si es medidor, crear también el registro de medidor
+      if (isMedidor) {
+        await createMedidor(medidorData, user.Id_Usuario);
+      }
+
       onClose();
       setFormData({
         Nombre_Material: '',
@@ -114,6 +142,8 @@ const CreateMaterialModal: React.FC<CreateMaterialModalProps> = ({ isOpen, onClo
         Id_Proveedor: undefined,
       });
       setFieldCharCounts({ nombreMaterial: 0, descripcion: 0 });
+      setIsMedidor(false);
+      setMedidorData({ Numero_Medidor: 0 });
     } catch (error) {
       console.log('Error creating material:', error);
     }
@@ -372,6 +402,50 @@ const CreateMaterialModal: React.FC<CreateMaterialModalProps> = ({ isOpen, onClo
               </div>
               {formErrors.IDS_Categorias && (
                 <p className="text-red-500 text-xs mt-1">{formErrors.IDS_Categorias}</p>
+              )}
+            </div>
+
+            {/* Sección de Medidor */}
+            <div className="border-t border-gray-200 pt-4">
+              <div className="flex items-center space-x-2 mb-3">
+                <input
+                  type="checkbox"
+                  id="es-medidor"
+                  checked={isMedidor}
+                  onChange={(e) => setIsMedidor(e.target.checked)}
+                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                />
+                <label htmlFor="es-medidor" className="text-sm font-medium text-gray-700">
+                  Este material es un medidor
+                </label>
+              </div>
+
+              {isMedidor && (
+                <div className="ml-6 animate-fadeIn">
+                  <label htmlFor="numero-medidor" className="block text-sm font-medium text-gray-700 mb-1">
+                    Número de Medidor <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    id="numero-medidor"
+                    type="text"
+                    value={medidorData.Numero_Medidor || ''}
+                    onChange={(e) => setMedidorData({ 
+                      Numero_Medidor: parseInt(e.target.value) || 0 
+                    })}
+                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                      formErrors.medidor_Numero_Medidor ? 'border-red-500' : 'border-gray-300'
+                    }`}
+                    placeholder="Ej: 123456789"
+                    min="1"
+                    max="999999999"
+                  />
+                  {formErrors.medidor_Numero_Medidor && (
+                    <p className="text-red-500 text-xs mt-1">{formErrors.medidor_Numero_Medidor}</p>
+                  )}
+                  <p className="text-xs text-gray-500 mt-1">
+                    Número único que identifica este medidor
+                  </p>
+                </div>
               )}
             </div>
 
