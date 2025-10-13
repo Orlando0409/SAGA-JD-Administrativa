@@ -33,16 +33,14 @@ const Breadcrumbs: React.FC<BreadcrumbsProps> = ({ className = '' }) => {
               )}
               
               {isLast ? (
-                // Último elemento (actual) - no es link
-                <span className="flex items-center gap-2 text-gray-900 font-semibold">
+                <span className="flex items-center bg-blue-50 border border-blue-200 p-2 rounded-lg px-3 py-2 text-blue-900 gap-2 font-semibold">
                   {Icon && <Icon className="w-5 h-5" />}
                   <span>{crumb.label}</span>
                 </span>
               ) : (
-                // Elementos anteriores - son links
                 <Link
                   to={crumb.path}
-                  className="flex items-center gap-2 text-gray-600 hover:text-blue-600 transition-colors font-medium"
+                  className="flex items-center gap-2 text-gray-600 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 hover:bg-blue-50 hover:border-blue-200 hover:text-blue-600 transition-colors font-medium"
                 >
                   {Icon && <Icon className="w-5 h-5" />}
                   <span>{crumb.label}</span>

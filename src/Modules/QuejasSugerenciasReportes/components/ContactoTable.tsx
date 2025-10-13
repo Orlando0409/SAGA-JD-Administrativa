@@ -14,13 +14,15 @@ import {
 import { 
   LuSearch, 
   LuFilter,
-  LuPlus,
-  LuChevronLeft,
-  LuChevronRight
+  LuPlus
 } from 'react-icons/lu';
 import { 
   MdKeyboardArrowUp, 
-  MdKeyboardArrowDown 
+  MdKeyboardArrowDown, 
+  MdKeyboardArrowLeft,
+  MdKeyboardArrowRight,
+  MdKeyboardDoubleArrowLeft,
+  MdKeyboardDoubleArrowRight
 } from 'react-icons/md';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -46,6 +48,96 @@ export interface ContactoItem {
   estado?: 'Pendiente' | 'En Proceso' | 'Resuelto';
   adjunto?: File | null;
 }
+
+// Render helpers moved outside component to avoid inline JSX definitions inside the main component
+const renderTipoCell = (item: ContactoItem) => {
+  let colorClass = '';
+  switch (item.tipo) {
+    case 'Queja':
+      colorClass = 'text-red-700';
+      break;
+    case 'Sugerencia':
+      colorClass = 'text-yellow-700';
+      break;
+    case 'Reporte':
+      colorClass = 'text-blue-700';
+      break;
+  }
+
+  return (
+    <span className={`text-sm font-medium ${colorClass}`}>
+      {item.tipo}
+    </span>
+  );
+};
+
+const renderPersonaCell = (item: ContactoItem) => {
+  const nombreCompleto = [item.nombre, item.primerApellido, item.segundoApellido]
+    .filter(Boolean)
+    .join(' ');
+
+  return (
+    <span className="text-sm">
+      {nombreCompleto || <span className="text-gray-400 italic">Anónimo</span>}
+    </span>
+  );
+};
+
+const renderMensajeCell = (mensaje?: string) => {
+  if (!mensaje) return <span className="text-gray-400 text-sm">-</span>;
+  const truncated = mensaje.length > 80 ? mensaje.substring(0, 80) + '...' : mensaje;
+  return (
+    <span className="text-sm text-gray-700" title={mensaje}>
+      {truncated}
+    </span>
+  );
+};
+
+const renderEstadoCell = (item: ContactoItem) => {
+  if (item.tipo !== 'Reporte' || !item.estado) return <span className="text-gray-400 text-sm">-</span>;
+
+  let badgeClass = '';
+  switch (item.estado) {
+    case 'Pendiente':
+      badgeClass = 'bg-yellow-100 text-yellow-800';
+      break;
+    case 'En Proceso':
+      badgeClass = 'bg-blue-100 text-blue-800';
+      break;
+    case 'Resuelto':
+      badgeClass = 'bg-green-100 text-green-800';
+      break;
+  }
+
+  return (
+    <span className={`px-2 py-1 text-xs rounded-full ${badgeClass}`}>
+      {item.estado}
+    </span>
+  );
+};
+
+const renderFechaCell = (fecha?: Date | string | null) => {
+  if (!fecha) return 'N/A';
+  const fechaObj = new Date(fecha);
+  return (
+    <span className="text-sm">
+      {format(fechaObj, 'dd/MM/yyyy', { locale: es })}
+    </span>
+  );
+};
+
+// Emit a global event that the component will listen to (avoids inline handlers)
+const renderAccionesCell = (item: ContactoItem) => (
+  <div className="flex items-center gap-2">
+    <button
+      className="px-4 py-1 bg-gray-600 text-white text-xs rounded hover:bg-gray-700 transition-colors"
+      title="Ver detalles"
+      onClick={() => window.dispatchEvent(new CustomEvent('openContactoDetail', { detail: item }))}
+    >
+      Ver
+    </button>
+  </div>
+);
 
 const ContactoTable = () => {
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -200,130 +292,42 @@ const ContactoTable = () => {
     columnHelper.display({
       id: 'tipo',
       header: 'Tipo',
-      cell: ({ row }) => {
-        const item = row.original;
-        let colorClass;
-
-        switch (item.tipo) {
-          case 'Queja':
-            colorClass = 'text-red-700';
-            break;
-          case 'Sugerencia':
-            colorClass = 'text-yellow-700';
-            break;
-          case 'Reporte':
-            colorClass = 'text-blue-700';
-            break;
-        }
-
-        return (
-          <span className={`text-sm font-medium ${colorClass}`}>
-            {item.tipo}
-          </span>
-        );
-      },
+      cell: ({ row }) => renderTipoCell(row.original),
       size: 130,
     }),
 
     columnHelper.display({
       id: 'persona',
       header: 'Persona',
-      cell: ({ row }) => {
-        const item = row.original;
-        const nombreCompleto = [item.nombre, item.primerApellido, item.segundoApellido]
-          .filter(Boolean)
-          .join(' ');
-
-        return (
-          <span className="text-sm">
-            {nombreCompleto || <span className="text-gray-400 italic">Anónimo</span>}
-          </span>
-        );
-      },
+      cell: ({ row }) => renderPersonaCell(row.original),
       size: 200,
     }),
 
     columnHelper.accessor('mensaje', {
       id: 'mensaje',
       header: 'Mensaje',
-      cell: ({ getValue }) => {
-        const mensaje = getValue();
-        if (!mensaje) return <span className="text-gray-400 text-sm">-</span>;
-        
-        const truncated = mensaje.length > 80 ? mensaje.substring(0, 80) + '...' : mensaje;
-        
-        return (
-          <span className="text-sm text-gray-700" title={mensaje}>
-            {truncated}
-          </span>
-        );
-      },
+      cell: ({ getValue }) => renderMensajeCell(getValue()),
       size: 350,
     }),
 
     columnHelper.display({
       id: 'estado',
       header: 'Estado',
-      cell: ({ row }) => {
-        const item = row.original;
-        
-        if (item.tipo !== 'Reporte' || !item.estado) {
-          return <span className="text-gray-400 text-sm">-</span>;
-        }
-
-        let badgeClass = '';
-        switch (item.estado) {
-          case 'Pendiente':
-            badgeClass = 'bg-yellow-100 text-yellow-800';
-            break;
-          case 'En Proceso':
-            badgeClass = 'bg-blue-100 text-blue-800';
-            break;
-          case 'Resuelto':
-            badgeClass = 'bg-green-100 text-green-800';
-            break;
-        }
-
-        return (
-          <span className={`px-2 py-1 text-xs rounded-full ${badgeClass}`}>
-            {item.estado}
-          </span>
-        );
-      },
+      cell: ({ row }) => renderEstadoCell(row.original),
       size: 130,
     }),
 
     columnHelper.accessor('fechaCreacion', {
       id: 'fecha',
       header: 'Fecha',
-      cell: ({ getValue }) => {
-        const fecha = getValue();
-        if (!fecha) return 'N/A';
-        
-        const fechaObj = new Date(fecha);
-        return (
-          <span className="text-sm">
-            {format(fechaObj, 'dd/MM/yyyy', { locale: es })}
-          </span>
-        );
-      },
+      cell: ({ getValue }) => renderFechaCell(getValue()),
       size: 120,
     }),
 
     columnHelper.display({
       id: 'acciones',
       header: 'Acciones',
-      cell: ({ row }) => (
-        <div className="flex items-center gap-2">
-          <button
-            className="px-4 py-1 bg-gray-600 text-white text-xs rounded hover:bg-gray-700 transition-colors"
-            onClick={() => handleViewDetails(row.original)}
-            title="Ver detalles"
-          >
-            Ver
-          </button>
-        </div>
-      ),
+      cell: ({ row }) => renderAccionesCell(row.original),
       size: 80,
       enableSorting: false,
     }),
@@ -358,6 +362,19 @@ const ContactoTable = () => {
     setIsDetailModalOpen(true);
   };
 
+  // Listen for global event dispatched by renderAccionesCell
+  useEffect(() => {
+    const listener = (e: Event) => {
+      const custom = e as CustomEvent<ContactoItem>;
+      if (custom?.detail) {
+        handleViewDetails(custom.detail);
+      }
+    };
+
+    window.addEventListener('openContactoDetail', listener as EventListener);
+    return () => window.removeEventListener('openContactoDetail', listener as EventListener);
+  }, []);
+
   const handleCloseDetailModal = () => {
     setIsDetailModalOpen(false);
     setSelectedItem(null);
@@ -375,14 +392,11 @@ const ContactoTable = () => {
   return (
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h2 className="text-3xl font-bold text-gray-900">
-            Gestión de Quejas, Sugerencias y Reportes
-          </h2>
+        <div className="flex items-center gap-4">
+          <div className="h-6 w-px bg-gray-300" />
+          <h2 className="text-2xl font-bold text-gray-900">Gestión de Quejas, Sugerencias y Reportes</h2>
         </div>
       </div>
-
-      {/* Controles de filtro y búsqueda */}
       <div className="bg-white rounded-lg p-3">
         <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
           <div className="flex items-center gap-4">
@@ -439,9 +453,8 @@ const ContactoTable = () => {
           </div>
         </div>
       </div>
-
       {/* Tabla */}
-      <div className="bg-white shadow-sm rounded-2xl border border-sky-100 overflow-hidden">
+      <div className="bg-white rounded-2xl shadow-sm border border-sky-100 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="min-w-full table-auto">
             <thead className="bg-sky-50">
@@ -509,39 +522,48 @@ const ContactoTable = () => {
                 ))}
               </select>
             </div>
-            <span className="text-sm text-gray-700">
-              Mostrando {table.getRowModel().rows.length > 0 ? table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1 : 0} a{' '}
-              {Math.min((table.getState().pagination.pageIndex + 1) * table.getState().pagination.pageSize, filteredData.length)} de {filteredData.length} registros
-            </span>
           </div>
 
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => table.previousPage()}
-              disabled={!table.getCanPreviousPage()}
-              className="p-2 border border-gray-300 rounded-md text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              title="Página anterior"
-            >
-              <LuChevronLeft className="w-4 h-4" />
-            </button>
-            
-            <span className="px-3 py-2 text-sm font-medium text-gray-700">
-              Página {table.getState().pagination.pageIndex + 1} de {table.getPageCount() || 1}
-            </span>
-
-            <button
-              onClick={() => table.nextPage()}
-              disabled={!table.getCanNextPage()}
-              className="p-2 border border-gray-300 rounded-md text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              title="Página siguiente"
-            >
-              <LuChevronRight className="w-4 h-4" />
-            </button>
-          </div>
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => table.setPageIndex(0)}
+                disabled={!table.getCanPreviousPage()}
+                className="p-2 border border-gray-300 rounded-md text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                title="Primera página"
+              >
+                <MdKeyboardDoubleArrowLeft />
+              </button>
+              <button
+                onClick={() => table.previousPage()}
+                disabled={!table.getCanPreviousPage()}
+                className="p-2 border border-gray-300 rounded-md text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                title="Página anterior"
+              >
+                <MdKeyboardArrowLeft />
+              </button>
+              <span className="px-2 py-1 text-sm">
+                Página {table.getState().pagination.pageIndex + 1} de {table.getPageCount() +1}
+              </span>
+              <button
+                onClick={() => table.nextPage()}
+                disabled={!table.getCanNextPage()}
+                className="p-2 border border-gray-300 rounded-md text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                title="Página siguiente"
+              >
+                <MdKeyboardArrowRight />
+              </button>
+              <button
+                onClick={() => table.setPageIndex(table.getPageCount() - 1)}
+                disabled={!table.getCanNextPage()}
+                className="p-2 border border-gray-300 rounded-md text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                title="Última página"
+              >
+                <MdKeyboardDoubleArrowRight />
+              </button>
+            </div>
         </div>
       </div>
 
-      {/* Modals */}
       <CreateContactoModal
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
