@@ -5,6 +5,7 @@ export interface ArchivoCalidadAgua {
   Url_Archivo: string;     // URL del archivo subido
   Fecha_Creacion: string;  
   Fecha_Actualizacion: string; // Fecha de actualización
+  Descripcion:string
   Visible: boolean;        // Campo de visibilidad (true = visible, false = oculto)
   Usuario_Creador: {       // Usuario que creó el registro
     Id_Usuario: number;
@@ -20,6 +21,7 @@ export const ArchivoCalidadAguaInicial: ArchivoCalidadAgua = {
     Url_Archivo: '', 
     Fecha_Creacion: '',
     Fecha_Actualizacion: '',
+    Descripcion:'',
     Visible: false, // Por defecto oculto hasta que se active
     Usuario_Creador: {
         Id_Usuario: 0,
