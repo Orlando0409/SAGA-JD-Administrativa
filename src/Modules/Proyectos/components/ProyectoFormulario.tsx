@@ -11,12 +11,11 @@ interface FormularioProyectoProps {
 }
 
 export default function FormularioProyecto({
-    id,
     tituloInicial = "",
     descripcionInicial = "",
     onClose,
     refetch,
-}: FormularioProyectoProps) {
+}: Readonly<FormularioProyectoProps>) {
     const { user } = useAuth();
     const createProyectoMutation = useCreateProyecto();
 

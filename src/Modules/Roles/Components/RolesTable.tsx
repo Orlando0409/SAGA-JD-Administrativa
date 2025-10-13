@@ -8,7 +8,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from '@tanstack/react-table';
-import { LuSearch, LuPlus, LuArrowLeft } from 'react-icons/lu';
+import { LuSearch, LuPlus } from 'react-icons/lu';
 import { MdKeyboardArrowUp, MdKeyboardArrowDown, MdKeyboardArrowLeft, MdKeyboardArrowRight, MdKeyboardDoubleArrowLeft, MdKeyboardDoubleArrowRight } from 'react-icons/md';
 import { useRoles, useDeactivateRole, useActivateRole } from '../Hooks/RoleHook';
 import RoleDetailModal from './RoleDetailModal';

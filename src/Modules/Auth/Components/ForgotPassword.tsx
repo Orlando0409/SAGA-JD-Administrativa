@@ -8,7 +8,7 @@ import { useAlerts } from '@/Modules/Global/context/AlertContext';
 export default function ForgotPassword() {
   const mutation = useForgotPassword();
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
-  const { showSuccess, showError, isBlocked } = useAlerts(); 
+  const { showSuccess, showError } = useAlerts(); 
   const form = useForm({
     defaultValues: {
         email: ''

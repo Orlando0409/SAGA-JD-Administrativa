@@ -310,7 +310,7 @@ const EditProveedorJuridicoModal: React.FC<EditProveedorJuridicoModalProps> = ({
                   </label>
                   <PhoneInput
                     defaultCountry="CR"
-                    value={field.state.value}
+                    value={field.state.value as any}
                     onChange={(value) => {
                       // Formatear el número en tiempo real
                       const formattedValue = formatPhoneNumberInput(value || '');

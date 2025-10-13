@@ -1,6 +1,6 @@
 import { useForm } from '@tanstack/react-form';
 import { useState } from 'react';
-import PhoneInput, { isValidPhoneNumber } from 'react-phone-number-input';
+import PhoneInput, { isValidPhoneNumber, type Value as PhoneValue } from 'react-phone-number-input';
 import 'react-phone-number-input/style.css';
 import { 
   EditProveedorSchema, 
@@ -212,7 +212,7 @@ const EditProveedorModal: React.FC<EditProveedorModalProps> = ({ isOpen, onClose
             <form.Field name="Nombre_Proveedor">
               {(field) => (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor='Nombre' className="block text-sm font-medium text-gray-700 mb-1">
                     Nombre del Proveedor *
                   </label>
                   <input
@@ -248,14 +248,14 @@ const EditProveedorModal: React.FC<EditProveedorModalProps> = ({ isOpen, onClose
             <form.Field name="Telefono_Proveedor">
               {(field) => (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor='Telefono' className="block text-sm font-medium text-gray-700 mb-1">
                     Teléfono *
                   </label>
                   <PhoneInput
                     defaultCountry="CR"
                     international
                     countryCallingCodeEditable={false}
-                    value={field.state.value}
+                    value={field.state.value as PhoneValue}
                     onChange={(value) => {
                       // Formatear el número en tiempo real
                       const formattedValue = formatPhoneNumberInput(value || '');
@@ -304,11 +304,15 @@ const EditProveedorModal: React.FC<EditProveedorModalProps> = ({ isOpen, onClose
                       Seleccione país y ingrese su número
                     </span>
                     <span className={`text-xs ${
-                      field.state.value && isValidPhoneNumber(field.state.value) 
-                        ? 'text-green-600' 
-                        : field.state.value 
-                          ? 'text-red-600' 
-                          : 'text-gray-500'
+                      (() => {
+                        if (field.state.value && isValidPhoneNumber(field.state.value)) {
+                          return 'text-green-600';
+                        }
+                        if (field.state.value) {
+                          return 'text-red-600';
+                        }
+                        return 'text-gray-500';
+                      })()
                     }`}>
                       {field.state.value 
                         ? (isValidPhoneNumber(field.state.value) ? '✓ Válido' : '✗ Inválido')

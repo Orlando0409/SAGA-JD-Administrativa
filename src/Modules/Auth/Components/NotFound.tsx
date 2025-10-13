@@ -1,8 +1,7 @@
 // src/Modules/Auth/Components/NotFound.tsx
-import { Link, Navigate } from '@tanstack/react-router';
+import { Link } from '@tanstack/react-router';
 import { 
   FiHome, 
-  FiArrowLeft, 
   FiSearch, 
   FiAlertTriangle,
   FiCompass
