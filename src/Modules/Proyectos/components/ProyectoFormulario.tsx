@@ -1,13 +1,16 @@
 import { useState } from "react";
 import { useAuth } from "@/Modules/Auth/Context/AuthContext";
 import { useCreateProyecto } from "../Hook/HookProyecto";
+//import { ProyectoSchema } from "../Schemas/ProyectoSchemas";
+import { z } from "zod";
+import { ProyectoSchema } from "../schemas/Proyecto";
 
 interface FormularioProyectoProps {
-    id: number; // Para identificar si es creación o edición
+    id: number;
     tituloInicial?: string;
     descripcionInicial?: string;
-    onClose: () => void; // Cierra el modal
-    refetch: () => void; // Refresca la tabla
+    onClose: () => void;
+    refetch: () => void;
 }
 
 export default function FormularioProyecto({
@@ -24,60 +27,73 @@ export default function FormularioProyecto({
     const [imagen, setImagen] = useState<File | null>(null);
     const [preview, setPreview] = useState<string | null>(null);
 
-    const [tituloError, setTituloError] = useState("");
-    const [descripcionError, setDescripcionError] = useState("");
-    const [imagenError, setImagenError] = useState("");
+    const [errors, setErrors] = useState<{
+        Titulo?: string;
+        Descripcion?: string;
+        Imagen_Url?: string;
+    }>({});
 
-    // Validar título
+    // Validar título usando Zod
     const handleTituloChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
         setTitulo(value);
-        if (value.length < 5) {
-            setTituloError("El título debe tener al menos 5 caracteres.");
-        } else if (value.length > 100) {
-            setTituloError("El título no puede exceder los 100 caracteres.");
-        } else {
-            setTituloError("");
+        
+        try {
+            ProyectoSchema.shape.Titulo.parse(value);
+            setErrors(prev => ({ ...prev, Titulo: undefined }));
+        } catch (error) {
+            if (error instanceof z.ZodError) {
+                setErrors(prev => ({ ...prev, Titulo: error.errors[0].message }));
+            }
         }
     };
 
-    // Validar descripción
+    // Validar descripción usando Zod
     const handleDescripcionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
         const value = e.target.value;
         setDescripcion(value);
-        if (value.length < 10) {
-            setDescripcionError("La descripción debe tener al menos 10 caracteres.");
-        } else if (value.length > 200) {
-            setDescripcionError("La descripción no puede exceder los 200 caracteres.");
-        } else {
-            setDescripcionError("");
+        
+        try {
+            ProyectoSchema.shape.Descripcion.parse(value);
+            setErrors(prev => ({ ...prev, Descripcion: undefined }));
+        } catch (error) {
+            if (error instanceof z.ZodError) {
+                setErrors(prev => ({ ...prev, Descripcion: error.errors[0].message }));
+            }
         }
     };
 
-    // Manejo de archivo
+    // Validar archivo usando Zod
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
 
-        // Validar tipo
-        if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
-            setImagenError("Solo se permiten imágenes JPG, PNG o WEBP.");
-            setImagen(null);
-            setPreview(null);
-            return;
-        }
-
         // Validar tamaño (máx 5MB)
         if (file.size > 5 * 1024 * 1024) {
-            setImagenError("La imagen no puede superar los 5MB.");
+            setErrors(prev => ({ ...prev, Imagen_Url: "El archivo no puede superar los 5MB." }));
             setImagen(null);
             setPreview(null);
             return;
         }
 
-        setImagenError("");
-        setImagen(file);
-        setPreview(URL.createObjectURL(file));
+        try {
+            ProyectoSchema.shape.Imagen_Url.parse(file);
+            setErrors(prev => ({ ...prev, Imagen_Url: undefined }));
+            setImagen(file);
+            
+            // Solo mostrar preview si es imagen (no PDF)
+            if (file.type.startsWith("image/")) {
+                setPreview(URL.createObjectURL(file));
+            } else {
+                setPreview(null);
+            }
+        } catch (error) {
+            if (error instanceof z.ZodError) {
+                setErrors(prev => ({ ...prev, Imagen_Url: error.errors[0].message }));
+                setImagen(null);
+                setPreview(null);
+            }
+        }
     };
 
     // Enviar formulario
@@ -89,15 +105,37 @@ export default function FormularioProyecto({
             return;
         }
 
-        if (tituloError || descripcionError || imagenError) {
-            alert("Por favor corrige los errores antes de enviar.");
+        // Validar que existe la imagen
+        if (!imagen) {
+            setErrors(prev => ({ ...prev, Imagen_Url: "Debes subir un archivo para el proyecto." }));
             return;
         }
 
+        // Validar con el schema completo antes de enviar
+        try {
+            ProyectoSchema.parse({
+                Titulo: titulo.trim(),
+                Descripcion: descripcion.trim(),
+                Imagen_Url: imagen,
+                Id_Usuario: user.Id_Usuario
+            });
+        } catch (error) {
+            if (error instanceof z.ZodError) {
+                const newErrors: typeof errors = {};
+                error.errors.forEach(err => {
+                    const field = err.path[0] as keyof typeof errors;
+                    newErrors[field] = err.message;
+                });
+                setErrors(newErrors);
+                return;
+            }
+        }
+
         const formData = new FormData();
-        formData.append("titulo", titulo.trim());
-        formData.append("descripcion", descripcion.trim());
-        if (imagen) formData.append("imagen_proyecto", imagen);
+        formData.append("Titulo", titulo.trim());
+        formData.append("Descripcion", descripcion.trim());
+        formData.append("Id_Usuario", user.Id_Usuario.toString());
+        formData.append("Imagen_Proyecto", imagen);
 
         createProyectoMutation.mutate(
             { formData, idUsuarioCreador: user.Id_Usuario },
@@ -107,6 +145,7 @@ export default function FormularioProyecto({
                     setDescripcion("");
                     setImagen(null);
                     setPreview(null);
+                    setErrors({});
                     onClose();
                     refetch();
                     alert("Proyecto creado con éxito.");
@@ -140,7 +179,7 @@ export default function FormularioProyecto({
                         required
                     />
                     <div className="text-right text-xs text-gray-500 mt-1">{titulo.length}/100</div>
-                    {tituloError && <p className="text-xs text-red-500 mt-1">{tituloError}</p>}
+                    {errors.Titulo && <p className="text-xs text-red-500 mt-1">{errors.Titulo}</p>}
                 </div>
 
                 {/* Campo Descripción */}
@@ -150,26 +189,27 @@ export default function FormularioProyecto({
                         placeholder="Descripción del proyecto"
                         value={descripcion}
                         onChange={handleDescripcionChange}
-                        maxLength={200}
+                        maxLength={1000}
                         className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-sky-500 text-sm break-words"
                         style={{ whiteSpace: "normal", overflowWrap: "break-word" }}
                         rows={3}
                         required
                     />
-                    <div className="text-right text-xs text-gray-500 mt-1">{descripcion.length}/200</div>
-                    {descripcionError && <p className="text-xs text-red-500 mt-1">{descripcionError}</p>}
+                    <div className="text-right text-xs text-gray-500 mt-1">{descripcion.length}/1000</div>
+                    {errors.Descripcion && <p className="text-xs text-red-500 mt-1">{errors.Descripcion}</p>}
                 </div>
 
                 {/* Campo Imagen */}
                 <div>
-                    <label className="block text-sm font-medium text-gray-700">Imagen del Proyecto</label>
+                    <label className="block text-sm font-medium text-gray-700">Archivo del Proyecto</label>
                     <input
                         type="file"
-                        accept="image/*"
+                        accept=".png,.jpg,.jpeg,.heic,.pdf"
                         onChange={handleFileChange}
                         className="w-full text-sm text-gray-600"
+                        required
                     />
-                    {imagenError && <p className="text-xs text-red-500 mt-1">{imagenError}</p>}
+                    {errors.Imagen_Url && <p className="text-xs text-red-500 mt-1">{errors.Imagen_Url}</p>}
                     {preview && (
                         <div className="mt-2">
                             <img
@@ -178,6 +218,9 @@ export default function FormularioProyecto({
                                 className="w-full max-h-40 object-cover rounded-md border"
                             />
                         </div>
+                    )}
+                    {imagen && !preview && (
+                        <p className="text-xs text-gray-600 mt-1">Archivo seleccionado: {imagen.name}</p>
                     )}
                 </div>
 

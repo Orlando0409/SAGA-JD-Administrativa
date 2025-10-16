@@ -104,18 +104,22 @@ export default function ProyectoModal({ isOpen, onClose, proyecto, refetch }: Pr
                                 />
                                 <div className="text-right text-xs text-gray-500 mt-1">{descripcion.length}/1000</div>
                             </div>
+                            <div className="mt-4 p-4 bg-white border border-gray-300 rounded-lg shadow-sm">
+                                <h4 className="text-sm font-semibold text-gray-700">Estado del Proyecto</h4>
+                                <p className="text-sm font-bold text-gray-800">{proyecto.Estado?.Nombre_Estado || "Sin estado"}</p>
+                            </div>
 
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">Imagen</label>
                                 <div className="relative">
                                     <input
                                         type="file"
-                                        accept="image/*"
+                                        accept=".png,.jpg,.jpeg,.heic,.pdf"
                                         onChange={(e) => setImagen(e.target.files?.[0] || null)}
                                         className="absolute inset-0 opacity-0 w-full h-full cursor-pointer"
                                     />
                                     <div className="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm text-gray-500 bg-white cursor-pointer">
-                                        {imagen ? imagen.name : "Seleccionar Imagen"}
+                                        {imagen ? imagen.name : "Seleccionar archivo (PNG, JPG, JPEG, HEIC, PDF)"}
                                     </div>
                                 </div>
                             </div>

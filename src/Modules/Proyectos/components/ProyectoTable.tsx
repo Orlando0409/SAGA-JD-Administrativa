@@ -133,13 +133,7 @@ export default function ProyectoTable() {
                                         >
                                             <Edit3 size={16} className="text-sky-600" />
                                         </button>
-                                        <button
-                                            onClick={(e) => e.stopPropagation()}
-                                            className="p-1 rounded hover:bg-sky-100 transition-colors"
-                                            title="Cambiar estado"
-                                        >
-                                            <Settings size={16} className="text-slate-600" />
-                                        </button>
+                                        
                                     </td>
                                 </tr>
                             ))
