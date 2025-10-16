@@ -50,6 +50,7 @@ export default function FormularioCalidadAgua({ onClose, refetch }: FormularioCa
 
         const formData = new FormData();
         formData.append("Titulo", titulo.trim());
+        formData.append("Descripcion", descripcion.trim());
         formData.append("Archivo_Calidad_Agua", file);
 
         // Verificar que el usuario esté disponible
