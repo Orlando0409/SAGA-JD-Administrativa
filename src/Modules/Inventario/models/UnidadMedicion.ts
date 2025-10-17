@@ -1,13 +1,22 @@
 export interface UnidadMedicion {
   Id_Unidad_Medicion: number;
-  // Support both field names for compatibility
-  Nombre_Unidad_Medicion?: string; // For DTO operations (create/update)
-  Nombre_Unidad?: string; // For display from database entity
+  // El backend devuelve "Nombre_Unidad" en las respuestas GET
+  Nombre_Unidad?: string;
+  // Pero espera "Nombre_Unidad_Medicion" en las peticiones POST/PUT
+  Nombre_Unidad_Medicion?: string;
   Abreviatura: string;
-  Descripcion?: string;
-  Estado_Unidad_Medicion: EstadoUnidadMedicion;
+  Descripcion: string;
+  // El backend devuelve "Estado_Unidad_Medicion" o "Estado" según el contexto
+  Estado_Unidad_Medicion?: EstadoUnidadMedicion;
+  Estado?: EstadoUnidadMedicion; // Alias para compatibilidad
   Fecha_Creacion: Date | string;
   Fecha_Actualizacion: Date | string;
+  Usuario_Creador: {
+    Id_Usuario: number;
+    Nombre_Usuario: string;
+    Id_Rol: number;
+    Nombre_Rol: string;
+  };
 }
 
 export interface EstadoUnidadMedicion {
@@ -29,7 +38,6 @@ export interface UpdateUnidadMedicionData {
 
 export interface UnidadMedicionSimple {
   Id_Unidad_Medicion: number;
-  // Support both field names for compatibility
   Nombre_Unidad_Medicion?: string; // For DTO operations
   Nombre_Unidad?: string; // For display from database entity
 }

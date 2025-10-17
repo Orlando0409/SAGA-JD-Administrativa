@@ -60,8 +60,8 @@ export const useUpdateCategoria = () => {
   const queryClient = useQueryClient();
   const { showSuccess, showError } = useAlerts();
   return useMutation({
-    mutationFn: ({ id, data }: { id: number; data: UpdateCategoriaMaterialData }) => 
-      CategoriasService.updateCategoria(id, data),
+    mutationFn: ({ id, idUsuario, data }: { id: number; idUsuario: number; data: UpdateCategoriaMaterialData }) => 
+      CategoriasService.updateCategoria(id, idUsuario, data),
     onSuccess: (updatedCategoria) => {
       queryClient.invalidateQueries({ queryKey: ['categories'] });
       queryClient.invalidateQueries({ queryKey: ['category', updatedCategoria.Id_Categoria] });
@@ -80,16 +80,16 @@ export const useUpdateEstadoCategoria = () => {
   const { showSuccessWithUndo, showError } = useAlerts();
 
   return useMutation({
-    mutationFn: ({ id, nuevoEstado }: { id: number; nuevoEstado: number }) =>
-      CategoriasService.updateEstadoCategoria(id, nuevoEstado),
-    onSuccess: (_, { id, nuevoEstado }) => {
+    mutationFn: ({ id, nuevoEstado, idUsuario }: { id: number; nuevoEstado: number; idUsuario: number }) =>
+      CategoriasService.updateEstadoCategoria(id, nuevoEstado, idUsuario),
+    onSuccess: (_, { id, nuevoEstado, idUsuario }) => {
       queryClient.invalidateQueries({ queryKey: ['categories'] });
       const accion = nuevoEstado === 1 ? 'activada' : 'desactivada';
       const estadoAnterior = nuevoEstado === 1 ? 2 : 1;
       
       const undoAction = async () => {
         try {
-          await CategoriasService.updateEstadoCategoria(id, estadoAnterior);
+          await CategoriasService.updateEstadoCategoria(id, estadoAnterior, idUsuario);
           queryClient.invalidateQueries({ queryKey: ['categories'] });
         } catch (error) {
           showError('Error', 'No se pudo revertir el cambio');

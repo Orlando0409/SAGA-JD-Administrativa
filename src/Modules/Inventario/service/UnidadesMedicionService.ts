@@ -10,7 +10,6 @@ import type {
 const transformUnidadMedicion = (unidad: any): UnidadMedicion => {
   return {
     ...unidad,
-    // Support both field names for maximum compatibility
     Nombre_Unidad_Medicion: unidad.Nombre_Unidad_Medicion,
     Nombre_Unidad: unidad.Nombre_Unidad
   };
@@ -19,7 +18,6 @@ const transformUnidadMedicion = (unidad: any): UnidadMedicion => {
 const transformUnidadMedicionSimple = (unidad: any): UnidadMedicionSimple => {
   return {
     Id_Unidad_Medicion: unidad.Id_Unidad_Medicion,
-    // Support both field names for maximum compatibility
     Nombre_Unidad_Medicion: unidad.Nombre_Unidad_Medicion,
     Nombre_Unidad: unidad.Nombre_Unidad
   };
@@ -55,17 +53,12 @@ export const createUnidadMedicion = async (unidadData: CreateUnidadMedicionData,
   return transformUnidadMedicion(response.data);
 };
 
-export const updateUnidadMedicion = async (id: number, unidadData: UpdateUnidadMedicionData): Promise<UnidadMedicion> => {
-  const response = await axiosPrivate.put(`/Inventario/update/unidad-medicion/${id}`, unidadData);
+export const updateUnidadMedicion = async (id: number,idUsuario:number, unidadData: UpdateUnidadMedicionData): Promise<UnidadMedicion> => {
+  const response = await axiosPrivate.put(`/Inventario/update/unidad-medicion/${id}/${idUsuario}`, unidadData);
   return transformUnidadMedicion(response.data);
 };
 
-export const updateEstadoUnidadMedicion = async (unidadId: number, estadoUnidad:number): Promise<UnidadMedicion> => {
-  const response = await axiosPrivate.patch(`/Inventario/update/estado/unidad-medicion/${unidadId}/${estadoUnidad}`);
+export const updateEstadoUnidadMedicion = async (unidadId: number, estadoUnidad:number, idUsuario:number): Promise<UnidadMedicion> => {
+  const response = await axiosPrivate.patch(`/Inventario/update/estado/unidad-medicion/${unidadId}/${estadoUnidad}/${idUsuario}`);
   return transformUnidadMedicion(response.data);
-};
-
-export const deleteUnidadMedicion = async (id: number): Promise<{ message: string }> => {
-  const response = await axiosPrivate.delete(`/Inventario/delete/unidad-medicion/${id}`);
-  return response.data;
 };

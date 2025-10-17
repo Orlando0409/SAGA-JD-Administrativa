@@ -126,7 +126,7 @@ export function AppSidebar({ allowedModules }: Readonly<AppSidebarProps>) {
                 <AccordionBody className="p-0" placeholder="">
                   <ul>
                     {sectionModules.map((mod, index) => (
-                      <li key={`${mod.name}-${mod.path}-${index}`}> {/* ✅ Key única */}
+                      <li key={`${mod.name}-${mod.path}-${index}`}> 
                         <Link
                           to={mod.path}
                           className={`flex items-center px-4 py-2 rounded-lg transition-colors
@@ -137,7 +137,7 @@ export function AppSidebar({ allowedModules }: Readonly<AppSidebarProps>) {
                         >
                           <span className="w-6 h-6 flex items-center justify-center">{mod.icon}</span>
                           <span className="ml-2 group-data-[collapsible=icon]:hidden">{mod.name}</span>
-                          {/* ✅ Badge de notificaciones para Solicitudes */}
+              
                           {(mod.name === 'Revisión de Solicitudes' || mod.path === '/Solicitudes') && totalPendientes > 0 && (
                             <span className="ml-auto bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-medium group-data-[collapsible=icon]:hidden">
                               {totalPendientes > 9 ? '9+' : totalPendientes}

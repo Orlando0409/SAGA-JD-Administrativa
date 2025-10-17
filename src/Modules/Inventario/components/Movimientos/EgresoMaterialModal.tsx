@@ -98,7 +98,7 @@ const EgresoMaterialModal: React.FC<EgresoMaterialModalProps> = ({
             <h3 className="text-sm font-medium text-gray-700 mb-2">Material Seleccionado</h3>
             <p className="text-lg font-semibold text-gray-900">{material.Nombre_Material}</p>
             <p className="text-sm text-gray-600">
-              Stock actual: {material.Cantidad} {material.Unidad_Medicion.Nombre_Unidad_Medicion || material.Unidad_Medicion.Nombre_Unidad}
+              Stock actual: {material.Cantidad} {material.Unidad_Medicion.Nombre_Unidad_Medicion}
             </p>
           </div>
 
@@ -140,7 +140,7 @@ const EgresoMaterialModal: React.FC<EgresoMaterialModalProps> = ({
             <div className="text-sm text-gray-600">
               <p>Stock después del egreso:</p>
               <p className={`font-semibold ${seAgotara ? 'text-red-600' : 'text-orange-600'}`}>
-                {stockRestante} {material.Unidad_Medicion.Nombre_Unidad_Medicion || material.Unidad_Medicion.Nombre_Unidad}
+                {stockRestante} {material.Unidad_Medicion.Nombre_Unidad_Medicion}
                 {seAgotara && ' (Material se agotará)'}
               </p>
             </div>

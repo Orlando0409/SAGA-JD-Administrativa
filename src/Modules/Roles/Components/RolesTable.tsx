@@ -295,7 +295,7 @@ const Roles = () => {
                 <option value="Inactivo">Inactivos</option>
               </select>
 
-              {canCreate('roles') && (
+              {canCreate('usuarios') && (
                 <button
                   onClick={() => setShowCreateModal(true)}
                   className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center gap-2"
@@ -308,7 +308,7 @@ const Roles = () => {
           </div>
         </div>
 
-        <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+<div className="bg-white rounded-2xl shadow-sm border border-sky-100 overflow-hidden max-h-[calc(100vh-300px)] overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100">
           <div className="overflow-x-auto">
             <table className="min-w-full table-auto">
               <thead className="bg-sky-50">

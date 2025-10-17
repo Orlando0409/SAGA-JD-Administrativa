@@ -1,0 +1,218 @@
+import { LuX, LuUser, LuCalendar } from 'react-icons/lu';
+import type { DetailMedidorModalProps } from '../../types/MedidorTypes';
+import {FaTachometerAlt, FaUsers} from 'react-icons/fa';
+
+const DetailMedidorModal = ({ isOpen, onClose, medidor }: DetailMedidorModalProps) => {
+  if (!isOpen) return null;
+
+  const getEstadoBadgeColor = (estadoId: number) => {
+    switch (estadoId) {
+      case 1:
+        return 'bg-orange-100 text-orange-800 border-orange-200';
+      case 2:
+        return 'bg-green-100 text-green-800 border-green-200';
+      case 3:
+        return 'bg-red-100 text-red-800 border-red-200';
+      default:
+        return 'bg-gray-100 text-gray-800 border-gray-200';
+    }
+  };
+
+  const formatDate = (dateString: string | Date) => {
+    return new Date(dateString).toLocaleDateString('es-ES', {
+      day: '2-digit',
+      month: 'long',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  };
+
+  return (
+    <div className="fixed inset-0 bg-opacity-10 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-lg shadow-2xl border border-gray-200 w-full max-w-3xl flex flex-col overflow-hidden max-h-[90vh]">
+        <div className="sticky top-0 bg-white border-b border-gray-200 p-4 sm:p-6 z-10">
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-bold text-gray-900">
+              Detalles del Medidor
+            </h2>
+            <button
+              onClick={onClose}
+              className="p-1 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100 transition-colors"
+            >
+              <LuX className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
+
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6 scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100">
+          {/* Información del Medidor */}
+          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
+            <div className="bg-gray-50 px-5 py-3 border-b border-gray-200">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                  <FaTachometerAlt className="w-4 h-4 text-blue-600" />
+                </div>
+                <h3 className="text-base font-bold text-gray-900">Información del Medidor</h3>
+              </div>
+            </div>
+            <div className="p-5">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
+                    Número del Medidor
+                  </label>
+                  <p className="text-2xl font-bold text-gray-900 font-mono">
+                    {medidor.Numero_Medidor}
+                  </p>
+                </div>
+
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
+                    Estado
+                  </label>
+                  <span className={`inline-flex items-center px-3 py-1 rounded-lg text-sm font-semibold border ${getEstadoBadgeColor(medidor.Estado_Medidor.Id_Estado_Medidor)}`}>
+                    {medidor.Estado_Medidor.Nombre_Estado_Medidor}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Información del Afiliado */}
+          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
+            <div className="bg-gray-50 px-5 py-3 border-b border-gray-200">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+                  <FaUsers className="w-4 h-4 text-green-600" />
+                </div>
+                <h3 className="text-base font-bold text-gray-900">Información del Afiliado</h3>
+              </div>
+            </div>
+            <div className="p-5">
+              {medidor.Afiliado ? (
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
+                      Nombre/Razón Social
+                    </label>
+                    <p className="text-sm text-gray-900 font-medium">
+                      {medidor.Afiliado.Nombre_Completo || medidor.Afiliado.Razon_Social}
+                    </p>
+                  </div>
+
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
+                      Número de Afiliado
+                    </label>
+                    <p className="text-sm text-gray-900 font-mono">
+                      #{medidor.Afiliado.Numero_Afiliado}
+                    </p>
+                  </div>
+
+                  <div className="bg-gray-50 p-4 rounded-lg lg:col-span-2">
+                    <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
+                      Tipo de Afiliado
+                    </label>
+                    <span className="inline-flex items-center px-3 py-1 rounded-lg text-xs font-semibold bg-blue-100 text-blue-800 border border-blue-200">
+                      {medidor.Afiliado.Tipo_Afiliado}
+                    </span>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <FaUsers className="w-8 h-8 text-gray-400" />
+                  </div>
+                  <p className="text-gray-600 font-medium">Sin afiliado asignado</p>
+                  <p className="text-gray-500 text-sm mt-1">
+                    Este medidor aún no ha sido asignado a ningún afiliado
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Fechas */}
+          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
+            <div className="bg-gray-50 px-5 py-3 border-b border-gray-200">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+                  <LuCalendar className="w-4 h-4 text-purple-600" />
+                </div>
+                <h3 className="text-base font-bold text-gray-900">Fechas</h3>
+              </div>
+            </div>
+            <div className="p-5">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
+                    Fecha de Creación
+                  </label>
+                  <p className="text-sm text-gray-900">
+                    {formatDate(medidor.Fecha_Creacion)}
+                  </p>
+                </div>
+
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
+                    Última Actualización
+                  </label>
+                  <p className="text-sm text-gray-900">
+                    {formatDate(medidor.Fecha_Actualizacion)}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Usuario Creador */}
+          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
+            <div className="bg-gray-50 px-5 py-3 border-b border-gray-200">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center">
+                  <LuUser className="w-4 h-4 text-indigo-600" />
+                </div>
+                <h3 className="text-base font-bold text-gray-900">Usuario Creador</h3>
+              </div>
+            </div>
+            <div className="p-5">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
+                    Nombre de Usuario
+                  </label>
+                  <p className="text-sm text-gray-900 font-medium">
+                    {medidor.Usuario_Creador.Nombre_Usuario}
+                  </p>
+                </div>
+
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
+                    Rol
+                  </label>
+                  <span className="inline-flex items-center px-3 py-1 rounded-lg text-xs font-semibold bg-indigo-100 text-indigo-800 border border-indigo-200">
+                    {medidor.Usuario_Creador.Nombre_Rol}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="sticky bottom-0 bg-gray-50 border-t border-gray-200 p-4 sm:p-6 z-10">
+          <div className="flex justify-end">
+            <button
+              onClick={onClose}
+              className="px-6 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium"
+            >
+              Cerrar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default DetailMedidorModal;

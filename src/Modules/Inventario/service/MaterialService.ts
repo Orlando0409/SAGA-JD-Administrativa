@@ -3,9 +3,6 @@ import type {
   Material, 
   CreateMaterialData, 
   UpdateMaterialData,
-  Medidor,
-  CreateMedidorData,
-  AsignarMedidorData
 } from '../models/Inventario';
 
 const transformMaterial = (material: any) => {
@@ -21,8 +18,6 @@ export const getAllMaterials = async (): Promise<Material[]> => {
   return response.data.map(transformMaterial);
 };
 
-// Note: Backend doesn't have individual material endpoint
-// This method might need to filter from getAllMaterials or backend needs to add the endpoint
 export const getMaterialById = async (id: number): Promise<Material> => {
   // Temporary workaround: get all materials and filter
   const allMaterials = await getAllMaterials();
@@ -83,8 +78,8 @@ export const createMaterial = async (materialData: CreateMaterialData, idUsuario
   return transformMaterial(response.data);
 };
 
-export const updateMaterial = async (id: number, materialData: UpdateMaterialData): Promise<Material> => {
-  const response = await axiosPrivate.put(`/Inventario/update/material/${id}`, materialData);
+export const updateMaterial = async (id: number, idUsuarioActualizador: number, materialData: UpdateMaterialData): Promise<Material> => {
+  const response = await axiosPrivate.put(`/Inventario/update/material/${id}/${idUsuarioActualizador}`, materialData);
   return transformMaterial(response.data);
 };
 
@@ -93,75 +88,7 @@ export const removeCategoriaFromMaterial = async (materialId: number, categoriaI
   return transformMaterial(response.data);
 };
 
-export const updateEstadoMaterial = async (materialId: number, estadoMaterialId: number): Promise<Material> => {
-  const response = await axiosPrivate.patch(`/Inventario/update/estado/material/${materialId}/${estadoMaterialId}`);
+export const updateEstadoMaterial = async (materialId: number, estadoMaterialId: number, idUsuarioActualizador: number): Promise<Material> => {
+  const response = await axiosPrivate.patch(`/Inventario/update/estado/material/${materialId}/${estadoMaterialId}/${idUsuarioActualizador}`);
   return transformMaterial(response.data);
-};
-
-// ============================================
-// FUNCIONES PARA MEDIDORES
-// ============================================
-
-// Obtener todos los medidores
-export const getAllMedidores = async (): Promise<Medidor[]> => {
-  const response = await axiosPrivate.get('/Inventario/all/medidores');
-  return response.data;
-};
-
-// Obtener medidores no instalados (estado 1)
-export const getMedidoresNoInstalados = async (): Promise<Medidor[]> => {
-  const response = await axiosPrivate.get('/Inventario/medidores/no-instalados');
-  return response.data;
-};
-
-// Obtener medidores instalados (estado 2)
-export const getMedidoresInstalados = async (): Promise<Medidor[]> => {
-  const response = await axiosPrivate.get('/Inventario/medidores/instalados');
-  return response.data;
-};
-
-// Obtener medidores averiados (estado 3)
-export const getMedidoresAveriados = async (): Promise<Medidor[]> => {
-  const response = await axiosPrivate.get('/Inventario/medidores/averiados');
-  return response.data;
-};
-
-// Obtener medidores de un afiliado específico
-export const getMedidoresAfiliado = async (idAfiliado: number): Promise<Medidor[]> => {
-  const response = await axiosPrivate.get(`/Inventario/medidores/afiliado/${idAfiliado}`);
-  return response.data;
-};
-
-// Crear un nuevo medidor
-export const createMedidor = async (
-  medidorData: CreateMedidorData, 
-  idUsuarioCreador: number
-): Promise<Medidor> => {
-  const response = await axiosPrivate.post(
-    `/Inventario/create/medidor/${idUsuarioCreador}`, 
-    medidorData
-  );
-  return response.data;
-};
-
-// Asignar medidor a un afiliado
-export const asignarMedidorAAfiliado = async (
-  asignacionData: AsignarMedidorData
-): Promise<Medidor> => {
-  const response = await axiosPrivate.patch(
-    '/Inventario/asignar/medidor/afiliado', 
-    asignacionData
-  );
-  return response.data;
-};
-
-// Actualizar estado del medidor
-export const updateEstadoMedidor = async (
-  idMedidor: number, 
-  idEstadoMedidor: number
-): Promise<Medidor> => {
-  const response = await axiosPrivate.patch(
-    `/Inventario/update/estado/medidor/${idMedidor}/${idEstadoMedidor}`
-  );
-  return response.data;
 };

@@ -40,22 +40,29 @@ const FilterMaterialModal: React.FC<FilterMaterialModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <section className="fixed inset-0 flex items-start justify-end z-50">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4 max-h-[90vh] overflow-hidden">
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
-          <h2 className="text-xl font-semibold text-gray-900 flex items-center">
+    <section className="fixed inset-0 flex items-center justify-end z-50 p-4">
+      <div className="bg-white rounded-lg shadow-2xl w-full max-w-md max-h-[90vh] flex flex-col overflow-hidden">
+        <div className="sticky top-0 bg-white flex items-center justify-between p-4 sm:p-6 border-b border-gray-200 z-10">
+          <h2 className="text-lg sm:text-xl font-semibold text-gray-900 flex items-center gap-2">
             <LuFilter className="w-5 h-5" />
             Filtros Avanzados
           </h2>
+          <button
+            onClick={onClose}
+            className="p-1 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100 transition-colors"
+            aria-label="Cerrar"
+          >
+            <LuX className="w-5 h-5" />
+          </button>
         </div>
 
-        <div className="p-6 space-y-4 overflow-y-auto max-h-[calc(90vh-140px)] scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 sm:space-y-6 scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100">
           <div>
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium text-gray-700">
                 Categorías
               </span>
-              <div className="flex gap-1">
+              <div className="flex gap-1 sm:gap-2">
                 <button
                   type="button"
                   onClick={() => {
@@ -64,7 +71,7 @@ const FilterMaterialModal: React.FC<FilterMaterialModalProps> = ({
                       categoria: categorias.map(c => c.Id_Categoria)
                     }));
                   }}
-                  className="text-xs text-blue-600 hover:text-blue-700 font-medium"
+                  className="text-xs sm:text-sm text-blue-600 hover:text-blue-700 font-medium px-2 py-1"
                 >
                   Todas
                 </button>
@@ -77,7 +84,7 @@ const FilterMaterialModal: React.FC<FilterMaterialModalProps> = ({
                       categoria: []
                     }));
                   }}
-                  className="text-xs text-gray-600 hover:text-gray-700 font-medium"
+                  className="text-xs sm:text-sm text-gray-600 hover:text-gray-700 font-medium px-2 py-1"
                 >
                   Ninguna
                 </button>
@@ -272,7 +279,7 @@ const FilterMaterialModal: React.FC<FilterMaterialModalProps> = ({
               )}
 
               {filters.tipoFiltroStock === 'entre' && (
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   <input
                     type="number"
                     placeholder="Stock mín."
@@ -281,7 +288,7 @@ const FilterMaterialModal: React.FC<FilterMaterialModalProps> = ({
                       ...prev, 
                       stockMinimo: e.target.value ? Number(e.target.value) : undefined 
                     }))}
-                    className="px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-transparent"
+                    className="px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-transparent"
                     min="0"
                   />
                   <input
@@ -292,7 +299,7 @@ const FilterMaterialModal: React.FC<FilterMaterialModalProps> = ({
                       ...prev, 
                       stockMaximo: e.target.value ? Number(e.target.value) : undefined 
                     }))}
-                    className="px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-transparent"
+                    className="px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-transparent"
                     min="0"
                   />
                 </div>
@@ -304,7 +311,7 @@ const FilterMaterialModal: React.FC<FilterMaterialModalProps> = ({
             <div className="block text-sm font-medium text-gray-700 mb-2">
               Rango de Precio
             </div>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
               <div>
                 <input
                   type="number"
@@ -314,7 +321,7 @@ const FilterMaterialModal: React.FC<FilterMaterialModalProps> = ({
                     ...prev, 
                     precioMin: e.target.value ? Number(e.target.value) : undefined 
                   }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   min="0"
                   step="0.01"
                 />
@@ -328,7 +335,7 @@ const FilterMaterialModal: React.FC<FilterMaterialModalProps> = ({
                     ...prev, 
                     precioMax: e.target.value ? Number(e.target.value) : undefined 
                   }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   min="0"
                   step="0.01"
                 />
@@ -337,23 +344,23 @@ const FilterMaterialModal: React.FC<FilterMaterialModalProps> = ({
           </div>
         </div>
 
-        <div className="flex items-center justify-end p-6 border-t border-gray-200 bg-gray-50">
-          <div className="flex gap-3">
+        <div className="sticky bottom-0 bg-gray-50 border-t border-gray-200 p-4 sm:p-6 z-10">
+          <div className="flex flex-col-reverse sm:flex-row gap-2 sm:gap-3 sm:justify-end">
             <button
               onClick={handleApply}
-              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
             >
               Aplicar Filtros
             </button>
-          <button
-            onClick={handleClear}
-            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-          >
-            Limpiar Filtros
-          </button>
+            <button
+              onClick={handleClear}
+              className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+            >
+              Limpiar Todo
+            </button>
             <button
               onClick={onClose}
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
             >
               Cancelar
             </button>

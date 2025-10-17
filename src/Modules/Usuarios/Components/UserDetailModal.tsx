@@ -46,7 +46,7 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({ userId, isOpen, onClo
 
   return (
     <div className="fixed inset-0 bg-opacity-10 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-2xl border border-gray-200 w-full max-w-3xl max-h-[90vh] overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100">
+      <div className="bg-white rounded-lg shadow-2xl border border-gray-200 w-full max-w-3xl flex flex-col overflow-hidden max-h-[90vh]">
         <div className="sticky top-0 bg-white border-b border-gray-200 p-4 z-10">
           <div className="flex items-center justify-between">
             <h1 className="text-xl font-bold text-gray-900 flex items-center gap-3">
@@ -58,7 +58,7 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({ userId, isOpen, onClo
           </div>
         </div>
 
-        <div className="p-6">
+        <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100 p-6">
 
           <div className="space-y-6">
             <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
@@ -166,15 +166,14 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({ userId, isOpen, onClo
             )}
           </div>
         </div>
+          
           <div className="sticky bottom-0 flex justify-end gap-3 p-6 border-t bg-gray-50 z-10">
-            <div className="flex items-center">
-              <button
-                onClick={onClose}
-                className="px-6 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium"
-              >
-                Cerrar
-              </button>
-            </div>
+            <button
+              onClick={onClose}
+              className="px-6 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium"
+            >
+              Cerrar
+            </button>
           </div>
       </div>
     </div>

@@ -4,7 +4,7 @@ import type {
   CreateUnidadMedicionData, 
   UpdateUnidadMedicionData 
 } from '../models/UnidadMedicion';
-import { getAllUnidadesMedicion, getAllUnidadesMedicionSimple, getUnidadesMedicionActivas, getUnidadesMedicionInactivas, createUnidadMedicion, updateUnidadMedicion, updateEstadoUnidadMedicion, deleteUnidadMedicion } from '../service/UnidadesMedicionService';
+import { getAllUnidadesMedicion, getAllUnidadesMedicionSimple, getUnidadesMedicionActivas, getUnidadesMedicionInactivas, createUnidadMedicion, updateUnidadMedicion, updateEstadoUnidadMedicion } from '../service/UnidadesMedicionService';
 
 
 export const useUnidadesMedicion = () => {
@@ -63,8 +63,8 @@ export const useUpdateUnidadMedicion = () => {
   const { showSuccess, showError } = useAlerts();
   
   return useMutation({
-    mutationFn: ({ id, data }: { id: number; data: UpdateUnidadMedicionData }) => 
-      updateUnidadMedicion(id, data),
+    mutationFn: ({ id, data, idUsuario }: { id: number; data: UpdateUnidadMedicionData; idUsuario: number }) => 
+      updateUnidadMedicion(id, idUsuario, data),
     onSuccess: () => {
       showSuccess('Éxito', 'Unidad de medición actualizada correctamente');
       queryClient.invalidateQueries({ queryKey: ['unidades-medicion'] });
@@ -83,8 +83,8 @@ export const useUpdateEstadoUnidadMedicion = () => {
   const { showSuccessWithUndo, showError } = useAlerts();
 
   return useMutation({
-    mutationFn: ({ unidadId, estadoUnidad }: { unidadId: number; estadoUnidad: number }) => updateEstadoUnidadMedicion(unidadId, estadoUnidad),
-    onSuccess: (_, { unidadId, estadoUnidad }) => {
+    mutationFn: ({ unidadId, estadoUnidad, idUsuario }: { unidadId: number; estadoUnidad: number; idUsuario: number }) => updateEstadoUnidadMedicion(unidadId, estadoUnidad, idUsuario),
+    onSuccess: (_, { unidadId, estadoUnidad, idUsuario }) => {
       queryClient.invalidateQueries({ queryKey: ['unidades-medicion'] });
       queryClient.invalidateQueries({ queryKey: ['unidades-medicion-simple'] });
       queryClient.invalidateQueries({ queryKey: ['unidad-medicion'] });
@@ -93,7 +93,7 @@ export const useUpdateEstadoUnidadMedicion = () => {
       
       const undoAction = async () => {
         try {
-          await updateEstadoUnidadMedicion(unidadId, estadoAnterior);
+          await updateEstadoUnidadMedicion(unidadId, estadoAnterior, idUsuario);
           queryClient.invalidateQueries({ queryKey: ['unidades-medicion'] });
           queryClient.invalidateQueries({ queryKey: ['unidades-medicion-simple'] });
           queryClient.invalidateQueries({ queryKey: ['unidad-medicion'] });
@@ -110,24 +110,6 @@ export const useUpdateEstadoUnidadMedicion = () => {
     },
     onError: (error: any) => {
       const errorMessage = error?.response?.data?.message || 'Error al actualizar el estado de la unidad de medición';
-      showError('Error', errorMessage);
-    },
-  });
-};
-
-export const useDeleteUnidadMedicion = () => {
-  const queryClient = useQueryClient();
-  const { showSuccess, showError } = useAlerts();
-  
-  return useMutation({
-    mutationFn: (id: number) => deleteUnidadMedicion(id),
-    onSuccess: () => {
-      showSuccess('Éxito', 'Unidad de medición eliminada correctamente');
-      queryClient.invalidateQueries({ queryKey: ['unidades-medicion'] });
-      queryClient.invalidateQueries({ queryKey: ['unidades-medicion-simple'] });
-    },
-    onError: (error: any) => {
-      const errorMessage = error?.response?.data?.message || 'Error al eliminar la unidad de medición';
       showError('Error', errorMessage);
     },
   });

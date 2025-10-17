@@ -88,7 +88,7 @@ const IngresoMaterialModal: React.FC<IngresoMaterialModalProps> = ({
             <h3 className="text-sm font-medium text-gray-700 mb-2">Material Seleccionado</h3>
             <p className="text-lg font-semibold text-gray-900">{material.Nombre_Material}</p>
             <p className="text-sm text-gray-600">
-              Stock actual: {material.Cantidad} {material.Unidad_Medicion.Nombre_Unidad_Medicion || material.Unidad_Medicion.Nombre_Unidad}
+              Stock actual: {material.Cantidad} {material.Unidad_Medicion.Nombre_Unidad_Medicion}
             </p>
           </div>
 
@@ -116,7 +116,7 @@ const IngresoMaterialModal: React.FC<IngresoMaterialModalProps> = ({
           <div className="text-sm text-gray-600">
             <p>Nuevo stock después del ingreso:</p>
             <p className="font-semibold text-green-600">
-              {material.Cantidad + formData.Cantidad} {material.Unidad_Medicion.Nombre_Unidad_Medicion || material.Unidad_Medicion.Nombre_Unidad}
+              {material.Cantidad + formData.Cantidad} {material.Unidad_Medicion.Nombre_Unidad_Medicion}
             </p>
           </div>
 

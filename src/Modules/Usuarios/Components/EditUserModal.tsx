@@ -109,18 +109,20 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ isOpen, onClose, user }) 
 
   return (
     <div className="fixed inset-0 bg-opacity-10 backdrop-blur-sm flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4">
-        <div className="flex items-center justify-between p-6 border-b">
+      <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4 flex flex-col overflow-hidden max-h-[90vh]">
+        <div className="sticky top-0 flex items-center justify-between p-6 border-b bg-white z-10">
           <h2 className="text-xl font-semibold text-gray-900">Editar Usuario</h2>
         </div>
 
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            form.handleSubmit();
-          }}
-          className="p-6 space-y-4"
-        >
+        <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+          <form
+            id="edit-user-form"
+            onSubmit={(e) => {
+              e.preventDefault();
+              form.handleSubmit();
+            }}
+            className="p-6 space-y-4"
+          >
           <form.Field name="Nombre_Usuario">
             {(field) => (
               <div>
@@ -226,10 +228,13 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ isOpen, onClose, user }) 
             )}
           </form.Field>
         </form>
+        </div>
+          
           <div className="sticky bottom-0 flex justify-end gap-3 p-6 border-t bg-gray-50 z-10">
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button
+                  form="edit-user-form"
                   disabled={updateUserMutation.isPending}
                   className={`flex-1 px-4 py-2 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors ${
                     updateUserMutation.isPending 

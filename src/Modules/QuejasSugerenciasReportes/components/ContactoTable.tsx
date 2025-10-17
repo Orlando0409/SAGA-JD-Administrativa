@@ -454,7 +454,7 @@ const ContactoTable = () => {
         </div>
       </div>
       {/* Tabla */}
-      <div className="bg-white rounded-2xl shadow-sm border border-sky-100 overflow-hidden">
+ <div className="bg-white rounded-2xl shadow-sm border border-sky-100 overflow-hidden max-h-[calc(100vh-300px)] overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100">
         <div className="overflow-x-auto">
           <table className="min-w-full table-auto">
             <thead className="bg-sky-50">

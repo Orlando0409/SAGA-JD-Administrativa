@@ -5,7 +5,7 @@ const axiosPrivate = axios.create({
   //Url local=http://localhost:3000/api
   //Url render=https://saga-jd-back-end-1.onrender.com/api
   
-  baseURL: 'https://saga-jd-back-end-1.onrender.com/api',
+  baseURL: 'http://localhost:3000/api',
   headers: { 'Content-Type': 'application/json' },
   withCredentials: true, 
 })

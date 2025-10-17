@@ -30,12 +30,12 @@ export const createCategoria = async (categoriaData: CreateCategoriaMaterialData
   return response.data;
 };
 
-export const updateCategoria = async (id: number, categoriaData: UpdateCategoriaMaterialData): Promise<CategoriaMaterial> => {
-  const response = await axiosPrivate.put(`/Inventario/update/categoria/${id}`, categoriaData);
+export const updateCategoria = async (id: number, idUsuario: number, categoriaData: UpdateCategoriaMaterialData): Promise<CategoriaMaterial> => {
+  const response = await axiosPrivate.put(`/Inventario/update/categoria/${id}/${idUsuario}`, categoriaData);
   return response.data;
 };
 
-export const updateEstadoCategoria = async (id: number, estadoId: number): Promise<CategoriaMaterial> => {
-  const response = await axiosPrivate.patch(`/Inventario/update/estado/categoria/${id}/${estadoId}`);
+export const updateEstadoCategoria = async (id: number, estadoId: number, idUsuario: number): Promise<CategoriaMaterial> => {
+  const response = await axiosPrivate.patch(`/Inventario/update/estado/categoria/${id}/${estadoId}/${idUsuario}`);
   return response.data;
 };

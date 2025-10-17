@@ -1,16 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { 
-  getAllMedidores,
-  getMedidoresNoInstalados,
-  getMedidoresInstalados,
-  getMedidoresAveriados,
-  getMedidoresAfiliado,
-  createMedidor,
-  asignarMedidorAAfiliado,
-  updateEstadoMedidor
-} from '../service/MaterialService';
-import type { CreateMedidorData, AsignarMedidorData } from '../models/Inventario';
-
+import type { CreateMedidorData } from '../models/Medidor';
+import { getAllMedidores, getMedidoresNoInstalados, getMedidoresInstalados, getMedidoresAveriados, getMedidoresAfiliado, createMedidor, updateEstadoMedidor } from '../service/MedidorServices';
 
 // Hook para obtener todos los medidores
 export const useMedidores = () => {
@@ -63,28 +53,13 @@ export const useCreateMedidor = () => {
   });
 };
 
-// Hook para asignar medidor a afiliado
-export const useAsignarMedidor = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (data: AsignarMedidorData) => asignarMedidorAAfiliado(data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['medidores'] });
-    },
-    onError: () => {
-        console.error('Error al asignar el medidor');
-    },
-  });
-};
-
 // Hook para actualizar estado del medidor
 export const useUpdateEstadoMedidor = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ idMedidor, idEstado }: { idMedidor: number; idEstado: number }) =>
-      updateEstadoMedidor(idMedidor, idEstado),
+    mutationFn: ({ idMedidor, idEstado, idUsuario }: { idMedidor: number; idEstado: number; idUsuario: number }) =>
+      updateEstadoMedidor(idMedidor, idEstado, idUsuario),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['medidores'] });
     },

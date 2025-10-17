@@ -101,14 +101,14 @@ export const EditRoleModal: React.FC<EditRoleModalProps> = ({ roleId, isOpen, on
 
   // Verificar si el módulo tiene permiso de editar disponible
   const hasEditPermission = (modulo: string) => {
-    return modulo !== 'bitacora';
+    return modulo !== 'auditoria';
   };
 
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 bg-opacity-10 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-2xl border border-gray-200 w-full max-w-3xl max-h-[90vh] overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100">
+      <div className="bg-white rounded-lg shadow-2xl border border-gray-200 w-full max-w-3xl flex flex-col overflow-hidden max-h-[90vh]">
         <div className="sticky top-0 bg-white border-b border-gray-200 p-4 z-10">
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-bold text-gray-900 flex items-center gap-3">
@@ -124,7 +124,7 @@ export const EditRoleModal: React.FC<EditRoleModalProps> = ({ roleId, isOpen, on
           </div>
         </div>
 
-        <div className="p-6">
+        <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100 p-6">
           {roleLoading || permisosLoading ? (
             <div className="text-center py-8">Cargando...</div>
           ) : (
@@ -283,49 +283,47 @@ export const EditRoleModal: React.FC<EditRoleModalProps> = ({ roleId, isOpen, on
           </form>
           )}
         </div>
-                    {/* Botones */}
-            <div className="sticky bottom-0 flex justify-end gap-3 p-6 border-t bg-gray-50 z-10">
-              <div className="flex justify-end gap-3">
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <Button
-                      disabled={hasError || nombreRol.length < RoleMIN_LENGTH}
-                      className={`px-6 py-2 rounded-lg transition-colors font-medium ${
-                        hasError || nombreRol.length < RoleMIN_LENGTH
-                          ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                          : 'bg-blue-600 text-white hover:bg-blue-700'
-                      }`}
-                    >
-                      Guardar Cambios
-                    </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>¿Confirmar actualización?</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        ¿Estás seguro de que deseas actualizar este rol? Esta acción modificará los permisos y el nombre del rol en el sistema.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogAction
-                        onClick={handleSubmit}
-                        disabled={hasError || nombreRol.length < RoleMIN_LENGTH}
-                      >
-                        Confirmar
-                      </AlertDialogAction>
-                      <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
-                  <button
-                  type="button"
-                  onClick={onClose}
-                  className="px-6 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium"
+        
+          <div className="sticky bottom-0 flex justify-end gap-3 p-6 border-t bg-gray-50 z-10">
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button
+                  disabled={hasError || nombreRol.length < RoleMIN_LENGTH}
+                  className={`px-6 py-2 rounded-lg transition-colors font-medium ${
+                    hasError || nombreRol.length < RoleMIN_LENGTH
+                      ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                      : 'bg-blue-600 text-white hover:bg-blue-700'
+                  }`}
                 >
-                  Cancelar
-                </button>
-              </div>
-            </div>
+                  Guardar Cambios
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>¿Confirmar actualización?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    ¿Estás seguro de que deseas actualizar este rol? Esta acción modificará los permisos y el nombre del rol en el sistema.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogAction
+                    onClick={handleSubmit}
+                    disabled={hasError || nombreRol.length < RoleMIN_LENGTH}
+                  >
+                    Confirmar
+                  </AlertDialogAction>
+                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-6 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium"
+            >
+              Cancelar
+            </button>
+          </div>
       </div>
     </div>
   );

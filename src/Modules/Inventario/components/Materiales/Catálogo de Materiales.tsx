@@ -22,8 +22,6 @@ import {
   useGetMaterialesEntreRangoPrecio,
   useUpdateEstadoMaterial,
 } from '../../hooks/useMaterials';
-import { getAllMedidores } from '../../service/MaterialService';
-import { useQuery } from '@tanstack/react-query';
 import { MdKeyboardArrowLeft, MdKeyboardArrowRight, MdKeyboardDoubleArrowLeft,
   MdKeyboardDoubleArrowRight, MdKeyboardArrowUp, MdKeyboardArrowDown} from "react-icons/md";
 import {
@@ -38,13 +36,15 @@ import {
   AlertDialogTrigger,
 } from '@/Modules/Global/components/Sidebar/ui/alert-dialog';
 
-import type { Material, Medidor } from '../../models/Inventario';
+import type { Material } from '../../models/Inventario';
 import type { MaterialFilterOptions } from '../../types/MaterialTypes';
 import { getMaterialLoadingState } from '../../helper/MaterialesHelpers';
 import CreateMaterialModal from './CreateMaterialModal';
 import DetailMaterialModal from './DetailMaterialModal';
 import FilterMaterialModal from './FilterMaterialModal';
 import EditMaterialModal from './EditMaterialModal';
+import { useNavigate } from '@tanstack/react-router';
+import { useAuth } from '@/Modules/Auth/Context/AuthContext';
 
 interface CatalogoMaterialesProps {
   onBack?: () => void;
@@ -60,24 +60,8 @@ const CatalogoMateriales: React.FC<CatalogoMaterialesProps> = ({ onBack }) => {
   const [appliedFilters, setAppliedFilters] = useState<MaterialFilterOptions>({});
   const [estadoFilter, setEstadoFilter] = useState<string>('Todos'); // Por defecto mostrar todos
   const updateEstadoMutation = useUpdateEstadoMaterial();
-
-  // Obtener todos los medidores para mostrar en la tabla
-  const { data: medidores = [] } = useQuery<Medidor[]>({
-    queryKey: ['medidores'],
-    queryFn: getAllMedidores,
-    staleTime: 1000 * 60 * 5, // 5 minutos
-  });
-
-  // Crear un mapa de Id_Material -> Medidor para búsqueda rápida
-  const medidoresMap = useMemo(() => {
-    const map = new Map<number, Medidor>();
-    medidores.forEach(medidor => {
-      if (medidor.Usuario_Creador?.Id_Usuario) {
-        map.set(medidor.Usuario_Creador.Id_Usuario, medidor);
-      }
-    });
-    return map;
-  }, [medidores]);
+  const navigate = useNavigate();
+  const user = useAuth();
 
   // Hooks para obtener materiales según el estado
   const { data: todosMateriales = [], isLoading: isLoadingTodos, refetch: refetchTodos } = useGetAllMaterials();
@@ -85,7 +69,6 @@ const CatalogoMateriales: React.FC<CatalogoMaterialesProps> = ({ onBack }) => {
   const { data: materialesAgotados = [], isLoading: isLoadingAgotados, refetch: refetchAgotados } = useGetMaterialesAgotados();
   const { data: materialesDeBaja = [], isLoading: isLoadingDeBaja, refetch: refetchDeBaja } = useGetMaterialesDeBaja();
   const { data: materialesAgotadosYDeBaja = [], isLoading: isLoadingAgotadosYDeBaja, refetch: refetchAgotadosYDeBaja } = useGetMaterialesAgotadosYDeBaja();
-  
   const { data: materialesConCategorias = [], isLoading: isLoadingConCat, refetch: refetchConCat } = useGetMaterialesConCategorias();
   const { data: materialesSinCategorias = [], isLoading: isLoadingSinCat, refetch: refetchSinCat } = useGetMaterialesSinCategorias();
   const { data: materialesEncimaStock = [], isLoading: isLoadingAbove, refetch: refetchAbove } = useGetMaterialesPorEncimaDeStock(
@@ -183,20 +166,24 @@ const CatalogoMateriales: React.FC<CatalogoMaterialesProps> = ({ onBack }) => {
   const filterByCategoria = (material: Material, categoria?: string | (string | number)[]) => {
     if (!categoria || (Array.isArray(categoria) && categoria.length === 0)) return true;
     
-    const categorias = (material.materialCategorias && material.materialCategorias.length > 0) 
-      ? material.materialCategorias 
-      : (material.Categorias || []);
+    // El backend devuelve "Categorias" como array directo de CategoriaMaterial
+    const categorias = material.Categorias || [];
     
     if (Array.isArray(categoria)) {
-      return categorias.some(cat =>
-        categoria.includes(cat.Categoria.Nombre_Categoria) ||
-        categoria.includes(cat.Categoria.Id_Categoria)
-      );
+      return categorias.some((cat: any) => {
+        // Si es formato antiguo (con Categoria nested), usar Categoria
+        const categoria = cat.Categoria || cat;
+        return categoria.includes(categoria.Nombre_Categoria) ||
+               categoria.includes(categoria.Id_Categoria);
+      });
     }
-    return categorias.some(cat => 
-      cat.Categoria.Nombre_Categoria === categoria ||
-      String(cat.Categoria.Id_Categoria) === String(categoria)
-    );
+    
+    return categorias.some((cat: any) => {
+      // Si es formato antiguo (con Categoria nested), usar Categoria
+      const categoriaObj = cat.Categoria || cat;
+      return categoriaObj.Nombre_Categoria === categoria ||
+             String(categoriaObj.Id_Categoria) === String(categoria);
+    });
   };
 
   const filterByStock = (material: Material, conStock?: boolean) => {
@@ -235,32 +222,10 @@ const CatalogoMateriales: React.FC<CatalogoMaterialesProps> = ({ onBack }) => {
           </div>
         ),
       }),
-      columnHelper.display({
-        id: 'tipo',
-        header: 'Tipo',
-        cell: info => {
-          const material = info.row.original;
-          const medidor = medidoresMap.get(material.Id_Material);
-          
-          if (medidor) {
-            return (
-                <span className="px-2 py-1 bg-purple-100 text-purple-700 border border-purple-300 rounded-full text-xs font-semibold inline-flex items-center gap-1 w-fit">
-                  Medidor
-                </span>
-            );
-          }
-          
-          return (
-            <span className="px-2 py-1 bg-gray-100 text-gray-600 rounded-full text-xs font-medium">
-              Material
-            </span>
-          );
-        },
-      }),
       columnHelper.accessor('Descripcion', {
         header: 'Descripción',
         cell: info => (
-          <div className="text-gray-600 max-w-xs truncate">
+          <div className="text-gray-600 max-w-[200px] truncate">
             {info.getValue() || 'Sin descripción'}
           </div>
         ),
@@ -273,7 +238,7 @@ const CatalogoMateriales: React.FC<CatalogoMaterialesProps> = ({ onBack }) => {
           </div>
         ),
       }),
-      columnHelper.accessor((row) => row.Unidad_Medicion?.Nombre_Unidad_Medicion || row.Unidad_Medicion?.Nombre_Unidad, {
+      columnHelper.accessor((row) => row.Unidad_Medicion?.Nombre_Unidad_Medicion, {
         header: 'Unidad de medida',
         cell: info => (
           <div className="text-sm text-gray-600">
@@ -326,18 +291,23 @@ const CatalogoMateriales: React.FC<CatalogoMaterialesProps> = ({ onBack }) => {
           }
           
           return (
-            <div className="flex flex-wrap gap-1 max-w-xs">
-              {categorias.slice(0, 3).map((categoria, index) => (
-                <span 
-                  key={categoria.Id_Material_Categoria || index} 
-                  className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs whitespace-nowrap"
-                >
-                  {categoria.Categoria?.Nombre_Categoria || 'N/A'}
-                </span>
-              ))}
-              {categorias.length > 3 && (
+            <div className="flex gap-1 max-w-xs">
+              {categorias.slice(0, 2).map((cat: any, index: number) => {
+                const categoria = cat.Categoria || cat;
+                const key = cat.Id_Material_Categoria || cat.Id_Categoria || index;
+                
+                return (
+                  <span 
+                    key={key} 
+                    className="inline-flex items-center px-2 py-1 rounded-lg text-xs font-semibold bg-blue-100 text-blue-800 border border-blue-200"
+                  >
+                    {categoria.Nombre_Categoria || 'N/A'}
+                  </span>
+                );
+              })}
+              {categorias.length > 2 && (
                 <span className="px-2 py-1 bg-gray-100 text-gray-600 rounded-full text-xs">
-                  +{categorias.length - 3}
+                  +{categorias.length - 2}
                 </span>
               )}
             </div>
@@ -564,7 +534,7 @@ const CatalogoMateriales: React.FC<CatalogoMaterialesProps> = ({ onBack }) => {
           </div>
         ),
       }),
-    ], [updateEstadoMutation.isPending, medidoresMap]);
+    ], [updateEstadoMutation.isPending]);
 
   const table = useReactTable({
     data: filteredMaterials,
@@ -626,6 +596,7 @@ const CatalogoMateriales: React.FC<CatalogoMaterialesProps> = ({ onBack }) => {
     updateEstadoMutation.mutate({
       materialId: material.Id_Material,
       estadoMaterialId: nuevoEstadoId,
+      idUsuarioActualizador: user.user?.Id_Usuario || 0,
     });
   };
 
@@ -717,11 +688,17 @@ const CatalogoMateriales: React.FC<CatalogoMaterialesProps> = ({ onBack }) => {
               <LuPlus className="w-4 h-4" />
               Nuevo Material
             </button>
+            <button
+              onClick={() => navigate({ to: '/Inventario/Materiales/Medidores' })}
+              className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition"
+            >
+              Medidores
+            </button>
           </div>
         </div>
       </div>
 
-      <div className="bg-white rounded-2xl shadow-sm border border-sky-100 overflow-hidden">
+<div className="bg-white rounded-2xl shadow-sm border border-sky-100 overflow-hidden max-h-[calc(100vh-300px)] overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100">
         <div className="overflow-x-auto">
           <table className="min-w-full table-auto">
             <thead className="bg-sky-50">
