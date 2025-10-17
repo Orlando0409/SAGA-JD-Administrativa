@@ -1,22 +1,25 @@
 import { useState } from "react";
 import { useUploadCalidadAgua } from "../Hook/HookCalidadAgua";
 import { useAuth } from "@/Modules/Auth/Context/AuthContext";
+import { useAlerts } from "@/Modules/Global/context/AlertContext"; // ✅ Importamos el hook de alertas
 
 interface FormularioCalidadAguaProps {
-    id: number; // Agregada la propiedad id
+    id: number;
     tituloInicial: string;
-    onClose: () => void; // Función para cerrar el modal
-    refetch: () => void; // Función para refrescar la tabla
+    onClose: () => void;
+    refetch: () => void;
 }
 
 export default function FormularioCalidadAgua({ onClose, refetch }: FormularioCalidadAguaProps) {
-    const { user } = useAuth(); // Obtener usuario autenticado
-    const uploadCalidadAguaMutation = useUploadCalidadAgua(); // Subir un nuevo archivo
+    const { user } = useAuth();
+    const uploadCalidadAguaMutation = useUploadCalidadAgua();
+    const { showSuccess, showError } = useAlerts(); // ✅ Hook de alertas
+
     const [descripcion, setDescripcion] = useState("");
     const [titulo, setTitulo] = useState("");
     const [file, setFile] = useState<File | null>(null);
-    const [tituloError, setTituloError] = useState(""); // Validación de título
-    const [descripcionError, setDescripcionError] = useState(""); // Validación de descripción
+    const [tituloError, setTituloError] = useState("");
+    const [descripcionError, setDescripcionError] = useState("");
 
     const handleTituloChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
@@ -29,6 +32,7 @@ export default function FormularioCalidadAgua({ onClose, refetch }: FormularioCa
             setTituloError("");
         }
     };
+
     const handleDescripcionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
         const value = e.target.value;
         setDescripcion(value);
@@ -40,11 +44,17 @@ export default function FormularioCalidadAgua({ onClose, refetch }: FormularioCa
             setDescripcionError("");
         }
     };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
         if (!file) {
-            alert("Debe seleccionar un archivo válido.");
+            showError("Debe seleccionar un archivo válido."); // ✅ Reemplazado alert por showError
+            return;
+        }
+
+        if (!user?.Id_Usuario) {
+            showError("Error: Usuario no autenticado."); // ✅
             return;
         }
 
@@ -53,28 +63,29 @@ export default function FormularioCalidadAgua({ onClose, refetch }: FormularioCa
         formData.append("Descripcion", descripcion.trim());
         formData.append("Archivo_Calidad_Agua", file);
 
-        // Verificar que el usuario esté disponible
-        if (!user?.Id_Usuario) {
-            alert("Error: Usuario no autenticado.");
-            return;
-        }
-
-        uploadCalidadAguaMutation.mutate({
-            formData,
-            idUsuarioCreador: user.Id_Usuario
-        }, {
-            onSuccess: () => {
-                setTitulo("");
-                setFile(null);
-                onClose(); // Oculta el modal después de crear el archivo
-                refetch(); // Refresca la tabla para mostrar el nuevo archivo
-                alert("Archivo creado con éxito.");
+        uploadCalidadAguaMutation.mutate(
+            {
+                formData,
+                idUsuarioCreador: user.Id_Usuario,
             },
-            onError: (error) => {
-                console.error("Error al crear el archivo:", error);
-                alert("Hubo un problema al crear el archivo.");
-            },
-        });
+            {
+                onSuccess: () => {
+                    setTitulo("");
+                    setFile(null);
+                    onClose();
+                    refetch();
+                    showSuccess("¡Archivo de Calidad de Agua creado exitosamente!"); // ✅
+                },
+                onError: (error) => {
+                    console.error("Error al crear el archivo:", error);
+                    const message =
+                        error instanceof Error
+                            ? error.message
+                            : "Hubo un problema al crear el archivo.";
+                    showError(`Error al crear el archivo de Calidad de Agua: ${message}`); // ✅
+                },
+            }
+        );
     };
 
     return (
@@ -100,10 +111,10 @@ export default function FormularioCalidadAgua({ onClose, refetch }: FormularioCa
                     <div className="text-right text-xs text-gray-500 mt-1">
                         {titulo.length}/100
                     </div>
-                    {tituloError && (
-                        <p className="text-xs text-red-500 mt-1">{tituloError}</p>
-                    )}
+                    {tituloError && <p className="text-xs text-red-500 mt-1">{tituloError}</p>}
                 </div>
+
+                {/* Campo de Descripción */}
                 <div>
                     <label className="block text-sm font-medium text-gray-700">Descripción</label>
                     <textarea
@@ -134,11 +145,7 @@ export default function FormularioCalidadAgua({ onClose, refetch }: FormularioCa
                             accept="application/pdf"
                             onChange={(e) => {
                                 const selectedFile = e.target.files?.[0];
-                                if (selectedFile) {
-                                    setFile(selectedFile);
-                                } else {
-                                    setFile(null);
-                                }
+                                setFile(selectedFile || null);
                             }}
                             className="absolute inset-0 opacity-0 w-full h-full cursor-pointer"
                         />
@@ -148,15 +155,17 @@ export default function FormularioCalidadAgua({ onClose, refetch }: FormularioCa
                     </div>
                 </div>
 
-                {/* Nota: El archivo se crea como activo por defecto */}
+                {/* Nota */}
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
                     <p className="text-xs text-blue-700">
                         <strong>Nota:</strong> Los archivos se crean como ocultos por defecto. Puedes cambiar la visibilidad después de crear el archivo.
                     </p>
-                </div>                <div className="flex justify-end gap-4">
+                </div>
+
+                <div className="flex justify-end gap-4">
                     <button
                         type="button"
-                        onClick={onClose} // Oculta el modal
+                        onClick={onClose}
                         className="px-4 py-2 rounded-lg bg-gray-200 text-gray-800 hover:bg-gray-300 shadow-sm text-sm"
                     >
                         Cancelar
@@ -166,10 +175,12 @@ export default function FormularioCalidadAgua({ onClose, refetch }: FormularioCa
                         className="px-4 py-2 rounded-lg bg-sky-600 text-white hover:bg-sky-700 shadow-sm text-sm"
                         disabled={uploadCalidadAguaMutation.status === "pending"}
                     >
-                        {uploadCalidadAguaMutation.status === "pending" ? "Subiendo..." : "Subir Archivo"}
+                        {uploadCalidadAguaMutation.status === "pending"
+                            ? "Subiendo..."
+                            : "Subir Archivo"}
                     </button>
                 </div>
             </form>
         </div>
     );
-} //funciona 
+}
