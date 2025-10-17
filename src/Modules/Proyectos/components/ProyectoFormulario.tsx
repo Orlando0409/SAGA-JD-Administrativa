@@ -206,7 +206,7 @@ export default function FormularioProyecto({
                 />
             )}
             
-            <div className="fixed inset-0  backdrop-blur-none flex items-center justify-center z-50">
+            <div className="fixed inset-0  backdrop-blur flex items-center justify-center z-50">
                 <form
                     onSubmit={handleSubmit}
                     className="w-full max-w-md bg-white rounded-lg shadow-lg p-6 space-y-4"
