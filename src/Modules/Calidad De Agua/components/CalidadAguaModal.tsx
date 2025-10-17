@@ -3,6 +3,7 @@ import { useUpdateCalidadAgua, useToggleVisibilidadCalidadAgua } from "../Hook/H
 import { CalidadAguaSchema } from "../schemas/CalidadDeAgua";
 import { z } from "zod";
 import { FileText, Calendar, RefreshCcw, Eye, EyeOff } from "lucide-react";
+import { useAlerts } from "@/Modules/Global/context/AlertContext"; // ✅ Importamos las alertas
 
 interface CalidadAguaModalProps {
     isOpen: boolean;
@@ -14,7 +15,7 @@ interface CalidadAguaModalProps {
         Fecha_Creacion: string;
         Fecha_Actualizacion?: string;
         Descripcion: string;
-        Visible: boolean; //  Visible en lugar de Estado
+        Visible: boolean;
         Usuario_Creador: {
             Id_Usuario: number;
             Nombre_Usuario: string;
@@ -22,24 +23,22 @@ interface CalidadAguaModalProps {
             Nombre_Rol: string;
         };
     };
-    refetch: () => void; // Función para refrescar la tabla
+    refetch: () => void;
 }
 
 const CalidadAguaModal = ({ isOpen, onClose, archivo, refetch }: CalidadAguaModalProps) => {
-    const [isEditing, setIsEditing] = useState(false); // Controla el modo de edición
+    const [isEditing, setIsEditing] = useState(false);
     const [titulo, setTitulo] = useState(archivo.Titulo || "");
     const [descripcion, setDescripcion] = useState(archivo.Descripcion || "");
     const [file, setFile] = useState<File | null>(null);
-    const [tituloError, setTituloError] = useState(""); // Validación de título
-    const [descripcionError, setDescripcionError] = useState(""); // Validación de descripción
+    const [tituloError, setTituloError] = useState("");
+    const [descripcionError, setDescripcionError] = useState("");
 
-    const updateCalidadAguaMutation = useUpdateCalidadAgua(); // Actualizar un archivo existente
-    const toggleVisibilidad = useToggleVisibilidadCalidadAgua(); // Cambiar visibilidad
+    const updateCalidadAguaMutation = useUpdateCalidadAgua();
+    const toggleVisibilidad = useToggleVisibilidadCalidadAgua();
+    const { showSuccess, showError } = useAlerts(); // ✅ Hook de alertas
 
-    // Actualizar los estados cuando cambie el archivo
     useEffect(() => {
-        console.log("Datos del archivo:", archivo); // Para debug
-        console.log("Descripción:", archivo.Descripcion); // Para debug
         setTitulo(archivo.Titulo || "");
         setDescripcion(archivo.Descripcion || "");
         setTituloError("");
@@ -48,7 +47,7 @@ const CalidadAguaModal = ({ isOpen, onClose, archivo, refetch }: CalidadAguaModa
         setIsEditing(false);
     }, [archivo]);
 
-    if (!isOpen) return null; // Si el modal no está abierto, no renderiza nada
+    if (!isOpen) return null;
 
     const handleTituloChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
@@ -74,13 +73,10 @@ const CalidadAguaModal = ({ isOpen, onClose, archivo, refetch }: CalidadAguaModa
         }
     };
 
-
-
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
         try {
-            // Validar los datos con el esquema
             CalidadAguaSchema.parse({
                 Titulo: titulo.trim(),
                 Descripcion: descripcion.trim(),
@@ -90,39 +86,43 @@ const CalidadAguaModal = ({ isOpen, onClose, archivo, refetch }: CalidadAguaModa
             formData.append("Titulo", titulo.trim());
             formData.append("Descripcion", descripcion.trim());
             if (file) {
-                formData.append("Archivo_Calidad_Agua", file); // Reemplaza el archivo existente solo si se selecciona uno nuevo
+                formData.append("Archivo_Calidad_Agua", file);
             }
 
             await updateCalidadAguaMutation.mutateAsync({ id: archivo.Id_Calidad_Agua, formData });
-            alert("Registro actualizado con éxito.");
-            refetch(); // Refresca la tabla
-            setIsEditing(false); // Salir del modo de edición
+
+            showSuccess("Registro actualizado con éxito."); // ✅ Alerta de éxito
+            refetch();
+            setIsEditing(false);
         } catch (error) {
             if (error instanceof z.ZodError) {
-                alert(error.errors[0].message); // Muestra el primer error de validación
+                showError(error.errors[0].message); // ✅ Alerta de validación
             } else {
                 console.error("Error inesperado:", error);
-                alert("Hubo un problema al actualizar el registro.");
+                showError("Hubo un problema al actualizar el registro."); // ✅ Alerta de error
             }
         }
     };
 
-
-    //descripcion 
-
-
     const handleToggleVisibility = () => {
         toggleVisibilidad.mutate(archivo.Id_Calidad_Agua, {
             onSuccess: () => {
-                refetch(); // Actualizar la tabla
-            }
+                refetch();
+                showSuccess(
+                    archivo.Visible
+                        ? "El archivo ahora está oculto."
+                        : "El archivo ahora es visible."
+                ); // ✅ Alerta informativa
+            },
+            onError: () => {
+                showError("Error al cambiar la visibilidad del archivo."); // ✅ Alerta de error
+            },
         });
     };
 
     return (
         <div className="fixed inset-0 bg-white bg-opacity-50 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-lg shadow-xl w-full max-w-lg">
-                {/* Header */}
                 <div className="flex items-center justify-between p-6 border-b border-gray-200">
                     <h2 className="text-xl font-semibold text-gray-800">
                         {isEditing ? "Editar Registro" : "Detalles del Registro"}
@@ -135,13 +135,9 @@ const CalidadAguaModal = ({ isOpen, onClose, archivo, refetch }: CalidadAguaModa
                     </button>
                 </div>
 
-                {/* Contenido */}
                 <div className="p-6 space-y-6">
                     {isEditing ? (
-                        <form
-                            onSubmit={handleSubmit}
-                            className="space-y-4"
-                        >
+                        <form onSubmit={handleSubmit} className="space-y-4">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">Título del archivo</label>
                                 <input
@@ -149,20 +145,15 @@ const CalidadAguaModal = ({ isOpen, onClose, archivo, refetch }: CalidadAguaModa
                                     placeholder="Título"
                                     value={titulo}
                                     onChange={handleTituloChange}
-                                    maxLength={100} // limita la cantidad de caracteres
+                                    maxLength={100}
                                     className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-sky-500 text-sm"
                                     required
                                 />
                                 <div className="text-right text-xs text-gray-500 mt-1">
                                     {titulo.length}/100
                                 </div>
-                                {tituloError && (
-                                    <p className="text-xs text-red-500 mt-1">{tituloError}</p>
-                                )}
+                                {tituloError && <p className="text-xs text-red-500 mt-1">{tituloError}</p>}
                             </div>
-
-
-                            {/* descripcion */}
 
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">Descripción</label>
@@ -179,15 +170,11 @@ const CalidadAguaModal = ({ isOpen, onClose, archivo, refetch }: CalidadAguaModa
                                 <div className="text-right text-xs text-gray-500 mt-1">
                                     {(descripcion || "").length}/200
                                 </div>
-                                {descripcionError && (
-                                    <p className="text-xs text-red-500 mt-1">{descripcionError}</p>
-                                )}
+                                {descripcionError && <p className="text-xs text-red-500 mt-1">{descripcionError}</p>}
                             </div>
 
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">Archivo PDF</label>
-
-                                {/* Mostrar archivo actual con botón de reemplazar */}
                                 <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border">
                                     <FileText size={16} className="text-blue-600" />
                                     <div className="flex-1">
@@ -224,10 +211,11 @@ const CalidadAguaModal = ({ isOpen, onClose, archivo, refetch }: CalidadAguaModa
                                     </div>
                                 )}
                             </div>
+
                             <div className="flex justify-end gap-4">
                                 <button
                                     type="button"
-                                    onClick={() => setIsEditing(false)} // Salir del modo de edición
+                                    onClick={() => setIsEditing(false)}
                                     className="px-4 py-2 rounded-lg bg-gray-200 text-gray-800 hover:bg-gray-300 shadow-sm text-sm"
                                 >
                                     Cancelar
@@ -237,13 +225,14 @@ const CalidadAguaModal = ({ isOpen, onClose, archivo, refetch }: CalidadAguaModa
                                     className="px-4 py-2 rounded-lg bg-sky-600 text-white hover:bg-sky-700 shadow-sm text-sm"
                                     disabled={updateCalidadAguaMutation.status === "pending"}
                                 >
-                                    {updateCalidadAguaMutation.status === "pending" ? "Actualizando..." : "Guardar"}
+                                    {updateCalidadAguaMutation.status === "pending"
+                                        ? "Actualizando..."
+                                        : "Guardar"}
                                 </button>
                             </div>
                         </form>
                     ) : (
                         <>
-                            {/* Mostrar detalles del archivo */}
                             <div className="bg-gray-100 p-4 rounded-lg shadow-sm">
                                 <div
                                     className="text-lg font-bold text-gray-800 break-words"
@@ -251,7 +240,6 @@ const CalidadAguaModal = ({ isOpen, onClose, archivo, refetch }: CalidadAguaModa
                                 >
                                     {archivo.Titulo}
                                 </div>
-
 
                                 <a
                                     href={archivo.Url_Archivo}
@@ -266,18 +254,11 @@ const CalidadAguaModal = ({ isOpen, onClose, archivo, refetch }: CalidadAguaModa
 
                             <div className="bg-gray-100 p-4 rounded-lg shadow-sm">
                                 <h4 className="text-sm font-semibold text-gray-700 mb-2">Descripción</h4>
-                                <div
-                                    className="text-sm text-gray-800 break-words"
-                                    style={{ whiteSpace: "normal", overflowWrap: "break-word" }}
-                                >
-                                    {descripcion && descripcion.trim() !== ""
-                                        ? descripcion
-                                        : archivo.Descripcion && archivo.Descripcion.trim() !== ""
-                                            ? archivo.Descripcion
-                                            : "Sin descripción disponible"
-                                    }
+                                <div className="text-sm text-gray-800 break-words">
+                                    {descripcion?.trim() || archivo.Descripcion?.trim() || "Sin descripción disponible"}
                                 </div>
-                            </div>                            {/* Estado de visibilidad */}
+                            </div>
+
                             <div className="bg-white border border-gray-300 rounded-lg p-4 shadow-sm">
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-2">
@@ -305,17 +286,16 @@ const CalidadAguaModal = ({ isOpen, onClose, archivo, refetch }: CalidadAguaModa
                                             ? 'Cambiando...'
                                             : archivo.Visible
                                                 ? 'Ocultar'
-                                                : 'Mostrar'
-                                        }
+                                                : 'Mostrar'}
                                     </button>
                                 </div>
                                 <p className="text-xs text-gray-600 mt-2">
                                     {archivo.Visible
                                         ? 'Este archivo es visible para los usuarios públicos'
-                                        : 'Este archivo está oculto y no aparece en la vista pública'
-                                    }
+                                        : 'Este archivo está oculto y no aparece en la vista pública'}
                                 </p>
                             </div>
+
                             <div className="flex gap-4 mt-4">
                                 <div className="flex-1 bg-white border border-gray-300 rounded-lg p-4 shadow-sm flex items-center gap-2">
                                     <Calendar size={18} className="text-gray-600" />
@@ -338,11 +318,11 @@ const CalidadAguaModal = ({ isOpen, onClose, archivo, refetch }: CalidadAguaModa
                                     </div>
                                 )}
                             </div>
-                            {/* Botones de acción */}
+
                             <div className="flex justify-end gap-3 mt-6">
                                 <button
                                     type="button"
-                                    onClick={() => setIsEditing(true)} // Activar modo de edición
+                                    onClick={() => setIsEditing(true)}
                                     className="px-4 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600 shadow-sm text-sm"
                                 >
                                     Editar
