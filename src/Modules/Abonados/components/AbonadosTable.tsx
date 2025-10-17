@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { createColumnHelper, getCoreRowModel, getPaginationRowModel, useReactTable, flexRender, type ColumnDef } from '@tanstack/react-table';
-import { User, Building } from 'lucide-react';
+import { User, Building, Trash2, Pencil, Eye } from 'lucide-react';
 import { useAfiliadosFisicos } from '../Hook/HookAfiliadoFisico';
 import { useAfiliadosJuridicos } from '../Hook/HookAfiliadoJuridico';
 import DetailAbonados from './DetailAbonados';
@@ -69,7 +69,7 @@ export default function AbonadosTable() {
             },
             Tipo_Persona: 'Jurídico' as const,
             Tipo_Afiliado: afiliado.Tipo_Afiliado?.Nombre_Tipo_Afiliado as 'Abonado' | 'Asociado' || 'Asociado',
-            Tipo_Identificacion: 'Cédula Jurídica', // ✅ CAMBIO: Siempre será "Cédula Jurídica" para jurídicos
+            Tipo_Identificacion: 'Cédula Jurídica', //  CAMBIO: Siempre será "Cédula Jurídica" para jurídicos
             datos_originales: afiliado
         }));
 
@@ -119,20 +119,7 @@ export default function AbonadosTable() {
                 }
             }
         }),
-        columnHelper.accessor('Cedula_Documento', {
-            header: 'Número Identificación / Cédula Jurídica', // <-- CAMBIO: Nuevo encabezado
-            cell: (info) => {
-                const fila = info.row.original;
-                if (fila.Tipo_Persona === 'Físico') {
-                    const datosOriginales = fila.datos_originales as AfiliadoFisico;
-                    return datosOriginales.Identificacion || 'Sin número de identificación'; // <-- CAMBIO: usa Numero_Identidad
-                } else {
-                    const datosOriginales = fila.datos_originales as AfiliadoJuridico;
-                    return datosOriginales.Cedula_Juridica || 'Sin cédula jurídica';
-                }
-            },
-            size: 160
-        }),
+       
         // <-- CAMBIO: Nueva columna Tipo_Identificacion después de cédula
         columnHelper.accessor('Tipo_Identificacion', {
             header: 'Tipo Identificación',
@@ -186,6 +173,59 @@ export default function AbonadosTable() {
             },
             size: 120,
         }),
+        columnHelper.display({
+    id: 'acciones',
+    header: 'Acciones',
+    cell: ({ row }) => {
+        const persona = row.original;
+
+        return (
+            <div className="flex items-center gap-2">
+                {/* Ver detalles */}
+                <button
+                    onClick={(e) => {
+                        e.stopPropagation(); // evita abrir modal por click en toda la fila
+                        handleViewDetail(persona);
+                    }}
+                    className="p-1 rounded-lg hover:bg-sky-100 text-sky-600 transition-colors"
+                    title="Ver detalles"
+                >
+                    <Eye size={16} />
+                </button>
+
+                {/* Editar */}
+                <button
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        alert(`Editar afiliado: ${persona.Nombre_Completo}`);
+                        // Aquí podrías abrir tu modal de edición si lo tienes
+                    }}
+                    className="p-1 rounded-lg hover:bg-amber-100 text-amber-600 transition-colors"
+                    title="Editar"
+                >
+                    <Pencil size={16} />
+                </button>
+
+                {/* Eliminar */}
+                <button
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        if (confirm(`¿Seguro que deseas eliminar a ${persona.Nombre_Completo}?`)) {
+                            console.log('Eliminar afiliado:', persona.Id);
+                            // Aquí podrías llamar a tu función de eliminación
+                        }
+                    }}
+                    className="p-1 rounded-lg hover:bg-red-100 text-red-600 transition-colors"
+                    title="Eliminar"
+                >
+                    <Trash2 size={16} />
+                </button>
+            </div>
+        );
+    },
+    size: 100,
+}),
+
     ];
 
     const table = useReactTable({
@@ -198,7 +238,7 @@ export default function AbonadosTable() {
 
     return (
         <div className="w-full">
-            <div className="flex flex-col  sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
+            <div className="flex flex-col backdrop-blur sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
                 <div className="flex items-center gap-3">
                     <h2 className="text-lg sm:text-xl font-semibold text-sky-800">Gestión de Afiliados</h2>
                 </div>

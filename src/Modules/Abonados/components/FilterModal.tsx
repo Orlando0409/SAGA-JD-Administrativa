@@ -41,7 +41,7 @@ const FilterModal: React.FC<FilterModalProps> = ({ isOpen, onClose, onApplyFilte
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 flex items-start justify-end z-50">
+        <div className="fixed inset-0 backdrop-blur flex items-start justify-end z-50">
             <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4 max-h-[90vh] overflow-hidden">
                 {/* Header */}
                 <div className="flex items-center justify-between p-6 border-b border-gray-200">

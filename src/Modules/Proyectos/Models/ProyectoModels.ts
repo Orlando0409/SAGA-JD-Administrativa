@@ -58,6 +58,6 @@ export const ProyectoDefault: Proyecto = {
 export interface ProyectoFormData {
   Titulo: string;
   Descripcion: string;
-  Imagen_url: string; 
+  Imagen_Url: string; 
   Id_Estado_Proyecto?: number;  
 }

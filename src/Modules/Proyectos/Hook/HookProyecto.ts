@@ -7,7 +7,7 @@ import {
   updateEstadoProyecto,
   toggleVisibilidadProyecto,
 } from "../Service/ServiceProyecto";
-import type { Proyecto, ProyectoFormData } from "../Models/ProyectoModels";
+import type { Proyecto } from "../Models/ProyectoModels";
 
 // Obtener todos los proyectos
 export const useGetProyectos = () => {
@@ -38,11 +38,11 @@ export const useCreateProyecto = () => {
   });
 };
 
-// Actualizar un proyecto existente
+// Actualizar un proyecto existente - AHORA USA FormData
 export const useUpdateProyecto = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, formData }: { id: number; formData: Partial<ProyectoFormData> }) =>
+    mutationFn: ({ id, formData }: { id: number; formData: FormData }) =>
       updateProyecto(id, formData),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["proyectos"] });

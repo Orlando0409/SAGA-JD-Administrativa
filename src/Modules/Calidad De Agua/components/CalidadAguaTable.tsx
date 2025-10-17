@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useGetCalidadAgua, useToggleVisibilidadCalidadAgua } from "../Hook/HookCalidadAgua";
 import CalidadAguaModal from "./CalidadAguaModal";
 import FormularioCalidadAgua from "./FormularioCalidadAgua";
-import { FileText, Plus, Eye, EyeOff } from "lucide-react";
+import { FileText, Plus, Eye, EyeOff, Pencil, Trash2 } from "lucide-react";
 import type { ArchivoCalidadAgua } from "../Models/CalidadDeAgua";
 
 export default function CalidadAguaTable() {
@@ -55,6 +55,8 @@ export default function CalidadAguaTable() {
               <th className="px-2 sm:px-4 py-3 font-medium border-b border-sky-100">Fecha de creación</th>
               <th className="px-2 sm:px-4 py-3 font-medium border-b border-sky-100">Fecha de actualización</th>
               <th className="px-2 sm:px-4 py-3 font-medium border-b border-sky-100">Visibilidad</th>
+              <th className="px-2 sm:px-4 py-3 font-medium border-b border-sky-100">Acciones</th>
+
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-sky-50">
@@ -121,6 +123,50 @@ export default function CalidadAguaTable() {
                       )}
                     </button>
                   </td>
+                  <td className="px-2 sm:px-4 py-3 text-xs sm:text-sm text-slate-700 align-top">
+                    <div className="flex items-center gap-2">
+                      {/* Ver detalles */}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation(); // Evita abrir el modal de fila
+                          handleOpenModal(archivo);
+                        }}
+                        className="p-1 rounded-lg hover:bg-sky-100 text-sky-600 transition-colors"
+                        title="Ver detalles"
+                      >
+                        <Eye size={16} />
+                      </button>
+
+                      {/* Editar */}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setArchivoSeleccionado(archivo);
+                          setFormVisible(true);
+                        }}
+                        className="p-1 rounded-lg hover:bg-amber-100 text-amber-600 transition-colors"
+                        title="Editar archivo"
+                      >
+                        <Pencil size={16} />
+                      </button>
+
+                      {/* Eliminar */}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (confirm(`¿Seguro que deseas eliminar "${archivo.Titulo}"?`)) {
+                            console.log("Eliminar archivo:", archivo.Id_Calidad_Agua);
+                            // Aquí puedes agregar la llamada a tu hook o API para eliminar
+                          }
+                        }}
+                        className="p-1 rounded-lg hover:bg-red-100 text-red-600 transition-colors"
+                        title="Eliminar archivo"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  </td>
+
                 </tr>
               ));
             })()}

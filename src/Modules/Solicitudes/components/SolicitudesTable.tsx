@@ -7,7 +7,7 @@ import {
     flexRender,
     type ColumnDef,
 } from '@tanstack/react-table';
-import { ChevronLeft, ChevronRight, User, Building } from 'lucide-react';
+import { ChevronLeft, ChevronRight, User, Building, Trash2, Pencil, Eye } from 'lucide-react';
 
 // Importar hooks de solicitudes
 import { useSolicitudesFisicas } from '../Hooks/HookSolicitudesFisicas';
@@ -281,6 +281,64 @@ export default function SolicitudesTable() {
             },
             size: 120,
         }),
+        columnHelper.display({
+    id: 'acciones',
+    header: 'Acciones',
+    cell: ({ row }) => {
+        const solicitud = row.original;
+
+        return (
+            <div className="flex items-center gap-2">
+                {/* Ver detalles */}
+                <button
+                    onClick={(e) => {
+                        e.stopPropagation(); // Evita que se dispare el click de la fila
+                        handleViewDetail(solicitud);
+                    }}
+                    className="p-1 rounded-lg hover:bg-sky-100 text-sky-600 transition-colors"
+                    title="Ver detalles"
+                >
+                    <Eye size={16} />
+                </button>
+
+                {/* Editar */}
+                <button
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedSolicitud({
+                            tipo: solicitud.Tipo_Persona === 'Físico'
+                                ? 'solicitud-fisica'
+                                : 'solicitud-juridica',
+                            datos: solicitud.datos_originales
+                        });
+                        setShowEditModal(true);
+                    }}
+                    className="p-1 rounded-lg hover:bg-amber-100 text-amber-600 transition-colors"
+                    title="Editar solicitud"
+                >
+                    <Pencil size={16} />
+                </button>
+
+                {/* Eliminar */}
+                <button
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        if (confirm(`¿Seguro que deseas eliminar la solicitud de ${solicitud.Nombre_Completo}?`)) {
+                            console.log('Eliminar solicitud:', solicitud.Id);
+                            // Aquí puedes llamar a una función para eliminar en el backend
+                        }
+                    }}
+                    className="p-1 rounded-lg hover:bg-red-100 text-red-600 transition-colors"
+                    title="Eliminar solicitud"
+                >
+                    <Trash2 size={16} />
+                </button>
+            </div>
+        );
+    },
+    size: 100,
+}),
+
     ];
 
     const table = useReactTable({
