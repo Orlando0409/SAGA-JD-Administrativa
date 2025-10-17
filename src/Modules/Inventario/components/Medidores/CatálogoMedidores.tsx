@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { LuPlus, LuSearch, LuArrowLeft, LuFilter } from 'react-icons/lu';
+import { LuPlus, LuSearch, LuFilter } from 'react-icons/lu';
 import {
   createColumnHelper,
   useReactTable,
@@ -38,7 +38,7 @@ interface CatalogoMedidoresProps {
   onBack?: () => void;
 }
 
-const CatalogoMedidores: React.FC<CatalogoMedidoresProps> = ({ onBack }) => {
+const CatalogoMedidores: React.FC<CatalogoMedidoresProps> = () => {
   const { user } = useAuth();
   const { data: medidores = [], isLoading, error, refetch } = useMedidores();
   const updateEstadoMutation = useUpdateEstadoMedidor();
@@ -50,11 +50,7 @@ const CatalogoMedidores: React.FC<CatalogoMedidoresProps> = ({ onBack }) => {
   const [estadoFilter, setEstadoFilter] = useState<string>('Todos');
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [filterOptions, setFilterOptions] = useState<any>({});
-  const handleApplyFilters = (filters: any) => {
-    setFilterOptions(filters);
-    setIsFilterModalOpen(false);
-    // You can add logic here to apply filters to medidores if needed
-  };
+
 
   const pageSizeOptions = [5, 10, 20, 50];
   const [pagination, setPagination] = useState({
@@ -125,8 +121,7 @@ const CatalogoMedidores: React.FC<CatalogoMedidoresProps> = ({ onBack }) => {
           </button>
         ),
       }),
-      columnHelper.display({
-        id: 'afiliado',
+      columnHelper.accessor('Afiliado', {
         header: 'Afiliado',
         cell: info => {
           const afiliado = info.row.original.Afiliado;
@@ -140,8 +135,8 @@ const CatalogoMedidores: React.FC<CatalogoMedidoresProps> = ({ onBack }) => {
           }
 
           return (
-            <div className="text-gray-600 text-left max-w-xs truncate">
-              {afiliado.Nombre_Completo || afiliado.Razon_Social}
+            <div className="flex justify-start">
+              <span className='text-gray-600 text-left max-w-xs truncate'>{afiliado.Nombre_Completo || afiliado.Razon_Social}</span>
             </div>
           );
         },
@@ -300,6 +295,15 @@ const CatalogoMedidores: React.FC<CatalogoMedidoresProps> = ({ onBack }) => {
     },
   });
 
+    const handleApplyFilters = (filters: any) => {
+    setFilterOptions(filters);
+    setIsFilterModalOpen(false);
+  };
+
+  const activeFiltersCount = Object.values(filterOptions).filter(
+    v => v !== undefined && v !== '' && v !== false
+  ).length;
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -319,22 +323,6 @@ const CatalogoMedidores: React.FC<CatalogoMedidoresProps> = ({ onBack }) => {
 
   return (
     <div className="space-y-6">
-      {onBack && (
-        <div className="flex items-center gap-4">
-          <button
-            onClick={onBack}
-            className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
-          >
-            <LuArrowLeft className="w-4 h-4" />
-            Volver al Dashboard
-          </button>
-          <div className="h-6 w-px bg-gray-300" />
-          <h1 className="text-2xl font-bold text-gray-900">
-            Gestión de Medidores
-          </h1>
-        </div>
-      )}
-
       <div className="bg-white rounded-lg p-3">
         <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
           <div className="flex items-center gap-4">
@@ -363,11 +351,20 @@ const CatalogoMedidores: React.FC<CatalogoMedidoresProps> = ({ onBack }) => {
               />
             </div>
             <button
-              onClick={handleOpenFilterModal}
-              className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-md flex items-center gap-2 transition-colors"  
+              onClick={() => handleOpenFilterModal()}
+              className={`px-4 py-2 border rounded-md flex items-center gap-2 transition-colors ${
+                activeFiltersCount > 0
+                  ? 'border-blue-500 bg-blue-50 text-blue-700'
+                  : 'border-gray-300 hover:bg-gray-50'
+              }`}
             >
               <LuFilter className="w-4 h-4" />
-              Filtrar
+              Filtros
+              {activeFiltersCount > 0 && (
+                <span className="bg-blue-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                  {activeFiltersCount}
+                </span>
+              )}
             </button>
             <button
               onClick={() => setIsCreateModalOpen(true)}
