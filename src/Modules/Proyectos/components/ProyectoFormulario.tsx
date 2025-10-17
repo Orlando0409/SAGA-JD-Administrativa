@@ -37,7 +37,7 @@ export default function FormularioProyecto({
     const handleTituloChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
         setTitulo(value);
-        
+
         try {
             ProyectoSchema.shape.Titulo.parse(value);
             setErrors(prev => ({ ...prev, Titulo: undefined }));
@@ -52,7 +52,7 @@ export default function FormularioProyecto({
     const handleDescripcionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
         const value = e.target.value;
         setDescripcion(value);
-        
+
         try {
             ProyectoSchema.shape.Descripcion.parse(value);
             setErrors(prev => ({ ...prev, Descripcion: undefined }));
@@ -80,7 +80,7 @@ export default function FormularioProyecto({
             ProyectoSchema.shape.Imagen_Url.parse(file);
             setErrors(prev => ({ ...prev, Imagen_Url: undefined }));
             setImagen(file);
-            
+
             // Solo mostrar preview si es imagen (no PDF)
             if (file.type.startsWith("image/")) {
                 setPreview(URL.createObjectURL(file));
@@ -159,7 +159,8 @@ export default function FormularioProyecto({
     };
 
     return (
-        <div className="fixed inset-0 bg-white bg-opacity-50 flex items-center justify-center z-50">
+        
+        <div className="fixed inset-0  backdrop-blur-none flex items-center justify-center z-50">
             <form
                 onSubmit={handleSubmit}
                 className="w-full max-w-md bg-white rounded-lg shadow-lg p-6 space-y-4"
@@ -202,26 +203,33 @@ export default function FormularioProyecto({
                 {/* Campo Imagen */}
                 <div>
                     <label className="block text-sm font-medium text-gray-700">Archivo del Proyecto</label>
-                    <input
-                        type="file"
-                        accept=".png,.jpg,.jpeg,.heic,.pdf"
-                        onChange={handleFileChange}
-                        className="w-full text-sm text-gray-600"
-                        required
-                    />
+                    <label className="block w-full cursor-pointer border border-gray-300 rounded-lg bg-gray-50 px-3 py-2">
+                        <span className="text-xs text-gray-500">
+                            {imagen ? imagen.name : "Selecciona un archivo"}
+                        </span>
+                        <input
+                            type="file"
+                            accept=".png,.jpg,.jpeg,.heic,.pdf"
+                            onChange={handleFileChange}
+                            className="hidden"
+                            required
+                        />
+                    </label>
                     {errors.Imagen_Url && <p className="text-xs text-red-500 mt-1">{errors.Imagen_Url}</p>}
-                    {preview && (
-                        <div className="mt-2">
-                            <img
-                                src={preview}
-                                alt="Vista previa"
-                                className="w-full max-h-40 object-cover rounded-md border"
-                            />
-                        </div>
+                    {imagen && (
+                        <input
+                            type="text"
+                            value={imagen.name}
+                            readOnly
+                            className="w-full px-3 py-2 rounded-lg border border-gray-300 bg-gray-50 text-gray-700 mt-2"
+                        />
                     )}
-                    {imagen && !preview && (
-                        <p className="text-xs text-gray-600 mt-1">Archivo seleccionado: {imagen.name}</p>
-                    )}
+
+                </div>
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                    <p className="text-xs text-blue-700">
+                        <strong>Nota:</strong> Los archivos se crean como ocultos por defecto. Puedes cambiar la visibilidad después de crear el archivo.
+                    </p>
                 </div>
 
                 {/* Botones */}

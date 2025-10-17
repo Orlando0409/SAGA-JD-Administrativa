@@ -69,7 +69,7 @@ export default function AbonadosTable() {
             },
             Tipo_Persona: 'Jurídico' as const,
             Tipo_Afiliado: afiliado.Tipo_Afiliado?.Nombre_Tipo_Afiliado as 'Abonado' | 'Asociado' || 'Asociado',
-            Tipo_Identificacion: 'Cédula Jurídica', // ✅ CAMBIO: Siempre será "Cédula Jurídica" para jurídicos
+            Tipo_Identificacion: 'Cédula Jurídica', //  CAMBIO: Siempre será "Cédula Jurídica" para jurídicos
             datos_originales: afiliado
         }));
 
@@ -119,20 +119,7 @@ export default function AbonadosTable() {
                 }
             }
         }),
-        columnHelper.accessor('Cedula_Documento', {
-            header: 'Número Identificación / Cédula Jurídica', // <-- CAMBIO: Nuevo encabezado
-            cell: (info) => {
-                const fila = info.row.original;
-                if (fila.Tipo_Persona === 'Físico') {
-                    const datosOriginales = fila.datos_originales as AfiliadoFisico;
-                    return datosOriginales.Identificacion || 'Sin número de identificación'; // <-- CAMBIO: usa Numero_Identidad
-                } else {
-                    const datosOriginales = fila.datos_originales as AfiliadoJuridico;
-                    return datosOriginales.Cedula_Juridica || 'Sin cédula jurídica';
-                }
-            },
-            size: 160
-        }),
+       
         // <-- CAMBIO: Nueva columna Tipo_Identificacion después de cédula
         columnHelper.accessor('Tipo_Identificacion', {
             header: 'Tipo Identificación',
@@ -198,7 +185,7 @@ export default function AbonadosTable() {
 
     return (
         <div className="w-full">
-            <div className="flex flex-col  sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
+            <div className="flex flex-col backdrop-blur sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
                 <div className="flex items-center gap-3">
                     <h2 className="text-lg sm:text-xl font-semibold text-sky-800">Gestión de Afiliados</h2>
                 </div>

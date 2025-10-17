@@ -42,13 +42,22 @@ export default function ProyectoModal({ isOpen, onClose, proyecto, refetch }: Pr
                 Imagen_Url: imagen || undefined
             });
 
-            const proyectoData = {
-                Titulo: titulo.trim(),
-                Descripcion: descripcion.trim(),
-                Imagen_Url: imagen || null
-            };
+            // Crear FormData en lugar de objeto plano
+            const formData = new FormData();
+            formData.append("Titulo", titulo.trim());
+            formData.append("Descripcion", descripcion.trim());
+            formData.append("Id_Estado_Proyecto", proyecto.Estado.Id_Estado_Proyecto.toString());
+            
+            // Solo agregar imagen si se seleccionó una nueva
+            if (imagen instanceof File) {
+                formData.append("imagen", imagen);
+            }
 
-            await updateProyectoMutation.mutateAsync({ id: proyecto.Id_Proyecto, formData: proyectoData });
+            await updateProyectoMutation.mutateAsync({ 
+                id: proyecto.Id_Proyecto, 
+                formData 
+            });
+            
             alert("Proyecto actualizado con éxito.");
             refetch();
             setIsEditing(false);
@@ -68,17 +77,24 @@ export default function ProyectoModal({ isOpen, onClose, proyecto, refetch }: Pr
 
     return (
         <div className="fixed inset-0 bg-white bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-lg shadow-xl w-full max-w-lg">
-                <div className="flex items-center justify-between p-6 border-b border-gray-200">
-                    <h2 className="text-xl font-semibold text-gray-800">
+            <div 
+                className="bg-white rounded-lg shadow-xl w-full max-w-lg max-h-[85vh] overflow-y-auto"
+                style={{
+                    scrollbarWidth: 'thin',
+                    scrollbarColor: '#0ea5e9 #e0f2fe'
+                }}
+            >
+             
+                <div className="flex items-center justify-between p-4 border-b border-gray-200">
+                    <h2 className="text-lg font-semibold text-gray-800">
                         {isEditing ? "Editar Proyecto" : "Detalles del Proyecto"}
                     </h2>
                     <button onClick={onClose} className="p-1 hover:bg-gray-100 rounded-full transition-colors">✕</button>
                 </div>
 
-                <div className="p-6 space-y-6">
+                <div className="p-4 space-y-4">
                     {isEditing ? (
-                        <form onSubmit={handleSubmit} className="space-y-4">
+                        <form onSubmit={handleSubmit} className="space-y-3">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">Título</label>
                                 <input
@@ -99,18 +115,30 @@ export default function ProyectoModal({ isOpen, onClose, proyecto, refetch }: Pr
                                     onChange={(e) => setDescripcion(e.target.value)}
                                     maxLength={1000}
                                     className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-sky-500 text-sm break-words"
-                                    rows={4}
+                                    rows={3}
                                     required
                                 />
                                 <div className="text-right text-xs text-gray-500 mt-1">{descripcion.length}/1000</div>
                             </div>
-                            <div className="mt-4 p-4 bg-white border border-gray-300 rounded-lg shadow-sm">
+                            
+                            <div className="mt-3 p-3 bg-white border border-gray-300 rounded-lg shadow-sm">
                                 <h4 className="text-sm font-semibold text-gray-700">Estado del Proyecto</h4>
                                 <p className="text-sm font-bold text-gray-800">{proyecto.Estado?.Nombre_Estado || "Sin estado"}</p>
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700">Imagen</label>
+                                <label className="block text-sm font-medium text-gray-700">Imagen (opcional)</label>
+                                
+                                {/* Mostrar nombre del archivo actual si existe */}
+                                {proyecto.Imagen_Url && !imagen && (
+                                    <div className="mb-2">
+                                        <p className="text-xs text-gray-600 mb-1">Archivo actual:</p>
+                                        <div className="px-3 py-2 rounded-lg border border-gray-200 bg-gray-50 text-sm text-gray-700">
+                                            {decodeURIComponent(proyecto.Imagen_Url.split('/').pop()?.split('?')[0] || 'Archivo del proyecto')}
+                                        </div>
+                                    </div>
+                                )}
+                                
                                 <div className="relative">
                                     <input
                                         type="file"
@@ -118,30 +146,65 @@ export default function ProyectoModal({ isOpen, onClose, proyecto, refetch }: Pr
                                         onChange={(e) => setImagen(e.target.files?.[0] || null)}
                                         className="absolute inset-0 opacity-0 w-full h-full cursor-pointer"
                                     />
-                                    <div className="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm text-gray-500 bg-white cursor-pointer">
-                                        {imagen ? imagen.name : "Seleccionar archivo (PNG, JPG, JPEG, HEIC, PDF)"}
+                                    <div className="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm text-gray-500 bg-white cursor-pointer hover:bg-gray-50">
+                                        {imagen ? imagen.name : "Cambiar archivo (PNG, JPG, JPEG, HEIC, PDF)"}
                                     </div>
                                 </div>
+                                
+                                {imagen && (
+                                    <p className="text-xs text-green-600 mt-1">
+                                         Nuevo archivo seleccionado: {imagen.name}
+                                    </p>
+                                )}
                             </div>
 
                             <div className="flex justify-end gap-4">
-                                <button type="button" onClick={() => setIsEditing(false)} className="px-4 py-2 rounded-lg bg-gray-200 text-gray-800 hover:bg-gray-300 shadow-sm text-sm">
+                                <button 
+                                    type="button" 
+                                    onClick={() => {
+                                        setIsEditing(false);
+                                        setImagen(null);
+                                    }} 
+                                    className="px-4 py-2 rounded-lg bg-gray-200 text-gray-800 hover:bg-gray-300 shadow-sm text-sm"
+                                >
                                     Cancelar
                                 </button>
-                                <button type="submit" className="px-4 py-2 rounded-lg bg-sky-600 text-white hover:bg-sky-700 shadow-sm text-sm">
-                                    Guardar
+                                <button 
+                                    type="submit" 
+                                    disabled={updateProyectoMutation.isPending}
+                                    className="px-4 py-2 rounded-lg bg-sky-600 text-white hover:bg-sky-700 shadow-sm text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    {updateProyectoMutation.isPending ? "Guardando..." : "Guardar"}
                                 </button>
                             </div>
                         </form>
                     ) : (
                         <>
-                            <div className="bg-gray-100 p-4 rounded-lg shadow-sm">
+                            <div className="bg-gray-100 p-3 rounded-lg shadow-sm">
                                 <div className="text-lg font-bold text-gray-800 break-words">{proyecto.Titulo}</div>
                                 <div className="text-sm text-gray-700 mt-2 break-words">{proyecto.Descripcion || "Sin descripción disponible"}</div>
                             </div>
 
-                            <div className="flex gap-4 mt-4">
-                                <div className="flex-1 bg-white border border-gray-300 rounded-lg p-4 shadow-sm flex items-center gap-2">
+                            {/* Archivo del proyecto */}
+                            {proyecto.Imagen_Url && (
+                                <div className="bg-white border border-gray-300 rounded-lg p-4 shadow-sm">
+                                    <h4 className="text-sm font-semibold text-gray-700 mb-2">Archivo del proyecto</h4>
+                                    <a 
+                                        href={proyecto.Imagen_Url} 
+                                        target="_blank" 
+                                        rel="noopener noreferrer"
+                                        className="flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-200 bg-gray-50 text-sm text-blue-600 hover:bg-blue-50 hover:border-blue-300 transition-colors"
+                                    >
+                                    
+                                        <span className="truncate">
+                                            {decodeURIComponent(proyecto.Imagen_Url.split('/').pop()?.split('?')[0] || 'Archivo adjunto')}
+                                        </span>
+                                    </a>
+                                </div>
+                            )}
+
+                            <div className="flex gap-3 mt-3">
+                                <div className="flex-1 bg-white border border-gray-300 rounded-lg p-3 shadow-sm flex items-center gap-2">
                                     <Calendar size={18} className="text-gray-600" />
                                     <div>
                                         <h4 className="text-sm font-semibold text-gray-700">Fecha de creación</h4>
@@ -149,7 +212,7 @@ export default function ProyectoModal({ isOpen, onClose, proyecto, refetch }: Pr
                                     </div>
                                 </div>
                                 {proyecto.Fecha_Actualizacion && (
-                                    <div className="flex-1 bg-white border border-gray-300 rounded-lg p-4 shadow-sm flex items-center gap-2">
+                                    <div className="flex-1 bg-white border border-gray-300 rounded-lg p-3 shadow-sm flex items-center gap-2">
                                         <RefreshCcw size={18} className="text-gray-600" />
                                         <div>
                                             <h4 className="text-sm font-semibold text-gray-700">Fecha de actualización</h4>
@@ -159,7 +222,12 @@ export default function ProyectoModal({ isOpen, onClose, proyecto, refetch }: Pr
                                 )}
                             </div>
 
-                            <div className="flex items-center justify-between mt-4 p-4 bg-white border border-gray-300 rounded-lg shadow-sm">
+                            <div className="mt-3 p-3 bg-white border border-gray-300 rounded-lg shadow-sm">
+                                <h4 className="text-sm font-semibold text-gray-700">Estado del Proyecto</h4>
+                                <p className="text-sm font-bold text-gray-800">{proyecto.Estado?.Nombre_Estado || "Sin estado"}</p>
+                            </div>
+
+                            <div className="flex items-center justify-between mt-3 p-3 bg-white border border-gray-300 rounded-lg shadow-sm">
                                 <div className="flex items-center gap-2">
                                     {proyecto.Visible ? (
                                         <>
@@ -175,14 +243,26 @@ export default function ProyectoModal({ isOpen, onClose, proyecto, refetch }: Pr
                                 </div>
                                 <button
                                     onClick={handleToggleVisibility}
-                                    className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${proyecto.Visible ? 'bg-red-100 text-red-700 hover:bg-red-200' : 'bg-green-100 text-green-700 hover:bg-green-200'}`}
+                                    disabled={toggleVisibilidad.isPending}
+                                    className={`px-3 py-1 rounded-full text-xs font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+                                        proyecto.Visible 
+                                            ? 'bg-red-100 text-red-700 hover:bg-red-200' 
+                                            : 'bg-green-100 text-green-700 hover:bg-green-200'
+                                    }`}
                                 >
-                                    {proyecto.Visible ? "Ocultar" : "Mostrar"}
+                                    {toggleVisibilidad.isPending 
+                                        ? "Cambiando..." 
+                                        : (proyecto.Visible ? "Ocultar" : "Mostrar")
+                                    }
                                 </button>
                             </div>
 
-                            <div className="flex justify-end gap-3 mt-6">
-                                <button type="button" onClick={() => setIsEditing(true)} className="px-4 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600 shadow-sm text-sm">
+                            <div className="flex justify-end gap-3 mt-4">
+                                <button 
+                                    type="button" 
+                                    onClick={() => setIsEditing(true)} 
+                                    className="px-4 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600 shadow-sm text-sm"
+                                >
                                     Editar
                                 </button>
                             </div>

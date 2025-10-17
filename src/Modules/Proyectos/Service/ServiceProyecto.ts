@@ -24,9 +24,13 @@ export const createProyecto = async (formData: FormData, idUsuarioCreador: numbe
   return res.data;
 };
 
-// Editar un proyecto existente
-export const updateProyecto = async (id: number, formData: Partial<ProyectoFormData>): Promise<Proyecto> => {
-  const res = await apiAuth.put(`/proyectos/update/${id}`, formData);
+// Editar un proyecto existente - CAMBIADO A FormData
+export const updateProyecto = async (id: number, formData: FormData): Promise<Proyecto> => {
+  const res = await apiAuth.put(`/proyectos/update/${id}`, formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
   return res.data;
 };
 
