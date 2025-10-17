@@ -261,15 +261,7 @@ export default function FormularioProyecto({
                                 required
                             />
                         </label>
-                        {errors.Imagen_Url && <p className="text-xs text-red-500 mt-1">{errors.Imagen_Url}</p>}
-                        {imagen && (
-                            <input
-                                type="text"
-                                value={imagen.name}
-                                readOnly
-                                className="w-full px-3 py-2 rounded-lg border border-gray-300 bg-gray-50 text-gray-700 mt-2"
-                            />
-                        )}
+                        
 
                     </div>
                     <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
