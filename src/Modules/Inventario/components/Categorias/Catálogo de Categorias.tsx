@@ -35,7 +35,7 @@ interface CategoriasManagementProps {
   onBack?: () => void;
 }
 
-const CategoriasManagement: React.FC<CategoriasManagementProps> = ({ onBack }) => {
+const CategoriasManagement: React.FC<CategoriasManagementProps> = () => {
   const [globalFilter, setGlobalFilter] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);

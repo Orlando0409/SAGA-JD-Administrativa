@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useAuth } from "@/Modules/Auth/Context/AuthContext";
 import { useCreateProyecto } from "../Hook/HookProyecto";
-//import { ProyectoSchema } from "../Schemas/ProyectoSchemas";
 import { z } from "zod";
 import { ProyectoSchema } from "../schemas/Proyecto";
 
@@ -55,7 +54,7 @@ export default function FormularioProyecto({
     const [titulo, setTitulo] = useState(tituloInicial);
     const [descripcion, setDescripcion] = useState(descripcionInicial);
     const [imagen, setImagen] = useState<File | null>(null);
-    const [preview, setPreview] = useState<string | null>(null);
+    const [_preview, setPreview] = useState<string | null>(null);
 
     const [errors, setErrors] = useState<{
         Titulo?: string;

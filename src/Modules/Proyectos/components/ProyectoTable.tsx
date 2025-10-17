@@ -4,7 +4,7 @@ import {
     useToggleVisibilidadProyecto,
 } from "../Hook/HookProyecto";
 
-import { FileText, Plus, Eye, EyeOff, Edit3, Settings } from "lucide-react";
+import { FileText, Plus, Eye, EyeOff, Edit3 } from "lucide-react";
 import type { Proyecto } from "../Models/ProyectoModels";
 import FormularioProyecto from "./ProyectoFormulario";
 import ProyectoModal from "./ProyectoModal";

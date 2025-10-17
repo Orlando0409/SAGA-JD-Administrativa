@@ -1,6 +1,6 @@
 // src/services/proyectoService.ts
 import apiAuth from "@/Api/apiAuth";
-import type { Proyecto, ProyectoFormData } from "../Models/ProyectoModels";
+import type { Proyecto } from "../Models/ProyectoModels";
 
 // Obtener todos los proyectos
 export const getProyectos = async (): Promise<Proyecto[]> => {
