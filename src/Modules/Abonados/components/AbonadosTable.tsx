@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { createColumnHelper, getCoreRowModel, getPaginationRowModel, useReactTable, flexRender, type ColumnDef } from '@tanstack/react-table';
-import { User, Building } from 'lucide-react';
+import { User, Building, Trash2, Pencil, Eye } from 'lucide-react';
 import { useAfiliadosFisicos } from '../Hook/HookAfiliadoFisico';
 import { useAfiliadosJuridicos } from '../Hook/HookAfiliadoJuridico';
 import DetailAbonados from './DetailAbonados';
@@ -173,6 +173,59 @@ export default function AbonadosTable() {
             },
             size: 120,
         }),
+        columnHelper.display({
+    id: 'acciones',
+    header: 'Acciones',
+    cell: ({ row }) => {
+        const persona = row.original;
+
+        return (
+            <div className="flex items-center gap-2">
+                {/* Ver detalles */}
+                <button
+                    onClick={(e) => {
+                        e.stopPropagation(); // evita abrir modal por click en toda la fila
+                        handleViewDetail(persona);
+                    }}
+                    className="p-1 rounded-lg hover:bg-sky-100 text-sky-600 transition-colors"
+                    title="Ver detalles"
+                >
+                    <Eye size={16} />
+                </button>
+
+                {/* Editar */}
+                <button
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        alert(`Editar afiliado: ${persona.Nombre_Completo}`);
+                        // Aquí podrías abrir tu modal de edición si lo tienes
+                    }}
+                    className="p-1 rounded-lg hover:bg-amber-100 text-amber-600 transition-colors"
+                    title="Editar"
+                >
+                    <Pencil size={16} />
+                </button>
+
+                {/* Eliminar */}
+                <button
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        if (confirm(`¿Seguro que deseas eliminar a ${persona.Nombre_Completo}?`)) {
+                            console.log('Eliminar afiliado:', persona.Id);
+                            // Aquí podrías llamar a tu función de eliminación
+                        }
+                    }}
+                    className="p-1 rounded-lg hover:bg-red-100 text-red-600 transition-colors"
+                    title="Eliminar"
+                >
+                    <Trash2 size={16} />
+                </button>
+            </div>
+        );
+    },
+    size: 100,
+}),
+
     ];
 
     const table = useReactTable({

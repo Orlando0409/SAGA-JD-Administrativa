@@ -13,6 +13,36 @@ interface FormularioProyectoProps {
     refetch: () => void;
 }
 
+// Componente Toast
+function Toast({ message, type, onClose }: { message: string; type: 'success' | 'error'; onClose: () => void }) {
+    return (
+        <div className={`fixed top-4 right-4 z-[100] flex items-center gap-3 px-4 py-3 rounded-lg shadow-lg ${
+            type === 'success' ? 'bg-green-700' : 'bg-red-700'
+        } text-white min-w-[300px] max-w-md animate-slideIn`}>
+            <div className="flex items-center gap-2 flex-1">
+                {type === 'success' ? (
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                ) : (
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                    </svg>
+                )}
+                <span className="text-sm font-medium">{message}</span>
+            </div>
+            <button
+                onClick={onClose}
+                className="text-white hover:bg-white/10 rounded-full p-1 transition-colors"
+            >
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                </svg>
+            </button>
+        </div>
+    );
+}
+
 export default function FormularioProyecto({
     tituloInicial = "",
     descripcionInicial = "",
@@ -32,6 +62,14 @@ export default function FormularioProyecto({
         Descripcion?: string;
         Imagen_Url?: string;
     }>({});
+
+    const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+
+    // Función para mostrar toast
+    const showToast = (message: string, type: 'success' | 'error') => {
+        setToast({ message, type });
+        setTimeout(() => setToast(null), 5000);
+    };
 
     // Validar título usando Zod
     const handleTituloChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -101,7 +139,7 @@ export default function FormularioProyecto({
         e.preventDefault();
 
         if (!user?.Id_Usuario) {
-            alert("Error: Usuario no autenticado.");
+            showToast("Error: Usuario no autenticado.", "error");
             return;
         }
 
@@ -148,108 +186,133 @@ export default function FormularioProyecto({
                     setErrors({});
                     onClose();
                     refetch();
-                    alert("Proyecto creado con éxito.");
+                    showToast("Proyecto creado con éxito", "success");
                 },
                 onError: (error) => {
                     console.error("Error al crear el proyecto:", error);
-                    alert("Hubo un problema al crear el proyecto.");
+                    showToast("Hubo un problema al crear el proyecto", "error");
                 },
             }
         );
     };
 
     return (
-        
-        <div className="fixed inset-0  backdrop-blur-none flex items-center justify-center z-50">
-            <form
-                onSubmit={handleSubmit}
-                className="w-full max-w-md bg-white rounded-lg shadow-lg p-6 space-y-4"
-            >
-                <h3 className="text-lg font-semibold text-gray-800">Crear Proyecto</h3>
+        <>
+            {toast && (
+                <Toast
+                    message={toast.message}
+                    type={toast.type}
+                    onClose={() => setToast(null)}
+                />
+            )}
+            
+            <div className="fixed inset-0  backdrop-blur-none flex items-center justify-center z-50">
+                <form
+                    onSubmit={handleSubmit}
+                    className="w-full max-w-md bg-white rounded-lg shadow-lg p-6 space-y-4"
+                >
+                    <h3 className="text-lg font-semibold text-gray-800">Crear Proyecto</h3>
 
-                {/* Campo Título */}
-                <div>
-                    <label className="block text-sm font-medium text-gray-700">Título</label>
-                    <input
-                        type="text"
-                        placeholder="Título del proyecto"
-                        value={titulo}
-                        onChange={handleTituloChange}
-                        maxLength={100}
-                        className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-sky-500 text-sm"
-                        required
-                    />
-                    <div className="text-right text-xs text-gray-500 mt-1">{titulo.length}/100</div>
-                    {errors.Titulo && <p className="text-xs text-red-500 mt-1">{errors.Titulo}</p>}
-                </div>
-
-                {/* Campo Descripción */}
-                <div>
-                    <label className="block text-sm font-medium text-gray-700">Descripción</label>
-                    <textarea
-                        placeholder="Descripción del proyecto"
-                        value={descripcion}
-                        onChange={handleDescripcionChange}
-                        maxLength={1000}
-                        className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-sky-500 text-sm break-words"
-                        style={{ whiteSpace: "normal", overflowWrap: "break-word" }}
-                        rows={3}
-                        required
-                    />
-                    <div className="text-right text-xs text-gray-500 mt-1">{descripcion.length}/1000</div>
-                    {errors.Descripcion && <p className="text-xs text-red-500 mt-1">{errors.Descripcion}</p>}
-                </div>
-
-                {/* Campo Imagen */}
-                <div>
-                    <label className="block text-sm font-medium text-gray-700">Archivo del Proyecto</label>
-                    <label className="block w-full cursor-pointer border border-gray-300 rounded-lg bg-gray-50 px-3 py-2">
-                        <span className="text-xs text-gray-500">
-                            {imagen ? imagen.name : "Selecciona un archivo"}
-                        </span>
-                        <input
-                            type="file"
-                            accept=".png,.jpg,.jpeg,.heic,.pdf"
-                            onChange={handleFileChange}
-                            className="hidden"
-                            required
-                        />
-                    </label>
-                    {errors.Imagen_Url && <p className="text-xs text-red-500 mt-1">{errors.Imagen_Url}</p>}
-                    {imagen && (
+                    {/* Campo Título */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700">Título</label>
                         <input
                             type="text"
-                            value={imagen.name}
-                            readOnly
-                            className="w-full px-3 py-2 rounded-lg border border-gray-300 bg-gray-50 text-gray-700 mt-2"
+                            placeholder="Título del proyecto"
+                            value={titulo}
+                            onChange={handleTituloChange}
+                            maxLength={100}
+                            className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-sky-500 text-sm"
+                            required
                         />
-                    )}
+                        <div className="text-right text-xs text-gray-500 mt-1">{titulo.length}/100</div>
+                        {errors.Titulo && <p className="text-xs text-red-500 mt-1">{errors.Titulo}</p>}
+                    </div>
 
-                </div>
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                    <p className="text-xs text-blue-700">
-                        <strong>Nota:</strong> Los archivos se crean como ocultos por defecto. Puedes cambiar la visibilidad después de crear el archivo.
-                    </p>
-                </div>
+                    {/* Campo Descripción */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700">Descripción</label>
+                        <textarea
+                            placeholder="Descripción del proyecto"
+                            value={descripcion}
+                            onChange={handleDescripcionChange}
+                            maxLength={1000}
+                            className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-sky-500 text-sm break-words"
+                            style={{ whiteSpace: "normal", overflowWrap: "break-word" }}
+                            rows={3}
+                            required
+                        />
+                        <div className="text-right text-xs text-gray-500 mt-1">{descripcion.length}/1000</div>
+                        {errors.Descripcion && <p className="text-xs text-red-500 mt-1">{errors.Descripcion}</p>}
+                    </div>
 
-                {/* Botones */}
-                <div className="flex justify-end gap-4">
-                    <button
-                        type="button"
-                        onClick={onClose}
-                        className="px-4 py-2 rounded-lg bg-gray-200 text-gray-800 hover:bg-gray-300 shadow-sm text-sm"
-                    >
-                        Cancelar
-                    </button>
-                    <button
-                        type="submit"
-                        className="px-4 py-2 rounded-lg bg-sky-600 text-white hover:bg-sky-700 shadow-sm text-sm"
-                        disabled={createProyectoMutation.status === "pending"}
-                    >
-                        {createProyectoMutation.status === "pending" ? "Creando..." : "Crear Proyecto"}
-                    </button>
-                </div>
-            </form>
-        </div>
+                    {/* Campo Imagen */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700">Archivo del Proyecto</label>
+                        <label className="block w-full cursor-pointer border border-gray-300 rounded-lg bg-gray-50 px-3 py-2">
+                            <span className="text-xs text-gray-500">
+                                {imagen ? imagen.name : "Selecciona un archivo"}
+                            </span>
+                            <input
+                                type="file"
+                                accept=".png,.jpg,.jpeg,.heic,.pdf"
+                                onChange={handleFileChange}
+                                className="hidden"
+                                required
+                            />
+                        </label>
+                        {errors.Imagen_Url && <p className="text-xs text-red-500 mt-1">{errors.Imagen_Url}</p>}
+                        {imagen && (
+                            <input
+                                type="text"
+                                value={imagen.name}
+                                readOnly
+                                className="w-full px-3 py-2 rounded-lg border border-gray-300 bg-gray-50 text-gray-700 mt-2"
+                            />
+                        )}
+
+                    </div>
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                        <p className="text-xs text-blue-700">
+                            <strong>Nota:</strong> Los archivos se crean como ocultos por defecto. Puedes cambiar la visibilidad después de crear el archivo.
+                        </p>
+                    </div>
+
+                    {/* Botones */}
+                    <div className="flex justify-end gap-4">
+                        <button
+                            type="button"
+                            onClick={onClose}
+                            className="px-4 py-2 rounded-lg bg-gray-200 text-gray-800 hover:bg-gray-300 shadow-sm text-sm"
+                        >
+                            Cancelar
+                        </button>
+                        <button
+                            type="submit"
+                            className="px-4 py-2 rounded-lg bg-sky-600 text-white hover:bg-sky-700 shadow-sm text-sm"
+                            disabled={createProyectoMutation.status === "pending"}
+                        >
+                            {createProyectoMutation.status === "pending" ? "Creando..." : "Crear Proyecto"}
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <style>{`
+                @keyframes slideIn {
+                    from {
+                        transform: translateX(100%);
+                        opacity: 0;
+                    }
+                    to {
+                        transform: translateX(0);
+                        opacity: 1;
+                    }
+                }
+                .animate-slideIn {
+                    animation: slideIn 0.3s ease-out;
+                }
+            `}</style>
+        </>
     );
 }
