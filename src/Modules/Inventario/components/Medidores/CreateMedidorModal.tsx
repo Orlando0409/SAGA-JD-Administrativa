@@ -94,7 +94,7 @@ const CreateMedidorModal = ({ isOpen, onClose }: CreateMedidorModalProps) => {
                 className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors font-mono ${
                   formErrors.Numero_Medidor ? 'border-red-300 bg-red-50' : 'border-gray-300'
                 }`}
-                placeholder="Ej: Nise-123"
+                placeholder="Ej: 123456"
                 min="1"
                 autoComplete="off"
               />
