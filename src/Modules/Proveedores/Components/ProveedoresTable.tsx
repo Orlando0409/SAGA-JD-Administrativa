@@ -9,6 +9,7 @@ import type { ProveedorJuridico } from '../Models/TablaProveedo/tablaJuridicoPro
 import CreateModalProveedor from './CreateModalProveedor';
 import ProveedorDetailModal from './DetailFisicoProveedor';
 import ProveedorJuridicoDetailModal from './DetailJuridicoProveedor';
+import ActionButtons from './ActionButtons';
 
 // Tipo unificado para la tabla (similar al patrón de AbonadosTable)
 type ProveedorUnificado = {
@@ -127,7 +128,7 @@ export default function ProveedoresTable() {
                     <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
                         tipo === 'Físico' 
                             ? 'bg-blue-100 text-blue-700' 
-                            : 'bg-teal-100 text-teal-700'
+                            : 'bg-blue-100 text-blue-700'
                     }`}>
                         {tipo}
                     </span>
@@ -194,6 +195,20 @@ export default function ProveedoresTable() {
                 return <span className={`${base} bg-slate-100 text-slate-700`}>{estadoNombre}</span>;
             },
             size: 120,
+        }),
+        columnHelper.display({
+            id: 'acciones',
+            header: 'Acción',
+            cell: (info) => {
+                const proveedor = info.row.original;
+                return (
+                    <ActionButtons
+                        proveedor={proveedor.datos_originales}
+                        tipoProveedor={proveedor.Tipo_Proveedor}
+                    />
+                );
+            },
+            size: 140,
         }),
     ];
 

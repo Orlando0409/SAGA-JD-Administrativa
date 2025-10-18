@@ -221,7 +221,7 @@ const EditProveedorJuridicoModal: React.FC<EditProveedorJuridicoModalProps> = ({
           </button>
         </div>
 
-        <div className="p-6 overflow-y-auto scrollbar-thin scrollbar-thumb-green-600 scrollbar-track-green-100 max-h-[calc(90vh-140px)]">
+        <div className="p-6 overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100 max-h-[calc(90vh-140px)]">
           <form
             onSubmit={(e) => {
               e.preventDefault();
@@ -243,7 +243,7 @@ const EditProveedorJuridicoModal: React.FC<EditProveedorJuridicoModalProps> = ({
                     className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-colors ${
                       (formErrors.Nombre_Proveedor || field.state.meta.errors?.length) 
                         ? 'border-red-300 focus:ring-red-500' 
-                        : 'border-gray-300 focus:ring-green-500'
+                        : 'border-gray-300 focus:ring-blue-500'
                     }`}
                     placeholder="Ingrese el nombre del proveedor (mín. 2 caracteres)"
                     maxLength={JURIDICO_VALIDATION_LIMITS.NOMBRE_MAX_LENGTH}
@@ -279,7 +279,7 @@ const EditProveedorJuridicoModal: React.FC<EditProveedorJuridicoModalProps> = ({
                     className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-colors ${
                       (formErrors.Razon_Social || field.state.meta.errors?.length) 
                         ? 'border-red-300 focus:ring-red-500' 
-                        : 'border-gray-300 focus:ring-green-500'
+                        : 'border-gray-300 focus:ring-blue-500'
                     }`}
                     placeholder="Ingrese la razón social (mín. 2 caracteres)"
                     maxLength={JURIDICO_VALIDATION_LIMITS.RAZON_SOCIAL_MAX_LENGTH}
@@ -310,6 +310,8 @@ const EditProveedorJuridicoModal: React.FC<EditProveedorJuridicoModalProps> = ({
                   </label>
                   <PhoneInput
                     defaultCountry="CR"
+                    international
+                    countryCallingCodeEditable={false}
                     value={field.state.value as any}
                     onChange={(value) => {
                       // Formatear el número en tiempo real
@@ -321,11 +323,37 @@ const EditProveedorJuridicoModal: React.FC<EditProveedorJuridicoModalProps> = ({
                       }));
                       validateFieldRealTime('Telefono_Proveedor', value || '');
                     }}
-                    className={`phone-input ${
+                    className={`react-phone-number-input ${
                       (formErrors.Telefono_Proveedor || field.state.meta.errors?.length) 
-                        ? 'phone-input-error' 
-                        : 'phone-input-success-juridico'
+                        ? 'react-phone-number-input--error' 
+                        : ''
                     }`}
+                    style={{
+                      '--PhoneInput-color--focus': '#3b82f6',
+                      '--PhoneInputCountrySelect-marginRight': '0.5rem',
+                      '--PhoneInputCountryFlag-aspectRatio': '1.5',
+                      '--PhoneInputCountryFlag-height': '1rem',
+                      '--PhoneInputCountrySelectArrow-color': '#6b7280',
+                      '--PhoneInputCountrySelectArrow-color--focus': '#3b82f6',
+                    } as React.CSSProperties}
+                    inputProps={{
+                      autoComplete: 'tel',
+                      'aria-label': 'Número de teléfono internacional',
+                      className: `w-full px-3 py-2 border rounded-r-lg focus:ring-2 focus:border-transparent transition-colors ${
+                        (formErrors.Telefono_Proveedor || field.state.meta.errors?.length) 
+                          ? 'border-red-300 focus:ring-red-500' 
+                          : 'border-gray-300 focus:ring-blue-500'
+                      }`,
+                      placeholder: 'Número de teléfono'
+                    }}
+                    countrySelectProps={{
+                      'aria-label': 'Seleccionar país',
+                      className: `border rounded-l-lg px-2 py-2 bg-white hover:bg-gray-50 focus:ring-2 focus:border-transparent transition-colors ${
+                        (formErrors.Telefono_Proveedor || field.state.meta.errors?.length) 
+                          ? 'border-red-300 focus:ring-red-500' 
+                          : 'border-gray-300 focus:ring-blue-500'
+                      }`
+                    }}
                   />
                   
                   <div className="flex justify-between items-center mt-1">
@@ -333,11 +361,15 @@ const EditProveedorJuridicoModal: React.FC<EditProveedorJuridicoModalProps> = ({
                       Seleccione país y ingrese su número
                     </span>
                     <span className={`text-xs ${
-                      field.state.value && isValidPhoneNumber(field.state.value) 
-                        ? 'text-green-600' 
-                        : field.state.value 
-                          ? 'text-red-600' 
-                          : 'text-gray-500'
+                      (() => {
+                        if (field.state.value && isValidPhoneNumber(field.state.value)) {
+                          return 'text-green-600';
+                        }
+                        if (field.state.value) {
+                          return 'text-red-600';
+                        }
+                        return 'text-gray-500';
+                      })()
                     }`}>
                       {field.state.value 
                         ? (isValidPhoneNumber(field.state.value) ? '✓ Válido' : '✗ Inválido')
@@ -370,8 +402,8 @@ const EditProveedorJuridicoModal: React.FC<EditProveedorJuridicoModalProps> = ({
                 disabled={isUpdating}
                 className={`px-4 py-2 text-white rounded-lg transition-colors ${
                   isUpdating 
-                    ? 'bg-green-300 cursor-not-allowed' 
-                    : 'bg-green-600 hover:bg-green-700' 
+                    ? 'bg-blue-300 cursor-not-allowed' 
+                    : 'bg-blue-600 hover:bg-blue-700' 
                 }`}
               >
                 {isUpdating ? 'Actualizando...' : 'Actualizar Proveedor'}
