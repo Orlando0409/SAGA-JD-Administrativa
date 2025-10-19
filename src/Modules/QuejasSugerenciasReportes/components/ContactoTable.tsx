@@ -1,4 +1,5 @@
 // src/Modules/QuejasSugerenciasReportes/components/ContactoTable.tsx
+import ResponderModal from './ResponderModal';
 import { useState, useEffect, useMemo } from 'react';
 import {
   createColumnHelper,
@@ -33,7 +34,7 @@ import type { Reporte } from '../models/Reportes';
 import type { ContactoFilterOptions, TipoContacto } from '../types/ContactoTypes';
 import FilterContactoModal from './FilterContactoModal';
 import ContactoDetailModal from './ContactoDetailModal';
-import CreateContactoModal from './CreateContactoModal';
+
 
 // Tipo unificado para la tabla
 export interface ContactoItem {
@@ -44,8 +45,9 @@ export interface ContactoItem {
   segundoApellido?: string;
   ubicacion?: string;
   mensaje: string;
+  correo?: string;
   fechaCreacion: Date | string | null;
-  estado?: 'Pendiente' | 'En Proceso' | 'Resuelto';
+  estado?: string
   adjunto?: File | null;
 }
 
@@ -94,17 +96,14 @@ const renderMensajeCell = (mensaje?: string) => {
 };
 
 const renderEstadoCell = (item: ContactoItem) => {
-  if (item.tipo !== 'Reporte' || !item.estado) return <span className="text-gray-400 text-sm">-</span>;
+  if (!item.estado) return <span className="text-gray-400 text-sm">-</span>;
 
   let badgeClass = '';
   switch (item.estado) {
     case 'Pendiente':
       badgeClass = 'bg-yellow-100 text-yellow-800';
       break;
-    case 'En Proceso':
-      badgeClass = 'bg-blue-100 text-blue-800';
-      break;
-    case 'Resuelto':
+    case 'Contestado':
       badgeClass = 'bg-green-100 text-green-800';
       break;
   }
@@ -136,6 +135,16 @@ const renderAccionesCell = (item: ContactoItem) => (
     >
       Ver
     </button>
+    {item.estado === 'Pendiente' && (
+      <button
+        className="px-4 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition-colors"
+        title="Responder"
+        onClick={() => window.dispatchEvent(new CustomEvent('openContactoResponder', { detail: item }))}
+      >
+        Responder
+      </button>
+    )
+    }
   </div>
 );
 
@@ -145,8 +154,8 @@ const ContactoTable = () => {
   const [globalFilter, setGlobalFilter] = useState('');
   const [selectedItem, setSelectedItem] = useState<ContactoItem | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [isResponderModalOpen, setIsResponderModalOpen] = useState(false);
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [appliedFilters, setAppliedFilters] = useState<ContactoFilterOptions>({});
 
   const pageSizeOptions = [5, 10, 20, 50];
@@ -177,11 +186,13 @@ const ContactoTable = () => {
       data.push({
         id: queja.Id_Queja,
         tipo: 'Queja',
-        nombre: queja.name,
-        primerApellido: queja.Papellido,
-        segundoApellido: queja.Sapellido,
-        mensaje: queja.descripcion,
+        nombre: queja.Nombre,
+        primerApellido: queja.Primer_Apellido,
+        segundoApellido: queja.Segundo_Apellido,
+        mensaje: queja.Descripcion,
         fechaCreacion: queja.Fecha_Queja,
+        correo: queja.Correo,
+        estado: queja.Estado.Estado_Queja,
         adjunto: queja.Adjunto && queja.Adjunto.length > 0 ? ({} as File) : null,
       });
     });
@@ -193,6 +204,8 @@ const ContactoTable = () => {
         tipo: 'Sugerencia',
         mensaje: sugerencia.Mensaje,
         fechaCreacion: sugerencia.Fecha_Sugerencia,
+        correo: sugerencia.Correo,
+        estado: sugerencia.Estado.Estado_Sugerencia,
         adjunto: sugerencia.Adjunto && sugerencia.Adjunto.length > 0 ? ({} as File) : null,
       });
     });
@@ -202,13 +215,14 @@ const ContactoTable = () => {
       data.push({
         id: reporte.IdReporte,
         tipo: 'Reporte',
-        nombre: reporte.name,
-        primerApellido: reporte.Papellido,
-        segundoApellido: reporte.Sapellido,
-        ubicacion: reporte.ubicacion,
-        mensaje: reporte.descripcion || '',
+        nombre: reporte.Nombre,
+        primerApellido: reporte.Primer_Apellido,
+        segundoApellido: reporte.Segundo_Apellido,
+        ubicacion: reporte.Ubicacion,
+        mensaje: reporte.Descripcion || '',
         fechaCreacion: reporte.Fecha_Reporte,
-        estado: reporte.Estado.Estado_Reporte as 'Pendiente' | 'En Proceso' | 'Resuelto',
+        correo: reporte.Correo,
+        estado: reporte.Estado.Estado_Reporte,
         adjunto: reporte.Adjunto && reporte.Adjunto.length > 0 ? ({} as File) : null,
       });
     });
@@ -328,7 +342,7 @@ const ContactoTable = () => {
       id: 'acciones',
       header: 'Acciones',
       cell: ({ row }) => renderAccionesCell(row.original),
-      size: 80,
+
       enableSorting: false,
     }),
   ];
@@ -362,21 +376,35 @@ const ContactoTable = () => {
     setIsDetailModalOpen(true);
   };
 
-  // Listen for global event dispatched by renderAccionesCell
+  // Listen for global events dispatched by renderAccionesCell
   useEffect(() => {
-    const listener = (e: Event) => {
+    const detailListener = (e: Event) => {
       const custom = e as CustomEvent<ContactoItem>;
       if (custom?.detail) {
         handleViewDetails(custom.detail);
       }
     };
-
-    window.addEventListener('openContactoDetail', listener as EventListener);
-    return () => window.removeEventListener('openContactoDetail', listener as EventListener);
+    const responderListener = (e: Event) => {
+      const custom = e as CustomEvent<ContactoItem>;
+      if (custom?.detail) {
+        setSelectedItem(custom.detail);
+        setIsResponderModalOpen(true);
+      }
+    };
+    window.addEventListener('openContactoDetail', detailListener as EventListener);
+    window.addEventListener('openContactoResponder', responderListener as EventListener);
+    return () => {
+      window.removeEventListener('openContactoDetail', detailListener as EventListener);
+      window.removeEventListener('openContactoResponder', responderListener as EventListener);
+    };
   }, []);
 
   const handleCloseDetailModal = () => {
     setIsDetailModalOpen(false);
+    setSelectedItem(null);
+  };
+  const handleCloseResponderModal = () => {
+    setIsResponderModalOpen(false);
     setSelectedItem(null);
   };
 
@@ -443,13 +471,6 @@ const ContactoTable = () => {
                 </span>
               )}
             </button>
-            <button 
-              onClick={() => setIsCreateModalOpen(true)}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md flex items-center gap-2 transition-colors"
-            >
-              <LuPlus className="w-4 h-4" />
-              Nuevo
-            </button>
           </div>
         </div>
       </div>
@@ -504,27 +525,25 @@ const ContactoTable = () => {
         </div>
 
         {/* Paginación */}
-        <div className="bg-white px-4 py-3 flex flex-col sm:flex-row items-center justify-between border-t border-gray-200 sm:px-6 gap-4">
-          <div className="flex flex-col sm:flex-row items-center gap-4">
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-gray-700">Filas por página</span>
-              <select
-                value={table.getState().pagination.pageSize}
-                onChange={(e) => {
-                  table.setPageSize(Number(e.target.value));
-                }}
-                className="border border-gray-300 rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
-              >
-                {pageSizeOptions.map((pageSize) => (
-                  <option key={pageSize} value={pageSize}>
-                    {pageSize}
-                  </option>
-                ))}
-              </select>
-            </div>
+        <div className="bg-gray-50 px-6 py-3 border-t border-gray-200 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className='text-sm text-gray-700'>Filas por página</span>
+            <select
+              value={table.getState().pagination.pageSize}
+              onChange={(e) => {
+                table.setPageSize(Number(e.target.value));
+              }}
+              className="border border-gray-300 rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+            >
+              {pageSizeOptions.map((pageSize) => (
+                <option key={pageSize} value={pageSize}>
+                  {pageSize}
+                </option>
+              ))}
+            </select>
           </div>
 
-            <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1">
               <button
                 onClick={() => table.setPageIndex(0)}
                 disabled={!table.getCanPreviousPage()}
@@ -542,7 +561,8 @@ const ContactoTable = () => {
                 <MdKeyboardArrowLeft />
               </button>
               <span className="px-2 py-1 text-sm">
-                Página {table.getState().pagination.pageIndex + 1} de {table.getPageCount() +1}
+                Página {table.getState().pagination.pageIndex + 1} de{' '}
+                {table.getPageCount()}
               </span>
               <button
                 onClick={() => table.nextPage()}
@@ -564,10 +584,6 @@ const ContactoTable = () => {
         </div>
       </div>
 
-      <CreateContactoModal
-        isOpen={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
-      />
 
       <FilterContactoModal
         isOpen={isFilterModalOpen}
@@ -580,6 +596,13 @@ const ContactoTable = () => {
         <ContactoDetailModal
           isOpen={isDetailModalOpen}
           onClose={handleCloseDetailModal}
+          item={selectedItem}
+        />
+      )}
+      {selectedItem && (
+        <ResponderModal
+          isOpen={isResponderModalOpen}
+          onClose={handleCloseResponderModal}
           item={selectedItem}
         />
       )}

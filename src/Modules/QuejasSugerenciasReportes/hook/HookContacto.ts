@@ -1,21 +1,60 @@
-// src/Modules/QuejasSugerenciasReportes/hook/HookContacto.ts
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import {
-  obtenerQuejas,
-  obtenerSugerencias,
-  obtenerReportes,
-  crearQueja,
-  crearSugerencia,
-  crearReporte,
-  actualizarEstadoReporte,
-  eliminarQueja,
-  eliminarSugerencia,
-  eliminarReporte,
-} from '../service/ContactoService';
-import type { CreateQuejaData } from '../models/Quejas';
-import type { CreateSugerenciaData } from '../models/Sugerencias';
-import type { CreateReporteData } from '../models/Reportes';
+import React from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import type { ContactoItem } from '../components/ContactoTable';
+import { responderQueja, responderSugerencia, responderReporte, obtenerQuejas, obtenerSugerencias, obtenerReportes, actualizarEstadoReporte } from '../service/ContactoService';
 
+export function useResponderContacto(item: ContactoItem) {
+  const queryClient = useQueryClient();
+  const [errorMsg, setErrorMsg] = React.useState('');
+  const [successMsg, setSuccessMsg] = React.useState('');
+
+  const mutation = useMutation({
+    mutationFn: async (respuesta: string) => {
+      if (!respuesta.trim()) throw new Error('La respuesta no puede estar vacía');
+      if (item.tipo === 'Queja') {
+        return responderQueja(item.id, respuesta);
+      } else if (item.tipo === 'Sugerencia') {
+        return responderSugerencia(item.id, respuesta);
+      } else if (item.tipo === 'Reporte') {
+        return responderReporte(item.id, respuesta);
+      }
+      throw new Error('Tipo de contacto no soportado');
+    },
+    onSuccess: () => {
+      setSuccessMsg('Respuesta enviada correctamente');
+      setErrorMsg('');
+      // Actualizar la lista correspondiente
+      if (item.tipo === 'Queja') queryClient.invalidateQueries({ queryKey: ['quejas'] });
+      if (item.tipo === 'Sugerencia') queryClient.invalidateQueries({ queryKey: ['sugerencias'] });
+      if (item.tipo === 'Reporte') queryClient.invalidateQueries({ queryKey: ['reportes'] });
+    },
+    onError: (err: any) => {
+      setErrorMsg(err?.message || 'Error al enviar la respuesta');
+      setSuccessMsg('');
+    },
+  });
+
+  function sendRespuesta(respuesta: string, onSuccess?: () => void) {
+    mutation.mutate(respuesta, {
+      onSuccess: () => {
+        if (onSuccess) onSuccess();
+      },
+    });
+  }
+
+  function resetFeedback() {
+    setErrorMsg('');
+    setSuccessMsg('');
+  }
+
+  return {
+    sendRespuesta,
+    isLoading: mutation.isPending,
+    errorMsg,
+    successMsg,
+    resetFeedback,
+  };
+}
 // ======================== QUERIES ========================
 export const useQuejas = () => {
   return useQuery({
@@ -42,38 +81,6 @@ export const useReportes = () => {
 };
 
 // ======================== MUTATIONS ========================
-export const useCreateQueja = () => {
-  const queryClient = useQueryClient();
-  
-  return useMutation({
-    mutationFn: ({ data, adjunto }: { data: CreateQuejaData; adjunto?: File }) => crearQueja(data, adjunto),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['quejas'] });
-    },
-  });
-};
-
-export const useCreateSugerencia = () => {
-  const queryClient = useQueryClient();
-  
-  return useMutation({
-    mutationFn: ({ data, adjunto }: { data: CreateSugerenciaData; adjunto?: File }) => crearSugerencia(data, adjunto),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['sugerencias'] });
-    },
-  });
-};
-
-export const useCreateReporte = () => {
-  const queryClient = useQueryClient();
-  
-  return useMutation({
-    mutationFn: ({ data, adjunto }: { data: CreateReporteData; adjunto?: File }) => crearReporte(data, adjunto),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['reportes'] });
-    },
-  });
-};
 
 export const useUpdateReporteEstado = () => {
   const queryClient = useQueryClient();
@@ -81,39 +88,6 @@ export const useUpdateReporteEstado = () => {
   return useMutation({
     mutationFn: ({ id, idEstado }: { id: number; idEstado: number }) =>
       actualizarEstadoReporte(id, idEstado),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['reportes'] });
-    },
-  });
-};
-
-export const useDeleteQueja = () => {
-  const queryClient = useQueryClient();
-  
-  return useMutation({
-    mutationFn: (id: number) => eliminarQueja(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['quejas'] });
-    },
-  });
-};
-
-export const useDeleteSugerencia = () => {
-  const queryClient = useQueryClient();
-  
-  return useMutation({
-    mutationFn: (id: number) => eliminarSugerencia(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['sugerencias'] });
-    },
-  });
-};
-
-export const useDeleteReporte = () => {
-  const queryClient = useQueryClient();
-  
-  return useMutation({
-    mutationFn: (id: number) => eliminarReporte(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['reportes'] });
     },

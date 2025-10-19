@@ -9,28 +9,13 @@ import {
   LuUser, 
   LuMapPin, 
   LuMessageSquare,
-  LuTrash2,
 } from 'react-icons/lu';
-import { FaUserEdit } from 'react-icons/fa';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Accordion, AccordionHeader, AccordionBody } from "@material-tailwind/react";
 import { FiChevronDown, FiChevronRight } from 'react-icons/fi';
-import {
-  AlertDialog,
-  AlertDialogTrigger,
-  AlertDialogContent,
-  AlertDialogTitle,
-  AlertDialogDescription,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogHeader,
-  AlertDialogFooter
-} from "@/Modules/Global/components/Sidebar/ui/alert-dialog";
-import { Button } from '@/Modules/Global/components/Sidebar/ui/button';
 import { CUSTOM_ANIMATION } from '@/Modules/Global/types/Sections';
 import type { ContactoItem } from './ContactoTable';
-import { useDeleteQueja, useDeleteSugerencia, useDeleteReporte } from '../hook/HookContacto';
 
 interface ContactoDetailModalProps {
   item: ContactoItem;
@@ -41,10 +26,6 @@ interface ContactoDetailModalProps {
 const ContactoDetailModal = ({ item, isOpen, onClose }: ContactoDetailModalProps) => {
   const [openSections, setOpenSections] = useState<number[]>([1, 2, 3]);
   const [showEditModal, setShowEditModal] = useState(false);
-
-  const deleteQuejaMutation = useDeleteQueja();
-  const deleteSugerenciaMutation = useDeleteSugerencia();
-  const deleteReporteMutation = useDeleteReporte();
 
 
   if (!isOpen) return null;
@@ -66,37 +47,17 @@ const ContactoDetailModal = ({ item, isOpen, onClose }: ContactoDetailModalProps
     return configs[tipo as keyof typeof configs];
   };
 
-  const handleDelete = async () => {
-    try {
-      switch (item.tipo) {
-        case 'Queja':
-          await deleteQuejaMutation.mutateAsync(item.id);
-          break;
-        case 'Sugerencia':
-          await deleteSugerenciaMutation.mutateAsync(item.id);
-          break;
-        case 'Reporte':
-          await deleteReporteMutation.mutateAsync(item.id);
-          break;
-      }
-      onClose();
-    } catch (error) {
-      console.error('Error eliminando:', error);
-    }
-  };
-
 
   const config = getTipoConfig(item.tipo);
   const IconComponent = config.icon;
 
   return (
-    <div className="fixed inset-0 bg-white bg-opacity-95 flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 bg-opacity-10 backdrop-blur-sm flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg shadow-2xl border border-gray-200 w-full max-w-4xl max-h-[90vh] overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100">
         {/* Header */}
         <div className="sticky top-0 bg-white border-b border-gray-200 p-6 z-10">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <IconComponent className="w-6 h-6" />
               <h1 className="text-3xl font-bold text-gray-900">{config.title}</h1>
             </div>
             <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors">
@@ -211,7 +172,7 @@ const ContactoDetailModal = ({ item, isOpen, onClose }: ContactoDetailModalProps
 
                   {/* Mensaje */}
                   <div>
-                    <span className="block text-sm font-medium text-gray-500 mb-2">Mensaje</span>
+                    <span className="block text-sm font-medium text-gray-500 mb-2">Descripción</span>
                     <div className="bg-gray-50 p-4 rounded-lg">
                       <p className="text-gray-800 whitespace-pre-wrap leading-relaxed">{item.mensaje}</p>
                     </div>
@@ -277,50 +238,6 @@ const ContactoDetailModal = ({ item, isOpen, onClose }: ContactoDetailModalProps
             </Accordion>
           </div>
 
-          {/* Action Buttons */}
-          <div className="flex justify-end gap-4 mt-8">
-            <Button
-              size="xl"
-              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center gap-2"
-              onClick={() => setShowEditModal(true)}
-            >
-              <FaUserEdit className="w-5 h-5" />
-              Editar
-            </Button>
-
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button
-                  variant='destructive'
-                  size={'xl'}
-                >
-                  <LuTrash2 className="w-5 h-5" />
-                  <span className="ml-2">Eliminar</span>
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>
-                    <span>¿Eliminar {item.tipo.toLowerCase()}?</span>
-                  </AlertDialogTitle>
-                  <AlertDialogDescription>
-                    <span>Esta acción no se puede deshacer. ¿Estás seguro de que deseas eliminar esta {item.tipo.toLowerCase()}?</span>
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogAction
-                    onClick={handleDelete}
-                    disabled={deleteQuejaMutation.isPending || deleteSugerenciaMutation.isPending || deleteReporteMutation.isPending}
-                  >
-                    <span>Eliminar</span>
-                  </AlertDialogAction>
-                  <AlertDialogCancel>
-                    <span>Cancelar</span>
-                  </AlertDialogCancel>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          </div>
         </div>
 
         {/* Modal de edición (placeholder) */}

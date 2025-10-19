@@ -55,14 +55,13 @@ const FilterContactoModal: React.FC<FilterContactoModalProps> = ({
               value={filters.estado || ''}
               onChange={(e) => setFilters(prev => ({ 
                 ...prev, 
-                estado: e.target.value ? e.target.value as 'Pendiente' | 'En Proceso' | 'Resuelto' : undefined
+                estado: e.target.value ? e.target.value as 'Pendiente' | 'Contestado' : undefined
               }))}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="">Todos los estados</option>
               <option value="Pendiente">Pendiente</option>
-              <option value="En Proceso">En Proceso</option>
-              <option value="Resuelto">Resuelto</option>
+              <option value="Contestado">Contestado</option>
             </select>
           </div>
 

@@ -1,7 +1,7 @@
 // src/Modules/QuejasSugerenciasReportes/types/ContactoTypes.ts
 
 export type TipoContacto = 'Queja' | 'Sugerencia' | 'Reporte';
-export type EstadoContacto = 'Pendiente' | 'En Proceso' | 'Resuelto';
+export type EstadoContacto = 'Pendiente' | 'Contestado';
 
 export interface ContactoFilterOptions {
   tipo?: TipoContacto;
