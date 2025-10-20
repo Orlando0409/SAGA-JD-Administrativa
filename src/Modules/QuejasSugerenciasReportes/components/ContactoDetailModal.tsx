@@ -2,14 +2,14 @@
 import { useState } from 'react';
 import { 
   LuX, 
-  LuFileText, 
-  LuTriangle, 
-  LuLightbulb, 
   LuCalendar, 
   LuUser, 
   LuMapPin, 
   LuMessageSquare,
 } from 'react-icons/lu';
+import { MdReportProblem } from 'react-icons/md';
+import { FaLightbulb } from 'react-icons/fa';
+import { HiOutlineDocumentReport } from 'react-icons/hi';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Accordion, AccordionHeader, AccordionBody } from "@material-tailwind/react";
@@ -40,9 +40,9 @@ const ContactoDetailModal = ({ item, isOpen, onClose }: ContactoDetailModalProps
 
   const getTipoConfig = (tipo: string) => {
     const configs = {
-      'Queja': { icon: LuTriangle, color: 'text-red-600 bg-red-50 border-red-200', title: 'Detalle de Queja' },
-      'Sugerencia': { icon: LuLightbulb, color: 'text-yellow-600 bg-yellow-50 border-yellow-200', title: 'Detalle de Sugerencia' },
-      'Reporte': { icon: LuFileText, color: 'text-blue-600 bg-blue-50 border-blue-200', title: 'Detalle de Reporte' }
+      'Queja': { icon: MdReportProblem, color: 'text-red-600 bg-red-50 border-red-200', title: 'Detalle de Queja' },
+      'Sugerencia': { icon: FaLightbulb, color: 'text-yellow-600 bg-yellow-50 border-yellow-200', title: 'Detalle de Sugerencia' },
+      'Reporte': { icon: HiOutlineDocumentReport, color: 'text-blue-600 bg-blue-50 border-blue-200', title: 'Detalle de Reporte' }
     };
     return configs[tipo as keyof typeof configs];
   };
@@ -184,7 +184,7 @@ const ContactoDetailModal = ({ item, isOpen, onClose }: ContactoDetailModalProps
                     {item.adjunto ? (
                       <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
                         <p className="text-blue-800 text-sm flex items-center gap-2">
-                          📎 <span>Archivo adjunto disponible</span>
+                          📎 <span>Archivo adjunto disponible</span> {typeof item.adjunto === 'string' ? item.adjunto : item.adjunto?.name}
                         </p>
                       </div>
                     ) : (

@@ -15,7 +15,6 @@ import {
 import { 
   LuSearch, 
   LuFilter,
-  LuPlus
 } from 'react-icons/lu';
 import { 
   MdKeyboardArrowUp, 
@@ -87,7 +86,7 @@ const renderPersonaCell = (item: ContactoItem) => {
 
 const renderMensajeCell = (mensaje?: string) => {
   if (!mensaje) return <span className="text-gray-400 text-sm">-</span>;
-  const truncated = mensaje.length > 80 ? mensaje.substring(0, 80) + '...' : mensaje;
+  const truncated = mensaje.length > 50 ? mensaje.substring(0, 50) + '...' : mensaje;
   return (
     <span className="text-sm text-gray-700" title={mensaje}>
       {truncated}
