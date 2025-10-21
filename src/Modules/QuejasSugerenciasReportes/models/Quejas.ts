@@ -10,7 +10,7 @@ export interface Queja {
     Segundo_Apellido: string;
     Correo: string;
     Descripcion: string;
-    Adjunto?: string[];
+    Adjunto?: string;
     RespuestasReporte?: string | null;
     Estado: EstadoQueja;
     Fecha_Queja: Date | string;

@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
-import type { ContactoItem } from './ContactoTable';
+
 import { LuX } from 'react-icons/lu';
 import { useResponderContacto } from '../hook/HookContacto';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/Modules/Global/components/Sidebar/ui/alert-dialog';
+import type { ContactoItem } from '../types/ContactoTypes';
 
 interface ResponderModalProps {
     item: ContactoItem;
@@ -11,27 +13,18 @@ interface ResponderModalProps {
 
 const ResponderModal: React.FC<ResponderModalProps> = ({ item, isOpen, onClose }) => {
   const [respuesta, setRespuesta] = useState('');
-  const {
-    sendRespuesta,
-    isLoading,
-    errorMsg,
-    successMsg,
-    resetFeedback,
-  } = useResponderContacto(item);
+  const { mutate: sendRespuesta, isPending, error } = useResponderContacto(item);
 
   if (!isOpen) return null;
 
   const handleSendResponse = () => {
-    if (!respuesta.trim()) {
-      // El hook maneja el error, pero puedes mostrarlo aquí si prefieres
-      return;
-    }
-    sendRespuesta(respuesta, () => {
-      setRespuesta('');
-      setTimeout(() => {
-        resetFeedback();
-        onClose();
-      }, 1200);
+    sendRespuesta(respuesta, {
+      onSuccess: () => {
+        setRespuesta('');
+        setTimeout(() => {
+          onClose();
+        }, 1200);
+      },
     });
   };
 
@@ -70,24 +63,44 @@ const ResponderModal: React.FC<ResponderModalProps> = ({ item, isOpen, onClose }
             placeholder="Escribe tu respuesta aquí..."
             value={respuesta}
             onChange={e => setRespuesta(e.target.value)}
-            disabled={isLoading}
+            disabled={isPending}
           />
-          {errorMsg && <div className="text-red-600 mt-2 text-sm">{errorMsg}</div>}
-          {successMsg && <div className="text-green-600 mt-2 text-sm">{successMsg}</div>}
+          {error && <div className="text-red-600 mt-2 text-sm">{error.message}</div>}
         </div>
 
         <div className="p-6 border-t border-gray-200 flex justify-end space-x-4">
-          <button
-            onClick={handleSendResponse}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-            disabled={isLoading}
-          >
-            {isLoading ? 'Enviando...' : 'Enviar Respuesta'}
-          </button>
+         <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <button
+                type="button"
+                disabled={isPending}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+              >
+                {isPending ? 'Enviando...' : 'Enviar Respuesta'}
+              </button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>¿Confirmar envío?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  ¿Estás seguro de que deseas enviar esta respuesta? Esta acción no se puede deshacer.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogAction
+                  onClick={() => handleSendResponse()}
+                  disabled={isPending}
+                >
+                  {isPending ? 'Enviando...' : 'Confirmar'}
+                </AlertDialogAction>
+                 <AlertDialogCancel>Cancelar</AlertDialogCancel>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
           <button
             onClick={onClose}
             className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
-            disabled={isLoading}
+            disabled={isPending}
           >
             Cancelar
           </button>

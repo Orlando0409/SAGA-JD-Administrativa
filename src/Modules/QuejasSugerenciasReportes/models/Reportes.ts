@@ -12,7 +12,7 @@ export interface Reporte {
     Descripcion: string;
     Fecha_Reporte: Date | string;
     Correo: string;
-    Adjunto?: string[];
+    Adjunto?: string;
     RespuestasReporte?: string | null;
     Estado: EstadoReporte;
 }

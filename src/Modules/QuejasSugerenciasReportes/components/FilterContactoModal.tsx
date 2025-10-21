@@ -1,7 +1,7 @@
 // src/Modules/QuejasSugerenciasReportes/components/FilterContactoModal.tsx
 import React, { useState } from 'react';
 import { LuFilter } from 'react-icons/lu';
-import type { FilterContactoModalProps, ContactoFilterOptions } from '../types/ContactoTypes';
+import type { FilterContactoModalProps, ContactoFilterOptions, TipoContacto } from '../types/ContactoTypes';
 
 const FilterContactoModal: React.FC<FilterContactoModalProps> = ({ 
   isOpen, 
@@ -23,8 +23,6 @@ const FilterContactoModal: React.FC<FilterContactoModalProps> = ({
       fechaInicio: undefined,
       fechaFin: undefined,
       conAdjunto: false,
-      soloConNombre: false,
-      soloSinNombre: false,
     };
     setFilters(clearFilters);
     onApplyFilters(clearFilters);
@@ -46,22 +44,22 @@ const FilterContactoModal: React.FC<FilterContactoModalProps> = ({
         <div className="p-6 space-y-4 overflow-y-auto max-h-[calc(90vh-140px)] scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100">
           
           {/* Filtro por Estado (solo para reportes) */}
-          <div>
-            <label htmlFor="estado-filter" className="block text-sm font-medium text-gray-700 mb-2">
-              Estado
-            </label>
+
+        <div className="flex items-center gap-4">
+            <label htmlFor="tipo-contacto-filter-select" className="text-sm font-medium text-gray-700">Tipo:</label>
             <select
-              id="estado-filter"
-              value={filters.estado || ''}
-              onChange={(e) => setFilters(prev => ({ 
-                ...prev, 
-                estado: e.target.value ? e.target.value as 'Pendiente' | 'Contestado' : undefined
+              id="tipo-contacto-filter-select"
+              value={filters.tipo || "todos"}
+              onChange={(e) => setFilters(prev => ({
+                ...prev,
+                tipo: e.target.value === "todos" ? undefined : e.target.value as TipoContacto
               }))}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
-              <option value="">Todos los estados</option>
-              <option value="Pendiente">Pendiente</option>
-              <option value="Contestado">Contestado</option>
+              <option value="">Todos los tipos</option>
+              <option value="Queja">Quejas</option>
+              <option value="Sugerencia">Sugerencias</option>
+              <option value="Reporte">Reportes</option>
             </select>
           </div>
 
@@ -118,41 +116,6 @@ const FilterContactoModal: React.FC<FilterContactoModalProps> = ({
               />
               <span className="text-sm text-gray-700">Solo con archivos adjuntos</span>
             </label>
-          </div>
-
-          {/* Filtro por Nombre */}
-          <div>
-            <div className="block text-sm font-medium text-gray-700 mb-2">
-              Identificación
-            </div>
-            <div className="space-y-2">
-              <label className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  checked={filters.soloConNombre || false}
-                  onChange={(e) => setFilters(prev => ({ 
-                    ...prev, 
-                    soloConNombre: e.target.checked,
-                    soloSinNombre: e.target.checked ? false : prev.soloSinNombre
-                  }))}
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                />
-                <span className="text-sm text-gray-700">Solo con nombre (identificados)</span>
-              </label>
-              <label className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  checked={filters.soloSinNombre || false}
-                  onChange={(e) => setFilters(prev => ({ 
-                    ...prev, 
-                    soloSinNombre: e.target.checked,
-                    soloConNombre: e.target.checked ? false : prev.soloConNombre
-                  }))}
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                />
-                <span className="text-sm text-gray-700">Solo anónimos</span>
-              </label>
-            </div>
           </div>
         </div>
 

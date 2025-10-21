@@ -1,7 +1,7 @@
 // src/Modules/QuejasSugerenciasReportes/types/ContactoTypes.ts
 
 export type TipoContacto = 'Queja' | 'Sugerencia' | 'Reporte';
-export type EstadoContacto = 'Pendiente' | 'Contestado';
+export type EstadoContacto = 'Pendiente' | 'Contestado' | 'Archivado';
 
 export interface ContactoFilterOptions {
   tipo?: TipoContacto;
@@ -9,8 +9,6 @@ export interface ContactoFilterOptions {
   fechaInicio?: string;
   fechaFin?: string;
   conAdjunto?: boolean;
-  soloConNombre?: boolean;
-  soloSinNombre?: boolean;
 }
 
 export interface FilterContactoModalProps {
@@ -19,3 +17,22 @@ export interface FilterContactoModalProps {
   onApplyFilters: (filters: ContactoFilterOptions) => void;
   currentFilters: ContactoFilterOptions;
 }
+
+export interface ContactoItem {
+  id: number;
+  tipo: TipoContacto;
+  nombre?: string;
+  primerApellido?: string;
+  segundoApellido?: string;
+  ubicacion?: string;
+  mensaje: string;
+  correo?: string;
+  fechaCreacion: Date | string | null;
+  estado?: string
+  adjunto?: string | null;
+}
+export const ESTADO_IDS = {
+  PENDIENTE: 1,
+  CONTESTADO: 2,
+  ARCHIVADO: 3,
+};

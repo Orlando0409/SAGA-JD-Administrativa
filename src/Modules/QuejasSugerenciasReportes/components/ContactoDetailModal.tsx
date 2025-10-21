@@ -1,21 +1,16 @@
-// src/Modules/QuejasSugerenciasReportes/components/ContactoDetailModal.tsx
-import { useState } from 'react';
 import { 
   LuX, 
   LuCalendar, 
-  LuUser, 
   LuMapPin, 
   LuMessageSquare,
+  LuPaperclip,
 } from 'react-icons/lu';
 import { MdReportProblem } from 'react-icons/md';
-import { FaLightbulb } from 'react-icons/fa';
+import { FaLightbulb, FaUserFriends } from 'react-icons/fa';
 import { HiOutlineDocumentReport } from 'react-icons/hi';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { Accordion, AccordionHeader, AccordionBody } from "@material-tailwind/react";
-import { FiChevronDown, FiChevronRight } from 'react-icons/fi';
-import { CUSTOM_ANIMATION } from '@/Modules/Global/types/Sections';
-import type { ContactoItem } from './ContactoTable';
+import type { ContactoItem } from '../types/ContactoTypes';
 
 interface ContactoDetailModalProps {
   item: ContactoItem;
@@ -24,237 +19,192 @@ interface ContactoDetailModalProps {
 }
 
 const ContactoDetailModal = ({ item, isOpen, onClose }: ContactoDetailModalProps) => {
-  const [openSections, setOpenSections] = useState<number[]>([1, 2, 3]);
-  const [showEditModal, setShowEditModal] = useState(false);
-
-
   if (!isOpen) return null;
-
-  const handleAccordion = (id: number) => {
-    setOpenSections(prev =>
-      prev.includes(id)
-        ? prev.filter(sectionId => sectionId !== id)
-        : [...prev, id]
-    );
-  };
 
   const getTipoConfig = (tipo: string) => {
     const configs = {
-      'Queja': { icon: MdReportProblem, color: 'text-red-600 bg-red-50 border-red-200', title: 'Detalle de Queja' },
-      'Sugerencia': { icon: FaLightbulb, color: 'text-yellow-600 bg-yellow-50 border-yellow-200', title: 'Detalle de Sugerencia' },
-      'Reporte': { icon: HiOutlineDocumentReport, color: 'text-blue-600 bg-blue-50 border-blue-200', title: 'Detalle de Reporte' }
+      'Queja': { icon: MdReportProblem, color: 'bg-red-100 text-red-600', title: 'Detalle de Queja' },
+      'Sugerencia': { icon: FaLightbulb, color: 'bg-yellow-100 text-yellow-600', title: 'Detalle de Sugerencia' },
+      'Reporte': { icon: HiOutlineDocumentReport, color: 'bg-blue-100 text-blue-600', title: 'Detalle de Reporte' }
     };
     return configs[tipo as keyof typeof configs];
   };
-
 
   const config = getTipoConfig(item.tipo);
   const IconComponent = config.icon;
 
   return (
     <div className="fixed inset-0 bg-opacity-10 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-2xl border border-gray-200 w-full max-w-4xl max-h-[90vh] overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100">
+      <div className="bg-white rounded-lg shadow-2xl border border-gray-200 w-full max-w-3xl flex flex-col overflow-hidden max-h-[90vh]">
         {/* Header */}
-        <div className="sticky top-0 bg-white border-b border-gray-200 p-6 z-10">
+        <div className="sticky top-0 bg-white border-b border-gray-200 p-4 z-10">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <h1 className="text-3xl font-bold text-gray-900">{config.title}</h1>
-            </div>
+            <h1 className="text-xl font-bold text-gray-900 flex items-center gap-3">
+              {config.title}
+            </h1>
             <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors">
-              <LuX className="w-6 h-6" />
+              <LuX className="w-5 h-5" />
             </button>
           </div>
         </div>
 
         {/* Content */}
-        <div className="p-6">
-          {/* Header Card */}
-          <div className={`${config.color} p-6 rounded-lg mb-6 border`}>
-            <div className="flex items-center gap-4">
-              <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center">
-                <IconComponent className="w-8 h-8" />
+        <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100 p-6">
+          <div className="space-y-6">
+            {/* Información del Tipo y Usuario */}
+            <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
+              <div className="bg-gray-50 px-5 py-3 border-b border-gray-200">
+                <div className="flex items-center gap-3">
+                  <div className={`w-8 h-8 ${config.color} rounded-lg flex items-center justify-center`}>
+                    <IconComponent className="w-4 h-4" />
+                  </div>
+                  <h3 className="text-base font-bold text-gray-900">Información General</h3>
+                </div>
               </div>
-              <div>
-                <h2 className="text-2xl font-bold">
-                  {item.nombre ? `${item.nombre} ${item.primerApellido || ''}` : 'Usuario Anónimo'}
-                </h2>
-                <p className="opacity-80">
-                  {item.tipo} - {item.fechaCreacion ? format(new Date(item.fechaCreacion), 'dd/MM/yyyy', { locale: es }) : 'Fecha no disponible'}
-                </p>
+
+              <div className="p-5">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {/* Columna izquierda */}
+                  <div className="space-y-4">
+                    <div className="bg-gray-50 p-4 rounded-lg">
+                      <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
+                        Tipo
+                      </label>
+                      <span className={`inline-flex items-center px-3 py-1 rounded-lg text-xs font-semibold ${config.color} border border-gray-200`}>
+                        {item.tipo}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Columna derecha */}
+                  <div className="space-y-4">
+                    <div className="bg-gray-50 p-4 rounded-lg">
+                      <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
+                        Fecha de Creación
+                      </label>
+                      <p className="text-sm text-gray-900 flex items-center gap-2">
+                        <LuCalendar className="w-4 h-4 text-gray-400" />
+                        {item.fechaCreacion ? 
+                          format(new Date(item.fechaCreacion), 'dd/MM/yyyy HH:mm', { locale: es }) : 
+                          'No disponible'
+                        }
+                      </p>
+                    </div>
+
+                    {item.ubicacion && (
+                      <div className="bg-gray-50 p-4 rounded-lg">
+                        <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
+                          Ubicación
+                        </label>
+                        <p className="text-sm text-gray-900 flex items-start gap-2">
+                          <LuMapPin className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
+                          <span>{item.ubicacion}</span>
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* Accordion Sections */}
-          <div className="space-y-4">
-            {/* Información Personal */}
-            {(item.nombre || item.primerApellido) && (
-              <Accordion
-                open={openSections.includes(1)}
-                animate={CUSTOM_ANIMATION}
-                className="border border-gray-200 rounded-lg shadow-sm bg-white"
-                {...({} as any)}
-              >
-                <AccordionHeader
-                  onClick={() => handleAccordion(1)}
-                  className="text-base font-semibold px-6 py-4 border-b-0 hover:bg-gray-50"
-                  {...({} as any)}
-                >
-                  <div className="flex items-center justify-between w-full">
-                    <div className="flex items-center gap-3">
-                      <LuUser className="w-5 h-5 text-blue-600" />
-                      <span className="text-gray-900">Información Personal</span>
+            {/* Información Personal (si existe) */}
+            {(item.nombre || item.primerApellido || item.segundoApellido) && (
+              <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
+                <div className="bg-gray-50 px-5 py-3 border-b border-gray-200">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                      <FaUserFriends className="w-4 h-4 text-blue-600" />
                     </div>
-                    <span className="text-gray-500">
-                      {openSections.includes(1) ? <FiChevronDown size={20} /> : <FiChevronRight size={20} />}
-                    </span>
+                    <h3 className="text-base font-bold text-gray-900">Información Personal</h3>
                   </div>
-                </AccordionHeader>
-                <AccordionBody className="px-6 pb-6" placeholder="">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                </div>
+
+                <div className="p-5">
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
                     {item.nombre && (
-                      <div>
-                        <span className="block text-sm font-medium text-gray-500 mb-1">Nombre</span>
-                        <p className="text-gray-900 font-medium">{item.nombre}</p>
+                      <div className="bg-gray-50 p-4 rounded-lg">
+                        <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
+                          Nombre
+                        </label>
+                        <p className="text-sm font-medium text-gray-900">{item.nombre}</p>
                       </div>
                     )}
                     {item.primerApellido && (
-                      <div>
-                        <span className="block text-sm font-medium text-gray-500 mb-1">Primer Apellido</span>
-                        <p className="text-gray-900 font-medium">{item.primerApellido}</p>
+                      <div className="bg-gray-50 p-4 rounded-lg">
+                        <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
+                          Primer Apellido
+                        </label>
+                        <p className="text-sm font-medium text-gray-900">{item.primerApellido}</p>
                       </div>
                     )}
                     {item.segundoApellido && (
-                      <div>
-                        <span className="block text-sm font-medium text-gray-500 mb-1">Segundo Apellido</span>
-                        <p className="text-gray-900 font-medium">{item.segundoApellido}</p>
+                      <div className="bg-gray-50 p-4 rounded-lg">
+                        <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
+                          Segundo Apellido
+                        </label>
+                        <p className="text-sm font-medium text-gray-900">{item.segundoApellido}</p>
                       </div>
                     )}
                   </div>
-                </AccordionBody>
-              </Accordion>
+                </div>
+              </div>
             )}
 
-            {/* Contenido Principal */}
-            <Accordion
-              open={openSections.includes(2)}
-              animate={CUSTOM_ANIMATION}
-              className="border border-gray-200 rounded-lg shadow-sm bg-white"
-              {...({} as any)}
-            >
-              <AccordionHeader
-                onClick={() => handleAccordion(2)}
-                className="text-base font-semibold px-6 py-4 border-b-0 hover:bg-gray-50"
-                {...({} as any)}
-              >
-                <div className="flex items-center justify-between w-full">
-                  <div className="flex items-center gap-3">
-                    <LuMessageSquare className="w-5 h-5 text-blue-600" />
-                    <span className="text-gray-900">Contenido</span>
+            {/* Contenido del Mensaje */}
+            <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
+              <div className="bg-gray-50 px-5 py-3 border-b border-gray-200">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                    <LuMessageSquare className="w-4 h-4 text-blue-600" />
                   </div>
-                  <span className="text-gray-500">
-                    {openSections.includes(2) ? <FiChevronDown size={20} /> : <FiChevronRight size={20} />}
-                  </span>
+                  <h3 className="text-base font-bold text-gray-900">Contenido</h3>
                 </div>
-              </AccordionHeader>
-              <AccordionBody className="px-6 pb-6" placeholder="">
-                <div className="space-y-4">
-                  {/* Ubicación */}
-                  {item.ubicacion && (
-                    <div>
-                      <span className="block text-sm font-medium text-gray-500 mb-2">Ubicación</span>
-                      <div className="flex items-start gap-2 bg-gray-50 p-3 rounded-lg">
-                        <LuMapPin className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
-                        <p className="text-gray-800">{item.ubicacion}</p>
-                      </div>
-                    </div>
-                  )}
+              </div>
 
+              <div className="p-5">
+                <div className="space-y-4">
                   {/* Mensaje */}
-                  <div>
-                    <span className="block text-sm font-medium text-gray-500 mb-2">Descripción</span>
-                    <div className="bg-gray-50 p-4 rounded-lg">
-                      <p className="text-gray-800 whitespace-pre-wrap leading-relaxed">{item.mensaje}</p>
-                    </div>
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
+                      Descripción
+                    </label>
+                    <p className="text-sm text-gray-900 whitespace-pre-wrap leading-relaxed">{item.mensaje}</p>
                   </div>
 
-                  {/* Adjunto */}
-                  <div>
-                    <span className="block text-sm font-medium text-gray-500 mb-2">Archivo Adjunto</span>
+                  {/* Archivo Adjunto */}
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
+                      Archivo Adjunto
+                    </label>
                     {item.adjunto ? (
-                      <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
-                        <p className="text-blue-800 text-sm flex items-center gap-2">
-                          📎 <span>Archivo adjunto disponible</span> {typeof item.adjunto === 'string' ? item.adjunto : item.adjunto?.name}
-                        </p>
-                      </div>
+                      <a
+                        href={item.adjunto}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sm text-blue-600 hover:text-blue-800 underline font-medium flex items-center gap-2"
+                      >
+                        <LuPaperclip className="w-4 h-4" />
+                        Ver adjunto
+                      </a>
                     ) : (
-                      <div className="bg-gray-50 p-3 rounded-lg border border-gray-200">
-                        <p className="text-gray-500 text-sm">Sin adjuntos</p>
-                      </div>
+                      <p className="text-sm text-gray-500">Sin adjuntos</p>
                     )}
                   </div>
                 </div>
-              </AccordionBody>
-            </Accordion>
-
-            {/* Estado y Fecha */}
-            <Accordion
-              open={openSections.includes(3)}
-              animate={CUSTOM_ANIMATION}
-              className="border border-gray-200 rounded-lg shadow-sm bg-white"
-              {...({} as any)}
-            >
-              <AccordionHeader
-                onClick={() => handleAccordion(3)}
-                className="text-base font-semibold px-6 py-4 border-b-0 hover:bg-gray-50"
-                {...({} as any)}
-              >
-                <div className="flex items-center justify-between w-full">
-                  <div className="flex items-center gap-3">
-                    <LuCalendar className="w-5 h-5 text-blue-600" />
-                    <span className="text-gray-900">Información Adicional</span>
-                  </div>
-                  <span className="text-gray-500">
-                    {openSections.includes(3) ? <FiChevronDown size={20} /> : <FiChevronRight size={20} />}
-                  </span>
-                </div>
-              </AccordionHeader>
-              <AccordionBody className="px-6 pb-6" placeholder="">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-
-                  {/* Fecha */}
-                  <div>
-                    <span className="block text-sm font-medium text-gray-500 mb-2">Fecha de Creación</span>
-                    <p className="text-gray-800 flex items-center gap-2">
-                      <LuCalendar className="w-4 h-4 text-gray-400" />
-                      {item.fechaCreacion ? 
-                        format(new Date(item.fechaCreacion), 'dd/MM/yyyy HH:mm', { locale: es }) : 
-                        'No disponible'
-                      }
-                    </p>
-                  </div>
-                </div>
-              </AccordionBody>
-            </Accordion>
-          </div>
-
-        </div>
-
-        {/* Modal de edición (placeholder) */}
-        {showEditModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[60]">
-            <div className="bg-white p-6 rounded-lg">
-              <h3 className="text-lg font-bold mb-4">Editar {item.tipo}</h3>
-              <p className="mb-4">Modal de edición por implementar</p>
-              <button
-                onClick={() => setShowEditModal(false)}
-                className="px-4 py-2 bg-gray-600 text-white rounded"
-              >
-                Cerrar
-              </button>
+              </div>
             </div>
           </div>
-        )}
+        </div>
+
+        {/* Footer */}
+        <div className="sticky bottom-0 flex justify-end gap-3 p-6 border-t bg-gray-50 z-10">
+          <button
+            onClick={onClose}
+            className="px-6 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium"
+          >
+            Cerrar
+          </button>
+        </div>
       </div>
     </div>
   );

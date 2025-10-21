@@ -8,7 +8,7 @@ export interface Sugerencia {
     Fecha_Sugerencia: Date | string;
     Mensaje: string;
     Correo: string;
-    Adjunto?: string[] | null;
+    Adjunto?: string;
     RespuestasSugerencia?: string | null;
     Estado: EstadoSugerencia;
 }

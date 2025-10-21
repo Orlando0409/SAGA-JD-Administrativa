@@ -190,13 +190,13 @@ const EditUnidadMedicionModal: React.FC<EditUnidadMedicionModalProps> = ({ isOpe
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
-                <AlertDialogCancel>Cancelar</AlertDialogCancel>
                 <AlertDialogAction
                   onClick={(e) => handleSubmit(e as any)}
                   disabled={updateUnidadMutation.isPending}
                 >
                   {updateUnidadMutation.isPending ? 'Actualizando...' : 'Confirmar'}
                 </AlertDialogAction>
+                <AlertDialogCancel>Cancelar</AlertDialogCancel>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>

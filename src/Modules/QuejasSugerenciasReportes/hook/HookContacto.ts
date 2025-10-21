@@ -1,61 +1,9 @@
-import React from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type { ContactoItem } from '../components/ContactoTable';
-import { responderQueja, responderSugerencia, responderReporte, obtenerQuejas, obtenerSugerencias, obtenerReportes, actualizarEstadoReporte } from '../service/ContactoService';
+import { responderQueja, responderSugerencia, responderReporte, obtenerQuejas, obtenerSugerencias, obtenerReportes, actualizarEstadoReporte, actualizarEstadoSugerencia, actualizarEstadoQueja } from '../service/ContactoService';
+import { useAlerts } from '@/Modules/Global/context/AlertContext';
+import type { ContactoItem } from '../types/ContactoTypes';
 
-export function useResponderContacto(item: ContactoItem) {
-  const queryClient = useQueryClient();
-  const [errorMsg, setErrorMsg] = React.useState('');
-  const [successMsg, setSuccessMsg] = React.useState('');
 
-  const mutation = useMutation({
-    mutationFn: async (respuesta: string) => {
-      if (!respuesta.trim()) throw new Error('La respuesta no puede estar vacía');
-      if (item.tipo === 'Queja') {
-        return responderQueja(item.id, respuesta);
-      } else if (item.tipo === 'Sugerencia') {
-        return responderSugerencia(item.id, respuesta);
-      } else if (item.tipo === 'Reporte') {
-        return responderReporte(item.id, respuesta);
-      }
-      throw new Error('Tipo de contacto no soportado');
-    },
-    onSuccess: () => {
-      setSuccessMsg('Respuesta enviada correctamente');
-      setErrorMsg('');
-      // Actualizar la lista correspondiente
-      if (item.tipo === 'Queja') queryClient.invalidateQueries({ queryKey: ['quejas'] });
-      if (item.tipo === 'Sugerencia') queryClient.invalidateQueries({ queryKey: ['sugerencias'] });
-      if (item.tipo === 'Reporte') queryClient.invalidateQueries({ queryKey: ['reportes'] });
-    },
-    onError: (err: any) => {
-      setErrorMsg(err?.message || 'Error al enviar la respuesta');
-      setSuccessMsg('');
-    },
-  });
-
-  function sendRespuesta(respuesta: string, onSuccess?: () => void) {
-    mutation.mutate(respuesta, {
-      onSuccess: () => {
-        if (onSuccess) onSuccess();
-      },
-    });
-  }
-
-  function resetFeedback() {
-    setErrorMsg('');
-    setSuccessMsg('');
-  }
-
-  return {
-    sendRespuesta,
-    isLoading: mutation.isPending,
-    errorMsg,
-    successMsg,
-    resetFeedback,
-  };
-}
-// ======================== QUERIES ========================
 export const useQuejas = () => {
   return useQuery({
     queryKey: ['quejas'],
@@ -80,7 +28,6 @@ export const useReportes = () => {
   });
 };
 
-// ======================== MUTATIONS ========================
 
 export const useUpdateReporteEstado = () => {
   const queryClient = useQueryClient();
@@ -93,3 +40,56 @@ export const useUpdateReporteEstado = () => {
     },
   });
 };
+
+export const useUpdateSugerenciaEstado = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, idEstado }: { id: number; idEstado: number }) =>
+      actualizarEstadoSugerencia(id, idEstado),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['sugerencias'] });
+    },
+  });
+};
+
+export const useUpdateQuejaEstado = () => {
+  const queryClient = useQueryClient();   
+
+  return useMutation({
+    mutationFn: ({ id, idEstado }: { id: number; idEstado: number }) =>
+      actualizarEstadoQueja(id, idEstado),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['quejas'] });
+    },
+  });
+};
+
+
+export function useResponderContacto(item: ContactoItem) {
+  const queryClient = useQueryClient();
+  const { showSuccess, showError } = useAlerts();
+  return useMutation({
+    mutationFn: async (respuesta: string) => {
+      if (!respuesta.trim()) throw new Error('La respuesta no puede estar vacía');
+      if (item.tipo === 'Queja') {
+        return responderQueja(item.id, respuesta);
+      } else if (item.tipo === 'Sugerencia') {
+        return responderSugerencia(item.id, respuesta);
+      } else if (item.tipo === 'Reporte') {
+        return responderReporte(item.id, respuesta);
+      }
+      throw new Error('Tipo de contacto no soportado');
+    },
+    onSuccess: () => {
+      // Actualizar la lista correspondiente
+      if (item.tipo === 'Queja') queryClient.invalidateQueries({ queryKey: ['quejas'] });
+      if (item.tipo === 'Sugerencia') queryClient.invalidateQueries({ queryKey: ['sugerencias'] });
+      if (item.tipo === 'Reporte') queryClient.invalidateQueries({ queryKey: ['reportes'] });
+      showSuccess('Respuesta enviada', 'La respuesta se ha enviado exitosamente');
+    },
+    onError: (err: any) => {
+      console.error('Error al responder el contacto:', err);
+      showError('Error', err?.message);
+    },
+  });
+}
