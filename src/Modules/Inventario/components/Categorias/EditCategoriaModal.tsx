@@ -212,13 +212,13 @@ const EditCategoriaModal: React.FC<EditCategoriaModalProps> = ({ isOpen, onClose
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
-                <AlertDialogCancel>Cancelar</AlertDialogCancel>
                 <AlertDialogAction
                   onClick={(e) => handleSubmit(e as any)}
                   disabled={updateCategoriaMutation.isPending}
                 >
                   {updateCategoriaMutation.isPending ? 'Actualizando...' : 'Confirmar'}
                 </AlertDialogAction>
+                <AlertDialogCancel>Cancelar</AlertDialogCancel>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
