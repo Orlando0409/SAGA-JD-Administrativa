@@ -1,3 +1,4 @@
+import FAQTable from '@/Modules/PreguntasFrecuentes/components/FAQTable';
 import { createFileRoute } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/(app)/(Edicion)/FAQ')({
@@ -5,5 +6,5 @@ export const Route = createFileRoute('/(app)/(Edicion)/FAQ')({
 })
 
 function RouteComponent() {
-  return <div>Hello "/(app)/(Edicion)/FAQ"!</div>
+  return <FAQTable />;
 }
