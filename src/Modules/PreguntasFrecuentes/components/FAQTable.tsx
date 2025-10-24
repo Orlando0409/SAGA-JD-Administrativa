@@ -106,13 +106,13 @@ export default function FAQTable() {
                                 >
                                     <td className="px-2 sm:px-4 py-3 text-xs sm:text-sm text-slate-700 align-top flex items-center gap-2">
                                         <MessageSquare size={18} className="text-sky-600" />
-                                        {faq.Pregunta.length > 60
-                                            ? `${faq.Pregunta.slice(0, 60)}...`
+                                        {faq.Pregunta.length > 10
+                                            ? `${faq.Pregunta.slice(0, 10)}...`
                                             : faq.Pregunta}
                                     </td>
                                     <td className="px-2 sm:px-4 py-3 text-xs sm:text-sm text-slate-700 align-top">
-                                        {faq.Respuesta.length > 80
-                                            ? `${faq.Respuesta.slice(0, 80)}...`
+                                        {faq.Respuesta.length > 10
+                                            ? `${faq.Respuesta.slice(0, 10)}...`
                                             : faq.Respuesta}
                                     </td>
                                     <td className="px-2 sm:px-4 py-3 text-xs sm:text-sm text-slate-700">
