@@ -272,6 +272,13 @@ export default function FormularioProyecto({
 
                     {/* Botones */}
                     <div className="flex justify-end gap-4">
+                         <button
+                            type="submit"
+                            className="px-4 py-2 rounded-lg bg-sky-600 text-white hover:bg-sky-700 shadow-sm text-sm"
+                            disabled={createProyectoMutation.status === "pending"}
+                        >
+                            {createProyectoMutation.status === "pending" ? "Creando..." : "Crear Proyecto"}
+                        </button>
                         <button
                             type="button"
                             onClick={onClose}
@@ -279,13 +286,7 @@ export default function FormularioProyecto({
                         >
                             Cancelar
                         </button>
-                        <button
-                            type="submit"
-                            className="px-4 py-2 rounded-lg bg-sky-600 text-white hover:bg-sky-700 shadow-sm text-sm"
-                            disabled={createProyectoMutation.status === "pending"}
-                        >
-                            {createProyectoMutation.status === "pending" ? "Creando..." : "Crear Proyecto"}
-                        </button>
+                       
                     </div>
                 </form>
             </div>

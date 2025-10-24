@@ -88,8 +88,8 @@ export default function ProyectoTable() {
                                 >
                                     <td className="px-2 sm:px-4 py-3 text-xs sm:text-sm text-slate-700 align-top flex items-center gap-2">
                                         <FileText size={18} className="text-sky-600" />
-                                        {proyecto.Titulo.length > 20
-                                            ? `${proyecto.Titulo.slice(0, 20)}...`
+                                        {proyecto.Titulo.length > 10
+                                            ? `${proyecto.Titulo.slice(0, 10)}...`
                                             : proyecto.Titulo}
                                     </td>
                                     <td className="px-2 sm:px-4 py-3 text-xs sm:text-sm text-slate-700 align-top">
