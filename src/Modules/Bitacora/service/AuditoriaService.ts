@@ -17,7 +17,7 @@ const response = await axiosPrivate.get(`/auditoria/usuario/${idUsuario}`);
 return response.data;
 }
 
-export const obtenerAuditoriaPorRegistro = async (modulo:string,idRegistro: number): Promise<Auditoria[]> => {
-const response = await axiosPrivate.get(`/auditoria/registro/${modulo}/${idRegistro}`);
+export const obtenermisauditorias = async (): Promise<Auditoria[]> => {
+const response = await axiosPrivate.get(`/auditoria/mis-auditorias`);
 return response.data;
 }

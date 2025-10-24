@@ -41,8 +41,8 @@ export const useCreateMedidor = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ data, idUsuario }: { data: CreateMedidorData; idUsuario: number }) =>
-      createMedidor(data, idUsuario),
+    mutationFn: ({ data }: { data: CreateMedidorData;  }) =>
+      createMedidor(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['medidores'] });
     },
@@ -58,8 +58,8 @@ export const useUpdateEstadoMedidor = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ idMedidor, idEstado, idUsuario }: { idMedidor: number; idEstado: number; idUsuario: number }) =>
-      updateEstadoMedidor(idMedidor, idEstado, idUsuario),
+    mutationFn: ({ idMedidor, idEstado }: { idMedidor: number; idEstado: number; }) =>
+      updateEstadoMedidor(idMedidor, idEstado),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['medidores'] });
     },

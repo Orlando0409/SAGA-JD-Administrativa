@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { obtenerAuditorias, obtenerAuditoriaPorModulo, obtenerAuditoriaPorRegistro, obtenerAuditoriaPorUsuario } from "../service/AuditoriaService";
+import { obtenerAuditorias, obtenerAuditoriaPorModulo, obtenerAuditoriaPorUsuario, obtenermisauditorias } from "../service/AuditoriaService";
 
 export const useGetAllAuditorias = () => {
   return useQuery({
@@ -27,11 +27,10 @@ export const useGetAuditoriasPorUsuario = (idUsuario: number) => {
     refetchOnWindowFocus: false,
   });
 };
-export const useGetAuditoriasPorRegistro = (modulo: string, idRegistro: number) => {
+export const useGetmisAuditorias = () => {
   return useQuery({
-    queryKey: ['auditorias', 'registro', modulo, idRegistro],
-    queryFn: () => obtenerAuditoriaPorRegistro(modulo, idRegistro),
-    enabled: !!modulo && !!idRegistro,
+    queryKey: ['auditorias',],
+    queryFn: () => obtenermisauditorias(),
     staleTime: 1000 * 60 * 5, // 5 minutos
     refetchOnWindowFocus: false,
   });

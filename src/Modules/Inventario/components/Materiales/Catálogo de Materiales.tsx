@@ -44,7 +44,6 @@ import DetailMaterialModal from './DetailMaterialModal';
 import FilterMaterialModal from './FilterMaterialModal';
 import EditMaterialModal from './EditMaterialModal';
 import { useNavigate } from '@tanstack/react-router';
-import { useAuth } from '@/Modules/Auth/Context/AuthContext';
 
 interface CatalogoMaterialesProps {
   onBack?: () => void;
@@ -61,7 +60,7 @@ const CatalogoMateriales: React.FC<CatalogoMaterialesProps> = ({ onBack }) => {
   const [estadoFilter, setEstadoFilter] = useState<string>('Todos'); // Por defecto mostrar todos
   const updateEstadoMutation = useUpdateEstadoMaterial();
   const navigate = useNavigate();
-  const user = useAuth();
+
 
   // Hooks para obtener materiales según el estado
   const { data: todosMateriales = [], isLoading: isLoadingTodos, refetch: refetchTodos } = useGetAllMaterials();
@@ -596,7 +595,6 @@ const CatalogoMateriales: React.FC<CatalogoMaterialesProps> = ({ onBack }) => {
     updateEstadoMutation.mutate({
       materialId: material.Id_Material,
       estadoMaterialId: nuevoEstadoId,
-      idUsuarioActualizador: user.user?.Id_Usuario || 0,
     });
   };
 

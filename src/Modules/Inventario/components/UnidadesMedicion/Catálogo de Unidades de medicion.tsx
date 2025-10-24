@@ -28,7 +28,6 @@ import CreateUnidadMedicionModal from './CreateUnidadMedicionModal';
 import EditUnidadMedicionModal from './EditUnidadMedicionModal';
 import DetailUnidadMedicionModal from './DetailUnidadMedicionModal';
 import type { UnidadMedicion } from '../../models/Inventario';
-import { useAuth } from '@/Modules/Auth/Context/AuthContext';
 
 interface UnidadesMedicionManagementProps {
   onBack?: () => void;
@@ -41,7 +40,6 @@ const UnidadesMedicionManagement: React.FC<UnidadesMedicionManagementProps> = ({
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [selectedUnidad, setSelectedUnidad] = useState<UnidadMedicion | null>(null);
   const [estadoFilter, setEstadoFilter] = useState<string>('Todas'); // Por defecto mostrar todas
-  const { user } = useAuth();
   const pageSizeOptions = [5, 10, 20, 50];
   const [pagination, setPagination] = useState({
     pageSize: 5,
@@ -256,7 +254,6 @@ const UnidadesMedicionManagement: React.FC<UnidadesMedicionManagementProps> = ({
       await updateEstadoMutation.mutateAsync({
         unidadId: unidad.Id_Unidad_Medicion,
         estadoUnidad: unidad.Estado_Unidad_Medicion?.Id_Estado_Unidad_Medicion === 1 ? 2 : 1,
-        idUsuario: user?.Id_Usuario || 0,
       });
     } catch (error) {
       console.error('Error al cambiar estado:', error);

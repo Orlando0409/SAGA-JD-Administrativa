@@ -13,7 +13,6 @@ import {
   AlertDialogHeader,
   AlertDialogFooter
 } from "@/Modules/Global/components/Sidebar/ui/alert-dialog";
-import { useAuth } from '@/Modules/Auth/Context/AuthContext';
 
 interface EditUnidadMedicionModalProps {
   isOpen: boolean;
@@ -25,7 +24,6 @@ interface EditUnidadMedicionModalProps {
 const EditUnidadMedicionModal: React.FC<EditUnidadMedicionModalProps> = ({ isOpen, onClose, unidad }) => {
   const updateUnidadMutation = useUpdateUnidadMedicion();
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
-  const { user } = useAuth();
   const [formData, setFormData] = useState<UpdateUnidadMedicionSchemaData>({
     Nombre_Unidad_Medicion: '',
     Abreviatura: '',
@@ -80,7 +78,6 @@ const EditUnidadMedicionModal: React.FC<EditUnidadMedicionModalProps> = ({ isOpe
     try {
       await updateUnidadMutation.mutateAsync({
         id: unidad.Id_Unidad_Medicion,
-        idUsuario: user?.Id_Usuario || 0,
         data: {
           Nombre_Unidad_Medicion: formData.Nombre_Unidad_Medicion?.trim(),
           Abreviatura: formData.Abreviatura?.trim(),

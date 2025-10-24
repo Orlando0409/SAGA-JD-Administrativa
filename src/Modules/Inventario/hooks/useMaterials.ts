@@ -99,8 +99,8 @@ export const useCreateMaterial = () => {
   const queryClient = useQueryClient();
   const { showSuccess, showError } = useAlerts();
   return useMutation({
-    mutationFn: ({ data, idUsuarioCreador }: { data: CreateMaterialData; idUsuarioCreador: number }) => 
-      MaterialService.createMaterial(data, idUsuarioCreador),
+    mutationFn: ({ data }: { data: CreateMaterialData; }) => 
+      MaterialService.createMaterial(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['materials'] });
       showSuccess('Material creado exitosamente');
@@ -116,8 +116,8 @@ export const useUpdateMaterial = () => {
   const queryClient = useQueryClient();
   const { showSuccess, showError } = useAlerts();
   return useMutation({
-    mutationFn: ({ id, idUsuario, data }: { id: number; idUsuario: number; data: UpdateMaterialData }) => 
-      MaterialService.updateMaterial(id, idUsuario, data),
+    mutationFn: ({ id, data }: { id: number; data: UpdateMaterialData }) => 
+      MaterialService.updateMaterial(id, data),
     onSuccess: (updatedMaterial) => {
       queryClient.invalidateQueries({ queryKey: ['materials'] });
       queryClient.invalidateQueries({ queryKey: ['material', updatedMaterial.Id_Material] });
@@ -134,10 +134,10 @@ export const useUpdateEstadoMaterial = () => {
   const queryClient = useQueryClient();
   const { showSuccessWithUndo, showError } = useAlerts();
   return useMutation({
-    mutationFn: ({ materialId, estadoMaterialId, idUsuarioActualizador }: { materialId: number; estadoMaterialId: number; idUsuarioActualizador: number }) =>
-      MaterialService.updateEstadoMaterial(materialId, estadoMaterialId, idUsuarioActualizador), 
+    mutationFn: ({ materialId, estadoMaterialId }: { materialId: number; estadoMaterialId: number; }) =>
+      MaterialService.updateEstadoMaterial(materialId, estadoMaterialId), 
 
-    onSuccess: (updatedMaterial, { materialId, estadoMaterialId, idUsuarioActualizador }) => {
+    onSuccess: (updatedMaterial, { materialId, estadoMaterialId }) => {
       queryClient.invalidateQueries({ queryKey: ['materials'] });
       queryClient.invalidateQueries({ queryKey: ['material', materialId] });
       
@@ -169,8 +169,8 @@ export const useUpdateEstadoMaterial = () => {
       // Función para revertir el cambio
       const undoAction = async () => {
         try {
-          console.log("que envio?: ", materialId, estadoAnterior, idUsuarioActualizador);
-          await MaterialService.updateEstadoMaterial(materialId, estadoAnterior, idUsuarioActualizador);
+          console.log("que envio?: ", materialId, estadoAnterior);
+          await MaterialService.updateEstadoMaterial(materialId, estadoAnterior);
           queryClient.invalidateQueries({ queryKey: ['materials'] });
           queryClient.invalidateQueries({ queryKey: ['material', materialId] });
         } catch (error) {

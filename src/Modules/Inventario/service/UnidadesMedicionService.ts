@@ -48,17 +48,17 @@ export const getUnidadMedicionById = async (id: number): Promise<UnidadMedicion>
   return transformUnidadMedicion(response.data);
 };
 
-export const createUnidadMedicion = async (unidadData: CreateUnidadMedicionData, idUsuarioCreador: number): Promise<UnidadMedicion> => {
-  const response = await axiosPrivate.post(`/Inventario/create/unidad-medicion/${idUsuarioCreador}`, unidadData);
+export const createUnidadMedicion = async (unidadData: CreateUnidadMedicionData): Promise<UnidadMedicion> => {
+  const response = await axiosPrivate.post(`/Inventario/create/unidad-medicion/`, unidadData);
   return transformUnidadMedicion(response.data);
 };
 
-export const updateUnidadMedicion = async (id: number,idUsuario:number, unidadData: UpdateUnidadMedicionData): Promise<UnidadMedicion> => {
-  const response = await axiosPrivate.put(`/Inventario/update/unidad-medicion/${id}/${idUsuario}`, unidadData);
+export const updateUnidadMedicion = async (id: number, unidadData: UpdateUnidadMedicionData): Promise<UnidadMedicion> => {
+  const response = await axiosPrivate.put(`/Inventario/update/unidad-medicion/${id}/`, unidadData);
   return transformUnidadMedicion(response.data);
 };
 
-export const updateEstadoUnidadMedicion = async (unidadId: number, estadoUnidad:number, idUsuario:number): Promise<UnidadMedicion> => {
-  const response = await axiosPrivate.patch(`/Inventario/update/estado/unidad-medicion/${unidadId}/${estadoUnidad}/${idUsuario}`);
+export const updateEstadoUnidadMedicion = async (unidadId: number, estadoUnidad:number): Promise<UnidadMedicion> => {
+  const response = await axiosPrivate.patch(`/Inventario/update/estado/unidad-medicion/${unidadId}/${estadoUnidad}/`);
   return transformUnidadMedicion(response.data);
 };

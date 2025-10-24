@@ -26,7 +26,6 @@ import {
   AlertDialogFooter
 } from "@/Modules/Global/components/Sidebar/ui/alert-dialog";
 import { Button } from '@/Modules/Global/components/Sidebar/ui/button';
-import { useAuth } from '@/Modules/Auth/Context/AuthContext';
 
 
 const EditMaterialModal: React.FC<EditMaterialModalProps> = ({
@@ -34,7 +33,6 @@ const EditMaterialModal: React.FC<EditMaterialModalProps> = ({
   isOpen,
   onClose,
 }) => {
-  const {user} = useAuth();
   const { showError } = useAlerts();
   const updateMaterialMutation = useUpdateMaterial();
   const { data: categorias = [] } = useGetAllCategories();
@@ -148,7 +146,6 @@ const EditMaterialModal: React.FC<EditMaterialModalProps> = ({
 
       await updateMaterialMutation.mutateAsync({
         id: material.Id_Material,
-        idUsuario: user?.Id_Usuario || 0,
         data: updateData,
       });
 

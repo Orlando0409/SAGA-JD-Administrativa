@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { LuX } from 'react-icons/lu';
 import { useCreateMedidor } from '../../hooks/useMedidores';
 import { CreateMedidorSchema, type CreateMedidorSchemaData } from '../../schema/CreateMedidorSchemas';
-import { useAuth } from '@/Modules/Auth/Context/AuthContext';
 
 interface CreateMedidorModalProps {
   isOpen: boolean;
@@ -10,7 +9,6 @@ interface CreateMedidorModalProps {
 }
 
 const CreateMedidorModal = ({ isOpen, onClose }: CreateMedidorModalProps) => {
-  const { user } = useAuth();
   const createMedidorMutation = useCreateMedidor();
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   
@@ -38,7 +36,6 @@ const CreateMedidorModal = ({ isOpen, onClose }: CreateMedidorModalProps) => {
     try {
       await createMedidorMutation.mutateAsync({
         data: validation.data,
-        idUsuario: user?.Id_Usuario || 0,
       });
       
       // Resetear formulario

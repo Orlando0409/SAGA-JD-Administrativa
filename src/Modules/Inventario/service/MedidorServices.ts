@@ -32,14 +32,14 @@ export const getMedidoresAfiliado = async (idAfiliado: number): Promise<Medidor[
 };
 
 // Crear un nuevo medidor
-export const createMedidor = async (data: CreateMedidorData, idUsuario: number): Promise<Medidor> => {
-  const response = await axiosPrivate.post(`/Inventario/create/medidor/${idUsuario}`, data);
+export const createMedidor = async (data: CreateMedidorData): Promise<Medidor> => {
+  const response = await axiosPrivate.post(`/Inventario/create/medidor/`, data);
   return response.data;
 };
 
 // Actualizar el estado de un medidor
-export const updateEstadoMedidor = async ( idMedidor: number, nuevoEstado: number, idUsuario: number ): Promise<Medidor> => {
-  const response = await axiosPrivate.patch(`/Inventario/update/estado/${idMedidor}/${nuevoEstado}/${idUsuario}`);
+export const updateEstadoMedidor = async ( idMedidor: number, nuevoEstado: number ): Promise<Medidor> => {
+  const response = await axiosPrivate.patch(`/Inventario/update/estado/${idMedidor}/${nuevoEstado}/`);
   return response.data;
 };
 

@@ -44,8 +44,8 @@ export const useCreateUnidadMedicion = () => {
   const { showSuccess, showError } = useAlerts();
   
   return useMutation({
-    mutationFn: ({ data, idUsuarioCreador }: { data: CreateUnidadMedicionData; idUsuarioCreador: number }) => 
-      createUnidadMedicion(data, idUsuarioCreador),
+    mutationFn: ({ data }: { data: CreateUnidadMedicionData; }) => 
+      createUnidadMedicion(data),
     onSuccess: () => {
       showSuccess('Éxito', 'Unidad de medición creada correctamente');
       queryClient.invalidateQueries({ queryKey: ['unidades-medicion'] });
@@ -63,8 +63,8 @@ export const useUpdateUnidadMedicion = () => {
   const { showSuccess, showError } = useAlerts();
   
   return useMutation({
-    mutationFn: ({ id, data, idUsuario }: { id: number; data: UpdateUnidadMedicionData; idUsuario: number }) => 
-      updateUnidadMedicion(id, idUsuario, data),
+    mutationFn: ({ id, data }: { id: number; data: UpdateUnidadMedicionData;  }) => 
+      updateUnidadMedicion(id, data),
     onSuccess: () => {
       showSuccess('Éxito', 'Unidad de medición actualizada correctamente');
       queryClient.invalidateQueries({ queryKey: ['unidades-medicion'] });
@@ -83,8 +83,8 @@ export const useUpdateEstadoUnidadMedicion = () => {
   const { showSuccessWithUndo, showError } = useAlerts();
 
   return useMutation({
-    mutationFn: ({ unidadId, estadoUnidad, idUsuario }: { unidadId: number; estadoUnidad: number; idUsuario: number }) => updateEstadoUnidadMedicion(unidadId, estadoUnidad, idUsuario),
-    onSuccess: (_, { unidadId, estadoUnidad, idUsuario }) => {
+    mutationFn: ({ unidadId, estadoUnidad }: { unidadId: number; estadoUnidad: number; }) => updateEstadoUnidadMedicion(unidadId, estadoUnidad),
+    onSuccess: (_, { unidadId, estadoUnidad }) => {
       queryClient.invalidateQueries({ queryKey: ['unidades-medicion'] });
       queryClient.invalidateQueries({ queryKey: ['unidades-medicion-simple'] });
       queryClient.invalidateQueries({ queryKey: ['unidad-medicion'] });
@@ -93,7 +93,7 @@ export const useUpdateEstadoUnidadMedicion = () => {
       
       const undoAction = async () => {
         try {
-          await updateEstadoUnidadMedicion(unidadId, estadoAnterior, idUsuario);
+          await updateEstadoUnidadMedicion(unidadId, estadoAnterior);
           queryClient.invalidateQueries({ queryKey: ['unidades-medicion'] });
           queryClient.invalidateQueries({ queryKey: ['unidades-medicion-simple'] });
           queryClient.invalidateQueries({ queryKey: ['unidad-medicion'] });
