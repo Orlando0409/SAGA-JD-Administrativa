@@ -18,8 +18,9 @@ import {
   AlertDialogFooter
 } from "@/Modules/Global/components/Sidebar/ui/alert-dialog";
 import { Button } from '@/Modules/Global/components/Sidebar/ui/button';
+import { useAuth } from '@/Modules/Auth/Context/AuthContext';
 
-const EditUserModal: React.FC<EditUserModalProps> = ({ isOpen, onClose, user }) => {
+const EditUserModal: React.FC<EditUserModalProps> = ({ isOpen, onClose, usert }) => {
   const updateUserMutation = useUpdateUser();
   const { data: roles = [] } = useRoles();
   const activeRoles = roles.filter((rol: Role) => rol.Fecha_Eliminacion === null);
@@ -28,6 +29,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ isOpen, onClose, user }) 
     nombreUsuario: 0,
     email: 0
   });
+  const { user } = useAuth();
 
       const createInputHandler = (fieldName: string, handleChange: (value: string) => void, maxLength: number) => {
     return (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -47,10 +49,10 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ isOpen, onClose, user }) 
 
   const form = useForm({
     defaultValues: {
-      Nombre_Usuario: user.Nombre_Usuario,
-      Correo_Electronico: user.Correo_Electronico,
+      Nombre_Usuario: usert.Nombre_Usuario,
+      Correo_Electronico: usert.Correo_Electronico,
       Contraseña: '',
-      Id_Rol: user.Id_Rol,
+      Id_Rol: usert.Id_Rol,
     },
     onSubmit: async ({ value }: { value: UpdateUserSchemaData }) => {
       setFormErrors({});
@@ -73,7 +75,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ isOpen, onClose, user }) 
           Id_Rol: value.Id_Rol
         };
 
-        await updateUserMutation.mutateAsync({ Id_Usuario: user.Id_Usuario, userData: updateData });
+        await updateUserMutation.mutateAsync({ Id_Usuario: usert.Id_Usuario, userData: updateData, idUsuarioModificador: user ? user.Id_Usuario : 0 });
         onClose();
       } catch (error) {
         console.error('Error updating user:', error);

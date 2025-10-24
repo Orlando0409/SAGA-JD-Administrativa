@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useAuth } from "@/Modules/Auth/Context/AuthContext";
 import { useCreateProyecto } from "../Hook/HookProyecto";
 import { z } from "zod";
 import { ProyectoSchema } from "../schemas/Proyecto";
@@ -48,7 +47,7 @@ export default function FormularioProyecto({
     onClose,
     refetch,
 }: Readonly<FormularioProyectoProps>) {
-    const { user } = useAuth();
+
     const createProyectoMutation = useCreateProyecto();
 
     const [titulo, setTitulo] = useState(tituloInicial);
@@ -137,11 +136,6 @@ export default function FormularioProyecto({
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
-        if (!user?.Id_Usuario) {
-            showToast("Error: Usuario no autenticado.", "error");
-            return;
-        }
-
         // Validar que existe la imagen
         if (!imagen) {
             setErrors(prev => ({ ...prev, Imagen_Url: "Debes subir un archivo para el proyecto." }));
@@ -154,7 +148,6 @@ export default function FormularioProyecto({
                 Titulo: titulo.trim(),
                 Descripcion: descripcion.trim(),
                 Imagen_Url: imagen,
-                Id_Usuario: user.Id_Usuario
             });
         } catch (error) {
             if (error instanceof z.ZodError) {
@@ -171,11 +164,10 @@ export default function FormularioProyecto({
         const formData = new FormData();
         formData.append("Titulo", titulo.trim());
         formData.append("Descripcion", descripcion.trim());
-        formData.append("Id_Usuario", user.Id_Usuario.toString());
         formData.append("Imagen_Proyecto", imagen);
 
         createProyectoMutation.mutate(
-            { formData, idUsuarioCreador: user.Id_Usuario },
+            { formData, },
             {
                 onSuccess: () => {
                     setTitulo("");

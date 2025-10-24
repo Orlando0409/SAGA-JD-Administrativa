@@ -9,7 +9,7 @@ export interface UserDetailModalProps {
 export interface EditUserModalProps {
   isOpen: boolean;
   onClose: () => void;
-  user: Usuario;
+  usert: Usuario;
 }
 
 export interface FilterModalProps {
