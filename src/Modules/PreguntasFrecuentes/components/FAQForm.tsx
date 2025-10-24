@@ -160,6 +160,13 @@ export default function FAQForm({ onClose, refetch }: FAQFormProps) {
 
                 {/* Botones */}
                 <div className="flex justify-end gap-4">
+                     <button
+                        type="submit"
+                        className={`px-4 py-2 rounded-lg shadow-sm text-sm ${isValid ? 'bg-sky-600 text-white hover:bg-sky-700' : 'bg-gray-300 text-gray-600 cursor-not-allowed'}`}
+                        disabled={!isValid}
+                    >
+                        Crear Pregunta
+                    </button>
                     <button
                         type="button"
                         onClick={onClose}
@@ -167,13 +174,7 @@ export default function FAQForm({ onClose, refetch }: FAQFormProps) {
                     >
                         Cancelar
                     </button>
-                    <button
-                        type="submit"
-                        className={`px-4 py-2 rounded-lg shadow-sm text-sm ${isValid ? 'bg-sky-600 text-white hover:bg-sky-700' : 'bg-gray-300 text-gray-600 cursor-not-allowed'}`}
-                        disabled={!isValid}
-                    >
-                        Crear Pregunta
-                    </button>
+                   
                 </div>
             </form>
         </div>
