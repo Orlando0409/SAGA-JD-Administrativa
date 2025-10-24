@@ -9,7 +9,6 @@ import type { CreateMaterialData, CategoriaMaterial } from '../../models/Inventa
 import CreateCategoriaModal from '../Categorias/CreateCategoriaModal';
 import CreateUnidadMedicionModal from '../UnidadesMedicion/CreateUnidadMedicionModal';
 import CreateModalProveedor from '@/Modules/Proveedores/Components/CreateModalProveedor';
-import { useAuth } from '@/Modules/Auth/Context/AuthContext';
 import { 
   NOMBRE_MATERIAL_MAX_LENGTH, 
   DESCRIPCION_MAX_LENGTH, 
@@ -19,7 +18,7 @@ import { useProveedoresFisicos } from '@/Modules/Proveedores/Hook/hookFisicoProv
 import { useState } from 'react';
 
 const CreateMaterialModal: React.FC<CreateMaterialModalProps> = ({ isOpen, onClose }) => {
-  const { user } = useAuth();
+
   const createMaterialMutation = useCreateMaterial();
   const { data: categories = [] } = useGetAllCategories();
   const { data: unidadesMedicion = [] } = useUnidadesMedicionSimple();
@@ -82,11 +81,7 @@ const CreateMaterialModal: React.FC<CreateMaterialModalProps> = ({ isOpen, onClo
     }
 
     try {
-      if (!user?.Id_Usuario) {
-        console.error('Usuario no autenticado');
-        return;
-      }
-
+ 
       const payload: CreateMaterialData = {
         Nombre_Material: formData.Nombre_Material,
         Descripcion: formData.Descripcion,
@@ -100,7 +95,6 @@ const CreateMaterialModal: React.FC<CreateMaterialModalProps> = ({ isOpen, onClo
 
       await createMaterialMutation.mutateAsync({
         data: payload,
-        idUsuarioCreador: user.Id_Usuario
       });
       onClose();
       setFormData({

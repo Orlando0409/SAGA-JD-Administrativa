@@ -73,22 +73,17 @@ export const getMaterialesEntreRangoPrecio = async (min: number, max: number): P
   return response.data.map(transformMaterial);
 };
 
-export const createMaterial = async (materialData: CreateMaterialData, idUsuarioCreador: number): Promise<Material> => {
-  const response = await axiosPrivate.post(`/Inventario/create/material/${idUsuarioCreador}`, materialData);
+export const createMaterial = async (materialData: CreateMaterialData): Promise<Material> => {
+  const response = await axiosPrivate.post(`/Inventario/create/material`, materialData);
   return transformMaterial(response.data);
 };
 
-export const updateMaterial = async (id: number, idUsuarioActualizador: number, materialData: UpdateMaterialData): Promise<Material> => {
-  const response = await axiosPrivate.put(`/Inventario/update/material/${id}/${idUsuarioActualizador}`, materialData);
+export const updateMaterial = async (id: number, materialData: UpdateMaterialData): Promise<Material> => {
+  const response = await axiosPrivate.put(`/Inventario/update/material/${id}`, materialData);
   return transformMaterial(response.data);
 };
 
-export const removeCategoriaFromMaterial = async (materialId: number, categoriaId: number): Promise<Material> => {
-  const response = await axiosPrivate.delete(`/Inventario/material/${materialId}/categoria/${categoriaId}`);
-  return transformMaterial(response.data);
-};
-
-export const updateEstadoMaterial = async (materialId: number, estadoMaterialId: number, idUsuarioActualizador: number): Promise<Material> => {
-  const response = await axiosPrivate.patch(`/Inventario/update/estado/material/${materialId}/${estadoMaterialId}/${idUsuarioActualizador}`);
+export const updateEstadoMaterial = async (materialId: number, estadoMaterialId: number): Promise<Material> => {
+  const response = await axiosPrivate.patch(`/Inventario/update/estado/material/${materialId}/${estadoMaterialId}/`);
   return transformMaterial(response.data);
 };

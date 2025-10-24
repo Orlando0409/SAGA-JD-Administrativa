@@ -29,7 +29,6 @@ import CreateCategoriaModal from './CreateCategoriaModal';
 import EditCategoriaModal from './EditCategoriaModal';
 import DetailCategoriaModal from './DetailCategoriaModal';
 import type { CategoriaMaterial } from '../../models/Inventario';
-import { useAuth } from '@/Modules/Auth/Context/AuthContext';
 
 interface CategoriasManagementProps {
   onBack?: () => void;
@@ -42,7 +41,6 @@ const CategoriasManagement: React.FC<CategoriasManagementProps> = () => {
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [selectedCategoria, setSelectedCategoria] = useState<CategoriaMaterial | null>(null);
   const [estadoFilter, setEstadoFilter] = useState<string>('Todas'); // Por defecto mostrar todas
-  const { user } = useAuth();
   const pageSizeOptions = [5, 10, 20, 50];
   const [pagination, setPagination] = useState({
     pageSize: 5,
@@ -250,7 +248,7 @@ const CategoriasManagement: React.FC<CategoriasManagementProps> = () => {
         await updateEstadoMutation.mutateAsync({
           id: categoria.Id_Categoria,
           nuevoEstado: categoria.Estado_Categoria?.Id_Estado_Categoria === 1 ? 2 : 1,
-          idUsuario: user?.Id_Usuario || 0
+         
 
         });
       } catch (error) {

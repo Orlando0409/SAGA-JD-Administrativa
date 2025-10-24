@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useCreateUnidadMedicion } from '../../hooks/HookUnidadMedicion';
 import { CreateUnidadMedicionSchema, type CreateUnidadMedicionSchemaData } from '../../schema/CreateUnidadMedicionSchema';
-import { useAuth } from '@/Modules/Auth/Context/AuthContext';
 
 interface CreateUnidadMedicionModalProps {
   isOpen: boolean;
@@ -13,7 +12,6 @@ const CreateUnidadMedicionModal: React.FC<CreateUnidadMedicionModalProps> = ({
   isOpen,
   onClose,
 }) => {
-  const { user } = useAuth();
   const createUnidadMedicionMutation = useCreateUnidadMedicion();
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   
@@ -49,10 +47,6 @@ const CreateUnidadMedicionModal: React.FC<CreateUnidadMedicionModalProps> = ({
     }
 
     try {
-      if (!user?.Id_Usuario) {
-        console.error('Usuario no autenticado');
-        return;
-      }
 
       await createUnidadMedicionMutation.mutateAsync({
         data: {
@@ -60,7 +54,6 @@ const CreateUnidadMedicionModal: React.FC<CreateUnidadMedicionModalProps> = ({
           Abreviatura: formData.Abreviatura.trim(),
           Descripcion: formData.Descripcion?.trim() || undefined,
         },
-        idUsuarioCreador: user.Id_Usuario
       });
       
       onClose();

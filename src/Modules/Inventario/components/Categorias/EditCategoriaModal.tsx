@@ -13,7 +13,6 @@ import {
   AlertDialogHeader,
   AlertDialogFooter
 } from "@/Modules/Global/components/Sidebar/ui/alert-dialog";
-import { useAuth } from '@/Modules/Auth/Context/AuthContext';
 
 interface EditCategoriaModalProps {
   isOpen: boolean;
@@ -31,7 +30,6 @@ const EditCategoriaModal: React.FC<EditCategoriaModalProps> = ({ isOpen, onClose
   const [charCount, setCharCount] = useState({ name: 0, description: 0 });
   const MAX_NAME_LENGTH = 30;
   const MAX_DESC_LENGTH = 100;
-  const { user } = useAuth();
   const [formData, setFormData] = useState<FormData>({
     Nombre_Categoria: '',
     Descripcion_Categoria: '',
@@ -105,7 +103,6 @@ const EditCategoriaModal: React.FC<EditCategoriaModalProps> = ({ isOpen, onClose
     try {
       await updateCategoriaMutation.mutateAsync({
         id: categoria.Id_Categoria,
-        idUsuario: user?.Id_Usuario || 0,
         data: validationResult.data
       });
       onClose();

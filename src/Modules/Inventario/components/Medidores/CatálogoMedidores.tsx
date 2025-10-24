@@ -31,7 +31,6 @@ import { useMedidores, useUpdateEstadoMedidor } from '../../hooks/useMedidores';
 import type { Medidor } from '../../models/Medidor';
 import CreateMedidorModal from './CreateMedidorModal';
 import DetailMedidorModal from './DetailMedidorModal';
-import { useAuth } from '@/Modules/Auth/Context/AuthContext';
 import FilterMedidorModal from './FilterMedidorModal';
 
 interface CatalogoMedidoresProps {
@@ -39,7 +38,7 @@ interface CatalogoMedidoresProps {
 }
 
 const CatalogoMedidores: React.FC<CatalogoMedidoresProps> = () => {
-  const { user } = useAuth();
+
   const { data: medidores = [], isLoading, error, refetch } = useMedidores();
   const updateEstadoMutation = useUpdateEstadoMedidor();
   
@@ -69,7 +68,6 @@ const CatalogoMedidores: React.FC<CatalogoMedidoresProps> = () => {
       await updateEstadoMutation.mutateAsync({
         idMedidor: medidor.Id_Medidor,
         idEstado: 2,
-        idUsuario: user?.Id_Usuario || 0
       });
       refetch();
     } catch (error) {
@@ -82,13 +80,11 @@ const CatalogoMedidores: React.FC<CatalogoMedidoresProps> = () => {
   };
 
   const handleToggleEstado = async (medidor: Medidor, nuevoEstadoId: number) => {
-    if (!user?.Id_Usuario) return;
     
     try {
       await updateEstadoMutation.mutateAsync({
         idMedidor: medidor.Id_Medidor,
         idEstado: nuevoEstadoId,
-        idUsuario: user.Id_Usuario
       });
       refetch();
     } catch (error) {
