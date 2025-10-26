@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { LuX } from 'react-icons/lu';
 import { useCreateCategoria } from '../../hooks/useCategorias';
-import { useAuth } from '@/Modules/Auth/Context/AuthContext';
 import { CreateCategoriaMaterialSchema, type CreateCategoriaMaterialSchemaData } from '../../schema/CreateCategoriaMaterialSchema';
 
 interface CreateCategoriaModalProps {
