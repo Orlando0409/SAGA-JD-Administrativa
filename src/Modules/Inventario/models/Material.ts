@@ -32,6 +32,8 @@ export interface Material {
   Descripcion: string;
   Cantidad: number;
   Precio_Unitario: number;
+  Fecha_Creacion: NullableDate;
+  Fecha_Actualizacion: NullableDate;
   Ultima_Fecha_Baja?: NullableDate;
   Estado_Material: EstadoMaterial;
   Unidad_Medicion: {
@@ -43,7 +45,7 @@ export interface Material {
   Proveedor?: Proveedor;
   // El backend devuelve "Categorias" directamente como array
   Categorias?: CategoriaMaterial[];
-  Usuario_Creador?: {
+  Usuario?: {
     Id_Usuario: number;
     Nombre_Usuario: string;
     Id_Rol: number;
