@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useGetActas, useDeleteActa } from "../Hook/hookActas";
-import { FileText, ChevronLeft, ChevronRight } from "lucide-react";
+import { FileText, ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import type { Acta } from "../Models/ActasModels";
 import FormularioCrearActas from "./FormularioCrearActas";
 import ActasModal from "./ActasModal";
@@ -136,7 +136,21 @@ export default function ActasTable() {
     return (
         <div className="w-full">
             <div className="overflow-x-auto shadow-md rounded-lg">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
+                    <h2 className="text-lg sm:text-xl font-semibold text-sky-800">
+                        Gestión de Actas
+                    </h2>
+                    <button
+                        onClick={() => setModalVisible(true)}
+                        className="px-4 py-2 rounded-lg bg-sky-600 text-white hover:bg-sky-700 shadow-sm text-sm flex items-center gap-2"
+                    >
+                        <Plus size={18} />
+                        Crear Acta
+                    </button>
+                </div>
                 <table className="min-w-full divide-y divide-sky-100">
+
+
                     <thead className="bg-sky-50">
                         <tr className="text-left text-xs sm:text-sm text-sky-700">
                             <th className="px-2 sm:px-4 py-3 font-medium border-b border-sky-100">Título</th>
@@ -259,7 +273,7 @@ export default function ActasTable() {
                 </div>
             )}
 
-           
+
             {/* Modal para crear actas */}
             {modalVisible && (
                 <FormularioCrearActas

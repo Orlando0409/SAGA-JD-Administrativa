@@ -36,6 +36,7 @@ export const useCreateProyecto = () => {
       queryClient.invalidateQueries({ queryKey: ["proyectosVisibles"] });
     },
   });
+
 };
 
 // Actualizar un proyecto existente - AHORA USA FormData
