@@ -15,8 +15,8 @@ export const getProyectosVisibles = async (): Promise<Proyecto[]> => {
 };
 
 // Crear un proyecto
-export const createProyecto = async (formData: FormData, idUsuarioCreador: number): Promise<Proyecto> => {
-  const res = await apiAuth.post(`/proyectos/create/${idUsuarioCreador}`, formData, {
+export const createProyecto = async (formData: FormData): Promise<Proyecto> => {
+  const res = await apiAuth.post(`/proyectos/create`, formData, {
     headers: {
       "Content-Type": "multipart/form-data",
     },
