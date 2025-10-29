@@ -352,7 +352,7 @@ const handleArchive = async (item: ContactoItem) => {
               <option value="">Todos los estados</option>
               <option value="Pendiente">Pendiente</option>
               <option value="Contestado">Contestado</option>
-              <option value="Archivado y pendiente">Archivado</option>
+              <option value="Archivado">Archivado</option>
             </select>
           </div>
           <div className="flex items-center gap-4 w-full sm:w-auto">
