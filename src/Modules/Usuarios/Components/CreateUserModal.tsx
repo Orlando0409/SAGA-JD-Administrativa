@@ -6,6 +6,7 @@ import { CreateUserSchema, type CreateUserSchemaData } from '../Schema/CreateUse
 import type { Role } from '@/Modules/Roles/Models/Role';
 import { useRoles } from '@/Modules/Roles/Hooks/RoleHook';
 import { type CreateUserProps, NOMBRE_MAX_LENGTH, EMAIL_MAX_LENGTH, PASSWORD_MAX_LENGTH, PASSWORD_MIN_LENGTH } from '../Types/UserTypes';
+import { useAuth } from '@/Modules/Auth/Context/AuthContext';
 
 
 
@@ -19,6 +20,7 @@ const CreateUserModal = ({ onClose, setShowCreateModal }: CreateUserProps) => {
     password: 0,
     confirmPassword: 0
   });
+  const {user} = useAuth()
 
   const handleClose = () => {
     if (onClose) onClose();
@@ -67,6 +69,8 @@ const CreateUserModal = ({ onClose, setShowCreateModal }: CreateUserProps) => {
       }
 
       try {
+        if (!user) throw new Error("Usuario no autenticado");
+
         const payload : CreateUserData = {
           Nombre_Usuario: value.Nombre_Usuario,
           Contraseña: value.Contraseña,
@@ -74,7 +78,7 @@ const CreateUserModal = ({ onClose, setShowCreateModal }: CreateUserProps) => {
           Id_Rol: value.Id_Rol
         };
 
-        await createUserMutation.mutateAsync(payload);
+        await createUserMutation.mutateAsync({ userData: payload, idUsuario: user.Id_Usuario });
         handleClose();
         form.reset();
       } catch (error) {
@@ -109,19 +113,20 @@ const CreateUserModal = ({ onClose, setShowCreateModal }: CreateUserProps) => {
 
 
   return (
-    <div className="fixed inset-0 bg-opacity-10 backdrop-blur-sm flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-2xl border border-gray-200 w-full max-w-md mx-4 max-h-[90vh] overflow-hidden">
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
+    <div className="fixed inset-0 bg-opacity-10 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-lg shadow-2xl border border-gray-200 w-full max-w-md mx-4 max-h-[90vh] flex flex-col overflow-hidden">
+        <div className="sticky top-0 bg-white border-b border-gray-200 p-6 z-10">
           <h2 className="text-xl font-semibold text-gray-900">Registrar un nuevo usuario</h2>
         </div>
 
-        <div className="p-6 overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100 max-h-[calc(90vh-140px)]">
+        <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100 p-6">
           <form
             onSubmit={(e) => {
               e.preventDefault();
               form.handleSubmit();
             }}
-            className="p-6 space-y-4"
+            id="create-user-form"
+            className="space-y-4"
           >
             {/* Nombre de Usuario */}
             <form.Field name="Nombre_Usuario">
@@ -306,26 +311,28 @@ const CreateUserModal = ({ onClose, setShowCreateModal }: CreateUserProps) => {
             </form.Field>
           </form>
         </div>
-        
-            <div className="sticky bottom-0 flex justify-end gap-3 p-6 border-t bg-gray-50 z-10">
-                <button
-                  disabled={createUserMutation.isPending}
-                  className={`flex-1 px-4 py-2 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors ${
-                    createUserMutation.isPending 
-                        ? 'bg-blue-300 cursor-not-allowed' 
-                        : 'bg-blue-600 hover:bg-blue-700' 
-                  }`}
-                >
-                  {createUserMutation.isPending ? 'Creando...' : 'Crear Usuario'}
-                </button>
-              <button
-                type="button"
-                onClick={handleClose}
-                className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors"
-              >
-                Cancelar
-              </button>
-            </div>
+
+        <div className="sticky bottom-0 flex justify-end gap-3 p-6 border-t bg-gray-50 z-10">
+          <button
+            type="submit"
+            form="create-user-form"
+            disabled={createUserMutation.isPending}
+            className={`flex-1 px-4 py-2 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors ${
+              createUserMutation.isPending 
+                ? 'bg-blue-300 cursor-not-allowed' 
+                : 'bg-blue-600 hover:bg-blue-700' 
+            }`}
+          >
+            {createUserMutation.isPending ? 'Creando...' : 'Crear Usuario'}
+          </button>
+          <button
+            type="button"
+            onClick={handleClose}
+            className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors"
+          >
+            Cancelar
+          </button>
+        </div>
       </div>
     </div>
   );

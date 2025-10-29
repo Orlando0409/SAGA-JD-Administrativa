@@ -10,6 +10,7 @@ export const InventarioWrapper = () => {
       categorias: '/Inventario/Categorias',
       unidades: '/Inventario/UnidadesMedicion',
       movimientos: '/Inventario/Movimientos',
+      medidores: '/Inventario/Medidores',
     };
     
     if (routes[section]) {
@@ -18,7 +19,7 @@ export const InventarioWrapper = () => {
   };
 
   return (
-    <div className="p-6">
+    <div className="p-4 md:p-6 min-h-screen overflow-y-auto">
       <InventarioDashboard onNavigate={handleNavigate} />
     </div>
   );

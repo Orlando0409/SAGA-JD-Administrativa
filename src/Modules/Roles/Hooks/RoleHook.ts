@@ -1,6 +1,6 @@
 
 import { useAlerts } from "@/Modules/Global/context/AlertContext";
-import type { UpdateRoleData } from "../Models/Role";
+import type { CreateRoleData, UpdateRoleData } from "../Models/Role";
 import { GetRoles, GetPermissions, GetRoleById, CreateRole, UpdateRole, deactivateRole, activateRole } from "../Services/RoleService";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
@@ -29,7 +29,7 @@ export const useCreateRole = () => {
     const queryClient = useQueryClient();
     const { showSuccess, showError } = useAlerts();
     return useMutation({
-        mutationFn: CreateRole,
+        mutationFn: ({ roleData, idUsuario }: { roleData: CreateRoleData; idUsuario: number }) => CreateRole(roleData, idUsuario),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['roles'] });
             showSuccess('Rol creado', 'El rol se ha creado exitosamente');
@@ -48,7 +48,7 @@ export const useUpdateRole = () => {
     const queryClient = useQueryClient();
     const { showSuccess, showError } = useAlerts();
     return useMutation({
-        mutationFn: (data: { Id_Rol: number; roleData: UpdateRoleData }) => UpdateRole(data.Id_Rol, data.roleData),
+        mutationFn: (data: { Id_Rol: number; roleData: UpdateRoleData, idUsuario: number }) => UpdateRole(data.Id_Rol, data.roleData, data.idUsuario),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['roles'] });
             showSuccess('Rol actualizado', 'El rol se ha actualizado exitosamente');
@@ -67,13 +67,13 @@ export const useDeactivateRole = () => {
   const queryClient = useQueryClient();
   const { showSuccessWithUndo, showError } = useAlerts();
   return useMutation({
-    mutationFn: deactivateRole,
+    mutationFn: ({ id, idUsuario }: { id: number; idUsuario: number }) => deactivateRole(id, idUsuario),
     onSuccess: (_, roleId) => {
       queryClient.invalidateQueries({ queryKey: ['roles'] });
       
       const undoAction = async () => {
         try {
-          await activateRole(roleId);
+          await activateRole(roleId.id, roleId.idUsuario);
           queryClient.invalidateQueries({ queryKey: ['roles'] });
         } catch (error) {
           showError('Error', 'No se pudo revertir el cambio');
@@ -97,13 +97,13 @@ export const useActivateRole = () => {
   const queryClient = useQueryClient();
   const { showSuccessWithUndo, showError } = useAlerts();
   return useMutation({
-    mutationFn: activateRole,
-    onSuccess: (_, roleId) => {
+    mutationFn: ({ id, idUsuario }: { id: number; idUsuario: number }) => activateRole(id, idUsuario),
+    onSuccess: (_, roleData) => {
       queryClient.invalidateQueries({ queryKey: ['roles'] });
       
       const undoAction = async () => {
         try {
-          await deactivateRole(roleId);
+          await deactivateRole(roleData.id, roleData.idUsuario);
           queryClient.invalidateQueries({ queryKey: ['roles'] });
         } catch (error) {
           showError('Error', 'No se pudo revertir el cambio');

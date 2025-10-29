@@ -7,7 +7,7 @@ import {
   getPaginationRowModel,
   createColumnHelper,
 } from '@tanstack/react-table';
-import { LuPlus, LuSearch, LuArrowLeft } from 'react-icons/lu';
+import { LuPlus, LuSearch } from 'react-icons/lu';
 import { MdKeyboardArrowLeft, MdKeyboardArrowRight, MdKeyboardDoubleArrowLeft,
   MdKeyboardDoubleArrowRight, 
   MdKeyboardArrowDown,
@@ -34,14 +34,13 @@ interface CategoriasManagementProps {
   onBack?: () => void;
 }
 
-const CategoriasManagement: React.FC<CategoriasManagementProps> = ({ onBack }) => {
+const CategoriasManagement: React.FC<CategoriasManagementProps> = () => {
   const [globalFilter, setGlobalFilter] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [selectedCategoria, setSelectedCategoria] = useState<CategoriaMaterial | null>(null);
   const [estadoFilter, setEstadoFilter] = useState<string>('Todas'); // Por defecto mostrar todas
-
   const pageSizeOptions = [5, 10, 20, 50];
   const [pagination, setPagination] = useState({
     pageSize: 5,
@@ -248,7 +247,9 @@ const CategoriasManagement: React.FC<CategoriasManagementProps> = ({ onBack }) =
       try {
         await updateEstadoMutation.mutateAsync({
           id: categoria.Id_Categoria,
-          nuevoEstado: categoria.Estado_Categoria?.Id_Estado_Categoria === 1 ? 2 : 1
+          nuevoEstado: categoria.Estado_Categoria?.Id_Estado_Categoria === 1 ? 2 : 1,
+         
+
         });
       } catch (error) {
         console.error('Error al cambiar estado de la categoría:', error);
@@ -274,22 +275,6 @@ const CategoriasManagement: React.FC<CategoriasManagementProps> = ({ onBack }) =
 
   return (
     <div className="space-y-6">
-      {onBack && (
-        <div className="flex items-center gap-4">
-          <button
-            onClick={onBack}
-            className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
-          >
-            <LuArrowLeft className="w-4 h-4" />
-            Volver al Dashboard
-          </button>
-          <div className="h-6 w-px bg-gray-300" />
-          <h1 className="text-2xl font-bold text-gray-900">
-            Gestión de Categorías
-          </h1>
-        </div>
-      )}
-
  
       <div className="bg-white rounded-lg p-3">
         <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
@@ -329,7 +314,7 @@ const CategoriasManagement: React.FC<CategoriasManagementProps> = ({ onBack }) =
       </div>
 
       
-      <div className="bg-white rounded-2xl shadow-sm border border-sky-100 overflow-hidden">
+<div className="bg-white rounded-2xl shadow-sm border border-sky-100 overflow-hidden max-h-[calc(100vh-300px)] overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100">
         <div className="overflow-x-auto">
           <table className="min-w-full table-auto">
             <thead className="bg-sky-50">

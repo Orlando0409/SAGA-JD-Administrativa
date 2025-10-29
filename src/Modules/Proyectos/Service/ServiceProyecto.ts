@@ -1,6 +1,6 @@
 // src/services/proyectoService.ts
 import apiAuth from "@/Api/apiAuth";
-import type { Proyecto, ProyectoFormData } from "../Models/ProyectoModels";
+import type { Proyecto } from "../Models/ProyectoModels";
 
 // Obtener todos los proyectos
 export const getProyectos = async (): Promise<Proyecto[]> => {
@@ -16,7 +16,7 @@ export const getProyectosVisibles = async (): Promise<Proyecto[]> => {
 
 // Crear un proyecto
 export const createProyecto = async (formData: FormData): Promise<Proyecto> => {
-  const res = await apiAuth.post(`/proyectos/create`, formData, {
+  const res = await apiAuth.post(`/proyectos/create/`, formData, {
     headers: {
       "Content-Type": "multipart/form-data",
     },

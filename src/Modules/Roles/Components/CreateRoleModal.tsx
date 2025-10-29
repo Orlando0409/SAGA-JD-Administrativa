@@ -3,6 +3,7 @@ import { useCreateRole, usePermissions } from '../Hooks/RoleHook';
 import { LuShield, LuX, LuLock, LuFolderTree } from 'react-icons/lu';
 import { groupPermissionsByModule, getPermissionIdByLevel, type ModulePermission, type PermissionLevel } from '@/Modules/Usuarios/Helper/GroupPermiByModule';
 import { RoleMAX_LENGTH, RoleMIN_LENGTH, type CreateRoleModalProps } from '../Types/RoleTypes';
+import { useAuth } from '@/Modules/Auth/Context/AuthContext';
 
 
 const CreateRoleModal: React.FC<CreateRoleModalProps> = ({ onClose }) => {
@@ -11,7 +12,7 @@ const CreateRoleModal: React.FC<CreateRoleModalProps> = ({ onClose }) => {
   const { data: permisos = [], isLoading } = usePermissions();
   const { mutateAsync } = useCreateRole();
   const [errors, setErrors] = useState<{ nombreRol?: string }>({});
-  
+  const { user } = useAuth();
     // Función para validar el nombre
     const validateNombreRol = (value: string) => {
       if (value.length < RoleMIN_LENGTH) {
@@ -75,7 +76,7 @@ const CreateRoleModal: React.FC<CreateRoleModalProps> = ({ onClose }) => {
       .map(mp => mp.selectedId);
     
       try {
-        await mutateAsync({ Nombre_Rol: nombreRol, permisosIds });
+        await mutateAsync({ roleData: { Nombre_Rol: nombreRol, permisosIds }, idUsuario: user?.Id_Usuario || 0 });
       } catch (error) {
         console.error('Error creating role:', error);
       }
@@ -89,12 +90,12 @@ const CreateRoleModal: React.FC<CreateRoleModalProps> = ({ onClose }) => {
 
   // Verificar si el módulo tiene permiso de editar disponible
   const hasEditPermission = (modulo: string) => {
-    return modulo !== 'bitacora';
+    return modulo !== 'auditoria';
   };
 
   return (
     <div className="fixed inset-0 bg-opacity-10 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-2xl border border-gray-200 w-full max-w-3xl max-h-[90vh] overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100">
+      <div className="bg-white rounded-lg shadow-2xl border border-gray-200 w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden">
         <div className="sticky top-0 bg-white border-b border-gray-200 p-4 z-10">
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-bold text-gray-900 flex items-center gap-3">
@@ -110,8 +111,8 @@ const CreateRoleModal: React.FC<CreateRoleModalProps> = ({ onClose }) => {
           </div>
         </div>
 
-        <div className="p-6">
-          <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100 p-6">
+          <form onSubmit={handleSubmit} id="create-role-form" className="space-y-6">
             <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
               <div className="bg-gray-50 px-5 py-3 border-b border-gray-200">
                 <div className="flex items-center gap-3">
@@ -239,11 +240,11 @@ const CreateRoleModal: React.FC<CreateRoleModalProps> = ({ onClose }) => {
                                   if (hasEditPermission(mp.Modulo)) {
                                     if (e.target.checked) {
                                       handlePermissionChange(mp.Modulo, 'edit');
-                                    } else
-
+                                    } else {
                                       if (mp.level === 'edit') {
                                         handlePermissionChange(mp.Modulo, 'view');
                                       }
+                                    }
                                   }
                                 }}
                                 disabled={!hasEditPermission(mp.Modulo)}
@@ -265,31 +266,31 @@ const CreateRoleModal: React.FC<CreateRoleModalProps> = ({ onClose }) => {
                 </div>
               )}
             </div>
-          </div>
-        </form>
-      </div>
-                        <div className="sticky bottom-0 flex justify-end gap-3 p-6 border-t bg-gray-50 z-10">
-            <div className="flex justify-end gap-3">
-              <button
-                type="submit"
-                disabled={hasError || nombreRol.length < RoleMIN_LENGTH}
-                className={`px-6 py-2 rounded-lg transition-colors font-medium ${
-                  hasError || nombreRol.length < RoleMIN_LENGTH
-                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                    : 'bg-blue-600 text-white hover:bg-blue-700'
-                }`}
-              >
-                Crear Rol
-              </button>
-              <button
-                type="button"
-                onClick={onClose}
-                className="px-6 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium"
-              >
-                Cancelar
-              </button>
             </div>
-          </div>
+          </form>
+        </div>
+
+        <div className="sticky bottom-0 flex justify-end gap-3 p-6 border-t bg-gray-50 z-10">
+          <button
+            type="submit"
+            form="create-role-form"
+            disabled={hasError || nombreRol.length < RoleMIN_LENGTH}
+            className={`px-6 py-2 rounded-lg transition-colors font-medium ${
+              hasError || nombreRol.length < RoleMIN_LENGTH
+                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                : 'bg-blue-600 text-white hover:bg-blue-700'
+            }`}
+          >
+            Crear Rol
+          </button>
+          <button
+            type="button"
+            onClick={onClose}
+            className="px-6 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium"
+          >
+            Cancelar
+          </button>
+        </div>
       </div>
     </div>
   );

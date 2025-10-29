@@ -78,7 +78,7 @@ export const useMovimientoForm = (initialMaterial?: Material) => {
     return materiales.filter((material: Material) => 
       material.Nombre_Material.toLowerCase().includes(termino) ||
       material.Categorias?.some(cat => 
-        cat.Categoria.Nombre_Categoria.toLowerCase().includes(termino)
+        cat.Nombre_Categoria?.toLowerCase().includes(termino)
       )
     );
   }, [materiales, busquedaMaterial]);

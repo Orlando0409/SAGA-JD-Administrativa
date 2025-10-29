@@ -119,7 +119,7 @@ const Usuarios = () => {
 
   const handleDeactivate = async (userId: number) => {
     try {
-      await deactivateUserMutation.mutateAsync(userId);
+      await deactivateUserMutation.mutateAsync({ id: userId, idUsuario: currentUser?.Id_Usuario || 0 });
     } catch (error) {
       console.error('Error deactivating user:', error);
     }
@@ -127,7 +127,7 @@ const Usuarios = () => {
 
   const handleActivate = async (userId: number) => {
     try {
-      await activateUserMutation.mutateAsync(userId);
+      await activateUserMutation.mutateAsync({ id: userId, idUsuario: currentUser?.Id_Usuario || 0 });
     } catch (error) {
       console.error('Error activating user:', error);
     }
@@ -401,8 +401,8 @@ const Usuarios = () => {
             </div>
           )}
 
-          <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
-              <div className="overflow-x-auto">
+            <div className="bg-white rounded-2xl shadow-sm border border-sky-100 overflow-hidden max-h-[calc(100vh-300px)] overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100">
+              <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100">
                 <table className="min-w-full table-auto">
                   <thead className="bg-sky-50">
                     {table.getHeaderGroups().map((headerGroup) => (
@@ -567,7 +567,7 @@ const Usuarios = () => {
               setShowEditModal(false);
               setSelectedUser(null);
             }}
-            user={selectedUser}
+            usert={selectedUser}
           />
         )}
 

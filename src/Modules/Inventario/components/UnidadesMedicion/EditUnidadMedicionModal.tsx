@@ -13,7 +13,6 @@ import {
   AlertDialogHeader,
   AlertDialogFooter
 } from "@/Modules/Global/components/Sidebar/ui/alert-dialog";
-import { Button } from '@/Modules/Global/components/Sidebar/ui/button';
 
 interface EditUnidadMedicionModalProps {
   isOpen: boolean;
@@ -25,7 +24,6 @@ interface EditUnidadMedicionModalProps {
 const EditUnidadMedicionModal: React.FC<EditUnidadMedicionModalProps> = ({ isOpen, onClose, unidad }) => {
   const updateUnidadMutation = useUpdateUnidadMedicion();
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
-  
   const [formData, setFormData] = useState<UpdateUnidadMedicionSchemaData>({
     Nombre_Unidad_Medicion: '',
     Abreviatura: '',
@@ -98,15 +96,16 @@ const EditUnidadMedicionModal: React.FC<EditUnidadMedicionModalProps> = ({ isOpe
 
   return (
     <div className="fixed inset-0 bg-opacity-10 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between p-6 border-b">
-          <h2 className="text-xl font-semibold text-gray-900">
+      <div className="bg-white rounded-lg shadow-2xl border border-gray-200 w-full max-w-md mx-4 flex flex-col overflow-hidden max-h-[90vh]">
+        <div className="sticky top-0 bg-white border-b border-gray-200 p-4 z-10">
+          <h2 className="text-xl font-bold text-gray-900">
             Editar Unidad de Medición
           </h2>
         </div>
 
-        <div className="p-6">
-          <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+          <div className="p-6">
+            <form id="edit-unidad-form" onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label htmlFor="nombre-unidad" className="block text-sm font-medium text-gray-700 mb-1">
                 Nombre de la Unidad <span className="text-red-500">*</span>
@@ -165,44 +164,46 @@ const EditUnidadMedicionModal: React.FC<EditUnidadMedicionModalProps> = ({ isOpe
                 <p className="text-red-500 text-sm mt-1">{formErrors.Descripcion}</p>
               )}
             </div>
+            </form>
+          </div>
+        </div>
 
-            <div className="flex gap-3 pt-4 border-t">
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button
-                    disabled={updateUnidadMutation.isPending}
-                    className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                  >
-                    {updateUnidadMutation.isPending ? 'Actualizando...' : 'Actualizar'}
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>¿Confirmar actualización?</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      ¿Estás seguro de que deseas actualizar esta unidad de medición? Esta acción modificará la información de la unidad en el sistema.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogAction
-                      onClick={(e) => handleSubmit(e as any)}
-                      disabled={updateUnidadMutation.isPending}
-                    >
-                      {updateUnidadMutation.isPending ? 'Actualizando...' : 'Confirmar'}
-                    </AlertDialogAction>
-                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
+        <div className="sticky bottom-0 flex justify-end gap-3 p-6 border-t bg-gray-50 z-10">
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
               <button
                 type="button"
-                onClick={onClose}
-                className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors"
+                disabled={updateUnidadMutation.isPending}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
               >
-                Cancelar
+                {updateUnidadMutation.isPending ? 'Actualizando...' : 'Actualizar Unidad'}
               </button>
-            </div>
-          </form>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>¿Confirmar actualización?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  ¿Estás seguro de que deseas actualizar esta unidad de medición? Esta acción modificará la información de la unidad en el sistema.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogAction
+                  onClick={(e) => handleSubmit(e as any)}
+                  disabled={updateUnidadMutation.isPending}
+                >
+                  {updateUnidadMutation.isPending ? 'Actualizando...' : 'Confirmar'}
+                </AlertDialogAction>
+                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+          <button
+            type="button"
+            onClick={onClose}
+            className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors font-medium"
+          >
+            Cancelar
+          </button>
         </div>
       </div>
     </div>

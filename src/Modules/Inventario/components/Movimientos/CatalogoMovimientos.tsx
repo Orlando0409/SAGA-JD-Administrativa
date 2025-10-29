@@ -235,7 +235,7 @@ const CatalogoMovimientos: React.FC<CatalogoMovimientosProps> = ({ onBack }) => 
       cell: ({ getValue, row }) => {
         const cantidad = getValue();
         const unidad = row.original.Material?.Unidad_Medicion;
-        const nombreUnidad = unidad?.Nombre_Unidad_Medicion || unidad?.Nombre_Unidad || '';
+        const nombreUnidad = unidad?.Nombre_Unidad_Medicion || '';
         
         return (
           <span className="text-sm">
@@ -288,7 +288,7 @@ const CatalogoMovimientos: React.FC<CatalogoMovimientosProps> = ({ onBack }) => 
       cell: ({ row }) => {
         const movimiento = row.original;
         const unidad = movimiento.Material?.Unidad_Medicion;
-        const nombreUnidad = unidad?.Nombre_Unidad_Medicion || unidad?.Nombre_Unidad || '';
+        const nombreUnidad = unidad?.Nombre_Unidad_Medicion ||  '';
         
         return (
           <span className="text-sm text-gray-600">
@@ -305,7 +305,7 @@ const CatalogoMovimientos: React.FC<CatalogoMovimientosProps> = ({ onBack }) => 
       cell: ({ row }) => {
         const movimiento = row.original;
         const unidad = movimiento.Material?.Unidad_Medicion;
-        const nombreUnidad = unidad?.Nombre_Unidad_Medicion || unidad?.Nombre_Unidad || '';
+        const nombreUnidad = unidad?.Nombre_Unidad_Medicion || '';
         
         return (
           <span className="text-sm font-medium">
@@ -469,7 +469,7 @@ const CatalogoMovimientos: React.FC<CatalogoMovimientosProps> = ({ onBack }) => 
         </div>
       </div>
 
-      <div className="bg-white shadow-sm rounded-2xl border border-sky-100 overflow-hidden">
+<div className="bg-white rounded-2xl shadow-sm border border-sky-100 overflow-hidden max-h-[calc(100vh-300px)] overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100">
         <div className="overflow-x-auto">
           <table className="min-w-full table-auto">
             <thead className="bg-sky-50">
