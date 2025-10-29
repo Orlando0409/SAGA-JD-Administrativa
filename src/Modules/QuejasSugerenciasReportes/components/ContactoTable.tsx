@@ -100,7 +100,7 @@ const ContactoTable = () => {
     // Agregar reportes
     reportes?.forEach((reporte: Reporte) => {
       data.push({
-        id: reporte.IdReporte,
+        id: reporte.Id_Reporte,
         tipo: 'Reporte',
         nombre: reporte.Nombre,
         primerApellido: reporte.Primer_Apellido,

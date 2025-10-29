@@ -15,12 +15,3 @@ export interface Queja {
     Estado: EstadoQueja;
     Fecha_Queja: Date | string;
 }
-
-// Interfaz para crear una queja
-export interface CreateQuejaData {
-    Nombre: string;
-    Primer_Apellido: string;
-    Segundo_Apellido?: string;
-    Correo: string;
-    Descripcion: string;
-}
