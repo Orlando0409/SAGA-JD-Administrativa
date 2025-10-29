@@ -39,7 +39,7 @@ export const createMedidor = async (data: CreateMedidorData): Promise<Medidor> =
 
 // Actualizar el estado de un medidor
 export const updateEstadoMedidor = async ( idMedidor: number, nuevoEstado: number ): Promise<Medidor> => {
-  const response = await axiosPrivate.patch(`/Inventario/update/estado/${idMedidor}/${nuevoEstado}/`);
+  const response = await axiosPrivate.patch(`/Inventario/update/estado/medidor/${idMedidor}/${nuevoEstado}/`);
   return response.data;
 };
 

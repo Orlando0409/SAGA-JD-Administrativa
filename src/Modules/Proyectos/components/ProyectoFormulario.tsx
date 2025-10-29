@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useAuth } from "@/Modules/Auth/Context/AuthContext";
 import { useCreateProyecto } from "../Hook/HookProyecto";
 import { z } from "zod";
 import { ProyectoSchema } from "../schemas/Proyecto";
@@ -15,9 +14,8 @@ interface FormularioProyectoProps {
 // Componente Toast
 function Toast({ message, type, onClose }: { message: string; type: 'success' | 'error'; onClose: () => void }) {
     return (
-        <div className={`fixed top-4 right-4 z-[100] flex items-center gap-3 px-4 py-3 rounded-lg shadow-lg ${
-            type === 'success' ? 'bg-green-700' : 'bg-red-700'
-        } text-white min-w-[300px] max-w-md animate-slideIn`}>
+        <div className={`fixed top-4 right-4 z-[100] flex items-center gap-3 px-4 py-3 rounded-lg shadow-lg ${type === 'success' ? 'bg-green-700' : 'bg-red-700'
+            } text-white min-w-[300px] max-w-md animate-slideIn`}>
             <div className="flex items-center gap-2 flex-1">
                 {type === 'success' ? (
                     <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
@@ -48,7 +46,7 @@ export default function FormularioProyecto({
     onClose,
     refetch,
 }: Readonly<FormularioProyectoProps>) {
-    const { user } = useAuth();
+
     const createProyectoMutation = useCreateProyecto();
 
     const [titulo, setTitulo] = useState(tituloInicial);
@@ -137,11 +135,6 @@ export default function FormularioProyecto({
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
-        if (!user?.Id_Usuario) {
-            showToast("Error: Usuario no autenticado.", "error");
-            return;
-        }
-
         // Validar que existe la imagen
         if (!imagen) {
             setErrors(prev => ({ ...prev, Imagen_Url: "Debes subir un archivo para el proyecto." }));
@@ -154,7 +147,6 @@ export default function FormularioProyecto({
                 Titulo: titulo.trim(),
                 Descripcion: descripcion.trim(),
                 Imagen_Url: imagen,
-                Id_Usuario: user.Id_Usuario
             });
         } catch (error) {
             if (error instanceof z.ZodError) {
@@ -171,11 +163,10 @@ export default function FormularioProyecto({
         const formData = new FormData();
         formData.append("Titulo", titulo.trim());
         formData.append("Descripcion", descripcion.trim());
-        formData.append("Id_Usuario", user.Id_Usuario.toString());
         formData.append("Imagen_Proyecto", imagen);
 
         createProyectoMutation.mutate(
-            { formData, idUsuarioCreador: user.Id_Usuario },
+            { formData, },
             {
                 onSuccess: () => {
                     setTitulo("");
@@ -204,7 +195,7 @@ export default function FormularioProyecto({
                     onClose={() => setToast(null)}
                 />
             )}
-            
+
             <div className="fixed inset-0  backdrop-blur flex items-center justify-center z-50">
                 <form
                     onSubmit={handleSubmit}
@@ -260,7 +251,7 @@ export default function FormularioProyecto({
                                 required
                             />
                         </label>
-                        
+
 
                     </div>
                     <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
@@ -271,7 +262,7 @@ export default function FormularioProyecto({
 
                     {/* Botones */}
                     <div className="flex justify-end gap-4">
-                         <button
+                        <button
                             type="submit"
                             className="px-4 py-2 rounded-lg bg-sky-600 text-white hover:bg-sky-700 shadow-sm text-sm"
                             disabled={createProyectoMutation.status === "pending"}
@@ -285,7 +276,7 @@ export default function FormularioProyecto({
                         >
                             Cancelar
                         </button>
-                       
+
                     </div>
                 </form>
             </div>

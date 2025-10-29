@@ -12,8 +12,3 @@ export interface Sugerencia {
     RespuestasSugerencia?: string | null;
     Estado: EstadoSugerencia;
 }
-
-export interface CreateSugerenciaData {
-    Mensaje: string;
-    Correo: string;
-}

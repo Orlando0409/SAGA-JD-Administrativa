@@ -16,7 +16,7 @@ export interface Medidor {
     Razon_Social?: string;
     Tipo_Afiliado: string;
   } | null;
-  Usuario_Creador: {
+  Usuario: {
     Id_Usuario: number;
     Nombre_Usuario: string;
     Id_Rol: number;

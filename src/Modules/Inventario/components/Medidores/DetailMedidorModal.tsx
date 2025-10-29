@@ -50,7 +50,7 @@ const DetailMedidorModal = ({ isOpen, onClose, medidor }: DetailMedidorModalProp
           <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
             <div className="bg-gray-50 px-5 py-3 border-b border-gray-200">
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                <div className="w-8 h-8 items-center justify-center">
                   <FaTachometerAlt className="w-4 h-4 text-blue-600" />
                 </div>
                 <h3 className="text-base font-bold text-gray-900">Información del Medidor</h3>
@@ -83,8 +83,8 @@ const DetailMedidorModal = ({ isOpen, onClose, medidor }: DetailMedidorModalProp
           <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
             <div className="bg-gray-50 px-5 py-3 border-b border-gray-200">
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
-                  <FaUsers className="w-4 h-4 text-green-600" />
+                <div className="w-8 h-8 flex items-center justify-center">
+                  <FaUsers className="w-4 h-4 text-blue-600" />
                 </div>
                 <h3 className="text-base font-bold text-gray-900">Información del Afiliado</h3>
               </div>
@@ -121,9 +121,6 @@ const DetailMedidorModal = ({ isOpen, onClose, medidor }: DetailMedidorModalProp
                 </div>
               ) : (
                 <div className="text-center py-8">
-                  <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <FaUsers className="w-8 h-8 text-gray-400" />
-                  </div>
                   <p className="text-gray-600 font-medium">Sin afiliado asignado</p>
                   <p className="text-gray-500 text-sm mt-1">
                     Este medidor aún no ha sido asignado a ningún afiliado
@@ -137,8 +134,8 @@ const DetailMedidorModal = ({ isOpen, onClose, medidor }: DetailMedidorModalProp
           <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
             <div className="bg-gray-50 px-5 py-3 border-b border-gray-200">
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
-                  <LuCalendar className="w-4 h-4 text-purple-600" />
+                <div className="w-8 h-8 flex items-center justify-center">
+                  <LuCalendar className="w-4 h-4 text-blue-600" />
                 </div>
                 <h3 className="text-base font-bold text-gray-900">Fechas</h3>
               </div>
@@ -170,8 +167,8 @@ const DetailMedidorModal = ({ isOpen, onClose, medidor }: DetailMedidorModalProp
           <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
             <div className="bg-gray-50 px-5 py-3 border-b border-gray-200">
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center">
-                  <LuUser className="w-4 h-4 text-indigo-600" />
+                <div className="w-8 h-8 flex items-center justify-center">
+                  <LuUser className="w-4 h-4 text-blue-600" />
                 </div>
                 <h3 className="text-base font-bold text-gray-900">Usuario Creador</h3>
               </div>
@@ -183,7 +180,7 @@ const DetailMedidorModal = ({ isOpen, onClose, medidor }: DetailMedidorModalProp
                     Nombre de Usuario
                   </label>
                   <p className="text-sm text-gray-900 font-medium">
-                    {medidor.Usuario_Creador.Nombre_Usuario}
+                    {medidor.Usuario.Nombre_Usuario}
                   </p>
                 </div>
 
@@ -192,7 +189,7 @@ const DetailMedidorModal = ({ isOpen, onClose, medidor }: DetailMedidorModalProp
                     Rol
                   </label>
                   <span className="inline-flex items-center px-3 py-1 rounded-lg text-xs font-semibold bg-indigo-100 text-indigo-800 border border-indigo-200">
-                    {medidor.Usuario_Creador.Nombre_Rol}
+                    {medidor.Usuario.Nombre_Rol}
                   </span>
                 </div>
               </div>

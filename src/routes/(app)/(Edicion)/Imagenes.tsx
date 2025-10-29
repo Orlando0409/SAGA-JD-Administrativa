@@ -1,3 +1,4 @@
+import ImagenesTable from '@/Modules/EdiImagen/Components/EdiImagenTable'
 import { createFileRoute } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/(app)/(Edicion)/Imagenes')({
@@ -5,5 +6,5 @@ export const Route = createFileRoute('/(app)/(Edicion)/Imagenes')({
 })
 
 function RouteComponent() {
-  return <div>Hello "/(app)/(Edicion)/Imagenes"!</div>
+  return <ImagenesTable />;
 }

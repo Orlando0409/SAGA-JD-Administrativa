@@ -162,28 +162,6 @@ const CatalogoMateriales: React.FC<CatalogoMaterialesProps> = ({ onBack }) => {
     materialesDebajoStock, isLoadingBelow
   ]);
 
-  const filterByCategoria = (material: Material, categoria?: string | (string | number)[]) => {
-    if (!categoria || (Array.isArray(categoria) && categoria.length === 0)) return true;
-    
-    // El backend devuelve "Categorias" como array directo de CategoriaMaterial
-    const categorias = material.Categorias || [];
-    
-    if (Array.isArray(categoria)) {
-      return categorias.some((cat: any) => {
-        // Si es formato antiguo (con Categoria nested), usar Categoria
-        const categoria = cat.Categoria || cat;
-        return categoria.includes(categoria.Nombre_Categoria) ||
-               categoria.includes(categoria.Id_Categoria);
-      });
-    }
-    
-    return categorias.some((cat: any) => {
-      // Si es formato antiguo (con Categoria nested), usar Categoria
-      const categoriaObj = cat.Categoria || cat;
-      return categoriaObj.Nombre_Categoria === categoria ||
-             String(categoriaObj.Id_Categoria) === String(categoria);
-    });
-  };
 
   const filterByStock = (material: Material, conStock?: boolean) => {
     if (!conStock) return true;
@@ -199,7 +177,6 @@ const CatalogoMateriales: React.FC<CatalogoMaterialesProps> = ({ onBack }) => {
 
   const applyAdditionalFilters = (data: Material[], filters: MaterialFilterOptions): Material[] => {
     return data.filter(material =>
-      filterByCategoria(material, filters.categoria) &&
       filterByStock(material, filters.conStock) &&
       filterByStockEntre(material, filters.tipoFiltroStock, filters.stockMinimo, filters.stockMaximo)
     );

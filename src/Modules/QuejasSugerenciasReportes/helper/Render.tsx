@@ -130,7 +130,7 @@ export const renderAccionesCell = (item: ContactoItem, mutations: ArchiveMutatio
           Responder
         </button>
       )}
-      {item.estado === 'Contestado' && (
+      {(item.estado === 'Contestado' || item.estado === 'Archivado') && (
       <AlertDialog>
         <AlertDialogTrigger asChild>
           <button
