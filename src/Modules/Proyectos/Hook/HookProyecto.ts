@@ -29,7 +29,7 @@ export const useGetProyectosVisibles = () => {
 export const useCreateProyecto = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ formData}: { formData: FormData; }) =>
+    mutationFn: ({ formData }: { formData: FormData; }) =>
       createProyecto(formData),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["proyectos"] });
