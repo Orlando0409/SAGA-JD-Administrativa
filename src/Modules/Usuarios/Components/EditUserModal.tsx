@@ -18,7 +18,7 @@ import {
   AlertDialogFooter
 } from "@/Modules/Global/components/Sidebar/ui/alert-dialog";
 import { Button } from '@/Modules/Global/components/Sidebar/ui/button';
-import { useAuth } from '@/Modules/Auth/Context/AuthContext';
+
 
 const EditUserModal: React.FC<EditUserModalProps> = ({ isOpen, onClose, usert }) => {
   const updateUserMutation = useUpdateUser();
@@ -29,7 +29,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ isOpen, onClose, usert })
     nombreUsuario: 0,
     email: 0
   });
-  const { user } = useAuth();
+
 
       const createInputHandler = (fieldName: string, handleChange: (value: string) => void, maxLength: number) => {
     return (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -75,7 +75,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ isOpen, onClose, usert })
           Id_Rol: value.Id_Rol
         };
 
-        await updateUserMutation.mutateAsync({ Id_Usuario: usert.Id_Usuario, userData: updateData, idUsuarioModificador: user ? user.Id_Usuario : 0 });
+        await updateUserMutation.mutateAsync({ Id_Usuario: usert.Id_Usuario, userData: updateData });
         onClose();
       } catch (error) {
         console.error('Error updating user:', error);

@@ -13,20 +13,20 @@ export const getUserById = async (id: number): Promise<Usuario> => {
   return response.data;
 };
 
-export const createUser = async (userData: CreateUserData, idUsuario: number): Promise<Usuario> => {
-  const response = await axiosPrivate.post(`/usuarios/${idUsuario}`, userData);
+export const createUser = async (userData: CreateUserData,): Promise<Usuario> => {
+  const response = await axiosPrivate.post(`/usuarios/`, userData);
   return response.data;
 };
 
-export const updateUser = async (Id_Usuario:number,idUsuario: number, userData: UpdateUserData): Promise<Usuario> => {
-  const response = await axiosPrivate.put(`/usuarios/${Id_Usuario}/${idUsuario}`, userData);
+export const updateUser = async (Id_Usuario:number, userData: UpdateUserData): Promise<Usuario> => {
+  const response = await axiosPrivate.put(`/usuarios/${Id_Usuario}/`, userData);
   return response.data;
 };
 
-export const deactivateUser = async (id: number, idUsuario: number): Promise<void> => {
-  await axiosPrivate.delete(`/usuarios/${id}/${idUsuario}`);
+export const deactivateUser = async (id: number): Promise<void> => {
+  await axiosPrivate.delete(`/usuarios/${id}/`);
 };
 
-export const activateUser = async (id: number, idUsuario: number): Promise<void> => {
-  await axiosPrivate.patch(`/usuarios/restaurar/${id}/${idUsuario}`);
+export const activateUser = async (id: number): Promise<void> => {
+  await axiosPrivate.patch(`/usuarios/restaurar/${id}/`);
 };

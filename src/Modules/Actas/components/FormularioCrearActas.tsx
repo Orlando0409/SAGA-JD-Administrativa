@@ -49,7 +49,6 @@ export default function FormularioCrearActas({ onClose, refetch }: FormularioCre
         }
 
         const formData = new FormData();
-        formData.append("Id_Usuario", "1"); // Incluye el ID del usuario (puedes reemplazar "1" con el ID dinámico)
         formData.append("Titulo", titulo.trim());
         formData.append("Descripcion", descripcion.trim());
         files.forEach((file) => {

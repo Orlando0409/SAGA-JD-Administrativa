@@ -119,7 +119,7 @@ const Usuarios = () => {
 
   const handleDeactivate = async (userId: number) => {
     try {
-      await deactivateUserMutation.mutateAsync({ id: userId, idUsuario: currentUser?.Id_Usuario || 0 });
+      await deactivateUserMutation.mutateAsync({ id: userId });
     } catch (error) {
       console.error('Error deactivating user:', error);
     }
@@ -127,7 +127,7 @@ const Usuarios = () => {
 
   const handleActivate = async (userId: number) => {
     try {
-      await activateUserMutation.mutateAsync({ id: userId, idUsuario: currentUser?.Id_Usuario || 0 });
+      await activateUserMutation.mutateAsync({ id: userId });
     } catch (error) {
       console.error('Error activating user:', error);
     }

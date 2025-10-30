@@ -1,21 +1,32 @@
 import { useMemo, useState } from 'react';
-import { createColumnHelper, getCoreRowModel, getPaginationRowModel, useReactTable, flexRender, type ColumnDef } from '@tanstack/react-table';
-import { User, Building, Trash2, Pencil, Eye } from 'lucide-react';
+import { createColumnHelper, getCoreRowModel, getFilteredRowModel, getSortedRowModel, getPaginationRowModel, useReactTable, flexRender, type ColumnDef } from '@tanstack/react-table';
+import { User, Building, Trash2, Pencil, Eye, Plus } from 'lucide-react';
+import { MdKeyboardArrowLeft, MdKeyboardArrowRight, MdKeyboardDoubleArrowLeft, MdKeyboardDoubleArrowRight, MdKeyboardArrowDown, MdKeyboardArrowUp } from 'react-icons/md';
+import { LuSearch } from 'react-icons/lu';
 import { useAfiliadosFisicos } from '../Hook/HookAfiliadoFisico';
 import { useAfiliadosJuridicos } from '../Hook/HookAfiliadoJuridico';
 import DetailAbonados from './DetailAbonados';
 import CreateModal from './CreateModal';
+import EditModal from './EditModal'; // ✅ Agregar import
+import {
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogHeader,
+  AlertDialogFooter
+} from "@/Modules/Global/components/Sidebar/ui/alert-dialog";
 import type { AfiliadoFisico } from '../Models/TablaAfiliados/ModeloAfiliadoFisico';
 import type { AfiliadoJuridico } from '../Models/TablaAfiliados/ModeloAfiliadoJuridico';
 
 // Tipo unificado para la tabla
-
-
-
 type AfiliadoUnificado = {
     Id: number;
     Nombre_Completo: string;
-    Cedula_Documento?: string; // Para cédula o documento jurídico
+    Cedula_Documento?: string;
     Identificacion: string;
     Estado: {
         Id_Estado: number;
@@ -23,21 +34,29 @@ type AfiliadoUnificado = {
     };
     Tipo_Persona: 'Físico' | 'Jurídico';
     Tipo_Afiliado: 'Abonado' | 'Asociado';
-    Tipo_Identificacion?: string; // <-- FIX: Añadido campo
+    Tipo_Identificacion?: string;
     datos_originales: AfiliadoFisico | AfiliadoJuridico;
 };
 
 export default function AbonadosTable() {
-    const { afiliadosFisicos, isLoading: loadingFisicos, isError: errorFisicos } = useAfiliadosFisicos();
-    const { afiliadosJuridicos, isLoading: loadingJuridicos, isError: errorJuridicos } = useAfiliadosJuridicos();
+    const { afiliadosFisicos, isLoading: loadingFisicos, isError: errorFisicos, updateEstadoAfiliadoFisico: updateEstadoMutationFisico } = useAfiliadosFisicos();
+    const { afiliadosJuridicos, isLoading: loadingJuridicos, isError: errorJuridicos, updateEstadoAfiliadoJuridico: updateEstadoMutationJuridico } = useAfiliadosJuridicos();
 
     const [globalFilter, setGlobalFilter] = useState('');
+    const [estadoFilter, setEstadoFilter] = useState<string>('Todos'); // Filtro de estado
     const [showDetailModal, setShowDetailModal] = useState(false);
     const [showCreateModal, setShowCreateModal] = useState(false);
+    const [showEditModal, setShowEditModal] = useState(false); // ✅ Agregar estado para EditModal
     const [selectedPersona, setSelectedPersona] = useState<{
         tipo: 'afiliado-fisico' | 'afiliado-juridico';
         datos: AfiliadoFisico | AfiliadoJuridico;
     } | null>(null);
+
+    const pageSizeOptions = [5, 10, 20, 50];
+    const [pagination, setPagination] = useState({
+        pageSize: 5,
+        pageIndex: 0,
+    });
 
     const isLoading = loadingFisicos || loadingJuridicos;
     const isError = errorFisicos || errorJuridicos;
@@ -54,7 +73,7 @@ export default function AbonadosTable() {
             },
             Tipo_Persona: 'Físico' as const,
             Tipo_Afiliado: afiliado.Tipo_Afiliado?.Nombre_Tipo_Afiliado as 'Abonado' | 'Asociado' || 'Asociado',
-            Tipo_Identificacion: (afiliado as any).Tipo_Identificacion || 'Sin dato', // <-- CAMBIO: Mapeo del campo
+            Tipo_Identificacion: (afiliado as any).Tipo_Identificacion || 'Sin dato',
             datos_originales: afiliado
         }));
 
@@ -69,7 +88,7 @@ export default function AbonadosTable() {
             },
             Tipo_Persona: 'Jurídico' as const,
             Tipo_Afiliado: afiliado.Tipo_Afiliado?.Nombre_Tipo_Afiliado as 'Abonado' | 'Asociado' || 'Asociado',
-            Tipo_Identificacion: 'Cédula Jurídica', //  CAMBIO: Siempre será "Cédula Jurídica" para jurídicos
+            Tipo_Identificacion: 'Cédula Jurídica',
             datos_originales: afiliado
         }));
 
@@ -78,6 +97,25 @@ export default function AbonadosTable() {
             ...afiliadosJuridicosUnificados
         ].sort((a, b) => a.Id - b.Id);
     }, [afiliadosFisicos, afiliadosJuridicos]);
+
+    // Filtrar por estado
+    const filteredByEstado = useMemo(() => {
+        if (estadoFilter === 'Todos') return datosUnificados;
+        return datosUnificados.filter(afiliado => afiliado.Estado.Nombre_Estado === estadoFilter);
+    }, [datosUnificados, estadoFilter]);
+
+    // Filtrar por búsqueda global
+    const filteredData = useMemo(() => {
+        if (!globalFilter) return filteredByEstado;
+        const q = globalFilter.toLowerCase();
+        return filteredByEstado.filter((afiliado) =>
+            [afiliado.Nombre_Completo, afiliado.Cedula_Documento, afiliado.Estado.Nombre_Estado, afiliado.Tipo_Persona, afiliado.Tipo_Afiliado, afiliado.Tipo_Identificacion]
+                .filter(Boolean)
+                .join(' ')
+                .toLowerCase()
+                .includes(q)
+        );
+    }, [filteredByEstado, globalFilter]);
 
     const handleViewDetail = (persona: AfiliadoUnificado) => {
         const tipo = persona.Tipo_Persona === 'Físico' ? 'afiliado-fisico' : 'afiliado-juridico';
@@ -88,17 +126,31 @@ export default function AbonadosTable() {
         setShowDetailModal(true);
     };
 
-    const filteredData = useMemo(() => {
-        if (!globalFilter) return datosUnificados;
-        const q = globalFilter.toLowerCase();
-        return datosUnificados.filter((afiliado) =>
-            [afiliado.Nombre_Completo, afiliado.Cedula_Documento, afiliado.Estado.Nombre_Estado, afiliado.Tipo_Persona, afiliado.Tipo_Afiliado, afiliado.Tipo_Identificacion] // <-- CAMBIO: Incluido en filtro
-                .filter(Boolean)
-                .join(' ')
-                .toLowerCase()
-                .includes(q)
-        );
-    }, [datosUnificados, globalFilter]);
+    const handleEdit = (persona: AfiliadoUnificado) => { // ✅ Agregar función para editar
+        const tipo = persona.Tipo_Persona === 'Físico' ? 'afiliado-fisico' : 'afiliado-juridico';
+        setSelectedPersona({
+            tipo,
+            datos: persona.datos_originales
+        });
+        setShowEditModal(true);
+    };
+
+    const handleToggleEstado = async (persona: AfiliadoUnificado) => {
+        const nuevoEstadoId = persona.Estado.Id_Estado === 1 ? 2 : 1; // 1: Activo, 2: Inactivo
+        const id = persona.Id.toString();
+
+        try {
+            if (persona.Tipo_Persona === 'Físico') {
+                await updateEstadoMutationFisico.mutateAsync({ id, nuevoEstadoId });
+            } else {
+                await updateEstadoMutationJuridico.mutateAsync({ id, nuevoEstadoId });
+            }
+            console.log('Estado actualizado exitosamente');
+        } catch (error) {
+            console.error('Error al actualizar estado:', error);
+            alert('Error al actualizar el estado. Intente nuevamente.');
+        }
+    };
 
     const columnHelper = createColumnHelper<AfiliadoUnificado>();
     const columns: ColumnDef<AfiliadoUnificado, any>[] = [
@@ -117,10 +169,14 @@ export default function AbonadosTable() {
                     const datosOriginales = fila.datos_originales as AfiliadoJuridico;
                     return datosOriginales.Razon_Social || 'Sin razón social';
                 }
-            }
+            },
+            size: 200,
         }),
-       
-        // <-- CAMBIO: Nueva columna Tipo_Identificacion después de cédula
+        columnHelper.accessor('Identificacion', {
+            header: 'Cédula / Documento',
+            cell: (info) => info.getValue() || 'Sin dato',
+            size: 150,
+        }),
         columnHelper.accessor('Tipo_Identificacion', {
             header: 'Tipo Identificación',
             cell: (info) => info.getValue() || 'Sin dato',
@@ -135,9 +191,9 @@ export default function AbonadosTable() {
                 if (estadoNombre === 'Activo') {
                     return <span className={`${base} bg-green-100 text-green-700`}>Activo</span>;
                 } else if (estadoNombre === 'Inactivo') {
-                    return <span className={`${base} bg-red-100 text-red-700`}> Inactivo</span>;
+                    return <span className={`${base} bg-red-100 text-red-700`}>Inactivo</span>;
                 } else if (estadoNombre === 'Pendiente') {
-                    return <span className={`${base} bg-amber-100 text-amber-700`}> Pendiente</span>;
+                    return <span className={`${base} bg-amber-100 text-amber-700`}>Pendiente</span>;
                 }
                 return <span className={`${base} bg-slate-100 text-slate-700`}>{estadoNombre}</span>;
             },
@@ -174,153 +230,335 @@ export default function AbonadosTable() {
             size: 120,
         }),
         columnHelper.display({
-    id: 'acciones',
-    header: 'Acciones',
-    cell: ({ row }) => {
-        const persona = row.original;
-
-        return (
-            <div className="flex items-center gap-2">
-                {/* Ver detalles */}
-                <button
-                    onClick={(e) => {
-                        e.stopPropagation(); // evita abrir modal por click en toda la fila
-                        handleViewDetail(persona);
-                    }}
-                    className="p-1 rounded-lg hover:bg-sky-100 text-sky-600 transition-colors"
-                    title="Ver detalles"
-                >
-                    <Eye size={16} />
-                </button>
-
-                {/* Editar */}
-                <button
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        alert(`Editar afiliado: ${persona.Nombre_Completo}`);
-                        // Aquí podrías abrir tu modal de edición si lo tienes
-                    }}
-                    className="p-1 rounded-lg hover:bg-amber-100 text-amber-600 transition-colors"
-                    title="Editar"
-                >
-                    <Pencil size={16} />
-                </button>
-
-                {/* Eliminar */}
-                <button
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        if (confirm(`¿Seguro que deseas eliminar a ${persona.Nombre_Completo}?`)) {
-                            console.log('Eliminar afiliado:', persona.Id);
-                            // Aquí podrías llamar a tu función de eliminación
-                        }
-                    }}
-                    className="p-1 rounded-lg hover:bg-red-100 text-red-600 transition-colors"
-                    title="Eliminar"
-                >
-                    <Trash2 size={16} />
-                </button>
-            </div>
-        );
-    },
-    size: 100,
-}),
-
+            id: 'acciones',
+            header: 'Acciones',
+            cell: ({ row }) => {
+                const persona = row.original;
+                return (
+                    <div className="flex justify-center gap-1">
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                handleViewDetail(persona);
+                            }}
+                            className="px-4 py-1 bg-gray-600 text-white text-xs rounded hover:bg-gray-700 transition-colors"
+                            title="Ver detalles"
+                        >
+                            Ver
+                        </button>
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                handleEdit(persona); // ✅ Cambiar para abrir EditModal
+                            }}
+                            className="px-2 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition-colors"
+                            title="Editar"
+                        >
+                            Editar
+                        </button>
+                        {persona.Estado.Nombre_Estado === 'Activo' ? (
+                            <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                    <button
+                                        className="px-2 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-700 transition-colors"
+                                        disabled={updateEstadoMutationFisico.isPending || updateEstadoMutationJuridico.isPending}
+                                        title="Desactivar"
+                                    >
+                                        Desactivar
+                                    </button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                        <AlertDialogTitle>
+                                            <span>¿Desactivar afiliado?</span>
+                                        </AlertDialogTitle>
+                                        <AlertDialogDescription>
+                                            <span>¿Estás seguro de que deseas desactivar al afiliado "{persona.Nombre_Completo}"?</span>
+                                            <br />
+                                            <span>Esta acción puede revertirse posteriormente.</span>
+                                        </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                        <AlertDialogAction
+                                            onClick={() => handleToggleEstado(persona)}
+                                            disabled={updateEstadoMutationFisico.isPending || updateEstadoMutationJuridico.isPending}
+                                        >
+                                            <span>Desactivar</span>
+                                        </AlertDialogAction>
+                                        <AlertDialogCancel>
+                                            <span>Cancelar</span>
+                                        </AlertDialogCancel>
+                                    </AlertDialogFooter>
+                                </AlertDialogContent>
+                            </AlertDialog>
+                        ) : (
+                            <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                    <button
+                                        className="px-2 py-1 bg-green-600 text-white text-xs rounded hover:bg-green-700 transition-colors"
+                                        disabled={updateEstadoMutationFisico.isPending || updateEstadoMutationJuridico.isPending}
+                                        title="Activar"
+                                    >
+                                        Activar
+                                    </button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                        <AlertDialogTitle>
+                                            <span>¿Activar afiliado?</span>
+                                        </AlertDialogTitle>
+                                        <AlertDialogDescription>
+                                            <span>¿Estás seguro de que deseas activar al afiliado "{persona.Nombre_Completo}"?</span>
+                                        </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                        <AlertDialogAction
+                                            onClick={() => handleToggleEstado(persona)}
+                                            disabled={updateEstadoMutationFisico.isPending || updateEstadoMutationJuridico.isPending}
+                                        >
+                                            <span>Activar</span>
+                                        </AlertDialogAction>
+                                        <AlertDialogCancel>
+                                            <span>Cancelar</span>
+                                        </AlertDialogCancel>
+                                    </AlertDialogFooter>
+                                </AlertDialogContent>
+                            </AlertDialog>
+                        )}
+                    </div>
+                );
+            },
+            size: 150,
+        }),
     ];
 
     const table = useReactTable({
         data: filteredData,
         columns,
         getCoreRowModel: getCoreRowModel(),
+        getFilteredRowModel: getFilteredRowModel(),
+        getSortedRowModel: getSortedRowModel(),
         getPaginationRowModel: getPaginationRowModel(),
-        initialState: { pagination: { pageSize: 8 } },
+        state: {
+            globalFilter,
+            pagination,
+        },
+        onGlobalFilterChange: setGlobalFilter,
+        onPaginationChange: setPagination,
+        initialState: {
+            pagination: {
+                pageSize: 5,
+                pageIndex: 0,
+            },
+        },
     });
 
+    if (isLoading) {
+        return (
+            <div className="flex items-center justify-center h-64">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                <span className="ml-2 text-gray-600">Cargando afiliados...</span>
+            </div>
+        );
+    }
+
+    if (isError) {
+        return (
+            <div className="text-center text-red-600 p-4">
+                Error al cargar los afiliados. Por favor, intenta nuevamente.
+            </div>
+        );
+    }
+
     return (
-        <div className="w-full">
-            <div className="flex flex-col backdrop-blur sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
-                <div className="flex items-center gap-3">
-                    <h2 className="text-lg sm:text-xl font-semibold text-sky-800">Gestión de Afiliados</h2>
-                </div>
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-                    <input value={globalFilter} onChange={(e) => setGlobalFilter(e.target.value)} placeholder="Buscar por nombre, cédula, estado, tipo..." className="w-full sm:w-auto px-3 py-2 rounded-lg border border-sky-200 bg-sky-50 focus:outline-none focus:ring-2 focus:ring-sky-200 text-sm" />
-                    <button
-                        className="px-3 py-2 rounded-lg bg-sky-600 text-white hover:bg-sky-700 shadow-sm text-sm whitespace-nowrap"
-                        onClick={() => setShowCreateModal(true)}
-                    >
-                        + Nuevo Afiliado
-                    </button>
+        <div className="space-y-6">
+            {/* Encabezado con filtro de estado, búsqueda y botón */}
+            <div className="bg-white rounded-lg p-3">
+                <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
+                    <div className="flex items-center gap-4">
+                        <label htmlFor='estado' className="text-sm font-medium text-gray-700">Estado:</label>
+                        <select
+                            id='estado'
+                            value={estadoFilter}
+                            onChange={(e) => setEstadoFilter(e.target.value)}
+                            className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                        >
+                            <option value="Todos">Todos los afiliados</option>
+                            <option value="Activo">Activos</option>
+                            <option value="Inactivo">Inactivos</option>
+                            <option value="Pendiente">Pendientes</option>
+                        </select>
+                    </div>
+                    <div className="flex items-center gap-4 w-full sm:w-auto">
+                        <div className="relative flex-1 max-w-md">
+                            <LuSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                            <input
+                                type="text"
+                                placeholder="Buscar afiliados..."
+                                value={globalFilter ?? ''}
+                                onChange={(e) => setGlobalFilter(e.target.value)}
+                                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            />
+                        </div>
+                        <button
+                            onClick={() => setShowCreateModal(true)}
+                            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md flex items-center gap-2 transition-colors"
+                        >
+                            <Plus className="w-4 h-4" />
+                            Nuevo Afiliado
+                        </button>
+                    </div>
                 </div>
             </div>
-            <div className="overflow-x-auto rounded-2xl border border-sky-100 shadow-sm bg-white">
-                <table className="min-w-full table-auto">
-                    <thead className="bg-sky-50">
-                        {table.getHeaderGroups().map((hg) => (
-                            <tr key={hg.id} className="text-left text-xs sm:text-sm text-sky-700">
-                                {hg.headers.map((header) => (
-                                    <th key={header.id} className="px-2 sm:px-4 py-3 font-medium border-b border-sky-100">
-                                        {header.isPlaceholder ? null : <div>{flexRender(header.column.columnDef.header, header.getContext())}</div>}
-                                    </th>
-                                ))}
-                            </tr>
-                        ))}
-                    </thead>
-                    <tbody className="bg-white divide-y divide-sky-50">
-                        {(() => {
-                            if (isLoading) {
-                                return (
-                                    <tr>
-                                        <td colSpan={columns.length} className="p-4 sm:p-6 text-center text-slate-500 text-sm">
-                                            Cargando...
-                                        </td>
-                                    </tr>
-                                );
-                            }
-                            
-                            if (isError) {
-                                return (
-                                    <tr>
-                                        <td colSpan={columns.length} className="p-4 sm:p-6 text-center text-red-500 text-sm">
-                                            Error al cargar los datos
-                                        </td>
-                                    </tr>
-                                );
-                            }
-                            
-                            if (table.getRowModel().rows.length === 0) {
-                                return (
-                                    <tr>
-                                        <td colSpan={columns.length} className="p-4 sm:p-6 text-center text-slate-500 text-sm">
-                                            No se encontraron registros.
-                                        </td>
-                                    </tr>
-                                );
-                            }
-                            
-                            return table.getRowModel().rows.map((row) => (
-                                <tr
-                                    key={row.id}
-                                    className="hover:bg-sky-50 cursor-pointer transition-colors"
-                                    onClick={() => handleViewDetail(row.original)}
-                                >
-                                    {row.getVisibleCells().map((cell) => (
-                                        <td key={cell.id} className="px-2 sm:px-4 py-3 text-xs sm:text-sm text-slate-700 align-top">
-                                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                                        </td>
+
+            {/* Tabla con scroll vertical y horizontal */}
+            <div className="bg-white rounded-2xl shadow-sm border border-sky-100 overflow-hidden max-h-[calc(100vh-300px)] overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100">
+                <div className="overflow-x-auto">
+                    <table className="min-w-full table-auto">
+                        <thead className="bg-sky-50">
+                            {table.getHeaderGroups().map(headerGroup => (
+                                <tr key={headerGroup.id} className="text-left text-xs sm:text-sm text-sky-700">
+                                    {headerGroup.headers.map((header, index) => (
+                                        <th key={header.id} className={`px-2 sm:px-4 py-3 font-medium border-b border-sky-100 ${
+                                            index === 0 ? 'text-left' : 'text-center'
+                                        }`}>
+                                            {(() => {
+                                                if (header.isPlaceholder) {
+                                                    return null;
+                                                }
+                                                if (header.column.getCanSort()) {
+                                                    return (
+                                                        <button
+                                                            type="button"
+                                                            className={`cursor-pointer select-none flex items-center gap-2 bg-transparent border-none p-0 ${
+                                                                index === 0 ? 'justify-start' : 'justify-center'
+                                                            }`}
+                                                            onClick={header.column.getToggleSortingHandler()}
+                                                            onKeyDown={e => {
+                                                                if (e.key === 'Enter' || e.key === ' ') {
+                                                                    e.preventDefault();
+                                                                    header.column.getToggleSortingHandler()?.(e);
+                                                                }
+                                                            }}
+                                                            tabIndex={0}
+                                                            aria-label={`Ordenar por ${header.column.columnDef.header as string}`}
+                                                        >
+                                                            <span className="flex items-center gap-1">
+                                                                {header.column.columnDef.header as string}
+                                                                {header.column.getIsSorted() === 'asc' && <MdKeyboardArrowUp className="inline" />}
+                                                                {header.column.getIsSorted() === 'desc' && <MdKeyboardArrowDown className="inline" />}
+                                                            </span>
+                                                        </button>
+                                                    );
+                                                }
+                                                return (
+                                                    <span className={index === 0 ? 'text-left' : 'text-center'}>
+                                                        {header.column.columnDef.header as string}
+                                                    </span>
+                                                );
+                                            })()}
+                                        </th>
                                     ))}
                                 </tr>
-                            ));
-                        })()}
-                    </tbody>
-                </table>
-            </div>
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mt-4">
-                <div className="text-xs sm:text-sm text-slate-600 text-center sm:text-left">
-                    Mostrando {table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1} - {Math.min((table.getState().pagination.pageIndex + 1) * table.getState().pagination.pageSize, filteredData.length)} de {filteredData.length}
+                            ))}
+                        </thead>
+                        <tbody className="bg-white divide-y divide-sky-50">
+                            {table.getRowModel().rows.length === 0 ? (
+                                <tr>
+                                    <td colSpan={columns.length} className="px-2 sm:px-4 py-8 text-center text-slate-500">
+                                        {globalFilter ? 'No se encontraron afiliados que coincidan con la búsqueda' : 'No hay afiliados registrados'}
+                                    </td>
+                                </tr>
+                            ) : (
+                                table.getRowModel().rows.map(row => (
+                                    <tr key={row.id} className="hover:bg-sky-50 cursor-pointer transition-colors">
+                                        {row.getVisibleCells().map((cell, index) => {
+                                            let cellContent: React.ReactNode;
+
+                                            if (cell.column.columnDef.cell) {
+                                                if (typeof cell.column.columnDef.cell === 'function') {
+                                                    cellContent = cell.column.columnDef.cell(cell.getContext());
+                                                } else {
+                                                    cellContent = cell.column.columnDef.cell;
+                                                }
+                                            } else {
+                                                cellContent = cell.getValue() as React.ReactNode;
+                                            }
+
+                                            return (
+                                                <td key={cell.id} className={`px-2 sm:px-4 py-3 text-xs sm:text-sm text-slate-700 align-top ${
+                                                    index === 0 ? 'text-left' : 'text-center'
+                                                }`}>
+                                                    {cellContent}
+                                                </td>
+                                            );
+                                        })}
+                                    </tr>
+                                ))
+                            )}
+                        </tbody>
+                    </table>
                 </div>
-                <div className="flex items-center justify-center sm:justify-end gap-2">
-                    <button onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()} className="px-2 sm:px-3 py-1 rounded-md border border-sky-100 bg-white hover:bg-sky-50 disabled:opacity-50 text-xs sm:text-sm">Anterior</button>
-                    <button onClick={() => table.nextPage()} disabled={!table.getCanNextPage()} className="px-2 sm:px-3 py-1 rounded-md border border-sky-100 bg-white hover:bg-sky-50 disabled:opacity-50 text-xs sm:text-sm">Siguiente</button>
+
+                {/* Paginación completa */}
+                <div className="px-6 py-3 bg-gray-50 border-t border-gray-200">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                            <div className="flex items-center gap-2">
+                                <span className="text-sm text-gray-700">Filas por página:</span>
+                                <select
+                                    value={table.getState().pagination.pageSize}
+                                    onChange={(e) => {
+                                        table.setPageSize(Number(e.target.value));
+                                    }}
+                                    className="px-3 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                >
+                                    {pageSizeOptions.map((pageSize) => (
+                                        <option key={pageSize} value={pageSize}>
+                                            {pageSize}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <button
+                                onClick={() => table.setPageIndex(0)}
+                                disabled={!table.getCanPreviousPage()}
+                                className="p-2 rounded-md border text-gray-600 hover:text-gray-900 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                                title="Primera página"
+                            >
+                                <MdKeyboardDoubleArrowLeft className="w-4 h-4" />
+                            </button>
+                            <button
+                                onClick={() => table.previousPage()}
+                                disabled={!table.getCanPreviousPage()}
+                                className="p-2 rounded-md border text-gray-600 hover:text-gray-900 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                                title="Página anterior"
+                            >
+                                <MdKeyboardArrowLeft className="w-4 h-4" />
+                            </button>
+                            <span className="text-sm text-gray-700">
+                                Página {table.getState().pagination.pageIndex + 1} de {table.getPageCount()}
+                            </span>
+                            <button
+                                onClick={() => table.nextPage()}
+                                disabled={!table.getCanNextPage()}
+                                className="p-2 rounded-md border text-gray-600 hover:text-gray-900 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                                title="Página siguiente"
+                            >
+                                <MdKeyboardArrowRight className="w-4 h-4" />
+                            </button>
+                            <button
+                                onClick={() => table.setPageIndex(table.getPageCount() - 1)}
+                                disabled={!table.getCanNextPage()}
+                                className="p-2 rounded-md border text-gray-600 hover:text-gray-900 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                                title="Última página"
+                            >
+                                <MdKeyboardDoubleArrowRight className="w-4 h-4" />
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -341,6 +579,18 @@ export default function AbonadosTable() {
                 isOpen={showCreateModal}
                 onClose={() => setShowCreateModal(false)}
             />
+
+            {/* Modal de editar */}
+            {showEditModal && selectedPersona && (
+                <EditModal
+                    isOpen={showEditModal}
+                    onClose={() => {
+                        setShowEditModal(false);
+                        setSelectedPersona(null);
+                    }}
+                    persona={selectedPersona}
+                />
+            )}
         </div>
     );
 }
