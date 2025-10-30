@@ -32,7 +32,7 @@ export const useCreateUser = () => {
   const { showSuccess, showError } = useAlerts();
 
   return useMutation({
-    mutationFn: ({ userData, idUsuario }: { userData: CreateUserData; idUsuario: number }) => createUser(userData, idUsuario),
+    mutationFn: ({ userData }: { userData: CreateUserData; }) => createUser(userData),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['users'] });
       showSuccess('Usuario creado', 'El usuario se ha creado exitosamente');
@@ -52,7 +52,7 @@ export const useUpdateUser = () => {
   const { showSuccess, showError } = useAlerts();
 
   return useMutation({
-    mutationFn: ({ Id_Usuario, userData, idUsuarioModificador }: { Id_Usuario: number; idUsuarioModificador: number; userData: UpdateUserData;  }) => updateUser(Id_Usuario, idUsuarioModificador, userData),
+    mutationFn: ({ Id_Usuario, userData }: { Id_Usuario: number; userData: UpdateUserData;  }) => updateUser(Id_Usuario, userData),
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['users'] });
       queryClient.invalidateQueries({ queryKey: ['user', data.Id_Usuario] });
@@ -73,13 +73,13 @@ export const useDeactivateUser = () => {
   const { showSuccessWithUndo, showError } = useAlerts();
 
   return useMutation({
-    mutationFn: ({ id, idUsuario }: { id: number; idUsuario: number }) => deactivateUser(id, idUsuario),
+    mutationFn: ({ id  }: { id: number; }) => deactivateUser(id),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['users'] });
       
       const undoAction = async () => {
         try {
-          await activateUser(variables.id, variables.idUsuario);
+          await activateUser(variables.id);
           queryClient.invalidateQueries({ queryKey: ['users'] });
         } catch (error) {
           showError('Error', 'No se pudo revertir el cambio');
@@ -104,13 +104,13 @@ export const useActivateUser = () => {
   const { showSuccessWithUndo, showError, showWarning } = useAlerts();
 
   return useMutation({
-    mutationFn: ({ id, idUsuario }: { id: number; idUsuario: number }) => activateUser(id, idUsuario),
+    mutationFn: ({ id }: { id: number; }) => activateUser(id),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['users'] });
       
       const undoAction = async () => {
         try {
-          await deactivateUser(variables.id, variables.idUsuario);
+          await deactivateUser(variables.id);
           queryClient.invalidateQueries({ queryKey: ['users'] });
         } catch (error) {
           showError('Error', 'No se pudo revertir el cambio');

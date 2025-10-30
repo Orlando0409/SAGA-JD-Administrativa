@@ -53,7 +53,7 @@ export default function FAQTable() {
                 </div>
                 <button
                     onClick={() => setFormVisible(true)}
-                    className="px-4 py-2 rounded-lg bg-sky-600 text-white hover:bg-sky-700 shadow-sm text-sm flex items-center gap-2"
+                     className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md flex items-center gap-2 transition-colors"
                 >
                     <Plus size={18} />
                     Crear Pregunta
@@ -102,12 +102,11 @@ export default function FAQTable() {
                                 <tr
                                     key={faq.Id_FAQ}
                                     className="hover:bg-sky-50 cursor-pointer transition-colors"
-                                    onClick={() => handleOpenModal(faq)}
                                 >
                                     <td className="px-2 sm:px-4 py-3 text-xs sm:text-sm text-slate-700 align-top flex items-center gap-2">
                                         <MessageSquare size={18} className="text-sky-600" />
-                                        {faq.Pregunta.length > 10
-                                            ? `${faq.Pregunta.slice(0, 10)}...`
+                                        {faq.Pregunta.length > 40
+                                            ? `${faq.Pregunta.slice(0, 40)}...`
                                             : faq.Pregunta}
                                     </td>
                                     <td className="px-2 sm:px-4 py-3 text-xs sm:text-sm text-slate-700 align-top">
@@ -146,6 +145,15 @@ export default function FAQTable() {
                                     </td>
                                     <td className="px-2 sm:px-4 py-3 text-xs sm:text-sm text-slate-700">
                                         <div className="flex items-center gap-2">
+
+                                             <button
+                                                className="px-4 py-1 bg-gray-600 text-white text-xs rounded hover:bg-gray-700 transition-colors"
+                                                onClick={() => handleOpenModal(faq)}
+                                                title="Ver detalles"
+                                            >
+                                                Ver
+                                            </button>
+
                                             {/* Editar */}
                                             <button
                                                 onClick={(e) => {
@@ -153,10 +161,10 @@ export default function FAQTable() {
                                                     setFaqSeleccionada(faq);
                                                     setFormVisible(true);
                                                 }}
-                                                className="p-1 rounded-lg hover:bg-amber-100 text-amber-600 transition-colors"
+                                                 className="px-2 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition-colors"
                                                 title="Editar pregunta"
                                             >
-                                                <Pencil size={16} />
+                                                 Editar  
                                             </button>
 
                                             {/* Eliminar */}
@@ -165,10 +173,10 @@ export default function FAQTable() {
                                                     e.stopPropagation();
                                                     handleDelete(faq);
                                                 }}
-                                                className="p-1 rounded-lg hover:bg-red-100 text-red-600 transition-colors"
+                                                className="px-2 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-700 transition-colors"
                                                 title="Eliminar pregunta"
                                             >
-                                                <Trash2 size={16} />
+                                                Eliminar
                                             </button>
                                         </div>
                                     </td>
@@ -185,7 +193,6 @@ export default function FAQTable() {
                     isOpen={modalOpen}
                     onClose={handleCloseModal}
                     faq={faqSeleccionada}
-                    refetch={fetchAll}
                 />
             )}
 
@@ -200,6 +207,19 @@ export default function FAQTable() {
                     refetch={fetchAll}
                 />
             )}
+            {/* Formulario edit FAQ */}
+            {formVisible && faqSeleccionada && (
+                <FAQForm
+                    onClose={() => {
+                        setFormVisible(false);
+                        setFaqSeleccionada(null);
+                        fetchAll();
+                    }}
+                    refetch={fetchAll}
+                    initialData={faqSeleccionada}
+                />
+            )}
+
         </div>
     );
 }

@@ -6,7 +6,7 @@ import { CreateUserSchema, type CreateUserSchemaData } from '../Schema/CreateUse
 import type { Role } from '@/Modules/Roles/Models/Role';
 import { useRoles } from '@/Modules/Roles/Hooks/RoleHook';
 import { type CreateUserProps, NOMBRE_MAX_LENGTH, EMAIL_MAX_LENGTH, PASSWORD_MAX_LENGTH, PASSWORD_MIN_LENGTH } from '../Types/UserTypes';
-import { useAuth } from '@/Modules/Auth/Context/AuthContext';
+
 
 
 
@@ -20,7 +20,6 @@ const CreateUserModal = ({ onClose, setShowCreateModal }: CreateUserProps) => {
     password: 0,
     confirmPassword: 0
   });
-  const {user} = useAuth()
 
   const handleClose = () => {
     if (onClose) onClose();
@@ -69,7 +68,6 @@ const CreateUserModal = ({ onClose, setShowCreateModal }: CreateUserProps) => {
       }
 
       try {
-        if (!user) throw new Error("Usuario no autenticado");
 
         const payload : CreateUserData = {
           Nombre_Usuario: value.Nombre_Usuario,
@@ -78,7 +76,7 @@ const CreateUserModal = ({ onClose, setShowCreateModal }: CreateUserProps) => {
           Id_Rol: value.Id_Rol
         };
 
-        await createUserMutation.mutateAsync({ userData: payload, idUsuario: user.Id_Usuario });
+        await createUserMutation.mutateAsync({ userData: payload});
         handleClose();
         form.reset();
       } catch (error) {

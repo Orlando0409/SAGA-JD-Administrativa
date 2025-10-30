@@ -7,10 +7,6 @@ export async function getAfiliadosJuridicos(): Promise<AfiliadoJuridico[]> {
     return response.data;
 }
 
-
-
-
-
 export const createAfiliadoJuridico = async (formData: FormData) => {
     console.log("🚀 Hook - Enviando FormData:", formData);
 
@@ -32,5 +28,10 @@ export const updateAfiliadoJuridico = async (cedulaJuridica: string, formData: F
         },
     });
 
+    return response.data;
+};
+
+export const updateEstadoAfiliadoJuridico = async (id: string, nuevoEstadoId: number) => {
+    const response = await apiAuth.patch(`/afiliados/juridico/${id}/update/estado/${nuevoEstadoId}`);
     return response.data;
 };

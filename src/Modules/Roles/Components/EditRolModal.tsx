@@ -21,7 +21,7 @@ import {
   AlertDialogFooter
 } from "@/Modules/Global/components/Sidebar/ui/alert-dialog";
 import { Button } from '@/Modules/Global/components/Sidebar/ui/button';
-import { useAuth } from '@/Modules/Auth/Context/AuthContext';
+
 
 
 
@@ -32,7 +32,7 @@ export const EditRoleModal: React.FC<EditRoleModalProps> = ({ roleId, isOpen, on
   const [modulePermissions, setModulePermissions] = useState<ModulePermission[]>([]);
   const [nombreRol, setNombreRol] = useState('');
   const [errors, setErrors] = useState<{ nombreRol?: string }>({});
-  const { user } = useAuth();
+
   const validateNombreRol = (value: string) => {
     if (value.length < RoleMIN_LENGTH) {
       return `El nombre debe tener al menos ${RoleMIN_LENGTH} caracteres`;
@@ -90,8 +90,7 @@ export const EditRoleModal: React.FC<EditRoleModalProps> = ({ roleId, isOpen, on
 
     try {
       await mutateAsync({
-        Id_Rol: roleId, roleData: { Nombre_Rol: nombreRol, permisosIds },
-        idUsuario: user?.Id_Usuario || 0
+        Id_Rol: roleId, roleData: { Nombre_Rol: nombreRol, IDS_Permisos:permisosIds }
       });
       onClose();
     } catch (error) {

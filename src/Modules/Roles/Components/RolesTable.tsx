@@ -28,7 +28,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/Modules/Global/components/Sidebar/ui/alert-dialog';
-import { useAuth } from '@/Modules/Auth/Context/AuthContext';
+
 
 const Roles = () => {
   const { data: allRoles = [], isLoading } = useRoles();
@@ -42,7 +42,6 @@ const Roles = () => {
   const [_selectedRole, setSelectedRole] = useState<Role | null>(null);
   const deactivateRoleMutation = useDeactivateRole();
   const activateRoleMutation = useActivateRole();
-  const { user } = useAuth();
   const pageSizeOptions = [5, 10, 20, 50];
   const [pagination, setPagination] = useState({
     pageSize: 5,
@@ -76,7 +75,7 @@ const Roles = () => {
 
   const handleDeactivate = async (roleId: number) => {
     try {
-      await deactivateRoleMutation.mutateAsync({ id: roleId, idUsuario: user?.Id_Usuario || 0 });
+      await deactivateRoleMutation.mutateAsync({ id: roleId });
     } catch (error) {
       console.error('Error deactivating role:', error);
     }
@@ -84,7 +83,7 @@ const Roles = () => {
 
   const handleActivate = async (roleId: number) => {
     try {
-      await activateRoleMutation.mutateAsync({ id: roleId, idUsuario: user?.Id_Usuario || 0 });
+      await activateRoleMutation.mutateAsync({ id: roleId});
     } catch (error) {
       console.error('Error activating role:', error);
     }

@@ -1,23 +1,17 @@
 import { useState, useEffect } from "react";
 import { Eye, EyeOff, Calendar, RefreshCcw, MessageSquare } from "lucide-react";
-
-import { useAlerts } from "@/Modules/Global/context/AlertContext";
 import type { FAQ } from "../Models/FAQModels";
-import { useFAQ } from "../Hook/FAQHook";
-import FAQFormEdit from "./FAQFormEdit";
+
+
 
 interface FAQModalProps {
   isOpen: boolean;
   onClose: () => void;
   faq: FAQ;
-  refetch: () => void;
 }
 
-const FAQModal = ({ isOpen, onClose, faq, refetch }: FAQModalProps) => {
+const FAQModal = ({ isOpen, onClose, faq, }: FAQModalProps) => {
   const [isEditing, setIsEditing] = useState(false);
-
-  const { toggleVisible } = useFAQ(true);
-  const { showSuccess, showError } = useAlerts();
 
   useEffect(() => {
     // close edit form when the faq changes
@@ -26,20 +20,6 @@ const FAQModal = ({ isOpen, onClose, faq, refetch }: FAQModalProps) => {
 
   if (!isOpen) return null;
 
-  //  Cambiar visibilidad
-  const handleToggleVisibility = async () => {
-    try {
-      await toggleVisible(faq.Id_FAQ);
-      refetch();
-      showSuccess(
-        faq.Visible
-          ? "La pregunta ahora está oculta."
-          : "La pregunta ahora es visible."
-      );
-    } catch {
-      showError("Error al cambiar la visibilidad.");
-    }
-  };
 
   return (
     <div className="fixed inset-0 backdrop-blur bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -59,10 +39,7 @@ const FAQModal = ({ isOpen, onClose, faq, refetch }: FAQModalProps) => {
 
         {/* Body */}
         <div className="p-6 space-y-6">
-          {isEditing ? (
-            <FAQFormEdit onClose={() => setIsEditing(false)} refetch={refetch} faq={faq} />
-          ) : (
-            <>
+   
               <div className="bg-gray-100 p-4 rounded-lg shadow-sm">
                 <div className="text-lg font-bold text-gray-800 break-words">
                   <MessageSquare className="inline text-sky-600 mr-2" />
@@ -91,9 +68,7 @@ const FAQModal = ({ isOpen, onClose, faq, refetch }: FAQModalProps) => {
                       </>
                     )}
                   </div>
-                  <button onClick={handleToggleVisibility} className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${faq.Visible ? "bg-red-100 text-red-700 hover:bg-red-200" : "bg-green-100 text-green-700 hover:bg-green-200"}`}>
-                    {faq.Visible ? "Ocultar" : "Mostrar"}
-                  </button>
+      
                 </div>
                 <p className="text-xs text-gray-600 mt-2">
                   {faq.Visible ? "Esta pregunta es visible para los usuarios públicos." : "Esta pregunta está oculta y no aparece en la vista pública."}
@@ -121,10 +96,13 @@ const FAQModal = ({ isOpen, onClose, faq, refetch }: FAQModalProps) => {
               </div>
 
               <div className="flex justify-end gap-3 mt-6">
-                <button type="button" onClick={() => setIsEditing(true)} className="px-4 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600 shadow-sm text-sm">Editar</button>
+                <button
+                  onClick={onClose}
+                  className="px-6 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium"
+                >
+                  Cerrar
+                </button>
               </div>
-            </>
-          )}
         </div>
 
       </div>

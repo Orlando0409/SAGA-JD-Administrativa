@@ -1,7 +1,7 @@
-import Actas from '@/Modules/Actas/components/Actas'
+import ActasTable from '@/Modules/Actas/components/ActasTable'
 import { createFileRoute } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/(app)/(Gestion)/Actas')({
-  component: Actas,
+  component: ActasTable,
 })
 

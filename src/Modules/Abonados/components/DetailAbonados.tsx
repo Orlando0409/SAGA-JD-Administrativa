@@ -8,7 +8,7 @@ import { Button } from '@/Modules/Global/components/Sidebar/ui/button';
 import { CUSTOM_ANIMATION } from '@/Modules/Global/types/Sections';
 import type { AfiliadoFisico } from '../Models/TablaAfiliados/ModeloAfiliadoFisico';
 import type { AfiliadoJuridico } from '../Models/TablaAfiliados/ModeloAfiliadoJuridico';
-import EditModal from './EditModal';
+
 
 // Tipo unificado para identificar qué estamos viendo
 type PersonaParaDetalle = {
@@ -23,7 +23,7 @@ interface DetailAbonadosProps {
 }
 
 const DetailAbonados: React.FC<DetailAbonadosProps> = ({ persona, isOpen, onClose }) => {
-    const [showEditModal, setShowEditModal] = useState(false);
+
     const [openSections, setOpenSections] = useState<number[]>([1, 2, 3, 4]); // Abrir por defecto
 
     const handleAccordion = (id: number) => {
@@ -421,39 +421,16 @@ const DetailAbonados: React.FC<DetailAbonadosProps> = ({ persona, isOpen, onClos
                             </AccordionBody>
                         </Accordion>
                     </div>
-
-                    {/* Action Buttons */}
-                    <div className="flex justify-between items-center mt-8">
-                        {/* Botón de eliminar - izquierda */}
-                       { /*<Button
-                            size="xl"
-                            className="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition flex items-center gap-2"
-                            onClick={handleDelete}
-                        >
-                            <Trash className="w-5 h-5" />
-                            Eliminar
-                        </Button>*/}
-
-                        {/* Botón de editar - derecha */}
-                        <Button
-                            size="xl"
-                            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center gap-2"
-                            onClick={() => setShowEditModal(true)}
-                        >
-                            <FaUserEdit className="w-5 h-5" />
-                            Editar {personaInfo.tipoAfiliado}
-                        </Button>
-                    </div>
                 </div>
-
-                {/* Edit Modal */}
-                {showEditModal && (
-                    <EditModal
-                        isOpen={showEditModal}
-                        onClose={() => setShowEditModal(false)}
-                        persona={persona}
-                    />
-                )}
+                {/* Action Buttons */}
+                <div className="sticky bottom-0 flex justify-end gap-3 p-6 border-t bg-gray-50 z-10">
+                <button
+                    onClick={onClose}
+                    className="px-6 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium"
+                >
+                    Cerrar
+                </button>
+                </div>
             </div>
         </div>
     );

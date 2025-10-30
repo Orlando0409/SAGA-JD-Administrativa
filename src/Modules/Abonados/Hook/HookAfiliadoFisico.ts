@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { createAfiliadoFisico, getAfiliadosFisicos, updateAfiliadoFisico } from "../Service/ServiceAfiliadoFisico";
+import { createAfiliadoFisico, getAfiliadosFisicos, updateAfiliadoFisico, updateEstadoAfiliadoFisico } from "../Service/ServiceAfiliadoFisico";
 import type { AfiliadoFisico } from "../Models/TablaAfiliados/ModeloAfiliadoFisico";
 
 export const useAfiliadosFisicos = () => {
@@ -40,6 +40,15 @@ export const useAfiliadosFisicos = () => {
     onError: () => console.error("no se actualizo el afiliado"),
   });
 
+  const updateEstadoMutation = useMutation({
+    mutationFn: ({ id, nuevoEstadoId }: { id: string; nuevoEstadoId: number }) => updateEstadoAfiliadoFisico(id, nuevoEstadoId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["afiliadosFisicos"] });
+      console.log("estado del afiliado actualizado con exito");
+    },
+    onError: () => console.error("no se actualizo el estado del afiliado"),
+  });
+
   return {
     afiliadosFisicos,
     isLoading,
@@ -48,5 +57,6 @@ export const useAfiliadosFisicos = () => {
     refetch,
     createAfiliadoFisico: createMutation.mutateAsync,
     updateAfiliadoFisico: updateMutation.mutateAsync,
+    updateEstadoAfiliadoFisico: updateEstadoMutation,
   };
 }

@@ -33,7 +33,6 @@ export const MODULOS = [
 export const ACCIONES = [
   'Creación',
   'Actualización',
-  'Eliminación',
   'Activación',
   'Desactivación',
 ] as const;
