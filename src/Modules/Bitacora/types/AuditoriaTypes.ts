@@ -27,12 +27,13 @@ export const MODULOS = [
   'Material',
   'Medidor',
   'Calidad de Agua',
+  'Proveedor'
 ] as const;
 
 export const ACCIONES = [
-  'Insert',
-  'Update',
-  'Delete',
-  'Activate',
-  'Deactivate',
+  'Creación',
+  'Actualización',
+  'Eliminación',
+  'Activación',
+  'Desactivación',
 ] as const;

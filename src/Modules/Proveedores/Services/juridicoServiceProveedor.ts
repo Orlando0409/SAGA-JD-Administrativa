@@ -27,7 +27,7 @@ export const getProveedorJuridicoById = async (id: number): Promise<ProveedorJur
 export const createProveedorJuridico = async (proveedor: CreateProveedorJuridicoData): Promise<ProveedorJuridico> => {
   try {
     console.log('🔄 Creando proveedor jurídico:', proveedor);
-    const response = await apiAuth.post('/Proveedores/juridico', proveedor);
+    const response = await apiAuth.post('/Proveedores/juridico/create', proveedor);
     console.log('✅ Proveedor jurídico creado correctamente:', response.data);
     return response.data;
   } catch (error) {

@@ -1,6 +1,7 @@
+import React from 'react';
 import { LuX, LuUser, LuCalendar } from 'react-icons/lu';
 import type { DetailMedidorModalProps } from '../../types/MedidorTypes';
-import {FaTachometerAlt, FaUsers} from 'react-icons/fa';
+import { FaTachometerAlt, FaUsers } from 'react-icons/fa';
 
 const DetailMedidorModal = ({ isOpen, onClose, medidor }: DetailMedidorModalProps) => {
   if (!isOpen) return null;
@@ -50,7 +51,8 @@ const DetailMedidorModal = ({ isOpen, onClose, medidor }: DetailMedidorModalProp
           <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
             <div className="bg-gray-50 px-5 py-3 border-b border-gray-200">
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 items-center justify-center">
+                {/* Ícono estandarizado con fondo azul claro */}
+                <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
                   <FaTachometerAlt className="w-4 h-4 text-blue-600" />
                 </div>
                 <h3 className="text-base font-bold text-gray-900">Información del Medidor</h3>
@@ -62,7 +64,7 @@ const DetailMedidorModal = ({ isOpen, onClose, medidor }: DetailMedidorModalProp
                   <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
                     Número del Medidor
                   </label>
-                  <p className="text-2xl font-bold text-gray-900 font-mono">
+                  <p className="text-md font-bold text-gray-900 font-mono">
                     {medidor.Numero_Medidor}
                   </p>
                 </div>
@@ -71,7 +73,7 @@ const DetailMedidorModal = ({ isOpen, onClose, medidor }: DetailMedidorModalProp
                   <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
                     Estado
                   </label>
-                  <span className={`inline-flex items-center px-3 py-1 rounded-lg text-sm font-semibold border ${getEstadoBadgeColor(medidor.Estado_Medidor.Id_Estado_Medidor)}`}>
+                  <span className={`inline-flex items-center px-3 py-1 rounded-lg text-xs font-semibold border ${getEstadoBadgeColor(medidor.Estado_Medidor.Id_Estado_Medidor)}`}>
                     {medidor.Estado_Medidor.Nombre_Estado_Medidor}
                   </span>
                 </div>
@@ -83,7 +85,7 @@ const DetailMedidorModal = ({ isOpen, onClose, medidor }: DetailMedidorModalProp
           <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
             <div className="bg-gray-50 px-5 py-3 border-b border-gray-200">
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 flex items-center justify-center">
+                <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
                   <FaUsers className="w-4 h-4 text-blue-600" />
                 </div>
                 <h3 className="text-base font-bold text-gray-900">Información del Afiliado</h3>
@@ -96,7 +98,7 @@ const DetailMedidorModal = ({ isOpen, onClose, medidor }: DetailMedidorModalProp
                     <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
                       Nombre/Razón Social
                     </label>
-                    <p className="text-sm text-gray-900 font-medium">
+                    <p className="text-xs text-gray-900 font-medium">
                       {medidor.Afiliado.Nombre_Completo || medidor.Afiliado.Razon_Social}
                     </p>
                   </div>
@@ -134,7 +136,8 @@ const DetailMedidorModal = ({ isOpen, onClose, medidor }: DetailMedidorModalProp
           <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
             <div className="bg-gray-50 px-5 py-3 border-b border-gray-200">
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 flex items-center justify-center">
+                {/* Ícono estandarizado con fondo azul claro */}
+                <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
                   <LuCalendar className="w-4 h-4 text-blue-600" />
                 </div>
                 <h3 className="text-base font-bold text-gray-900">Fechas</h3>
@@ -146,7 +149,7 @@ const DetailMedidorModal = ({ isOpen, onClose, medidor }: DetailMedidorModalProp
                   <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
                     Fecha de Creación
                   </label>
-                  <p className="text-sm text-gray-900">
+                  <p className="text-sm text-gray-900 font-medium">
                     {formatDate(medidor.Fecha_Creacion)}
                   </p>
                 </div>
@@ -155,7 +158,7 @@ const DetailMedidorModal = ({ isOpen, onClose, medidor }: DetailMedidorModalProp
                   <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
                     Última Actualización
                   </label>
-                  <p className="text-sm text-gray-900">
+                  <p className="text-sm text-gray-900 font-medium">
                     {formatDate(medidor.Fecha_Actualizacion)}
                   </p>
                 </div>
@@ -167,7 +170,7 @@ const DetailMedidorModal = ({ isOpen, onClose, medidor }: DetailMedidorModalProp
           <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
             <div className="bg-gray-50 px-5 py-3 border-b border-gray-200">
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 flex items-center justify-center">
+                <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
                   <LuUser className="w-4 h-4 text-blue-600" />
                 </div>
                 <h3 className="text-base font-bold text-gray-900">Usuario Creador</h3>

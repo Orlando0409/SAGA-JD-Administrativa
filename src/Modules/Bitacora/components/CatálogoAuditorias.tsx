@@ -95,9 +95,9 @@ const CatálogoAuditorias = () => {
         const accion = info.getValue();
         const getAccionColor = (acc: string) => {
           switch (acc) {
-            case 'Insert':
+            case 'Creación':
               return 'bg-green-100 text-green-800 border-green-200';
-            case 'Update':
+            case 'Actualización':
               return 'bg-blue-100 text-blue-800 border-blue-200';
             default:
               return 'bg-gray-100 text-gray-800 border-gray-200';
