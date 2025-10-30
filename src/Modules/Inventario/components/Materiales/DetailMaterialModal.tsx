@@ -1,5 +1,5 @@
 import React from 'react';
-import { LuX, LuPackage, LuShoppingCart } from 'react-icons/lu';
+import { LuX, LuPackage, LuShoppingCart, LuUser } from 'react-icons/lu';
 import type { Material } from '../../models/Inventario';
 import { 
   getEstadoMaterialColorClass, 
@@ -153,6 +153,52 @@ const DetailMaterialModal: React.FC<DetailMaterialModalProps> = ({
                     <span className={`inline-flex items-center px-3 py-1 rounded-lg text-xs font-semibold border ${getProveedorTipoColorClass(material?.Proveedor?.Tipo_Entidad)}`}>
                       {getProveedorTipo(material?.Proveedor?.Tipo_Entidad)}
                     </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Información de registro */}
+            <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
+              <div className="bg-gray-50 px-5 py-3 border-b border-gray-200">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                    <LuUser className="w-4 h-4 text-blue-600" />
+                  </div>
+                  <h3 className="text-base font-bold text-gray-900">Información de Registro</h3>
+                </div>
+              </div>
+
+              <div className="p-5">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
+                      Fecha de Creación
+                    </label>
+                    <p className="text-sm font-medium text-gray-900">{material.Fecha_Creacion ? new Date(material.Fecha_Creacion).toLocaleString() : 'N/A'}</p>
+                  </div>
+
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
+                      Fecha de Actualización
+                    </label>
+                    <p className="text-sm font-medium text-gray-900">{material.Fecha_Actualizacion ? new Date(material.Fecha_Actualizacion).toLocaleString() : 'N/A'}</p>
+                  </div>
+
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
+                      Última Fecha de Baja
+                    </label>
+                    <p className="text-sm font-medium text-gray-900">{material.Ultima_Fecha_Baja ? new Date(material.Ultima_Fecha_Baja).toLocaleString() : 'Sin baja'}</p>
+                  </div>
+
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
+                      Usuario Creador
+                    </label>
+                    <p className="text-sm font-medium text-gray-900">
+                      {material.Usuario?.Nombre_Usuario || 'N/A'} ({material.Usuario?.Nombre_Rol || 'N/A'})
+                    </p>
                   </div>
                 </div>
               </div>
