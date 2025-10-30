@@ -71,7 +71,7 @@ export default function ImagenesTable() {
               <th className="px-2 sm:px-4 py-3 font-medium border-b border-sky-100">
                 Nombre
               </th>
-             
+
               <th className="px-2 sm:px-4 py-3 font-medium border-b border-sky-100">
                 Fecha de creación
               </th>
@@ -124,7 +124,7 @@ export default function ImagenesTable() {
                       : imagen.Nombre_Imagen}
                   </td>
 
-                
+
 
                   <td className="px-2 sm:px-4 py-3 text-xs sm:text-sm text-slate-700">
                     {new Date(imagen.Fecha_Creacion).toLocaleDateString("es-ES")}
@@ -137,30 +137,37 @@ export default function ImagenesTable() {
                   </td>
 
                   <td className="px-2 sm:px-4 py-3 text-xs sm:text-sm text-slate-700">
-                    <div className="flex items-center gap-2">
-                      {/* Editar */}
+                    <div className="flex justify-center gap-1">
                       <button
+                        className="px-4 py-1 bg-gray-600 text-white text-xs rounded hover:bg-gray-700 transition-colors"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleOpenModal(imagen);
+                        }}
+                        title="Ver detalles"
+                      >
+                        Ver
+                      </button>
+                      <button
+                        className="px-2 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition-colors"
                         onClick={(e) => {
                           e.stopPropagation();
                           setImagenSeleccionada(imagen);
                           setFormVisible(true);
                         }}
-                        className="p-1 rounded-lg hover:bg-amber-100 text-amber-600 transition-colors"
                         title="Editar imagen"
                       >
-                        <Pencil size={16} />
+                        Editar
                       </button>
-
-                      {/* Eliminar */}
                       <button
+                        className="px-2 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-700 transition-colors"
                         onClick={(e) => {
                           e.stopPropagation();
                           handleDelete(imagen);
                         }}
-                        className="p-1 rounded-lg hover:bg-red-100 text-red-600 transition-colors"
                         title="Eliminar imagen"
                       >
-                        <Trash2 size={16} />
+                        Eliminar
                       </button>
                     </div>
                   </td>
@@ -189,7 +196,7 @@ export default function ImagenesTable() {
             setImagenSeleccionada(null);
             refetch();
           }}
-       
+
           refetch={refetch}
         />
       )}
