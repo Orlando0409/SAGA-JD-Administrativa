@@ -1,67 +1,49 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useFAQ } from "../Hook/FAQHook";
-//import { useAuth } from "@/Modules/Auth/Context/AuthContext";
 import { useAlerts } from "@/Modules/Global/context/AlertContext";
-
 import { z } from "zod";
-import { CreateFAQSchema } from "../Schemas/FAQSchemas";
+import { CreateFAQSchema, UpdateFAQSchema } from "../Schemas/FAQSchemas";
+import type { FAQ } from "../Models/FAQModels";
 
 interface FAQFormProps {
     onClose: () => void;
     refetch: () => void;
+    initialData?: FAQ; // Nueva prop opcional para modo editar
 }
 
-export default function FAQForm({ onClose, refetch }: FAQFormProps) {
-    //const { user } = useAuth();
-    const { addFAQ } = useFAQ(true);
+export default function FAQForm({ onClose, refetch, initialData }: Readonly<FAQFormProps>) {
+    const { addFAQ, editFAQ } = useFAQ(true);
     const { showSuccess, showError } = useAlerts();
 
-    const [pregunta, setPregunta] = useState("");
-    const [respuesta, setRespuesta] = useState("");
+    const isEdit = !!initialData; // Determina si es modo editar
+
+    const [pregunta, setPregunta] = useState(initialData?.Pregunta || "");
+    const [respuesta, setRespuesta] = useState(initialData?.Respuesta || "");
     const [preguntaError, setPreguntaError] = useState("");
     const [respuestaError, setRespuestaError] = useState("");
     const [isValid, setIsValid] = useState(false);
 
-    //  Validar y guardar FAQ
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-
-        try {
-            CreateFAQSchema.parse({
-                Pregunta: pregunta.trim(),
-                Respuesta: respuesta.trim(),
-            });
-
-            await addFAQ({
-                Pregunta: pregunta.trim(),
-                Respuesta: respuesta.trim(),
-                //Id_Usuario: user?.Id_Usuario,
-            });
-
-            showSuccess("¡Pregunta creada exitosamente!");
-            setPregunta("");
-            setRespuesta("");
-            onClose();
-            refetch();
-        } catch (error) {
-            if (error instanceof z.ZodError) {
-                const msg = error.errors[0]?.message || "Error de validación.";
-                showError(msg);
-            } else {
-                showError("Hubo un problema al crear la pregunta frecuente.");
-                console.error(error);
-            }
+    // Reset form when initialData changes
+    useEffect(() => {
+        setPregunta(initialData?.Pregunta || "");
+        setRespuesta(initialData?.Respuesta || "");
+        setPreguntaError("");
+        setRespuestaError("");
+        setIsValid(false);
+        if (initialData) {
+            validateAll();
         }
-    };
+    }, [initialData]);
 
-    // Realtime validation as user types
+    // Validar campo individual
     const validateField = (field: "Pregunta" | "Respuesta", value: string) => {
+        const schema = isEdit ? UpdateFAQSchema : CreateFAQSchema;
         try {
             if (field === "Pregunta") {
-                CreateFAQSchema.pick({ Pregunta: true }).parse({ Pregunta: value.trim() });
+                schema.pick({ Pregunta: true }).parse({ Pregunta: value.trim() });
                 setPreguntaError("");
             } else {
-                CreateFAQSchema.pick({ Respuesta: true }).parse({ Respuesta: value.trim() });
+                schema.pick({ Respuesta: true }).parse({ Respuesta: value.trim() });
                 setRespuestaError("");
             }
         } catch (err) {
@@ -72,12 +54,74 @@ export default function FAQForm({ onClose, refetch }: FAQFormProps) {
             }
         }
 
-        // overall form validity
+        // Validar formulario completo
         try {
-            CreateFAQSchema.parse({ Pregunta: field === "Pregunta" ? value.trim() : pregunta.trim(), Respuesta: field === "Respuesta" ? value.trim() : respuesta.trim() });
+            schema.parse({ 
+                Pregunta: field === "Pregunta" ? value.trim() : pregunta.trim(), 
+                Respuesta: field === "Respuesta" ? value.trim() : respuesta.trim() 
+            });
             setIsValid(true);
         } catch {
             setIsValid(false);
+        }
+    };
+
+    // Validar el formulario
+    const validateAll = () => {
+        const schema = isEdit ? UpdateFAQSchema : CreateFAQSchema;
+        try {
+            schema.parse({ Pregunta: pregunta.trim(), Respuesta: respuesta.trim() });
+            setIsValid(true);
+            setPreguntaError("");
+            setRespuestaError("");
+        } catch (err) {
+            setIsValid(false);
+            if (err instanceof z.ZodError) {
+                for (const error of err.errors) {
+                    if (error.path[0] === "Pregunta") setPreguntaError(error.message);
+                    if (error.path[0] === "Respuesta") setRespuestaError(error.message);
+                }
+            }
+        }
+    };
+
+    // Enviar formulario
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+
+        try {
+            const schema = isEdit ? UpdateFAQSchema : CreateFAQSchema;
+            schema.parse({
+                Pregunta: pregunta.trim(),
+                Respuesta: respuesta.trim(),
+            });
+
+            if (isEdit && initialData) {
+                await editFAQ(initialData.Id_FAQ, {
+                    Pregunta: pregunta.trim(),
+                    Respuesta: respuesta.trim(),
+                });
+                showSuccess("¡Pregunta actualizada exitosamente!");
+            } else {
+                await addFAQ({
+                    Pregunta: pregunta.trim(),
+                    Respuesta: respuesta.trim(),
+                });
+                showSuccess("¡Pregunta creada exitosamente!");
+            }
+
+            setPregunta("");
+            setRespuesta("");
+            onClose();
+            refetch();
+        } catch (error) {
+            if (error instanceof z.ZodError) {
+                const msg = error.errors[0]?.message || "Error de validación.";
+                showError(msg);
+            } else {
+                showError(`Hubo un problema al ${isEdit ? 'actualizar' : 'crear'} la pregunta frecuente.`);
+                console.error(error);
+            }
         }
     };
 
@@ -88,7 +132,7 @@ export default function FAQForm({ onClose, refetch }: FAQFormProps) {
                 className="w-full max-w-md bg-white rounded-lg shadow-lg p-6 space-y-4"
             >
                 <h3 className="text-lg font-semibold text-gray-800">
-                    Crear Pregunta Frecuente
+                    {isEdit ? "Editar Pregunta Frecuente" : "Crear Pregunta Frecuente"}
                 </h3>
 
                 {/* Campo de Pregunta */}
@@ -108,8 +152,6 @@ export default function FAQForm({ onClose, refetch }: FAQFormProps) {
                         className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-sky-500 text-sm"
                         rows={2}
                         required
-
-                        
                     />
                     <div className="text-right text-xs text-gray-500 mt-1">
                         {pregunta.length}/100
@@ -153,19 +195,19 @@ export default function FAQForm({ onClose, refetch }: FAQFormProps) {
                 {/* Nota informativa */}
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
                     <p className="text-xs text-blue-700">
-                        <strong>Nota:</strong> Las preguntas creadas se mostrarán como
+                        <strong>Nota:</strong> Las preguntas {isEdit ? 'actualizadas' : 'creadas'} se mostrarán como
                         visibles automáticamente en la sección pública.
                     </p>
                 </div>
 
                 {/* Botones */}
                 <div className="flex justify-end gap-4">
-                     <button
+                    <button
                         type="submit"
                         className={`px-4 py-2 rounded-lg shadow-sm text-sm ${isValid ? 'bg-sky-600 text-white hover:bg-sky-700' : 'bg-gray-300 text-gray-600 cursor-not-allowed'}`}
                         disabled={!isValid}
                     >
-                        Crear Pregunta
+                        {isEdit ? "Guardar Cambios" : "Crear Pregunta"}
                     </button>
                     <button
                         type="button"
@@ -174,7 +216,6 @@ export default function FAQForm({ onClose, refetch }: FAQFormProps) {
                     >
                         Cancelar
                     </button>
-                   
                 </div>
             </form>
         </div>

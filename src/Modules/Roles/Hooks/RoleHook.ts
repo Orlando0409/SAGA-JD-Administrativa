@@ -29,7 +29,7 @@ export const useCreateRole = () => {
     const queryClient = useQueryClient();
     const { showSuccess, showError } = useAlerts();
     return useMutation({
-        mutationFn: ({ roleData, idUsuario }: { roleData: CreateRoleData; idUsuario: number }) => CreateRole(roleData, idUsuario),
+        mutationFn: ({ roleData }: { roleData: CreateRoleData;  }) => CreateRole(roleData),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['roles'] });
             showSuccess('Rol creado', 'El rol se ha creado exitosamente');
@@ -48,7 +48,7 @@ export const useUpdateRole = () => {
     const queryClient = useQueryClient();
     const { showSuccess, showError } = useAlerts();
     return useMutation({
-        mutationFn: (data: { Id_Rol: number; roleData: UpdateRoleData, idUsuario: number }) => UpdateRole(data.Id_Rol, data.roleData, data.idUsuario),
+        mutationFn: (data: { Id_Rol: number; roleData: UpdateRoleData }) => UpdateRole(data.Id_Rol, data.roleData),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['roles'] });
             showSuccess('Rol actualizado', 'El rol se ha actualizado exitosamente');
@@ -67,13 +67,13 @@ export const useDeactivateRole = () => {
   const queryClient = useQueryClient();
   const { showSuccessWithUndo, showError } = useAlerts();
   return useMutation({
-    mutationFn: ({ id, idUsuario }: { id: number; idUsuario: number }) => deactivateRole(id, idUsuario),
+    mutationFn: ({ id }: { id: number; }) => deactivateRole(id),
     onSuccess: (_, roleId) => {
       queryClient.invalidateQueries({ queryKey: ['roles'] });
       
       const undoAction = async () => {
         try {
-          await activateRole(roleId.id, roleId.idUsuario);
+          await activateRole(roleId.id);
           queryClient.invalidateQueries({ queryKey: ['roles'] });
         } catch (error) {
           showError('Error', 'No se pudo revertir el cambio');
@@ -97,13 +97,13 @@ export const useActivateRole = () => {
   const queryClient = useQueryClient();
   const { showSuccessWithUndo, showError } = useAlerts();
   return useMutation({
-    mutationFn: ({ id, idUsuario }: { id: number; idUsuario: number }) => activateRole(id, idUsuario),
+    mutationFn: ({ id }: { id: number; }) => activateRole(id),
     onSuccess: (_, roleData) => {
       queryClient.invalidateQueries({ queryKey: ['roles'] });
       
       const undoAction = async () => {
         try {
-          await deactivateRole(roleData.id, roleData.idUsuario);
+          await deactivateRole(roleData.id);
           queryClient.invalidateQueries({ queryKey: ['roles'] });
         } catch (error) {
           showError('Error', 'No se pudo revertir el cambio');

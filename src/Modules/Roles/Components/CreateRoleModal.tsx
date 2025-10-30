@@ -3,7 +3,7 @@ import { useCreateRole, usePermissions } from '../Hooks/RoleHook';
 import { LuShield, LuX, LuLock, LuFolderTree } from 'react-icons/lu';
 import { groupPermissionsByModule, getPermissionIdByLevel, type ModulePermission, type PermissionLevel } from '@/Modules/Usuarios/Helper/GroupPermiByModule';
 import { RoleMAX_LENGTH, RoleMIN_LENGTH, type CreateRoleModalProps } from '../Types/RoleTypes';
-import { useAuth } from '@/Modules/Auth/Context/AuthContext';
+
 
 
 const CreateRoleModal: React.FC<CreateRoleModalProps> = ({ onClose }) => {
@@ -12,7 +12,6 @@ const CreateRoleModal: React.FC<CreateRoleModalProps> = ({ onClose }) => {
   const { data: permisos = [], isLoading } = usePermissions();
   const { mutateAsync } = useCreateRole();
   const [errors, setErrors] = useState<{ nombreRol?: string }>({});
-  const { user } = useAuth();
     // Función para validar el nombre
     const validateNombreRol = (value: string) => {
       if (value.length < RoleMIN_LENGTH) {
@@ -76,7 +75,7 @@ const CreateRoleModal: React.FC<CreateRoleModalProps> = ({ onClose }) => {
       .map(mp => mp.selectedId);
     
       try {
-        await mutateAsync({ roleData: { Nombre_Rol: nombreRol, permisosIds }, idUsuario: user?.Id_Usuario || 0 });
+        await mutateAsync({ roleData: { Nombre_Rol: nombreRol, IDS_Permisos: permisosIds } });
       } catch (error) {
         console.error('Error creating role:', error);
       }

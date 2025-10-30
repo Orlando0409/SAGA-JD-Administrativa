@@ -9,12 +9,12 @@ export interface Role {
 
 export interface CreateRoleData {
   Nombre_Rol: string;
-  permisosIds: number[];
+  IDS_Permisos: number[];
 }
 
 export interface UpdateRoleData {
   Nombre_Rol: string;
-  permisosIds: number[]; 
+  IDS_Permisos: number[]; 
 }
 
 export interface Permiso {

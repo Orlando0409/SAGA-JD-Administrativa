@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useGetAllCategories } from '../../hooks/useCategorias';
+import { useGetCategoriasActivas } from '../../hooks/useCategorias';
 import { useUpdateMaterial } from '../../hooks/useMaterials';
-import { useUnidadesMedicionSimple } from '../../hooks/HookUnidadMedicion';
+import { useUnidadesMedicionActivas } from '../../hooks/HookUnidadMedicion';
 import { useAlerts } from '@/Modules/Global/context/AlertContext';
 import { UpdateMaterialSchema } from '../../schema/UpdateMaterialSchema';
 import { 
@@ -35,8 +35,8 @@ const EditMaterialModal: React.FC<EditMaterialModalProps> = ({
 }) => {
   const { showError } = useAlerts();
   const updateMaterialMutation = useUpdateMaterial();
-  const { data: categorias = [] } = useGetAllCategories();
-  const { data: unidadesMedicion = [] } = useUnidadesMedicionSimple();
+  const { data: categorias = [] } = useGetCategoriasActivas();
+  const { data: unidadesMedicion = [] } = useUnidadesMedicionActivas();
   const [isCreateCategoriaModalOpen, setIsCreateCategoriaModalOpen] = useState(false);
   const [isCreateUnidadMedicionModalOpen, setIsCreateUnidadMedicionModalOpen] = useState(false);
     

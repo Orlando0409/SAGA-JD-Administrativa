@@ -83,7 +83,6 @@ const ActasModal = ({ isOpen, onClose, acta, onEliminar }: ActasModalProps) => {
             });
 
             const formData = new FormData();
-            formData.append("Id_Usuario", "1"); // Incluye el ID del usuario (puedes reemplazar "1" con el ID dinámico)
             formData.append("Titulo", titulo.trim());
             formData.append("Descripcion", descripcion.trim());
             files.forEach((file) => {
@@ -263,7 +262,7 @@ const ActasModal = ({ isOpen, onClose, acta, onEliminar }: ActasModalProps) => {
                                 </p>
                                 <div className="mt-4">
                                     <h3 className="text-sm font-semibold text-gray-700">Archivos:</h3>
-                                    {acta.Archivos.map((archivo: ArchivoActa) => (
+                                    {acta?.Archivos?.map((archivo: ArchivoActa) => (
                                         <a
                                             key={archivo.Id_Archivo_Acta}
                                             href={archivo.Url_Archivo}
