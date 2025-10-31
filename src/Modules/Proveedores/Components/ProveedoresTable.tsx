@@ -10,6 +10,8 @@ import ProveedorDetailModal from './DetailFisicoProveedor';
 import ProveedorJuridicoDetailModal from './DetailJuridicoProveedor';
 import EditFisicoProveedoresModal from './EditFisicoProveedoresModal';
 import EditJuridicoProveedorModal from './EditJuridicoProveedorModal';
+import FilterProveedorModal from './FilterProveedorModal';
+import { LuFilter } from 'react-icons/lu';
 import { MdKeyboardArrowUp, MdKeyboardArrowDown, MdKeyboardDoubleArrowLeft, MdKeyboardArrowLeft, MdKeyboardArrowRight, MdKeyboardDoubleArrowRight } from 'react-icons/md';
 import ActionButtons from './ActionButtons';
 
@@ -60,6 +62,8 @@ export default function ProveedoresTable() {
 
     // Estados para el modal de creación
     const [showCreateModal, setShowCreateModal] = useState(false);
+    // Estado para abrir el modal de filtros avanzados
+    const [isFilterOpen, setIsFilterOpen] = useState(false);
 
     // Combinar ambos tipos de proveedores en una lista unificada (similar a AbonadosTable)
     const proveedoresUnificados = useMemo((): ProveedorUnificado[] => {
@@ -103,6 +107,14 @@ export default function ProveedoresTable() {
         });
         return ['Todos', ...Array.from(setEstados)];
     }, [proveedoresUnificados]);
+
+    const activeFiltersCount = useMemo(() => {
+        let c = 0;
+        if (tipoFilter && tipoFilter !== 'Todos') c++;
+        if (estadoFilter && estadoFilter !== 'Todos') c++;
+        if (globalFilter && globalFilter.trim() !== '') c++;
+        return c;
+    }, [tipoFilter, estadoFilter, globalFilter]);
 
     const filteredData = useMemo(() => {
         // Primero aplicar filtro global (texto)
@@ -266,26 +278,20 @@ export default function ProveedoresTable() {
                     <p className="text-sm text-gray-600 pb-4">Gestiona los proveedores del sistema</p>
                 </div>
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-                    <select
-                        value={tipoFilter}
-                        onChange={(e) => setTipoFilter(e.target.value as 'Todos' | 'Físico' | 'Jurídico')}
-                        className="px-3 py-2 rounded-lg border border-sky-200 bg-white text-sm"
+                    <button
+                        onClick={() => setIsFilterOpen(true)}
+                        className={`px-4 py-2 rounded-lg hover:bg-gray-200 transition flex items-center gap-2 bg-blue-100 text-blue-700 border border-blue-300`}
+                        aria-pressed={activeFiltersCount > 0}
                     >
-                        <option value="Todos">Todos los tipos</option>
-                        <option value="Físico">Físico</option>
-                        <option value="Jurídico">Jurídico</option>
-                    </select>
-
-                    <select
-                        value={estadoFilter}
-                        onChange={(e) => setEstadoFilter(e.target.value)}
-                        className="px-3 py-2 rounded-lg border border-sky-200 bg-white text-sm"
-                    >
-                        {estadosUnicos.map((est) => (
-                            <option key={est} value={est}>{est}</option>
-                        ))}
-                    </select>
-
+                        <LuFilter className="w-4 h-4" />
+                        Filtros
+                        {activeFiltersCount > 0 && (
+                            <span className="bg-blue-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                                {activeFiltersCount}
+                            </span>
+                        )}
+                    </button>
+,
                     <input
                         value={globalFilter}
                         onChange={(e) => setGlobalFilter(e.target.value)}
@@ -300,6 +306,18 @@ export default function ProveedoresTable() {
                     </button>
                 </div>
             </div>
+
+            {/* Modal de filtros avanzado */}
+            <FilterProveedorModal
+                isOpen={isFilterOpen}
+                onClose={() => setIsFilterOpen(false)}
+                currentFilters={{ tipo: tipoFilter, estado: estadoFilter }}
+                estadosOptions={estadosUnicos}
+                onApply={(f) => {
+                    setTipoFilter(f.tipo);
+                    setEstadoFilter(f.estado);
+                }}
+            />
 
             <div className="bg-white rounded-2xl shadow-sm border border-sky-100 overflow-hidden max-h-[calc(100vh-300px)] overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100">
                 <div className="overflow-x-auto">
