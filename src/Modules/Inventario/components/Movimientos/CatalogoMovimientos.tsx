@@ -16,7 +16,6 @@ import {
   LuTrendingDown,
   LuCalendar,
   LuUser,
-  LuArrowLeft,
   LuPlus,
   LuFilter
 } from 'react-icons/lu';
@@ -46,7 +45,7 @@ interface CatalogoMovimientosProps {
   onBack?: () => void;
 }
 
-const CatalogoMovimientos: React.FC<CatalogoMovimientosProps> = ({ onBack }) => {
+const CatalogoMovimientos: React.FC<CatalogoMovimientosProps> = () => {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [globalFilter, setGlobalFilter] = useState('');
@@ -173,7 +172,7 @@ const CatalogoMovimientos: React.FC<CatalogoMovimientosProps> = ({ onBack }) => 
 
     if (appliedFilters.usuario) {
       filtered = filtered.filter(mov => 
-        mov.Usuario_Creador?.Nombre_Usuario?.toLowerCase().includes(appliedFilters.usuario!.toLowerCase())
+        mov.Usuario?.Nombre_Usuario?.toLowerCase().includes(appliedFilters.usuario!.toLowerCase())
       );
     }
 
@@ -235,7 +234,7 @@ const CatalogoMovimientos: React.FC<CatalogoMovimientosProps> = ({ onBack }) => 
       cell: ({ getValue, row }) => {
         const cantidad = getValue();
         const unidad = row.original.Material?.Unidad_Medicion;
-        const nombreUnidad = unidad?.Nombre_Unidad_Medicion || unidad?.Nombre_Unidad || '';
+        const nombreUnidad = unidad?.Nombre_Unidad_Medicion || '';
         
         return (
           <span className="text-sm">
@@ -246,7 +245,7 @@ const CatalogoMovimientos: React.FC<CatalogoMovimientosProps> = ({ onBack }) => 
       size: 120,
     }),
 
-    columnHelper.accessor('Usuario_Creador.Nombre_Usuario', {
+    columnHelper.accessor('Usuario.Nombre_Usuario', {
       id: 'usuario',
       header: 'Usuario',
       cell: ({ getValue }) => (
@@ -288,7 +287,7 @@ const CatalogoMovimientos: React.FC<CatalogoMovimientosProps> = ({ onBack }) => 
       cell: ({ row }) => {
         const movimiento = row.original;
         const unidad = movimiento.Material?.Unidad_Medicion;
-        const nombreUnidad = unidad?.Nombre_Unidad_Medicion || unidad?.Nombre_Unidad || '';
+        const nombreUnidad = unidad?.Nombre_Unidad_Medicion ||  '';
         
         return (
           <span className="text-sm text-gray-600">
@@ -305,7 +304,7 @@ const CatalogoMovimientos: React.FC<CatalogoMovimientosProps> = ({ onBack }) => 
       cell: ({ row }) => {
         const movimiento = row.original;
         const unidad = movimiento.Material?.Unidad_Medicion;
-        const nombreUnidad = unidad?.Nombre_Unidad_Medicion || unidad?.Nombre_Unidad || '';
+        const nombreUnidad = unidad?.Nombre_Unidad_Medicion || '';
         
         return (
           <span className="text-sm font-medium">
@@ -396,29 +395,13 @@ const CatalogoMovimientos: React.FC<CatalogoMovimientosProps> = ({ onBack }) => 
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div className="flex items-center gap-4">
-          {onBack && (
-            <button
-              onClick={onBack}
-              className="flex items-center gap-2 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors"
-              title="Volver al dashboard"
-            >
-              <LuArrowLeft className="w-4 h-4" />
-              <span className="text-sm font-medium">Volver al Dashboard</span>
-            </button>
-          )}
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900">Historial de Movimientos</h2>
-          </div>
-        </div>
-      </div>
-
-      
-
       <div className="bg-white rounded-lg p-3">
-        <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
-          <div className="flex items-center gap-4">
+          <div className="flex items-start gap-4 flex-col justify-start">
+            <h2 className="text-2xl font-bold text-gray-900">Historial de Movimientos</h2>
+            <p className="text-sm text-gray-600 pb-4">Registra los movimientos de entrada y salida de materiales</p>
+        </div>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div className="flex items-center justify-start gap-4">
             <label htmlFor="tipo-movimiento-filter-select" className="text-sm font-medium text-gray-700">Tipo:</label>
             <select
               id="tipo-movimiento-filter-select"
@@ -431,6 +414,7 @@ const CatalogoMovimientos: React.FC<CatalogoMovimientosProps> = ({ onBack }) => 
               <option value="Salida">Salida</option>
             </select>
           </div>
+        <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
           <div className="flex items-center gap-4 w-full sm:w-auto">
             <div className="relative flex-1 max-w-md">
               <LuSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
@@ -468,8 +452,9 @@ const CatalogoMovimientos: React.FC<CatalogoMovimientosProps> = ({ onBack }) => 
           </div>
         </div>
       </div>
+      </div>
 
-      <div className="bg-white shadow-sm rounded-2xl border border-sky-100 overflow-hidden">
+<div className="bg-white rounded-2xl shadow-sm border border-sky-100 overflow-hidden max-h-[calc(100vh-300px)] overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100">
         <div className="overflow-x-auto">
           <table className="min-w-full table-auto">
             <thead className="bg-sky-50">
@@ -563,7 +548,7 @@ const CatalogoMovimientos: React.FC<CatalogoMovimientosProps> = ({ onBack }) => 
             </button>
             
             <span className="text-sm text-gray-700">
-              Página {table.getState().pagination.pageIndex + 1} de {table.getPageCount() + 1}
+              Página {table.getState().pagination.pageIndex + 1} de {table.getPageCount()}
             </span>
 
             <button

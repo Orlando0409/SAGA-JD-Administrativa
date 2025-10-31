@@ -19,7 +19,8 @@ import {
 } from "@/Modules/Global/components/Sidebar/ui/alert-dialog";
 import { Button } from '@/Modules/Global/components/Sidebar/ui/button';
 
-const EditUserModal: React.FC<EditUserModalProps> = ({ isOpen, onClose, user }) => {
+
+const EditUserModal: React.FC<EditUserModalProps> = ({ isOpen, onClose, usert }) => {
   const updateUserMutation = useUpdateUser();
   const { data: roles = [] } = useRoles();
   const activeRoles = roles.filter((rol: Role) => rol.Fecha_Eliminacion === null);
@@ -28,6 +29,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ isOpen, onClose, user }) 
     nombreUsuario: 0,
     email: 0
   });
+
 
       const createInputHandler = (fieldName: string, handleChange: (value: string) => void, maxLength: number) => {
     return (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -47,10 +49,10 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ isOpen, onClose, user }) 
 
   const form = useForm({
     defaultValues: {
-      Nombre_Usuario: user.Nombre_Usuario,
-      Correo_Electronico: user.Correo_Electronico,
+      Nombre_Usuario: usert.Nombre_Usuario,
+      Correo_Electronico: usert.Correo_Electronico,
       Contraseña: '',
-      Id_Rol: user.Id_Rol,
+      Id_Rol: usert.Id_Rol,
     },
     onSubmit: async ({ value }: { value: UpdateUserSchemaData }) => {
       setFormErrors({});
@@ -73,7 +75,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ isOpen, onClose, user }) 
           Id_Rol: value.Id_Rol
         };
 
-        await updateUserMutation.mutateAsync({ Id_Usuario: user.Id_Usuario, userData: updateData });
+        await updateUserMutation.mutateAsync({ Id_Usuario: usert.Id_Usuario, userData: updateData });
         onClose();
       } catch (error) {
         console.error('Error updating user:', error);
@@ -109,18 +111,20 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ isOpen, onClose, user }) 
 
   return (
     <div className="fixed inset-0 bg-opacity-10 backdrop-blur-sm flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4">
-        <div className="flex items-center justify-between p-6 border-b">
+      <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4 flex flex-col overflow-hidden max-h-[90vh]">
+        <div className="sticky top-0 flex items-center justify-between p-6 border-b bg-white z-10">
           <h2 className="text-xl font-semibold text-gray-900">Editar Usuario</h2>
         </div>
 
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            form.handleSubmit();
-          }}
-          className="p-6 space-y-4"
-        >
+        <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+          <form
+            id="edit-user-form"
+            onSubmit={(e) => {
+              e.preventDefault();
+              form.handleSubmit();
+            }}
+            className="p-6 space-y-4"
+          >
           <form.Field name="Nombre_Usuario">
             {(field) => (
               <div>
@@ -226,10 +230,13 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ isOpen, onClose, user }) 
             )}
           </form.Field>
         </form>
+        </div>
+          
           <div className="sticky bottom-0 flex justify-end gap-3 p-6 border-t bg-gray-50 z-10">
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button
+                  form="edit-user-form"
                   disabled={updateUserMutation.isPending}
                   className={`flex-1 px-4 py-2 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors ${
                     updateUserMutation.isPending 

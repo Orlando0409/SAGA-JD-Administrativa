@@ -5,20 +5,13 @@ export interface EstadoQueja {
 
 export interface Queja {
     Id_Queja: number;
-    name: string;
-    Papellido: string;
-    Sapellido: string;
-    descripcion: string;
-    Adjunto?: string[];
+    Nombre: string;
+    Primer_Apellido: string;
+    Segundo_Apellido: string;
+    Correo: string;
+    Descripcion: string;
+    Adjunto?: string;
     RespuestasReporte?: string | null;
     Estado: EstadoQueja;
     Fecha_Queja: Date | string;
-}
-
-// Interfaz para crear una queja
-export interface CreateQuejaData {
-    name: string;
-    Papellido?: string;
-    Sapellido?: string;
-    descripcion: string;
 }

@@ -1,12 +1,11 @@
 import { useState, useCallback, useMemo } from 'react';
-import type { Material, MovimientoMaterial } from '../models/Inventario';
+import type { IngresoEgresoMaterialData, Material, MovimientoMaterial } from '../models/Inventario';
 import type { MovimientoType, MovimientoFormData } from '../types/MovimientoTypes';
 import { useGetAllMaterials } from './useMaterials';
-import { useIngresoMaterial, useEgresoMaterial } from './HookMaterialMovimiento';
 import { useAlerts } from '@/Modules/Global/context/AlertContext';
 import { useAuth } from '@/Modules/Auth/Context/AuthContext';
-import { getAllMovimientos, getMovimientosEntradas, getMovimientosSalidas, getMovimientosEntreFechas, getMovimientosPorUsuarioCreador } from '../service/MovimientosService';
-import { useQuery } from '@tanstack/react-query';
+import { getAllMovimientos, getMovimientosEntradas, getMovimientosSalidas, getMovimientosEntreFechas, getMovimientosPorUsuarioAutenticado, egresoMaterial, ingresoMaterial } from '../service/MovimientosService';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 
 
@@ -48,15 +47,54 @@ export const useGetMovimientosEntreFechas = (startDate: string, endDate: string,
   });
 };
 
-export const useGetMovimientosPorUsuario = (idUsuarioCreador: number, enabled: boolean = true) => {
+export const useGetMovimientosPorUsuario = ( ) => {
   return useQuery<MovimientoMaterial[]>({
-    queryKey: ['movimientos', 'usuario', idUsuarioCreador],
-    queryFn: () => getMovimientosPorUsuarioCreador(idUsuarioCreador),
-    enabled: enabled && !!idUsuarioCreador,
+    queryKey: ['movimientos', 'usuario', ],
+    queryFn: () => getMovimientosPorUsuarioAutenticado(),
     staleTime: 1000 * 60 * 5,
     refetchOnWindowFocus: false,
   });
 };
+
+
+export const useIngresoMaterial = () => {
+  const queryClient = useQueryClient();
+  const { showSuccess, showError } = useAlerts();
+  
+  return useMutation({
+    mutationFn: ( data : IngresoEgresoMaterialData) => 
+      ingresoMaterial( data),
+    onSuccess: () => {
+      showSuccess('Éxito', 'Ingreso de material registrado correctamente');
+      queryClient.invalidateQueries({ queryKey: ['materials'] });
+      queryClient.invalidateQueries({ queryKey: ['material'] });
+    },
+    onError: (error: any) => {
+      const errorMessage = error?.response?.data?.message;
+      showError('Error', errorMessage);
+    },
+  });
+};
+
+ export const useEgresoMaterial = () => {
+  const queryClient = useQueryClient();
+  const { showSuccess, showError } = useAlerts();
+  
+  return useMutation({
+    mutationFn: ( data : IngresoEgresoMaterialData) => 
+      egresoMaterial( data),
+    onSuccess: () => {
+      showSuccess('Éxito', 'Egreso de material registrado correctamente');
+      queryClient.invalidateQueries({ queryKey: ['materials'] });
+      queryClient.invalidateQueries({ queryKey: ['material'] });
+    },
+    onError: (error: any) => {
+      const errorMessage = error?.response?.data?.message || 'Error al registrar el egreso de material';
+      showError('Error', errorMessage);
+    },
+  });
+};
+
 
 export const useMovimientoForm = (initialMaterial?: Material) => {
   const { user } = useAuth();
@@ -78,7 +116,7 @@ export const useMovimientoForm = (initialMaterial?: Material) => {
     return materiales.filter((material: Material) => 
       material.Nombre_Material.toLowerCase().includes(termino) ||
       material.Categorias?.some(cat => 
-        cat.Categoria.Nombre_Categoria.toLowerCase().includes(termino)
+        cat.Nombre_Categoria?.toLowerCase().includes(termino)
       )
     );
   }, [materiales, busquedaMaterial]);
@@ -141,15 +179,9 @@ export const useMovimientoForm = (initialMaterial?: Material) => {
       };
 
       if (tipoMovimiento === 'entrada') {
-        await ingresoMutation.mutateAsync({
-          idUsuario: user.Id_Usuario,
-          data: movimientoData
-        });
+        await ingresoMutation.mutateAsync(movimientoData);
       } else {
-        await egresoMutation.mutateAsync({
-          idUsuario: user.Id_Usuario,
-          data: movimientoData
-        });
+        await egresoMutation.mutateAsync(movimientoData);
       }
       await refetchMateriales();
       resetForm();

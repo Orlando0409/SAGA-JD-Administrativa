@@ -1,6 +1,6 @@
 // src/services/proyectoService.ts
 import apiAuth from "@/Api/apiAuth";
-import type { Proyecto, ProyectoFormData } from "../Models/ProyectoModels";
+import type { Proyecto } from "../Models/ProyectoModels";
 
 // Obtener todos los proyectos
 export const getProyectos = async (): Promise<Proyecto[]> => {
@@ -15,8 +15,8 @@ export const getProyectosVisibles = async (): Promise<Proyecto[]> => {
 };
 
 // Crear un proyecto
-export const createProyecto = async (formData: FormData, idUsuarioCreador: number): Promise<Proyecto> => {
-  const res = await apiAuth.post(`/proyectos/create/${idUsuarioCreador}`, formData, {
+export const createProyecto = async (formData: FormData): Promise<Proyecto> => {
+  const res = await apiAuth.post(`/proyectos/create/`, formData, {
     headers: {
       "Content-Type": "multipart/form-data",
     },
@@ -24,9 +24,13 @@ export const createProyecto = async (formData: FormData, idUsuarioCreador: numbe
   return res.data;
 };
 
-// Editar un proyecto existente
-export const updateProyecto = async (id: number, formData: Partial<ProyectoFormData>): Promise<Proyecto> => {
-  const res = await apiAuth.put(`/proyectos/update/${id}`, formData);
+// Editar un proyecto existente - CAMBIADO A FormData
+export const updateProyecto = async (id: number, formData: FormData): Promise<Proyecto> => {
+  const res = await apiAuth.put(`/proyectos/update/${id}`, formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
   return res.data;
 };
 

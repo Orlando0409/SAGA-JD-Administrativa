@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { LuX, LuFilter } from 'react-icons/lu';
-import { useGetAllCategories } from '../../hooks/useCategorias';
 import type { FilterMaterialModalProps, MaterialFilterOptions } from '../../types/MaterialTypes';
 
 
@@ -11,7 +10,6 @@ const FilterMaterialModal: React.FC<FilterMaterialModalProps> = ({
   onApplyFilters, 
   currentFilters 
 }) => {
-  const { data: categorias = [] } = useGetAllCategories();
   
   const [filters, setFilters] = useState<MaterialFilterOptions>(currentFilters);
 
@@ -22,7 +20,6 @@ const FilterMaterialModal: React.FC<FilterMaterialModalProps> = ({
 
   const handleClear = () => {
     const clearFilters: MaterialFilterOptions = {
-      categoria: [],
       conStock: false,
       precioMin: undefined,
       precioMax: undefined,
@@ -40,136 +37,23 @@ const FilterMaterialModal: React.FC<FilterMaterialModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <section className="fixed inset-0 flex items-start justify-end z-50">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4 max-h-[90vh] overflow-hidden">
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
-          <h2 className="text-xl font-semibold text-gray-900 flex items-center">
+    <section className="fixed inset-0 flex items-center justify-end z-50 p-4">
+      <div className="bg-white rounded-lg shadow-2xl w-full max-w-md max-h-[90vh] flex flex-col overflow-hidden">
+        <div className="sticky top-0 bg-white flex items-center justify-between p-4 sm:p-6 border-b border-gray-200 z-10">
+          <h2 className="text-lg sm:text-xl font-semibold text-gray-900 flex items-center gap-2">
             <LuFilter className="w-5 h-5" />
             Filtros Avanzados
           </h2>
+          <button
+            onClick={onClose}
+            className="p-1 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100 transition-colors"
+            aria-label="Cerrar"
+          >
+            <LuX className="w-5 h-5" />
+          </button>
         </div>
 
-        <div className="p-6 space-y-4 overflow-y-auto max-h-[calc(90vh-140px)] scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100">
-          <div>
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium text-gray-700">
-                Categorías
-              </span>
-              <div className="flex gap-1">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setFilters(prev => ({
-                      ...prev,
-                      categoria: categorias.map(c => c.Id_Categoria)
-                    }));
-                  }}
-                  className="text-xs text-blue-600 hover:text-blue-700 font-medium"
-                >
-                  Todas
-                </button>
-                <span className="text-xs text-gray-400">|</span>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setFilters(prev => ({
-                      ...prev,
-                      categoria: []
-                    }));
-                  }}
-                  className="text-xs text-gray-600 hover:text-gray-700 font-medium"
-                >
-                  Ninguna
-                </button>
-              </div>
-            </div>
-            
-            {filters.categoria && filters.categoria.length > 0 && (
-              <div className="mb-3 p-2 bg-gray-50 rounded-lg">
-                <div className="text-xs text-gray-600 mb-2">
-                  Categorías seleccionadas ({filters.categoria.length}):
-                </div>
-                <div className="flex flex-wrap gap-1">
-                  {filters.categoria.map((categoriaId) => {
-                    const categoria = categorias.find(c => c.Id_Categoria === categoriaId);
-                    return categoria ? (
-                      <span
-                        key={categoriaId}
-                        className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full"
-                      >
-                        {categoria.Nombre_Categoria}
-                        <button
-                          onClick={() => {
-                            setFilters(prev => ({
-                              ...prev,
-                              categoria: prev.categoria?.filter(id => id !== categoriaId) || []
-                            }));
-                          }}
-                          className="text-blue-600 hover:text-blue-800 ml-1"
-                        >
-                          <LuX className="w-3 h-3" />
-                        </button>
-                      </span>
-                    ) : null;
-                  })}
-                </div>
-              </div>
-            )}
-
-            <div className="max-h-48 overflow-y-auto border border-gray-200 rounded-lg scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100">
-              {categorias.length > 0 ? (
-                <div className="divide-y divide-gray-100">
-                  {categorias.map((categoria) => {
-                    const isSelected = filters.categoria?.includes(categoria.Id_Categoria) || false;
-                    return (
-                      <label
-                        key={categoria.Id_Categoria}
-                        className={`flex items-center space-x-3 p-3 cursor-pointer transition-colors ${
-                          isSelected 
-                            ? 'bg-blue-50 border-l-2 border-l-blue-500' 
-                            : 'hover:bg-gray-50'
-                        }`}
-                      >
-                        <input
-                          type="checkbox"
-                          checked={isSelected}
-                          onChange={(e) => {
-                            const currentCategorias = filters.categoria || [];
-                            if (e.target.checked) {
-                              setFilters(prev => ({
-                                ...prev,
-                                categoria: [...currentCategorias, categoria.Id_Categoria]
-                              }));
-                            } else {
-                              setFilters(prev => ({
-                                ...prev,
-                                categoria: currentCategorias.filter(id => id !== categoria.Id_Categoria)
-                              }));
-                            }
-                          }}
-                          className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 focus:ring-offset-0"
-                        />
-                        <span className={`text-sm flex-1 ${
-                          isSelected ? 'text-blue-900 font-medium' : 'text-gray-700'
-                        }`}>
-                          {categoria.Nombre_Categoria}
-                        </span>
-                        {isSelected && (
-                          <span className="text-blue-600 text-xs">✓</span>
-                        )}
-                      </label>
-                    );
-                  })}
-                </div>
-              ) : (
-                <div className="p-6 text-center text-gray-500 text-sm">
-                  <div className="mb-2">📂</div>
-                  No hay categorías disponibles
-                </div>
-              )}
-            </div>
-          </div>
-
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 sm:space-y-6 scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100">
           <div>
             <div className="block text-sm font-medium text-gray-700 mb-2">
               Filtrar por Categorías
@@ -272,7 +156,7 @@ const FilterMaterialModal: React.FC<FilterMaterialModalProps> = ({
               )}
 
               {filters.tipoFiltroStock === 'entre' && (
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   <input
                     type="number"
                     placeholder="Stock mín."
@@ -281,7 +165,7 @@ const FilterMaterialModal: React.FC<FilterMaterialModalProps> = ({
                       ...prev, 
                       stockMinimo: e.target.value ? Number(e.target.value) : undefined 
                     }))}
-                    className="px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-transparent"
+                    className="px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-transparent"
                     min="0"
                   />
                   <input
@@ -292,7 +176,7 @@ const FilterMaterialModal: React.FC<FilterMaterialModalProps> = ({
                       ...prev, 
                       stockMaximo: e.target.value ? Number(e.target.value) : undefined 
                     }))}
-                    className="px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-transparent"
+                    className="px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-transparent"
                     min="0"
                   />
                 </div>
@@ -304,7 +188,7 @@ const FilterMaterialModal: React.FC<FilterMaterialModalProps> = ({
             <div className="block text-sm font-medium text-gray-700 mb-2">
               Rango de Precio
             </div>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
               <div>
                 <input
                   type="number"
@@ -314,7 +198,7 @@ const FilterMaterialModal: React.FC<FilterMaterialModalProps> = ({
                     ...prev, 
                     precioMin: e.target.value ? Number(e.target.value) : undefined 
                   }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   min="0"
                   step="0.01"
                 />
@@ -328,7 +212,7 @@ const FilterMaterialModal: React.FC<FilterMaterialModalProps> = ({
                     ...prev, 
                     precioMax: e.target.value ? Number(e.target.value) : undefined 
                   }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   min="0"
                   step="0.01"
                 />
@@ -337,23 +221,23 @@ const FilterMaterialModal: React.FC<FilterMaterialModalProps> = ({
           </div>
         </div>
 
-        <div className="flex items-center justify-end p-6 border-t border-gray-200 bg-gray-50">
-          <div className="flex gap-3">
+        <div className="sticky bottom-0 bg-gray-50 border-t border-gray-200 p-4 sm:p-6 z-10">
+          <div className="flex flex-col-reverse sm:flex-row gap-2 sm:gap-3 sm:justify-end">
             <button
               onClick={handleApply}
-              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
             >
               Aplicar Filtros
             </button>
-          <button
-            onClick={handleClear}
-            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-          >
-            Limpiar Filtros
-          </button>
+            <button
+              onClick={handleClear}
+              className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+            >
+              Limpiar Todo
+            </button>
             <button
               onClick={onClose}
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
             >
               Cancelar
             </button>

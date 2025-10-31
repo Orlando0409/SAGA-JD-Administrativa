@@ -1,26 +1,18 @@
 export interface EstadoReporte {
-    IdEstadoReporte: number;
+    Id_Estado_Reporte: number;
     Estado_Reporte: string;
 }
 
 export interface Reporte {
-    IdReporte: number;
-    name: string;
-    Papellido?: string;
-    Sapellido?: string;
-    ubicacion?: string;
-    descripcion?: string;
+    Id_Reporte: number;
+    Nombre: string;
+    Primer_Apellido: string;
+    Segundo_Apellido?: string;
+    Ubicacion: string;
+    Descripcion: string;
     Fecha_Reporte: Date | string;
-    Adjunto?: string[];
+    Correo: string;
+    Adjunto?: string;
     RespuestasReporte?: string | null;
     Estado: EstadoReporte;
-}
-
-// Interfaz para crear un reporte
-export interface CreateReporteData {
-    name: string;
-    Papellido: string;
-    Sapellido: string;
-    ubicacion: string;
-    descripcion: string;
 }

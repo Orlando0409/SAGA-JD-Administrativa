@@ -51,7 +51,8 @@ export const getEstadoMaterialColorClass = (estado: string): string => {
 export const getProveedorNombre = (material: Material): string => {
   if (!material?.Proveedor) return 'No especificado';
   
-  return material.Proveedor.Id_Tipo_Proveedor === 2
+  // El backend usa "Tipo_Entidad" en lugar de "Id_Tipo_Proveedor"
+  return material.Proveedor.Tipo_Entidad === 2
     ? material.Proveedor.Razon_Social || material.Proveedor.Nombre_Proveedor
     : material.Proveedor.Nombre_Proveedor;
 };

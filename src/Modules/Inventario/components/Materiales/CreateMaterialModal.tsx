@@ -1,30 +1,27 @@
-import React, { useState } from 'react';
 import { LuX, LuPlus } from 'react-icons/lu';
-import {  useGetAllCategories } from '../../hooks/useCategorias';
+import { useGetCategoriasActivas } from '../../hooks/useCategorias';
 import { useCreateMaterial } from '../../hooks/useMaterials';
-import { useUnidadesMedicionSimple } from '../../hooks/HookUnidadMedicion';
+import { useUnidadesMedicionActivas } from '../../hooks/HookUnidadMedicion';
 import { useProveedoresJuridicos } from '@/Modules/Proveedores/Hook/hookjuridicoproveedor';
 import { CreateMaterialSchema, type CreateMaterialSchemaData } from '../../schema/CreateMaterialSchema';
-import { CreateMedidorSchema, type CreateMedidorSchemaData } from '../../schema/MedidorSchemas';
 import type { CreateMaterialModalProps } from '../../types/MaterialTypes';
 import type { CreateMaterialData, CategoriaMaterial } from '../../models/Inventario';
 import CreateCategoriaModal from '../Categorias/CreateCategoriaModal';
 import CreateUnidadMedicionModal from '../UnidadesMedicion/CreateUnidadMedicionModal';
 import CreateModalProveedor from '@/Modules/Proveedores/Components/CreateModalProveedor';
-import { useAuth } from '@/Modules/Auth/Context/AuthContext';
 import { 
   NOMBRE_MATERIAL_MAX_LENGTH, 
   DESCRIPCION_MAX_LENGTH, 
   PRECIO_MIN 
 } from '../../types/MaterialTypes';
 import { useProveedoresFisicos } from '@/Modules/Proveedores/Hook/hookFisicoProveedor';
-import { createMedidor } from '../../service/MaterialService';
+import { useState } from 'react';
 
 const CreateMaterialModal: React.FC<CreateMaterialModalProps> = ({ isOpen, onClose }) => {
-  const { user } = useAuth();
+
   const createMaterialMutation = useCreateMaterial();
-  const { data: categories = [] } = useGetAllCategories();
-  const { data: unidadesMedicion = [] } = useUnidadesMedicionSimple();
+  const { data: categories = [] } = useGetCategoriasActivas();
+  const { data: unidadesMedicion = [] } = useUnidadesMedicionActivas();
   const { proveedoresFisicos = [] } = useProveedoresFisicos();
   const { proveedoresJuridicos = [] } = useProveedoresJuridicos();
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
@@ -35,10 +32,6 @@ const CreateMaterialModal: React.FC<CreateMaterialModalProps> = ({ isOpen, onClo
   const [isCreateCategoriaModalOpen, setIsCreateCategoriaModalOpen] = useState(false);
   const [isCreateUnidadMedicionModalOpen, setIsCreateUnidadMedicionModalOpen] = useState(false);
   const [isCreateProveedorModalOpen, setIsCreateProveedorModalOpen] = useState(false);
-  const [isMedidor, setIsMedidor] = useState(false);
-  const [medidorData, setMedidorData] = useState<CreateMedidorSchemaData>({
-    Numero_Medidor: 0
-  });
   
   const [formData, setFormData] = useState<CreateMaterialSchemaData>({
     Nombre_Material: '',
@@ -75,7 +68,6 @@ const CreateMaterialModal: React.FC<CreateMaterialModalProps> = ({ isOpen, onClo
     e.preventDefault();
     setFormErrors({});
 
-    // Validar datos del material
     const validation = CreateMaterialSchema.safeParse(formData);
 
     if (!validation.success) {
@@ -88,26 +80,8 @@ const CreateMaterialModal: React.FC<CreateMaterialModalProps> = ({ isOpen, onClo
       return;
     }
 
-    // Si es medidor, validar número de medidor
-    if (isMedidor) {
-      const medidorValidation = CreateMedidorSchema.safeParse(medidorData);
-      if (!medidorValidation.success) {
-        const fieldErrors: Record<string, string> = {};
-        medidorValidation.error.errors.forEach((err) => {
-          const field = err.path[0] as string;
-          fieldErrors[`medidor_${field}`] = err.message;
-        });
-        setFormErrors(fieldErrors);
-        return;
-      }
-    }
-
     try {
-      if (!user?.Id_Usuario) {
-        console.error('Usuario no autenticado');
-        return;
-      }
-
+ 
       const payload: CreateMaterialData = {
         Nombre_Material: formData.Nombre_Material,
         Descripcion: formData.Descripcion,
@@ -119,17 +93,9 @@ const CreateMaterialModal: React.FC<CreateMaterialModalProps> = ({ isOpen, onClo
         Id_Proveedor: formData.Id_Proveedor,
       };
 
-      // Crear el material
       await createMaterialMutation.mutateAsync({
         data: payload,
-        idUsuarioCreador: user.Id_Usuario
       });
-
-      // Si es medidor, crear también el registro de medidor
-      if (isMedidor) {
-        await createMedidor(medidorData, user.Id_Usuario);
-      }
-
       onClose();
       setFormData({
         Nombre_Material: '',
@@ -142,8 +108,6 @@ const CreateMaterialModal: React.FC<CreateMaterialModalProps> = ({ isOpen, onClo
         Id_Proveedor: undefined,
       });
       setFieldCharCounts({ nombreMaterial: 0, descripcion: 0 });
-      setIsMedidor(false);
-      setMedidorData({ Numero_Medidor: 0 });
     } catch (error) {
       console.log('Error creating material:', error);
     }
@@ -186,7 +150,7 @@ const CreateMaterialModal: React.FC<CreateMaterialModalProps> = ({ isOpen, onClo
 
   return (
     <div className="fixed inset-0 bg-opacity-10 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-2xl border border-gray-200 w-full max-w-md mx-4 max-h-[90vh] overflow-hidden">
+      <div className="bg-white rounded-lg shadow-2xl border border-gray-200 w-full max-w-lg mx-4 max-h-[90vh] overflow-hidden">
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <h2 className="text-xl font-semibold text-gray-900">Crear Nuevo Material</h2>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors">
@@ -195,7 +159,7 @@ const CreateMaterialModal: React.FC<CreateMaterialModalProps> = ({ isOpen, onClo
         </div>
 
         <div className="p-6 overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100 max-h-[calc(90vh-140px)]">
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form id="create-material-form" onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label htmlFor="nombre-material" className="block text-sm font-medium text-gray-700 mb-1">
                 Nombre del Material <span className="text-red-500">*</span>
@@ -218,7 +182,7 @@ const CreateMaterialModal: React.FC<CreateMaterialModalProps> = ({ isOpen, onClo
 
             <div>
               <label htmlFor="descripcion" className="block text-sm font-medium text-gray-700 mb-1">
-                Descripción <span className="text-red-500">*</span>
+                Descripción (Opcional)
               </label>
               <textarea
                 id="descripcion"
@@ -228,7 +192,7 @@ const CreateMaterialModal: React.FC<CreateMaterialModalProps> = ({ isOpen, onClo
                 className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 scrollbar-thin focus:border-transparent resize-none ${
                   formErrors.Descripcion ? 'border-red-500' : 'border-gray-300'
                 }`}
-                placeholder="Descripción del materiaL"
+                placeholder="Descripción del material"
               />
               {renderCharCounter(fieldCharCounts.descripcion, DESCRIPCION_MAX_LENGTH, !!formErrors.Descripcion)}
               {formErrors.Descripcion && (
@@ -384,7 +348,7 @@ const CreateMaterialModal: React.FC<CreateMaterialModalProps> = ({ isOpen, onClo
               <div className="max-h-32 overflow-y-auto border border-gray-300 rounded-lg p-2 scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100">
                 {categories.length === 0 ? (
                   <div className="text-center py-4 text-gray-500 text-sm">
-                    No hay categorías disponibles. Crea una nueva categoría.
+                    No hay categor├¡as disponibles. Crea una nueva categor├¡a.
                   </div>
                 ) : (
                   categories.map((categoria: CategoriaMaterial) => (
@@ -404,68 +368,24 @@ const CreateMaterialModal: React.FC<CreateMaterialModalProps> = ({ isOpen, onClo
                 <p className="text-red-500 text-xs mt-1">{formErrors.IDS_Categorias}</p>
               )}
             </div>
-
-            {/* Sección de Medidor */}
-            <div className="border-t border-gray-200 pt-4">
-              <div className="flex items-center space-x-2 mb-3">
-                <input
-                  type="checkbox"
-                  id="es-medidor"
-                  checked={isMedidor}
-                  onChange={(e) => setIsMedidor(e.target.checked)}
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                />
-                <label htmlFor="es-medidor" className="text-sm font-medium text-gray-700">
-                  Este material es un medidor
-                </label>
-              </div>
-
-              {isMedidor && (
-                <div className="ml-6 animate-fadeIn">
-                  <label htmlFor="numero-medidor" className="block text-sm font-medium text-gray-700 mb-1">
-                    Número de Medidor <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    id="numero-medidor"
-                    type="text"
-                    value={medidorData.Numero_Medidor || ''}
-                    onChange={(e) => setMedidorData({ 
-                      Numero_Medidor: parseInt(e.target.value) || 0 
-                    })}
-                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                      formErrors.medidor_Numero_Medidor ? 'border-red-500' : 'border-gray-300'
-                    }`}
-                    placeholder="Ej: 123456789"
-                    min="1"
-                    max="999999999"
-                  />
-                  {formErrors.medidor_Numero_Medidor && (
-                    <p className="text-red-500 text-xs mt-1">{formErrors.medidor_Numero_Medidor}</p>
-                  )}
-                  <p className="text-xs text-gray-500 mt-1">
-                    Número único que identifica este medidor
-                  </p>
-                </div>
-              )}
-            </div>
-
-            <div className="flex gap-3 pt-4">
-              <button
-                type="submit"
-                disabled={createMaterialMutation.isPending}
-                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                {createMaterialMutation.isPending ? 'Creando...' : 'Crear Material'}
-              </button>
-              <button
-                type="button"
-                onClick={onClose}
-                className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors"
-              >
-                Cancelar
-              </button>
-            </div>
           </form>
+        </div>
+        <div className="sticky bottom-0 flex justify-end gap-3 p-6 border-t bg-gray-50 z-10">
+          <button
+            form='create-material-form'
+            type="submit"
+            disabled={createMaterialMutation.isPending}
+            className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            {createMaterialMutation.isPending ? 'Creando...' : 'Crear Material'}
+          </button>
+          <button
+            type="button"
+            onClick={onClose}
+            className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors"
+          >
+            Cancelar
+          </button>
         </div>
       </div>
 

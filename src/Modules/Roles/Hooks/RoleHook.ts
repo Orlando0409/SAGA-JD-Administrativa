@@ -1,6 +1,6 @@
 
 import { useAlerts } from "@/Modules/Global/context/AlertContext";
-import type { UpdateRoleData } from "../Models/Role";
+import type { CreateRoleData, UpdateRoleData } from "../Models/Role";
 import { GetRoles, GetPermissions, GetRoleById, CreateRole, UpdateRole, deactivateRole, activateRole } from "../Services/RoleService";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
@@ -29,7 +29,7 @@ export const useCreateRole = () => {
     const queryClient = useQueryClient();
     const { showSuccess, showError } = useAlerts();
     return useMutation({
-        mutationFn: CreateRole,
+        mutationFn: ({ roleData }: { roleData: CreateRoleData;  }) => CreateRole(roleData),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['roles'] });
             showSuccess('Rol creado', 'El rol se ha creado exitosamente');
@@ -67,13 +67,13 @@ export const useDeactivateRole = () => {
   const queryClient = useQueryClient();
   const { showSuccessWithUndo, showError } = useAlerts();
   return useMutation({
-    mutationFn: deactivateRole,
+    mutationFn: ({ id }: { id: number; }) => deactivateRole(id),
     onSuccess: (_, roleId) => {
       queryClient.invalidateQueries({ queryKey: ['roles'] });
       
       const undoAction = async () => {
         try {
-          await activateRole(roleId);
+          await activateRole(roleId.id);
           queryClient.invalidateQueries({ queryKey: ['roles'] });
         } catch (error) {
           showError('Error', 'No se pudo revertir el cambio');
@@ -97,13 +97,13 @@ export const useActivateRole = () => {
   const queryClient = useQueryClient();
   const { showSuccessWithUndo, showError } = useAlerts();
   return useMutation({
-    mutationFn: activateRole,
-    onSuccess: (_, roleId) => {
+    mutationFn: ({ id }: { id: number; }) => activateRole(id),
+    onSuccess: (_, roleData) => {
       queryClient.invalidateQueries({ queryKey: ['roles'] });
       
       const undoAction = async () => {
         try {
-          await deactivateRole(roleId);
+          await deactivateRole(roleData.id);
           queryClient.invalidateQueries({ queryKey: ['roles'] });
         } catch (error) {
           showError('Error', 'No se pudo revertir el cambio');

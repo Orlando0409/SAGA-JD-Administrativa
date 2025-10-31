@@ -371,7 +371,7 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                             value={field.state.value as any}
                             onChange={(value) => field.handleChange(value || '')}
                             onBlur={field.handleBlur}
-                            className={`w-full ${field.state.meta.errors.length > 0 ? 'border-red-500' : ''
+                            className={`w-full px-3 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500  ${field.state.meta.errors.length > 0 ? 'border-red-500' : ''
                                 }`}
                             inputClassName={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${field.state.meta.errors.length > 0
                                 ? 'border-red-500 bg-red-50'
@@ -671,9 +671,9 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                             value={field.state.value as any}
                             onChange={(value) => field.handleChange(value || '')}
                             onBlur={field.handleBlur}
-                            className={`w-full ${field.state.meta.errors.length > 0 ? 'border-red-500' : ''
+                            className={`w-full px-3 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500  ${field.state.meta.errors.length > 0 ? 'border-red-500' : ''
                                 }`}
-                            inputClassName={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${field.state.meta.errors.length > 0
+                            inputClassName={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 border-transparent ${field.state.meta.errors.length > 0
                                 ? 'border-red-500 bg-red-50'
                                 : 'border-gray-300'
                                 }`}
@@ -847,8 +847,8 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
     };
 
     return (
-        <div className="fixed inset-0 bg-white bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
+        <div className="fixed inset-0 backdrop-blur bg-opacity-10 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-hidden">
                 {/* Header */}
                 <div className="flex items-center justify-between p-6 border-b border-gray-200">
                     <h2 className="text-xl font-semibold text-gray-800">Nueva Solicitud</h2>
@@ -887,8 +887,9 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                 </div>
 
                 {/* Contenido del formulario */}
-                <div className="p-6 overflow-y-auto max-h-[calc(90vh-200px)]">
+                <div className="p-6 overflow-y-auto max-h-[calc(90vh-200px)] scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100">
                     <form
+                        id="afiliado-form"
                         onSubmit={(e) => {
                             e.preventDefault();
                             form.handleSubmit();
@@ -896,33 +897,35 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                         className="space-y-4"
                     >
                         {renderFormulario()}
-
-                        {/* Botones de acción */}
-                        <div className="flex gap-3 pt-6 border-t border-gray-200">
-                            <button
-                                type="button"
-                                onClick={onClose}
-                                className="flex-1 px-4 py-3 text-gray-600 hover:text-gray-800 transition-colors font-medium"
-                            >
-                                Cancelar
-                            </button>
-                            <button
-                                type="submit"
-                                disabled={isSubmitting}
-                                className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed transition-colors font-medium flex items-center justify-center gap-2"
-                            >
-                                {isSubmitting ? (
-                                    <>
-                                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                                        Creando...
-                                    </>
-                                ) : (
-                                    `Crear ${tipoActivo.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}`
-                                )}
-                            </button>
-                        </div>
                     </form>
                 </div>
+
+                {/* Botones de acción */}
+                <div className="sticky bottom-0 flex justify-end gap-3 p-6 border-t bg-gray-50 z-10">
+                    <button
+                        type="submit"
+                        form="afiliado-form"
+                        disabled={isSubmitting}
+                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+                    >
+                        {isSubmitting ? (
+                            <>
+                                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                <span>Creando...</span>
+                            </>
+                        ) : (
+                            `Crear ${tipoActivo.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}`
+                        )}
+                    </button>
+                    <button
+                        type="button"
+                        onClick={onClose}
+                        className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors"
+                    >
+                        Cancelar
+                    </button>
+                </div>
+    
             </div>
         </div>
     );

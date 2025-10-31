@@ -1,4 +1,4 @@
-import { FaUserFriends, FaBook,FaHandHoldingWater, FaClipboardList, FaHistory, FaBoxes, FaUsers, FaTruck, FaRegQuestionCircle, FaEdit, FaImage, FaShieldAlt } from "react-icons/fa";
+import { FaUserFriends, FaBook,FaHandHoldingWater, FaClipboardList, FaHistory, FaBoxes, FaUsers, FaTruck, FaRegQuestionCircle, FaEdit, FaImage, FaShieldAlt, FaTachometerAlt } from "react-icons/fa";
 import { MdOutlineReportGmailerrorred } from "react-icons/md";
 import { GrHelpBook } from "react-icons/gr";
 export const modules = [
@@ -21,8 +21,10 @@ export const modules = [
   { name: 'Unidades de Medición', icon: <FaBoxes />, path: '/Inventario/UnidadesMedicion', Permiso: 'inventario', hidden: true },
   { name: 'Movimientos de Inventario', icon: <FaBoxes />, path: '/Inventario/Movimientos', Permiso: 'inventario', hidden: true },
 
-  // Seguridad 
-  { name: 'Bitácora de Cambios', icon: <FaHistory />, path: '/Bitacora', section: 'Seguridad', Permiso: 'bitacora' },
+  { name: 'Medidores', icon: <FaTachometerAlt />, path: '/Inventario/Materiales/Medidores', section: 'Gestión', Permiso: 'inventario', hidden: true },
+ 
+  // Seguridad
+  { name: 'Control de Auditoría', icon: <FaHistory />, path: '/Auditoria', section: 'Seguridad', Permiso: 'auditoria' },
 
   // Edición
   { name: 'Edición de Preguntas Frecuentes(FAQ)', icon: <FaRegQuestionCircle />, path: '/FAQ', section: 'Edición', Permiso: 'faq' },

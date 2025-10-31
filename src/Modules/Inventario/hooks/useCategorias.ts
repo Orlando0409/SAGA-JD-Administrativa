@@ -43,8 +43,8 @@ export const useCreateCategoria = () => {
   const queryClient = useQueryClient();
   const { showSuccess, showError } = useAlerts();
   return useMutation({
-    mutationFn: ({ data, idUsuario }: { data: CreateCategoriaMaterialData; idUsuario: number }) => 
-      CategoriasService.createCategoria(data, idUsuario),
+    mutationFn: ({ data }: { data: CreateCategoriaMaterialData; }) => 
+      CategoriasService.createCategoria(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['categories'] });
         showSuccess('Categoría creada', 'La categoría se ha creado exitosamente');
@@ -80,7 +80,7 @@ export const useUpdateEstadoCategoria = () => {
   const { showSuccessWithUndo, showError } = useAlerts();
 
   return useMutation({
-    mutationFn: ({ id, nuevoEstado }: { id: number; nuevoEstado: number }) =>
+    mutationFn: ({ id, nuevoEstado }: { id: number; nuevoEstado: number; }) =>
       CategoriasService.updateEstadoCategoria(id, nuevoEstado),
     onSuccess: (_, { id, nuevoEstado }) => {
       queryClient.invalidateQueries({ queryKey: ['categories'] });

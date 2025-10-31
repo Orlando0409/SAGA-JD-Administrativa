@@ -269,7 +269,7 @@ const EditModal: React.FC<EditModalProps> = ({ isOpen, onClose, persona }) => {
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 bg-white bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 backdrop-blur bg-opacity-10 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-hidden">
                 <div className="flex items-center justify-between p-6 border-b">
                     <h2 className="text-xl font-semibold text-gray-900">{getModalTitle()}</h2>
@@ -281,13 +281,14 @@ const EditModal: React.FC<EditModalProps> = ({ isOpen, onClose, persona }) => {
                     </button>
                 </div>
 
-                <div className="p-6 overflow-y-auto max-h-[calc(90vh-140px)]">
+                <div className="p-6 overflow-y-auto max-h-[calc(90vh-140px)] scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100">
                     <form
                         onSubmit={(e) => {
                             e.preventDefault();
                             form.handleSubmit();
                         }}
                         className="space-y-4"
+                        id="edit-afiliado-form"
                     >
                         {/* Campos para personas físicas (afiliado físico) */}
                         {persona.tipo === 'afiliado-fisico' && (
@@ -655,16 +656,14 @@ const EditModal: React.FC<EditModalProps> = ({ isOpen, onClose, persona }) => {
                             </div>
                         )}
 
-                        <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
-                            <button
-                                type="button"
-                                onClick={onClose}
-                                className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
-                            >
-                                Cancelar
-                            </button>
+               
+                    </form>
+                </div>
+                 <div className="sticky bottom-0 flex justify-end gap-3 p-6 border-t bg-gray-50 z-10">
+       
                             <button
                                 type="submit"
+                                form="edit-afiliado-form"
                                 disabled={isSubmitting}
                                 className="px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
                             >
@@ -677,9 +676,14 @@ const EditModal: React.FC<EditModalProps> = ({ isOpen, onClose, persona }) => {
                                     'Actualizar Afiliado'
                                 )}
                             </button>
+                            <button
+                                type="button"
+                                onClick={onClose}
+                                className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                            >
+                                Cancelar
+                            </button>
                         </div>
-                    </form>
-                </div>
             </div>
         </div>
     );

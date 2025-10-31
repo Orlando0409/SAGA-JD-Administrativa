@@ -370,7 +370,7 @@ const CreateModalProveedor = ({ onClose, setShowCreateModal }: CreateModalProvee
             {tipoProveedor === 'fisico' ? (
               <LuUser className="w-6 h-6 text-blue-600" />
             ) : (
-              <LuBuilding2 className="w-6 h-6 text-green-600" />
+              <LuBuilding2 className="w-6 h-6 text-blue-600" />
             )}
             <h2 className="text-xl font-semibold text-gray-900">
               Registrar Proveedor {tipoProveedor === 'fisico' ? 'Físico' : 'Jurídico'}
@@ -409,7 +409,7 @@ const CreateModalProveedor = ({ onClose, setShowCreateModal }: CreateModalProvee
               }}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${
                 tipoProveedor === 'juridico'
-                  ? 'bg-green-100 text-green-700 border-2 border-green-300'
+                  ? 'bg-blue-100 text-blue-700 border-2 border-blue-300'
                   : 'bg-white text-gray-600 border-2 border-gray-200 hover:bg-gray-50'
               }`}
             >
@@ -597,7 +597,7 @@ const CreateModalProveedor = ({ onClose, setShowCreateModal }: CreateModalProvee
                         className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-colors ${
                           formErrors.Nombre_Proveedor
                             ? 'border-red-300 focus:ring-red-500' 
-                            : 'border-gray-300 focus:ring-green-500'
+                            : 'border-gray-300 focus:ring-blue-500'
                         }`}
                         placeholder="Ingrese el nombre del proveedor (mín. 2 caracteres)"
                         maxLength={JURIDICO_VALIDATION_LIMITS.NOMBRE_MAX_LENGTH}
@@ -630,7 +630,7 @@ const CreateModalProveedor = ({ onClose, setShowCreateModal }: CreateModalProvee
                         className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-colors ${
                           formErrors.Cedula_Juridica
                             ? 'border-red-300 focus:ring-red-500' 
-                            : 'border-gray-300 focus:ring-green-500'
+                            : 'border-gray-300 focus:ring-blue-500'
                         }`}
                         placeholder="Ej: 3-101-654321 (10 dígitos, inicia con 2,3,4 o 5)"
                         maxLength={JURIDICO_VALIDATION_LIMITS.CEDULA_JURIDICA_MAX_LENGTH}
@@ -663,7 +663,7 @@ const CreateModalProveedor = ({ onClose, setShowCreateModal }: CreateModalProvee
                         className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-colors ${
                           formErrors.Razon_Social
                             ? 'border-red-300 focus:ring-red-500' 
-                            : 'border-gray-300 focus:ring-green-500'
+                            : 'border-gray-300 focus:ring-blue-500'
                         }`}
                         placeholder="Ingrese la razón social (mín. 2 caracteres)"
                         maxLength={JURIDICO_VALIDATION_LIMITS.RAZON_SOCIAL_MAX_LENGTH}
@@ -716,23 +716,23 @@ const CreateModalProveedor = ({ onClose, setShowCreateModal }: CreateModalProvee
 
             <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
               <button
+                type="submit"
+                disabled={isCreating}
+                className={`px-4 py-2 text-white rounded-lg transition-colors ${
+                  isCreating 
+                    ? 'bg-blue-300 cursor-not-allowed' 
+                    : 'bg-blue-600 hover:bg-blue-700' 
+                }`}
+              >
+                {isCreating ? 'Creando...' : `Crear Proveedor ${tipoProveedor === 'fisico' ? 'Físico' : 'Jurídico'}`}
+              </button>
+                   <button
                 type="button"
                 onClick={handleClose}
                 className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
                 disabled={isCreating}
               >
                 Cancelar
-              </button>
-              <button
-                type="submit"
-                disabled={isCreating}
-                className={`px-4 py-2 text-white rounded-lg transition-colors ${
-                  isCreating 
-                    ? `${tipoProveedor === 'fisico' ? 'bg-blue-300' : 'bg-green-300'} cursor-not-allowed` 
-                    : `${tipoProveedor === 'fisico' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-green-600 hover:bg-green-700'}` 
-                }`}
-              >
-                {isCreating ? 'Creando...' : `Crear Proveedor ${tipoProveedor === 'fisico' ? 'Físico' : 'Jurídico'}`}
               </button>
             </div>
           </form>

@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
 import { LuTrendingUp } from 'react-icons/lu';
-import { useIngresoMaterial } from '../../hooks/HookMaterialMovimiento';
 import { IngresoEgresoMaterialSchema } from '../../schema/MaterialMovimientoSchema';
 import type { Material, IngresoEgresoMaterialData } from '../../models/Inventario';
-import { useAuth } from '@/Modules/Auth/Context/AuthContext';
+import { useIngresoMaterial } from '../../hooks/useMovimientos';
 
 interface IngresoMaterialModalProps {
   isOpen: boolean;
@@ -16,7 +15,6 @@ const IngresoMaterialModal: React.FC<IngresoMaterialModalProps> = ({
   onClose,
   material
 }) => {
-  const { user } = useAuth();
   const ingresoMutation = useIngresoMaterial();
   const [formData, setFormData] = useState<IngresoEgresoMaterialData>({
     Id_Material: material.Id_Material,
@@ -52,15 +50,8 @@ const IngresoMaterialModal: React.FC<IngresoMaterialModalProps> = ({
     }
 
     try {
-      if (!user?.Id_Usuario) {
-        console.error('Usuario no autenticado');
-        return;
-      }
 
-      await ingresoMutation.mutateAsync({
-        idUsuario: user.Id_Usuario,
-        data: formData
-      });
+      await ingresoMutation.mutateAsync(formData);
       setFormData({ Id_Material: material.Id_Material, Cantidad: 1 });
       onClose();
     } catch (error) {
@@ -88,7 +79,7 @@ const IngresoMaterialModal: React.FC<IngresoMaterialModalProps> = ({
             <h3 className="text-sm font-medium text-gray-700 mb-2">Material Seleccionado</h3>
             <p className="text-lg font-semibold text-gray-900">{material.Nombre_Material}</p>
             <p className="text-sm text-gray-600">
-              Stock actual: {material.Cantidad} {material.Unidad_Medicion.Nombre_Unidad_Medicion || material.Unidad_Medicion.Nombre_Unidad}
+              Stock actual: {material.Cantidad} {material.Unidad_Medicion.Nombre_Unidad_Medicion}
             </p>
           </div>
 
@@ -116,7 +107,7 @@ const IngresoMaterialModal: React.FC<IngresoMaterialModalProps> = ({
           <div className="text-sm text-gray-600">
             <p>Nuevo stock después del ingreso:</p>
             <p className="font-semibold text-green-600">
-              {material.Cantidad + formData.Cantidad} {material.Unidad_Medicion.Nombre_Unidad_Medicion || material.Unidad_Medicion.Nombre_Unidad}
+              {material.Cantidad + formData.Cantidad} {material.Unidad_Medicion.Nombre_Unidad_Medicion}
             </p>
           </div>
 

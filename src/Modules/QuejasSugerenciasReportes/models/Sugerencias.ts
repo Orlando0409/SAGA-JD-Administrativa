@@ -7,12 +7,8 @@ export interface Sugerencia {
     Id_Sugerencia: number;
     Fecha_Sugerencia: Date | string;
     Mensaje: string;
-    Adjunto?: string[] | null;
+    Correo: string;
+    Adjunto?: string;
     RespuestasSugerencia?: string | null;
     Estado: EstadoSugerencia;
-}
-
-// Interfaz para crear una sugerencia
-export interface CreateSugerenciaData {
-    Mensaje: string;
 }

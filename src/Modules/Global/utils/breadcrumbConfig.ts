@@ -1,9 +1,10 @@
 import { Home } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { LuTags, LuActivity, LuRuler, LuPackage, LuShield } from 'react-icons/lu';
-import { FaBoxes, FaUsers, FaTruck, FaUserFriends, FaBook,FaClipboardList, FaHandHoldingWater, FaRegQuestionCircle, FaEdit, FaImage, FaHistory } from 'react-icons/fa';
+import { FaBoxes, FaUsers, FaTruck, FaUserFriends, FaBook,FaClipboardList, FaHandHoldingWater, FaRegQuestionCircle, FaEdit, FaImage, FaHistory, FaTachometerAlt } from 'react-icons/fa';
 import { MdOutlineReportGmailerrorred } from "react-icons/md";
 import { GrHelpBook } from "react-icons/gr";
+
 
 export interface BreadcrumbItem {
   label: string;
@@ -62,12 +63,8 @@ export const breadcrumbConfig: BreadcrumbConfig = {
   },
   
   // Seguridad
-  '/Usuarios/Roles': {
-    label: 'Gestión de Roles',
-    icon: LuShield as LucideIcon,
-  },
-  '/Bitacora': {
-    label: 'Bitácora de Cambios',
+  '/Auditoria': {
+    label: 'Control de Auditoría',
     icon:   FaHistory as LucideIcon,
   },
   
@@ -91,6 +88,11 @@ export const breadcrumbConfig: BreadcrumbConfig = {
     icon: GrHelpBook as LucideIcon,
   },
   
+  //sub-ruta de Usuarios
+    '/Usuarios/Roles': {
+    label: 'Gestión de Roles',
+    icon: LuShield as LucideIcon,
+  },
 
   // Sub-rutas de Inventario
   '/Inventario/Materiales': {
@@ -109,6 +111,12 @@ export const breadcrumbConfig: BreadcrumbConfig = {
     label: 'Movimientos de Inventario',
     icon: LuActivity as LucideIcon,
   },
+
+  '/Inventario/Materiales/Medidores': {
+    label: 'Medidores',
+    icon: FaTachometerAlt as LucideIcon,
+  },
+
 };
 
 /**

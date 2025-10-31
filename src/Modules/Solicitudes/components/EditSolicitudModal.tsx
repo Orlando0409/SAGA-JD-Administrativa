@@ -3,16 +3,12 @@ import { useState } from 'react';
 import type { SolicitudFisica } from '../Models/ModelosFisicas';
 import type { SolicitudJuridica } from '../Models/ModelosJuridicos';
 import { useAlerts } from '@/Modules/Global/context/AlertContext';
-//funciona 
+
 // Tipo unificado para identificar qué estamos editando
 type SolicitudParaEditar = {
     tipo: 'solicitud-fisica' | 'solicitud-juridica';
     datos: SolicitudFisica | SolicitudJuridica;
 };
-
-
-
-
 
 interface EditSolicitudModalProps {
     isOpen: boolean;
@@ -66,14 +62,14 @@ const EditSolicitudModal: React.FC<EditSolicitudModalProps> = ({ isOpen, onClose
                 Nombre: solicitudFisica.Nombre,
                 Apellido1: solicitudFisica.Apellido1,
                 Apellido2: solicitudFisica.Apellido2 || '',
-                Cedula: solicitudFisica.Identificacion || '', // Priorizar Identificacion
+                Cedula: solicitudFisica.Identificacion || '',
                 Numero_Telefono: solicitudFisica.Numero_Telefono,
                 Correo: solicitudFisica.Correo,
                 Direccion_Exacta: solicitudFisica.Direccion_Exacta || '',
                 Edad: solicitudFisica.Edad,
                 Tipo_Solicitud: solicitudFisica.Tipo_Solicitud,
             };
-        } else { // solicitud-juridica
+        } else {
             const solicitudJuridica = datos as SolicitudJuridica;
             return {
                 Razon_Social: solicitudJuridica.Razon_Social,
@@ -92,7 +88,6 @@ const EditSolicitudModal: React.FC<EditSolicitudModalProps> = ({ isOpen, onClose
             setFormErrors({});
 
             try {
-                // TODO: Implementar actualizaciones para solicitudes cuando estén disponibles las funciones
                 console.log('Actualizar solicitud:', solicitud.tipo, value);
                 showSuccess(`${solicitud.tipo === 'solicitud-fisica' ? 'Solicitud física' : 'Solicitud jurídica'} actualizada exitosamente`);
                 onClose();
@@ -112,8 +107,7 @@ const EditSolicitudModal: React.FC<EditSolicitudModalProps> = ({ isOpen, onClose
                 <span className="text-xs text-gray-500">
                     {hasError ? '' : `Máximo ${max} caracteres`}
                 </span>
-                <span className={`text-xs font-medium ${isNearLimit ? 'text-orange-600' : 'text-gray-500'
-                    }`}>
+                <span className={`text-xs font-medium ${isNearLimit ? 'text-orange-600' : 'text-gray-500'}`}>
                     {current}/{max}
                     {isNearLimit && current < max && (
                         <span className="ml-1 text-orange-600">
@@ -128,9 +122,9 @@ const EditSolicitudModal: React.FC<EditSolicitudModalProps> = ({ isOpen, onClose
     const getModalTitle = () => {
         switch (solicitud.tipo) {
             case 'solicitud-fisica':
-                return ' Editar Solicitud Física';
+                return 'Editar Solicitud Física';
             case 'solicitud-juridica':
-                return ' Editar Solicitud Jurídica';
+                return 'Editar Solicitud Jurídica';
             default:
                 return 'Editar Solicitud';
         }
@@ -139,8 +133,9 @@ const EditSolicitudModal: React.FC<EditSolicitudModalProps> = ({ isOpen, onClose
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-hidden">
+        <div className="fixed inset-0 backdrop-blur bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
+                {/* Header */}
                 <div className="flex items-center justify-between p-6 border-b">
                     <h2 className="text-xl font-semibold text-gray-900">{getModalTitle()}</h2>
                     <button
@@ -153,8 +148,10 @@ const EditSolicitudModal: React.FC<EditSolicitudModalProps> = ({ isOpen, onClose
                     </button>
                 </div>
 
-                <div className="p-6 overflow-y-auto max-h-[calc(90vh-140px)]">
+                {/* Contenido del formulario */}
+                <div className="p-6 overflow-y-auto max-h-[calc(90vh-200px)] scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100">
                     <form
+                        id="edit-solicitud-form"
                         onSubmit={(e) => {
                             e.preventDefault();
                             form.handleSubmit();
@@ -388,23 +385,25 @@ const EditSolicitudModal: React.FC<EditSolicitudModalProps> = ({ isOpen, onClose
                                 </div>
                             )}
                         </form.Field>
-
-                        <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
-                            <button
-                                type="button"
-                                onClick={onClose}
-                                className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-                            >
-                                Cancelar
-                            </button>
-                            <button
-                                type="submit"
-                                className="px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
-                            >
-                                Actualizar Solicitud
-                            </button>
-                        </div>
                     </form>
+                </div>
+
+                {/* Botones de acción - Fuera del form */}
+                <div className="flex justify-end gap-3 p-6 border-t bg-gray-50">
+                    <button
+                        type="submit"
+                        form="edit-solicitud-form"
+                        className="px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
+                    >
+                        Actualizar Solicitud
+                    </button>
+                    <button
+                        type="button"
+                        onClick={onClose}
+                        className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                    >
+                        Cancelar
+                    </button>
                 </div>
             </div>
         </div>

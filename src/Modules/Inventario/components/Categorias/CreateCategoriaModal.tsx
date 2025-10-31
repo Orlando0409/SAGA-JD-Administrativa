@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { LuX } from 'react-icons/lu';
 import { useCreateCategoria } from '../../hooks/useCategorias';
-import { useAuth } from '@/Modules/Auth/Context/AuthContext';
 import { CreateCategoriaMaterialSchema, type CreateCategoriaMaterialSchemaData } from '../../schema/CreateCategoriaMaterialSchema';
 
 interface CreateCategoriaModalProps {
@@ -12,7 +11,6 @@ interface CreateCategoriaModalProps {
 
 const CreateCategoriaModal: React.FC<CreateCategoriaModalProps> = ({ isOpen, onClose }) => {
   const createCategoriaMutation = useCreateCategoria();
-  const { user } = useAuth();
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [charCount, setCharCount] = useState({ name: 0, description: 0 });
   const MAX_NAME_LENGTH = 30;
@@ -45,10 +43,6 @@ const CreateCategoriaModal: React.FC<CreateCategoriaModalProps> = ({ isOpen, onC
     e.preventDefault();
     setFormErrors({});
 
-    if (!user?.Id_Usuario) {
-      setFormErrors({ Nombre_Categoria: 'No se pudo obtener la información del usuario' });
-      return;
-    }
     const dataToValidate = {
       Nombre_Categoria: formData.Nombre_Categoria.trim(),
       Descripcion_Categoria: formData.Descripcion_Categoria?.trim()
@@ -69,7 +63,6 @@ const CreateCategoriaModal: React.FC<CreateCategoriaModalProps> = ({ isOpen, onC
     try {
       await createCategoriaMutation.mutateAsync({
         data: validation.data,
-        idUsuario: user.Id_Usuario
       });
       setFormData({ Nombre_Categoria: '', Descripcion_Categoria: '' });
       setCharCount({ name: 0, description: 0 });

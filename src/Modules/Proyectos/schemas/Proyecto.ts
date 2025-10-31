@@ -20,18 +20,14 @@ export const ProyectoSchema = z.object({
       "La descripción contiene caracteres no permitidos."
     ),
   
-  Imagen_Proyecto: z
+  Imagen_Url: z
     .instanceof(File)
     .optional()
     .refine((file) => {
       if (!file) return true; // Opcional para edición
-      return ["image/jpeg", "image/png", "image/webp"].includes(file.type);
-    }, "Solo se permiten imágenes JPG, PNG o WEBP"),
+      return ["image/jpeg", "image/png", "image/heic", "application/pdf"].includes(file.type);
+    }, "Solo se permiten imágenes JPG, PNG, HEIC o archivos PDF"),
   
-  Id_Usuario: z
-    .number()
-    .min(1, "El ID del usuario debe ser mayor a 0")
-    .max(999999, "El ID del usuario no puede ser mayor a 999,999")
 });
 
 // Esquema para actualización (todos los campos opcionales excepto ID)
@@ -63,8 +59,8 @@ export const ProyectoUpdateSchema = z.object({
     .optional()
     .refine((file) => {
       if (!file) return true;
-      return ["image/jpeg", "image/png", "image/webp"].includes(file.type);
-    }, "Solo se permiten imágenes JPG, PNG o WEBP")
+      return ["image/jpeg", "image/png", "image/heic", "application/pdf"].includes(file.type);
+    }, "Solo se permiten imágenes JPG, PNG, HEIC o archivos PDF")
 });
 
 // Tipos TypeScript inferidos de los esquemas

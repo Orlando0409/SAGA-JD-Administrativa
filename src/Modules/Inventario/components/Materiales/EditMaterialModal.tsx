@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useGetAllCategories } from '../../hooks/useCategorias';
+import { useGetCategoriasActivas } from '../../hooks/useCategorias';
 import { useUpdateMaterial } from '../../hooks/useMaterials';
-import { useUnidadesMedicionSimple } from '../../hooks/HookUnidadMedicion';
+import { useUnidadesMedicionActivas } from '../../hooks/HookUnidadMedicion';
 import { useAlerts } from '@/Modules/Global/context/AlertContext';
 import { UpdateMaterialSchema } from '../../schema/UpdateMaterialSchema';
 import { 
@@ -35,8 +35,8 @@ const EditMaterialModal: React.FC<EditMaterialModalProps> = ({
 }) => {
   const { showError } = useAlerts();
   const updateMaterialMutation = useUpdateMaterial();
-  const { data: categorias = [] } = useGetAllCategories();
-  const { data: unidadesMedicion = [] } = useUnidadesMedicionSimple();
+  const { data: categorias = [] } = useGetCategoriasActivas();
+  const { data: unidadesMedicion = [] } = useUnidadesMedicionActivas();
   const [isCreateCategoriaModalOpen, setIsCreateCategoriaModalOpen] = useState(false);
   const [isCreateUnidadMedicionModalOpen, setIsCreateUnidadMedicionModalOpen] = useState(false);
     
@@ -58,13 +58,13 @@ const EditMaterialModal: React.FC<EditMaterialModalProps> = ({
 
   useEffect(() => {
     if (isOpen && material) {
-      const categorias = (material.materialCategorias && material.materialCategorias.length > 0) 
-        ? material.materialCategorias 
+      const categorias = (material.Categorias && material.Categorias.length > 0) 
+        ? material.Categorias 
         : (material.Categorias || []);
       
       const categoriaIds = categorias.map(cat => {
-        if (cat.Categoria) {
-          return cat.Categoria.Id_Categoria;
+        if (cat) {
+          return cat.Id_Categoria;
         }
         return (cat as any).Id_Categoria;
       });
@@ -168,15 +168,16 @@ const EditMaterialModal: React.FC<EditMaterialModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-opacity-10 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-lg w-full max-w-2xl max-h-[85vh] overflow-y-auto">
-        <div className="flex items-center justify-between p-6 border-b">
-          <h2 className="text-xl font-semibold text-gray-900">
+      <div className="bg-white rounded-lg shadow-2xl border border-gray-200 w-full max-w-lg mx-4 flex flex-col overflow-hidden max-h-[90vh]">
+        <div className="sticky top-0 bg-white border-b border-gray-200 p-4 z-10">
+          <h2 className="text-xl font-bold text-gray-900">
             Editar Material
           </h2>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100">
+          <form id="edit-material-form" onSubmit={handleSubmit} className="p-6 space-y-4">
+          <div className="space-y-4">
             <div>
               <div className="flex justify-between items-center mb-1">
                 <label htmlFor="nombre" className="block text-sm flex gap-2 font-medium text-gray-700">
@@ -276,9 +277,8 @@ const EditMaterialModal: React.FC<EditMaterialModalProps> = ({
 
           <div>
             <div className="flex justify-between items-center mb-1">
-              <label htmlFor="descripcion" className="block text-sm flex gap-2font-medium text-gray-700">
-                Descripción
-                <p className='text-red-500'>*</p>
+              <label htmlFor="descripcion" className="block text-sm flex gap-2 font-medium text-gray-700">
+                Descripción (Opcional)
               </label>
               {renderCharCounter(fieldCharCounts.descripcion, DESCRIPCION_MAX_LENGTH)}
             </div>
@@ -339,56 +339,58 @@ const EditMaterialModal: React.FC<EditMaterialModalProps> = ({
               <p className="mt-1 text-sm text-red-600">{formErrors.IDS_Categorias}</p>
             )}
           </div>
+          </form>
+        </div>
 
-          <div className="flex justify-end gap-3 pt-4 border-t">
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button
+        <div className="sticky bottom-0 flex justify-end gap-3 p-6 border-t bg-gray-50 z-10">
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button
+                form="edit-material-form"
+                disabled={isSubmitting}
+                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isSubmitting ? 'Actualizando...' : 'Actualizar Material'}
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>¿Confirmar actualización?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  ¿Estás seguro de que deseas actualizar este material? Esta acción modificará la información del material en el inventario.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogAction
+                  onClick={(e) => handleSubmit(e as any)}
                   disabled={isSubmitting}
-                  className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {isSubmitting ? 'Actualizando...' : 'Actualizar Material'}
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>¿Confirmar actualización?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    ¿Estás seguro de que deseas actualizar este material? Esta acción modificará la información del material en el inventario.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogAction
-                    onClick={(e) => handleSubmit(e as any)}
-                    disabled={isSubmitting}
-                  >
-                    {isSubmitting ? 'Actualizando...' : 'Confirmar'}
-                  </AlertDialogAction>
-                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors"
-            >
-              Cancelar
-            </button>
-          </div>
-        </form>
+                  {isSubmitting ? 'Actualizando...' : 'Confirmar'}
+                </AlertDialogAction>
+                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+          <button
+            type="button"
+            onClick={onClose}
+            className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors"
+          >
+            Cancelar
+          </button>
+        </div>
       </div>
 
-        <CreateCategoriaModal
-          isOpen={isCreateCategoriaModalOpen}
-          onClose={() => setIsCreateCategoriaModalOpen(false)}
-        />
-        <CreateUnidadMedicionModal
-          isOpen={isCreateUnidadMedicionModalOpen}
-          onClose={() => setIsCreateUnidadMedicionModalOpen(false)}
-        />
+      <CreateCategoriaModal
+        isOpen={isCreateCategoriaModalOpen}
+        onClose={() => setIsCreateCategoriaModalOpen(false)}
+      />
+      <CreateUnidadMedicionModal
+        isOpen={isCreateUnidadMedicionModalOpen}
+        onClose={() => setIsCreateUnidadMedicionModalOpen(false)}
+      />
     </div>
-  )
-}
+  );
+};
 
-export default EditMaterialModal
+export default EditMaterialModal;

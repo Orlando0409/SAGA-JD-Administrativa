@@ -2,6 +2,7 @@ import { useForm } from '@tanstack/react-form';
 import { useState } from 'react';
 import PhoneInput, { isValidPhoneNumber, type Value as PhoneValue } from 'react-phone-number-input';
 import 'react-phone-number-input/style.css';
+import { LuX } from 'react-icons/lu';
 import { 
   EditProveedorSchema, 
   type EditProveedorSchemaData,
@@ -194,10 +195,13 @@ const EditProveedorModal: React.FC<EditProveedorModalProps> = ({ isOpen, onClose
   if (!isOpen) return null;
 
   return (
-    <div className="absolute inset-0 bg-black/10 backdrop-blur-md flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-black/10 backdrop-blur-md flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4 max-h-[90vh] overflow-hidden">
         <div className="flex items-center justify-between p-6 border-b">
           <h2 className="text-xl font-semibold text-gray-900">Editar Proveedor</h2>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors">
+            <LuX className="w-6 h-6" />
+          </button>
         </div>
 
         <div className="p-6 overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100 max-h-[calc(90vh-140px)]">
@@ -332,14 +336,7 @@ const EditProveedorModal: React.FC<EditProveedorModalProps> = ({ isOpen, onClose
             </form.Field>
 
             <div className="flex justify-end gap-3 pt-4">
-              <button
-                type="button"
-                onClick={onClose}
-                className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
-                disabled={isUpdating}
-              >
-                Cancelar
-              </button>
+             
               <button
                 type="submit"
                 disabled={isUpdating}
@@ -350,6 +347,14 @@ const EditProveedorModal: React.FC<EditProveedorModalProps> = ({ isOpen, onClose
                 }`}
               >
                 {isUpdating ? 'Actualizando...' : 'Actualizar Proveedor'}
+              </button>
+               <button
+                type="button"
+                onClick={onClose}
+                className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                disabled={isUpdating}
+              >
+                Cancelar
               </button>
             </div>
           </form>

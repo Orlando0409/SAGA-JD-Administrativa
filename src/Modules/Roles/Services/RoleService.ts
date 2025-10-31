@@ -11,19 +11,19 @@ export const GetRoleById = async (id: number): Promise<Role> => {
 }
 
 export const CreateRole = async (roleData: CreateRoleData): Promise<Role> => {
-    const response = await axiosPrivate.post("/roles", roleData);
+    const response = await axiosPrivate.post(`/roles/`, roleData);
     return response.data;
 }
 export const UpdateRole = async (Id_Rol:number, roleData: UpdateRoleData): Promise<Role> => {
-    const response = await axiosPrivate.put(`/roles/${Id_Rol}`, roleData);
+    const response = await axiosPrivate.put(`/roles/${Id_Rol}/`, roleData);
     return response.data;
 }
 export const deactivateRole = async (id: number): Promise<void> => {
-  await axiosPrivate.delete(`/roles/${id}`);
+  await axiosPrivate.delete(`/roles/${id}/`);
 };
 
 export const activateRole = async (id: number): Promise<void> => {
-  await axiosPrivate.patch(`/roles/restore/${id}`);
+  await axiosPrivate.patch(`/roles/restore/${id}/`);
 };
 export const GetPermissions = async (): Promise<Permiso[]> => {
     const response = await axiosPrivate.get("/roles/allPermissions");

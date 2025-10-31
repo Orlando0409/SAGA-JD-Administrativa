@@ -7,9 +7,6 @@ export async function getAfiliadosFisicos(): Promise<AfiliadoFisico[]> {
     return response.data;
 }
 
-
-
-
 // En tu Hook o Service
 export const createAfiliadoFisico = async (formData: FormData) => {
     console.log("🚀 Hook - Enviando FormData:", formData);
@@ -32,5 +29,10 @@ export const updateAfiliadoFisico = async (cedula: string, formData: FormData) =
         },
     });
 
+    return response.data;
+};
+
+export const updateEstadoAfiliadoFisico = async (id: string, nuevoEstadoId: number) => {
+    const response = await apiAuth.patch(`/afiliados/fisico/${id}/update/estado/${nuevoEstadoId}`);
     return response.data;
 };
