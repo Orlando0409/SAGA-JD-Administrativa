@@ -303,7 +303,7 @@ export default function ProveedoresTable() {
                         />
                     </div>
                     <button
-                        className="px-3 py-2 rounded-lg bg-sky-600 text-white hover:bg-sky-700 shadow-sm text-sm whitespace-nowrap"
+                        className="px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 shadow-sm text-sm whitespace-nowrap"
                         onClick={() => setShowCreateModal(true)}
                     >
                         + Nuevo Proveedor

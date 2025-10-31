@@ -143,7 +143,7 @@ const DetailAbonados: React.FC<DetailAbonadosProps> = ({ persona, isOpen, onClos
 
     return (
         <div className="fixed inset-0 backdrop-blur flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-lg shadow-2xl border border-gray-200 w-full max-w-4xl max-h-[90vh] overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100">
+            <div className="bg-white rounded-lg shadow-2xl border border-gray-200 w-full max-w-3xl max-h-[90vh] overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100">
                 {/* Header */}
                 <div className="sticky top-0 bg-white border-b border-gray-200 p-6 z-10">
                     <div className="flex items-center justify-between">

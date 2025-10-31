@@ -28,8 +28,8 @@ export const obtenerReportes = async () => {
     const response = await axiosPrivate.get('/reportes');
     return response.data;
 }
-export const actualizarEstadoReporte = async (idReporte: number, IdEstadoReporte: number) => {
-    const response = await axiosPrivate.patch(`/reportes/${idReporte}/estado`, { IdEstadoReporte });
+export const actualizarEstadoReporte = async (idReporte: number, Id_Estado_Reporte: number) => {
+    const response = await axiosPrivate.patch(`/reportes/${idReporte}/estado`, { Id_Estado_Reporte });
     return response.data;
 }
 export const actualizarEstadoSugerencia = async (idSugerencia: number, Id_EstadoSugerencia: number) => {

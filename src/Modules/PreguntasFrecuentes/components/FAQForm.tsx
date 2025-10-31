@@ -204,7 +204,7 @@ export default function FAQForm({ onClose, refetch, initialData }: Readonly<FAQF
                 <div className="flex justify-end gap-4">
                     <button
                         type="submit"
-                        className={`px-4 py-2 rounded-lg shadow-sm text-sm ${isValid ? 'bg-sky-600 text-white hover:bg-sky-700' : 'bg-gray-300 text-gray-600 cursor-not-allowed'}`}
+                        className={`px-4 py-2 rounded-lg shadow-sm text-sm ${isValid ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-gray-300 text-gray-600 cursor-not-allowed'}`}
                         disabled={!isValid}
                     >
                         {isEdit ? "Guardar Cambios" : "Crear Pregunta"}

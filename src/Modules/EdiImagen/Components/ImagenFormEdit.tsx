@@ -12,12 +12,11 @@ interface ImagenFormEditProps {
 }
 
 export default function ImagenFormEdit({ onClose, refetch, imagen }: ImagenFormEditProps) {
-
   const { showSuccess, showError } = useAlerts();
 
   const [nombre, setNombre] = useState(imagen.Nombre_Imagen || "");
   const [file, setFile] = useState<File | null>(null);
-  const [_preview, setPreview] = useState(imagen.Imagen || "");
+  const [preview, setPreview] = useState(imagen.Imagen || "");
   const [nombreError, setNombreError] = useState("");
   const [isValid, setIsValid] = useState(false);
 
@@ -91,75 +90,114 @@ export default function ImagenFormEdit({ onClose, refetch, imagen }: ImagenFormE
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-5">
-      {/* Campo nombre */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700">
-          Nombre de la imagen
-        </label>
-        <input
-          type="text"
-          value={nombre}
-          onChange={handleNombreChange}
-          maxLength={100}
-          className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-sky-500 text-sm"
-          required
-        />
-        <div className="text-right text-xs text-gray-500 mt-1">
-          {nombre.length}/100
+    <div className="fixed inset-0 bg-opacity-10 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-hidden">
+        {/* Header */}
+        <div className="flex items-center justify-between p-6 border-b border-gray-200">
+          <h2 className="text-xl font-semibold text-gray-800">Editar Imagen</h2>
+          <button
+            onClick={onClose}
+            className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+          >
+            <div className="w-5 h-5 text-gray-500 flex items-center justify-center">✕</div>
+          </button>
         </div>
-        {nombreError ? (
-          <p className="text-xs text-red-500 mt-1">{nombreError}</p>
-        ) : (
-          <p className="text-xs text-gray-400 mt-1">&nbsp;</p>
-        )}
-      </div>
 
-      {/* Campo imagen */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700">
-          Cambiar imagen
-        </label>
-        <div className="flex flex-col sm:flex-row gap-4 items-center">
-          <div className="relative w-full sm:w-2/3">
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleFileChange}
-              className="absolute inset-0 opacity-0 cursor-pointer"
-            />
-            <div className="w-full px-3 py-2 rounded-lg border border-gray-300 bg-white text-sm text-gray-600 cursor-pointer">
-              {file ? file.name : "Seleccionar nueva imagen"}
+        {/* Contenido del formulario */}
+        <div className="p-6 overflow-y-auto max-h-[calc(90vh-180px)] scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100 scrollbar-rounded">
+          <form
+            id="edit-imagen-form"
+            onSubmit={handleSubmit}
+            className="space-y-5"
+          >
+            {/* Campo nombre */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Nombre de la imagen *
+              </label>
+              <input
+                type="text"
+                value={nombre}
+                onChange={handleNombreChange}
+                maxLength={100}
+                className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-sky-500 text-sm"
+                required
+              />
+              <div className="text-right text-xs text-gray-500 mt-1">
+                {nombre.length}/100
+              </div>
+              {nombreError && (
+                <p className="text-xs text-red-500 mt-1">{nombreError}</p>
+              )}
             </div>
-          </div>
 
-         
+            {/* Campo imagen */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Cambiar imagen
+              </label>
+              <div className="relative">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileChange}
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                />
+                <div className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 flex items-center justify-between cursor-pointer hover:bg-gray-100 transition-colors">
+                  <span className="text-gray-700 text-sm">
+                    {file ? file.name : "Seleccionar nueva imagen..."}
+                  </span>
+                  <span className="bg-blue-500 text-white px-3 py-1 rounded text-sm">
+                    Examinar
+                  </span>
+                </div>
+              </div>
+              <p className="text-xs text-gray-500 mt-1">
+                Formatos permitidos: JPG, PNG, GIF, WEBP
+              </p>
+            </div>
+
+            {/* Preview de la imagen */}
+            {preview && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Vista previa
+                </label>
+                <div className="border border-gray-300 rounded-lg p-2 bg-gray-50">
+                  <img
+                    src={preview}
+                    alt="Preview"
+                    className="max-w-full h-auto max-h-64 mx-auto rounded"
+                  />
+                </div>
+              </div>
+            )}
+          </form>
+        </div>
+
+        {/* Botones de acción - Fuera del form */}
+        <div className="flex justify-end gap-3 p-6 border-t bg-gray-50">
+          <button
+            type="submit"
+            form="edit-imagen-form"
+            disabled={!isValid}
+            className={`px-4 py-2 rounded-lg shadow-sm text-sm transition-colors ${
+              isValid
+                ? "bg-blue-600 text-white hover:bg-blue-700"
+                : "bg-gray-300 text-gray-600 cursor-not-allowed"
+            }`}
+          >
+            Guardar Cambios
+          </button>
+          <button
+            type="button"
+            onClick={onClose}
+            className="px-4 py-2 rounded-lg bg-gray-200 text-gray-800 hover:bg-gray-300 shadow-sm text-sm transition-colors"
+          >
+            Cancelar
+          </button>
         </div>
       </div>
-
-      {/* Botones */}
-      <div className="flex justify-end gap-4 pt-2">
-        <button
-          type="button"
-          onClick={onClose}
-          className="px-4 py-2 rounded-lg bg-gray-200 text-gray-800 hover:bg-gray-300 shadow-sm text-sm"
-        >
-          Cancelar
-        </button>
-        <button
-          type="submit"
-          disabled={!isValid}
-          className={`px-4 py-2 rounded-lg shadow-sm text-sm ${
-            isValid
-              ? "bg-sky-600 text-white hover:bg-sky-700"
-              : "bg-gray-300 text-gray-600 cursor-not-allowed"
-          }`}
-        >
-          Guardar
-        </button>
-      </div>
-    </form>
+    </div>
   );
 }
-
-

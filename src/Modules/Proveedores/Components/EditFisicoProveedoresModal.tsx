@@ -336,14 +336,7 @@ const EditProveedorModal: React.FC<EditProveedorModalProps> = ({ isOpen, onClose
             </form.Field>
 
             <div className="flex justify-end gap-3 pt-4">
-              <button
-                type="button"
-                onClick={onClose}
-                className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
-                disabled={isUpdating}
-              >
-                Cancelar
-              </button>
+             
               <button
                 type="submit"
                 disabled={isUpdating}
@@ -354,6 +347,14 @@ const EditProveedorModal: React.FC<EditProveedorModalProps> = ({ isOpen, onClose
                 }`}
               >
                 {isUpdating ? 'Actualizando...' : 'Actualizar Proveedor'}
+              </button>
+               <button
+                type="button"
+                onClick={onClose}
+                className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                disabled={isUpdating}
+              >
+                Cancelar
               </button>
             </div>
           </form>

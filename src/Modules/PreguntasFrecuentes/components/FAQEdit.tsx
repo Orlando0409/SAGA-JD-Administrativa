@@ -224,6 +224,13 @@ export default function FAQEdit({ faq, onClose, refetch }: FAQEditProps) {
                 </div>
 
                 <div className="flex justify-end gap-4">
+                         <button
+                        type="submit"
+                        className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 shadow-sm text-sm"
+                        disabled={loading}
+                    >
+                        {loading ? "Actualizando..." : "Actualizar Pregunta"}
+                    </button>
                     <button
                         type="button"
                         onClick={onClose} // Oculta el modal
@@ -231,13 +238,7 @@ export default function FAQEdit({ faq, onClose, refetch }: FAQEditProps) {
                     >
                         Cancelar
                     </button>
-                    <button
-                        type="submit"
-                        className="px-4 py-2 rounded-lg bg-sky-600 text-white hover:bg-sky-700 shadow-sm text-sm"
-                        disabled={loading}
-                    >
-                        {loading ? "Actualizando..." : "Actualizar Pregunta"}
-                    </button>
+               
                 </div>
             </form>
         </div>

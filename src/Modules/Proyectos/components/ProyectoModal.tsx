@@ -159,6 +159,13 @@ export default function ProyectoModal({ isOpen, onClose, proyecto, refetch }: Pr
                             </div>
 
                             <div className="flex justify-end gap-4">
+                                   <button 
+                                    type="submit" 
+                                    disabled={updateProyectoMutation.isPending}
+                                    className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 shadow-sm text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    {updateProyectoMutation.isPending ? "Guardando..." : "Guardar"}
+                                </button>
                                 <button 
                                     type="button" 
                                     onClick={() => {
@@ -169,13 +176,7 @@ export default function ProyectoModal({ isOpen, onClose, proyecto, refetch }: Pr
                                 >
                                     Cancelar
                                 </button>
-                                <button 
-                                    type="submit" 
-                                    disabled={updateProyectoMutation.isPending}
-                                    className="px-4 py-2 rounded-lg bg-sky-600 text-white hover:bg-sky-700 shadow-sm text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                                >
-                                    {updateProyectoMutation.isPending ? "Guardando..." : "Guardar"}
-                                </button>
+                            
                             </div>
                         </form>
                     ) : (
@@ -264,6 +265,13 @@ export default function ProyectoModal({ isOpen, onClose, proyecto, refetch }: Pr
                                     className="px-4 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600 shadow-sm text-sm"
                                 >
                                     Editar
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={onClose}
+                                     className="px-4 py-2 rounded-lg bg-gray-200 text-gray-800 hover:bg-gray-300 shadow-sm text-sm"
+                                >
+                                    Cerrar
                                 </button>
                             </div>
                         </>

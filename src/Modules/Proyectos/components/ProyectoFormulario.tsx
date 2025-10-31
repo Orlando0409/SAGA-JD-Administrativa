@@ -264,7 +264,7 @@ export default function FormularioProyecto({
                     <div className="flex justify-end gap-4">
                         <button
                             type="submit"
-                            className="px-4 py-2 rounded-lg bg-sky-600 text-white hover:bg-sky-700 shadow-sm text-sm"
+                            className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 shadow-sm text-sm"
                             disabled={createProyectoMutation.status === "pending"}
                         >
                             {createProyectoMutation.status === "pending" ? "Creando..." : "Crear Proyecto"}

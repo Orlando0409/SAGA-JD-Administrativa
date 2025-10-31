@@ -174,12 +174,17 @@ export default function AbonadosTable() {
         }),
         columnHelper.accessor('Identificacion', {
             header: 'Cédula / Documento',
-            cell: (info) => info.getValue() || 'Sin dato',
+            cell: (info) => (
+                <div className='flex items-center justify-start'>
+                    {info.getValue() || 'Sin dato'}</div>
+            ),
             size: 150,
         }),
         columnHelper.accessor('Tipo_Identificacion', {
             header: 'Tipo Identificación',
-            cell: (info) => info.getValue() || 'Sin dato',
+            cell: (info) => (
+                <div>{info.getValue() || 'Sin dato'}</div>
+            ),
             size: 120,
         }),
         columnHelper.accessor('Estado', {
@@ -195,7 +200,7 @@ export default function AbonadosTable() {
                 } else if (estadoNombre === 'Pendiente') {
                     return <span className={`${base} bg-amber-100 text-amber-700`}>Pendiente</span>;
                 }
-                return <span className={`${base} bg-slate-100 text-slate-700`}>{estadoNombre}</span>;
+                return <div className='flex items-center justify-start'><span className={`${base} bg-slate-100 text-slate-700`}>{estadoNombre}</span></div>;
             },
             size: 120,
         }),

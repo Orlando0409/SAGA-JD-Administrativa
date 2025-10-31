@@ -272,8 +272,8 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 backdrop-blur bg-opacity-95 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-lg shadow-xl border border-gray-200 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 backdrop-blur bg-opacity-10 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-lg shadow-xl border border-gray-200 w-full max-w-3xl max-h-[90vh] overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100">
                 {/* Header */}
                 <div className="sticky top-0 bg-white border-b border-gray-200 p-4 z-10">
                     <div className="flex items-center justify-between">
@@ -460,9 +460,10 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
                         </div>
                     </div>
 
-                    {/* Botones de Acción */}
-                    <div className="border-t border-gray-200 pt-4 mt-6">
-                        <div className="flex flex-col sm:flex-row justify-end gap-3">
+              
+                </div>
+
+                <div className="sticky bottom-0 flex justify-end gap-3 p-6 border-t bg-gray-50 z-10">
                             <button
                                 onClick={handleAprobar}
                                 disabled={isLoading || info.estado === 'Aprobada'}
@@ -506,9 +507,8 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
                             >
                                 Cancelar
                             </button>
-                        </div>
+                        
                     </div>
-                </div>
             </div>
         </div>
     );

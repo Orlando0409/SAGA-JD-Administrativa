@@ -79,7 +79,7 @@ export default function ActasEdit({ acta, onClose, refetch }: ActasEditProps) {
     };
 
     return (
-        <div className="fixed inset-0 bg-white bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-opacity-10 backdrop-blur-sm flex items-center justify-center z-50">
             <form
                 onSubmit={handleSubmit}
                 className="w-full max-w-md bg-white rounded-lg shadow-lg p-6 space-y-4"
@@ -226,18 +226,18 @@ export default function ActasEdit({ acta, onClose, refetch }: ActasEditProps) {
 
                 <div className="flex justify-end gap-4">
                     <button
+                        type="submit"
+                        className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 shadow-sm text-sm"
+                        disabled={updateActaMutation.isPending}
+                    >
+                        {updateActaMutation.isPending ? "Actualizando..." : "Actualizar Acta"}
+                    </button>
+                                <button
                         type="button"
                         onClick={onClose} // Oculta el modal
                         className="px-4 py-2 rounded-lg bg-gray-200 text-gray-800 hover:bg-gray-300 shadow-sm text-sm"
                     >
                         Cancelar
-                    </button>
-                    <button
-                        type="submit"
-                        className="px-4 py-2 rounded-lg bg-sky-600 text-white hover:bg-sky-700 shadow-sm text-sm"
-                        disabled={updateActaMutation.isPending}
-                    >
-                        {updateActaMutation.isPending ? "Actualizando..." : "Actualizar Acta"}
                     </button>
                 </div>
             </form>
