@@ -36,7 +36,10 @@ export const MODULOS = [
   'Manuales de Usuario',
   'Proyecto',
   'Lecturas',
-  'Actas'
+  'Actas',
+  'Quejas',
+  'Sugerencias',
+  'Reportes'
 
 ] as const;
 
