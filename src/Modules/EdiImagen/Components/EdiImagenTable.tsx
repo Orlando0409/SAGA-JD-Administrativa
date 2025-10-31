@@ -25,7 +25,6 @@ import {
 } from "@/Modules/Global/components/Sidebar/ui/alert-dialog";
 import { useAlerts } from "@/Modules/Global/context/AlertContext";
 import { useDeleteImagen, useGetImagenes } from "../Hook/hookEdiImagen";
-import { ImageIcon } from "lucide-react";
 import type { Imagen } from "../Models/ModelsEdiImagen";
 import ImagenForm from "./EdiImagenForm";
 import ImagenModal from "./EdiImagenModal";

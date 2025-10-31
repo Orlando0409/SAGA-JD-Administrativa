@@ -8,7 +8,7 @@ import {
   createColumnHelper,
   flexRender,
 } from '@tanstack/react-table';
-import { LuPlus, LuFilter, LuSearch, LuArrowLeft } from 'react-icons/lu';
+import { LuPlus, LuFilter, LuSearch } from 'react-icons/lu';
 import {
   useGetAllMaterials, 
   useGetMaterialesDisponibles,

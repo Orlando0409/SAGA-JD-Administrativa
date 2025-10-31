@@ -16,7 +16,6 @@ import {
   LuTrendingDown,
   LuCalendar,
   LuUser,
-  LuArrowLeft,
   LuPlus,
   LuFilter
 } from 'react-icons/lu';

@@ -54,10 +54,6 @@ const CatálogoAuditorias = () => {
     table.setPageIndex(0);
   };
 
-  const clearFilters = () => {
-    setAppliedFilters({});
-    table.setPageIndex(0);
-  };
 
   // Filtrado de datos
   const filteredData = useMemo(() => {
