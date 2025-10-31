@@ -11,6 +11,8 @@ import ProveedorJuridicoDetailModal from './DetailJuridicoProveedor';
 import EditFisicoProveedoresModal from './EditFisicoProveedoresModal';
 import EditJuridicoProveedorModal from './EditJuridicoProveedorModal';
 import { MdKeyboardArrowUp, MdKeyboardArrowDown, MdKeyboardDoubleArrowLeft, MdKeyboardArrowLeft, MdKeyboardArrowRight, MdKeyboardDoubleArrowRight } from 'react-icons/md';
+import ActionButtons from './ActionButtons';
+
 
 // Tipo unificado para la tabla (similar al patrón de AbonadosTable)
 type ProveedorUnificado = {
@@ -103,6 +105,8 @@ export default function ProveedoresTable() {
         }
     };
 
+
+
     const filteredData = useMemo(() => {
         if (!globalFilter) return proveedoresUnificados;
         const q = globalFilter.toLowerCase();
@@ -133,8 +137,8 @@ export default function ProveedoresTable() {
                 const tipo = info.getValue();
                 return (
                     <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${tipo === 'Físico'
-                            ? 'bg-blue-100 text-blue-700'
-                            : 'bg-blue-100 text-blue-700'
+                        ? 'bg-blue-100 text-blue-700'
+                        : 'bg-blue-100 text-blue-700'
                         }`}>
                         {tipo}
                     </span>
@@ -210,14 +214,13 @@ export default function ProveedoresTable() {
             header: 'Acciones',
             cell: (info) => {
                 const proveedor = info.row.original;
+                const tipoProveedor = proveedor.Tipo_Proveedor;
                 return (
-                    <div className='flex items-center justify-center gap-1'>
-                        {/* Botón Ver */}
-                        <button className="px-2 py-1 bg-gray-600 text-white text-xs rounded hover:bg-gray-700 transition-colors" onClick={() => handleViewDetail(proveedor)} title="Ver">Ver</button>
-                        {/* Botón Editar */}
-                        <button className="px-2 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition-colors" onClick={() => { setProveedorEdit(proveedor); setShowEditModal(true); }} title="Editar">Editar</button>
-                        {/* Botón Desactivar/Activar */}
-                        <button className="px-2 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-700 transition-colors" title="Desactivar">Desactivar</button>
+                    <div className="flex items-center justify-center gap-1">
+                        <ActionButtons
+                            proveedor={proveedor.datos_originales}
+                            tipoProveedor={tipoProveedor}
+                        />
                     </div>
                 );
             }
