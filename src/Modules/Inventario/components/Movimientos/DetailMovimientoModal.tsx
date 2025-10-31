@@ -148,12 +148,12 @@ const DetailMovimientoModal: React.FC<DetailMovimientoModalProps> = ({
 
               <div className="p-5">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  {movimiento.Usuario_Creador && (
+                  {movimiento.Usuario && (
                     <div className="bg-gray-50 p-4 rounded-lg">
                       <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
-                        Usuario
+                        realizado por
                       </label>
-                      <p className="text-sm text-gray-900">{movimiento.Usuario_Creador.Nombre_Usuario}</p>
+                      <p className="text-sm text-gray-900">{movimiento.Usuario.Nombre_Usuario}</p>
                     </div>
                   )}
 

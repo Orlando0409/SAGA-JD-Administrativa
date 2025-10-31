@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useAlerts } from "@/Modules/Global/context/AlertContext";
 import { z } from "zod";
 import { CreateImagenSchema } from "../Schemas/SchemasEdiImagen";
-import { createImagen } from "../Services/ServiceEdiImagen";
+import { useCreateImagen } from "../Hook/hookEdiImagen";
 
 interface ImagenFormProps {
   onClose: () => void;
@@ -17,7 +17,7 @@ export default function ImagenForm({ onClose, refetch }: ImagenFormProps) {
   const [nombre, setNombre] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
-
+  const  {mutateAsync, isPending}= useCreateImagen();
   const [nombreError, setNombreError] = useState("");
   const [isValid, setIsValid] = useState(false);
 
@@ -69,7 +69,7 @@ export default function ImagenForm({ onClose, refetch }: ImagenFormProps) {
       formData.append("Nombre_Imagen", nombre.trim());
       formData.append("Imagen", file);
 
-      await createImagen(formData);
+      await mutateAsync(formData);
 
       showSuccess("¡Imagen subida exitosamente!");
       setNombre("");
@@ -164,7 +164,7 @@ export default function ImagenForm({ onClose, refetch }: ImagenFormProps) {
                 ? "bg-sky-600 text-white hover:bg-sky-700"
                 : "bg-gray-300 text-gray-600 cursor-not-allowed"
             }`}
-            disabled={!isValid || !file}
+            disabled={!isValid || !file || isPending }
           >
             Subir Imagen
           </button>

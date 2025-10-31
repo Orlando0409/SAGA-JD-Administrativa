@@ -29,7 +29,7 @@ import {
     useUpdateEstadoProyecto,
 } from "../Hook/HookProyecto";
 
-import { FileText, Eye, EyeOff, Edit3 } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 import type { Proyecto } from "../Models/ProyectoModels";
 import FormularioProyecto from "./ProyectoFormulario";
 import ProyectoModal from "./ProyectoModal";
@@ -37,7 +37,7 @@ import ProyectoModal from "./ProyectoModal";
 
 export default function ProyectoTable() {
     const { data: proyectos, isLoading, isError, refetch } = useGetProyectos();
-    const toggleVisibilidad = useToggleVisibilidadProyecto();
+    const { mutate: toggleVisibilidad } = useToggleVisibilidadProyecto();
     const updateEstadoMutation = useUpdateEstadoProyecto();
 
     const [globalFilter, setGlobalFilter] = useState('');
@@ -69,17 +69,15 @@ export default function ProyectoTable() {
         columnHelper.accessor('Titulo', {
             header: 'Título',
             cell: info => (
-                <button
+                <div
                     className="font-medium transition-colors text-left w-full flex items-center gap-2"
-                    onClick={() => handleViewDetail(info.row.original)}
                 >
-                    <FileText size={18} className="text-sky-600" />
                     <span className="truncate">
                         {info.getValue().length > 30
                             ? `${info.getValue().slice(0, 30)}...`
                             : info.getValue()}
                     </span>
-                </button>
+                </div>
             ),
         }),
         columnHelper.accessor('Estado.Nombre_Estado', {
@@ -124,7 +122,7 @@ export default function ProyectoTable() {
             cell: info => {
                 const visible = info.getValue();
                 return (
-                    <div className="flex justify-start">
+                    <button className="flex justify-start" onClick={() => toggleVisibilidad(info.row.original.Id_Proyecto)}>
                         <span className={`inline-flex items-center gap-2 px-2 py-1 rounded-full text-xs font-medium ${
                             visible
                                 ? 'bg-green-100 text-green-700'
@@ -133,7 +131,7 @@ export default function ProyectoTable() {
                             {visible ? <Eye size={14} /> : <EyeOff size={14} />}
                             {visible ? 'Visible' : 'Oculto'}
                         </span>
-                    </div>
+                    </button>
                 );
             },
         }),
@@ -157,7 +155,7 @@ export default function ProyectoTable() {
                         Editar
                     </button>
                     {(() => {
-                        const estadoActual = info.row.original.Estado?.Nombre_Estado;
+        
                         const estadoId = info.row.original.Estado?.Id_Estado_Proyecto;
 
                         switch (estadoId) {
@@ -166,7 +164,7 @@ export default function ProyectoTable() {
                                     <AlertDialog>
                                         <AlertDialogTrigger asChild>
                                             <button
-                                                className="px-2 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition-colors"
+                                                className="px-2 py-1 bg-green-600 text-white text-xs rounded hover:bg-green-700 transition-colors"
                                                 disabled={updateEstadoMutation.isPending}
                                                 title="Iniciar Proyecto"
                                             >
@@ -333,11 +331,6 @@ export default function ProyectoTable() {
         } catch (error) {
             console.error('Error al cambiar estado del proyecto:', error);
         }
-    };
-
-    const handleCloseModal = () => {
-        setModalOpen(false);
-        setProyectoSeleccionado(null);
     };
 
     if (isLoading) {

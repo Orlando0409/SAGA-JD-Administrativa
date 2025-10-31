@@ -173,7 +173,7 @@ const CatalogoMovimientos: React.FC<CatalogoMovimientosProps> = ({ onBack }) => 
 
     if (appliedFilters.usuario) {
       filtered = filtered.filter(mov => 
-        mov.Usuario_Creador?.Nombre_Usuario?.toLowerCase().includes(appliedFilters.usuario!.toLowerCase())
+        mov.Usuario?.Nombre_Usuario?.toLowerCase().includes(appliedFilters.usuario!.toLowerCase())
       );
     }
 
@@ -246,7 +246,7 @@ const CatalogoMovimientos: React.FC<CatalogoMovimientosProps> = ({ onBack }) => 
       size: 120,
     }),
 
-    columnHelper.accessor('Usuario_Creador.Nombre_Usuario', {
+    columnHelper.accessor('Usuario.Nombre_Usuario', {
       id: 'usuario',
       header: 'Usuario',
       cell: ({ getValue }) => (
@@ -563,7 +563,7 @@ const CatalogoMovimientos: React.FC<CatalogoMovimientosProps> = ({ onBack }) => 
             </button>
             
             <span className="text-sm text-gray-700">
-              Página {table.getState().pagination.pageIndex + 1} de {table.getPageCount() + 1}
+              Página {table.getState().pagination.pageIndex + 1} de {table.getPageCount()}
             </span>
 
             <button

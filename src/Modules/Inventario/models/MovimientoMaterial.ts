@@ -11,7 +11,7 @@ export interface MovimientoMaterial {
   Cantidad_Anterior: number;
   Cantidad_Nueva: number;
   Motivo?: string;
-  Usuario_Creador?: {
+  Usuario?: {
     Id_Usuario: number;
     Nombre_Usuario: string;
     Id_Rol: number;

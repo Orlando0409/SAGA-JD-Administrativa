@@ -1,19 +1,16 @@
 import { useState, useEffect } from "react";
 import { Calendar, RefreshCcw, Image as ImageIcon } from "lucide-react";
-import { useAlerts } from "@/Modules/Global/context/AlertContext";
 import type { Imagen } from "../Models/ModelsEdiImagen";
-import ImagenFormEdit from "./ImagenFormEdit";
+
 
 interface ImagenModalProps {
     isOpen: boolean;
     onClose: () => void;
     imagen: Imagen;
-    refetch: () => void;
 }
 
-const ImagenModal = ({ isOpen, onClose, imagen, refetch }: ImagenModalProps) => {
+const ImagenModal = ({ isOpen, onClose, imagen }: ImagenModalProps) => {
     const [isEditing, setIsEditing] = useState(false);
-    const { showSuccess } = useAlerts();
 
     useEffect(() => {
         setIsEditing(false);
@@ -21,11 +18,6 @@ const ImagenModal = ({ isOpen, onClose, imagen, refetch }: ImagenModalProps) => 
 
     if (!isOpen) return null;
 
-    const handleUpdateSuccess = () => {
-        refetch();
-        setIsEditing(false);
-        showSuccess("Imagen actualizada correctamente.");
-    };
 
     return (
         <div className="fixed inset-0 backdrop-blur bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -46,14 +38,6 @@ const ImagenModal = ({ isOpen, onClose, imagen, refetch }: ImagenModalProps) => 
                 {/* Body */}
                 <div className="p-6 space-y-6 max-h-[80vh] overflow-y-auto scrollbar-thin scrollbar-thumb-sky-400 scrollbar-track-slate-100 scrollbar-rounded">
 
-                    {isEditing ? (
-                        <ImagenFormEdit
-                            imagen={imagen}
-                            onClose={() => setIsEditing(false)}
-                            refetch={handleUpdateSuccess}
-                        />
-                    ) : (
-                        <>
                             <div className="flex flex-col items-center bg-gray-100 p-4 rounded-lg shadow-sm">
                                 <div className="text-lg font-bold text-gray-800 mb-2 flex items-center gap-2">
                                     <ImageIcon className="text-sky-600" />
@@ -101,20 +85,15 @@ const ImagenModal = ({ isOpen, onClose, imagen, refetch }: ImagenModalProps) => 
                                     </div>
                                 )}
                             </div>
-
-                            {/* Botón Editar */}
-                            <div className="flex justify-end gap-3 mt-6">
-                                <button
-                                    type="button"
-                                    onClick={() => setIsEditing(true)}
-                                    className="px-4 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600 shadow-sm text-sm"
-                                >
-                                    Editar
-                                </button>
-                            </div>
-                        </>
-                    )}
                 </div>
+                     <div className="sticky bottom-0 flex justify-end gap-3 p-6 border-t bg-gray-50 z-10">
+                        <button
+                            onClick={onClose}
+                            className="px-6 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium"
+                        >
+                            Cerrar
+                        </button>
+                        </div>
             </div>
         </div>
     );
