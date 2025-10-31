@@ -4,13 +4,13 @@ import type {
 } from '../models/Inventario';
 
 // Updated to match backend controller endpoints
-export const ingresoMaterial = async (idUsuario: number, ingresoData: IngresoEgresoMaterialData): Promise<any> => {
-  const response = await axiosPrivate.post(`/Inventario/ingreso/material/${idUsuario}`, ingresoData);
+export const ingresoMaterial = async ( ingresoData: IngresoEgresoMaterialData): Promise<any> => {
+  const response = await axiosPrivate.post(`/Inventario/ingreso/material`, ingresoData);
   return response.data;
 };
 
-export const egresoMaterial = async (idUsuario: number, egresoData: IngresoEgresoMaterialData): Promise<any> => {
-  const response = await axiosPrivate.post(`/Inventario/egreso/material/${idUsuario}`, egresoData);
+export const egresoMaterial = async (egresoData: IngresoEgresoMaterialData): Promise<any> => {
+  const response = await axiosPrivate.post(`/Inventario/egreso/material`, egresoData);
   return response.data;
 };
 
@@ -35,7 +35,7 @@ export const getMovimientosEntreFechas = async (startDate: string, endDate: stri
   return response.data;
 };
 
-export const getMovimientosPorUsuarioCreador = async (idUsuarioCreador: number): Promise<any[]> => {
-  const response = await axiosPrivate.get(`/Inventario/movimientos/${idUsuarioCreador}`);
+export const getMovimientosPorUsuarioAutenticado = async (): Promise<any[]> => {
+  const response = await axiosPrivate.get(`/Inventario/movimientos/mis-movimientos`);
   return response.data;
 };

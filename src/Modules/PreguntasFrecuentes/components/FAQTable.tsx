@@ -1,10 +1,34 @@
-import { useState } from "react";
-import { Eye, EyeOff, Pencil, Plus, Trash2, MessageSquare } from "lucide-react";
+import { useState, useMemo } from "react";
+import {
+    useReactTable,
+    getCoreRowModel,
+    getFilteredRowModel,
+    getSortedRowModel,
+    getPaginationRowModel,
+    createColumnHelper,
+} from '@tanstack/react-table';
+import { LuPlus, LuSearch } from 'react-icons/lu';
+import { MdKeyboardArrowLeft, MdKeyboardArrowRight, MdKeyboardDoubleArrowLeft,
+  MdKeyboardDoubleArrowRight,
+  MdKeyboardArrowDown,
+  MdKeyboardArrowUp} from "react-icons/md";
+import {
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogHeader,
+  AlertDialogFooter
+} from "@/Modules/Global/components/Sidebar/ui/alert-dialog";
 import { useFAQ } from "../Hook/FAQHook";
+import { Eye, EyeOff } from "lucide-react";
 import type { FAQ } from "../Models/FAQModels";
-
 import FAQForm from "./FAQForm";
 import FAQModal from "./FAQModal";
+import FAQEdit from "./FAQEdit";
 
 export default function FAQTable() {
     const {
@@ -16,210 +40,396 @@ export default function FAQTable() {
         toggleVisible,
     } = useFAQ(true); // true = modo admin
 
-    const [modalOpen, setModalOpen] = useState(false);
+    const [globalFilter, setGlobalFilter] = useState('');
     const [formVisible, setFormVisible] = useState(false);
+    const [editVisible, setEditVisible] = useState(false);
+    const [modalOpen, setModalOpen] = useState(false);
     const [faqSeleccionada, setFaqSeleccionada] = useState<FAQ | null>(null);
 
-    const handleOpenModal = (faq: FAQ) => {
+    const pageSizeOptions = [5, 10, 20, 50];
+    const [pagination, setPagination] = useState({
+        pageSize: 5,
+        pageIndex: 0,
+    });
+
+    // Column helper para definir las columnas
+    const columnHelper = createColumnHelper<FAQ>();
+
+    // Definir las columnas
+    const columns = useMemo(() => [
+        columnHelper.accessor('Pregunta', {
+            header: 'Pregunta',
+            cell: info => (
+                <div
+                    className="font-medium transition-colors text-left w-full flex items-center gap-2"
+
+                >
+                    <span className="truncate">
+                        {info.getValue().length > 40
+                            ? `${info.getValue().slice(0, 40)}...`
+                            : info.getValue()}
+                    </span>
+                </div>
+            ),
+        }),
+        columnHelper.accessor('Respuesta', {
+            header: 'Respuesta',
+            cell: info => (
+                <div className="flex items-center justify-start">
+                    <span className="truncate block">
+                        {info.getValue().length > 30
+                            ? `${info.getValue().slice(0, 30)}...`
+                            : info.getValue()}
+                    </span>
+                </div>
+            ),
+        }),
+        columnHelper.accessor('Fecha_Creacion', {
+            header: 'Fecha creación',
+            cell: info =>
+                <div className="flex items-center justify-start">{new Date(info.getValue()).toLocaleDateString("es-ES")}</div>,
+        }),
+        columnHelper.accessor('Fecha_Actualizacion', {
+            header: 'Actualización',
+            cell: info =>
+                <div className="flex items-center justify-start">
+                    {info.getValue()
+                    ? new Date(info.getValue()).toLocaleDateString("es-ES")
+                    : "Sin cambios"}
+                    </div>
+        }),
+        columnHelper.accessor('Visible', {
+            header: 'Visibilidad',
+            cell: info => (
+                <button
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        toggleVisible(info.row.original.Id_FAQ);
+                    }}
+                    className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium transition-colors ${
+                        info.getValue()
+                            ? "bg-green-100 text-green-700 hover:bg-green-200"
+                            : "bg-red-100 text-red-700 hover:bg-red-200"
+                    }`}
+                >
+                    {info.getValue() ? (
+                        <>
+                            <Eye size={14} />
+                            Visible
+                        </>
+                    ) : (
+                        <>
+                            <EyeOff size={14} />
+                            Oculto
+                        </>
+                    )}
+                </button>
+            ),
+        }),
+        columnHelper.display({
+            id: 'acciones',
+            header: 'Acciones',
+            cell: info => (
+                <div className="flex justify-center gap-1">
+                    <button
+                        className="px-4 py-1 bg-gray-600 text-white text-xs rounded hover:bg-gray-700 transition-colors"
+                        onClick={() => handleViewDetail(info.row.original)}
+                        title="Ver detalles"
+                    >
+                        Ver
+                    </button>
+                    <button
+                        className="px-2 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition-colors"
+                        onClick={() => handleEdit(info.row.original)}
+                        title="Editar"
+                    >
+                        Editar
+                    </button>
+                    <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                            <button
+                                className="px-2 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-700 transition-colors"
+                                disabled={loading}
+                                title="Eliminar pregunta"
+                            >
+                                Eliminar
+                            </button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>
+                                    <span>¿Eliminar pregunta?</span>
+                                </AlertDialogTitle>
+                                <AlertDialogDescription>
+                                    <span>¿Estás seguro de que deseas eliminar la pregunta "{info.row.original.Pregunta}"? Esta acción no se puede deshacer.</span>
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                                <AlertDialogAction
+                                    onClick={() => handleDelete(info.row.original)}
+                                    disabled={loading}
+                                >
+                                    <span>Eliminar</span>
+                                </AlertDialogAction>
+                                <AlertDialogCancel>
+                                    <span>Cancelar</span>
+                                </AlertDialogCancel>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
+                </div>
+            ),
+        }),
+    ], [loading]);
+
+    // Funciones para manejar las acciones
+    const handleViewDetail = (faq: FAQ) => {
         setFaqSeleccionada(faq);
         setModalOpen(true);
     };
 
-    const handleCloseModal = () => {
-        setModalOpen(false);
-        setFaqSeleccionada(null);
+    const handleEdit = (faq: FAQ) => {
+        setFaqSeleccionada(faq);
+        setEditVisible(true);
     };
 
-    const handleToggleVisible = async (e: React.MouseEvent, id: number) => {
-        e.stopPropagation();
-        await toggleVisible(id);
+    const handleDelete = (faq: FAQ) => {
+        removeFAQ(faq.Id_FAQ).then(() => {
+            fetchAll();
+        });
     };
 
-    const handleDelete = async (faq: FAQ) => {
-        if (confirm(`¿Seguro que deseas eliminar la pregunta "${faq.Pregunta}"?`)) {
-            await removeFAQ(faq.Id_FAQ);
-            fetchAll(); // Refresca la tabla
-        }
-    };
+    // Crear la tabla con TanStack Table
+    const table = useReactTable({
+        data: faqs || [],
+        columns,
+        getCoreRowModel: getCoreRowModel(),
+        getFilteredRowModel: getFilteredRowModel(),
+        getSortedRowModel: getSortedRowModel(),
+        getPaginationRowModel: getPaginationRowModel(),
+        onGlobalFilterChange: setGlobalFilter,
+        globalFilterFn: 'includesString',
+        state: {
+            globalFilter,
+            pagination,
+        },
+        onPaginationChange: setPagination,
+    });
 
     return (
-        <div className="w-full">
-            {/* Encabezado */}
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
-                <div className="flex items-center gap-3">
-                    <h2 className="text-lg sm:text-xl font-semibold text-sky-800">
-                        Gestión de Preguntas Frecuentes (FAQ)
-                    </h2>
+        <div className="space-y-6">
+            {/* Encabezado con búsqueda y botón */}
+            <div className="bg-white rounded-lg p-3">
+               <div className="flex items-start gap-4 flex-col justify-start">
+                    <h2 className="text-2xl font-bold text-gray-900">Edición de Preguntas Frecuentes</h2>
+                    <p className="text-sm text-gray-600 pb-4">Gestiona las preguntas frecuentes de la ASADA</p>
                 </div>
-                <button
-                    onClick={() => setFormVisible(true)}
-                     className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md flex items-center gap-2 transition-colors"
-                >
-                    <Plus size={18} />
-                    Crear Pregunta
-                </button>
+                <div className="flex flex-col sm:flex-row gap-4 items-center justify-end">
+                    <div className="flex items-center gap-4 w-full sm:w-auto">
+                        <div className="relative flex-1 max-w-md">
+                            <LuSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                            <input
+                                type="text"
+                                placeholder="Buscar preguntas..."
+                                value={globalFilter ?? ''}
+                                onChange={(e) => setGlobalFilter(e.target.value)}
+                                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            />
+                        </div>
+                        <button
+                            onClick={() => setFormVisible(true)}
+                            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md flex items-center gap-2 transition-colors"
+                        >
+                            <LuPlus className="w-4 h-4" />
+                            Crear Pregunta
+                        </button>
+                    </div>
+                </div>
             </div>
 
             {/* Mostrar errores */}
             {error && <div className="text-red-600 mb-2">{error}</div>}
 
-            {/* Tabla FAQ */}
-            <div className="overflow-x-auto rounded-2xl border border-sky-100 shadow-sm bg-white">
-                <table className="min-w-full table-auto">
-                    <thead className="bg-sky-50">
-                        <tr className="text-left text-xs sm:text-sm text-sky-700">
-                            <th className="px-2 sm:px-4 py-3 font-medium border-b border-sky-100">Pregunta</th>
-                            <th className="px-2 sm:px-4 py-3 font-medium border-b border-sky-100">Respuesta</th>
-                            <th className="px-2 sm:px-4 py-3 font-medium border-b border-sky-100">Fecha creación</th>
-                            <th className="px-2 sm:px-4 py-3 font-medium border-b border-sky-100">Actualización</th>
-                            <th className="px-2 sm:px-4 py-3 font-medium border-b border-sky-100">Visibilidad</th>
-                            <th className="px-2 sm:px-4 py-3 font-medium border-b border-sky-100">Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-sky-50">
-                        {(() => {
-                            if (loading) {
-                                return (
-                                    <tr>
-                                        <td colSpan={6} className="p-4 text-center text-slate-500 text-sm">
-                                            Cargando...
-                                        </td>
-                                    </tr>
-                                );
-                            }
-
-                            if (!faqs || faqs.length === 0) {
-                                return (
-                                    <tr>
-                                        <td colSpan={6} className="p-4 text-center text-slate-500 text-sm">
-                                            No hay preguntas registradas.
-                                        </td>
-                                    </tr>
-                                );
-                            }
-
-                            return faqs.map((faq) => (
-                                <tr
-                                    key={faq.Id_FAQ}
-                                    className="hover:bg-sky-50 cursor-pointer transition-colors"
-                                >
-                                    <td className="px-2 sm:px-4 py-3 text-xs sm:text-sm text-slate-700 align-top flex items-center gap-2">
-                                        <MessageSquare size={18} className="text-sky-600" />
-                                        {faq.Pregunta.length > 40
-                                            ? `${faq.Pregunta.slice(0, 40)}...`
-                                            : faq.Pregunta}
-                                    </td>
-                                    <td className="px-2 sm:px-4 py-3 text-xs sm:text-sm text-slate-700 align-top">
-                                        {faq.Respuesta.length > 10
-                                            ? `${faq.Respuesta.slice(0, 10)}...`
-                                            : faq.Respuesta}
-                                    </td>
-                                    <td className="px-2 sm:px-4 py-3 text-xs sm:text-sm text-slate-700">
-                                        {new Date(faq.Fecha_Creacion).toLocaleDateString("es-ES")}
-                                    </td>
-                                    <td className="px-2 sm:px-4 py-3 text-xs sm:text-sm text-slate-700">
-                                        {faq.Fecha_Actualizacion
-                                            ? new Date(faq.Fecha_Actualizacion).toLocaleDateString("es-ES")
-                                            : "Sin cambios"}
-                                    </td>
-                                    <td className="px-2 sm:px-4 py-3 text-xs sm:text-sm text-slate-700">
-                                        <button
-                                            onClick={(e) => handleToggleVisible(e, faq.Id_FAQ)}
-                                            className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium transition-colors ${faq.Visible
-                                                    ? "bg-green-100 text-green-700 hover:bg-green-200"
-                                                    : "bg-red-100 text-red-700 hover:bg-red-200"
-                                                }`}
-                                        >
-                                            {faq.Visible ? (
-                                                <>
-                                                    <Eye size={14} />
-                                                    Visible
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <EyeOff size={14} />
-                                                    Oculto
-                                                </>
-                                            )}
-                                        </button>
-                                    </td>
-                                    <td className="px-2 sm:px-4 py-3 text-xs sm:text-sm text-slate-700">
-                                        <div className="flex items-center gap-2">
-
-                                             <button
-                                                className="px-4 py-1 bg-gray-600 text-white text-xs rounded hover:bg-gray-700 transition-colors"
-                                                onClick={() => handleOpenModal(faq)}
-                                                title="Ver detalles"
-                                            >
-                                                Ver
-                                            </button>
-
-                                            {/* Editar */}
-                                            <button
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    setFaqSeleccionada(faq);
-                                                    setFormVisible(true);
-                                                }}
-                                                 className="px-2 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition-colors"
-                                                title="Editar pregunta"
-                                            >
-                                                 Editar  
-                                            </button>
-
-                                            {/* Eliminar */}
-                                            <button
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    handleDelete(faq);
-                                                }}
-                                                className="px-2 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-700 transition-colors"
-                                                title="Eliminar pregunta"
-                                            >
-                                                Eliminar
-                                            </button>
-                                        </div>
+            <div className="bg-white rounded-2xl shadow-sm border border-sky-100 overflow-hidden max-h-[calc(100vh-300px)] overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100">
+                <div className="overflow-x-auto">
+                    <table className="min-w-full table-auto">
+                        <thead className="bg-sky-50">
+                            {table.getHeaderGroups().map(headerGroup => (
+                                <tr key={headerGroup.id} className="text-left text-xs sm:text-sm text-sky-700">
+                                    {headerGroup.headers.map((header, index) => (
+                                        <th key={header.id} className={`px-2 sm:px-4 py-3 font-medium border-b border-sky-100 ${
+                                            index === 0 ? 'text-left' : 'text-center'
+                                        }`}>
+                                            {(() => {
+                                                if (header.isPlaceholder) {
+                                                    return null;
+                                                }
+                                                if (header.column.getCanSort()) {
+                                                    return (
+                                                        <button
+                                                            type="button"
+                                                            className={`cursor-pointer select-none flex items-center gap-2 bg-transparent border-none p-0 ${
+                                                                index === 0 ? 'justify-start' : 'justify-center'
+                                                            }`}
+                                                            onClick={header.column.getToggleSortingHandler()}
+                                                            onKeyDown={e => {
+                                                                if (e.key === 'Enter' || e.key === ' ') {
+                                                                    e.preventDefault();
+                                                                    header.column.getToggleSortingHandler()?.(e);
+                                                                }
+                                                            }}
+                                                            tabIndex={0}
+                                                            aria-label={`Ordenar por ${header.column.columnDef.header as string}`}
+                                                        >
+                                                            <span className="flex items-center gap-1">
+                                                                {header.column.columnDef.header as string}
+                                                                {header.column.getIsSorted() === 'asc' && <MdKeyboardArrowUp className="inline" />}
+                                                                {header.column.getIsSorted() === 'desc' && <MdKeyboardArrowDown className="inline" />}
+                                                            </span>
+                                                        </button>
+                                                    );
+                                                }
+                                                return (
+                                                    <span className={index === 0 ? 'text-left' : 'text-center'}>
+                                                        {header.column.columnDef.header as string}
+                                                    </span>
+                                                );
+                                            })()}
+                                        </th>
+                                    ))}
+                                </tr>
+                            ))}
+                        </thead>
+                        <tbody className="bg-white divide-y divide-sky-50">
+                            {table.getRowModel().rows.length === 0 ? (
+                                <tr>
+                                    <td colSpan={6} className="px-2 sm:px-4 py-8 text-center text-slate-500">
+                                        {globalFilter ? 'No se encontraron preguntas que coincidan con la búsqueda' : 'No hay preguntas registradas'}
                                     </td>
                                 </tr>
-                            ));
-                        })()}
-                    </tbody>
-                </table>
+                            ) : (
+                                table.getRowModel().rows.map(row => (
+                                    <tr key={row.id} className="hover:bg-sky-50 cursor-pointer transition-colors">
+                                        {row.getVisibleCells().map((cell, index) => {
+                                            let cellContent: React.ReactNode;
+
+                                            if (cell.column.columnDef.cell) {
+                                                if (typeof cell.column.columnDef.cell === 'function') {
+                                                    cellContent = cell.column.columnDef.cell(cell.getContext());
+                                                } else {
+                                                    cellContent = cell.column.columnDef.cell;
+                                                }
+                                            } else {
+                                                cellContent = cell.getValue() as React.ReactNode;
+                                            }
+
+                                            return (
+                                                <td key={cell.id} className={`px-2 sm:px-4 py-3 text-xs sm:text-sm text-slate-700 align-top ${
+                                                    index === 0 ? 'text-left' : 'text-center'
+                                                }`}>
+                                                    {cellContent}
+                                                </td>
+                                            );
+                                        })}
+                                    </tr>
+                                ))
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div className="px-6 py-3 bg-gray-50 border-t border-gray-200">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                            <div className="flex items-center gap-2">
+                                <span className="text-sm text-gray-700">Filas por página:</span>
+                                <select
+                                    value={table.getState().pagination.pageSize}
+                                    onChange={(e) => {
+                                        table.setPageSize(Number(e.target.value));
+                                    }}
+                                    className="px-3 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                >
+                                    {pageSizeOptions.map((pageSize) => (
+                                        <option key={pageSize} value={pageSize}>
+                                            {pageSize}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <button
+                                onClick={() => table.setPageIndex(0)}
+                                disabled={!table.getCanPreviousPage()}
+                                className="p-2 rounded-md border text-gray-600 hover:text-gray-900 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                                title="Primera página"
+                            >
+                                <MdKeyboardDoubleArrowLeft className="w-4 h-4" />
+                            </button>
+                            <button
+                                onClick={() => table.previousPage()}
+                                disabled={!table.getCanPreviousPage()}
+                                className="p-2 rounded-md border text-gray-600 hover:text-gray-900 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                                title="Página anterior"
+                            >
+                                <MdKeyboardArrowLeft className="w-4 h-4" />
+                            </button>
+                            <span className="text-sm text-gray-700">
+                                Página {table.getState().pagination.pageIndex + 1} de {table.getPageCount()}
+                            </span>
+                            <button
+                                onClick={() => table.nextPage()}
+                                disabled={!table.getCanNextPage()}
+                                className="p-2 rounded-md border text-gray-600 hover:text-gray-900 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                                title="Página siguiente"
+                            >
+                                <MdKeyboardArrowRight className="w-4 h-4" />
+                            </button>
+                            <button
+                                onClick={() => table.setPageIndex(table.getPageCount() - 1)}
+                                disabled={!table.getCanNextPage()}
+                                className="p-2 rounded-md border text-gray-600 hover:text-gray-900 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                                title="Última página"
+                            >
+                                <MdKeyboardDoubleArrowRight className="w-4 h-4" />
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            {/* Modal FAQ */}
+            {/* Modal para crear preguntas */}
+            {formVisible && (
+                <FAQForm
+                    onClose={() => setFormVisible(false)}
+                    refetch={fetchAll}
+                />
+            )}
+
+            {/* Modal para editar preguntas */}
+            {editVisible && faqSeleccionada && (
+                <FAQEdit
+                    faq={faqSeleccionada}
+                    onClose={() => {
+                        setEditVisible(false);
+                        setFaqSeleccionada(null);
+                    }}
+                    refetch={fetchAll}
+                />
+            )}
+
+            {/* Modal para mostrar detalles de la pregunta */}
             {modalOpen && faqSeleccionada && (
                 <FAQModal
                     isOpen={modalOpen}
-                    onClose={handleCloseModal}
+                    onClose={() => {
+                        setModalOpen(false);
+                        setFaqSeleccionada(null);
+                    }}
                     faq={faqSeleccionada}
                 />
             )}
-
-            {/* Formulario FAQ */}
-            {formVisible && (
-                <FAQForm
-                    onClose={() => {
-                        setFormVisible(false);
-                        setFaqSeleccionada(null);
-                        fetchAll();
-                    }}
-                    refetch={fetchAll}
-                />
-            )}
-            {/* Formulario edit FAQ */}
-            {formVisible && faqSeleccionada && (
-                <FAQForm
-                    onClose={() => {
-                        setFormVisible(false);
-                        setFaqSeleccionada(null);
-                        fetchAll();
-                    }}
-                    refetch={fetchAll}
-                    initialData={faqSeleccionada}
-                />
-            )}
-
         </div>
     );
 }

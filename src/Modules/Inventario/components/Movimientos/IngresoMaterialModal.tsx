@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
 import { LuTrendingUp } from 'react-icons/lu';
-import { useIngresoMaterial } from '../../hooks/HookMaterialMovimiento';
 import { IngresoEgresoMaterialSchema } from '../../schema/MaterialMovimientoSchema';
 import type { Material, IngresoEgresoMaterialData } from '../../models/Inventario';
-import { useAuth } from '@/Modules/Auth/Context/AuthContext';
+import { useIngresoMaterial } from '../../hooks/useMovimientos';
 
 interface IngresoMaterialModalProps {
   isOpen: boolean;
@@ -16,7 +15,6 @@ const IngresoMaterialModal: React.FC<IngresoMaterialModalProps> = ({
   onClose,
   material
 }) => {
-  const { user } = useAuth();
   const ingresoMutation = useIngresoMaterial();
   const [formData, setFormData] = useState<IngresoEgresoMaterialData>({
     Id_Material: material.Id_Material,
@@ -52,15 +50,8 @@ const IngresoMaterialModal: React.FC<IngresoMaterialModalProps> = ({
     }
 
     try {
-      if (!user?.Id_Usuario) {
-        console.error('Usuario no autenticado');
-        return;
-      }
 
-      await ingresoMutation.mutateAsync({
-        idUsuario: user.Id_Usuario,
-        data: formData
-      });
+      await ingresoMutation.mutateAsync(formData);
       setFormData({ Id_Material: material.Id_Material, Cantidad: 1 });
       onClose();
     } catch (error) {

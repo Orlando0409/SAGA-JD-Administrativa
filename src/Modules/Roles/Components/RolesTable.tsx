@@ -265,10 +265,9 @@ const Roles = () => {
   return (
     <div className="w-full flex flex-col items-start h-full p-2">
       <div className="w-full overflow-hidden">
-        <div className="flex pl-6 items-center gap-4">
-          <h1 className="text-2xl font-bold text-gray-800">
-            Gestión de Roles
-          </h1>
+           <div className="flex items-start gap-4 flex-col justify-start">
+            <h2 className="text-2xl font-bold text-gray-900">Gestión de Roles</h2>
+            <p className="text-sm text-gray-600 pb-4">Gestiona los roles de los usuarios en el sistema</p>
         </div>
 
         <div className="p-6">

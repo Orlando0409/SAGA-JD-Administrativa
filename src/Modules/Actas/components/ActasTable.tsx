@@ -1,294 +1,408 @@
-import { useMemo, useState } from "react";
+import { useState, useMemo } from "react";
+import {
+    useReactTable,
+    getCoreRowModel,
+    getFilteredRowModel,
+    getSortedRowModel,
+    getPaginationRowModel,
+    createColumnHelper,
+} from '@tanstack/react-table';
+import { LuPlus, LuSearch } from 'react-icons/lu';
+import { MdKeyboardArrowLeft, MdKeyboardArrowRight, MdKeyboardDoubleArrowLeft,
+  MdKeyboardDoubleArrowRight,
+  MdKeyboardArrowDown,
+  MdKeyboardArrowUp} from "react-icons/md";
+import {
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogHeader,
+  AlertDialogFooter
+} from "@/Modules/Global/components/Sidebar/ui/alert-dialog";
 import { useGetActas, useDeleteActa } from "../Hook/hookActas";
-import { FileText, ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import type { Acta } from "../Models/ActasModels";
 import FormularioCrearActas from "./FormularioCrearActas";
 import ActasModal from "./ActasModal";
-//funciona 
+import ActasEdit from "./ActasEdit";
 export default function ActasTable() {
-    const { data: actas, isLoading, refetch } = useGetActas(); // Obtener todas las actas
-    const deleteActaMutation = useDeleteActa(); // Eliminar una acta
+    const { data: actas, isLoading, refetch } = useGetActas();
+    const deleteActaMutation = useDeleteActa();
 
-    const [modalVisible, setModalVisible] = useState(false); // Controla la visibilidad del modal de creación
-    const [actaSeleccionada, setActaSeleccionada] = useState<Acta | null>(null); // Acta seleccionada para el modal de detalles
+    const [globalFilter, setGlobalFilter] = useState('');
+    const [formVisible, setFormVisible] = useState(false);
+    const [editVisible, setEditVisible] = useState(false);
+    const [modalOpen, setModalOpen] = useState(false);
+    const [actaSeleccionada, setActaSeleccionada] = useState<Acta | null>(null);
 
-    // Estados para búsqueda y paginación
-    const [searchText] = useState("");
-    const [currentPage, setCurrentPage] = useState(1);
-    const [itemsPerPage, setItemsPerPage] = useState(10);
+    const pageSizeOptions = [5, 10, 20, 50];
+    const [pagination, setPagination] = useState({
+        pageSize: 5,
+        pageIndex: 0,
+    });
 
-    // Filtra actas por título usando useMemo para optimizar
-    const filteredActas = useMemo(() => {
-        if (!actas) return [];
+    // Column helper para definir las columnas
+    const columnHelper = createColumnHelper<Acta>();
 
-        if (!searchText.trim()) {
-            return actas; // Si no hay búsqueda, devolver todas las actas
-        }
+    // Definir las columnas
+    const columns = useMemo(() => [
+        columnHelper.accessor('Titulo', {
+            header: 'Título',
+            cell: info => (
+                <div className="font-medium text-left flex items-center gap-2">
+                    <span className="truncate">
+                        {info.getValue().length > 30
+                            ? `${info.getValue().slice(0, 30)}...`
+                            : info.getValue()}
+                    </span>
+                </div>
+            ),
+        }),
+        columnHelper.accessor('Descripcion', {
+            header: 'Descripción',
+            cell: info => (
+                <div className="text-gray-600 text-left">
+                    {info.getValue().length > 30
+                        ? `${info.getValue().slice(0, 30)}...`
+                        : info.getValue()}
+                </div>
+            ),
+        }),
+        columnHelper.accessor('Fecha_Creacion', {
+            header: 'Fecha de creación',
+            cell: info => (
+                <div className="text-gray-600 text-left">
+                    {new Date(info.getValue()).toLocaleDateString("es-ES")}
+                </div>
+            ),
+        }),
+        columnHelper.accessor('Fecha_Actualizacion', {
+            header: 'Fecha de actualización',
+            cell: info => (
+                <div className="text-gray-600 text-left">
+                    {info.getValue()
+                        ? new Date(info.getValue()).toLocaleDateString("es-ES")
+                        : "Sin actualizar"}
+                </div>
+            ),
+        }),
+        columnHelper.display({
+            id: 'acciones',
+            header: 'Acciones',
+            cell: info => (
+                <div className="flex justify-center gap-1">
+                    <button
+                        className="px-4 py-1 bg-gray-600 text-white text-xs rounded hover:bg-gray-700 transition-colors"
+                        onClick={() => handleViewDetail(info.row.original)}
+                        title="Ver detalles"
+                    >
+                        Ver
+                    </button>
+                    <button
+                        className="px-2 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition-colors"
+                        onClick={() => handleEdit(info.row.original)}
+                        title="Editar"
+                    >
+                        Editar
+                    </button>
+                    <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                            <button
+                                className="px-2 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-700 transition-colors"
+                                disabled={deleteActaMutation.isPending}
+                                title="Eliminar acta"
+                            >
+                                Eliminar
+                            </button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>
+                                    <span>¿Eliminar acta?</span>
+                                </AlertDialogTitle>
+                                <AlertDialogDescription>
+                                    <span>¿Estás seguro de que deseas eliminar la acta "{info.row.original.Titulo}"? Esta acción no se puede deshacer.</span>
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                                <AlertDialogAction
+                                    onClick={() => handleDelete(info.row.original)}
+                                    disabled={deleteActaMutation.isPending}
+                                >
+                                    <span>Eliminar</span>
+                                </AlertDialogAction>
+                                <AlertDialogCancel>
+                                    <span>Cancelar</span>
+                                </AlertDialogCancel>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
+                </div>
+            ),
+        }),
+    ], [deleteActaMutation.isPending]);
 
-        // Filtrar por título (case-insensitive)
-        return actas.filter(acta =>
-            acta.Titulo.toLowerCase().includes(searchText.toLowerCase().trim())
-        );
-    }, [actas, searchText]);
-
-    // Calcula datos de paginación
-    const paginationData = useMemo(() => {
-        const totalItems = filteredActas.length;
-        const totalPages = Math.ceil(totalItems / itemsPerPage);
-        const startIndex = (currentPage - 1) * itemsPerPage;
-        const endIndex = startIndex + itemsPerPage;
-        const currentItems = filteredActas.slice(startIndex, endIndex);
-
-        return {
-            totalItems,
-            totalPages,
-            currentItems,
-            startIndex,
-            endIndex,
-        };
-    }, [filteredActas, currentPage, itemsPerPage]);
-
-    //  Función para cambiar de página
-    const handlePageChange = (page: number) => {
-        setCurrentPage(page);
+    // Funciones para manejar las acciones
+    const handleViewDetail = (acta: Acta) => {
+        setActaSeleccionada(acta);
+        setModalOpen(true);
     };
 
-    // unción para cambiar elementos por página
-    const handleItemsPerPageChange = (newItemsPerPage: number) => {
-        setItemsPerPage(newItemsPerPage);
-        setCurrentPage(1); // Reset a la primera página
+    const handleEdit = (acta: Acta) => {
+        setActaSeleccionada(acta);
+        setEditVisible(true);
     };
 
-    const handleEliminarActa = async (id: number) => {
-        deleteActaMutation.mutate(id, {
+    const handleDelete = (acta: Acta) => {
+        deleteActaMutation.mutate(acta.Id_Acta, {
             onSuccess: () => {
-                refetch(); // Refresca la tabla después de eliminar el acta
-                alert("Acta eliminada con éxito.");
-            },
-            onError: () => {
-                alert("Hubo un problema al eliminar el acta.");
+                refetch();
             },
         });
     };
 
-    const handleOpenModalDetalles = (acta: Acta) => {
-        setActaSeleccionada(acta); // Establece el acta seleccionada
-    };
+    // Crear la tabla con TanStack Table
+    const table = useReactTable({
+        data: actas || [],
+        columns,
+        getCoreRowModel: getCoreRowModel(),
+        getFilteredRowModel: getFilteredRowModel(),
+        getSortedRowModel: getSortedRowModel(),
+        getPaginationRowModel: getPaginationRowModel(),
+        state: {
+            globalFilter,
+            pagination,
+        },
+        onGlobalFilterChange: setGlobalFilter,
+        onPaginationChange: setPagination,
+        initialState: {
+            pagination: {
+                pageSize: 5,
+                pageIndex: 0,
+            },
+        },
+    });
 
-    const handleCloseModalDetalles = () => {
-        setActaSeleccionada(null); // Cierra el modal de detalles
-    };
-
-    // Renderiza el contenido de la tabla según el estado
-    const renderTableContent = () => {
-        if (isLoading) {
-            return (
-                <tr>
-                    <td colSpan={4} className="p-4 sm:p-6 text-center text-slate-500 text-sm">
-                        Cargando...
-                    </td>
-                </tr>
-            );
-        }
-
-        if (paginationData.currentItems.length === 0) {
-            return (
-                <tr>
-                    <td colSpan={4} className="p-4 sm:p-6 text-center text-slate-500 text-sm">
-                        {(actas ?? []).length > 0
-                            ? `No se encontraron actas con el título "${searchText}".`
-                            : "No se encontraron registros."
-                        }
-                    </td>
-                </tr>
-            );
-        }
-
-        return paginationData.currentItems.map((acta) => (
-            <tr
-                key={acta.Id_Acta}
-                className="hover:bg-sky-50 cursor-pointer transition-colors"
-                onClick={() => handleOpenModalDetalles(acta)} // Abre el modal de detalles al hacer clic en la fila
-            >
-                <td className="px-2 sm:px-4 py-3 text-xs sm:text-sm text-slate-700 align-top flex items-center gap-2">
-                    <FileText size={18} className="text-sky-600" />
-                    {acta.Titulo.length > 20
-                        ? `${acta.Titulo.slice(0, 20)}...`
-                        : acta.Titulo}
-                </td>
-                <td className="px-2 sm:px-4 py-3 text-xs sm:text-sm text-slate-700 align-top">
-                    {acta.Descripcion.length > 20
-                        ? `${acta.Descripcion.slice(0, 20)}...`
-                        : acta.Descripcion}
-                </td>
-                <td className="px-2 sm:px-4 py-3 text-xs sm:text-sm text-slate-700 align-top">
-                    {new Date(acta.Fecha_Creacion).toLocaleDateString("es-ES")}
-                </td>
-                <td className="px-2 sm:px-4 py-3 text-xs sm:text-sm text-slate-700 align-top">
-                    {acta.Fecha_Actualizacion
-                        ? new Date(acta.Fecha_Actualizacion).toLocaleDateString("es-ES")
-                        : "Sin actualizar"}
-                </td>
-            </tr>
-        ));
-    };
+    if (isLoading) {
+        return (
+            <div className="flex justify-center items-center p-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            </div>
+        );
+    }
 
     return (
-        <div className="w-full">
-            <div className="overflow-x-auto shadow-md rounded-lg">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
-                    <h2 className="text-lg sm:text-xl font-semibold text-sky-800">
-                        Gestión de Actas
-                    </h2>
-                    <button
-                        onClick={() => setModalVisible(true)}
-                        className="px-4 py-2 rounded-lg bg-sky-600 text-white hover:bg-sky-700 shadow-sm text-sm flex items-center gap-2"
-                    >
-                        <Plus size={18} />
-                        Crear Acta
-                    </button>
+        <div className="space-y-6">
+            {/* Encabezado con búsqueda y botón */}
+            <div className="bg-white rounded-lg p-3">
+                <div className="flex items-start gap-4 flex-col justify-start">
+                    <h2 className="text-2xl font-bold text-gray-900">Gestión de Actas</h2>
+                    <p className="text-sm text-gray-600 pb-4">Lleva un control de las actas de reuniones</p>
                 </div>
-                <table className="min-w-full divide-y divide-sky-100">
-
-
-                    <thead className="bg-sky-50">
-                        <tr className="text-left text-xs sm:text-sm text-sky-700">
-                            <th className="px-2 sm:px-4 py-3 font-medium border-b border-sky-100">Título</th>
-                            <th className="px-2 sm:px-4 py-3 font-medium border-b border-sky-100">Descripción</th>
-                            <th className="px-2 sm:px-4 py-3 font-medium border-b border-sky-100">Fecha de creación</th>
-                            <th className="px-2 sm:px-4 py-3 font-medium border-b border-sky-100">Fecha de actualización</th>
-                        </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-sky-50">
-                        {renderTableContent()}
-                    </tbody>
-                </table>
+                <div className="flex flex-col sm:flex-row gap-4 items-center justify-end">
+                    <div className="flex items-center gap-4 w-full sm:w-auto">
+                        <div className="relative flex-1 max-w-md">
+                            <LuSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                            <input
+                                type="text"
+                                placeholder="Buscar actas..."
+                                value={globalFilter ?? ''}
+                                onChange={(e) => setGlobalFilter(e.target.value)}
+                                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            />
+                        </div>
+                        <button
+                            onClick={() => setFormVisible(true)}
+                            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md flex items-center gap-2 transition-colors"
+                        >
+                            <LuPlus className="w-4 h-4" />
+                            Nueva Acta
+                        </button>
+                    </div>
+                </div>
             </div>
 
-            {/* Paginación */}
-            {paginationData.totalItems > 0 && (
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mt-4">
-                    {/* Selector de elementos por página (lado izquierdo) */}
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                        <label htmlFor="Mostrar">Mostrar:</label>
-                        <select
-                            value={itemsPerPage}
-                            onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
-                            className="px-2 py-1 border border-gray-200 rounded text-sm focus:ring-2 focus:ring-sky-500 focus:border-transparent"
-                        >
-                            <option value={5}>5</option>
-                            <option value={10}>10</option>
-                            <option value={20}>20</option>
-                            <option value={50}>50</option>
-                        </select>
-                        <span>por página</span>
-                    </div>
+            <div className="bg-white rounded-2xl shadow-sm border border-sky-100 overflow-hidden max-h-[calc(100vh-300px)] overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100">
+                <div className="overflow-x-auto">
+                    <table className="min-w-full table-auto">
+                        <thead className="bg-sky-50">
+                            {table.getHeaderGroups().map(headerGroup => (
+                                <tr key={headerGroup.id} className="text-left text-xs sm:text-sm text-sky-700">
+                                    {headerGroup.headers.map((header, index) => (
+                                        <th key={header.id} className={`px-2 sm:px-4 py-3 font-medium border-b border-sky-100 ${
+                                            index === 0 ? 'text-left' : 'text-center'
+                                        }`}>
+                                            {(() => {
+                                                if (header.isPlaceholder) {
+                                                    return null;
+                                                }
+                                                if (header.column.getCanSort()) {
+                                                    return (
+                                                        <button
+                                                            type="button"
+                                                            className={`cursor-pointer select-none flex items-center gap-2 bg-transparent border-none p-0 ${
+                                                                index === 0 ? 'justify-start' : 'justify-center'
+                                                            }`}
+                                                            onClick={header.column.getToggleSortingHandler()}
+                                                            onKeyDown={e => {
+                                                                if (e.key === 'Enter' || e.key === ' ') {
+                                                                    e.preventDefault();
+                                                                    header.column.getToggleSortingHandler()?.(e);
+                                                                }
+                                                            }}
+                                                            tabIndex={0}
+                                                            aria-label={`Ordenar por ${header.column.columnDef.header as string}`}
+                                                        >
+                                                            <span className="flex items-center gap-1">
+                                                                {header.column.columnDef.header as string}
+                                                                {header.column.getIsSorted() === 'asc' && <MdKeyboardArrowUp className="inline" />}
+                                                                {header.column.getIsSorted() === 'desc' && <MdKeyboardArrowDown className="inline" />}
+                                                            </span>
+                                                        </button>
+                                                    );
+                                                }
+                                                return (
+                                                    <span className={index === 0 ? 'text-left' : 'text-center'}>
+                                                        {header.column.columnDef.header as string}
+                                                    </span>
+                                                );
+                                            })()}
+                                        </th>
+                                    ))}
+                                </tr>
+                            ))}
+                        </thead>
+                        <tbody className="bg-white divide-y divide-sky-50">
+                            {table.getRowModel().rows.length === 0 ? (
+                                <tr>
+                                    <td colSpan={5} className="px-2 sm:px-4 py-8 text-center text-slate-500">
+                                        {globalFilter ? 'No se encontraron actas que coincidan con la búsqueda' : 'No hay actas registradas'}
+                                    </td>
+                                </tr>
+                            ) : (
+                                table.getRowModel().rows.map(row => (
+                                    <tr key={row.id} className="hover:bg-sky-50 cursor-pointer transition-colors">
+                                        {row.getVisibleCells().map((cell, index) => {
+                                            let cellContent: React.ReactNode;
 
-                    {/* Información de página (lado derecho) */}
-                    <div className="flex items-center gap-4 text-sm text-gray-600">
-                        <span>
-                            Mostrando {paginationData.startIndex + 1} a {Math.min(paginationData.endIndex, paginationData.totalItems)} de {paginationData.totalItems} resultados
-                        </span>
-                    </div>
+                                            if (cell.column.columnDef.cell) {
+                                                if (typeof cell.column.columnDef.cell === 'function') {
+                                                    cellContent = cell.column.columnDef.cell(cell.getContext());
+                                                } else {
+                                                    cellContent = cell.column.columnDef.cell;
+                                                }
+                                            } else {
+                                                cellContent = cell.getValue() as React.ReactNode;
+                                            }
 
-                    {/* Controles de paginación */}
-                    {paginationData.totalPages > 1 && (
-                        <div className="flex items-center gap-2">
-                            {/* Botón anterior */}
-                            <button
-                                onClick={() => handlePageChange(currentPage - 1)}
-                                disabled={currentPage === 1}
-                                className={`p-2 rounded-md transition-colors ${currentPage === 1
-                                    ? 'text-gray-400 cursor-not-allowed'
-                                    : 'text-gray-700 hover:bg-gray-100'
-                                    }`}
-                            >
-                                <ChevronLeft size={16} />
-                            </button>
+                                            return (
+                                                <td key={cell.id} className={`px-2 sm:px-4 py-3 text-xs sm:text-sm text-slate-700 align-top ${
+                                                    index === 0 ? 'text-left' : 'text-center'
+                                                }`}>
+                                                    {cellContent}
+                                                </td>
+                                            );
+                                        })}
+                                    </tr>
+                                ))
+                            )}
+                        </tbody>
+                    </table>
+                </div>
 
-                            {/* Números de página */}
-                            <div className="flex items-center gap-1">
-                                {/* Primera página */}
-                                {currentPage > 3 && (
-                                    <>
-                                        <button
-                                            onClick={() => handlePageChange(1)}
-                                            className="px-3 py-1 text-sm rounded-md hover:bg-gray-100 transition-colors"
-                                        >
-                                            1
-                                        </button>
-                                        {currentPage > 4 && <span className="text-gray-400">...</span>}
-                                    </>
-                                )}
-
-                                {/* Páginas cercanas */}
-                                {Array.from({ length: Math.min(5, paginationData.totalPages) }, (_, i) => {
-                                    const pageStart = Math.max(1, Math.min(currentPage - 2, paginationData.totalPages - 4));
-                                    const pageNumber = pageStart + i;
-
-                                    if (pageNumber <= paginationData.totalPages) {
-                                        return (
-                                            <button
-                                                key={pageNumber}
-                                                onClick={() => handlePageChange(pageNumber)}
-                                                className={`px-3 py-1 text-sm rounded-md transition-colors ${currentPage === pageNumber
-                                                    ? 'bg-sky-600 text-white'
-                                                    : 'hover:bg-gray-100'
-                                                    }`}
-                                            >
-                                                {pageNumber}
-                                            </button>
-                                        );
-                                    }
-                                    return null;
-                                })}
-
-                                {/* Última página */}
-                                {currentPage < paginationData.totalPages - 2 && (
-                                    <>
-                                        {currentPage < paginationData.totalPages - 3 && <span className="text-gray-400">...</span>}
-                                        <button
-                                            onClick={() => handlePageChange(paginationData.totalPages)}
-                                            className="px-3 py-1 text-sm rounded-md hover:bg-gray-100 transition-colors"
-                                        >
-                                            {paginationData.totalPages}
-                                        </button>
-                                    </>
-                                )}
+                <div className="px-6 py-3 bg-gray-50 border-t border-gray-200">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                            <div className="flex items-center gap-2">
+                                <span className="text-sm text-gray-700">Filas por página:</span>
+                                <select
+                                    value={table.getState().pagination.pageSize}
+                                    onChange={(e) => {
+                                        table.setPageSize(Number(e.target.value));
+                                    }}
+                                    className="px-3 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                >
+                                    {pageSizeOptions.map((pageSize) => (
+                                        <option key={pageSize} value={pageSize}>
+                                            {pageSize}
+                                        </option>
+                                    ))}
+                                </select>
                             </div>
-
-                            {/* Botón siguiente */}
+                        </div>
+                        <div className="flex items-center gap-2">
                             <button
-                                onClick={() => handlePageChange(currentPage + 1)}
-                                disabled={currentPage === paginationData.totalPages}
-                                className={`p-2 rounded-md transition-colors ${currentPage === paginationData.totalPages
-                                    ? 'text-gray-400 cursor-not-allowed'
-                                    : 'text-gray-700 hover:bg-gray-100'
-                                    }`}
+                                onClick={() => table.setPageIndex(0)}
+                                disabled={!table.getCanPreviousPage()}
+                                className="p-2 rounded-md border text-gray-600 hover:text-gray-900 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                                title="Primera página"
                             >
-                                <ChevronRight size={16} />
+                                <MdKeyboardDoubleArrowLeft className="w-4 h-4" />
+                            </button>
+                            <button
+                                onClick={() => table.previousPage()}
+                                disabled={!table.getCanPreviousPage()}
+                                className="p-2 rounded-md border text-gray-600 hover:text-gray-900 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                                title="Página anterior"
+                            >
+                                <MdKeyboardArrowLeft className="w-4 h-4" />
+                            </button>
+                            <span className="text-sm text-gray-700">
+                                Página {table.getState().pagination.pageIndex + 1} de {table.getPageCount()}
+                            </span>
+                            <button
+                                onClick={() => table.nextPage()}
+                                disabled={!table.getCanNextPage()}
+                                className="p-2 rounded-md border text-gray-600 hover:text-gray-900 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                                title="Página siguiente"
+                            >
+                                <MdKeyboardArrowRight className="w-4 h-4" />
+                            </button>
+                            <button
+                                onClick={() => table.setPageIndex(table.getPageCount() - 1)}
+                                disabled={!table.getCanNextPage()}
+                                className="p-2 rounded-md border text-gray-600 hover:text-gray-900 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                                title="Última página"
+                            >
+                                <MdKeyboardDoubleArrowRight className="w-4 h-4" />
                             </button>
                         </div>
-                    )}
+                    </div>
                 </div>
-            )}
-
+            </div>
 
             {/* Modal para crear actas */}
-            {modalVisible && (
+            {formVisible && (
                 <FormularioCrearActas
-                    onClose={() => setModalVisible(false)} // Oculta el modal de creación
-                    refetch={refetch} // Refresca la tabla
+                    onClose={() => setFormVisible(false)}
+                    refetch={refetch}
+                />
+            )}
+
+            {/* Modal para editar actas */}
+            {editVisible && actaSeleccionada && (
+                <ActasEdit
+                    acta={actaSeleccionada}
+                    onClose={() => {
+                        setEditVisible(false);
+                        setActaSeleccionada(null);
+                    }}
+                    refetch={refetch}
                 />
             )}
 
             {/* Modal para mostrar detalles del acta */}
-            {actaSeleccionada && (
+            {modalOpen && actaSeleccionada && (
                 <ActasModal
-                    isOpen={!!actaSeleccionada} // Muestra el modal si hay un acta seleccionada
-                    onClose={handleCloseModalDetalles} // Cierra el modal
-                    acta={actaSeleccionada} // Pasa el acta seleccionada al modal
-                    onEliminar={handleEliminarActa} // Función para eliminar el acta
+                    isOpen={modalOpen}
+                    onClose={() => {
+                        setModalOpen(false);
+                        setActaSeleccionada(null);
+                    }}
+                    acta={actaSeleccionada}
                 />
             )}
         </div>

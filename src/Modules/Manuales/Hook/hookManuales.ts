@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 
 import type { Manual } from "../Models/ModelsManuales";
 import {  getManuales } from "../Services/ServicesManuales";

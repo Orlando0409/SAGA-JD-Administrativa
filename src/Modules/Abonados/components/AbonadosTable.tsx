@@ -1,11 +1,11 @@
 import { useMemo, useState } from 'react';
-import { createColumnHelper, getCoreRowModel, getFilteredRowModel, getSortedRowModel, getPaginationRowModel, useReactTable, flexRender, type ColumnDef } from '@tanstack/react-table';
-import { User, Building, Trash2, Pencil, Eye, Plus } from 'lucide-react';
+import { createColumnHelper, getCoreRowModel, getFilteredRowModel, getSortedRowModel, getPaginationRowModel, useReactTable, type ColumnDef } from '@tanstack/react-table';
+import { User, Building, Plus } from 'lucide-react';
 import { MdKeyboardArrowLeft, MdKeyboardArrowRight, MdKeyboardDoubleArrowLeft, MdKeyboardDoubleArrowRight, MdKeyboardArrowDown, MdKeyboardArrowUp } from 'react-icons/md';
 import { LuSearch } from 'react-icons/lu';
 import { useAfiliadosFisicos } from '../Hook/HookAfiliadoFisico';
 import { useAfiliadosJuridicos } from '../Hook/HookAfiliadoJuridico';
-import DetailAbonados from './DetailAbonados';
+import DetailAbonados from './DetailAfiliado';
 import CreateModal from './CreateModal';
 import EditModal from './EditModal'; // ✅ Agregar import
 import {
@@ -374,6 +374,10 @@ export default function AbonadosTable() {
         <div className="space-y-6">
             {/* Encabezado con filtro de estado, búsqueda y botón */}
             <div className="bg-white rounded-lg p-3">
+                 <div className="flex items-start gap-4 flex-col justify-start">
+                    <h2 className="text-2xl font-bold text-gray-900">Gestión de afiliados</h2>
+                    <p className="text-sm text-gray-600 pb-4">Gestiona los afiliados de la ASADA</p>
+                </div>
                 <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
                     <div className="flex items-center gap-4">
                         <label htmlFor='estado' className="text-sm font-medium text-gray-700">Estado:</label>

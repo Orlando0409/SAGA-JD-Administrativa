@@ -7,7 +7,7 @@ export const getArchivosCalidadAgua = async (): Promise<ArchivoCalidadAgua[]> =>
 };
 
 export const uploadArchivoCalidadAgua = async (formData: FormData): Promise<ArchivoCalidadAgua> => {
-  const res = await apiAuth.post(`/calidad-agua/create`, formData, {
+  const res = await apiAuth.post(`/calidad-agua/create/`, formData, {
     headers: {
       "Content-Type": "multipart/form-data",
     },

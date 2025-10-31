@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { LuPlus, LuSearch, LuFilter } from 'react-icons/lu';
+import { LuPlus, LuSearch } from 'react-icons/lu';
 import {
   createColumnHelper,
   useReactTable,
@@ -27,11 +27,10 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/Modules/Global/components/Sidebar/ui/alert-dialog';
-import { useMedidores, useUpdateEstadoMedidor } from '../../hooks/useMedidores';
+import { useMedidores, useMedidoresPorEstado, useUpdateEstadoMedidor } from '../../hooks/useMedidores';
 import type { Medidor } from '../../models/Medidor';
 import CreateMedidorModal from './CreateMedidorModal';
 import DetailMedidorModal from './DetailMedidorModal';
-import FilterMedidorModal from './FilterMedidorModal';
 
 interface CatalogoMedidoresProps {
   onBack?: () => void;
@@ -39,16 +38,47 @@ interface CatalogoMedidoresProps {
 
 const CatalogoMedidores: React.FC<CatalogoMedidoresProps> = () => {
 
-  const { data: medidores = [], isLoading, error, refetch } = useMedidores();
-  const updateEstadoMutation = useUpdateEstadoMedidor();
-  
   const [globalFilter, setGlobalFilter] = useState('');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [selectedMedidor, setSelectedMedidor] = useState<Medidor | null>(null);
   const [estadoFilter, setEstadoFilter] = useState<string>('Todos');
-  const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
-  const [filterOptions, setFilterOptions] = useState<any>({});
+
+
+  // Llama todos los hooks en el nivel superior del componente
+  const medidoresTodos = useMedidores();
+  const medidoresNoInstalados = useMedidoresPorEstado('no-instalados');
+  const medidoresInstalados = useMedidoresPorEstado('instalados');
+  const medidoresAveriados = useMedidoresPorEstado('averiados');
+  const updateEstadoMutation = useUpdateEstadoMedidor();
+
+  // Selecciona los datos y estados según el filtro
+  let medidores: Medidor[] = [];
+  let isLoading = false;
+  let error: unknown = null;
+  let refetch = () => {};
+
+  if (estadoFilter === 'No instalado') {
+    medidores = medidoresNoInstalados.data ?? [];
+    isLoading = medidoresNoInstalados.isLoading;
+    error = medidoresNoInstalados.error;
+    refetch = medidoresNoInstalados.refetch;
+  } else if (estadoFilter === 'Instalado') {
+    medidores = medidoresInstalados.data ?? [];
+    isLoading = medidoresInstalados.isLoading;
+    error = medidoresInstalados.error;
+    refetch = medidoresInstalados.refetch;
+  } else if (estadoFilter === 'Averiado') {
+    medidores = medidoresAveriados.data ?? [];
+    isLoading = medidoresAveriados.isLoading;
+    error = medidoresAveriados.error;
+    refetch = medidoresAveriados.refetch;
+  } else {
+    medidores = medidoresTodos.data ?? [];
+    isLoading = medidoresTodos.isLoading;
+    error = medidoresTodos.error;
+    refetch = medidoresTodos.refetch;
+  }
 
 
   const pageSizeOptions = [5, 10, 20, 50];
@@ -75,9 +105,6 @@ const CatalogoMedidores: React.FC<CatalogoMedidoresProps> = () => {
     }
   };
 
-  const handleOpenFilterModal = () => {
-    setIsFilterModalOpen(true);
-  };
 
   const handleToggleEstado = async (medidor: Medidor, nuevoEstadoId: number) => {
     
@@ -91,16 +118,6 @@ const CatalogoMedidores: React.FC<CatalogoMedidoresProps> = () => {
       console.error('Error al cambiar estado del medidor:', error);
     }
   };
-
-  const filteredMedidores = useMemo(() => {
-    return medidores.filter((medidor: Medidor) => {
-      const matchesEstado = 
-        estadoFilter === 'Todos' ||
-        medidor.Estado_Medidor.Nombre_Estado_Medidor === estadoFilter;
-
-      return matchesEstado;
-    });
-  }, [medidores, estadoFilter]);
 
   const columnHelper = createColumnHelper<Medidor>();
 
@@ -271,7 +288,7 @@ const CatalogoMedidores: React.FC<CatalogoMedidoresProps> = () => {
   );
 
   const table = useReactTable({
-    data: filteredMedidores,
+    data: medidores,
     columns,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
@@ -289,16 +306,7 @@ const CatalogoMedidores: React.FC<CatalogoMedidoresProps> = () => {
         pageIndex: 0,
       },
     },
-  });
-
-    const handleApplyFilters = (filters: any) => {
-    setFilterOptions(filters);
-    setIsFilterModalOpen(false);
-  };
-
-  const activeFiltersCount = Object.values(filterOptions).filter(
-    v => v !== undefined && v !== '' && v !== false
-  ).length;
+  });  
 
   if (isLoading) {
     return (
@@ -320,6 +328,10 @@ const CatalogoMedidores: React.FC<CatalogoMedidoresProps> = () => {
   return (
     <div className="space-y-6">
       <div className="bg-white rounded-lg p-3">
+           <div className="flex items-start gap-4 flex-col justify-start">
+            <h2 className="text-2xl font-bold text-gray-900">Catálogo de Medidores</h2>
+            <p className="text-sm text-gray-600 pb-4">Gestiona los medidores del inventario</p>
+        </div>
         <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
           <div className="flex items-center gap-4">
             <label htmlFor='estado' className="text-sm font-medium text-gray-700">Estado:</label>
@@ -346,22 +358,6 @@ const CatalogoMedidores: React.FC<CatalogoMedidoresProps> = () => {
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
-            <button
-              onClick={() => handleOpenFilterModal()}
-              className={`px-4 py-2 border rounded-md flex items-center gap-2 transition-colors ${
-                activeFiltersCount > 0
-                  ? 'border-blue-500 bg-blue-50 text-blue-700'
-                  : 'border-gray-300 hover:bg-gray-50'
-              }`}
-            >
-              <LuFilter className="w-4 h-4" />
-              Filtros
-              {activeFiltersCount > 0 && (
-                <span className="bg-blue-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                  {activeFiltersCount}
-                </span>
-              )}
-            </button>
             <button
               onClick={() => setIsCreateModalOpen(true)}
               className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md flex items-center gap-2 transition-colors"
@@ -537,12 +533,6 @@ const CatalogoMedidores: React.FC<CatalogoMedidoresProps> = () => {
           medidor={selectedMedidor}
         />
       )}
-      <FilterMedidorModal
-        isOpen={isFilterModalOpen}
-        onClose={() => setIsFilterModalOpen(false)}
-        onApplyFilters={handleApplyFilters}
-        currentFilters={filterOptions}
-      />
     </div>
   );
 };

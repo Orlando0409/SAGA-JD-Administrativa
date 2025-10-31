@@ -17,7 +17,7 @@ export default function ImagenFormEdit({ onClose, refetch, imagen }: ImagenFormE
 
   const [nombre, setNombre] = useState(imagen.Nombre_Imagen || "");
   const [file, setFile] = useState<File | null>(null);
-  const [preview, setPreview] = useState(imagen.Imagen || "");
+  const [_preview, setPreview] = useState(imagen.Imagen || "");
   const [nombreError, setNombreError] = useState("");
   const [isValid, setIsValid] = useState(false);
 
