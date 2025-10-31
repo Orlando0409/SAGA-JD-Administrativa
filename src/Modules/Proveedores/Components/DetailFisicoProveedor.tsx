@@ -66,7 +66,7 @@ const ProveedorDetailModal: React.FC<ProveedorDetailModalProps> = ({ proveedor, 
         </div>
 
         {/* Content */}
-        <div className="p-6">
+        <div className="p-6 text-left">
           {/* Proveedor Header Card */}
           <div className="bg-gradient-to-r from-blue-600 to-blue-700 p-6 rounded-lg mb-6">
             <div className="flex items-center gap-4">
@@ -139,7 +139,7 @@ const ProveedorDetailModal: React.FC<ProveedorDetailModalProps> = ({ proveedor, 
                       <label className="block text-sm font-medium text-gray-500 mb-2">Estado del Proveedor</label>
                       <span className={`inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium border ${
                         isActiveProveedor(proveedor.Estado_Proveedor)
-                          ? 'bg-blue-100 text-blue-800 border-blue-200' 
+                          ? 'bg-blue-100 text-green-800 border-blue-200' 
                           : 'bg-red-100 text-red-800 border-red-200'
                       }`}>
                         {getStatusDisplay(proveedor.Estado_Proveedor)}

@@ -1,6 +1,4 @@
 import React, { useState } from 'react';
-import { LuUserX, LuUserCheck } from 'react-icons/lu';
-import { FaUserEdit } from "react-icons/fa";
 import { useChangeProveedorFisicoStatus } from '../Hook/hookFisicoProveedor';
 import { useChangeProveedorJuridicoStatus } from '../Hook/hookjuridicoproveedor';
 import {
@@ -14,7 +12,6 @@ import {
     AlertDialogHeader,
     AlertDialogFooter
 } from "@/Modules/Global/components/Sidebar/ui/alert-dialog";
-import { Button } from '@/Modules/Global/components/Sidebar/ui/button';
 import { useAlerts } from '@/Modules/Global/context/AlertContext';
 import EditProveedorModal from './EditFisicoProveedoresModal';
 import EditProveedorJuridicoModal from './EditJuridicoProveedorModal';

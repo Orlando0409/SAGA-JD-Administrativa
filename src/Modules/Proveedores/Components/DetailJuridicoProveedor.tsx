@@ -66,7 +66,7 @@ const ProveedorJuridicoDetailModal: React.FC<ProveedorJuridicoDetailModalProps> 
         </div>
 
         {/* Content */}
-        <div className="p-6">
+        <div className="p-6 text-left">
           {/* Proveedor Header Card */}
           <div className="bg-gradient-to-r from-blue-600 to-blue-700 p-6 rounded-lg mb-6">
             <div className="flex items-center gap-4">

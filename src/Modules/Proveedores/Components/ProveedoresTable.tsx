@@ -91,22 +91,6 @@ export default function ProveedoresTable() {
             .sort((a, b) => a.Id_Proveedor - b.Id_Proveedor);
     }, [proveedoresFisicos, proveedoresJuridicos]);
 
-
-    // Función para abrir el modal de detalle correspondiente
-    const handleViewDetail = (proveedor: ProveedorUnificado) => {
-        if (proveedor.Tipo_Proveedor === 'Físico') {
-            // Para proveedores físicos
-            setSelectedProveedorFisico(proveedor.datos_originales as ProveedorFisico);
-            setShowDetailModal(true);
-        } else {
-            // Para proveedores jurídicos
-            setSelectedProveedorJuridico(proveedor.datos_originales as ProveedorJuridico);
-            setShowJuridicoDetailModal(true);
-        }
-    };
-
-
-
     const filteredData = useMemo(() => {
         if (!globalFilter) return proveedoresUnificados;
         const q = globalFilter.toLowerCase();
