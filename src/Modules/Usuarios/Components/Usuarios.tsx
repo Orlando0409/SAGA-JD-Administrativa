@@ -339,11 +339,10 @@ const Usuarios = () => {
             </div>
           </div>
         )}
-          <div className="flex pl-6 items-center gap-4 ">
-            <h1 className="text-2xl font-bold text-gray-800">
-              Gestión de Usuarios
-            </h1>
-          </div>
+         <div className="flex items-start gap-4 flex-col justify-start">
+            <h2 className="text-2xl font-bold text-gray-900">Gestión de Usuarios</h2>
+            <p className="text-sm text-gray-600 pb-4">Administra los usuarios del sistema</p>
+        </div>
 
           {(hasEditPermission || filteredUsers.length > 1) && (
             <div className="p-6">

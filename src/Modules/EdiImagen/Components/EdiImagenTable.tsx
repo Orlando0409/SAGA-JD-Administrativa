@@ -61,7 +61,6 @@ export default function ImagenesTable() {
                     className="font-medium transition-colors text-left w-full flex items-center gap-2"
 
                 >
-                    <ImageIcon size={18} className="text-sky-600" />
                     <span className="truncate">
                         {info.getValue().length > 25
                             ? `${info.getValue().slice(0, 25)}...`
@@ -189,8 +188,9 @@ export default function ImagenesTable() {
         <div className="space-y-6">
             {/* Encabezado con búsqueda y botón */}
             <div className="bg-white rounded-lg p-3">
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
-                    <h2 className="text-lg sm:text-xl font-semibold">Edición de Imágenes</h2>
+                 <div className="flex items-start gap-4 flex-col justify-start">
+                    <h2 className="text-2xl font-bold text-gray-900">Edición de Imágenes</h2>
+                    <p className="text-sm text-gray-600 pb-4">Gestión de imágenes para el apartado de la historia</p>
                 </div>
                 <div className="flex flex-col sm:flex-row gap-4 items-center justify-end">
                     <div className="flex items-center gap-4 w-full sm:w-auto">

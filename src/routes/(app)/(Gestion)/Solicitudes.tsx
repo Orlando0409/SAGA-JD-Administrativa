@@ -1,7 +1,7 @@
-import Solicitudes from '@/Modules/Solicitudes/components/Solicitudes';
+import SolicitudesTable from '@/Modules/Solicitudes/components/SolicitudesTable'
 import { createFileRoute } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/(app)/(Gestion)/Solicitudes')({
-  component: Solicitudes,
+  component: SolicitudesTable,
 })
 

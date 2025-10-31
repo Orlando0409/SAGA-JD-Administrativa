@@ -27,10 +27,10 @@ const Manuales = () => {
     return (
       <div className="flex flex-col items-center">
     {/* 🔹 Título centrado arriba */}
-    <h2 className="text-2xl font-semibold text-center mb-6">
-      Manuales de Usuario
-    </h2>
-      
+           <div className="flex items-start gap-4 flex-col justify-start">
+            <h2 className="text-2xl font-bold text-gray-900">Ocupas ayuda?</h2>
+            <p className="text-sm text-gray-600 pb-4">Aquí puedes encontrar los manuales de usuario disponibles.</p>
+        </div>
       <div className='grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4'>
 
         

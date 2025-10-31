@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { useGetCalidadAgua, useToggleVisibilidadCalidadAgua } from "../Hook/HookCalidadAgua";
+import { useGetCalidadAgua, useToggleVisibilidadCalidadAgua, useDeleteCalidadAgua } from "../Hook/HookCalidadAgua";
 import CalidadAguaModal from "./CalidadAguaModal";
 import CalidadAguaEdit from "./CalidadAguaEdit";
 import FormularioCalidadAgua from "./FormularioCalidadAgua";
-import { Plus, Eye, EyeOff, Pencil, } from "lucide-react";
+import { Plus, Eye, EyeOff } from "lucide-react";
 import { MdKeyboardArrowLeft, MdKeyboardArrowRight, MdKeyboardDoubleArrowLeft,
   MdKeyboardDoubleArrowRight,
   MdKeyboardArrowDown,
@@ -15,10 +15,12 @@ import {
   getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
+  createColumnHelper,
   flexRender,
 } from "@tanstack/react-table";
-import type { ColumnDef } from "@tanstack/react-table";
+
 import { useAlerts } from "@/Modules/Global/context/AlertContext";
+
 
 export default function CalidadAguaTable() {
   const { data: archivos, isLoading, isError, refetch } = useGetCalidadAgua();
@@ -71,100 +73,90 @@ export default function CalidadAguaTable() {
   };
 
 
-  const columns: ColumnDef<ArchivoCalidadAgua>[] = [
-    {
-      accessorKey: "Titulo",
-      header: "Título",
-      cell: ({ row }) => (
-        <div className="flex items-center gap-2 justify-center">
-          <span className="text-xs sm:text-sm text-slate-700 truncate">
-            {row.original.Titulo}
+
+  // Column helper para definir las columnas
+  const columnHelper = createColumnHelper<ArchivoCalidadAgua>();
+
+  // Definir las columnas
+  const columns = [
+    columnHelper.accessor('Titulo', {
+      header: 'Título',
+      cell: info => (
+        <div className="flex justify-center items-center">
+          <span className="font-medium text-left flex items-center gap-2 truncate">
+            {info.getValue().length > 30
+              ? `${info.getValue().slice(0, 30)}...`
+              : info.getValue()}
           </span>
         </div>
       ),
-    },
-    {
-      accessorKey: "Fecha_Creacion",
-      header: "Fecha creación",
-      size: 120,
-      cell: ({ row }) => (
-        <span className="text-xs sm:text-sm text-slate-700 whitespace-nowrap">
-          {new Date(row.original.Fecha_Creacion).toLocaleDateString("es-ES")}
-        </span>
-      ),
-    },
-    {
-      accessorKey: "Fecha_Actualizacion",
-      header: "Fecha actualización",
-      size: 120,
-      cell: ({ row }) => (
-        <span className="text-xs sm:text-sm text-slate-700 whitespace-nowrap">
-          {row.original.Fecha_Actualizacion
-            ? new Date(row.original.Fecha_Actualizacion).toLocaleDateString("es-ES")
-            : "Sin actualizar"}
-        </span>
-      ),
-    },
-    {
-      accessorKey: "Visible",
-      header: "Estado",
-      size: 100,
-      cell: ({ row }) => (
-        <div className="flex items-center justify-center">
-        <button
-          onClick={(e) => handleToggleVisible(e, row.original.Id_Calidad_Agua)}
-          className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium transition-colors ${
-            row.original.Visible
-              ? 'bg-green-100 text-green-700 hover:bg-green-200'
-              : 'bg-red-100 text-red-700 hover:bg-red-200'
-          }`}
-          disabled={toggleVisibilidad.isPending}
-        >
-          {row.original.Visible ? (
-            <>
-              <Eye size={12} className="sm:w-3 sm:h-3" />
-              <span className="hidden sm:inline">Visible</span>
-            </>
-          ) : (
-            <>
-              <EyeOff size={12} className="sm:w-3 sm:h-3" />
-              <span className="hidden sm:inline">Oculto</span>
-            </>
-          )}
-        </button>
-
-        </div>),
-    },
-    {
-      id: "actions",
-      header: "Acciones",
-      cell: ({ row }) => (
-        <div className="flex items-center justify-center gap-1 sm:gap-2">
-            <button
-                className="px-2 py-1 sm:px-4 sm:py-1 bg-gray-600 text-white text-xs rounded hover:bg-gray-700 transition-colors"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleOpenModal(row.original);
-                }}
-                title="Ver detalles"
-            >
-                <span className="hidden sm:inline">Ver</span>
-                <Eye size={14} className="sm:hidden" />
-            </button>
-            <button
-                className="px-2 py-1 sm:px-4 sm:py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition-colors"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleOpenEditModal(row.original);
-                }}
-                title="Editar"
-            >
-                <span className="hidden sm:inline">Editar</span>
-                <Pencil size={14} className="sm:hidden" />
-            </button>
+    }),
+    columnHelper.accessor('Fecha_Creacion', {
+      header: 'Fecha de creación',
+      cell: info => (
+        <div className="flex justify-center items-center">
+          <span className="text-gray-600 text-left">{new Date(info.getValue()).toLocaleDateString("es-ES")}</span>
         </div>
       ),
-    },
+    }),
+    columnHelper.accessor('Fecha_Actualizacion', {
+      header: 'Fecha de actualización',
+      cell: info => (
+        <div className="flex justify-center items-center">
+          <span className="text-gray-600 text-left">{info.getValue() ? new Date(info.getValue()).toLocaleDateString("es-ES") : "Sin actualizar"}</span>
+        </div>
+      ),
+    }),
+    columnHelper.accessor('Visible', {
+      header: 'Estado',
+      cell: info => (
+        <div className="flex items-center justify-center">
+          <button
+            onClick={(e) => handleToggleVisible(e, info.row.original.Id_Calidad_Agua)}
+            className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium transition-colors ${
+              info.getValue()
+                ? 'bg-green-100 text-green-700 hover:bg-green-200'
+                : 'bg-red-100 text-red-700 hover:bg-red-200'
+            }`}
+            disabled={toggleVisibilidad.isPending}
+          >
+            {info.getValue() ? (
+              <>
+                <Eye size={12} className="sm:w-3 sm:h-3" />
+                <span className="hidden sm:inline">Visible</span>
+              </>
+            ) : (
+              <>
+                <EyeOff size={12} className="sm:w-3 sm:h-3" />
+                <span className="hidden sm:inline">Oculto</span>
+              </>
+            )}
+          </button>
+        </div>
+      ),
+    }),
+    columnHelper.display({
+      id: 'acciones',
+      header: 'Acciones',
+      cell: info => (
+        <div className="flex justify-center gap-1">
+          <button
+            className="px-4 py-1 bg-gray-600 text-white text-xs rounded hover:bg-gray-700 transition-colors"
+            onClick={() => handleOpenModal(info.row.original)}
+            title="Ver detalles"
+          >
+            Ver
+          </button>
+          <button
+            className="px-2 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition-colors"
+            onClick={() => handleOpenEditModal(info.row.original)}
+            title="Editar"
+          >
+            Editar
+          </button>
+        </div>
+      ),
+    }),
   ];
 
   const table = useReactTable({
@@ -193,11 +185,11 @@ export default function CalidadAguaTable() {
     <div className="w-full">
       {/* Header responsive */}
       <div className="flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0 mb-4">
-        <div className="flex items-center gap-3">
-          <h2 className="text-lg sm:text-xl font-semibold text-sky-800">Gestión de Calidad de Agua</h2>
+           <div className="flex items-start gap-4 flex-col justify-start">
+            <h2 className="text-2xl font-bold text-gray-900">Gestión de Calidad de Agua</h2>
+            <p className="text-sm text-gray-600 pb-4">Gestiona los documentos de los resultados de la calidad de agua</p>
         </div>
-
-        {/* Filtro y botón en móviles */}
+      
         <div className="flex flex-col space-y-2 sm:flex-row sm:items-center sm:space-y-0 sm:space-x-4">
           <input
             type="text"
@@ -341,60 +333,48 @@ export default function CalidadAguaTable() {
                   ))}
                 </select>
               </div>
-              <span className="text-xs sm:text-sm text-gray-700">
-                {table.getFilteredRowModel().rows.length > 0
-                  ? `${table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1}-${Math.min(
-                      (table.getState().pagination.pageIndex + 1) * table.getState().pagination.pageSize,
-                      table.getFilteredRowModel().rows.length
-                    )} de ${table.getFilteredRowModel().rows.length}`
-                  : '0 resultados'
-                }
-              </span>
             </div>
 
             {/* Controles de navegación */}
-            <div className="flex items-center justify-center gap-1 sm:gap-2">
-              <button
-                onClick={() => table.setPageIndex(0)}
-                disabled={!table.getCanPreviousPage()}
-                className="p-1 sm:p-2 rounded-md border text-gray-600 hover:text-gray-900 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                title="Primera página"
-              >
-                <MdKeyboardDoubleArrowLeft className="w-3 h-3 sm:w-4 sm:h-4" />
-              </button>
-              <button
-                onClick={() => table.previousPage()}
-                disabled={!table.getCanPreviousPage()}
-                className="p-1 sm:p-2 rounded-md border text-gray-600 hover:text-gray-900 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                title="Página anterior"
-              >
-                <MdKeyboardArrowLeft className="w-3 h-3 sm:w-4 sm:h-4" />
-              </button>
-
-              <span className="text-xs sm:text-sm text-gray-700 px-2">
-                {table.getPageCount() > 0
-                  ? `${table.getState().pagination.pageIndex + 1} / ${table.getPageCount()}`
-                  : '0 / 0'
-                }
-              </span>
-
-              <button
-                onClick={() => table.nextPage()}
-                disabled={!table.getCanNextPage()}
-                className="p-1 sm:p-2 rounded-md border text-gray-600 hover:text-gray-900 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                title="Página siguiente"
-              >
-                <MdKeyboardArrowRight className="w-3 h-3 sm:w-4 sm:h-4" />
-              </button>
-              <button
-                onClick={() => table.setPageIndex(table.getPageCount() - 1)}
-                disabled={!table.getCanNextPage()}
-                className="p-1 sm:p-2 rounded-md border text-gray-600 hover:text-gray-900 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                title="Última página"
-              >
-                <MdKeyboardDoubleArrowRight className="w-3 h-3 sm:w-4 sm:h-4" />
-              </button>
-            </div>
+               <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => table.setPageIndex(0)}
+                    disabled={!table.getCanPreviousPage()}
+                    className="p-1 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                    title="Primera página"
+                  >
+                    <MdKeyboardDoubleArrowLeft className="w-5 h-5 text-gray-600" />
+                  </button>
+                  <button
+                    onClick={() => table.previousPage()}
+                    disabled={!table.getCanPreviousPage()}
+                    className="p-1 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                    title="Página anterior"
+                  >
+                    <MdKeyboardArrowLeft className="w-5 h-5 text-gray-600" />
+                  </button>
+                  <span className="text-sm text-gray-700 min-w-[120px] text-center">
+                    Página {table.getState().pagination.pageIndex + 1} de {table.getPageCount()}
+                  </span>
+                  <button
+                    onClick={() => table.nextPage()}
+                    disabled={!table.getCanNextPage()}
+                    className="p-1 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                    title="Página siguiente"
+                  >
+                    <MdKeyboardArrowRight className="w-5 h-5 text-gray-600" />
+                  </button>
+                  <button
+                    onClick={() => table.setPageIndex(table.getPageCount() - 1)}
+                    disabled={!table.getCanNextPage()}
+                    className="p-1 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                    title="Última página"
+                  >
+                    <MdKeyboardDoubleArrowRight className="w-5 h-5 text-gray-600" />
+                  </button>
+                </div>
+              </div>
           </div>
         </div>
       </div>

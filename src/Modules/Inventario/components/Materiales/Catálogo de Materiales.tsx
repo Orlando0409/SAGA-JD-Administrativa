@@ -49,7 +49,7 @@ interface CatalogoMaterialesProps {
   onBack?: () => void;
 }
 
-const CatalogoMateriales: React.FC<CatalogoMaterialesProps> = ({ onBack }) => {
+const CatalogoMateriales: React.FC<CatalogoMaterialesProps> = () => {
   const [globalFilter, setGlobalFilter] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showDetailModal, setShowDetailModal] = useState(false);
@@ -596,23 +596,11 @@ const CatalogoMateriales: React.FC<CatalogoMaterialesProps> = ({ onBack }) => {
 
     return (
     <div className="space-y-6">
-      {onBack && (
-        <div className="flex items-center gap-4">
-          <button
-            onClick={onBack}
-            className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
-          >
-            <LuArrowLeft className="w-4 h-4" />
-            Volver al Dashboard
-          </button>
-          <div className="h-6 w-px bg-gray-300" />
-          <h1 className="text-2xl font-bold text-gray-900">
-            Catálogo de Materiales
-          </h1>
-        </div>
-      )}
-
       <div className="bg-white rounded-lg p-3">
+          <div className="flex items-start gap-4 flex-col justify-start">
+            <h2 className="text-2xl font-bold text-gray-900">Catálogo de Materiales</h2>
+            <p className="text-sm text-gray-600 pb-4">Gestiona los materiales del inventario</p>
+        </div>
         <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
           <div className="flex items-center gap-4">
             <label htmlFor="estado-filter-select" className="text-sm font-medium text-gray-700">Estado:</label>

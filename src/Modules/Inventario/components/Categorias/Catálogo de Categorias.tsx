@@ -275,8 +275,11 @@ const CategoriasManagement: React.FC<CategoriasManagementProps> = () => {
 
   return (
     <div className="space-y-6">
- 
       <div className="bg-white rounded-lg p-3">
+          <div className="flex items-start gap-4 flex-col justify-start">
+            <h2 className="text-2xl font-bold text-gray-900">Catálogo de Categorías</h2>
+            <p className="text-sm text-gray-600 pb-4">Gestiona las categorías de los materiales</p>
+        </div>
         <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
           <div className="flex items-center gap-4">
             <label htmlFor='estado' className="text-sm font-medium text-gray-700">Estado:</label>

@@ -246,16 +246,6 @@ const CatálogoAuditorias = () => {
         </div>
 
         <div className='flex items-center gap-3'>
-          {hasActiveFilters && (
-              <button
-                  onClick={clearFilters}
-                  className="px-3 py-2 text-sm font-medium text-red-600 border border-red-200 bg-red-50 hover:bg-red-100 rounded-lg transition-colors"
-                  title="Limpiar Filtros Aplicados"
-              >
-                  Limpiar Filtros
-              </button>
-          )}
-
           <button
             onClick={() => setShowFilterModal(true)}
             className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors text-sm font-medium ${
