@@ -11,7 +11,7 @@ import ProveedorJuridicoDetailModal from './DetailJuridicoProveedor';
 import EditFisicoProveedoresModal from './EditFisicoProveedoresModal';
 import EditJuridicoProveedorModal from './EditJuridicoProveedorModal';
 import FilterProveedorModal from './FilterProveedorModal';
-import { LuFilter } from 'react-icons/lu';
+import { LuFilter, LuSearch } from 'react-icons/lu';
 import { MdKeyboardArrowUp, MdKeyboardArrowDown, MdKeyboardDoubleArrowLeft, MdKeyboardArrowLeft, MdKeyboardArrowRight, MdKeyboardDoubleArrowRight } from 'react-icons/md';
 import ActionButtons from './ActionButtons';
 
@@ -292,12 +292,16 @@ export default function ProveedoresTable() {
                         )}
                     </button>
 ,
-                    <input
-                        value={globalFilter}
-                        onChange={(e) => setGlobalFilter(e.target.value)}
-                        placeholder="Buscar por nombre, identificación, teléfono, razón social..."
-                        className="w-full sm:w-auto px-3 py-2 rounded-lg border border-sky-200 bg-sky-50 focus:outline-none focus:ring-2 focus:ring-sky-200 text-sm"
-                    />
+                    <div className="relative flex-1 max-w-md">
+                        <LuSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                        <input
+                            type="text"
+                            placeholder="Buscar proveedores..."
+                            value={globalFilter ?? ''}
+                            onChange={(e) => setGlobalFilter(e.target.value)}
+                            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        />
+                    </div>
                     <button
                         className="px-3 py-2 rounded-lg bg-sky-600 text-white hover:bg-sky-700 shadow-sm text-sm whitespace-nowrap"
                         onClick={() => setShowCreateModal(true)}
