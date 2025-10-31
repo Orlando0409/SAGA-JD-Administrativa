@@ -18,6 +18,8 @@ import { Button } from '@/Modules/Global/components/Sidebar/ui/button';
 import { useAlerts } from '@/Modules/Global/context/AlertContext';
 import EditProveedorModal from './EditFisicoProveedoresModal';
 import EditProveedorJuridicoModal from './EditJuridicoProveedorModal';
+import ProveedorDetailModal from './DetailFisicoProveedor';
+import ProveedorJuridicoDetailModal from './DetailJuridicoProveedor';
 import type { ProveedorFisico } from '../Models/TablaProveedo/tablaFisicoProveedor';
 import type { ProveedorJuridico } from '../Models/TablaProveedo/tablaJuridicoProveedor';
 
@@ -32,6 +34,7 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({ proveedor, tipoProveedor 
     const { changeStatus: changeStatusJuridico, isChangingStatus: isChangingStatusJuridico } = useChangeProveedorJuridicoStatus();
 
     const [showEditModal, setShowEditModal] = useState(false);
+    const [showDetailModal, setShowDetailModal] = useState(false);
     const { showSuccess, showError } = useAlerts();
 
     // Determinar estado activo del proveedor
@@ -81,39 +84,42 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({ proveedor, tipoProveedor 
 
     return (
         <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+            {/* Botón de Ver */}
+            <button
+                type="button"
+                onClick={() => setShowDetailModal(true)}
+                className="px-2 py-1 bg-gray-600 text-white text-xs rounded hover:bg-gray-700 transition-colors"
+                title="Ver proveedor"
+            >
+                Ver
+            </button>
+
             {/* Botón de Editar */}
-            <Button
-                size="sm"
+            <button
+                type="button"
                 onClick={handleEdit}
-                className="px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition flex items-center gap-1 min-w-[32px] h-8"
+                className="px-2 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition-colors"
                 title="Editar proveedor"
             >
-                <FaUserEdit className="w-3 h-3" />
-                <span className="hidden lg:inline text-xs">Editar</span>
-            </Button>
+                Editar
+            </button>
 
             {/* Botón de Cambiar Estado */}
             <AlertDialog>
                 <AlertDialogTrigger asChild>
-                    <Button
-                        size="sm"
+                    <button
+                        type="button"
                         onClick={(e) => e.stopPropagation()}
-                        className={`px-2 py-1 rounded transition flex items-center gap-1 min-w-[32px] h-8 ${
+                        className={`px-2 py-1 text-xs rounded transition-colors ${
                             isActiveProveedor(proveedor.Estado_Proveedor)
-                                ? 'bg-red-500 hover:bg-red-600 text-white'
-                                : 'bg-green-500 hover:bg-green-600 text-white'
+                                ? 'bg-red-600 hover:bg-red-700 text-white'
+                                : 'bg-green-600 hover:bg-green-700 text-white'
                         }`}
                         title="Cambiar estado"
+                        disabled={isChangingStatus}
                     >
-                        {isActiveProveedor(proveedor.Estado_Proveedor) ? (
-                            <LuUserX className="w-3 h-3" />
-                        ) : (
-                            <LuUserCheck className="w-3 h-3" />
-                        )}
-                        <span className="hidden lg:inline text-xs">
-                            {isActiveProveedor(proveedor.Estado_Proveedor) ? 'Desactivar' : 'Activar'}
-                        </span>
-                    </Button>
+                        {isActiveProveedor(proveedor.Estado_Proveedor) ? 'Desactivar' : 'Activar'}
+                    </button>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
                     <AlertDialogHeader>
@@ -156,6 +162,21 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({ proveedor, tipoProveedor 
                     isOpen={showEditModal}
                     onClose={() => setShowEditModal(false)}
                     proveedor={proveedor as ProveedorJuridico}
+                />
+            )}
+
+            {/* Modales de Detalle */}
+            {tipoProveedor === 'Físico' ? (
+                <ProveedorDetailModal
+                    proveedor={proveedor as ProveedorFisico}
+                    isOpen={showDetailModal}
+                    onClose={() => setShowDetailModal(false)}
+                />
+            ) : (
+                <ProveedorJuridicoDetailModal
+                    proveedor={proveedor as ProveedorJuridico}
+                    isOpen={showDetailModal}
+                    onClose={() => setShowDetailModal(false)}
                 />
             )}
         </div>

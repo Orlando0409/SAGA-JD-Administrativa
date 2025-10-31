@@ -181,18 +181,17 @@ export default function ProveedoresTable() {
             cell: (info) => {
                 const estado = info.getValue();
                 const estadoNombre = estado?.Estado_Proveedor || 'Sin estado';
-
-                const base = 'inline-flex items-center gap-2 px-2 py-1 rounded-full text-xs font-medium';
+                const base = 'px-3 py-1 rounded-full text-xs font-semibold';
 
                 if (estadoNombre.toLowerCase() === 'activo') {
-                    return <span className={`${base} bg-green-100 text-green-700`}>Activo</span>;
+                    return <span className={`${base} bg-emerald-100 text-emerald-700 border border-emerald-300`}>Activo</span>;
                 } else if (estadoNombre.toLowerCase() === 'inactivo') {
-                    return <span className={`${base} bg-red-100 text-red-700`}>Inactivo</span>;
+                    return <span className={`${base} bg-red-100 text-red-700 border border-red-300`}>Inactivo</span>;
                 } else if (estadoNombre.toLowerCase() === 'pendiente') {
-                    return <span className={`${base} bg-amber-100 text-amber-700`}>Pendiente</span>;
+                    return <span className={`${base} bg-amber-100 text-amber-700 border border-amber-300`}>Pendiente</span>;
                 }
 
-                return <span className={`${base} bg-slate-100 text-slate-700`}>{estadoNombre}</span>;
+                return <span className={`${base} bg-slate-100 text-slate-700 border border-slate-300`}>{estadoNombre}</span>;
             },
             size: 120,
         }),
