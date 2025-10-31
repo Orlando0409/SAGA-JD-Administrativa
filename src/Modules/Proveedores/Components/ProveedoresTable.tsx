@@ -38,6 +38,9 @@ export default function ProveedoresTable() {
     const { proveedoresJuridicos, } = useProveedoresJuridicos();
 
     const [globalFilter, setGlobalFilter] = useState('');
+    // Filtros específicos solicitados: por tipo y por estado
+    const [tipoFilter, setTipoFilter] = useState<'Todos' | 'Físico' | 'Jurídico'>('Todos');
+    const [estadoFilter, setEstadoFilter] = useState<string>('Todos');
     // Estado para la paginación
     const [pagination, setPagination] = useState({
         pageIndex: 0,
@@ -91,10 +94,21 @@ export default function ProveedoresTable() {
             .sort((a, b) => a.Id_Proveedor - b.Id_Proveedor);
     }, [proveedoresFisicos, proveedoresJuridicos]);
 
+    // Lista de estados únicos para poblar el select de estados
+    const estadosUnicos = useMemo(() => {
+        const setEstados = new Set<string>();
+        proveedoresUnificados.forEach(p => {
+            const nombre = p.Estado_Proveedor?.Estado_Proveedor || 'Sin estado';
+            setEstados.add(nombre);
+        });
+        return ['Todos', ...Array.from(setEstados)];
+    }, [proveedoresUnificados]);
+
     const filteredData = useMemo(() => {
-        if (!globalFilter) return proveedoresUnificados;
-        const q = globalFilter.toLowerCase();
-        return proveedoresUnificados.filter((proveedor) => {
+        // Primero aplicar filtro global (texto)
+        const q = globalFilter?.toLowerCase() || '';
+        let data = proveedoresUnificados.filter((proveedor) => {
+            if (!q) return true;
             const searchFields = [
                 proveedor.Nombre_Proveedor,
                 proveedor.Telefono_Proveedor,
@@ -111,7 +125,19 @@ export default function ProveedoresTable() {
                 .toLowerCase()
                 .includes(q);
         });
-    }, [proveedoresUnificados, globalFilter]);
+
+        // Aplicar filtro por tipo si no es 'Todos'
+        if (tipoFilter && tipoFilter !== 'Todos') {
+            data = data.filter(p => p.Tipo_Proveedor === tipoFilter);
+        }
+
+        // Aplicar filtro por estado si no es 'Todos'
+        if (estadoFilter && estadoFilter !== 'Todos') {
+            data = data.filter(p => (p.Estado_Proveedor?.Estado_Proveedor || 'Sin estado') === estadoFilter);
+        }
+
+        return data;
+    }, [proveedoresUnificados, globalFilter, tipoFilter, estadoFilter]);
 
     const columnHelper = createColumnHelper<ProveedorUnificado>();
     const columns: ColumnDef<ProveedorUnificado, any>[] = [
@@ -240,6 +266,26 @@ export default function ProveedoresTable() {
                     <p className="text-sm text-gray-600 pb-4">Gestiona los proveedores del sistema</p>
                 </div>
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                    <select
+                        value={tipoFilter}
+                        onChange={(e) => setTipoFilter(e.target.value as 'Todos' | 'Físico' | 'Jurídico')}
+                        className="px-3 py-2 rounded-lg border border-sky-200 bg-white text-sm"
+                    >
+                        <option value="Todos">Todos los tipos</option>
+                        <option value="Físico">Físico</option>
+                        <option value="Jurídico">Jurídico</option>
+                    </select>
+
+                    <select
+                        value={estadoFilter}
+                        onChange={(e) => setEstadoFilter(e.target.value)}
+                        className="px-3 py-2 rounded-lg border border-sky-200 bg-white text-sm"
+                    >
+                        {estadosUnicos.map((est) => (
+                            <option key={est} value={est}>{est}</option>
+                        ))}
+                    </select>
+
                     <input
                         value={globalFilter}
                         onChange={(e) => setGlobalFilter(e.target.value)}
@@ -307,7 +353,7 @@ export default function ProveedoresTable() {
                             {table.getRowModel().rows.length === 0 ? (
                                 <tr>
                                     <td colSpan={5} className="px-2 sm:px-4 py-8 text-center text-slate-500">
-                                        {globalFilter ? 'No se encontraron actas que coincidan con la búsqueda' : 'No hay actas registradas'}
+                                        {globalFilter ? 'No se encontraron proveedores que coincidan con la búsqueda' : 'No hay proveedores registrados'}
                                     </td>
                                 </tr>
                             ) : (
