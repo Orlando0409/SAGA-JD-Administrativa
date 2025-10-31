@@ -1,10 +1,7 @@
 import { useState } from 'react';
 import { LuX, LuUser, LuMail, LuPhone, LuMapPin, LuCalendar, LuBuilding, LuFileText, LuMap, LuInfo } from 'react-icons/lu';
-import { FaUserEdit } from "react-icons/fa";
 import { Accordion, AccordionHeader, AccordionBody } from "@material-tailwind/react"
 import { FiChevronDown, FiChevronRight } from 'react-icons/fi'
-
-import { Button } from '@/Modules/Global/components/Sidebar/ui/button';
 import { CUSTOM_ANIMATION } from '@/Modules/Global/types/Sections';
 import type { AfiliadoFisico } from '../Models/TablaAfiliados/ModeloAfiliadoFisico';
 import type { AfiliadoJuridico } from '../Models/TablaAfiliados/ModeloAfiliadoJuridico';

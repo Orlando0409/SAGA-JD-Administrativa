@@ -1,4 +1,3 @@
-import React from 'react';
 import { LuX, LuUser, LuCalendar } from 'react-icons/lu';
 import type { DetailMedidorModalProps } from '../../types/MedidorTypes';
 import { FaTachometerAlt, FaUsers } from 'react-icons/fa';

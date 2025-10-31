@@ -3,7 +3,7 @@ import { useGetCalidadAgua, useToggleVisibilidadCalidadAgua } from "../Hook/Hook
 import CalidadAguaModal from "./CalidadAguaModal";
 import CalidadAguaEdit from "./CalidadAguaEdit";
 import FormularioCalidadAgua from "./FormularioCalidadAgua";
-import { FileText, Plus, Eye, EyeOff, Pencil, } from "lucide-react";
+import { Plus, Eye, EyeOff, Pencil, } from "lucide-react";
 import { MdKeyboardArrowLeft, MdKeyboardArrowRight, MdKeyboardDoubleArrowLeft,
   MdKeyboardDoubleArrowRight,
   MdKeyboardArrowDown,

@@ -5,7 +5,7 @@ import { MdKeyboardArrowLeft, MdKeyboardArrowRight, MdKeyboardDoubleArrowLeft, M
 import { LuSearch } from 'react-icons/lu';
 import { useAfiliadosFisicos } from '../Hook/HookAfiliadoFisico';
 import { useAfiliadosJuridicos } from '../Hook/HookAfiliadoJuridico';
-import DetailAbonados from './DetailAbonados';
+import DetailAbonados from './DetailAfiliado';
 import CreateModal from './CreateModal';
 import EditModal from './EditModal'; // ✅ Agregar import
 import {

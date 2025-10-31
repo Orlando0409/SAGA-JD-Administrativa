@@ -16,13 +16,13 @@ export default function ImagenForm({ onClose, refetch }: ImagenFormProps) {
 
   const [nombre, setNombre] = useState("");
   const [file, setFile] = useState<File | null>(null);
-  const [preview, setPreview] = useState<string | null>(null);
+  const [_preview, setPreview] = useState<string | null>(null);
   const  {mutateAsync, isPending}= useCreateImagen();
   const [nombreError, setNombreError] = useState("");
   const [isValid, setIsValid] = useState(false);
 
   //  Validar campo individual y formulario completo
-  const validateField = (field: "Nombre_Imagen", value: string) => {
+  const validateField = (_field: "Nombre_Imagen", value: string) => {
     try {
       CreateImagenSchema.pick({ Nombre_Imagen: true }).parse({
         Nombre_Imagen: value.trim(),
