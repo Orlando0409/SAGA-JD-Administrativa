@@ -18,7 +18,7 @@ type ProveedorUnificado = {
     Nombre_Proveedor: string;
     Telefono_Proveedor: string;
     Identificacion_Unificada: string; // Campo unificado para ambos tipos
-    Tipo_Identificacion_Unificado: string; // Campo unificado para ambos tipos
+    Tipo_Identificacion_Unificada: string; // Campo unificado para ambos tipos
     Estado_Proveedor: {
         Id_Estado_Proveedor: number;
         Estado_Proveedor: string;
@@ -63,7 +63,7 @@ export default function ProveedoresTable() {
             Nombre_Proveedor: proveedor.Nombre_Proveedor,
             Telefono_Proveedor: proveedor.Telefono_Proveedor,
             Identificacion_Unificada: proveedor.Identificacion || 'Sin identificación',
-            Tipo_Identificacion_Unificado: proveedor.Tipo_Identificacion || 'Sin tipo',
+            Tipo_Identificacion_Unificada: proveedor.Tipo_Identificacion || 'Sin tipo',
             Estado_Proveedor: proveedor.Estado_Proveedor,
             Tipo_Proveedor: 'Físico' as const,
             Fecha_Creacion: proveedor.Fecha_Creacion,
@@ -76,7 +76,7 @@ export default function ProveedoresTable() {
             Nombre_Proveedor: proveedor.Razon_Social || proveedor.Nombre_Proveedor, // Usar Razón Social como nombre principal para la tabla
             Telefono_Proveedor: proveedor.Telefono_Proveedor,
             Identificacion_Unificada: formatCedulaJuridica(proveedor.Cedula_Juridica || ''), // Aplicar formato
-            Tipo_Identificacion_Unificado: 'Cédula Jurídica',
+            Tipo_Identificacion_Unificada: 'Cédula Jurídica',
             Estado_Proveedor: proveedor.Estado_Proveedor,
             Tipo_Proveedor: 'Jurídico' as const,
             Razon_Social: proveedor.Razon_Social,
@@ -113,7 +113,7 @@ export default function ProveedoresTable() {
                 proveedor.Estado_Proveedor?.Estado_Proveedor,
                 proveedor.Tipo_Proveedor,
                 proveedor.Identificacion_Unificada,
-                proveedor.Tipo_Identificacion_Unificado,
+                proveedor.Tipo_Identificacion_Unificada,
                 proveedor.Razon_Social
             ];
 
@@ -132,11 +132,10 @@ export default function ProveedoresTable() {
             cell: (info) => {
                 const tipo = info.getValue();
                 return (
-                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                        tipo === 'Físico' 
-                            ? 'bg-blue-100 text-blue-700' 
+                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${tipo === 'Físico'
+                            ? 'bg-blue-100 text-blue-700'
                             : 'bg-blue-100 text-blue-700'
-                    }`}>
+                        }`}>
                         {tipo}
                     </span>
                 );
@@ -150,35 +149,35 @@ export default function ProveedoresTable() {
                 return <div className='flex items-center justify-start'>{nombre || 'Sin nombre'}</div>;
             }
         }),
-        
+
         columnHelper.accessor('Identificacion_Unificada', {
             header: 'Identificación',
             cell: (info) => {
                 const proveedor = info.row.original;
-                
+
                 return (
                     <div className='flex items-center justify-start'>
-                    <div className="flex flex-col">
-                        <span className="font-medium text-start">{proveedor.Identificacion_Unificada}</span>
-                        <span className="text-xs text-start text-slate-500">
-                            {proveedor.Tipo_Proveedor === 'Jurídico' 
-                                ? 'Cédula Jurídica' 
-                                : proveedor.Tipo_Identificacion_Unificado
-                            }
-                        </span>
-                    </div>
+                        <div className="flex flex-col">
+                            <span className="font-medium text-start">{proveedor.Identificacion_Unificada}</span>
+                            <span className="text-xs text-start text-slate-500">
+                                {proveedor.Tipo_Proveedor === 'Jurídico'
+                                    ? 'Cédula Jurídica'
+                                    : proveedor.Tipo_Identificacion_Unificada
+                                }
+                            </span>
+                        </div>
                     </div>
                 );
             },
             size: 160
         }),
-        
+
         columnHelper.accessor('Telefono_Proveedor', {
             header: 'Teléfono',
             cell: (info) => {
                 const telefono = info.getValue();
                 if (!telefono) return 'Sin teléfono';
-                
+
                 // Formatear el número para mejor visualización
                 const formattedPhone = formatPhoneNumberDisplay(telefono);
                 return <div className='flex items-center justify-start'>{formattedPhone}</div>;
@@ -199,10 +198,10 @@ export default function ProveedoresTable() {
                     return <span className={`${base} bg-amber-100 text-amber-700 border border-amber-300`}>Pendiente</span>;
                 }
 
-                return( 
-                <div className='flex items-center justify-start'>
-                    <span className={`${base} bg-slate-100 text-slate-700`}>{estadoNombre}</span>
-                </div>);
+                return (
+                    <div className='flex items-center justify-start'>
+                        <span className={`${base} bg-slate-100 text-slate-700`}>{estadoNombre}</span>
+                    </div>);
             },
 
         }),
@@ -225,7 +224,7 @@ export default function ProveedoresTable() {
         })
     ];
 
-   const table = useReactTable({
+    const table = useReactTable({
         data: filteredData,
         columns,
         getCoreRowModel: getCoreRowModel(),
@@ -238,12 +237,12 @@ export default function ProveedoresTable() {
         },
         onGlobalFilterChange: setGlobalFilter,
         onPaginationChange: setPagination,
-         initialState: {
+        initialState: {
             pagination: {
                 pageSize: 5,
                 pageIndex: 0,
             },
-         },
+        },
     });
 
     return (
@@ -254,169 +253,166 @@ export default function ProveedoresTable() {
                     <p className="text-sm text-gray-600 pb-4">Gestiona los proveedores del sistema</p>
                 </div>
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-                    <input 
-                        value={globalFilter} 
-                        onChange={(e) => setGlobalFilter(e.target.value)} 
-                        placeholder="Buscar por nombre, identificación, teléfono, razón social..." 
-                        className="w-full sm:w-auto px-3 py-2 rounded-lg border border-sky-200 bg-sky-50 focus:outline-none focus:ring-2 focus:ring-sky-200 text-sm" 
+                    <input
+                        value={globalFilter}
+                        onChange={(e) => setGlobalFilter(e.target.value)}
+                        placeholder="Buscar por nombre, identificación, teléfono, razón social..."
+                        className="w-full sm:w-auto px-3 py-2 rounded-lg border border-sky-200 bg-sky-50 focus:outline-none focus:ring-2 focus:ring-sky-200 text-sm"
                     />
-                    <button 
-                        className="px-3 py-2 rounded-lg bg-sky-600 text-white hover:bg-sky-700 shadow-sm text-sm whitespace-nowrap" 
+                    <button
+                        className="px-3 py-2 rounded-lg bg-sky-600 text-white hover:bg-sky-700 shadow-sm text-sm whitespace-nowrap"
                         onClick={() => setShowCreateModal(true)}
                     >
                         + Nuevo Proveedor
                     </button>
                 </div>
             </div>
-            
-           <div className="bg-white rounded-2xl shadow-sm border border-sky-100 overflow-hidden max-h-[calc(100vh-300px)] overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100">
-                     <div className="overflow-x-auto">
-                         <table className="min-w-full table-auto">
-                             <thead className="bg-sky-50">
-                                 {table.getHeaderGroups().map(headerGroup => (
-                                     <tr key={headerGroup.id} className="text-left text-xs sm:text-sm text-sky-700">
-                                         {headerGroup.headers.map((header, index) => (
-                                             <th key={header.id} className={`px-2 sm:px-4 py-3 font-medium border-b border-sky-100 ${
-                                                 index === 0 ? 'text-left' : 'text-center'
-                                             }`}>
-                                                 {(() => {
-                                                     if (header.isPlaceholder) {
-                                                         return null;
-                                                     }
-                                                     if (header.column.getCanSort()) {
-                                                         return (
-                                                             <button
-                                                                 type="button"
-                                                                 className={`cursor-pointer select-none flex items-center gap-2 bg-transparent border-none p-0 ${
-                                                                     index === 0 ? 'justify-start' : 'justify-center'
-                                                                 }`}
-                                                                 onClick={header.column.getToggleSortingHandler()}
-                                                                 onKeyDown={e => {
-                                                                     if (e.key === 'Enter' || e.key === ' ') {
-                                                                         e.preventDefault();
-                                                                         header.column.getToggleSortingHandler()?.(e);
-                                                                     }
-                                                                 }}
-                                                                 tabIndex={0}
-                                                                 aria-label={`Ordenar por ${header.column.columnDef.header as string}`}
-                                                             >
-                                                                 <span className="flex items-center gap-1">
-                                                                     {header.column.columnDef.header as string}
-                                                                     {header.column.getIsSorted() === 'asc' && <MdKeyboardArrowUp className="inline" />}
-                                                                     {header.column.getIsSorted() === 'desc' && <MdKeyboardArrowDown className="inline" />}
-                                                                 </span>
-                                                             </button>
-                                                         );
-                                                     }
-                                                     return (
-                                                         <span className={index === 0 ? 'text-left' : 'text-center'}>
-                                                             {header.column.columnDef.header as string}
-                                                         </span>
-                                                     );
-                                                 })()}
-                                             </th>
-                                         ))}
-                                     </tr>
-                                 ))}
-                             </thead>
-                             <tbody className="bg-white divide-y divide-sky-50">
-                                 {table.getRowModel().rows.length === 0 ? (
-                                     <tr>
-                                         <td colSpan={5} className="px-2 sm:px-4 py-8 text-center text-slate-500">
-                                             {globalFilter ? 'No se encontraron actas que coincidan con la búsqueda' : 'No hay actas registradas'}
-                                         </td>
-                                     </tr>
-                                 ) : (
-                                     table.getRowModel().rows.map(row => (
-                                         <tr key={row.id} className="hover:bg-sky-50 cursor-pointer transition-colors">
-                                             {row.getVisibleCells().map((cell, index) => {
-                                                 let cellContent: React.ReactNode;
-     
-                                                 if (cell.column.columnDef.cell) {
-                                                     if (typeof cell.column.columnDef.cell === 'function') {
-                                                         cellContent = cell.column.columnDef.cell(cell.getContext());
-                                                     } else {
-                                                         cellContent = cell.column.columnDef.cell;
-                                                     }
-                                                 } else {
-                                                     cellContent = cell.getValue() as React.ReactNode;
-                                                 }
-     
-                                                 return (
-                                                     <td key={cell.id} className={`px-2 sm:px-4 py-3 text-xs sm:text-sm text-slate-700 align-top ${
-                                                         index === 0 ? 'text-left' : 'text-center'
-                                                     }`}>
-                                                         {cellContent}
-                                                     </td>
-                                                 );
-                                             })}
-                                         </tr>
-                                     ))
-                                 )}
-                             </tbody>
-                         </table>
-                     </div>
-     
-                     <div className="px-6 py-3 bg-gray-50 border-t border-gray-200">
-                         <div className="flex items-center justify-between">
-                             <div className="flex items-center gap-4">
-                                 <div className="flex items-center gap-2">
-                                     <span className="text-sm text-gray-700">Filas por página:</span>
-                                     <select
-                                         value={table.getState().pagination.pageSize}
-                                         onChange={(e) => {
-                                             table.setPageSize(Number(e.target.value));
-                                         }}
-                                         className="px-3 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                     >
-                                         {pageSizeOptions.map((pageSize) => (
-                                             <option key={pageSize} value={pageSize}>
-                                                 {pageSize}
-                                             </option>
-                                         ))}
-                                     </select>
-                                 </div>
-                             </div>
-                             <div className="flex items-center gap-2">
-                                 <button
-                                     onClick={() => table.setPageIndex(0)}
-                                     disabled={!table.getCanPreviousPage()}
-                                     className="p-2 rounded-md border text-gray-600 hover:text-gray-900 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                                     title="Primera página"
-                                 >
-                                     <MdKeyboardDoubleArrowLeft className="w-4 h-4" />
-                                 </button>
-                                 <button
-                                     onClick={() => table.previousPage()}
-                                     disabled={!table.getCanPreviousPage()}
-                                     className="p-2 rounded-md border text-gray-600 hover:text-gray-900 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                                     title="Página anterior"
-                                 >
-                                     <MdKeyboardArrowLeft className="w-4 h-4" />
-                                 </button>
-                                 <span className="text-sm text-gray-700">
-                                     Página {table.getState().pagination.pageIndex + 1} de {table.getPageCount()}
-                                 </span>
-                                 <button
-                                     onClick={() => table.nextPage()}
-                                     disabled={!table.getCanNextPage()}
-                                     className="p-2 rounded-md border text-gray-600 hover:text-gray-900 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                                     title="Página siguiente"
-                                 >
-                                     <MdKeyboardArrowRight className="w-4 h-4" />
-                                 </button>
-                                 <button
-                                     onClick={() => table.setPageIndex(table.getPageCount() - 1)}
-                                     disabled={!table.getCanNextPage()}
-                                     className="p-2 rounded-md border text-gray-600 hover:text-gray-900 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                                     title="Última página"
-                                 >
-                                     <MdKeyboardDoubleArrowRight className="w-4 h-4" />
-                                 </button>
-                             </div>
-                         </div>
-                     </div>
-                 </div>
+
+            <div className="bg-white rounded-2xl shadow-sm border border-sky-100 overflow-hidden max-h-[calc(100vh-300px)] overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100">
+                <div className="overflow-x-auto">
+                    <table className="min-w-full table-auto">
+                        <thead className="bg-sky-50">
+                            {table.getHeaderGroups().map(headerGroup => (
+                                <tr key={headerGroup.id} className="text-left text-xs sm:text-sm text-sky-700">
+                                    {headerGroup.headers.map((header, index) => (
+                                        <th key={header.id} className={`px-2 sm:px-4 py-3 font-medium border-b border-sky-100 ${index === 0 ? 'text-left' : 'text-center'
+                                            }`}>
+                                            {(() => {
+                                                if (header.isPlaceholder) {
+                                                    return null;
+                                                }
+                                                if (header.column.getCanSort()) {
+                                                    return (
+                                                        <button
+                                                            type="button"
+                                                            className={`cursor-pointer select-none flex items-center gap-2 bg-transparent border-none p-0 ${index === 0 ? 'justify-start' : 'justify-center'
+                                                                }`}
+                                                            onClick={header.column.getToggleSortingHandler()}
+                                                            onKeyDown={e => {
+                                                                if (e.key === 'Enter' || e.key === ' ') {
+                                                                    e.preventDefault();
+                                                                    header.column.getToggleSortingHandler()?.(e);
+                                                                }
+                                                            }}
+                                                            tabIndex={0}
+                                                            aria-label={`Ordenar por ${header.column.columnDef.header as string}`}
+                                                        >
+                                                            <span className="flex items-center gap-1">
+                                                                {header.column.columnDef.header as string}
+                                                                {header.column.getIsSorted() === 'asc' && <MdKeyboardArrowUp className="inline" />}
+                                                                {header.column.getIsSorted() === 'desc' && <MdKeyboardArrowDown className="inline" />}
+                                                            </span>
+                                                        </button>
+                                                    );
+                                                }
+                                                return (
+                                                    <span className={index === 0 ? 'text-left' : 'text-center'}>
+                                                        {header.column.columnDef.header as string}
+                                                    </span>
+                                                );
+                                            })()}
+                                        </th>
+                                    ))}
+                                </tr>
+                            ))}
+                        </thead>
+                        <tbody className="bg-white divide-y divide-sky-50">
+                            {table.getRowModel().rows.length === 0 ? (
+                                <tr>
+                                    <td colSpan={5} className="px-2 sm:px-4 py-8 text-center text-slate-500">
+                                        {globalFilter ? 'No se encontraron actas que coincidan con la búsqueda' : 'No hay actas registradas'}
+                                    </td>
+                                </tr>
+                            ) : (
+                                table.getRowModel().rows.map(row => (
+                                    <tr key={row.id} className="hover:bg-sky-50 cursor-pointer transition-colors">
+                                        {row.getVisibleCells().map((cell, index) => {
+                                            let cellContent: React.ReactNode;
+
+                                            if (cell.column.columnDef.cell) {
+                                                if (typeof cell.column.columnDef.cell === 'function') {
+                                                    cellContent = cell.column.columnDef.cell(cell.getContext());
+                                                } else {
+                                                    cellContent = cell.column.columnDef.cell;
+                                                }
+                                            } else {
+                                                cellContent = cell.getValue() as React.ReactNode;
+                                            }
+
+                                            return (
+                                                <td key={cell.id} className={`px-2 sm:px-4 py-3 text-xs sm:text-sm text-slate-700 align-top ${index === 0 ? 'text-left' : 'text-center'
+                                                    }`}>
+                                                    {cellContent}
+                                                </td>
+                                            );
+                                        })}
+                                    </tr>
+                                ))
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div className="px-6 py-3 bg-gray-50 border-t border-gray-200">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                            <div className="flex items-center gap-2">
+                                <span className="text-sm text-gray-700">Filas por página:</span>
+                                <select
+                                    value={table.getState().pagination.pageSize}
+                                    onChange={(e) => {
+                                        table.setPageSize(Number(e.target.value));
+                                    }}
+                                    className="px-3 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                >
+                                    {pageSizeOptions.map((pageSize) => (
+                                        <option key={pageSize} value={pageSize}>
+                                            {pageSize}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <button
+                                onClick={() => table.setPageIndex(0)}
+                                disabled={!table.getCanPreviousPage()}
+                                className="p-2 rounded-md border text-gray-600 hover:text-gray-900 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                                title="Primera página"
+                            >
+                                <MdKeyboardDoubleArrowLeft className="w-4 h-4" />
+                            </button>
+                            <button
+                                onClick={() => table.previousPage()}
+                                disabled={!table.getCanPreviousPage()}
+                                className="p-2 rounded-md border text-gray-600 hover:text-gray-900 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                                title="Página anterior"
+                            >
+                                <MdKeyboardArrowLeft className="w-4 h-4" />
+                            </button>
+                            <span className="text-sm text-gray-700">
+                                Página {table.getState().pagination.pageIndex + 1} de {table.getPageCount()}
+                            </span>
+                            <button
+                                onClick={() => table.nextPage()}
+                                disabled={!table.getCanNextPage()}
+                                className="p-2 rounded-md border text-gray-600 hover:text-gray-900 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                                title="Página siguiente"
+                            >
+                                <MdKeyboardArrowRight className="w-4 h-4" />
+                            </button>
+                            <button
+                                onClick={() => table.setPageIndex(table.getPageCount() - 1)}
+                                disabled={!table.getCanNextPage()}
+                                className="p-2 rounded-md border text-gray-600 hover:text-gray-900 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                                title="Última página"
+                            >
+                                <MdKeyboardDoubleArrowRight className="w-4 h-4" />
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
             {/* Modal de detalle de proveedores físicos */}
             <ProveedorDetailModal
@@ -438,7 +434,6 @@ export default function ProveedoresTable() {
                 }}
             />
 
-            {/* Modal de creación de proveedores */}
             {/* Modal de edición fuera de la tabla, controlado por el estado global */}
             {showEditModal && proveedorEdit && (
                 proveedorEdit.Tipo_Proveedor === 'Físico' ? (
@@ -454,6 +449,11 @@ export default function ProveedoresTable() {
                         proveedor={proveedorEdit.datos_originales as ProveedorJuridico}
                     />
                 )
+            )}
+            {showCreateModal && (
+                <CreateModalProveedor
+                    onClose={() => setShowCreateModal(false)}
+                />
             )}
         </div>
     );
