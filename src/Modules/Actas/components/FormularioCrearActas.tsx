@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useCreateActa } from "../Hook/hookActas";
 import { FaFilePdf, FaTimes } from "react-icons/fa";
+import { Alert } from '@/Modules/Global/components/Alert/ui/Alert';
 
 interface FormularioCrearActasProps {
     onClose: () => void; // Función para cerrar el modal
@@ -15,6 +16,17 @@ export default function FormularioCrearActas({ onClose, refetch }: FormularioCre
     const [files, setFiles] = useState<File[]>([]);
     const [tituloError, setTituloError] = useState(""); // Validación de título
     const [descripcionError, setDescripcionError] = useState(""); // Validación de descripción
+    const [notification, setNotification] = useState<{
+        type: 'success' | 'error' | 'info';
+        title: string;
+        description?: string;
+    } | null>(null);
+
+    useEffect(() => {
+        if (!notification) return;
+        const t = setTimeout(() => setNotification(null), 3500);
+        return () => clearTimeout(t);
+    }, [notification]);
 
     const handleTituloChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
@@ -44,7 +56,7 @@ export default function FormularioCrearActas({ onClose, refetch }: FormularioCre
         e.preventDefault();
 
         if (files.length === 0) {
-            alert("Debe seleccionar al menos un archivo válido.");
+            setNotification({ type: 'error', title: 'Debe seleccionar al menos un archivo válido.' });
             return;
         }
 
@@ -60,25 +72,40 @@ export default function FormularioCrearActas({ onClose, refetch }: FormularioCre
                 setTitulo("");
                 setDescripcion("");
                 setFiles([]);
-                onClose(); // Oculta el modal después de crear el acta
                 refetch(); // Refresca la tabla para mostrar la nueva acta
-                alert("Acta creada con éxito.");
+                setNotification({ type: 'success', title: 'Acta creada con éxito.' });
+               
+                setTimeout(() => onClose(), 500);
             },
             onError: (error) => {
                 console.error("Error al crear el acta:", error);
-                alert("Hubo un problema al crear el acta.");
+                setNotification({ type: 'error', title: 'Hubo un problema al crear el acta.' });
             },
         });
     };
 
     return (
-        <div className="fixed inset-0 bg-white bg-opacity-50 flex items-center justify-center z-50">
+    <>
+        
+        {notification && (
+            <div className="fixed top-4 right-4 z-[200]">
+                <Alert
+                    type={notification.type === 'success' ? 'success' : (notification.type === 'error' ? 'error' : 'info')}
+                    title={notification.title}
+                    description={notification.description}
+                    onClose={() => setNotification(null)}
+                />
+            </div>
+        )}
+
+        <div className="fixed inset-0 bg-opacity-10 backdrop-blur-sm flex items-center justify-center z-50 p-4">
             <form
                 onSubmit={handleSubmit}
-                className="w-full max-w-md bg-white rounded-lg shadow-lg p-6 space-y-4"
+                className="w-full max-w-md bg-white rounded-lg shadow-lg p-6 space-y-4 transition-all duration-200"
             >
                 <h3 className="text-lg font-semibold text-gray-800">Crear Acta</h3>
 
+               
                 {/* Campo de Título */}
                 <div>
                     <label className="block text-sm font-medium text-gray-700">Título</label>
@@ -233,5 +260,6 @@ export default function FormularioCrearActas({ onClose, refetch }: FormularioCre
                 </div>
             </form>
         </div>
+    </>
     );
 }
