@@ -1,7 +1,7 @@
 import { LuX, LuPlus } from 'react-icons/lu';
-import {  useGetAllCategories } from '../../hooks/useCategorias';
+import { useGetCategoriasActivas } from '../../hooks/useCategorias';
 import { useCreateMaterial } from '../../hooks/useMaterials';
-import { useUnidadesMedicionSimple } from '../../hooks/HookUnidadMedicion';
+import { useUnidadesMedicionActivas } from '../../hooks/HookUnidadMedicion';
 import { useProveedoresJuridicos } from '@/Modules/Proveedores/Hook/hookjuridicoproveedor';
 import { CreateMaterialSchema, type CreateMaterialSchemaData } from '../../schema/CreateMaterialSchema';
 import type { CreateMaterialModalProps } from '../../types/MaterialTypes';
@@ -20,8 +20,8 @@ import { useState } from 'react';
 const CreateMaterialModal: React.FC<CreateMaterialModalProps> = ({ isOpen, onClose }) => {
 
   const createMaterialMutation = useCreateMaterial();
-  const { data: categories = [] } = useGetAllCategories();
-  const { data: unidadesMedicion = [] } = useUnidadesMedicionSimple();
+  const { data: categories = [] } = useGetCategoriasActivas();
+  const { data: unidadesMedicion = [] } = useUnidadesMedicionActivas();
   const { proveedoresFisicos = [] } = useProveedoresFisicos();
   const { proveedoresJuridicos = [] } = useProveedoresJuridicos();
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});

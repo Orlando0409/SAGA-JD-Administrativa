@@ -119,7 +119,7 @@ const Usuarios = () => {
 
   const handleDeactivate = async (userId: number) => {
     try {
-      await deactivateUserMutation.mutateAsync({ id: userId, idUsuario: currentUser?.Id_Usuario || 0 });
+      await deactivateUserMutation.mutateAsync({ id: userId });
     } catch (error) {
       console.error('Error deactivating user:', error);
     }
@@ -127,7 +127,7 @@ const Usuarios = () => {
 
   const handleActivate = async (userId: number) => {
     try {
-      await activateUserMutation.mutateAsync({ id: userId, idUsuario: currentUser?.Id_Usuario || 0 });
+      await activateUserMutation.mutateAsync({ id: userId });
     } catch (error) {
       console.error('Error activating user:', error);
     }
@@ -339,11 +339,10 @@ const Usuarios = () => {
             </div>
           </div>
         )}
-          <div className="flex pl-6 items-center gap-4 ">
-            <h1 className="text-2xl font-bold text-gray-800">
-              Gestión de Usuarios
-            </h1>
-          </div>
+         <div className="flex items-start gap-4 flex-col justify-start">
+            <h2 className="text-2xl font-bold text-gray-900">Gestión de Usuarios</h2>
+            <p className="text-sm text-gray-600 pb-4">Administra los usuarios del sistema</p>
+        </div>
 
           {(hasEditPermission || filteredUsers.length > 1) && (
             <div className="p-6">

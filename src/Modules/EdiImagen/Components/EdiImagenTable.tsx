@@ -1,198 +1,405 @@
-import { useState } from "react";
-import { ImageIcon, Plus, Pencil, Trash2 } from "lucide-react";
-
+import { useState, useMemo } from "react";
+import {
+    useReactTable,
+    getCoreRowModel,
+    getFilteredRowModel,
+    getSortedRowModel,
+    getPaginationRowModel,
+    createColumnHelper,
+} from '@tanstack/react-table';
+import { LuPlus, LuSearch } from 'react-icons/lu';
+import { MdKeyboardArrowLeft, MdKeyboardArrowRight, MdKeyboardDoubleArrowLeft,
+  MdKeyboardDoubleArrowRight,
+  MdKeyboardArrowDown,
+  MdKeyboardArrowUp} from "react-icons/md";
+import {
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogHeader,
+  AlertDialogFooter
+} from "@/Modules/Global/components/Sidebar/ui/alert-dialog";
 import { useAlerts } from "@/Modules/Global/context/AlertContext";
 import { useDeleteImagen, useGetImagenes } from "../Hook/hookEdiImagen";
+import { ImageIcon } from "lucide-react";
 import type { Imagen } from "../Models/ModelsEdiImagen";
 import ImagenForm from "./EdiImagenForm";
 import ImagenModal from "./EdiImagenModal";
+import ImagenFormEdit from "./ImagenFormEdit";
+
 
 export default function ImagenesTable() {
-  const { data: imagenes, isLoading, isError, refetch } = useGetImagenes();
-  const deleteImagenMutation = useDeleteImagen();
-  const { showSuccess, showError } = useAlerts();
+    const { data: imagenes, isLoading, isError, refetch } = useGetImagenes();
+    const deleteImagenMutation = useDeleteImagen();
+    const { showSuccess, showError } = useAlerts();
 
-  const [modalOpen, setModalOpen] = useState(false);
-  const [formVisible, setFormVisible] = useState(false);
-  const [imagenSeleccionada, setImagenSeleccionada] = useState<Imagen | null>(null);
+    const [globalFilter, setGlobalFilter] = useState('');
+    const [formVisible, setFormVisible] = useState(false);
+    const [editVisible, setEditVisible] = useState(false);
+    const [modalOpen, setModalOpen] = useState(false);
+    const [imagenSeleccionada, setImagenSeleccionada] = useState<Imagen | null>(null);
 
-  const handleOpenModal = (imagen: Imagen) => {
-    setImagenSeleccionada(imagen);
-    setModalOpen(true);
-  };
+    const pageSizeOptions = [5, 10, 20, 50];
+    const [pagination, setPagination] = useState({
+        pageSize: 5,
+        pageIndex: 0,
+    });
 
-  const handleCloseModal = () => {
-    setModalOpen(false);
-    setImagenSeleccionada(null);
-  };
+    // Column helper para definir las columnas
+    const columnHelper = createColumnHelper<Imagen>();
 
-  const handleDelete = (imagen: Imagen) => {
-    if (confirm(`¿Seguro que deseas eliminar la imagen "${imagen.Nombre_Imagen}"?`)) {
-      deleteImagenMutation.mutate(imagen.Id_Imagen, {
-        onSuccess: () => {
-          showSuccess("Imagen eliminada correctamente.");
-          refetch();
-        },
-        onError: () => {
-          showError("Error al eliminar la imagen.");
-        },
-      });
-    }
-  };
+    // Definir las columnas
+    const columns = useMemo(() => [
+        columnHelper.accessor('Nombre_Imagen', {
+            header: 'Nombre',
+            cell: info => (
+                <div
+                    className="font-medium transition-colors text-left w-full flex items-center gap-2"
 
-  return (
-    <div className="w-full">
-      {/* Encabezado */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
-        <div className="flex items-center gap-3">
-          <h2 className="text-lg sm:text-xl font-semibold text-sky-800">
-            Gestión de Imágenes Informativas
-          </h2>
-        </div>
-        <button
-          onClick={() => setFormVisible(true)}
-          className="px-4 py-2 rounded-lg bg-sky-600 text-white hover:bg-sky-700 shadow-sm text-sm flex items-center gap-2"
-        >
-          <Plus size={18} />
-          Subir Imagen
-        </button>
-      </div>
-
-      {/* Errores */}
-      {isError && (
-        <div className="text-red-600 mb-2">Error al cargar las imágenes.</div>
-      )}
-
-      {/* Tabla */}
-      <div className="overflow-x-auto rounded-2xl border border-sky-100 shadow-sm bg-white">
-        <table className="min-w-full table-auto">
-          <thead className="bg-sky-50">
-            <tr className="text-left text-xs sm:text-sm text-sky-700">
-              <th className="px-2 sm:px-4 py-3 font-medium border-b border-sky-100">
-                Nombre
-              </th>
-             
-              <th className="px-2 sm:px-4 py-3 font-medium border-b border-sky-100">
-                Fecha de creación
-              </th>
-              <th className="px-2 sm:px-4 py-3 font-medium border-b border-sky-100">
-                Última actualización
-              </th>
-              <th className="px-2 sm:px-4 py-3 font-medium border-b border-sky-100">
-                Acciones
-              </th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-sky-50">
-            {(() => {
-              if (isLoading) {
-                return (
-                  <tr>
-                    <td
-                      colSpan={5}
-                      className="p-4 text-center text-slate-500 text-sm"
-                    >
-                      Cargando imágenes...
-                    </td>
-                  </tr>
-                );
-              }
-
-              if (!imagenes || imagenes.length === 0) {
-                return (
-                  <tr>
-                    <td
-                      colSpan={5}
-                      className="p-4 text-center text-slate-500 text-sm"
-                    >
-                      No hay imágenes registradas.
-                    </td>
-                  </tr>
-                );
-              }
-
-              return imagenes.map((imagen) => (
-                <tr
-                  key={imagen.Id_Imagen}
-                  className="hover:bg-sky-50 cursor-pointer transition-colors"
-                  onClick={() => handleOpenModal(imagen)}
                 >
-                  <td className="px-2 sm:px-4 py-3 text-xs sm:text-sm text-slate-700 flex items-center gap-2">
-                    <ImageIcon size={18} className="text-sky-600" />
-                    {imagen.Nombre_Imagen.length > 25
-                      ? `${imagen.Nombre_Imagen.slice(0, 25)}...`
-                      : imagen.Nombre_Imagen}
-                  </td>
+                    <span className="truncate">
+                        {info.getValue().length > 25
+                            ? `${info.getValue().slice(0, 25)}...`
+                            : info.getValue()}
+                    </span>
+                </div>
+            ),
+        }),
+        columnHelper.accessor('Fecha_Creacion', {
+            header: 'Fecha creación',
+            cell: info =>
+              <div className="flex items-center justify-start">{new Date(info.getValue()).toLocaleDateString("es-ES")}</div>,
+        }),
+        columnHelper.accessor('Fecha_Actualizacion', {
+            header: 'Última actualización',
+            cell: info => (
+              <div className="flex items-center justify-start">
+                {info.getValue()
+                  ? new Date(info.getValue()).toLocaleDateString("es-ES")
+                  : "Sin cambios"}
+              </div>
+            ),
+        }),
+        columnHelper.display({
+            id: 'acciones',
+            header: 'Acciones',
+            cell: info => (
+                <div className="flex justify-center gap-1">
+                    <button
+                        className="px-4 py-1 bg-gray-600 text-white text-xs rounded hover:bg-gray-700 transition-colors"
+                        onClick={() => handleViewDetail(info.row.original)}
+                        title="Ver detalles"
+                    >
+                        Ver
+                    </button>
+                    <button
+                        className="px-2 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition-colors"
+                        onClick={() => handleEdit(info.row.original)}
+                        title="Editar"
+                    >
+                        Editar
+                    </button>
+                    <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                            <button
+                                className="px-2 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-700 transition-colors"
+                                disabled={deleteImagenMutation.isPending}
+                                title="Eliminar imagen"
+                            >
+                                Eliminar
+                            </button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>
+                                    <span>¿Eliminar imagen?</span>
+                                </AlertDialogTitle>
+                                <AlertDialogDescription>
+                                    <span>¿Estás seguro de que deseas eliminar la imagen "{info.row.original.Nombre_Imagen}"? Esta acción no se puede deshacer.</span>
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                                <AlertDialogAction
+                                    onClick={() => handleDelete(info.row.original)}
+                                    disabled={deleteImagenMutation.isPending}
+                                >
+                                    <span>Eliminar</span>
+                                </AlertDialogAction>
+                                <AlertDialogCancel>
+                                    <span>Cancelar</span>
+                                </AlertDialogCancel>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
+                </div>
+            ),
+        }),
+    ], [deleteImagenMutation.isPending]);
 
-                
+    // Funciones para manejar las acciones
+    const handleViewDetail = (imagen: Imagen) => {
+        setImagenSeleccionada(imagen);
+        setModalOpen(true);
+    };
 
-                  <td className="px-2 sm:px-4 py-3 text-xs sm:text-sm text-slate-700">
-                    {new Date(imagen.Fecha_Creacion).toLocaleDateString("es-ES")}
-                  </td>
+    const handleEdit = (imagen: Imagen) => {
+        setImagenSeleccionada(imagen);
+        setEditVisible(true);
+    };
 
-                  <td className="px-2 sm:px-4 py-3 text-xs sm:text-sm text-slate-700">
-                    {imagen.Fecha_Actualizacion
-                      ? new Date(imagen.Fecha_Actualizacion).toLocaleDateString("es-ES")
-                      : "Sin cambios"}
-                  </td>
+    const handleDelete = (imagen: Imagen) => {
+        deleteImagenMutation.mutate(imagen.Id_Imagen, {
+            onSuccess: () => {
+                showSuccess("Imagen eliminada correctamente.");
+                refetch();
+            },
+            onError: () => {
+                showError("Error al eliminar la imagen.");
+            },
+        });
+    };
 
-                  <td className="px-2 sm:px-4 py-3 text-xs sm:text-sm text-slate-700">
-                    <div className="flex items-center gap-2">
-                      {/* Editar */}
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setImagenSeleccionada(imagen);
-                          setFormVisible(true);
-                        }}
-                        className="p-1 rounded-lg hover:bg-amber-100 text-amber-600 transition-colors"
-                        title="Editar imagen"
-                      >
-                        <Pencil size={16} />
-                      </button>
+    // Crear la tabla con TanStack Table
+    const table = useReactTable({
+        data: imagenes || [],
+        columns,
+        getCoreRowModel: getCoreRowModel(),
+        getFilteredRowModel: getFilteredRowModel(),
+        getSortedRowModel: getSortedRowModel(),
+        getPaginationRowModel: getPaginationRowModel(),
+        onGlobalFilterChange: setGlobalFilter,
+        globalFilterFn: 'includesString',
+        state: {
+            globalFilter,
+            pagination,
+        },
+        onPaginationChange: setPagination,
+    });
 
-                      {/* Eliminar */}
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDelete(imagen);
-                        }}
-                        className="p-1 rounded-lg hover:bg-red-100 text-red-600 transition-colors"
-                        title="Eliminar imagen"
-                      >
-                        <Trash2 size={16} />
-                      </button>
+    if (isLoading) {
+        return <div>Cargando...</div>;
+    }
+
+    return (
+        <div className="space-y-6">
+            {/* Encabezado con búsqueda y botón */}
+            <div className="bg-white rounded-lg p-3">
+                 <div className="flex items-start gap-4 flex-col justify-start">
+                    <h2 className="text-2xl font-bold text-gray-900">Edición de Imágenes</h2>
+                    <p className="text-sm text-gray-600 pb-4">Gestión de imágenes para el apartado de la historia</p>
+                </div>
+                <div className="flex flex-col sm:flex-row gap-4 items-center justify-end">
+                    <div className="flex items-center gap-4 w-full sm:w-auto">
+                        <div className="relative flex-1 max-w-md">
+                            <LuSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                            <input
+                                type="text"
+                                placeholder="Buscar imágenes..."
+                                value={globalFilter ?? ''}
+                                onChange={(e) => setGlobalFilter(e.target.value)}
+                                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            />
+                        </div>
+                        <button
+                            onClick={() => setFormVisible(true)}
+                            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md flex items-center gap-2 transition-colors"
+                        >
+                            <LuPlus className="w-4 h-4" />
+                            Subir Imagen
+                        </button>
                     </div>
-                  </td>
-                </tr>
-              ));
-            })()}
-          </tbody>
-        </table>
-      </div>
+                </div>
+            </div>
 
-      {/* Modal de detalles */}
-      {modalOpen && imagenSeleccionada && (
-        <ImagenModal
-          isOpen={modalOpen}
-          onClose={handleCloseModal}
-          imagen={imagenSeleccionada}
-          refetch={refetch}
-        />
-      )}
+            {/* Errores */}
+            {isError && (
+                <div className="text-red-600 mb-2">Error al cargar las imágenes.</div>
+            )}
 
-      {/* Formulario para crear o editar */}
-      {formVisible && (
-        <ImagenForm
-          onClose={() => {
-            setFormVisible(false);
-            setImagenSeleccionada(null);
-            refetch();
-          }}
-       
-          refetch={refetch}
-        />
-      )}
-    </div>
-  );
+            <div className="bg-white rounded-2xl shadow-sm border border-sky-100 overflow-hidden max-h-[calc(100vh-300px)] overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100">
+                <div className="overflow-x-auto">
+                    <table className="min-w-full table-auto">
+                        <thead className="bg-sky-50">
+                            {table.getHeaderGroups().map(headerGroup => (
+                                <tr key={headerGroup.id} className="text-left text-xs sm:text-sm text-sky-700">
+                                    {headerGroup.headers.map((header, index) => (
+                                        <th key={header.id} className={`px-2 sm:px-4 py-3 font-medium border-b border-sky-100 ${
+                                            index === 0 ? 'text-left' : 'text-center'
+                                        }`}>
+                                            {(() => {
+                                                if (header.isPlaceholder) {
+                                                    return null;
+                                                }
+                                                if (header.column.getCanSort()) {
+                                                    return (
+                                                        <button
+                                                            type="button"
+                                                            className={`cursor-pointer select-none flex items-center gap-2 bg-transparent border-none p-0 ${
+                                                                index === 0 ? 'justify-start' : 'justify-center'
+                                                            }`}
+                                                            onClick={header.column.getToggleSortingHandler()}
+                                                            onKeyDown={e => {
+                                                                if (e.key === 'Enter' || e.key === ' ') {
+                                                                    e.preventDefault();
+                                                                    header.column.getToggleSortingHandler()?.(e);
+                                                                }
+                                                            }}
+                                                            tabIndex={0}
+                                                            aria-label={`Ordenar por ${header.column.columnDef.header as string}`}
+                                                        >
+                                                            <span className="flex items-center gap-1">
+                                                                {header.column.columnDef.header as string}
+                                                                {header.column.getIsSorted() === 'asc' && <MdKeyboardArrowUp className="inline" />}
+                                                                {header.column.getIsSorted() === 'desc' && <MdKeyboardArrowDown className="inline" />}
+                                                            </span>
+                                                        </button>
+                                                    );
+                                                }
+                                                return (
+                                                    <span className={index === 0 ? 'text-left' : 'text-center'}>
+                                                        {header.column.columnDef.header as string}
+                                                    </span>
+                                                );
+                                            })()}
+                                        </th>
+                                    ))}
+                                </tr>
+                            ))}
+                        </thead>
+                        <tbody className="bg-white divide-y divide-sky-50">
+                            {table.getRowModel().rows.length === 0 ? (
+                                <tr>
+                                    <td colSpan={4} className="px-2 sm:px-4 py-8 text-center text-slate-500">
+                                        {globalFilter ? 'No se encontraron imágenes que coincidan con la búsqueda' : 'No hay imágenes registradas'}
+                                    </td>
+                                </tr>
+                            ) : (
+                                table.getRowModel().rows.map(row => (
+                                    <tr key={row.id} className="hover:bg-sky-50 cursor-pointer transition-colors">
+                                        {row.getVisibleCells().map((cell, index) => {
+                                            let cellContent: React.ReactNode;
+
+                                            if (cell.column.columnDef.cell) {
+                                                if (typeof cell.column.columnDef.cell === 'function') {
+                                                    cellContent = cell.column.columnDef.cell(cell.getContext());
+                                                } else {
+                                                    cellContent = cell.column.columnDef.cell;
+                                                }
+                                            } else {
+                                                cellContent = cell.getValue() as React.ReactNode;
+                                            }
+
+                                            return (
+                                                <td key={cell.id} className={`px-2 sm:px-4 py-3 text-xs sm:text-sm text-slate-700 align-top ${
+                                                    index === 0 ? 'text-left' : 'text-center'
+                                                }`}>
+                                                    {cellContent}
+                                                </td>
+                                            );
+                                        })}
+                                    </tr>
+                                ))
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div className="px-6 py-3 bg-gray-50 border-t border-gray-200">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                            <div className="flex items-center gap-2">
+                                <span className="text-sm text-gray-700">Filas por página:</span>
+                                <select
+                                    value={table.getState().pagination.pageSize}
+                                    onChange={(e) => {
+                                        table.setPageSize(Number(e.target.value));
+                                    }}
+                                    className="px-3 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                >
+                                    {pageSizeOptions.map((pageSize) => (
+                                        <option key={pageSize} value={pageSize}>
+                                            {pageSize}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <button
+                                onClick={() => table.setPageIndex(0)}
+                                disabled={!table.getCanPreviousPage()}
+                                className="p-2 rounded-md border text-gray-600 hover:text-gray-900 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                                title="Primera página"
+                            >
+                                <MdKeyboardDoubleArrowLeft className="w-4 h-4" />
+                            </button>
+                            <button
+                                onClick={() => table.previousPage()}
+                                disabled={!table.getCanPreviousPage()}
+                                className="p-2 rounded-md border text-gray-600 hover:text-gray-900 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                                title="Página anterior"
+                            >
+                                <MdKeyboardArrowLeft className="w-4 h-4" />
+                            </button>
+                            <span className="text-sm text-gray-700">
+                              Página {table.getState().pagination.pageIndex + 1} de {table.getPageCount()}
+                            </span>
+                            <button
+                                onClick={() => table.nextPage()}
+                                disabled={!table.getCanNextPage()}
+                                className="p-2 rounded-md border text-gray-600 hover:text-gray-900 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                                title="Página siguiente"
+                            >
+                                <MdKeyboardArrowRight className="w-4 h-4" />
+                            </button>
+                            <button
+                                onClick={() => table.setPageIndex(table.getPageCount() - 1)}
+                                disabled={!table.getCanNextPage()}
+                                className="p-2 rounded-md border text-gray-600 hover:text-gray-900 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                                title="Última página"
+                            >
+                                <MdKeyboardDoubleArrowRight className="w-4 h-4" />
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Modal para crear imágenes */}
+            {formVisible && (
+                <ImagenForm
+                    onClose={() => setFormVisible(false)}
+                    refetch={refetch}
+                />
+            )}
+
+            {/* Modal para editar imágenes */}
+            {editVisible && imagenSeleccionada && (
+                <ImagenFormEdit
+                    imagen={imagenSeleccionada}
+                    onClose={() => {
+                        setEditVisible(false);
+                        setImagenSeleccionada(null);
+                    }}
+                    refetch={refetch}
+                />
+            )}
+
+            {/* Modal para mostrar detalles de la imagen */}
+            {modalOpen && imagenSeleccionada && (
+                <ImagenModal
+                    isOpen={modalOpen}
+                    onClose={() => {
+                        setModalOpen(false);
+                        setImagenSeleccionada(null);
+                    }}
+                    imagen={imagenSeleccionada}
+                />
+            )}
+        </div>
+    );
 }

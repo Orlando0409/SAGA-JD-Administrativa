@@ -14,8 +14,8 @@ export const useGetCalidadAgua = () => {
 export const useUploadCalidadAgua = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ formData, idUsuarioCreador }: { formData: FormData; idUsuarioCreador: number }) => 
-      uploadArchivoCalidadAgua(formData, idUsuarioCreador),
+    mutationFn: ({ formData,  }: { formData: FormData; }) => 
+      uploadArchivoCalidadAgua(formData),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["calidadAgua"] });
     },

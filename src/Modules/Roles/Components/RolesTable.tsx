@@ -28,7 +28,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/Modules/Global/components/Sidebar/ui/alert-dialog';
-import { useAuth } from '@/Modules/Auth/Context/AuthContext';
+
 
 const Roles = () => {
   const { data: allRoles = [], isLoading } = useRoles();
@@ -42,7 +42,6 @@ const Roles = () => {
   const [_selectedRole, setSelectedRole] = useState<Role | null>(null);
   const deactivateRoleMutation = useDeactivateRole();
   const activateRoleMutation = useActivateRole();
-  const { user } = useAuth();
   const pageSizeOptions = [5, 10, 20, 50];
   const [pagination, setPagination] = useState({
     pageSize: 5,
@@ -76,7 +75,7 @@ const Roles = () => {
 
   const handleDeactivate = async (roleId: number) => {
     try {
-      await deactivateRoleMutation.mutateAsync({ id: roleId, idUsuario: user?.Id_Usuario || 0 });
+      await deactivateRoleMutation.mutateAsync({ id: roleId });
     } catch (error) {
       console.error('Error deactivating role:', error);
     }
@@ -84,7 +83,7 @@ const Roles = () => {
 
   const handleActivate = async (roleId: number) => {
     try {
-      await activateRoleMutation.mutateAsync({ id: roleId, idUsuario: user?.Id_Usuario || 0 });
+      await activateRoleMutation.mutateAsync({ id: roleId});
     } catch (error) {
       console.error('Error activating role:', error);
     }
@@ -266,10 +265,9 @@ const Roles = () => {
   return (
     <div className="w-full flex flex-col items-start h-full p-2">
       <div className="w-full overflow-hidden">
-        <div className="flex pl-6 items-center gap-4">
-          <h1 className="text-2xl font-bold text-gray-800">
-            Gestión de Roles
-          </h1>
+           <div className="flex items-start gap-4 flex-col justify-start">
+            <h2 className="text-2xl font-bold text-gray-900">Gestión de Roles</h2>
+            <p className="text-sm text-gray-600 pb-4">Gestiona los roles de los usuarios en el sistema</p>
         </div>
 
         <div className="p-6">

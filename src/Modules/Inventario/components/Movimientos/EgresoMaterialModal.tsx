@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { LuTrendingDown, LuTriangleAlert } from 'react-icons/lu';
-import { useEgresoMaterial } from '../../hooks/HookMaterialMovimiento';
 import { IngresoEgresoMaterialSchema } from '../../schema/MaterialMovimientoSchema';
 import type { Material, IngresoEgresoMaterialData } from '../../models/Inventario';
-import { useAuth } from '@/Modules/Auth/Context/AuthContext';
+import { useEgresoMaterial } from '../../hooks/useMovimientos';
+
 
 interface EgresoMaterialModalProps {
   isOpen: boolean;
@@ -16,7 +16,7 @@ const EgresoMaterialModal: React.FC<EgresoMaterialModalProps> = ({
   onClose,
   material
 }) => {
-  const { user } = useAuth();
+
   const egresoMutation = useEgresoMaterial();
   const [formData, setFormData] = useState<IngresoEgresoMaterialData>({
     Id_Material: material.Id_Material,
@@ -58,15 +58,10 @@ const EgresoMaterialModal: React.FC<EgresoMaterialModalProps> = ({
     }
 
     try {
-      if (!user?.Id_Usuario) {
-        console.error('Usuario no autenticado');
-        return;
-      }
 
-      await egresoMutation.mutateAsync({
-        idUsuario: user.Id_Usuario,
-        data: formData
-      });
+
+      await egresoMutation.mutateAsync(formData);
+    
       setFormData({ Id_Material: material.Id_Material, Cantidad: 1 });
       onClose();
     } catch (error) {

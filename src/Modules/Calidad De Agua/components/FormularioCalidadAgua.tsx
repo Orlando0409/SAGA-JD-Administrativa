@@ -1,17 +1,15 @@
 import { useState } from "react";
 import { useUploadCalidadAgua } from "../Hook/HookCalidadAgua";
-import { useAuth } from "@/Modules/Auth/Context/AuthContext";
 import { useAlerts } from "@/Modules/Global/context/AlertContext"; // ✅ Importamos el hook de alertas
 
 interface FormularioCalidadAguaProps {
-    id: number;
     tituloInicial: string;
     onClose: () => void;
     refetch: () => void;
 }
 
 export default function FormularioCalidadAgua({ onClose, refetch }: FormularioCalidadAguaProps) {
-    const { user } = useAuth();
+  
     const uploadCalidadAguaMutation = useUploadCalidadAgua();
     const { showSuccess, showError } = useAlerts(); // ✅ Hook de alertas
 
@@ -52,12 +50,6 @@ export default function FormularioCalidadAgua({ onClose, refetch }: FormularioCa
             showError("Debe seleccionar un archivo válido."); // ✅ Reemplazado alert por showError
             return;
         }
-
-        if (!user?.Id_Usuario) {
-            showError("Error: Usuario no autenticado."); // ✅
-            return;
-        }
-
         const formData = new FormData();
         formData.append("Titulo", titulo.trim());
         formData.append("Descripcion", descripcion.trim());
@@ -65,8 +57,7 @@ export default function FormularioCalidadAgua({ onClose, refetch }: FormularioCa
 
         uploadCalidadAguaMutation.mutate(
             {
-                formData,
-                idUsuarioCreador: user.Id_Usuario,
+                formData
             },
             {
                 onSuccess: () => {
@@ -164,20 +155,20 @@ export default function FormularioCalidadAgua({ onClose, refetch }: FormularioCa
 
                 <div className="flex justify-end gap-4">
                     <button
-                        type="button"
-                        onClick={onClose}
-                        className="px-4 py-2 rounded-lg bg-gray-200 text-gray-800 hover:bg-gray-300 shadow-sm text-sm"
-                    >
-                        Cancelar
-                    </button>
-                    <button
                         type="submit"
-                        className="px-4 py-2 rounded-lg bg-sky-600 text-white hover:bg-sky-700 shadow-sm text-sm"
+                        className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 shadow-sm text-sm"
                         disabled={uploadCalidadAguaMutation.status === "pending"}
                     >
                         {uploadCalidadAguaMutation.status === "pending"
                             ? "Subiendo..."
                             : "Subir Archivo"}
+                    </button>
+                    <button
+                        type="button"
+                        onClick={onClose}
+                        className="px-4 py-2 rounded-lg bg-gray-200 text-gray-800 hover:bg-gray-300 shadow-sm text-sm"
+                    >
+                        Cancelar
                     </button>
                 </div>
             </form>

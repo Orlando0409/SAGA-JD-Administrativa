@@ -1,20 +1,28 @@
-import { useState } from "react";
-import { useCreateActa } from "../Hook/hookActas";
+import { useState, useEffect } from "react";
+import { useUpdateActa } from "../Hook/hookActas";
 import { FaFilePdf, FaTimes } from "react-icons/fa";
+import type { Acta } from "../Models/ActasModels";
 
-interface FormularioCrearActasProps {
+interface ActasEditProps {
+    acta: Acta;
     onClose: () => void; // Función para cerrar el modal
     refetch: () => void; // Función para refrescar la tabla
 }
 
-export default function FormularioCrearActas({ onClose, refetch }: FormularioCrearActasProps) {
-    const createActaMutation = useCreateActa(); // Crear una nueva acta
+export default function ActasEdit({ acta, onClose, refetch }: ActasEditProps) {
+    const updateActaMutation = useUpdateActa();
 
-    const [titulo, setTitulo] = useState("");
-    const [descripcion, setDescripcion] = useState("");
+    const [titulo, setTitulo] = useState(acta.Titulo);
+    const [descripcion, setDescripcion] = useState(acta.Descripcion);
     const [files, setFiles] = useState<File[]>([]);
     const [tituloError, setTituloError] = useState(""); // Validación de título
     const [descripcionError, setDescripcionError] = useState(""); // Validación de descripción
+
+    // Pre-cargar los valores del acta cuando se monta el componente
+    useEffect(() => {
+        setTitulo(acta.Titulo);
+        setDescripcion(acta.Descripcion);
+    }, [acta]);
 
     const handleTituloChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
@@ -43,32 +51,31 @@ export default function FormularioCrearActas({ onClose, refetch }: FormularioCre
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        if (files.length === 0) {
-            alert("Debe seleccionar al menos un archivo válido.");
-            return;
-        }
-
         const formData = new FormData();
         formData.append("Titulo", titulo.trim());
         formData.append("Descripcion", descripcion.trim());
-        files.forEach((file) => {
-            formData.append("Archivo", file); // El backend espera "Archivo" para cada archivo
-        });
 
-        createActaMutation.mutate(formData, {
-            onSuccess: () => {
-                setTitulo("");
-                setDescripcion("");
-                setFiles([]);
-                onClose(); // Oculta el modal después de crear el acta
-                refetch(); // Refresca la tabla para mostrar la nueva acta
-                alert("Acta creada con éxito.");
-            },
-            onError: (error) => {
-                console.error("Error al crear el acta:", error);
-                alert("Hubo un problema al crear el acta.");
-            },
-        });
+        // Solo agregar archivos si se seleccionaron nuevos
+        if (files.length > 0) {
+            files.forEach((file) => {
+                formData.append("Archivo", file);
+            });
+        }
+
+        updateActaMutation.mutate(
+            { id: acta.Id_Acta, formData },
+            {
+                onSuccess: () => {
+                    onClose(); // Oculta el modal después de actualizar el acta
+                    refetch(); // Refresca la tabla para mostrar los cambios
+                    alert("Acta actualizada con éxito.");
+                },
+                onError: (error) => {
+                    console.error("Error al actualizar el acta:", error);
+                    alert("Hubo un problema al actualizar el acta.");
+                },
+            }
+        );
     };
 
     return (
@@ -77,7 +84,7 @@ export default function FormularioCrearActas({ onClose, refetch }: FormularioCre
                 onSubmit={handleSubmit}
                 className="w-full max-w-md bg-white rounded-lg shadow-lg p-6 space-y-4"
             >
-                <h3 className="text-lg font-semibold text-gray-800">Crear Acta</h3>
+                <h3 className="text-lg font-semibold text-gray-800">Editar Acta</h3>
 
                 {/* Campo de Título */}
                 <div>
@@ -121,10 +128,12 @@ export default function FormularioCrearActas({ onClose, refetch }: FormularioCre
                     )}
                 </div>
 
-                {/* Campo de Archivos */}
+                {/* Campo de Archivos (opcional para edición) */}
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Archivos PDF</label>
-                    
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Archivos PDF (opcional - reemplazar archivos existentes)
+                    </label>
+
                     {/* Botón para seleccionar múltiples archivos */}
                     <div className="relative">
                         <input
@@ -139,8 +148,8 @@ export default function FormularioCrearActas({ onClose, refetch }: FormularioCre
                                     setFiles(prevFiles => {
                                         const newFiles = [...prevFiles];
                                         selectedFiles.forEach(newFile => {
-                                            const isDuplicate = newFiles.some(existingFile => 
-                                                existingFile.name === newFile.name && 
+                                            const isDuplicate = newFiles.some(existingFile =>
+                                                existingFile.name === newFile.name &&
                                                 existingFile.size === newFile.size
                                             );
                                             if (!isDuplicate) {
@@ -166,7 +175,7 @@ export default function FormularioCrearActas({ onClose, refetch }: FormularioCre
                                 {files.length > 0 ? "Agregar Más Archivos" : "Seleccionar Archivos PDF"}
                             </span>
                             <span className="text-xs text-gray-500">
-                                Haz clic para elegir archivos PDF 
+                                Opcional - Solo si deseas reemplazar archivos
                             </span>
                         </button>
                     </div>
@@ -226,9 +235,9 @@ export default function FormularioCrearActas({ onClose, refetch }: FormularioCre
                     <button
                         type="submit"
                         className="px-4 py-2 rounded-lg bg-sky-600 text-white hover:bg-sky-700 shadow-sm text-sm"
-                        disabled={createActaMutation.isPending}
+                        disabled={updateActaMutation.isPending}
                     >
-                        {createActaMutation.isPending ? "Subiendo..." : "Subir Acta"}
+                        {updateActaMutation.isPending ? "Actualizando..." : "Actualizar Acta"}
                     </button>
                 </div>
             </form>

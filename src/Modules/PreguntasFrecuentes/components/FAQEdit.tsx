@@ -1,130 +1,138 @@
-import { useState } from "react";
-import { useCreateActa } from "../Hook/hookActas";
+import { useState, useEffect } from "react";
+import { useFAQ } from "../Hook/FAQHook";
 import { FaFilePdf, FaTimes } from "react-icons/fa";
+import type { FAQ } from "../Models/FAQModels";
 
-interface FormularioCrearActasProps {
+interface FAQEditProps {
+    faq: FAQ;
     onClose: () => void; // Función para cerrar el modal
     refetch: () => void; // Función para refrescar la tabla
 }
 
-export default function FormularioCrearActas({ onClose, refetch }: FormularioCrearActasProps) {
-    const createActaMutation = useCreateActa(); // Crear una nueva acta
+export default function FAQEdit({ faq, onClose, refetch }: FAQEditProps) {
+    const { editFAQ, loading } = useFAQ(true);
 
-    const [titulo, setTitulo] = useState("");
-    const [descripcion, setDescripcion] = useState("");
+    const [pregunta, setPregunta] = useState(faq.Pregunta);
+    const [respuesta, setRespuesta] = useState(faq.Respuesta);
     const [files, setFiles] = useState<File[]>([]);
-    const [tituloError, setTituloError] = useState(""); // Validación de título
-    const [descripcionError, setDescripcionError] = useState(""); // Validación de descripción
+    const [preguntaError, setPreguntaError] = useState(""); // Validación de pregunta
+    const [respuestaError, setRespuestaError] = useState(""); // Validación de respuesta
 
-    const handleTituloChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Pre-cargar los valores de la FAQ cuando se monta el componente
+    useEffect(() => {
+        setPregunta(faq.Pregunta);
+        setRespuesta(faq.Respuesta);
+    }, [faq]);
+
+    const handlePreguntaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
-        setTitulo(value);
+        setPregunta(value);
         if (value.length < 5) {
-            setTituloError("El título debe tener al menos 5 caracteres.");
-        } else if (value.length > 100) {
-            setTituloError("El título no puede exceder los 100 caracteres.");
+            setPreguntaError("La pregunta debe tener al menos 5 caracteres.");
+        } else if (value.length > 200) {
+            setPreguntaError("La pregunta no puede exceder los 200 caracteres.");
         } else {
-            setTituloError("");
+            setPreguntaError("");
         }
     };
 
-    const handleDescripcionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const handleRespuestaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
         const value = e.target.value;
-        setDescripcion(value);
+        setRespuesta(value);
         if (value.length < 10) {
-            setDescripcionError("La descripción debe tener al menos 10 caracteres.");
-        } else if (value.length > 200) {
-            setDescripcionError("La descripción no puede exceder los 200 caracteres.");
+            setRespuestaError("La respuesta debe tener al menos 10 caracteres.");
+        } else if (value.length > 1000) {
+            setRespuestaError("La respuesta no puede exceder los 1000 caracteres.");
         } else {
-            setDescripcionError("");
+            setRespuestaError("");
         }
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        if (files.length === 0) {
-            alert("Debe seleccionar al menos un archivo válido.");
-            return;
+        const formData = new FormData();
+        formData.append("Pregunta", pregunta.trim());
+        formData.append("Respuesta", respuesta.trim());
+
+        // Solo agregar archivos si se seleccionaron nuevos
+        if (files.length > 0) {
+            files.forEach((file) => {
+                formData.append("Archivo", file);
+            });
         }
 
-        const formData = new FormData();
-        formData.append("Titulo", titulo.trim());
-        formData.append("Descripcion", descripcion.trim());
-        files.forEach((file) => {
-            formData.append("Archivo", file); // El backend espera "Archivo" para cada archivo
-        });
-
-        createActaMutation.mutate(formData, {
-            onSuccess: () => {
-                setTitulo("");
-                setDescripcion("");
-                setFiles([]);
-                onClose(); // Oculta el modal después de crear el acta
-                refetch(); // Refresca la tabla para mostrar la nueva acta
-                alert("Acta creada con éxito.");
-            },
-            onError: (error) => {
-                console.error("Error al crear el acta:", error);
-                alert("Hubo un problema al crear el acta.");
-            },
-        });
+        try {
+            await editFAQ(faq.Id_FAQ, {
+                Pregunta: pregunta.trim(),
+                Respuesta: respuesta.trim(),
+                // Aquí podrías agregar lógica para archivos si el backend lo soporta
+            });
+            alert("Pregunta actualizada con éxito.");
+            refetch();
+            onClose();
+        } catch (error) {
+            console.error("Error al actualizar la pregunta:", error);
+            alert("Hubo un problema al actualizar la pregunta.");
+        }
     };
 
     return (
-        <div className="fixed inset-0 bg-white bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-opacity-10 backdrop-blur-sm flex items-center justify-center z-50">
             <form
                 onSubmit={handleSubmit}
                 className="w-full max-w-md bg-white rounded-lg shadow-lg p-6 space-y-4"
             >
-                <h3 className="text-lg font-semibold text-gray-800">Crear Acta</h3>
+                <h3 className="text-lg font-semibold text-gray-800">Editar Pregunta Frecuente</h3>
 
-                {/* Campo de Título */}
+                {/* Campo de Pregunta */}
                 <div>
-                    <label className="block text-sm font-medium text-gray-700">Título</label>
+                    <label className="block text-sm font-medium text-gray-700">Pregunta</label>
                     <input
                         type="text"
-                        placeholder="Título"
-                        value={titulo}
-                        onChange={handleTituloChange}
-                        maxLength={100}
-                        className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-sky-500 text-sm break-words"
-                        style={{ whiteSpace: "normal", overflowWrap: "break-word" }}
-                        required
-                    />
-                    <div className="text-right text-xs text-gray-500 mt-1">
-                        {titulo.length}/100
-                    </div>
-                    {tituloError && (
-                        <p className="text-xs text-red-500 mt-1">{tituloError}</p>
-                    )}
-                </div>
-
-                {/* Campo de Descripción */}
-                <div>
-                    <label className="block text-sm font-medium text-gray-700">Descripción</label>
-                    <textarea
-                        placeholder="Descripción"
-                        value={descripcion}
-                        onChange={handleDescripcionChange}
+                        placeholder="Pregunta"
+                        value={pregunta}
+                        onChange={handlePreguntaChange}
                         maxLength={200}
                         className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-sky-500 text-sm break-words"
                         style={{ whiteSpace: "normal", overflowWrap: "break-word" }}
-                        rows={3}
                         required
                     />
                     <div className="text-right text-xs text-gray-500 mt-1">
-                        {descripcion.length}/200
+                        {pregunta.length}/200
                     </div>
-                    {descripcionError && (
-                        <p className="text-xs text-red-500 mt-1">{descripcionError}</p>
+                    {preguntaError && (
+                        <p className="text-xs text-red-500 mt-1">{preguntaError}</p>
                     )}
                 </div>
 
-                {/* Campo de Archivos */}
+                {/* Campo de Respuesta */}
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Archivos PDF</label>
-                    
+                    <label className="block text-sm font-medium text-gray-700">Respuesta</label>
+                    <textarea
+                        placeholder="Respuesta"
+                        value={respuesta}
+                        onChange={handleRespuestaChange}
+                        maxLength={1000}
+                        className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-sky-500 text-sm break-words"
+                        style={{ whiteSpace: "normal", overflowWrap: "break-word" }}
+                        rows={4}
+                        required
+                    />
+                    <div className="text-right text-xs text-gray-500 mt-1">
+                        {respuesta.length}/1000
+                    </div>
+                    {respuestaError && (
+                        <p className="text-xs text-red-500 mt-1">{respuestaError}</p>
+                    )}
+                </div>
+
+                {/* Campo de Archivos (opcional para edición) */}
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Archivos PDF (opcional - reemplazar archivos existentes)
+                    </label>
+
                     {/* Botón para seleccionar múltiples archivos */}
                     <div className="relative">
                         <input
@@ -139,8 +147,8 @@ export default function FormularioCrearActas({ onClose, refetch }: FormularioCre
                                     setFiles(prevFiles => {
                                         const newFiles = [...prevFiles];
                                         selectedFiles.forEach(newFile => {
-                                            const isDuplicate = newFiles.some(existingFile => 
-                                                existingFile.name === newFile.name && 
+                                            const isDuplicate = newFiles.some(existingFile =>
+                                                existingFile.name === newFile.name &&
                                                 existingFile.size === newFile.size
                                             );
                                             if (!isDuplicate) {
@@ -166,7 +174,7 @@ export default function FormularioCrearActas({ onClose, refetch }: FormularioCre
                                 {files.length > 0 ? "Agregar Más Archivos" : "Seleccionar Archivos PDF"}
                             </span>
                             <span className="text-xs text-gray-500">
-                                Haz clic para elegir archivos PDF 
+                                Opcional - Solo si deseas reemplazar archivos
                             </span>
                         </button>
                     </div>
@@ -226,9 +234,9 @@ export default function FormularioCrearActas({ onClose, refetch }: FormularioCre
                     <button
                         type="submit"
                         className="px-4 py-2 rounded-lg bg-sky-600 text-white hover:bg-sky-700 shadow-sm text-sm"
-                        disabled={createActaMutation.isPending}
+                        disabled={loading}
                     >
-                        {createActaMutation.isPending ? "Subiendo..." : "Subir Acta"}
+                        {loading ? "Actualizando..." : "Actualizar Pregunta"}
                     </button>
                 </div>
             </form>

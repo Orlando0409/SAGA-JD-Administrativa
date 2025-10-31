@@ -1,7 +1,7 @@
-import Abonados from '@/Modules/Abonados/components/Abonados'
+import AbonadosTable from '@/Modules/Abonados/components/AbonadosTable'
 import { createFileRoute } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/(app)/(Gestion)/Abonados')({
-  component: Abonados,
+  component: AbonadosTable,
 })
 

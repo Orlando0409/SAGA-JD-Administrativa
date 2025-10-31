@@ -329,10 +329,12 @@ const handleArchive = async (item: ContactoItem) => {
   return (
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div className="flex items-center gap-4">
-          <div className="h-6 w-px bg-gray-300" />
-          <h2 className="text-2xl font-bold text-gray-900">Gestión de Quejas, Sugerencias y Reportes</h2>
+        <div className="flex items-start gap-4 flex-col justify-start">
+          <div className="flex items-start gap-4 flex-col justify-start" />
+            <h2 className="text-2xl font-bold text-gray-900">Revisión de Quejas, Sugrerencias y Reportes</h2>
+            <p className="text-sm text-gray-600 pb-4">Gestiona y revisa las quejas, sugerencias y reportes del sistema</p>
         </div>
+  
       </div>
       <div className="bg-white rounded-lg p-3">
         <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
