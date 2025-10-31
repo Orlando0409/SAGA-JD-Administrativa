@@ -8,6 +8,8 @@ import type { ProveedorJuridico } from '../Models/TablaProveedo/tablaJuridicoPro
 import CreateModalProveedor from './CreateModalProveedor';
 import ProveedorDetailModal from './DetailFisicoProveedor';
 import ProveedorJuridicoDetailModal from './DetailJuridicoProveedor';
+import EditFisicoProveedoresModal from './EditFisicoProveedoresModal';
+import EditJuridicoProveedorModal from './EditJuridicoProveedorModal';
 import { MdKeyboardArrowUp, MdKeyboardArrowDown, MdKeyboardDoubleArrowLeft, MdKeyboardArrowLeft, MdKeyboardArrowRight, MdKeyboardDoubleArrowRight } from 'react-icons/md';
 
 // Tipo unificado para la tabla (similar al patrón de AbonadosTable)
@@ -46,6 +48,10 @@ export default function ProveedoresTable() {
     const [showJuridicoDetailModal, setShowJuridicoDetailModal] = useState(false);
     const [selectedProveedorFisico, setSelectedProveedorFisico] = useState<ProveedorFisico | null>(null);
     const [selectedProveedorJuridico, setSelectedProveedorJuridico] = useState<ProveedorJuridico | null>(null);
+
+    // Estado para el modal de edición
+    const [showEditModal, setShowEditModal] = useState(false);
+    const [proveedorEdit, setProveedorEdit] = useState<ProveedorUnificado | null>(null);
 
     // Estados para el modal de creación
     const [showCreateModal, setShowCreateModal] = useState(false);
@@ -206,8 +212,13 @@ export default function ProveedoresTable() {
             cell: (info) => {
                 const proveedor = info.row.original;
                 return (
-                    <div className='flex items-center justify-center'>
-                        <button  className="px-4 py-1 bg-gray-600 text-white text-xs rounded hover:bg-gray-700 transition-colors" onClick={() => handleViewDetail(proveedor)}>ver</button>
+                    <div className='flex items-center justify-center gap-1'>
+                        {/* Botón Ver */}
+                        <button className="px-2 py-1 bg-gray-600 text-white text-xs rounded hover:bg-gray-700 transition-colors" onClick={() => handleViewDetail(proveedor)} title="Ver">Ver</button>
+                        {/* Botón Editar */}
+                        <button className="px-2 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition-colors" onClick={() => { setProveedorEdit(proveedor); setShowEditModal(true); }} title="Editar">Editar</button>
+                        {/* Botón Desactivar/Activar */}
+                        <button className="px-2 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-700 transition-colors" title="Desactivar">Desactivar</button>
                     </div>
                 );
             }
@@ -428,11 +439,21 @@ export default function ProveedoresTable() {
             />
 
             {/* Modal de creación de proveedores */}
-            {showCreateModal && (
-                <CreateModalProveedor
-                    onClose={() => setShowCreateModal(false)}
-                    setShowCreateModal={setShowCreateModal}
-                />
+            {/* Modal de edición fuera de la tabla, controlado por el estado global */}
+            {showEditModal && proveedorEdit && (
+                proveedorEdit.Tipo_Proveedor === 'Físico' ? (
+                    <EditFisicoProveedoresModal
+                        isOpen={showEditModal}
+                        onClose={() => { setShowEditModal(false); setProveedorEdit(null); }}
+                        proveedor={proveedorEdit.datos_originales as ProveedorFisico}
+                    />
+                ) : (
+                    <EditJuridicoProveedorModal
+                        isOpen={showEditModal}
+                        onClose={() => { setShowEditModal(false); setProveedorEdit(null); }}
+                        proveedor={proveedorEdit.datos_originales as ProveedorJuridico}
+                    />
+                )
             )}
         </div>
     );
