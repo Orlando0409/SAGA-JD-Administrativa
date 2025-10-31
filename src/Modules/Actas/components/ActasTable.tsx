@@ -24,7 +24,6 @@ import {
   AlertDialogFooter
 } from "@/Modules/Global/components/Sidebar/ui/alert-dialog";
 import { useGetActas, useDeleteActa } from "../Hook/hookActas";
-import { FileText } from "lucide-react";
 import type { Acta } from "../Models/ActasModels";
 import FormularioCrearActas from "./FormularioCrearActas";
 import ActasModal from "./ActasModal";
@@ -54,7 +53,6 @@ export default function ActasTable() {
             header: 'Título',
             cell: info => (
                 <div className="font-medium text-left flex items-center gap-2">
-                    <FileText size={18} className="text-sky-600" />
                     <span className="truncate">
                         {info.getValue().length > 30
                             ? `${info.getValue().slice(0, 30)}...`

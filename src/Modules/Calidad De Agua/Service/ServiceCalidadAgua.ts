@@ -25,15 +25,15 @@ export const updateArchivoCalidadAgua = async (id: number, formData: FormData): 
 };
 
 export const deleteArchivoCalidadAgua = async (id: number): Promise<void> => {
-    try {
-        const response = await apiAuth.delete(`/calidad-agua/delete/${id}`);
-        if (response.status !== 200) {
-            throw new Error("Error al eliminar el archivo en el backend.");
-        }
-    } catch (error) {
-        console.error("Error en el servicio al eliminar el archivo:", error);
-        throw new Error("Error al eliminar el archivo.");
+  try {
+    const response = await apiAuth.delete(`/calidad-agua/delete/${id}`);
+    if (response.status !== 200) {
+      throw new Error("Error al eliminar el archivo en el backend.");
     }
+  } catch (error) {
+    console.error("Error en el servicio al eliminar el archivo:", error);
+    throw new Error("Error al eliminar el archivo.");
+  }
 };
 
 // Función para cambiar visibilidad
