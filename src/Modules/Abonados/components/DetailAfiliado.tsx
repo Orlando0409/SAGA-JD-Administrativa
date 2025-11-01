@@ -3,6 +3,7 @@ import { LuX, LuUser, LuMail, LuPhone, LuMapPin, LuCalendar, LuBuilding, LuFileT
 import { Accordion, AccordionHeader, AccordionBody } from "@material-tailwind/react"
 import { FiChevronDown, FiChevronRight } from 'react-icons/fi'
 import { CUSTOM_ANIMATION } from '@/Modules/Global/types/Sections';
+import { formatCedulaJuridica } from '../Helper/formatUtils';
 import type { AfiliadoFisico } from '../Models/TablaAfiliados/ModeloAfiliadoFisico';
 import type { AfiliadoJuridico } from '../Models/TablaAfiliados/ModeloAfiliadoJuridico';
 
@@ -63,7 +64,7 @@ const DetailAbonados: React.FC<DetailAbonadosProps> = ({ persona, isOpen, onClos
             return {
                 id: afiliado.Id_Afiliado,
                 nombre: afiliado.Razon_Social,
-                documento: afiliado.Cedula_Juridica,
+                documento: formatCedulaJuridica(afiliado.Cedula_Juridica || ''),
                 tipoDocumento: 'Cédula Jurídica',
                 telefono: afiliado.Numero_Telefono,
                 correo: afiliado.Correo,

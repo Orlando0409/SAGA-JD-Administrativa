@@ -5,6 +5,7 @@ import { MdKeyboardArrowLeft, MdKeyboardArrowRight, MdKeyboardDoubleArrowLeft, M
 import { LuSearch } from 'react-icons/lu';
 import { useAfiliadosFisicos } from '../Hook/HookAfiliadoFisico';
 import { useAfiliadosJuridicos } from '../Hook/HookAfiliadoJuridico';
+import { formatCedulaJuridica } from '../Helper/formatUtils';
 import DetailAbonados from './DetailAfiliado';
 import CreateModal from './CreateModal';
 import EditModal from './EditModal'; // ✅ Agregar import
@@ -80,8 +81,8 @@ export default function AbonadosTable() {
         const afiliadosJuridicosUnificados: AfiliadoUnificado[] = afiliadosJuridicos.map((afiliado: AfiliadoJuridico) => ({
             Id: afiliado.Id_Afiliado,
             Nombre_Completo: afiliado.Razon_Social || 'Sin razón social',
-            Cedula_Documento: afiliado.Cedula_Juridica || 'Sin cédula jurídica',
-            Identificacion: afiliado.Cedula_Juridica || 'Sin cédula jurídica',
+            Cedula_Documento: formatCedulaJuridica(afiliado.Cedula_Juridica || '') || 'Sin cédula jurídica',
+            Identificacion: formatCedulaJuridica(afiliado.Cedula_Juridica || '') || 'Sin cédula jurídica',
             Estado: {
                 Id_Estado: afiliado.Estado?.Id_Estado_Afiliado || 0,
                 Nombre_Estado: afiliado.Estado?.Nombre_Estado || 'Sin estado'

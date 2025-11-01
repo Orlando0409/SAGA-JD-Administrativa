@@ -5,6 +5,7 @@ import type { AfiliadoJuridico } from '../Models/TablaAfiliados/ModeloAfiliadoJu
 import { useAlerts } from '@/Modules/Global/context/AlertContext';
 import { useAfiliadosFisicos } from '../Hook/HookAfiliadoFisico';
 import { useAfiliadosJuridicos } from '../Hook/HookAfiliadoJuridico';
+import { formatCedulaJuridica } from '../Helper/formatUtils';
 import PhoneInput from "react-phone-number-input";
 import "react-phone-number-input/style.css";
 import { AfiliadoFisicoEditSchema } from '../Schemas/AfiliadoFisico';
@@ -476,7 +477,7 @@ const EditModal: React.FC<EditModalProps> = ({ isOpen, onClose, persona }) => {
                                             </label>
                                             <input
                                                 type="text"
-                                                value={field.state.value}
+                                                value={formatCedulaJuridica(field.state.value || '')}
                                                 readOnly
                                                 className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-600 cursor-not-allowed"
                                                 placeholder="Cédula jurídica"
