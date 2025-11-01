@@ -109,7 +109,7 @@ export default function AbonadosTable() {
         if (!globalFilter) return filteredByEstado;
         const q = globalFilter.toLowerCase();
         return filteredByEstado.filter((afiliado) =>
-            [afiliado.Nombre_Completo, afiliado.Cedula_Documento, afiliado.Estado.Nombre_Estado, afiliado.Tipo_Persona, afiliado.Tipo_Afiliado, afiliado.Tipo_Identificacion]
+            [afiliado.Nombre_Completo, afiliado.Cedula_Documento, afiliado.Identificacion, afiliado.Estado.Nombre_Estado, afiliado.Tipo_Persona, afiliado.Tipo_Afiliado, afiliado.Tipo_Identificacion]
                 .filter(Boolean)
                 .join(' ')
                 .toLowerCase()
@@ -174,18 +174,19 @@ export default function AbonadosTable() {
         }),
         columnHelper.accessor('Identificacion', {
             header: 'Cédula / Documento',
-            cell: (info) => (
-                <div className='flex items-center justify-start'>
-                    {info.getValue() || 'Sin dato'}</div>
-            ),
-            size: 150,
-        }),
-        columnHelper.accessor('Tipo_Identificacion', {
-            header: 'Tipo Identificación',
-            cell: (info) => (
-                <div>{info.getValue() || 'Sin dato'}</div>
-            ),
-            size: 120,
+            cell: (info) => {
+                const fila = info.row.original;
+                const tipoIdentificacion = fila.Tipo_Identificacion || 'Sin dato';
+                const identificacion = info.getValue() || 'Sin dato';
+                
+                return (
+                    <div className='flex flex-col items-start justify-start'>
+                        <div className="font-medium text-gray-900">{identificacion}</div>
+                        <div className="text-xs text-gray-500 mt-1">{tipoIdentificacion}</div>
+                    </div>
+                );
+            },
+            size: 180,
         }),
         columnHelper.accessor('Estado', {
             header: 'Estado',
