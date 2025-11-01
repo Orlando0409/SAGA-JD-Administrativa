@@ -119,7 +119,7 @@ const DetailAbonados: React.FC<DetailAbonadosProps> = ({ persona, isOpen, onClos
     const getTipoAfiliadoColor = (tipo: string) => {
         return tipo === 'Físico'
             ? 'bg-blue-100 text-blue-800 border-blue-200'
-            : 'bg-purple-100 text-purple-800 border-purple-200';
+            : 'bg-blue-100 text-blue-800 border-blue-200';
     };
 
     const getModalTitle = () => {

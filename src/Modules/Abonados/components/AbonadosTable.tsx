@@ -194,15 +194,20 @@ export default function AbonadosTable() {
             cell: (info) => {
                 const estado = info.getValue();
                 const estadoNombre = estado?.Nombre_Estado || 'Sin estado';
-                const base = 'inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold';
-                if (estadoNombre === 'Activo') {
-                    return <div className='flex items-center justify-start'><span className={`${base} bg-emerald-100 text-emerald-700 border border-emerald-300`}>Activo</span></div>;
-                } else if (estadoNombre === 'Inactivo') {
-                    return <div className='flex items-center justify-start'><span className={`${base} bg-red-100 text-red-700`}>Inactivo</span></div>;
-                } else if (estadoNombre === 'Pendiente') {
-                    return <div className='flex items-center justify-start'><span className={`${base} bg-amber-100 text-amber-700`}>Pendiente</span></div>;
+                const base = 'px-3 py-1 rounded-full text-xs font-semibold';
+
+                if (estadoNombre.toLowerCase() === 'activo') {
+                    return <span className={`${base} bg-emerald-100 text-emerald-700 border border-emerald-300`}>Activo</span>;
+                } else if (estadoNombre.toLowerCase() === 'inactivo') {
+                    return <span className={`${base} bg-red-100 text-red-700 border border-red-300`}>Inactivo</span>;
+                } else if (estadoNombre.toLowerCase() === 'pendiente') {
+                    return <span className={`${base} bg-amber-100 text-amber-700 border border-amber-300`}>Pendiente</span>;
                 }
-                return <div className='flex items-center justify-start'><span className={`${base} bg-slate-100 text-slate-700`}>{estadoNombre}</span></div>;
+
+                return (
+                    <div className='flex items-center justify-start'>
+                        <span className={`${base} bg-slate-100 text-slate-700 border border-slate-300`}>{estadoNombre}</span>
+                    </div>);
             },
             size: 120,
         }),
@@ -214,7 +219,7 @@ export default function AbonadosTable() {
                     <div className='flex items-center justify-start'>
                         <span className={`inline-flex items-center gap-2 px-2 py-1 rounded-full text-xs font-medium ${tipo === 'Físico'
                             ? 'bg-blue-100 text-blue-700'
-                            : 'bg-purple-100 text-purple-700'
+                            : 'bg-blue-100 text-blue-700'
                             }`}>
                             {tipo === 'Físico' ? <User size={14} /> : <Building size={14} />} {tipo}
                         </span>
