@@ -410,10 +410,8 @@ export default function SolicitudesTable() {
                              <thead className="bg-sky-50">
                                  {table.getHeaderGroups().map(headerGroup => (
                                      <tr key={headerGroup.id} className="text-left text-xs sm:text-sm text-sky-700">
-                                         {headerGroup.headers.map((header, index) => (
-                                             <th key={header.id} className={`px-2 sm:px-4 py-3 font-medium border-b border-sky-100 ${
-                                                 index === 0 ? 'text-left' : 'text-center'
-                                             }`}>
+                                         {headerGroup.headers.map((header) => (
+                                             <th key={header.id} className={`px-2 sm:px-4 py-3 font-medium border-b border-sky-100 text-left`}>
                                                  {(() => {
                                                      if (header.isPlaceholder) {
                                                          return null;
@@ -422,9 +420,7 @@ export default function SolicitudesTable() {
                                                          return (
                                                              <button
                                                                  type="button"
-                                                                 className={`cursor-pointer select-none flex items-center gap-2 bg-transparent border-none p-0 ${
-                                                                     index === 0 ? 'justify-start' : 'justify-center'
-                                                                 }`}
+                                                                 className={`cursor-pointer select-none flex items-center gap-2 bg-transparent border-none p-0 justify-start`}
                                                                  onClick={header.column.getToggleSortingHandler()}
                                                                  onKeyDown={e => {
                                                                      if (e.key === 'Enter' || e.key === ' ') {
@@ -444,7 +440,7 @@ export default function SolicitudesTable() {
                                                          );
                                                      }
                                                      return (
-                                                         <span className={index === 0 ? 'text-left' : 'text-center'}>
+                                                         <span className="text-left">
                                                              {header.column.columnDef.header as string}
                                                          </span>
                                                      );
@@ -464,7 +460,7 @@ export default function SolicitudesTable() {
                                  ) : (
                                      table.getRowModel().rows.map(row => (
                                          <tr key={row.id} className="hover:bg-sky-50 cursor-pointer transition-colors">
-                                             {row.getVisibleCells().map((cell, index) => {
+                                             {row.getVisibleCells().map((cell) => {
                                                  let cellContent: React.ReactNode;
      
                                                  if (cell.column.columnDef.cell) {
@@ -478,9 +474,7 @@ export default function SolicitudesTable() {
                                                  }
      
                                                  return (
-                                                     <td key={cell.id} className={`px-2 sm:px-4 py-3 text-xs sm:text-sm text-slate-700 align-top ${
-                                                         index === 0 ? 'text-left' : 'text-center'
-                                                     }`}>
+                                                     <td key={cell.id} className={`px-2 sm:px-4 py-3 text-xs sm:text-sm text-slate-700 align-top text-left`}>
                                                          {cellContent}
                                                      </td>
                                                  );

@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import { LuPlus, LuSearch } from 'react-icons/lu';
 import {
   createColumnHelper,
@@ -27,7 +27,6 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/Modules/Global/components/Sidebar/ui/alert-dialog';
-import { Alert } from '@/Modules/Global/components/Alert/ui/Alert';
 import { useMedidores, useMedidoresPorEstado, useUpdateEstadoMedidor } from '../../hooks/useMedidores';
 import type { Medidor } from '../../models/Medidor';
 import CreateMedidorModal from './CreateMedidorModal';
@@ -112,16 +111,8 @@ const CatalogoMedidores: React.FC<CatalogoMedidoresProps> = () => {
         idEstado: 2,
       });
       refetch();
-      setNotification({
-        type: 'success',
-        title: 'Estado del medidor cambiado correctamente'
-      });
     } catch (error) {
       console.error('Error al cambiar estado del medidor:', error);
-      setNotification({
-        type: 'error',
-        title: 'Error al cambiar el estado del medidor'
-      });
     }
   };
 
@@ -134,16 +125,8 @@ const CatalogoMedidores: React.FC<CatalogoMedidoresProps> = () => {
         idEstado: nuevoEstadoId,
       });
       refetch();
-      setNotification({
-        type: 'success',
-        title: 'Estado del medidor cambiado correctamente'
-      });
     } catch (error) {
       console.error('Error al cambiar estado del medidor:', error);
-      setNotification({
-        type: 'error',
-        title: 'Error al cambiar el estado del medidor'
-      });
     }
   };
 
@@ -354,19 +337,7 @@ const CatalogoMedidores: React.FC<CatalogoMedidoresProps> = () => {
   }
 
   return (
-    <>
-      {notification && (
-        <div className="fixed top-4 right-4 z-[200]">
-          <Alert
-            type={notification.type === 'success' ? 'success' : (notification.type === 'error' ? 'error' : 'info')}
-            title={notification.title}
-            description={notification.description}
-            onClose={() => setNotification(null)}
-          />
-        </div>
-      )}
-
-      <div className="space-y-6">
+    <div className="space-y-6">
       <div className="bg-white rounded-lg p-3">
            <div className="flex items-start gap-4 flex-col justify-start">
             <h2 className="text-2xl font-bold text-gray-900">Catálogo de Medidores</h2>
@@ -574,7 +545,6 @@ const CatalogoMedidores: React.FC<CatalogoMedidoresProps> = () => {
         />
       )}
     </div>
-    </>
   );
 };
 

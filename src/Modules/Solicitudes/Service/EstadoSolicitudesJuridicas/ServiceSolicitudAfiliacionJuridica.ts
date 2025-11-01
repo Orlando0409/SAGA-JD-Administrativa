@@ -32,7 +32,7 @@ export class ServiceSolicitudAfiliacionJuridicas {
     }
 
    
-    static async rechazar(solicitudId: string | number, estadoRechazadoId: number = 4): Promise<SolicitudJuridica> {
+    static async rechazar(solicitudId: string | number, estadoRechazadoId: number = 5): Promise<SolicitudJuridica> {
         try {
             console.log(` Rechazando solicitud de afiliación jurídica ${solicitudId}...`);
             return await this.updateEstado(solicitudId, estadoRechazadoId);

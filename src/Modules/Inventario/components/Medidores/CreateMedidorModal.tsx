@@ -1,8 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { LuX } from 'react-icons/lu';
 import { useCreateMedidor } from '../../hooks/useMedidores';
 import { CreateMedidorSchema, type CreateMedidorSchemaData } from '../../schema/CreateMedidorSchemas';
-import { Alert } from '@/Modules/Global/components/Alert/ui/Alert';
 
 interface CreateMedidorModalProps {
   isOpen: boolean;
@@ -12,21 +11,10 @@ interface CreateMedidorModalProps {
 const CreateMedidorModal = ({ isOpen, onClose }: CreateMedidorModalProps) => {
   const createMedidorMutation = useCreateMedidor();
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
-  const [notification, setNotification] = useState<{
-    type: 'success' | 'error' | 'info';
-    title: string;
-    description?: string;
-  } | null>(null);
   
   const [formData, setFormData] = useState<CreateMedidorSchemaData>({
     Numero_Medidor: 0,
   });
-
-  useEffect(() => {
-    if (!notification) return;
-    const t = setTimeout(() => setNotification(null), 3500);
-    return () => clearTimeout(t);
-  }, [notification]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,23 +38,11 @@ const CreateMedidorModal = ({ isOpen, onClose }: CreateMedidorModalProps) => {
         data: validation.data,
       });
       
-      // Mostrar alerta de éxito
-      setNotification({ 
-        type: 'success', 
-        title: 'Medidor creado correctamente' 
-      });
-      
       // Resetear formulario
       setFormData({ Numero_Medidor: 0 });
-      
-      // Cerrar modal después de un breve delay para que se vea la alerta
-      setTimeout(() => onClose(), 500);
+      onClose();
     } catch (error) {
       console.error('Error creating medidor:', error);
-      setNotification({ 
-        type: 'error', 
-        title: 'Error al crear el medidor' 
-      });
     }
   };
 
@@ -79,19 +55,7 @@ const CreateMedidorModal = ({ isOpen, onClose }: CreateMedidorModalProps) => {
   if (!isOpen) return null;
 
   return (
-    <>
-      {notification && (
-        <div className="fixed top-4 right-4 z-[200]">
-          <Alert
-            type={notification.type === 'success' ? 'success' : (notification.type === 'error' ? 'error' : 'info')}
-            title={notification.title}
-            description={notification.description}
-            onClose={() => setNotification(null)}
-          />
-        </div>
-      )}
-
-      <div className="fixed inset-0 bg-opacity-10 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 bg-opacity-10 backdrop-blur-sm flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg shadow-2xl border border-gray-200 w-full max-w-md flex flex-col overflow-hidden max-h-[90vh]">
         <div className="sticky top-0 bg-white border-b border-gray-200 p-4 sm:p-6 z-10">
           <div className="flex items-center justify-between">
@@ -161,7 +125,6 @@ const CreateMedidorModal = ({ isOpen, onClose }: CreateMedidorModalProps) => {
         </form>
       </div>
     </div>
-    </>
   );
 };
 

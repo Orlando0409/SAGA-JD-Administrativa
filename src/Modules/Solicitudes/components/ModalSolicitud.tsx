@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { X, User, Check, XCircle } from 'lucide-react';
+import { useAlerts } from '@/Modules/Global/context/AlertContext';
 import { useAprobarSolicitudAfiliacion, useRechazarSolicitudAfiliacion } from '../Hooks/Fisico Update/HookAfiliadoFisico';
 import type { SolicitudFisica } from '../Models/ModelosFisicas';
 import type { SolicitudJuridica } from '../Models/ModelosJuridicos';
@@ -40,6 +41,14 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
     const rechazarCambioMedidorJuridicoMutation = useRechazarSolicitudCambioMedidorJuridica();
     const aprobarDesconexionJuridicoMutation = useAprobarSolicitudDesconexionJuridica();
     const rechazarDesconexionJuridicoMutation = useRechazarSolicitudDesconexionJuridica();
+    
+    // Hook para notificaciones
+    const { showSuccess, showError } = useAlerts();
+    
+    // Estado para controlar el modal de confirmación
+    const [showConfirmModal, setShowConfirmModal] = useState(false);
+    const [showRejectModal, setShowRejectModal] = useState(false);
+    
     // Extraer información básica de la solicitud
     const getSolicitudInfo = () => {
         console.log(' Datos completos de la solicitud:', solicitud.datos);
@@ -135,7 +144,11 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
 
     // Función para manejar aprobación por casos
     const handleAprobar = async () => {
-        if (confirm(`¿Está seguro de APROBAR la solicitud de ${info.nombre}?`)) {
+        setShowConfirmModal(true);
+    };
+
+    // Función para confirmar la aprobación
+    const confirmarAprobacion = async () => {
             try {
                 const tipoSolicitud = solicitud.tipoSolicitud || info.tipoSolicitud;
                 const tipoPersona = solicitud.tipo; // 'solicitud-fisica' o 'solicitud-juridica'
@@ -186,18 +199,23 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
                     throw new Error('Tipo de solicitud no válido');
                 }
 
-                alert(' Solicitud aprobada exitosamente');
+                showSuccess('Solicitud Aprobada', `La solicitud de ${info.nombre} ha sido aprobada exitosamente`);
                 onClose(); // Cerrar modal después del éxito
+                setShowConfirmModal(false); // Cerrar modal de confirmación
             } catch (error) {
                 console.error('Error al aprobar:', error);
-                alert(' Error al aprobar la solicitud');
+                showError('Error al Aprobar', 'Hubo un problema al aprobar la solicitud. Intente nuevamente.');
+                setShowConfirmModal(false); // Cerrar modal de confirmación aunque haya error
             }
-        }
     };
 
     // Función para manejar rechazo por casos
     const handleRechazar = async () => {
-        if (confirm(`¿Está seguro de RECHAZAR la solicitud de ${info.nombre}?`)) {
+        setShowRejectModal(true);
+    };
+
+    // Función para confirmar el rechazo
+    const confirmarRechazo = async () => {
             try {
                 const tipoSolicitud = solicitud.tipoSolicitud || info.tipoSolicitud;
                 const tipoPersona = solicitud.tipo; // 'solicitud-fisica' o 'solicitud-juridica'
@@ -248,13 +266,14 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
                     throw new Error('Tipo de solicitud no válido');
                 }
 
-                alert(' Solicitud rechazada');
+                showSuccess('Solicitud Rechazada', `La solicitud de ${info.nombre} ha sido rechazada`);
                 onClose(); // Cerrar modal después del éxito
+                setShowRejectModal(false); // Cerrar modal de confirmación
             } catch (error) {
                 console.error('Error al rechazar:', error);
-                alert(' Error al rechazar la solicitud');
+                showError('Error al Rechazar', 'Hubo un problema al rechazar la solicitud. Intente nuevamente.');
+                setShowRejectModal(false); // Cerrar modal de confirmación aunque haya error
             }
-        }
     };
 
     const isLoading =
@@ -272,8 +291,9 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 backdrop-blur bg-opacity-10 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-lg shadow-xl border border-gray-200 w-full max-w-3xl max-h-[90vh] overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100">
+        <>
+            <div className="fixed inset-0 backdrop-blur bg-opacity-10 flex items-center justify-center z-50 p-4">
+                <div className="bg-white rounded-lg shadow-xl border border-gray-200 w-full max-w-3xl max-h-[90vh] overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100">
                 {/* Header */}
                 <div className="sticky top-0 bg-white border-b border-gray-200 p-4 z-10">
                     <div className="flex items-center justify-between">
@@ -509,8 +529,133 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
                             </button>
                         
                     </div>
+                </div>
             </div>
-        </div>
+
+            {/* Modal de confirmación para aprobar solicitud */}
+            {showConfirmModal && (
+                <div className="fixed inset-0 bg-white/5 backdrop-blur-sm flex items-center justify-center z-[60] p-4">
+                    <div className="bg-white rounded-2xl shadow-2xl border border-gray-200 w-full max-w-sm transform transition-all duration-300 scale-100">
+                        {/* Header del modal */}
+                        <div className="p-4 border-b border-gray-100">
+                            <div className="flex items-center gap-2">
+                                <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                                    <Check className="w-4 h-4 text-green-600" />
+                                </div>
+                                <div>
+                                    <h3 className="text-lg font-bold text-gray-900">
+                                        Confirmar Aprobación
+                                    </h3>
+                                    <p className="text-xs text-gray-500">
+                                        Esta acción no se puede deshacer
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Contenido del modal */}
+                        <div className="p-4">
+                            <div className="text-center">
+                                <div className="mb-3">
+                                    <div className="w-12 h-12 bg-gradient-to-br from-green-100 to-emerald-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                                        <User className="w-6 h-6 text-green-600" />
+                                    </div>
+                                    <p className="text-sm text-gray-900 font-medium mb-2">
+                                        ¿Está seguro de <span className="font-bold text-green-600">APROBAR</span> la solicitud de
+                                    </p>
+                                    <p className="text-lg font-bold text-gray-900 bg-gray-50 px-3 py-2 rounded-lg">
+                                        {info.nombre}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Footer del modal */}
+                        <div className="p-4 border-t border-gray-100 bg-gray-50 rounded-b-2xl">
+                            <div className="flex flex-col gap-2">
+                                <button
+                                    onClick={confirmarAprobacion}
+                                    className="w-full px-4 py-2 text-white bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 rounded-lg transition-all duration-200 font-medium shadow-lg hover:shadow-xl transform hover:scale-105"
+                                >
+                                    <div className="flex items-center justify-center gap-2">
+                                        <Check className="w-4 h-4" />
+                                        Sí, Aprobar
+                                    </div>
+                                </button>
+                                <button
+                                    onClick={() => setShowConfirmModal(false)}
+                                    className="w-full px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-all duration-200 font-medium shadow-sm"
+                                >
+                                    Cancelar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Modal de confirmación para rechazar solicitud */}
+            {showRejectModal && (
+                <div className="fixed inset-0 bg-white/5 backdrop-blur-sm flex items-center justify-center z-[60] p-4">
+                    <div className="bg-white rounded-2xl shadow-2xl border border-gray-200 w-full max-w-sm transform transition-all duration-300 scale-100">
+                        {/* Header del modal */}
+                        <div className="p-4 border-b border-gray-100">
+                            <div className="flex items-center gap-2">
+                                <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
+                                    <XCircle className="w-4 h-4 text-red-600" />
+                                </div>
+                                <div>
+                                    <h3 className="text-lg font-bold text-gray-900">
+                                        Confirmar Rechazo
+                                    </h3>
+                                    <p className="text-xs text-gray-500">
+                                        Esta acción no se puede deshacer
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Contenido del modal */}
+                        <div className="p-4">
+                            <div className="text-center">
+                                <div className="mb-3">
+                                    <div className="w-12 h-12 bg-gradient-to-br from-red-100 to-rose-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                                        <User className="w-6 h-6 text-red-600" />
+                                    </div>
+                                    <p className="text-sm text-gray-900 font-medium mb-2">
+                                        ¿Está seguro de <span className="font-bold text-red-600">RECHAZAR</span> la solicitud de
+                                    </p>
+                                    <p className="text-lg font-bold text-gray-900 bg-gray-50 px-3 py-2 rounded-lg">
+                                        {info.nombre}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Footer del modal */}
+                        <div className="p-4 border-t border-gray-100 bg-gray-50 rounded-b-2xl">
+                            <div className="flex flex-col gap-2">
+                                <button
+                                    onClick={confirmarRechazo}
+                                    className="w-full px-4 py-2 text-white bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 rounded-lg transition-all duration-200 font-medium shadow-lg hover:shadow-xl transform hover:scale-105"
+                                >
+                                    <div className="flex items-center justify-center gap-2">
+                                        <XCircle className="w-4 h-4" />
+                                        Sí, Rechazar
+                                    </div>
+                                </button>
+                                <button
+                                    onClick={() => setShowRejectModal(false)}
+                                    className="w-full px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-all duration-200 font-medium shadow-sm"
+                                >
+                                    Cancelar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </>
     );
 };
 
