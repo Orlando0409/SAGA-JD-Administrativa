@@ -17,7 +17,6 @@ import { Route as appGestionProveedoresRouteImport } from './routes/(app)/(Gesti
 import { Route as appGestionContactoRouteImport } from './routes/(app)/(Gestion)/Contacto'
 import { Route as appGestionCalidadAguaRouteImport } from './routes/(app)/(Gestion)/CalidadAgua'
 import { Route as appGestionActasRouteImport } from './routes/(app)/(Gestion)/Actas'
-import { Route as appGestionAbonadosRouteImport } from './routes/(app)/(Gestion)/Abonados'
 import { Route as appEdicionProyectosRouteImport } from './routes/(app)/(Edicion)/Proyectos'
 import { Route as appEdicionImagenesRouteImport } from './routes/(app)/(Edicion)/Imagenes'
 import { Route as appEdicionFAQRouteImport } from './routes/(app)/(Edicion)/FAQ'
@@ -28,10 +27,12 @@ import { Route as appAuthLoginRouteImport } from './routes/(app)/(Auth)/Login'
 import { Route as appAuthForgotPasswordRouteImport } from './routes/(app)/(Auth)/ForgotPassword'
 import { Route as appGestionUsuariosIndexRouteImport } from './routes/(app)/(Gestion)/Usuarios/index'
 import { Route as appGestionInventarioIndexRouteImport } from './routes/(app)/(Gestion)/Inventario/index'
+import { Route as appGestionAfiliadosIndexRouteImport } from './routes/(app)/(Gestion)/Afiliados/index'
 import { Route as appGestionUsuariosRolesRouteImport } from './routes/(app)/(Gestion)/Usuarios/Roles'
 import { Route as appGestionInventarioUnidadesMedicionRouteImport } from './routes/(app)/(Gestion)/Inventario/UnidadesMedicion'
 import { Route as appGestionInventarioMovimientosRouteImport } from './routes/(app)/(Gestion)/Inventario/Movimientos'
 import { Route as appGestionInventarioCategoriasRouteImport } from './routes/(app)/(Gestion)/Inventario/Categorias'
+import { Route as appGestionAfiliadosLecturasRouteImport } from './routes/(app)/(Gestion)/Afiliados/Lecturas'
 import { Route as appGestionInventarioMaterialesIndexRouteImport } from './routes/(app)/(Gestion)/Inventario/Materiales/index'
 import { Route as appGestionInventarioMaterialesMedidoresRouteImport } from './routes/(app)/(Gestion)/Inventario/Materiales/Medidores'
 
@@ -73,11 +74,6 @@ const appGestionCalidadAguaRoute = appGestionCalidadAguaRouteImport.update({
 const appGestionActasRoute = appGestionActasRouteImport.update({
   id: '/(app)/(Gestion)/Actas',
   path: '/Actas',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const appGestionAbonadosRoute = appGestionAbonadosRouteImport.update({
-  id: '/(app)/(Gestion)/Abonados',
-  path: '/Abonados',
   getParentRoute: () => rootRouteImport,
 } as any)
 const appEdicionProyectosRoute = appEdicionProyectosRouteImport.update({
@@ -131,6 +127,12 @@ const appGestionInventarioIndexRoute =
     path: '/Inventario/',
     getParentRoute: () => rootRouteImport,
   } as any)
+const appGestionAfiliadosIndexRoute =
+  appGestionAfiliadosIndexRouteImport.update({
+    id: '/(app)/(Gestion)/Afiliados/',
+    path: '/Afiliados/',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const appGestionUsuariosRolesRoute = appGestionUsuariosRolesRouteImport.update({
   id: '/(app)/(Gestion)/Usuarios/Roles',
   path: '/Usuarios/Roles',
@@ -152,6 +154,12 @@ const appGestionInventarioCategoriasRoute =
   appGestionInventarioCategoriasRouteImport.update({
     id: '/(app)/(Gestion)/Inventario/Categorias',
     path: '/Inventario/Categorias',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const appGestionAfiliadosLecturasRoute =
+  appGestionAfiliadosLecturasRouteImport.update({
+    id: '/(app)/(Gestion)/Afiliados/Lecturas',
+    path: '/Afiliados/Lecturas',
     getParentRoute: () => rootRouteImport,
   } as any)
 const appGestionInventarioMaterialesIndexRoute =
@@ -178,17 +186,18 @@ export interface FileRoutesByFullPath {
   '/FAQ': typeof appEdicionFAQRoute
   '/Imagenes': typeof appEdicionImagenesRoute
   '/Proyectos': typeof appEdicionProyectosRoute
-  '/Abonados': typeof appGestionAbonadosRoute
   '/Actas': typeof appGestionActasRoute
   '/CalidadAgua': typeof appGestionCalidadAguaRoute
   '/Contacto': typeof appGestionContactoRoute
   '/Proveedores': typeof appGestionProveedoresRoute
   '/Solicitudes': typeof appGestionSolicitudesRoute
   '/Auditoria': typeof appSeguridadAuditoriaRoute
+  '/Afiliados/Lecturas': typeof appGestionAfiliadosLecturasRoute
   '/Inventario/Categorias': typeof appGestionInventarioCategoriasRoute
   '/Inventario/Movimientos': typeof appGestionInventarioMovimientosRoute
   '/Inventario/UnidadesMedicion': typeof appGestionInventarioUnidadesMedicionRoute
   '/Usuarios/Roles': typeof appGestionUsuariosRolesRoute
+  '/Afiliados': typeof appGestionAfiliadosIndexRoute
   '/Inventario': typeof appGestionInventarioIndexRoute
   '/Usuarios': typeof appGestionUsuariosIndexRoute
   '/Inventario/Materiales/Medidores': typeof appGestionInventarioMaterialesMedidoresRoute
@@ -205,17 +214,18 @@ export interface FileRoutesByTo {
   '/FAQ': typeof appEdicionFAQRoute
   '/Imagenes': typeof appEdicionImagenesRoute
   '/Proyectos': typeof appEdicionProyectosRoute
-  '/Abonados': typeof appGestionAbonadosRoute
   '/Actas': typeof appGestionActasRoute
   '/CalidadAgua': typeof appGestionCalidadAguaRoute
   '/Contacto': typeof appGestionContactoRoute
   '/Proveedores': typeof appGestionProveedoresRoute
   '/Solicitudes': typeof appGestionSolicitudesRoute
   '/Auditoria': typeof appSeguridadAuditoriaRoute
+  '/Afiliados/Lecturas': typeof appGestionAfiliadosLecturasRoute
   '/Inventario/Categorias': typeof appGestionInventarioCategoriasRoute
   '/Inventario/Movimientos': typeof appGestionInventarioMovimientosRoute
   '/Inventario/UnidadesMedicion': typeof appGestionInventarioUnidadesMedicionRoute
   '/Usuarios/Roles': typeof appGestionUsuariosRolesRoute
+  '/Afiliados': typeof appGestionAfiliadosIndexRoute
   '/Inventario': typeof appGestionInventarioIndexRoute
   '/Usuarios': typeof appGestionUsuariosIndexRoute
   '/Inventario/Materiales/Medidores': typeof appGestionInventarioMaterialesMedidoresRoute
@@ -233,17 +243,18 @@ export interface FileRoutesById {
   '/(app)/(Edicion)/FAQ': typeof appEdicionFAQRoute
   '/(app)/(Edicion)/Imagenes': typeof appEdicionImagenesRoute
   '/(app)/(Edicion)/Proyectos': typeof appEdicionProyectosRoute
-  '/(app)/(Gestion)/Abonados': typeof appGestionAbonadosRoute
   '/(app)/(Gestion)/Actas': typeof appGestionActasRoute
   '/(app)/(Gestion)/CalidadAgua': typeof appGestionCalidadAguaRoute
   '/(app)/(Gestion)/Contacto': typeof appGestionContactoRoute
   '/(app)/(Gestion)/Proveedores': typeof appGestionProveedoresRoute
   '/(app)/(Gestion)/Solicitudes': typeof appGestionSolicitudesRoute
   '/(app)/(Seguridad)/Auditoria': typeof appSeguridadAuditoriaRoute
+  '/(app)/(Gestion)/Afiliados/Lecturas': typeof appGestionAfiliadosLecturasRoute
   '/(app)/(Gestion)/Inventario/Categorias': typeof appGestionInventarioCategoriasRoute
   '/(app)/(Gestion)/Inventario/Movimientos': typeof appGestionInventarioMovimientosRoute
   '/(app)/(Gestion)/Inventario/UnidadesMedicion': typeof appGestionInventarioUnidadesMedicionRoute
   '/(app)/(Gestion)/Usuarios/Roles': typeof appGestionUsuariosRolesRoute
+  '/(app)/(Gestion)/Afiliados/': typeof appGestionAfiliadosIndexRoute
   '/(app)/(Gestion)/Inventario/': typeof appGestionInventarioIndexRoute
   '/(app)/(Gestion)/Usuarios/': typeof appGestionUsuariosIndexRoute
   '/(app)/(Gestion)/Inventario/Materiales/Medidores': typeof appGestionInventarioMaterialesMedidoresRoute
@@ -262,17 +273,18 @@ export interface FileRouteTypes {
     | '/FAQ'
     | '/Imagenes'
     | '/Proyectos'
-    | '/Abonados'
     | '/Actas'
     | '/CalidadAgua'
     | '/Contacto'
     | '/Proveedores'
     | '/Solicitudes'
     | '/Auditoria'
+    | '/Afiliados/Lecturas'
     | '/Inventario/Categorias'
     | '/Inventario/Movimientos'
     | '/Inventario/UnidadesMedicion'
     | '/Usuarios/Roles'
+    | '/Afiliados'
     | '/Inventario'
     | '/Usuarios'
     | '/Inventario/Materiales/Medidores'
@@ -289,17 +301,18 @@ export interface FileRouteTypes {
     | '/FAQ'
     | '/Imagenes'
     | '/Proyectos'
-    | '/Abonados'
     | '/Actas'
     | '/CalidadAgua'
     | '/Contacto'
     | '/Proveedores'
     | '/Solicitudes'
     | '/Auditoria'
+    | '/Afiliados/Lecturas'
     | '/Inventario/Categorias'
     | '/Inventario/Movimientos'
     | '/Inventario/UnidadesMedicion'
     | '/Usuarios/Roles'
+    | '/Afiliados'
     | '/Inventario'
     | '/Usuarios'
     | '/Inventario/Materiales/Medidores'
@@ -316,17 +329,18 @@ export interface FileRouteTypes {
     | '/(app)/(Edicion)/FAQ'
     | '/(app)/(Edicion)/Imagenes'
     | '/(app)/(Edicion)/Proyectos'
-    | '/(app)/(Gestion)/Abonados'
     | '/(app)/(Gestion)/Actas'
     | '/(app)/(Gestion)/CalidadAgua'
     | '/(app)/(Gestion)/Contacto'
     | '/(app)/(Gestion)/Proveedores'
     | '/(app)/(Gestion)/Solicitudes'
     | '/(app)/(Seguridad)/Auditoria'
+    | '/(app)/(Gestion)/Afiliados/Lecturas'
     | '/(app)/(Gestion)/Inventario/Categorias'
     | '/(app)/(Gestion)/Inventario/Movimientos'
     | '/(app)/(Gestion)/Inventario/UnidadesMedicion'
     | '/(app)/(Gestion)/Usuarios/Roles'
+    | '/(app)/(Gestion)/Afiliados/'
     | '/(app)/(Gestion)/Inventario/'
     | '/(app)/(Gestion)/Usuarios/'
     | '/(app)/(Gestion)/Inventario/Materiales/Medidores'
@@ -344,17 +358,18 @@ export interface RootRouteChildren {
   appEdicionFAQRoute: typeof appEdicionFAQRoute
   appEdicionImagenesRoute: typeof appEdicionImagenesRoute
   appEdicionProyectosRoute: typeof appEdicionProyectosRoute
-  appGestionAbonadosRoute: typeof appGestionAbonadosRoute
   appGestionActasRoute: typeof appGestionActasRoute
   appGestionCalidadAguaRoute: typeof appGestionCalidadAguaRoute
   appGestionContactoRoute: typeof appGestionContactoRoute
   appGestionProveedoresRoute: typeof appGestionProveedoresRoute
   appGestionSolicitudesRoute: typeof appGestionSolicitudesRoute
   appSeguridadAuditoriaRoute: typeof appSeguridadAuditoriaRoute
+  appGestionAfiliadosLecturasRoute: typeof appGestionAfiliadosLecturasRoute
   appGestionInventarioCategoriasRoute: typeof appGestionInventarioCategoriasRoute
   appGestionInventarioMovimientosRoute: typeof appGestionInventarioMovimientosRoute
   appGestionInventarioUnidadesMedicionRoute: typeof appGestionInventarioUnidadesMedicionRoute
   appGestionUsuariosRolesRoute: typeof appGestionUsuariosRolesRoute
+  appGestionAfiliadosIndexRoute: typeof appGestionAfiliadosIndexRoute
   appGestionInventarioIndexRoute: typeof appGestionInventarioIndexRoute
   appGestionUsuariosIndexRoute: typeof appGestionUsuariosIndexRoute
   appGestionInventarioMaterialesMedidoresRoute: typeof appGestionInventarioMaterialesMedidoresRoute
@@ -417,13 +432,6 @@ declare module '@tanstack/react-router' {
       path: '/Actas'
       fullPath: '/Actas'
       preLoaderRoute: typeof appGestionActasRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/(app)/(Gestion)/Abonados': {
-      id: '/(app)/(Gestion)/Abonados'
-      path: '/Abonados'
-      fullPath: '/Abonados'
-      preLoaderRoute: typeof appGestionAbonadosRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/(app)/(Edicion)/Proyectos': {
@@ -496,6 +504,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof appGestionInventarioIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/(app)/(Gestion)/Afiliados/': {
+      id: '/(app)/(Gestion)/Afiliados/'
+      path: '/Afiliados'
+      fullPath: '/Afiliados'
+      preLoaderRoute: typeof appGestionAfiliadosIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/(app)/(Gestion)/Usuarios/Roles': {
       id: '/(app)/(Gestion)/Usuarios/Roles'
       path: '/Usuarios/Roles'
@@ -522,6 +537,13 @@ declare module '@tanstack/react-router' {
       path: '/Inventario/Categorias'
       fullPath: '/Inventario/Categorias'
       preLoaderRoute: typeof appGestionInventarioCategoriasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/(app)/(Gestion)/Afiliados/Lecturas': {
+      id: '/(app)/(Gestion)/Afiliados/Lecturas'
+      path: '/Afiliados/Lecturas'
+      fullPath: '/Afiliados/Lecturas'
+      preLoaderRoute: typeof appGestionAfiliadosLecturasRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/(app)/(Gestion)/Inventario/Materiales/': {
@@ -552,18 +574,19 @@ const rootRouteChildren: RootRouteChildren = {
   appEdicionFAQRoute: appEdicionFAQRoute,
   appEdicionImagenesRoute: appEdicionImagenesRoute,
   appEdicionProyectosRoute: appEdicionProyectosRoute,
-  appGestionAbonadosRoute: appGestionAbonadosRoute,
   appGestionActasRoute: appGestionActasRoute,
   appGestionCalidadAguaRoute: appGestionCalidadAguaRoute,
   appGestionContactoRoute: appGestionContactoRoute,
   appGestionProveedoresRoute: appGestionProveedoresRoute,
   appGestionSolicitudesRoute: appGestionSolicitudesRoute,
   appSeguridadAuditoriaRoute: appSeguridadAuditoriaRoute,
+  appGestionAfiliadosLecturasRoute: appGestionAfiliadosLecturasRoute,
   appGestionInventarioCategoriasRoute: appGestionInventarioCategoriasRoute,
   appGestionInventarioMovimientosRoute: appGestionInventarioMovimientosRoute,
   appGestionInventarioUnidadesMedicionRoute:
     appGestionInventarioUnidadesMedicionRoute,
   appGestionUsuariosRolesRoute: appGestionUsuariosRolesRoute,
+  appGestionAfiliadosIndexRoute: appGestionAfiliadosIndexRoute,
   appGestionInventarioIndexRoute: appGestionInventarioIndexRoute,
   appGestionUsuariosIndexRoute: appGestionUsuariosIndexRoute,
   appGestionInventarioMaterialesMedidoresRoute:
