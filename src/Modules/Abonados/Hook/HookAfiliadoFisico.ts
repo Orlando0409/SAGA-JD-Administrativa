@@ -19,9 +19,6 @@ export const useAfiliadosFisicos = () => {
     retry: 3,
   });
 
-
-
-  
   const createMutation = useMutation({
     mutationFn: (data: FormData) => createAfiliadoFisico(data),
     onSuccess: () => {
