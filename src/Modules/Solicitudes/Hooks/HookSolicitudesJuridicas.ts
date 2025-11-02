@@ -1,6 +1,6 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { SolicitudesJuridicasService } from '../Service/SolicitudesJuridicas';
 import type { SolicitudJuridica } from '../Models/ModelosJuridicos';
+import { getSolicitudesJuridicas, getSolicitudesPendientes, getSolicitudesPorEstado, getSolicitudesPorTipo } from '../Service/SolicitudesJuridicas';
 
 /**
  * 🔄 Función para refrescar todas las consultas de solicitudes jurídicas
@@ -8,10 +8,7 @@ import type { SolicitudJuridica } from '../Models/ModelosJuridicos';
  */
 export const useRefetchAllSolicitudesJuridicas = () => {
     const queryClient = useQueryClient();
-    
 
-
-    
     const refetchAll = async () => {
         try {
             // Invalidar todas las queries relacionadas con solicitudes jurídicas
@@ -36,7 +33,7 @@ export const useRefetchAllSolicitudesJuridicas = () => {
 export const useSolicitudesJuridicas = () => {
     return useQuery<SolicitudJuridica[], Error>({
         queryKey: ['solicitudes-juridicas'],
-        queryFn: () => SolicitudesJuridicasService.getSolicitudesJuridicas(),
+        queryFn: () => getSolicitudesJuridicas(),
         staleTime: 5 * 60 * 1000, // 5 minutos
         gcTime: 10 * 60 * 1000,   // 10 minutos (antes cacheTime)
         refetchOnWindowFocus: false,
@@ -51,7 +48,7 @@ export const useSolicitudesJuridicas = () => {
 export const useSolicitudesJuridicasPendientes = () => {
     return useQuery<SolicitudJuridica[], Error>({
         queryKey: ['solicitudes-juridicas', 'pendientes'],
-        queryFn: () => SolicitudesJuridicasService.getSolicitudesPendientes(),
+        queryFn: () => getSolicitudesPendientes(),
         staleTime: 3 * 60 * 1000, // 3 minutos
         gcTime: 8 * 60 * 1000,    // 8 minutos
         refetchOnWindowFocus: false,
@@ -65,7 +62,7 @@ export const useSolicitudesJuridicasPendientes = () => {
 export const useSolicitudesJuridicasPorEstado = (estado: string, enabled: boolean = true) => {
     return useQuery<SolicitudJuridica[], Error>({
         queryKey: ['solicitudes-juridicas', 'estado', estado],
-        queryFn: () => SolicitudesJuridicasService.getSolicitudesPorEstado(estado),
+        queryFn: () =>  getSolicitudesPorEstado(estado),
         enabled: enabled && !!estado,
         staleTime: 3 * 60 * 1000, // 3 minutos
         gcTime: 8 * 60 * 1000,    // 8 minutos
@@ -82,7 +79,7 @@ export const useSolicitudesJuridicasPorTipo = (
 ) => {
     return useQuery<SolicitudJuridica[], Error>({
         queryKey: ['solicitudes-juridicas', 'tipo', tipo],
-        queryFn: () => SolicitudesJuridicasService.getSolicitudesPorTipo(tipo),
+        queryFn: () => getSolicitudesPorTipo(tipo),
         enabled: enabled && !!tipo,
         staleTime: 3 * 60 * 1000, // 3 minutos
         gcTime: 8 * 60 * 1000,    // 8 minutos
