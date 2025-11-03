@@ -38,8 +38,8 @@ export const AfiliacionJuridicaSchema = BaseAfiliadoSchema.extend({
     .max(100, 'La razón social no puede tener más de 100 caracteres')
     .regex(/^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\s.,&()-]+$/, 'La razón social solo puede contener letras, números, espacios y los caracteres .,&()-'),
     
-  Planos_Terreno: z.instanceof(File, { message: "Debe subir el plano del terreno" }),
-  Escritura_Terreno: z.instanceof(File, { message: "Debe subir la escritura del terreno" }),
+  Planos_Terreno: z.union([z.instanceof(File), z.string()]).optional(),
+  Escritura_Terreno: z.union([z.instanceof(File), z.string()]).optional(),
 });
 
 // Schema para edición (campo de cédula no editable y archivos opcionales)
