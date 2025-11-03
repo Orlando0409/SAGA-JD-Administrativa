@@ -51,8 +51,8 @@ export const AfiliadoFisicoSchema = BaseAfiliadoSchema.extend({
     .min(18, 'La edad mínima es 18 años')
     .max(120, 'La edad máxima es 120 años'),
 
-  Planos_Terreno: z.instanceof(File, { message: "Debe subir el plano del terreno" }),
-  Escritura_Terreno: z.instanceof(File, { message: "Debe subir la escritura del terreno" }),
+  Planos_Terreno: z.union([z.instanceof(File), z.string()]).optional(),
+  Escritura_Terreno: z.union([z.instanceof(File), z.string()]).optional(),
 }).refine((data) => {
   const { Tipo_Identificacion, Identificacion } = data;
 
