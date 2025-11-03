@@ -1,5 +1,4 @@
 export interface AfiliadoJuridico {
-
     Razon_Social: string
     Cedula_Juridica: string
     Numero_Telefono: string
@@ -9,11 +8,7 @@ export interface AfiliadoJuridico {
     Escritura_Terreno?: File | string;
 }
 
-
-
-
 export const AfiliadoJuridicoInicialState: AfiliadoJuridico = {
-
     Razon_Social: '',
     Cedula_Juridica: '',
     Numero_Telefono: '',
@@ -22,6 +17,7 @@ export const AfiliadoJuridicoInicialState: AfiliadoJuridico = {
     Planos_Terreno: undefined,
     Escritura_Terreno: undefined,
 }
+
 export interface AfiliadoJuridicoFormData {
     Razon_Social: string;
     Cedula_Juridica: string;

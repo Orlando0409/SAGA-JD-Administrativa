@@ -1,4 +1,3 @@
-
 export type TipoIdentificacion = 'Cedula Nacional' | 'Dimex' | 'Pasaporte';
 
 export interface AfiliadoFisico {
@@ -28,9 +27,6 @@ export const AfiliadoFisicoInicialState: AfiliadoFisico = {
     Escritura_Terreno: undefined,
     Tipo_Identificacion: "Cedula Nacional"
 }
-
-
-
 
 export interface AfiliacionFisicaFormData {
     Nombre: string;
