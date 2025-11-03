@@ -20,7 +20,7 @@ export default function InsertarLecturaModal({ onClose }: InsertarLecturaModalPr
 
   // Estado para modo manual
   const [formData, setFormData] = useState<CreateLecturaDTO>({
-    Id_Medidor: 0,
+    Numero_Medidor: 0,
     Id_Tipo_Tarifa_Lectura: tarifas?.[0]?.Id_Tipo_Tarifa_Lectura || 1,
     Valor_Lectura_Anterior: 0,
     Valor_Lectura_Actual: 0,
@@ -75,7 +75,7 @@ export default function InsertarLecturaModal({ onClose }: InsertarLecturaModalPr
   // Handlers para modo manual
   const handleMedidorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseInt(e.target.value);
-    setFormData({ ...formData, Id_Medidor: value });
+    setFormData({ ...formData, Numero_Medidor: value });
 
     if (isNaN(value) || value <= 0) {
       setErrors({ ...errors, medidor: "Debe ingresar un ID de medidor válido" });
@@ -127,7 +127,7 @@ export default function InsertarLecturaModal({ onClose }: InsertarLecturaModalPr
 
     // Validaciones finales
     if (
-      formData.Id_Medidor <= 0 ||
+      formData.Numero_Medidor <= 0 ||
       formData.Valor_Lectura_Actual < formData.Valor_Lectura_Anterior ||
       !formData.Fecha_Lectura ||
       Object.values(errors).some((error) => error !== "")
@@ -281,12 +281,12 @@ export default function InsertarLecturaModal({ onClose }: InsertarLecturaModalPr
               {/* ID Medidor */}
               <div>
                 <label htmlFor="medidor" className="block text-sm font-medium text-gray-700 mb-2">
-                  ID del Medidor <span className="text-red-500">*</span>
+                  Número del Medidor <span className="text-red-500">*</span>
                 </label>
                 <input
-                  type="number"
+                  type="text"
                   id="medidor"
-                  value={formData.Id_Medidor || ""}
+                  value={formData.Numero_Medidor || ""}
                   onChange={handleMedidorChange}
                   min="1"
                   className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
@@ -412,7 +412,7 @@ export default function InsertarLecturaModal({ onClose }: InsertarLecturaModalPr
                   disabled={
                     createLecturaMutation.isPending ||
                     Object.values(errors).some((error) => error !== "") ||
-                    formData.Id_Medidor <= 0 ||
+                    formData.Numero_Medidor <= 0 ||
                     formData.Valor_Lectura_Actual < formData.Valor_Lectura_Anterior
                   }
                   className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed font-medium"

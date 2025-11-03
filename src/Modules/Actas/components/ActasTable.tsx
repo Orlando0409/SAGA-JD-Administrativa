@@ -350,7 +350,7 @@ export default function ActasTable() {
                             >
                                 <MdKeyboardArrowLeft className="w-4 h-4" />
                             </button>
-                            <span className="text-sm text-gray-700">
+                             <span className="text-sm text-gray-700">
                                 Página {table.getState().pagination.pageIndex + 1} de {table.getPageCount()}
                             </span>
                             <button

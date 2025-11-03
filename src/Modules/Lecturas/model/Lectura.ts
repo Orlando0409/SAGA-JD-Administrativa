@@ -3,23 +3,23 @@ export interface Lectura {
     Medidor: {
         Id_Medidor: number;
         Numero_Medidor: number;
-        Estado_Medidor: {
-            Id_Estado_Medidor: number;
+        Estado: {
+            Id_Estado: number;
             Nombre_Estado: string;
         };
-        Afiliado: {
-            Id_Afiliado: number;
-            Nombre_Afiliado: string;
-            Tipo_Afiliado: {
-                Id_Tipo_Afiliado: number;
-                Nombre_Tipo: string;
-            };
-            Estado: {
-                Id_Estado_Afiliado: number;
-                Nombre_Estado: string;
-            };
-        };
     };
+    Afiliado: {
+        Id_Afiliado: number;
+        Nombre_Afiliado: string;
+        Tipo_Afiliado: {
+            Id_Tipo_Afiliado: number;
+            Nombre_Tipo: string;
+        };
+        Estado: {
+            Id_Estado_Afiliado: number;
+            Nombre_Estado: string;
+        };
+    } | null;
     Tipo_Tarifa: {
         Id_Tipo_Tarifa_Lectura: number;
         Nombre_Tipo_Tarifa: string;
@@ -28,11 +28,13 @@ export interface Lectura {
     Valor_Lectura_Anterior: number;
     Valor_Lectura_Actual: number;
     Consumo_Calculado_M3: number;
-    Total_A_Pagar: number;
+    Total_A_Pagar?: number;
     Fecha_Lectura: string;
     Usuario: {
         Id_Usuario: number;
         Nombre_Usuario: string;
+        Id_Rol: number;
+        Nombre_Rol: string;
     };
 }
 
@@ -43,7 +45,7 @@ export interface TipoTarifaLectura {
 }
 
 export interface CreateLecturaDTO {
-    Id_Medidor: number;
+    Numero_Medidor: number;
     Id_Tipo_Tarifa_Lectura: number;
     Valor_Lectura_Anterior: number;
     Valor_Lectura_Actual: number;
@@ -51,9 +53,9 @@ export interface CreateLecturaDTO {
 }
 
 export interface UpdateLecturaDTO {
-    Id_Tipo_Tarifa_Lectura: number;
-    Valor_Lectura_Actual: number;
-    Fecha_Lectura?: string;
+    Id_Tipo_Tarifa: number;
+    Valor_Lectura: number;
+    Numero_Medidor: number;
 }
 
 export const LecturaInicial: Lectura = {
@@ -61,23 +63,12 @@ export const LecturaInicial: Lectura = {
     Medidor: {
         Id_Medidor: 0,
         Numero_Medidor: 0,
-        Estado_Medidor: {
-            Id_Estado_Medidor: 0,
+        Estado: {
+            Id_Estado: 0,
             Nombre_Estado: '',
         },
-        Afiliado: {
-            Id_Afiliado: 0,
-            Nombre_Afiliado: '',
-            Tipo_Afiliado: {
-                Id_Tipo_Afiliado: 0,
-                Nombre_Tipo: '',
-            },
-            Estado: {
-                Id_Estado_Afiliado: 0,
-                Nombre_Estado: '',
-            },
-        },
     },
+    Afiliado: null,
     Tipo_Tarifa: {
         Id_Tipo_Tarifa_Lectura: 0,
         Nombre_Tipo_Tarifa: '',
@@ -91,5 +82,7 @@ export const LecturaInicial: Lectura = {
     Usuario: {
         Id_Usuario: 0,
         Nombre_Usuario: '',
+        Id_Rol: 0,
+        Nombre_Rol: '',
     },
 };

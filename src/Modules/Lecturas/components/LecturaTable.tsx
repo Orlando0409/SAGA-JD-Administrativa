@@ -34,7 +34,7 @@ export default function LecturaTable() {
 
   const pageSizeOptions = [5, 10, 20, 50];
   const [pagination, setPagination] = useState({
-    pageSize: 10,
+    pageSize: 5,
     pageIndex: 0,
   });
 
@@ -71,14 +71,7 @@ export default function LecturaTable() {
 
   // Definir las columnas
   const columns = [
-    columnHelper.accessor("Id_Lectura", {
-      header: "ID",
-      cell: (info) => (
-        <div className="flex justify-center items-center">
-          <span className="font-medium">{info.getValue()}</span>
-        </div>
-      ),
-    }),
+ 
     columnHelper.accessor((row) => row.Medidor.Numero_Medidor, {
       id: "medidor",
       header: "Medidor",
@@ -88,12 +81,14 @@ export default function LecturaTable() {
         </div>
       ),
     }),
-    columnHelper.accessor((row) => row.Medidor.Afiliado.Nombre_Afiliado, {
+    columnHelper.accessor((row) => row.Afiliado?.Nombre_Afiliado ?? "Sin asignar", {
       id: "afiliado",
       header: "Afiliado",
       cell: (info) => (
         <div className="flex justify-center items-center">
-          <span className="text-gray-700">{info.getValue() || "N/A"}</span>
+          <span className={`text-sm ${info.getValue() === "Sin asignar" ? "text-gray-400 italic" : "text-gray-700"}`}>
+            {info.getValue()}
+          </span>
         </div>
       ),
     }),
@@ -138,14 +133,14 @@ export default function LecturaTable() {
         <div className="flex items-center justify-center gap-2">
           <button
             onClick={() => handleOpenDetailModal(info.row.original)}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            className="px-4 py-1 bg-gray-600 text-white text-xs rounded hover:bg-gray-700 transition-colors"
             title="Ver detalles"
           >
-            <Eye size={18} className="text-blue-600" />
+            Ver
           </button>
           <button
             onClick={() => handleOpenUpdateModal(info.row.original)}
-            className="px-3 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
+            className="px-2 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition-colors"
           >
             Editar
           </button>
@@ -187,7 +182,7 @@ export default function LecturaTable() {
   }
 
   return (
-    <div className="p-4 sm:p-6 bg-white rounded-lg shadow-md">
+    <div className="p-4 sm:p-6">
       {/* Header con título y botón */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <div>
@@ -198,54 +193,51 @@ export default function LecturaTable() {
             Administra las lecturas de los medidores
           </p>
         </div>
-        <button
-          onClick={handleOpenInsertModal}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors w-full sm:w-auto justify-center"
-        >
-          <Plus size={20} />
-          <span>Nueva Lectura</span>
-        </button>
       </div>
 
-      {/* Filtro global */}
-      <div className="mb-4">
-        <input
-          type="text"
-          value={globalFilter ?? ""}
-          onChange={(e) => setGlobalFilter(e.target.value)}
-          placeholder="Buscar en todas las columnas..."
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-        />
-      </div>
+        <div className="flex items-center gap-4 w-full sm:w-auto justify-end mb-4">
+            {/* Filtro global */}
+            <div className="relative flex-1 max-w-md">
+                <input
+                type="text"
+                value={globalFilter ?? ""}
+                onChange={(e) => setGlobalFilter(e.target.value)}
+                placeholder="Buscar en todas las columnas..."
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+            </div>
+            <button
+            onClick={handleOpenInsertModal}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors w-full sm:w-auto justify-center"
+            >
+            <Plus size={20} />
+            <span>Nueva Lectura</span>
+            </button>
+        </div>
+
 
       {/* Tabla responsive */}
-      <div className="overflow-x-auto rounded-lg border border-gray-200">
+      <div className="overflow-x-auto bg-white rounded-2xl shadow-sm border border-sky-100 overflow-hidden max-h-[calc(100vh-300px)] overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             {table.getHeaderGroups().map((headerGroup) => (
               <tr key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
-                  <th
+                 <th
                     key={header.id}
-                    className="px-3 sm:px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
+                    className="px-2 sm:px-4 py-3 font-medium border-b border-sky-100 cursor-pointer"
                     onClick={header.column.getToggleSortingHandler()}
-                  >
-                    <div className="flex items-center justify-center gap-2">
-                      {flexRender(
-                        header.column.columnDef.header,
-                        header.getContext()
-                      )}
-                      {header.column.getIsSorted() && (
-                        <span className="text-blue-600">
-                          {header.column.getIsSorted() === "asc" ? (
-                            <MdKeyboardArrowUp size={20} />
-                          ) : (
-                            <MdKeyboardArrowDown size={20} />
-                          )}
-                        </span>
-                      )}
-                    </div>
-                  </th>
+                    >
+                  
+                         <span className="flex items-center justify-center gap-1">
+                        {header.isPlaceholder
+                        ? null
+                        : flexRender(header.column.columnDef.header, header.getContext())}
+                        {header.column.getIsSorted() === 'asc' && <MdKeyboardArrowUp className="inline" />}
+                        {header.column.getIsSorted() === 'desc' && <MdKeyboardArrowDown className="inline" />}
+                    </span>
+                     
+                </th>
                 ))}
               </tr>
             ))}
@@ -282,67 +274,68 @@ export default function LecturaTable() {
             )}
           </tbody>
         </table>
+           <div className="px-6 py-3 bg-gray-50 border-t border-gray-200">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-4">
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-sm text-gray-700">Filas por página:</span>
+                                        <select
+                                            value={table.getState().pagination.pageSize}
+                                            onChange={(e) => {
+                                                table.setPageSize(Number(e.target.value));
+                                            }}
+                                            className="px-3 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        >
+                                            {pageSizeOptions.map((pageSize) => (
+                                                <option key={pageSize} value={pageSize}>
+                                                    {pageSize}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <button
+                                        onClick={() => table.setPageIndex(0)}
+                                        disabled={!table.getCanPreviousPage()}
+                                        className="p-2 rounded-md border text-gray-600 hover:text-gray-900 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                                        title="Primera página"
+                                    >
+                                        <MdKeyboardDoubleArrowLeft className="w-4 h-4" />
+                                    </button>
+                                    <button
+                                        onClick={() => table.previousPage()}
+                                        disabled={!table.getCanPreviousPage()}
+                                        className="p-2 rounded-md border text-gray-600 hover:text-gray-900 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                                        title="Página anterior"
+                                    >
+                                        <MdKeyboardArrowLeft className="w-4 h-4" />
+                                    </button>
+                                    <span className="text-sm text-gray-700">
+                                        Página {table.getState().pagination.pageIndex + 1} de {table.getPageCount()}
+                                    </span>
+                                    <button
+                                        onClick={() => table.nextPage()}
+                                        disabled={!table.getCanNextPage()}
+                                        className="p-2 rounded-md border text-gray-600 hover:text-gray-900 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                                        title="Página siguiente"
+                                    >
+                                        <MdKeyboardArrowRight className="w-4 h-4" />
+                                    </button>
+                                    <button
+                                        onClick={() => table.setPageIndex(table.getPageCount() - 1)}
+                                        disabled={!table.getCanNextPage()}
+                                        className="p-2 rounded-md border text-gray-600 hover:text-gray-900 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                                        title="Última página"
+                                    >
+                                        <MdKeyboardDoubleArrowRight className="w-4 h-4" />
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
       </div>
 
-      {/* Controles de paginación */}
-      <div className="mt-4 flex flex-col sm:flex-row items-center justify-between gap-4">
-        <div className="flex items-center gap-2">
-          <span className="text-sm text-gray-700">Mostrar:</span>
-          <select
-            value={table.getState().pagination.pageSize}
-            onChange={(e) => {
-              table.setPageSize(Number(e.target.value));
-            }}
-            className="border border-gray-300 rounded-md px-2 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          >
-            {pageSizeOptions.map((pageSize) => (
-              <option key={pageSize} value={pageSize}>
-                {pageSize}
-              </option>
-            ))}
-          </select>
-          <span className="text-sm text-gray-700">registros</span>
-        </div>
 
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => table.setPageIndex(0)}
-            disabled={!table.getCanPreviousPage()}
-            className="p-2 rounded-lg border border-gray-300 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            <MdKeyboardDoubleArrowLeft size={20} />
-          </button>
-          <button
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
-            className="p-2 rounded-lg border border-gray-300 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            <MdKeyboardArrowLeft size={20} />
-          </button>
-          <span className="text-sm text-gray-700 px-2">
-            Página{" "}
-            <span>
-              {table.getState().pagination.pageIndex + 1} de{" "}
-              {table.getPageCount()}
-            </span>
-          </span>
-          <button
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
-            className="p-2 rounded-lg border border-gray-300 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            <MdKeyboardArrowRight size={20} />
-          </button>
-          <button
-            onClick={() => table.setPageIndex(table.getPageCount() - 1)}
-            disabled={!table.getCanNextPage()}
-            className="p-2 rounded-lg border border-gray-300 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            <MdKeyboardDoubleArrowRight size={20} />
-          </button>
-        </div>
-
-      </div>
 
       {/* Modales */}
       {detailModalOpen && lecturaSeleccionada && (

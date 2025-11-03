@@ -673,7 +673,7 @@ const CatalogoMateriales: React.FC<CatalogoMaterialesProps> = () => {
                       className="px-2 sm:px-4 py-3 font-medium border-b border-sky-100 cursor-pointer"
                       onClick={header.column.getToggleSortingHandler()}
                     >
-                      <span className="flex items-center gap-1">
+                      <span className="flex items-center justify-center gap-1">
                         {header.isPlaceholder
                           ? null
                           : flexRender(header.column.columnDef.header, header.getContext())}
