@@ -15,6 +15,7 @@ export type Module = {
   path: string
   icon: React.ReactNode
   section: string
+  hidden: boolean
 }
 
 export interface AppSidebarProps {

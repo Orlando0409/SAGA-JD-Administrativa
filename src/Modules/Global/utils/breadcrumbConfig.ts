@@ -4,6 +4,7 @@ import { LuTags, LuActivity, LuRuler, LuPackage, LuShield } from 'react-icons/lu
 import { FaBoxes, FaUsers, FaTruck, FaUserFriends, FaBook,FaClipboardList, FaHandHoldingWater, FaRegQuestionCircle, FaEdit, FaImage, FaHistory, FaTachometerAlt } from 'react-icons/fa';
 import { MdOutlineReportGmailerrorred } from "react-icons/md";
 import { GrHelpBook } from "react-icons/gr";
+import { IoDocumentTextOutline } from 'react-icons/io5';
 
 
 export interface BreadcrumbItem {
@@ -115,6 +116,12 @@ export const breadcrumbConfig: BreadcrumbConfig = {
   '/Inventario/Materiales/Medidores': {
     label: 'Medidores',
     icon: FaTachometerAlt as LucideIcon,
+  },
+
+  // Sub-ruta de Abonados
+  '/Lecturas': {
+    label: 'Lecturas',
+    icon: IoDocumentTextOutline as LucideIcon,
   },
 
 };

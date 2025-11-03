@@ -1,8 +1,9 @@
 import { useMemo, useState } from 'react';
 import { createColumnHelper, getCoreRowModel, getFilteredRowModel, getSortedRowModel, getPaginationRowModel, useReactTable, type ColumnDef } from '@tanstack/react-table';
-import { User, Building, Plus } from 'lucide-react';
+import { User, Building, Plus, BookOpen } from 'lucide-react';
 import { MdKeyboardArrowLeft, MdKeyboardArrowRight, MdKeyboardDoubleArrowLeft, MdKeyboardDoubleArrowRight, MdKeyboardArrowDown, MdKeyboardArrowUp } from 'react-icons/md';
 import { LuSearch } from 'react-icons/lu';
+import { useNavigate } from '@tanstack/react-router';
 import { useAfiliadosFisicos } from '../Hook/HookAfiliadoFisico';
 import { useAfiliadosJuridicos } from '../Hook/HookAfiliadoJuridico';
 import { formatCedulaJuridica } from '../Helper/formatUtils';
@@ -42,6 +43,7 @@ type AfiliadoUnificado = {
 export default function AbonadosTable() {
     const { afiliadosFisicos, isLoading: loadingFisicos, isError: errorFisicos, updateEstadoAfiliadoFisico: updateEstadoMutationFisico } = useAfiliadosFisicos();
     const { afiliadosJuridicos, isLoading: loadingJuridicos, isError: errorJuridicos, updateEstadoAfiliadoJuridico: updateEstadoMutationJuridico } = useAfiliadosJuridicos();
+    const navigate = useNavigate();
 
     const [globalFilter, setGlobalFilter] = useState('');
     const [estadoFilter, setEstadoFilter] = useState<string>('Todos'); // Filtro de estado
@@ -426,6 +428,13 @@ export default function AbonadosTable() {
                         >
                             <Plus className="w-4 h-4" />
                             Nuevo Afiliado
+                        </button>
+                        <button
+                            onClick={() => navigate({ to: '/Afiliados/Lecturas' })}
+                            className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-md flex items-center gap-2 transition-colors"
+                        >
+                            <BookOpen className="w-4 h-4" />
+                            Lecturas
                         </button>
                     </div>
                 </div>

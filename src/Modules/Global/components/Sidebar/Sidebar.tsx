@@ -57,7 +57,7 @@ export function AppSidebar({ allowedModules }: Readonly<AppSidebarProps>) {
   }
 
   const sectionsWithModules = sections.filter(section => {
-    const sectionModules = allowedModules.filter(mod => mod.section === section.key)
+    const sectionModules = allowedModules.filter(mod => mod.section === section.key && !mod.hidden)
     return sectionModules.length > 0
   })
 
@@ -125,7 +125,7 @@ export function AppSidebar({ allowedModules }: Readonly<AppSidebarProps>) {
                 
                 <AccordionBody className="p-0" placeholder="">
                   <ul>
-                    {sectionModules.map((mod, index) => (
+                    {sectionModules.filter(mod => !mod.hidden).map((mod, index) => (
                       <li key={`${mod.name}-${mod.path}-${index}`}> 
                         <Link
                           to={mod.path}
