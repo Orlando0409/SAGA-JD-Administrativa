@@ -3,50 +3,81 @@ import type { SolicitudFisica } from "../../Models/ModelosFisicas";
 
 
 export class ServiceSolicitudAfiliacion {
-    
 
-
-
-    
-    
-     // PUT - Actualizar estado de una solicitud de afiliación física
-     
-    static async updateEstado(solicitudId: string | number, nuevoEstadoId: string | number): Promise<SolicitudFisica> {
+    static async updateEstado(
+        solicitudId: string | number,
+        nuevoEstadoId: string | number
+    ): Promise<SolicitudFisica> {
         try {
-            console.log(` Actualizando estado de solicitud ${solicitudId} a estado ${nuevoEstadoId}...`);
+            console.log(`Actualizando solicitud ${solicitudId} → estado ${nuevoEstadoId}`);
 
             const response = await apiAuth.patch<SolicitudFisica>(
-                `/solicitud-afiliacion-fisica/${solicitudId}/update/estado/${nuevoEstadoId}`
+                `/solicitudes-fisicas/update/estado/afiliacion/${solicitudId}/${nuevoEstadoId}`
             );
-            
-            console.log(' Estado de solicitud actualizado exitosamente:', response.data);
+
+            console.log(" Estado actualizado correctamente:", response.data);
             return response.data;
         } catch (error) {
-            console.error(' Error al actualizar estado de solicitud:', error);
+            console.error(" Error al actualizar estado de solicitud:", error);
             throw error;
         }
     }
 
-  
-    static async aprobar(solicitudId: string | number, estadoAprobadoId: number = 3): Promise<SolicitudFisica> {
+    static async EnRevision(
+        solicitudId: string | number,
+        estadoPendienteId: number = 2
+    ): Promise<SolicitudFisica> {
         try {
-            console.log(` Aprobando solicitud de afiliación ${solicitudId}...`);
-            return await this.updateEstado(solicitudId, estadoAprobadoId);
+            console.log(` Marcando solicitud ${solicitudId} como en revisión...`);
+            return await this.updateEstado(solicitudId, estadoPendienteId);
         } catch (error) {
-            console.error(' Error al aprobar solicitud:', error);
-            throw new Error('No se pudo aprobar la solicitud');
+            console.error("Error al marcar como en revisión:", error);
+            throw new Error("No se pudo cambiar a estado en revisión");
         }
     }
 
-    //Rechazar solicitud de afiliación física (cambiar a estado "Rechazada")
-    
-    static async rechazar(solicitudId: string | number, estadoRechazadoId: number = 4): Promise<SolicitudFisica> {
+
+    static async AprobarYEnEspera(
+        solicitudId: string | number,
+        estadoAprobadoId: number = 3
+    ): Promise<SolicitudFisica> {
         try {
-            console.log(` Rechazando solicitud de afiliación ${solicitudId}...`);
+            console.log(`🟢 Aprobando solicitud ${solicitudId}...`);
+            return await this.updateEstado(solicitudId, estadoAprobadoId);
+        } catch (error) {
+            console.error(" Error al aprobar solicitud:", error);
+            throw new Error("No se pudo aprobar la solicitud de afiliación");
+        }
+    }
+
+    static async Completado(
+        solicitudId: string | number,
+        estadoProcesoId: number = 4
+    ): Promise<SolicitudFisica> {
+        try {
+            console.log(` Marcando solicitud ${solicitudId} como completada...`);
+            return await this.updateEstado(solicitudId, estadoProcesoId);
+        } catch (error) {
+            console.error(" Error al cambiar a estado completado:", error);
+            throw new Error("No se pudo cambiar a estado 'completado    '");
+        }
+    }
+
+    static async Rechazar(
+        solicitudId: string | number,
+        estadoRechazadoId: number = 5
+    ): Promise<SolicitudFisica> {
+        try {
+            console.log(`🟥 Rechazando solicitud ${solicitudId}...`);
             return await this.updateEstado(solicitudId, estadoRechazadoId);
         } catch (error) {
-            console.error('Error al rechazar solicitud:', error);
-            throw new Error('No se pudo rechazar la solicitud');
+            console.error(" Error al rechazar solicitud:", error);
+            throw new Error("No se pudo rechazar la solicitud");
         }
     }
 }
+
+//Medidor 
+
+
+
