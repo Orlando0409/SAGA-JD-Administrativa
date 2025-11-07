@@ -1,17 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { X, User, Check, XCircle } from 'lucide-react';
-import { useCompletarSolicitudAfiliacion, useRechazarSolicitudAfiliacion, useEnRevisionSolicitudAfiliacion, useAprobarEnEsperaSolicitudAfiliacion } from '../Hooks/Fisico Update/HookAfiliadoFisico';
 import type { SolicitudFisica } from '../Models/ModelosFisicas';
 import type { SolicitudJuridica } from '../Models/ModelosJuridicos';
-import { useAprobarSolicitudCambioMedidor, useRechazarSolicitudCambioMedidor } from '../Hooks/Fisico Update/HookCambioMedidorFisico';
-import { useAprobarSolicitudAsociado, useRechazarSolicitudAsociado } from '../Hooks/Fisico Update/HookAsociadoFisico';
-import { useAprobarSolicitudDesconexion, useRechazarSolicitudDesconexion } from '../Hooks/Fisico Update/HookDesconexionMedidorFisico';
-import { useAprobarSolicitudAfiliacionJuridica, useRechazarSolicitudAfiliacionJuridica } from '../Hooks/Juridico Update/HookAfiliadoJuridico';
-import { useAprobarSolicitudAsociadoJuridico, useRechazarSolicitudAsociadoJuridico } from '../Hooks/Juridico Update/HookAsociadoJuridico';
 import ModalMedidor from './ModalMedidor';
-import { useAprobarSolicitudCambioMedidorJuridica, useRechazarSolicitudCambioMedidorJuridica } from '../Hooks/Juridico Update/HookCambioMedidorJuridico';
-import { useAprobarSolicitudDesconexionJuridica, useRechazarSolicitudDesconexionJuridica } from '../Hooks/Juridico Update/HookDesconexionMedidor';
-import { useQueryClient } from '@tanstack/react-query';
+import { useMarcarEnRevision, useAprobarYEnEspera, useCompletar, useRechazar } from '../Hooks/HookEstadosSolicitudes';
+import { mapearTipoSolicitud, mapearTipoPersona } from '../Service/EstadoSolicitudes';
+import type { TipoSolicitud, TipoPersona } from '../Types/EstadoSolicitudes';
+import { useAlerts } from '@/Modules/Global/context/AlertContext';
 
 interface ModalSolicitudProps {
     isOpen: boolean;
@@ -25,32 +20,17 @@ interface ModalSolicitudProps {
 
 //Modal simple para gestionar estados de solicitudes
 const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solicitud }) => {
-    const queryClient = useQueryClient(); // 👈 agrega esto
-
     // Estado para controlar el modal de asignación de medidor
     const [showModalMedidor, setShowModalMedidor] = useState(false);
 
-    // Hooks para cambio de estados
-    const marcarEnRevisionMutation = useEnRevisionSolicitudAfiliacion();
-    const marcarAprobadaEnEsperaMutation = useAprobarEnEsperaSolicitudAfiliacion();
+    // 🎯 HOOKS UNIFICADOS - Reemplaza a los 16+ hooks anteriores
+    const marcarEnRevisionMutation = useMarcarEnRevision();
+    const aprobarYEnEsperaMutation = useAprobarYEnEspera();
+    const completarMutation = useCompletar();
+    const rechazarMutation = useRechazar();
 
-    // Hooks para manejar los cambios de estado
-    const completarAfiliacionMutation = useCompletarSolicitudAfiliacion();
-    const rechazarAfiliacionMutation = useRechazarSolicitudAfiliacion();
-    const aprobarCambioMedidorMutation = useAprobarSolicitudCambioMedidor();
-    const rechazarCambioMedidorMutation = useRechazarSolicitudCambioMedidor();
-    const aprobarAsociadoMutation = useAprobarSolicitudAsociado();
-    const rechazarAsociadoMutation = useRechazarSolicitudAsociado();
-    const aprobarDesconexionMutation = useAprobarSolicitudDesconexion();
-    const rechazarDesconexionMutation = useRechazarSolicitudDesconexion();
-    const aprobarAfiliacionJuridicaMutation = useAprobarSolicitudAfiliacionJuridica();
-    const rechazarAfiliacionJuridicaMutation = useRechazarSolicitudAfiliacionJuridica();
-    const aprobarAsociadoJuridicoMutation = useAprobarSolicitudAsociadoJuridico();
-    const rechazarAsociadoJuridicoMutation = useRechazarSolicitudAsociadoJuridico();
-    const aprobarCambioMedidorJuridicoMutation = useAprobarSolicitudCambioMedidorJuridica();
-    const rechazarCambioMedidorJuridicoMutation = useRechazarSolicitudCambioMedidorJuridica();
-    const aprobarDesconexionJuridicoMutation = useAprobarSolicitudDesconexionJuridica();
-    const rechazarDesconexionJuridicoMutation = useRechazarSolicitudDesconexionJuridica();
+    // Sistema de alertas (para mensajes de advertencia)
+    const { showWarning } = useAlerts();
     // Extraer información básica de la solicitud
     const getSolicitudInfo = () => {
         console.log(' Datos completos de la solicitud:', solicitud.datos);
@@ -70,11 +50,17 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
                 solicitudId = datos.Cedula || `temp-${Date.now()}`;
             }
 
+            // ⚠️ IMPORTANTE: Usar Tipo_Entidad de los datos originales
+            // Tipo_Entidad: 1 = Física, 2 = Jurídica
+            const tipoEntidad = datos.Tipo_Entidad || datos.Id_Tipo_Entidad || 1;
+            const tipoPersonaReal = tipoEntidad === 1 ? 'Físico' : 'Jurídico';
+            console.log('📋 Modal - Tipo_Entidad:', tipoEntidad, '→', tipoPersonaReal);
+
             return {
                 id: solicitudId,
                 nombre: `${datos.Nombre || ''} ${datos.Apellido1 || ''} ${datos.Apellido2 || ''}`.trim() || 'Sin nombre',
                 documento: datos.Cedula || 'Sin cédula',
-                tipo: 'Física',
+                tipo: tipoPersonaReal, // ✅ Usar tipo real del backend
                 tipoSolicitud: datos.Tipo_Solicitud || 'Sin tipo',
                 estado: datos.Estado?.Nombre_Estado || 'Sin estado',
                 estadoId: datos.Estado?.Id_Estado_Solicitud || 0,
@@ -111,11 +97,17 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
                 solicitudId = datos.Cedula_Juridica || `temp-${Date.now()}`;
             }
 
+            // ⚠️ IMPORTANTE: Usar Tipo_Entidad de los datos originales
+            // Tipo_Entidad: 1 = Física, 2 = Jurídica
+            const tipoEntidad = datos.Tipo_Entidad || datos.Id_Tipo_Entidad || 2;
+            const tipoPersonaReal = tipoEntidad === 1 ? 'Físico' : 'Jurídico';
+            console.log('📋 Modal - Tipo_Entidad:', tipoEntidad, '→', tipoPersonaReal);
+
             return {
                 id: solicitudId,
                 nombre: datos.Razon_Social || 'Sin razón social',
                 documento: datos.Cedula_Juridica || 'Sin cédula jurídica',
-                tipo: 'Jurídica',
+                tipo: tipoPersonaReal, // ✅ Usar tipo real del backend
                 tipoSolicitud: datos.Tipo_Solicitud || 'Sin tipo',
                 estado: datos.Estado?.Nombre_Estado || 'Sin estado',
                 estadoId: datos.Estado?.Id_Estado_Solicitud || 0,
@@ -143,186 +135,126 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
 
     const info = getSolicitudInfo();
 
-    // useEffect para cambiar automáticamente a estado 2 (Pendiente) cuando se abre el modal
+    // useEffect para cambiar automáticamente a estado 2 (En Revisión) cuando se abre el modal
     useEffect(() => {
-        const cambiarAPendiente = async () => {
+        const cambiarAEnRevision = async () => {
             if (isOpen && info.estadoId === 1) {
                 try {
-                    console.log('🔄 Cambiando solicitud a estado Pendiente (2)...');
-                    await marcarEnRevisionMutation.mutateAsync(info.id);
-                    console.log('✅ Solicitud cambiada a Pendiente');
+                    // Mapear los tipos a los valores internos
+                    const tipoSolicitud: TipoSolicitud = mapearTipoSolicitud(info.tipoSolicitud);
+                    const tipoPersona: TipoPersona = mapearTipoPersona(info.tipo);
+
+                    console.log('🔄 Cambiando solicitud a estado En Revisión...');
+                    console.log(`📋 Tipo: ${tipoSolicitud} | Persona: ${tipoPersona}`);
+
+                    await marcarEnRevisionMutation.mutateAsync(tipoSolicitud, tipoPersona, info.id);
+                    console.log('✅ Solicitud cambiada a En Revisión');
                 } catch (error) {
-                    console.error('❌ Error al cambiar a Pendiente:', error);
+                    console.error('❌ Error al cambiar a En Revisión:', error);
                 }
             }
         };
 
-        cambiarAPendiente();
-    }, [isOpen, info.estadoId, info.id]);
+        cambiarAEnRevision();
+    }, [isOpen, info.estadoId, info.id, info.tipoSolicitud, info.tipo]);
 
-    // Función para manejar aprobación por casos
-    const handleAprobar = async () => {
+    // Función para manejar aprobación por casos usando hooks unificados
+    const handleCambiarEstado = async () => {
         const estadoActual = info.estadoId;
 
-        // Estado 2 (Pendiente) → Cambiar a Estado 3 (Aprobada y en espera)
+        // Mapear los tipos
+        const tipoSolicitud: TipoSolicitud = mapearTipoSolicitud(info.tipoSolicitud);
+        const tipoPersona: TipoPersona = mapearTipoPersona(info.tipo);
+
+        // Verificar si requiere asignación de medidor (Afiliación o Cambio de Medidor)
+        const requiereAsignacionMedidor = info.tipoSolicitud === 'Afiliacion' || info.tipoSolicitud === 'Cambio de Medidor';
+
+        // Estado 2 (En Revisión) → Decidir flujo según tipo de solicitud
         if (estadoActual === 2) {
-            if (confirm(`¿Desea aprobar la solicitud de ${info.nombre} y ponerla en espera?`)) {
+            if (requiereAsignacionMedidor) {
+                // Para Afiliación y Cambio de Medidor: Preguntar y si confirma, marcar En Espera y abrir modal de medidor
+                const ok = window.confirm(`¿Desea aprobar la solicitud de ${info.nombre} y ponerla en espera para asignar medidor?`);
+                if (!ok) return;
+
                 try {
-                    await marcarAprobadaEnEsperaMutation.mutateAsync(info.id);
-                    alert('✅ Solicitud marcada como "Aprobada y en espera"');
+                    console.log(`✅ Aprobando y poniendo en espera: ${tipoSolicitud} - ${tipoPersona}`);
+                    await aprobarYEnEsperaMutation.mutateAsync(tipoSolicitud, tipoPersona, info.id);
+                    // Abrir modal para asignar medidor inmediatamente después de cambiar a estado 3
+                    setShowModalMedidor(true);
                 } catch (error) {
-                    console.error('Error al marcar en aprobada y en espera:', error);
-                    alert('❌ Error al cambiar el estado');
+                    console.error('❌ Error al marcar en aprobada y en espera:', error);
+                }
+            } else {
+                // Para Asociado y Desconexión: Estado 2 → Estado 4 (Completada) directamente
+                const ok = window.confirm(`¿Desea completar la solicitud de ${info.nombre}? (no requiere asignación de medidor)`);
+                if (!ok) return;
+
+                try {
+                    console.log(`🎉 Completando solicitud ${info.tipoSolicitud} directamente desde Estado 2 (sin medidor)`);
+                    await completarMutation.mutateAsync(tipoSolicitud, tipoPersona, info.id);
+                    onClose();
+                } catch (error) {
+                    console.error('❌ Error al completar solicitud:', error);
                 }
             }
         }
-        // Estado 3 (Aprobada y en espera) → Abrir modal de medidor → Al asignar cambia a Estado 4 (Completada)
+        // Estado 3 (Aprobada y en espera) → Solo llega aquí si requiere medidor (Afiliación o Cambio de Medidor)
         else if (estadoActual === 3) {
-            if (confirm(`¿Desea completar la solicitud de ${info.nombre} y asignarle un medidor?`)) {
-                setShowModalMedidor(true);
-            }
+            // Abrir modal de medidor directamente → Al asignar cambia a Estado 4 (Completada)
+            console.log('🔓 Abriendo modal de medidor para asignar');
+            setShowModalMedidor(true);
         }
         // Si ya está completada (Estado 4)
         else if (estadoActual === 4) {
-            alert('⚠️ Esta solicitud ya está completada');
+            showWarning('Solicitud completada', 'Esta solicitud ya está completada');
         }
     };
 
-    // Nueva función para aprobar después de asignar el medidor
+    // Nueva función para aprobar después de asignar el medidor usando hooks unificados
     const aprobarSolicitudDespuesDeAsignar = async () => {
         try {
-            const tipoSolicitud = solicitud.tipoSolicitud || info.tipoSolicitud;
-            const tipoPersona = solicitud.tipo; // 'solicitud-fisica' o 'solicitud-juridica'
+            // Mapear los tipos a los valores internos
+            const tipoSolicitudInterno: TipoSolicitud = mapearTipoSolicitud(solicitud.tipoSolicitud || info.tipoSolicitud);
+            const tipoPersonaInterno: TipoPersona = mapearTipoPersona(info.tipo);
 
-            console.log(` Aprobando solicitud: Tipo Persona: ${tipoPersona}, Tipo Solicitud: ${tipoSolicitud}`);
+            console.log(`🎉 Completando solicitud: ${tipoSolicitudInterno} - ${tipoPersonaInterno}`);
 
-            // Determinar qué mutación usar basado en tipo de persona y tipo de solicitud
-            if (tipoPersona === 'solicitud-fisica') {
-                switch (tipoSolicitud) {
-                    case 'Afiliacion':
-                        await completarAfiliacionMutation.mutateAsync(info.id);
-                        break;
-                    case 'Cambio de Medidor':
-                        await aprobarCambioMedidorMutation.mutateAsync(info.id);
-                        break;
-                    case 'Asociado':
-                        await aprobarAsociadoMutation.mutateAsync(info.id);
-                        break;
-                    case 'Desconexion':
-                        await aprobarDesconexionMutation.mutateAsync(info.id);
-                        break;
-                    default:
-                        // Fallback a afiliación física si no se especifica tipo
-                        await completarAfiliacionMutation.mutateAsync(info.id);
-                        console.warn(' Tipo de solicitud física no especificado, usando Afiliación como fallback');
-                }
-            } else if (tipoPersona === 'solicitud-juridica') {
-                switch (tipoSolicitud) {
-                    case 'Afiliacion':
-                        await aprobarAfiliacionJuridicaMutation.mutateAsync(info.id);
-                        break;
-                    case 'Cambio de Medidor':
-                        await aprobarCambioMedidorJuridicoMutation.mutateAsync(info.id);
-                        break;
-                    case 'Asociado':
-                        await aprobarAsociadoJuridicoMutation.mutateAsync(info.id);
-                        break;
-                    case 'Desconexion':
-                        await aprobarDesconexionJuridicoMutation.mutateAsync(info.id);
-                        break;
-                    default:
-                        // Fallback a afiliación jurídica si no se especifica tipo
-                        await aprobarAfiliacionJuridicaMutation.mutateAsync(info.id);
-                        console.warn(' Tipo de solicitud jurídica no especificado, usando Afiliación como fallback');
-                }
-            } else {
-                console.error(' Tipo de persona no reconocido:', tipoPersona);
-                throw new Error('Tipo de solicitud no válido');
-            }
+            // Usar el hook unificado para completar (Estado 3 → 4)
+            await completarMutation.mutateAsync(tipoSolicitudInterno, tipoPersonaInterno, info.id);
 
-            alert('✅ Solicitud aprobada exitosamente');
             onClose(); // Cerrar modal principal después de aprobar
         } catch (error) {
-            console.error('Error al aprobar:', error);
-            alert('❌ Error al aprobar la solicitud');
+            console.error('❌ Error al completar solicitud:', error);
         }
     };
 
-    // Función para manejar rechazo por casos
+    // Función para manejar rechazo usando hooks unificados
     const handleRechazar = async () => {
-        if (confirm(`¿Está seguro de RECHAZAR la solicitud de ${info.nombre}?`)) {
-            try {
-                const tipoSolicitud = solicitud.tipoSolicitud || info.tipoSolicitud;
-                const tipoPersona = solicitud.tipo; // 'solicitud-fisica' o 'solicitud-juridica'
+        const ok = window.confirm(`¿Está seguro de RECHAZAR la solicitud de ${info.nombre}?`);
+        if (!ok) return;
 
-                console.log(` Rechazando solicitud: Tipo Persona: ${tipoPersona}, Tipo Solicitud: ${tipoSolicitud}`);
+        try {
+            // Mapear los tipos a los valores internos
+            const tipoSolicitudInterno: TipoSolicitud = mapearTipoSolicitud(solicitud.tipoSolicitud || info.tipoSolicitud);
+            const tipoPersonaInterno: TipoPersona = mapearTipoPersona(info.tipo);
 
-                // Determinar qué mutación usar basado en tipo de persona y tipo de solicitud
-                if (tipoPersona === 'solicitud-fisica') {
-                    switch (tipoSolicitud) {
-                        case 'Afiliacion':
-                            await rechazarAfiliacionMutation.mutateAsync(info.id);
-                            break;
-                        case 'Cambio de Medidor':
-                            await rechazarCambioMedidorMutation.mutateAsync(info.id);
-                            break;
-                        case 'Asociado':
-                            await rechazarAsociadoMutation.mutateAsync(info.id);
-                            break;
-                        case 'Desconexion':
-                            await rechazarDesconexionMutation.mutateAsync(info.id);
-                            break;
-                        default:
-                            // Fallback a afiliación física si no se especifica tipo
-                            await rechazarAfiliacionMutation.mutateAsync(info.id);
-                            console.warn(' Tipo de solicitud física no especificado, usando Afiliación como fallback');
-                    }
-                } else if (tipoPersona === 'solicitud-juridica') {
-                    switch (tipoSolicitud) {
-                        case 'Afiliacion':
-                            await rechazarAfiliacionJuridicaMutation.mutateAsync(info.id);
-                            break;
-                        case 'Cambio de Medidor':
-                            await rechazarCambioMedidorJuridicoMutation.mutateAsync(info.id);
-                            break;
-                        case 'Asociado':
-                            await rechazarAsociadoJuridicoMutation.mutateAsync(info.id);
-                            break;
-                        case 'Desconexion':
-                            await rechazarDesconexionJuridicoMutation.mutateAsync(info.id);
-                            break;
-                        default:
-                            // Fallback a afiliación jurídica si no se especifica tipo
-                            await rechazarAfiliacionJuridicaMutation.mutateAsync(info.id);
-                            console.warn(' Tipo de solicitud jurídica no especificado, usando Afiliación como fallback');
-                    }
-                } else {
-                    console.error(' Tipo de persona no reconocido:', tipoPersona);
-                    throw new Error('Tipo de solicitud no válido');
-                }
+            console.log(`❌ Rechazando solicitud: ${tipoSolicitudInterno} - ${tipoPersonaInterno}`);
 
-                alert(' Solicitud rechazada');
-                onClose(); // Cerrar modal después del éxito
-            } catch (error) {
-                console.error('Error al rechazar:', error);
-                alert(' Error al rechazar la solicitud');
-            }
+            // Usar el hook unificado para rechazar (Cualquier estado → 5)
+            await rechazarMutation.mutateAsync(tipoSolicitudInterno, tipoPersonaInterno, info.id);
+
+            onClose(); // Cerrar modal después del éxito
+        } catch (error) {
+            console.error('❌ Error al rechazar:', error);
         }
     };
 
+    // 🎯 Estado de carga unificado - Mucho más simple ahora
     const isLoading =
-        // Cambios de estado
-        marcarEnRevisionMutation.isPending || marcarAprobadaEnEsperaMutation.isPending ||
-        // Mutaciones físicas
-        completarAfiliacionMutation.isPending || rechazarAfiliacionMutation.isPending ||
-        aprobarCambioMedidorMutation.isPending || rechazarCambioMedidorMutation.isPending ||
-        aprobarAsociadoMutation.isPending || rechazarAsociadoMutation.isPending ||
-        aprobarDesconexionMutation.isPending || rechazarDesconexionMutation.isPending ||
-        // Mutaciones jurídicas
-        aprobarAfiliacionJuridicaMutation.isPending || rechazarAfiliacionJuridicaMutation.isPending ||
-        aprobarCambioMedidorJuridicoMutation.isPending || rechazarCambioMedidorJuridicoMutation.isPending ||
-        aprobarAsociadoJuridicoMutation.isPending || rechazarAsociadoJuridicoMutation.isPending ||
-        aprobarDesconexionJuridicoMutation.isPending || rechazarDesconexionJuridicoMutation.isPending;
+        marcarEnRevisionMutation.isPending ||
+        aprobarYEnEsperaMutation.isPending ||
+        completarMutation.isPending ||
+        rechazarMutation.isPending;
 
     if (!isOpen) return null;
 
@@ -520,7 +452,7 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
 
                 <div className="sticky bottom-0 flex justify-end gap-3 p-6 border-t bg-gray-50 z-10">
                     <button
-                        onClick={handleAprobar}
+                        onClick={handleCambiarEstado}
                         disabled={isLoading || info.estadoId === 4 || info.estadoId === 5}
                         className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm hover:shadow-md flex items-center gap-2 text-sm font-medium"
                     >
@@ -532,7 +464,13 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
                         ) : (
                             <>
                                 <Check className="w-4 h-4" />
-                                {info.estadoId === 2 ? 'Aprobar y poner en espera' : info.estadoId === 3 ? 'Completar y asignar medidor' : 'Aprobar Solicitud'}
+                                {info.estadoId === 2
+                                    ? (info.tipoSolicitud === 'Afiliacion' || info.tipoSolicitud === 'Cambio de Medidor'
+                                        ? 'Aprobar y poner en espera'
+                                        : 'Completar solicitud')
+                                    : info.estadoId === 3
+                                        ? 'Completar y asignar medidor'
+                                        : 'Aprobar Solicitud'}
                             </>
                         )}
                     </button>

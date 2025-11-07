@@ -52,7 +52,7 @@ export async function getSolicitudesJuridicas(): Promise<SolicitudJuridica[]> {
             const tiposSolicitud = [
                 { key: 'Afiliacion', tipo: 'Afiliacion' },
                 { key: 'Asociado', tipo: 'Asociado' },
-                { key: 'CambioMedidor', tipo: 'Cambio de Medidor' },
+                { key: 'Cambio De Medidor', tipo: 'Cambio de Medidor' },  // ⚠️ Key exacta del backend
                 { key: 'Desconexion', tipo: 'Desconexion' }
             ];
 

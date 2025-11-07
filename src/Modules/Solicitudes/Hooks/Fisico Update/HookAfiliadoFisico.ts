@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { ServiceSolicitudAfiliacion } from '../../Service/EstadoSolicitudesFisicas/ServiceSolicitudAfiliacion';
+import { ServiceSolicitudAfiliacionFisica } from '../../Service/EstadoSolicitudesFisicas/ServiceSolicitudAfiliacion';
 
-export const useMutateEstadoSolicitud = () => {
+export const useMutateEstadoSolicitudAfiliacionFisica = () => {
     const queryClient = useQueryClient();
 
     return useMutation({
@@ -9,7 +9,7 @@ export const useMutateEstadoSolicitud = () => {
             solicitudId: string | number;
             nuevoEstadoId: string | number;
         }) => {
-            return ServiceSolicitudAfiliacion.updateEstado(solicitudId, nuevoEstadoId);
+            return ServiceSolicitudAfiliacionFisica.updateEstado(solicitudId, nuevoEstadoId);
         },
         onSuccess: (data, variables) => {
             try {
@@ -41,12 +41,12 @@ export const useMutateEstadoSolicitud = () => {
     });
 };
 
-export const useEnRevisionSolicitudAfiliacion = () => {
+export const useEnRevisionSolicitudAfiliacionFisica = () => {
     const queryClient = useQueryClient();
 
     return useMutation({
         mutationFn: (solicitudId: string | number) => {
-            return ServiceSolicitudAfiliacion.EnRevision(solicitudId);
+            return ServiceSolicitudAfiliacionFisica.EnRevision(solicitudId);
         },
         onSuccess: (data, solicitudId) => {
             try {
@@ -78,12 +78,12 @@ export const useEnRevisionSolicitudAfiliacion = () => {
     });
 };
 
-export const useAprobarEnEsperaSolicitudAfiliacion = () => {
+export const useAprobarEnEsperaSolicitudAfiliacionFisica = () => {
     const queryClient = useQueryClient();
 
     return useMutation({
         mutationFn: (solicitudId: string | number) => {
-            return ServiceSolicitudAfiliacion.AprobarYEnEspera(solicitudId);
+            return ServiceSolicitudAfiliacionFisica.AprobarYEnEspera(solicitudId);
         },
         onSuccess: (data, solicitudId) => {
             try {
@@ -115,12 +115,12 @@ export const useAprobarEnEsperaSolicitudAfiliacion = () => {
     });
 };
 
-export const useCompletarSolicitudAfiliacion = () => {
+export const useCompletarSolicitudAfiliacionFisica = () => {
     const queryClient = useQueryClient();
 
     return useMutation({
         mutationFn: (solicitudId: string | number) => {
-            return ServiceSolicitudAfiliacion.Completado(solicitudId);
+            return ServiceSolicitudAfiliacionFisica.Completado(solicitudId);
         },
         onSuccess: (data, solicitudId) => {
             try {
@@ -152,12 +152,12 @@ export const useCompletarSolicitudAfiliacion = () => {
     });
 };
 
-export const useRechazarSolicitudAfiliacion = () => {
+export const useRechazarSolicitudAfiliacionFisica = () => {
     const queryClient = useQueryClient();
 
     return useMutation({
         mutationFn: (solicitudId: string | number) => {
-            return ServiceSolicitudAfiliacion.Rechazar(solicitudId);
+            return ServiceSolicitudAfiliacionFisica.Rechazar(solicitudId);
         },
         onSuccess: (data, solicitudId) => {
             try {

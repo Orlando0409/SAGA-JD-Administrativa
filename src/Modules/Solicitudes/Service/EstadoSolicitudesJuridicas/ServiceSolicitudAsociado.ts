@@ -1,45 +1,79 @@
 import apiAuth from "@/Api/apiAuth";
+
 import type { SolicitudJuridica } from "../../Models/ModelosJuridicos";
 
 
-export class ServiceSolicitudAsociadoJuridicas {
-    
- 
-    static async updateEstado(solicitudId: string | number, nuevoEstadoId: string | number): Promise<SolicitudJuridica> {
+export class ServiceSolicitudAsociadoJuridica {
+
+    static async updateEstado(
+        solicitudId: string | number,
+        nuevoEstadoId: string | number
+    ): Promise<SolicitudJuridica> {
         try {
-            console.log(` Actualizando estado de solicitud jurídica ${solicitudId} a estado ${nuevoEstadoId}...`);
+            console.log(`Actualizando solicitud ${solicitudId} → estado ${nuevoEstadoId}`);
 
             const response = await apiAuth.patch<SolicitudJuridica>(
-                `/solicitud-asociado-juridica/${solicitudId}/update/estado/${nuevoEstadoId}`
+                `/solicitudes-juridicas/update/estado/asociado/${solicitudId}/${nuevoEstadoId}`
             );
-            
-            console.log(' Estado de solicitud jurídica actualizado exitosamente:', response.data);
+
+            console.log(" Estado actualizado correctamente:", response.data);
             return response.data;
         } catch (error) {
-            console.error(' Error al actualizar estado de solicitud jurídica:', error);
+            console.error(" Error al actualizar estado de solicitud:", error);
             throw error;
         }
     }
 
-   
-    static async aprobar(solicitudId: string | number, estadoAprobadoId: number = 3): Promise<SolicitudJuridica> {
+    static async EnRevision(
+        solicitudId: string | number,
+        estadoPendienteId: number = 2
+    ): Promise<SolicitudJuridica> {
         try {
-            console.log(`✅ Aprobando solicitud de afiliación jurídica ${solicitudId}...`);
-            return await this.updateEstado(solicitudId, estadoAprobadoId);
+            console.log(` Marcando solicitud ${solicitudId} como en revisión...`);
+            return await this.updateEstado(solicitudId, estadoPendienteId);
         } catch (error) {
-            console.error(' Error al aprobar solicitud jurídica:', error);
-            throw new Error('No se pudo aprobar la solicitud jurídica');
+            console.error("Error al marcar como en revisión:", error);
+            throw new Error("No se pudo cambiar a estado en revisión");
         }
     }
 
-    
-    static async rechazar(solicitudId: string | number, estadoRechazadoId: number = 4): Promise<SolicitudJuridica> {
+
+    static async AprobarYEnEspera(
+        solicitudId: string | number,
+        estadoAprobadoId: number = 3
+    ): Promise<SolicitudJuridica> {
         try {
-            console.log(` Rechazando solicitud de afiliación jurídica ${solicitudId}...`);
+            console.log(`🟢 Aprobando solicitud ${solicitudId}...`);
+            return await this.updateEstado(solicitudId, estadoAprobadoId);
+        } catch (error) {
+            console.error(" Error al aprobar solicitud:", error);
+            throw new Error("No se pudo aprobar la solicitud de afiliación");
+        }
+    }
+
+    static async Completado(
+        solicitudId: string | number,
+        estadoProcesoId: number = 4
+    ): Promise<SolicitudJuridica> {
+        try {
+            console.log(` Marcando solicitud ${solicitudId} como completada...`);
+            return await this.updateEstado(solicitudId, estadoProcesoId);
+        } catch (error) {
+            console.error(" Error al cambiar a estado completado:", error);
+            throw new Error("No se pudo cambiar a estado 'completado    '");
+        }
+    }
+
+    static async Rechazar(
+        solicitudId: string | number,
+        estadoRechazadoId: number = 5
+    ): Promise<SolicitudJuridica> {
+        try {
+            console.log(`🟥 Rechazando solicitud ${solicitudId}...`);
             return await this.updateEstado(solicitudId, estadoRechazadoId);
         } catch (error) {
-            console.error(' Error al rechazar solicitud jurídica:', error);
-            throw new Error('No se pudo rechazar la solicitud jurídica');
+            console.error(" Error al rechazar solicitud:", error);
+            throw new Error("No se pudo rechazar la solicitud");
         }
     }
 }

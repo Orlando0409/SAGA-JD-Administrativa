@@ -14,6 +14,10 @@ import { User, Building } from 'lucide-react';
 import { useSolicitudesFisicas } from '../Hooks/HookSolicitudesFisicas';
 import { useSolicitudesJuridicas } from '../Hooks/HookSolicitudesJuridicas';
 
+// Importar hooks unificados para cambio de estados
+import { useMarcarEnRevision } from '../Hooks/HookEstadosSolicitudes';
+import { mapearTipoSolicitud, mapearTipoPersona } from '../Service/EstadoSolicitudes';
+
 // Importar tipos
 import type { SolicitudFisica } from '../Models/ModelosFisicas';
 import type { SolicitudJuridica } from '../Models/ModelosJuridicos';
@@ -22,7 +26,6 @@ import type { SolicitudJuridica } from '../Models/ModelosJuridicos';
 import EditSolicitudModal from './EditSolicitudModal';
 import ModalSolicitud from './ModalSolicitud';
 import { MdKeyboardArrowUp, MdKeyboardArrowDown, MdKeyboardDoubleArrowLeft, MdKeyboardArrowLeft, MdKeyboardArrowRight, MdKeyboardDoubleArrowRight } from 'react-icons/md';
-import { useEnRevisionSolicitudAfiliacion } from '../Hooks/Fisico Update/HookAfiliadoFisico';
 
 // Tipo unificado para la tabla de solicitudes
 type SolicitudUnificada = {
@@ -46,9 +49,10 @@ export default function SolicitudesTable() {
     // Hooks para ambos tipos de solicitudes
     const { data: solicitudesFisicas, isLoading: loadingFisicas, isError: errorFisicos } = useSolicitudesFisicas();
     const { data: solicitudesJuridicas, isLoading: loadingJuridicas, isError: errorJuridicos } = useSolicitudesJuridicas();
-    const marcarEnRevisionMutation = useEnRevisionSolicitudAfiliacion();
 
-    // Debug INMEDIATO al cargar el componente
+    // Hook unificado para cambiar estado a "En Revisión" (estado 1 → 2)
+    const marcarEnRevisionMutation = useMarcarEnRevision();
+
 
     const [globalFilter, setGlobalFilter] = useState('');
 
@@ -79,16 +83,83 @@ export default function SolicitudesTable() {
     const pageSizeOptions = [5, 10, 20, 50];
     // Función para unificar los datos de solicitudes
     const datosUnificados = useMemo((): SolicitudUnificada[] => {
+        console.log('📦 Datos originales físicas:', solicitudesFisicas);
+        console.log('📦 Datos originales jurídicas:', solicitudesJuridicas);
 
+        // Función para normalizar el nombre del tipo de solicitud
+        const normalizarTipoSolicitud = (tipo: string): 'Afiliacion' | 'Desconexion' | 'Cambio de Medidor' | 'Asociado' => {
+            const tipoLower = tipo.toLowerCase().trim();
+            let resultado: string;
 
+            if (tipoLower.includes('afiliacion')) {
+                resultado = 'Afiliacion';
+            } else if (tipoLower.includes('desconexion')) {
+                resultado = 'Desconexion';
+            } else if (tipoLower.includes('cambio') && tipoLower.includes('medidor')) {
+                resultado = 'Cambio de Medidor';
+            } else if (tipoLower.includes('asociado')) {
+                resultado = 'Asociado';
+            } else {
+                resultado = tipo; // Fallback al tipo original
+                console.warn('⚠️ Tipo de solicitud no reconocido:', tipo);
+            }
 
+            console.log(`🔄 Normalización: "${tipo}" → "${resultado}"`);
+            return resultado as any;
+        };
 
+        // Función para aplanar la estructura agrupada por tipo de solicitud
+        const aplanarSolicitudes = (datos: any): any[] => {
+            if (!datos) {
+                console.log('⚠️ No hay datos para aplanar');
+                return [];
+            }
 
-        // Validar que los datos sean arrays
-        const solicitudesFisicasArray = Array.isArray(solicitudesFisicas) ? solicitudesFisicas : [];
-        const solicitudesJuridicasArray = Array.isArray(solicitudesJuridicas) ? solicitudesJuridicas : [];
+            // Si ya es un array, devolverlo directamente
+            if (Array.isArray(datos)) {
+                console.log('✅ Los datos ya son un array:', datos.length, 'elementos');
+                return datos;
+            }
 
+            // Si es un objeto agrupado por tipo (Afiliacion, Desconexion, etc.)
+            console.log('📦 Datos agrupados detectados. Claves:', Object.keys(datos));
+            const solicitudesPlanas: any[] = [];
 
+            Object.keys(datos).forEach(tipoSolicitud => {
+                const solicitudesDelTipo = datos[tipoSolicitud];
+                console.log(`  📂 Procesando tipo: "${tipoSolicitud}"`, {
+                    esArray: Array.isArray(solicitudesDelTipo),
+                    cantidad: Array.isArray(solicitudesDelTipo) ? solicitudesDelTipo.length : 0,
+                    datos: solicitudesDelTipo
+                });
+
+                if (Array.isArray(solicitudesDelTipo) && solicitudesDelTipo.length > 0) {
+                    // Agregar el Tipo_Solicitud a cada solicitud si no lo tiene
+                    solicitudesDelTipo.forEach((solicitud, idx) => {
+                        const solicitudConTipo = {
+                            ...solicitud,
+                            Tipo_Solicitud: solicitud.Tipo_Solicitud || tipoSolicitud
+                        };
+                        console.log(`    ➕ Agregando solicitud ${idx + 1}:`, {
+                            Id: solicitud.Id_Solicitud,
+                            Tipo_Original: solicitud.Tipo_Solicitud,
+                            Tipo_Asignado: solicitudConTipo.Tipo_Solicitud
+                        });
+                        solicitudesPlanas.push(solicitudConTipo);
+                    });
+                }
+            });
+
+            console.log('✅ Total de solicitudes aplanadas:', solicitudesPlanas.length);
+            return solicitudesPlanas;
+        };
+
+        // Aplanar las solicitudes físicas y jurídicas
+        const solicitudesFisicasArray = aplanarSolicitudes(solicitudesFisicas);
+        const solicitudesJuridicasArray = aplanarSolicitudes(solicitudesJuridicas);
+
+        console.log('📋 Solicitudes físicas aplanadas:', solicitudesFisicasArray);
+        console.log('📋 Solicitudes jurídicas aplanadas:', solicitudesJuridicasArray);
 
         // Solicitudes Físicas
         const solicitudesFisicasUnificadas: SolicitudUnificada[] = solicitudesFisicasArray.map((solicitud: SolicitudFisica, index: number) => {
@@ -103,7 +174,7 @@ export default function SolicitudesTable() {
                 Id: idReal || (index + 1), // Usar ID real del backend o secuencial como fallback
                 Nombre_Completo: `${solicitud.Nombre || ''} ${solicitud.Apellido1 || ''} ${solicitud.Apellido2 || ''}`.trim() || 'Sin nombre',
                 Cedula_Documento: solicitud.Identificacion || 'Sin identificación',
-                Tipo_Solicitud: solicitud.Tipo_Solicitud,
+                Tipo_Solicitud: normalizarTipoSolicitud(solicitud.Tipo_Solicitud || 'Afiliacion'),
                 Estado: {
                     Id_Estado: solicitud.Estado?.Id_Estado_Solicitud || 0,
                     Nombre_Estado: solicitud.Estado?.Nombre_Estado || 'Sin estado'
@@ -126,7 +197,7 @@ export default function SolicitudesTable() {
                 Id: idReal || (solicitudesFisicasUnificadas.length + index + 1), // Usar ID real del backend o continuar secuencia
                 Nombre_Completo: solicitud.Razon_Social || 'Sin razón social',
                 Cedula_Documento: solicitud.Cedula_Juridica || 'Sin cédula jurídica',
-                Tipo_Solicitud: solicitud.Tipo_Solicitud,
+                Tipo_Solicitud: normalizarTipoSolicitud(solicitud.Tipo_Solicitud || 'Afiliacion'),
                 Estado: {
                     Id_Estado: solicitud.Estado?.Id_Estado_Solicitud || 0,
                     Nombre_Estado: solicitud.Estado?.Nombre_Estado || 'Sin estado'
@@ -142,22 +213,21 @@ export default function SolicitudesTable() {
             ...solicitudesJuridicasUnificadas
         ].sort((a, b) => a.Id - b.Id);
 
-        console.log(' Datos unificados finales:', resultado);
-        console.log(' IDs finales en la tabla:', resultado.map(s => ({ Id: s.Id, Cedula: s.Cedula_Documento, Tipo: s.Tipo_Persona })));
+        console.log('═══════════════════════════════════════');
+        console.log('📊 RESUMEN FINAL DE SOLICITUDES');
+        console.log('═══════════════════════════════════════');
+        console.log(`✅ Total físicas: ${solicitudesFisicasUnificadas.length}`);
+        console.log(`✅ Total jurídicas: ${solicitudesJuridicasUnificadas.length}`);
+        console.log(`✅ Total general: ${resultado.length}`);
+        console.log('═══════════════════════════════════════');
+        console.log('📋 Detalle de solicitudes:');
+        resultado.forEach((s, idx) => {
+            console.log(`  ${idx + 1}. ID:${s.Id} | ${s.Tipo_Solicitud} | ${s.Estado.Nombre_Estado} | ${s.Tipo_Persona} | ${s.Nombre_Completo}`);
+        });
+        console.log('═══════════════════════════════════════');
+
         return resultado;
     }, [solicitudesFisicas, solicitudesJuridicas]);
-
-    // Función para abrir el modal de gestión (aprobar/rechazar)
-    const handleViewDetail = (solicitud: SolicitudUnificada) => {
-        // Determinar el tipo según Tipo_Persona
-        const tipo = solicitud.Tipo_Persona === 'Físico' ? 'solicitud-fisica' : 'solicitud-juridica';
-
-        setSelectedSolicitudForGestion({
-            tipo: tipo,
-            datos: solicitud.datos_originales
-        });
-        setShowGestionModal(true);
-    };
 
     const filteredData = useMemo(() => {
         if (!globalFilter) return datosUnificados;
@@ -307,14 +377,43 @@ export default function SolicitudesTable() {
 
                                 const tipo = solicitud.Tipo_Persona === 'Físico' ? 'solicitud-fisica' : 'solicitud-juridica';
 
-                                // Si el estado actual NO es "Pendiente" (2), marcarlo como pendiente
+                                // Si el estado actual es "Registro" (1), marcarlo como "En Revisión" (2)
                                 if (solicitud.Estado.Id_Estado === 1) {
                                     try {
-                                        console.log(' Marcando solicitud como pendiente...', solicitud.Id);
-                                        await marcarEnRevisionMutation.mutateAsync(solicitud.Id);
-                                        console.log(' Solicitud marcada como pendiente');
+                                        console.log('🔄 Cambiando estado 1 → 2 (En Revisión)...');
+                                        console.log('📋 ID en tabla:', solicitud.Id);
+                                        console.log('📋 Datos originales completos:', solicitud.datos_originales);
+                                        console.log('📋 Tipo Solicitud:', solicitud.Tipo_Solicitud);
+                                        console.log('📋 Tipo Persona:', solicitud.Tipo_Persona);
+
+                                        // Obtener el ID real del backend
+                                        const datosOriginales = solicitud.datos_originales as any;
+                                        const idReal = datosOriginales.Id_Solicitud || datosOriginales.id || datosOriginales.Id || datosOriginales.ID;
+                                        console.log('📋 ID REAL del backend:', idReal);
+
+                                        // ⚠️ IMPORTANTE: Usar Tipo_Entidad de los datos originales, no el tipo de la tabla
+                                        // Tipo_Entidad: 1 = Física, 2 = Jurídica
+                                        const tipoEntidad = datosOriginales.Tipo_Entidad || datosOriginales.Id_Tipo_Entidad;
+                                        const tipoPersonaReal = tipoEntidad === 1 ? 'Físico' : 'Jurídico';
+                                        console.log('📋 Tipo_Entidad del backend:', tipoEntidad, '→', tipoPersonaReal);
+
+                                        // Mapear los tipos para el servicio unificado
+                                        const tipoSolicitudMapeado = mapearTipoSolicitud(solicitud.Tipo_Solicitud);
+                                        const tipoPersonaMapeado = mapearTipoPersona(tipoPersonaReal); // ✅ Usar tipo real del backend
+
+                                        console.log('🔀 Tipo mapeado:', tipoSolicitudMapeado, tipoPersonaMapeado);
+
+                                        // Usar el hook unificado (params: tipoSolicitud, tipoPersona, solicitudId)
+                                        // IMPORTANTE: Usar el ID real del backend, no el ID de la tabla
+                                        await marcarEnRevisionMutation.mutateAsync(
+                                            tipoSolicitudMapeado,
+                                            tipoPersonaMapeado,
+                                            idReal  // ✅ Usar ID real del backend
+                                        );
+
+                                        console.log('✅ Estado cambiado exitosamente');
                                     } catch (error) {
-                                        console.error(' Error al marcar como pendiente:', error);
+                                        console.error('❌ Error al cambiar estado:', error);
                                     }
                                 }
 
