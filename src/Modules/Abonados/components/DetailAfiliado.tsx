@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { LuX, LuUser, LuMail, LuPhone, LuMapPin, LuCalendar, LuBuilding, LuFileText, LuMap, LuInfo } from 'react-icons/lu';
+import { LuX, LuUser, LuMail, LuPhone, LuMapPin, LuCalendar, LuBuilding, LuFileText, LuMap, LuInfo, LuGauge } from 'react-icons/lu';
 import { Accordion, AccordionHeader, AccordionBody } from "@material-tailwind/react"
 import { FiChevronDown, FiChevronRight } from 'react-icons/fi'
 import { CUSTOM_ANIMATION } from '@/Modules/Global/types/Sections';
+import { formatCedulaJuridica } from '../Helper/formatUtils';
 import type { AfiliadoFisico } from '../Models/TablaAfiliados/ModeloAfiliadoFisico';
 import type { AfiliadoJuridico } from '../Models/TablaAfiliados/ModeloAfiliadoJuridico';
 
@@ -21,7 +22,7 @@ interface DetailAbonadosProps {
 
 const DetailAbonados: React.FC<DetailAbonadosProps> = ({ persona, isOpen, onClose }) => {
 
-    const [openSections, setOpenSections] = useState<number[]>([1, 2, 3, 4]); // Abrir por defecto
+    const [openSections, setOpenSections] = useState<number[]>([1, 2, 3, 4, 5]); // Abrir por defecto (agregado 4 para medidores)
 
     const handleAccordion = (id: number) => {
         setOpenSections(prev =>
@@ -41,9 +42,9 @@ const DetailAbonados: React.FC<DetailAbonadosProps> = ({ persona, isOpen, onClos
             const afiliado = datos as AfiliadoFisico;
             return {
                 id: afiliado.Id_Afiliado,
-                nombre: `${afiliado.Nombre} ${afiliado.Apellido1} ${afiliado.Apellido2 || ''}`.trim(),
+                nombre: `${afiliado.Nombre} ${afiliado.Apellido1} ${afiliado.Apellido2?.includes('No Proporcionado') ? '' : afiliado.Apellido2 || ''}`.trim(),
                 documento: afiliado.Identificacion,
-                
+
                 telefono: afiliado.Numero_Telefono,
                 correo: afiliado.Correo,
                 direccion: afiliado.Direccion_Exacta,
@@ -56,14 +57,15 @@ const DetailAbonados: React.FC<DetailAbonadosProps> = ({ persona, isOpen, onClos
                 fechaActualizacion: afiliado.Fecha_Actualizacion,
                 escritura: afiliado.Escritura_Terreno,
                 planos: afiliado.Planos_Terreno,
-                motivo: null // Campo no disponible en el modelo actual
+                motivo: null, // Campo no disponible en el modelo actual
+                medidores: afiliado.Medidores || afiliado.medidores || [] // Backend puede enviar Medidores (mayúscula) o medidores (minúscula)
             };
         } else { // afiliado-juridico
             const afiliado = datos as AfiliadoJuridico;
             return {
                 id: afiliado.Id_Afiliado,
                 nombre: afiliado.Razon_Social,
-                documento: afiliado.Cedula_Juridica,
+                documento: formatCedulaJuridica(afiliado.Cedula_Juridica || ''),
                 tipoDocumento: 'Cédula Jurídica',
                 telefono: afiliado.Numero_Telefono,
                 correo: afiliado.Correo,
@@ -77,7 +79,8 @@ const DetailAbonados: React.FC<DetailAbonadosProps> = ({ persona, isOpen, onClos
                 fechaActualizacion: afiliado.Fecha_Actualizacion,
                 escritura: afiliado.Escritura_Terreno,
                 planos: afiliado.Planos_Terreno,
-                motivo: null // Campo no disponible en el modelo actual
+                motivo: null, // Campo no disponible en el modelo actual
+                medidores: afiliado.Medidores || afiliado.medidores || [] // Backend puede enviar Medidores (mayúscula) o medidores (minúscula)
             };
         }
     };
@@ -118,7 +121,7 @@ const DetailAbonados: React.FC<DetailAbonadosProps> = ({ persona, isOpen, onClos
     const getTipoAfiliadoColor = (tipo: string) => {
         return tipo === 'Físico'
             ? 'bg-blue-100 text-blue-800 border-blue-200'
-            : 'bg-purple-100 text-purple-800 border-purple-200';
+            : 'bg-blue-100 text-blue-800 border-blue-200';
     };
 
     const getModalTitle = () => {
@@ -375,7 +378,7 @@ const DetailAbonados: React.FC<DetailAbonadosProps> = ({ persona, isOpen, onClos
                             </Accordion>
                         )}
 
-                        {/* Información del Sistema */}
+                        {/* Medidores Asignados */}
                         <Accordion
                             open={openSections.includes(4)}
                             animate={CUSTOM_ANIMATION}
@@ -389,11 +392,97 @@ const DetailAbonados: React.FC<DetailAbonadosProps> = ({ persona, isOpen, onClos
                             >
                                 <div className="flex items-center justify-between w-full">
                                     <div className="flex items-center gap-3">
+                                        <LuGauge className="w-5 h-5 text-blue-600" />
+                                        <span className="text-gray-900">Medidores Asignados</span>
+                                        {personaInfo.medidores && personaInfo.medidores.length > 0 && (
+                                            <span className="ml-2 px-2 py-0.5 bg-blue-100 text-blue-800 text-xs font-medium rounded-full">
+                                                {personaInfo.medidores.length}
+                                            </span>
+                                        )}
+                                    </div>
+                                    <span className="text-gray-500">
+                                        {openSections.includes(4) ? <FiChevronDown size={20} /> : <FiChevronRight size={20} />}
+                                    </span>
+                                </div>
+                            </AccordionHeader>
+                            <AccordionBody className="px-6 pb-6" placeholder="">
+                                {personaInfo.medidores && personaInfo.medidores.length > 0 ? (
+                                    <div className="space-y-4">
+                                        {personaInfo.medidores.map((medidor) => (
+                                            <div
+                                                key={medidor.Id_Medidor}
+                                                className="bg-gradient-to-r from-blue-50 to-blue-100 border border-blue-200 rounded-lg p-4 hover:shadow-md transition-shadow"
+                                            >
+                                                <div className="flex items-start justify-between">
+                                                    <div className="flex items-center gap-3 flex-1">
+                                                        <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center shadow-md">
+                                                            <LuGauge className="w-6 h-6 text-white" />
+                                                        </div>
+                                                        <div className="flex-1">
+                                                            <div className="flex items-center gap-2 mb-1">
+                                                                <h4 className="text-lg font-bold text-gray-900">
+                                                                    Medidor #{medidor.Numero_Medidor}
+                                                                </h4>
+                                                                <span className={`px-2 py-1 rounded-full text-xs font-semibold ${medidor.Estado_Medidor.Id_Estado_Medidor === 1
+                                                                    ? 'bg-green-100 text-green-800 border border-green-300'
+                                                                    : 'bg-gray-100 text-gray-800 border border-gray-300'
+                                                                    }`}>
+                                                                    {medidor.Estado_Medidor.Nombre_Estado_Medidor}
+                                                                </span>
+                                                            </div>
+                                                            <div className="grid grid-cols-2 gap-3 mt-3">
+                                                                <div>
+                                                                    <p className="text-xs text-gray-500 mb-1">ID Medidor</p>
+                                                                    <p className="text-sm font-medium text-gray-900">{medidor.Id_Medidor}</p>
+                                                                </div>
+                                                                <div>
+                                                                    <p className="text-xs text-gray-500 mb-1">ID Solicitud</p>
+                                                                    <p className="text-sm font-medium text-gray-900">{medidor.Id_Solicitud}</p>
+                                                                </div>
+                                                                <div>
+                                                                    <p className="text-xs text-gray-500 mb-1">Fecha Creación</p>
+                                                                    <p className="text-sm font-medium text-gray-900">{formatDate(medidor.Fecha_Creacion)}</p>
+                                                                </div>
+                                                                <div>
+                                                                    <p className="text-xs text-gray-500 mb-1">Última Actualización</p>
+                                                                    <p className="text-sm font-medium text-gray-900">{formatDate(medidor.Fecha_Actualizacion)}</p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="text-center py-8">
+                                        <LuGauge className="w-16 h-16 text-gray-300 mx-auto mb-3" />
+                                        <p className="text-gray-500 font-medium">No hay medidores asignados</p>
+                                        <p className="text-sm text-gray-400 mt-1">Este afiliado aún no tiene medidores registrados</p>
+                                    </div>
+                                )}
+                            </AccordionBody>
+                        </Accordion>
+
+                        {/* Información del Sistema */}
+                        <Accordion
+                            open={openSections.includes(5)}
+                            animate={CUSTOM_ANIMATION}
+                            className="border border-gray-200 rounded-lg shadow-sm bg-white"
+                            {...({} as any)}
+                        >
+                            <AccordionHeader
+                                onClick={() => handleAccordion(5)}
+                                className="text-base font-semibold px-6 py-4 border-b-0 hover:bg-gray-50"
+                                {...({} as any)}
+                            >
+                                <div className="flex items-center justify-between w-full">
+                                    <div className="flex items-center gap-3">
                                         <LuCalendar className="w-5 h-5 text-blue-600" />
                                         <span className="text-gray-900">Información del Sistema</span>
                                     </div>
                                     <span className="text-gray-500">
-                                        {openSections.includes(4) ? <FiChevronDown size={20} /> : <FiChevronRight size={20} />}
+                                        {openSections.includes(5) ? <FiChevronDown size={20} /> : <FiChevronRight size={20} />}
                                     </span>
                                 </div>
                             </AccordionHeader>
@@ -421,12 +510,12 @@ const DetailAbonados: React.FC<DetailAbonadosProps> = ({ persona, isOpen, onClos
                 </div>
                 {/* Action Buttons */}
                 <div className="sticky bottom-0 flex justify-end gap-3 p-6 border-t bg-gray-50 z-10">
-                <button
-                    onClick={onClose}
-                    className="px-6 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium"
-                >
-                    Cerrar
-                </button>
+                    <button
+                        onClick={onClose}
+                        className="px-6 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium"
+                    >
+                        Cerrar
+                    </button>
                 </div>
             </div>
         </div>

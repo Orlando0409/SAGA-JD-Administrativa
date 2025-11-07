@@ -3,11 +3,14 @@ import { createColumnHelper, getCoreRowModel, getFilteredRowModel, getSortedRowM
 import { User, Building, Plus } from 'lucide-react';
 import { MdKeyboardArrowLeft, MdKeyboardArrowRight, MdKeyboardDoubleArrowLeft, MdKeyboardDoubleArrowRight, MdKeyboardArrowDown, MdKeyboardArrowUp } from 'react-icons/md';
 import { LuSearch } from 'react-icons/lu';
+import { useNavigate } from '@tanstack/react-router';
+import { useAlerts } from '@/Modules/Global/context/AlertContext';
 import { useAfiliadosFisicos } from '../Hook/HookAfiliadoFisico';
 import { useAfiliadosJuridicos } from '../Hook/HookAfiliadoJuridico';
+import { formatCedulaJuridica } from '../Helper/formatUtils';
 import DetailAbonados from './DetailAfiliado';
 import CreateModal from './CreateModal';
-import EditModal from './EditModal'; // ✅ Agregar import
+import EditModal from './EditModal'; 
 import {
   AlertDialog,
   AlertDialogTrigger,
@@ -41,6 +44,8 @@ type AfiliadoUnificado = {
 export default function AbonadosTable() {
     const { afiliadosFisicos, isLoading: loadingFisicos, isError: errorFisicos, updateEstadoAfiliadoFisico: updateEstadoMutationFisico } = useAfiliadosFisicos();
     const { afiliadosJuridicos, isLoading: loadingJuridicos, isError: errorJuridicos, updateEstadoAfiliadoJuridico: updateEstadoMutationJuridico } = useAfiliadosJuridicos();
+    const navigate = useNavigate();
+    const { showError } = useAlerts();
 
     const [globalFilter, setGlobalFilter] = useState('');
     const [estadoFilter, setEstadoFilter] = useState<string>('Todos'); // Filtro de estado
@@ -80,8 +85,8 @@ export default function AbonadosTable() {
         const afiliadosJuridicosUnificados: AfiliadoUnificado[] = afiliadosJuridicos.map((afiliado: AfiliadoJuridico) => ({
             Id: afiliado.Id_Afiliado,
             Nombre_Completo: afiliado.Razon_Social || 'Sin razón social',
-            Cedula_Documento: afiliado.Cedula_Juridica || 'Sin cédula jurídica',
-            Identificacion: afiliado.Cedula_Juridica || 'Sin cédula jurídica',
+            Cedula_Documento: formatCedulaJuridica(afiliado.Cedula_Juridica || '') || 'Sin cédula jurídica',
+            Identificacion: formatCedulaJuridica(afiliado.Cedula_Juridica || '') || 'Sin cédula jurídica',
             Estado: {
                 Id_Estado: afiliado.Estado?.Id_Estado_Afiliado || 0,
                 Nombre_Estado: afiliado.Estado?.Nombre_Estado || 'Sin estado'
@@ -109,7 +114,7 @@ export default function AbonadosTable() {
         if (!globalFilter) return filteredByEstado;
         const q = globalFilter.toLowerCase();
         return filteredByEstado.filter((afiliado) =>
-            [afiliado.Nombre_Completo, afiliado.Cedula_Documento, afiliado.Estado.Nombre_Estado, afiliado.Tipo_Persona, afiliado.Tipo_Afiliado, afiliado.Tipo_Identificacion]
+            [afiliado.Nombre_Completo, afiliado.Cedula_Documento, afiliado.Identificacion, afiliado.Estado.Nombre_Estado, afiliado.Tipo_Persona, afiliado.Tipo_Afiliado, afiliado.Tipo_Identificacion]
                 .filter(Boolean)
                 .join(' ')
                 .toLowerCase()
@@ -148,7 +153,10 @@ export default function AbonadosTable() {
             console.log('Estado actualizado exitosamente');
         } catch (error) {
             console.error('Error al actualizar estado:', error);
-            alert('Error al actualizar el estado. Intente nuevamente.');
+            showError(
+                'Error al actualizar estado',
+                'No se pudo actualizar el estado del afiliado. Por favor, intente nuevamente.'
+            );
         }
     };
 
@@ -163,7 +171,7 @@ export default function AbonadosTable() {
                     if (!datosOriginales.Nombre && !datosOriginales.Apellido1) {
                         return 'Datos no disponibles';
                     }
-                    const nombreCompleto = `${datosOriginales.Nombre || ''} ${datosOriginales.Apellido1 || ''} ${datosOriginales.Apellido2 || ''}`.trim();
+                    const nombreCompleto = `${datosOriginales.Nombre || ''} ${datosOriginales.Apellido1 || ''} ${datosOriginales.Apellido2?.includes('No Proporcionado') ? '' : datosOriginales.Apellido2 || ''}`.trim();
                     return nombreCompleto || 'Sin nombre';
                 } else {
                     const datosOriginales = fila.datos_originales as AfiliadoJuridico;
@@ -174,33 +182,39 @@ export default function AbonadosTable() {
         }),
         columnHelper.accessor('Identificacion', {
             header: 'Cédula / Documento',
-            cell: (info) => (
-                <div className='flex items-center justify-start'>
-                    {info.getValue() || 'Sin dato'}</div>
-            ),
-            size: 150,
-        }),
-        columnHelper.accessor('Tipo_Identificacion', {
-            header: 'Tipo Identificación',
-            cell: (info) => (
-                <div>{info.getValue() || 'Sin dato'}</div>
-            ),
-            size: 120,
+            cell: (info) => {
+                const fila = info.row.original;
+                const tipoIdentificacion = fila.Tipo_Identificacion || 'Sin dato';
+                const identificacion = info.getValue() || 'Sin dato';
+                
+                return (
+                    <div className='flex flex-col items-start justify-start'>
+                        <div className="font-medium text-gray-900">{identificacion}</div>
+                        <div className="text-xs text-gray-500 mt-1">{tipoIdentificacion}</div>
+                    </div>
+                );
+            },
+            size: 180,
         }),
         columnHelper.accessor('Estado', {
             header: 'Estado',
             cell: (info) => {
                 const estado = info.getValue();
                 const estadoNombre = estado?.Nombre_Estado || 'Sin estado';
-                const base = 'inline-flex items-center gap-2 px-2 py-1 rounded-full text-xs font-medium';
-                if (estadoNombre === 'Activo') {
-                    return <span className={`${base} bg-green-100 text-green-700`}>Activo</span>;
-                } else if (estadoNombre === 'Inactivo') {
-                    return <span className={`${base} bg-red-100 text-red-700`}>Inactivo</span>;
-                } else if (estadoNombre === 'Pendiente') {
-                    return <span className={`${base} bg-amber-100 text-amber-700`}>Pendiente</span>;
+                const base = 'px-3 py-1 rounded-full text-xs font-semibold';
+
+                if (estadoNombre.toLowerCase() === 'activo') {
+                    return <span className={`${base} bg-emerald-100 text-emerald-700 border border-emerald-300`}>Activo</span>;
+                } else if (estadoNombre.toLowerCase() === 'inactivo') {
+                    return <span className={`${base} bg-red-100 text-red-700 border border-red-300`}>Inactivo</span>;
+                } else if (estadoNombre.toLowerCase() === 'pendiente') {
+                    return <span className={`${base} bg-amber-100 text-amber-700 border border-amber-300`}>Pendiente</span>;
                 }
-                return <div className='flex items-center justify-start'><span className={`${base} bg-slate-100 text-slate-700`}>{estadoNombre}</span></div>;
+
+                return (
+                    <div className='flex items-center justify-start'>
+                        <span className={`${base} bg-slate-100 text-slate-700 border border-slate-300`}>{estadoNombre}</span>
+                    </div>);
             },
             size: 120,
         }),
@@ -209,12 +223,14 @@ export default function AbonadosTable() {
             cell: (info) => {
                 const tipo = info.getValue();
                 return (
-                    <span className={`inline-flex items-center gap-2 px-2 py-1 rounded-full text-xs font-medium ${tipo === 'Físico'
-                        ? 'bg-blue-100 text-blue-700'
-                        : 'bg-purple-100 text-purple-700'
-                        }`}>
-                        {tipo === 'Físico' ? <User size={14} /> : <Building size={14} />} {tipo}
-                    </span>
+                    <div className='flex items-center justify-start'>
+                        <span className={`inline-flex items-center gap-2 px-2 py-1 rounded-full text-xs font-medium ${tipo === 'Físico'
+                            ? 'bg-blue-100 text-blue-700'
+                            : 'bg-blue-100 text-blue-700'
+                            }`}>
+                            {tipo === 'Físico' ? <User size={14} /> : <Building size={14} />} {tipo}
+                        </span>
+                    </div>
                 );
             },
             size: 120,
@@ -224,12 +240,14 @@ export default function AbonadosTable() {
             cell: (info) => {
                 const tipo = info.getValue();
                 return (
-                    <span className={`inline-flex items-center gap-2 px-2 py-1 rounded-full text-xs font-medium ${tipo === 'Abonado'
-                        ? 'bg-emerald-100 text-emerald-700'
-                        : 'bg-orange-100 text-orange-700'
-                        }`}>
-                        {tipo}
-                    </span>
+                    <div className='flex items-center justify-start'>
+                        <span className={`inline-flex items-center gap-2 px-2 py-1 rounded-full text-xs font-medium ${tipo === 'Abonado'
+                            ? 'bg-emerald-100 text-emerald-700'
+                            : 'bg-orange-100 text-orange-700'
+                            }`}>
+                            {tipo}
+                        </span>
+                    </div>
                 );
             },
             size: 120,
@@ -246,7 +264,7 @@ export default function AbonadosTable() {
                                 e.stopPropagation();
                                 handleViewDetail(persona);
                             }}
-                            className="px-4 py-1 bg-gray-600 text-white text-xs rounded hover:bg-gray-700 transition-colors"
+                            className="px-2 py-1 bg-gray-600 text-white text-xs rounded hover:bg-gray-700 transition-colors"
                             title="Ver detalles"
                         >
                             Ver
@@ -416,6 +434,13 @@ export default function AbonadosTable() {
                             <Plus className="w-4 h-4" />
                             Nuevo Afiliado
                         </button>
+                        <button
+                            onClick={() => navigate({ to: '/Afiliados/Lecturas' })}
+                            className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-md flex items-center gap-2 transition-colors"
+                        >
+             
+                            Lecturas
+                        </button>
                     </div>
                 </div>
             </div>
@@ -427,47 +452,46 @@ export default function AbonadosTable() {
                         <thead className="bg-sky-50">
                             {table.getHeaderGroups().map(headerGroup => (
                                 <tr key={headerGroup.id} className="text-left text-xs sm:text-sm text-sky-700">
-                                    {headerGroup.headers.map((header, index) => (
-                                        <th key={header.id} className={`px-2 sm:px-4 py-3 font-medium border-b border-sky-100 ${
-                                            index === 0 ? 'text-left' : 'text-center'
-                                        }`}>
-                                            {(() => {
-                                                if (header.isPlaceholder) {
-                                                    return null;
-                                                }
-                                                if (header.column.getCanSort()) {
+                                    {headerGroup.headers.map((header) => {
+                                        const isActionsColumn = header.column.id === 'acciones';
+                                        return (
+                                            <th key={header.id} className={`px-2 sm:px-4 py-3 font-medium border-b border-sky-100 ${isActionsColumn ? 'text-center' : 'text-left'}`}>
+                                                {(() => {
+                                                    if (header.isPlaceholder) {
+                                                        return null;
+                                                    }
+                                                    if (header.column.getCanSort()) {
+                                                        return (
+                                                            <button
+                                                                type="button"
+                                                                className={`cursor-pointer select-none flex items-center gap-2 bg-transparent border-none p-0 ${isActionsColumn ? 'justify-center' : 'justify-start'}`}
+                                                                onClick={header.column.getToggleSortingHandler()}
+                                                                onKeyDown={e => {
+                                                                    if (e.key === 'Enter' || e.key === ' ') {
+                                                                        e.preventDefault();
+                                                                        header.column.getToggleSortingHandler()?.(e);
+                                                                    }
+                                                                }}
+                                                                tabIndex={0}
+                                                                aria-label={`Ordenar por ${header.column.columnDef.header as string}`}
+                                                            >
+                                                                <span className="flex items-center gap-1">
+                                                                    {header.column.columnDef.header as string}
+                                                                    {header.column.getIsSorted() === 'asc' && <MdKeyboardArrowUp className="inline" />}
+                                                                    {header.column.getIsSorted() === 'desc' && <MdKeyboardArrowDown className="inline" />}
+                                                                </span>
+                                                            </button>
+                                                        );
+                                                    }
                                                     return (
-                                                        <button
-                                                            type="button"
-                                                            className={`cursor-pointer select-none flex items-center gap-2 bg-transparent border-none p-0 ${
-                                                                index === 0 ? 'justify-start' : 'justify-center'
-                                                            }`}
-                                                            onClick={header.column.getToggleSortingHandler()}
-                                                            onKeyDown={e => {
-                                                                if (e.key === 'Enter' || e.key === ' ') {
-                                                                    e.preventDefault();
-                                                                    header.column.getToggleSortingHandler()?.(e);
-                                                                }
-                                                            }}
-                                                            tabIndex={0}
-                                                            aria-label={`Ordenar por ${header.column.columnDef.header as string}`}
-                                                        >
-                                                            <span className="flex items-center gap-1">
-                                                                {header.column.columnDef.header as string}
-                                                                {header.column.getIsSorted() === 'asc' && <MdKeyboardArrowUp className="inline" />}
-                                                                {header.column.getIsSorted() === 'desc' && <MdKeyboardArrowDown className="inline" />}
-                                                            </span>
-                                                        </button>
+                                                        <span className={isActionsColumn ? 'text-center' : 'text-left'}>
+                                                            {header.column.columnDef.header as string}
+                                                        </span>
                                                     );
-                                                }
-                                                return (
-                                                    <span className={index === 0 ? 'text-left' : 'text-center'}>
-                                                        {header.column.columnDef.header as string}
-                                                    </span>
-                                                );
-                                            })()}
-                                        </th>
-                                    ))}
+                                                })()}
+                                            </th>
+                                        );
+                                    })}
                                 </tr>
                             ))}
                         </thead>
@@ -481,7 +505,7 @@ export default function AbonadosTable() {
                             ) : (
                                 table.getRowModel().rows.map(row => (
                                     <tr key={row.id} className="hover:bg-sky-50 cursor-pointer transition-colors">
-                                        {row.getVisibleCells().map((cell, index) => {
+                                        {row.getVisibleCells().map((cell) => {
                                             let cellContent: React.ReactNode;
 
                                             if (cell.column.columnDef.cell) {
@@ -495,9 +519,7 @@ export default function AbonadosTable() {
                                             }
 
                                             return (
-                                                <td key={cell.id} className={`px-2 sm:px-4 py-3 text-xs sm:text-sm text-slate-700 align-top ${
-                                                    index === 0 ? 'text-left' : 'text-center'
-                                                }`}>
+                                                <td key={cell.id} className="px-2 sm:px-4 py-3 text-xs sm:text-sm text-slate-700 align-top text-left">
                                                     {cellContent}
                                                 </td>
                                             );

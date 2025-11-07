@@ -1,12 +1,24 @@
+export interface Medidor {
+    Id_Medidor: number;
+    Numero_Medidor: number;
+    Id_Solicitud: number;
+    Fecha_Creacion: string;
+    Fecha_Actualizacion: string;
+    Estado_Medidor: {
+        Id_Estado_Medidor: number;
+        Nombre_Estado_Medidor: string;
+    };
+}
+
 export interface AfiliadoJuridico {
     Id_Afiliado: number
     Razon_Social: string
     Cedula_Juridica: string
     Numero_Telefono: string
-   
 
 
-    
+
+
     Correo: string
     Direccion_Exacta?: string
     Estado: {
@@ -21,6 +33,8 @@ export interface AfiliadoJuridico {
     Fecha_Actualizacion: string
     Escritura_Terreno?: string
     Planos_Terreno?: string
+    medidores?: Medidor[];
+    Medidores?: Medidor[]; // Backend puede enviar con mayúscula
 }
 
 export const AfiliadoJuridicoInicialState: AfiliadoJuridico = {

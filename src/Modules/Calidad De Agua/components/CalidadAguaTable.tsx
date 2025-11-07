@@ -247,7 +247,7 @@ export default function CalidadAguaTable() {
                             tabIndex={0}
                             aria-label={`Ordenar por ${header.column.columnDef.header as string}`}
                           >
-                            <span className="flex items-center gap-1">
+                            <span className="flex items-center justify-start gap-1">
                               {header.column.columnDef.header as string}
                               {header.column.getIsSorted() === 'asc' && <MdKeyboardArrowUp className="inline w-3 h-3 sm:w-4 sm:h-4" />}
                               {header.column.getIsSorted() === 'desc' && <MdKeyboardArrowDown className="inline w-3 h-3 sm:w-4 sm:h-4" />}
@@ -256,7 +256,7 @@ export default function CalidadAguaTable() {
                         );
                       }
                       return (
-                        <span className="text-xs sm:text-sm block text-center">
+                        <span className="text-xs sm:text-sm block text-start">
                           {header.column.columnDef.header as string}
                         </span>
                       );

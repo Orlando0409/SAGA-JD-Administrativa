@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { LuPlus, LuSearch } from 'react-icons/lu';
 import {
   createColumnHelper,
@@ -43,6 +43,17 @@ const CatalogoMedidores: React.FC<CatalogoMedidoresProps> = () => {
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [selectedMedidor, setSelectedMedidor] = useState<Medidor | null>(null);
   const [estadoFilter, setEstadoFilter] = useState<string>('Todos');
+  const [notification, setNotification] = useState<{
+    type: 'success' | 'error' | 'info';
+    title: string;
+    description?: string;
+  } | null>(null);
+
+  useEffect(() => {
+    if (!notification) return;
+    const t = setTimeout(() => setNotification(null), 3500);
+    return () => clearTimeout(t);
+  }, [notification]);
 
 
   // Llama todos los hooks en el nivel superior del componente

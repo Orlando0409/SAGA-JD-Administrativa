@@ -19,6 +19,7 @@ export default function ImagenFormEdit({ onClose, refetch, imagen }: ImagenFormE
   const [preview, setPreview] = useState(imagen.Imagen || "");
   const [nombreError, setNombreError] = useState("");
   const [isValid, setIsValid] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     setNombre(imagen.Nombre_Imagen || "");
@@ -31,7 +32,7 @@ export default function ImagenFormEdit({ onClose, refetch, imagen }: ImagenFormE
   const validateAll = () => {
     const result = UpdateImagenSchema.safeParse({
       Nombre_Imagen: nombre.trim(),
-      Imagen: file ?? imagen.Imagen,
+      Imagen: file ?? undefined, // Cambiado a undefined si no hay archivo nuevo
     });
     setIsValid(result.success);
     setNombreError(result.success ? "" : result.error.errors[0]?.message || "");
@@ -55,17 +56,23 @@ export default function ImagenFormEdit({ onClose, refetch, imagen }: ImagenFormE
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selected = e.target.files?.[0] || null;
     setFile(selected);
-    if (selected) setPreview(URL.createObjectURL(selected));
+    if (selected) {
+      setPreview(URL.createObjectURL(selected));
+    }
     validateAll();
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (isSubmitting) return; // Prevenir doble submit
+
+    setIsSubmitting(true);
+
     try {
       UpdateImagenSchema.parse({
         Nombre_Imagen: nombre.trim(),
-        Imagen: file ?? imagen.Imagen,
+        Imagen: file ?? undefined, // Cambiado a undefined si no hay archivo nuevo
       });
 
       const formData = new FormData();
@@ -86,6 +93,8 @@ export default function ImagenFormEdit({ onClose, refetch, imagen }: ImagenFormE
         console.error(error);
         showError("Error al actualizar la imagen.");
       }
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -134,7 +143,7 @@ export default function ImagenFormEdit({ onClose, refetch, imagen }: ImagenFormE
             {/* Campo imagen */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Cambiar imagen
+                Cambiar imagen <span className="text-gray-500 font-normal">(opcional)</span>
               </label>
               <div className="relative">
                 <input
@@ -153,7 +162,7 @@ export default function ImagenFormEdit({ onClose, refetch, imagen }: ImagenFormE
                 </div>
               </div>
               <p className="text-xs text-gray-500 mt-1">
-                Formatos permitidos: JPG, PNG, GIF, WEBP
+                Formatos permitidos: JPG, PNG, GIF, WEBP. Deja vacío si no deseas cambiar la imagen.
               </p>
             </div>
 
@@ -180,19 +189,30 @@ export default function ImagenFormEdit({ onClose, refetch, imagen }: ImagenFormE
           <button
             type="submit"
             form="edit-imagen-form"
-            disabled={!isValid}
+            disabled={!isValid || isSubmitting}
             className={`px-4 py-2 rounded-lg shadow-sm text-sm transition-colors ${
-              isValid
+              isValid && !isSubmitting
                 ? "bg-blue-600 text-white hover:bg-blue-700"
                 : "bg-gray-300 text-gray-600 cursor-not-allowed"
             }`}
           >
-            Guardar Cambios
+            {isSubmitting ? (
+              <span className="flex items-center gap-2">
+                Guardando...
+              </span>
+            ) : (
+              "Guardar Cambios"
+            )}
           </button>
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 rounded-lg bg-gray-200 text-gray-800 hover:bg-gray-300 shadow-sm text-sm transition-colors"
+            disabled={isSubmitting}
+            className={`px-4 py-2 rounded-lg shadow-sm text-sm transition-colors ${
+              isSubmitting
+                ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                : "bg-gray-200 text-gray-800 hover:bg-gray-300"
+            }`}
           >
             Cancelar
           </button>

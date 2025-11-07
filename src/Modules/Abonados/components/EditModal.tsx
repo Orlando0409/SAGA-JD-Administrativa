@@ -5,6 +5,7 @@ import type { AfiliadoJuridico } from '../Models/TablaAfiliados/ModeloAfiliadoJu
 import { useAlerts } from '@/Modules/Global/context/AlertContext';
 import { useAfiliadosFisicos } from '../Hook/HookAfiliadoFisico';
 import { useAfiliadosJuridicos } from '../Hook/HookAfiliadoJuridico';
+import { formatCedulaJuridica } from '../Helper/formatUtils';
 import PhoneInput from "react-phone-number-input";
 import "react-phone-number-input/style.css";
 import { AfiliadoFisicoEditSchema } from '../Schemas/AfiliadoFisico';
@@ -102,7 +103,7 @@ const EditModal: React.FC<EditModalProps> = ({ isOpen, onClose, persona }) => {
             return {
                 Nombre: afiliado.Nombre,
                 Apellido1: afiliado.Apellido1,
-                Apellido2: afiliado.Apellido2 || '',
+                Apellido2: afiliado.Apellido2?.includes('No Proporcionado') ? '' : afiliado.Apellido2 || '',
                 Tipo_Identificacion: (afiliado as any).Tipo_Identificacion || 'Cedula Nacional' as 'Cedula Nacional' | 'Dimex' | 'Pasaporte',
                 Identificacion: afiliado.Identificacion,
                 Numero_Telefono: afiliado.Numero_Telefono,
@@ -476,7 +477,7 @@ const EditModal: React.FC<EditModalProps> = ({ isOpen, onClose, persona }) => {
                                             </label>
                                             <input
                                                 type="text"
-                                                value={field.state.value}
+                                                value={formatCedulaJuridica(field.state.value || '')}
                                                 readOnly
                                                 className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-600 cursor-not-allowed"
                                                 placeholder="Cédula jurídica"

@@ -1,17 +1,24 @@
 export type TipoIdentificacion = "Cedula" | "Pasaporte" | "DIMEX" | "Otro";
 
+export interface Medidor {
+    Id_Medidor: number;
+    Numero_Medidor: number;
+    Id_Solicitud: number;
+    Fecha_Creacion: string;
+    Fecha_Actualizacion: string;
+    Estado_Medidor: {
+        Id_Estado_Medidor: number;
+        Nombre_Estado_Medidor: string;
+    };
+}
+
 export interface AfiliadoFisico {
     Id_Afiliado: number
     Nombre: string
     Apellido1: string
     Apellido2?: string
-  
-
-
-
-    
     Numero_Telefono: string
-     Identificacion: string;
+    Identificacion: string;
     Correo: string
     Direccion_Exacta?: string
     Edad: number
@@ -27,7 +34,9 @@ export interface AfiliadoFisico {
     Fecha_Actualizacion: string
     Escritura_Terreno?: string
     Planos_Terreno?: string
-     Tipo_Identificacion: TipoIdentificacion;
+    Tipo_Identificacion: TipoIdentificacion;
+    medidores?: Medidor[];
+    Medidores?: Medidor[]; // Backend puede enviar con mayúscula
 }
 
 export const AfiliadoFisicoInicialState: AfiliadoFisico = {
@@ -51,5 +60,4 @@ export const AfiliadoFisicoInicialState: AfiliadoFisico = {
     Fecha_Creacion: new Date().toISOString(),
     Fecha_Actualizacion: new Date().toISOString(),
     Tipo_Identificacion: 'Cedula'
-
 }

@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { CreateMedidorData } from '../models/Medidor';
 import { getAllMedidores, getMedidoresNoInstalados, getMedidoresInstalados, getMedidoresAveriados, getMedidoresAfiliado, createMedidor, updateEstadoMedidor } from '../service/MedidorServices';
+import { useAlerts } from '@/Modules/Global/context/AlertContext';
 
 // Hook para obtener todos los medidores
 export const useMedidores = () => {
@@ -39,16 +40,17 @@ export const useMedidoresAfiliado = (idAfiliado: number) => {
 // Hook para crear medidor
 export const useCreateMedidor = () => {
   const queryClient = useQueryClient();
-
+  const { showSuccess, showError } = useAlerts();
   return useMutation({
     mutationFn: ({ data }: { data: CreateMedidorData;  }) =>
       createMedidor(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['medidores'] });
+      showSuccess('Éxito', 'Medidor creado correctamente');
     },
     onError: (error: any) => {
       const errorMessage = error.response?.data?.message || 'Error al crear el medidor';
-        console.error(errorMessage);
+      showError('Error', errorMessage);
     },
   });
 };
@@ -56,16 +58,18 @@ export const useCreateMedidor = () => {
 // Hook para actualizar estado del medidor
 export const useUpdateEstadoMedidor = () => {
   const queryClient = useQueryClient();
+  const { showSuccess, showError } = useAlerts();
 
   return useMutation({
     mutationFn: ({ idMedidor, idEstado }: { idMedidor: number; idEstado: number; }) =>
       updateEstadoMedidor(idMedidor, idEstado),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['medidores'] });
+      showSuccess('Éxito', 'Estado del medidor actualizado correctamente');
     },
     onError: (error: any) => {
-        const errorMessage = error.response?.data?.message || 'Error al actualizar el estado del medidor';
-        console.error(errorMessage);
+      const errorMessage = error.response?.data?.message || 'Error al actualizar el estado del medidor';
+      showError('Error', errorMessage);
     },
   });
 };

@@ -21,7 +21,7 @@ interface EditProveedorModalProps {
 
 const EditProveedorModal: React.FC<EditProveedorModalProps> = ({ isOpen, onClose, proveedor }) => {
   // Hook de alertas
-  const { showSuccess, showError, showWarning } = useAlerts();
+  const {  showError, showWarning } = useAlerts();
   
   // Hook para actualizar proveedor físico
   const { 
@@ -160,7 +160,6 @@ const EditProveedorModal: React.FC<EditProveedorModalProps> = ({ isOpen, onClose
           data: payload 
         });
         
-        showSuccess('¡Proveedor actualizado exitosamente!');
         onClose();
       } catch (error) {
         handleApiError(error);

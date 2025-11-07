@@ -9,9 +9,6 @@ const BaseAfiliadoSchema = z.object({
     .email('El correo electrónico debe tener un formato válido')
     .regex(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/, 'El formato del correo electrónico no es válido'),
 
-
-
-    
   Numero_Telefono: z.string()
     .min(1, 'El número de teléfono no puede estar vacío')
     .refine(
@@ -32,7 +29,7 @@ export const AfiliadoFisicoSchema = BaseAfiliadoSchema.extend({
   Tipo_Identificacion: z.enum(['Cedula Nacional', 'DIMEX', 'Pasaporte'], {
     errorMap: () => ({ message: 'El tipo de identificación debe ser uno de los siguientes: Cedula Nacional, DIMEX, Pasaporte' })
   }),
-  
+
   Identificacion: z.string()
     .min(1, 'La identificación no puede estar vacía'),
 
@@ -54,11 +51,11 @@ export const AfiliadoFisicoSchema = BaseAfiliadoSchema.extend({
     .min(18, 'La edad mínima es 18 años')
     .max(120, 'La edad máxima es 120 años'),
 
-  Planos_Terreno: z.instanceof(File, { message: "Debe subir el plano del terreno" }),
-  Escritura_Terreno: z.instanceof(File, { message: "Debe subir la escritura del terreno" }),
+  Planos_Terreno: z.union([z.instanceof(File), z.string()]).optional(),
+  Escritura_Terreno: z.union([z.instanceof(File), z.string()]).optional(),
 }).refine((data) => {
   const { Tipo_Identificacion, Identificacion } = data;
-  
+
   if (Tipo_Identificacion === 'Cedula Nacional') {
     return /^\d{9,10}$/.test(Identificacion);
   } else if (Tipo_Identificacion === 'DIMEX') {
@@ -69,7 +66,7 @@ export const AfiliadoFisicoSchema = BaseAfiliadoSchema.extend({
   return true;
 }, (data) => {
   const { Tipo_Identificacion } = data;
-  
+
   if (Tipo_Identificacion === 'Cedula Nacional') {
     return { message: 'La cédula nacional debe tener entre 9 y 10 dígitos', path: ['Identificacion'] };
   } else if (Tipo_Identificacion === 'DIMEX') {
