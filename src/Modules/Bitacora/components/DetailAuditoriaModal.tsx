@@ -140,7 +140,7 @@ const DetailAuditoriaModal = ({
                  Registro Afectado
                 </p>
                 <p className="text-base font-medium text-gray-900 mt-1">
-                  {auditoria.Nombre_Registro}
+                  {auditoria.Registro_Afectado}
                 </p>
               </div>
             </div>
