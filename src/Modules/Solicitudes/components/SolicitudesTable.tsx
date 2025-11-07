@@ -455,7 +455,7 @@ export default function SolicitudesTable() {
                                                             tabIndex={0}
                                                             aria-label={`Ordenar por ${header.column.columnDef.header as string}`}
                                                         >
-                                                            <span className="flex items-center gap-1">
+                                                            <span className="flex items-center justify-center gap-1">
                                                                 {header.column.columnDef.header as string}
                                                                 {header.column.getIsSorted() === 'asc' && <MdKeyboardArrowUp className="inline" />}
                                                                 {header.column.getIsSorted() === 'desc' && <MdKeyboardArrowDown className="inline" />}
@@ -477,8 +477,8 @@ export default function SolicitudesTable() {
                         <tbody className="bg-white divide-y divide-sky-50">
                             {table.getRowModel().rows.length === 0 ? (
                                 <tr>
-                                    <td colSpan={5} className="px-2 sm:px-4 py-8 text-center text-slate-500">
-                                        {globalFilter ? 'No se encontraron actas que coincidan con la búsqueda' : 'No hay actas registradas'}
+                                    <td colSpan={columns.length} className="px-2 sm:px-4 py-8 text-center text-slate-500">
+                                        {globalFilter ? 'No se encontraron resultados que coincidan con la búsqueda' : 'No hay solicitudes registradas'}
                                     </td>
                                 </tr>
                             ) : (

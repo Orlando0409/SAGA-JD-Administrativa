@@ -46,10 +46,8 @@ export interface TipoTarifaLectura {
 
 export interface CreateLecturaDTO {
     Numero_Medidor: number;
-    Id_Tipo_Tarifa_Lectura: number;
-    Valor_Lectura_Anterior: number;
-    Valor_Lectura_Actual: number;
-    Fecha_Lectura: string;
+    Id_Tipo_Tarifa: number;
+    Valor_Lectura: number;
 }
 
 export interface UpdateLecturaDTO {

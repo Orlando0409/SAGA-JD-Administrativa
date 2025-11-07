@@ -12,6 +12,7 @@ import ModalMedidor from './ModalMedidor';
 import { useAprobarSolicitudCambioMedidorJuridica, useRechazarSolicitudCambioMedidorJuridica } from '../Hooks/Juridico Update/HookCambioMedidorJuridico';
 import { useAprobarSolicitudDesconexionJuridica, useRechazarSolicitudDesconexionJuridica } from '../Hooks/Juridico Update/HookDesconexionMedidor';
 import { useQueryClient } from '@tanstack/react-query';
+import { useAlerts } from '@/Modules/Global/context/AlertContext';
 
 interface ModalSolicitudProps {
     isOpen: boolean;
@@ -340,7 +341,6 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
     if (!isOpen) return null;
 
     return (
-        <>
             <div className="fixed inset-0 backdrop-blur bg-opacity-10 flex items-center justify-center z-50 p-4">
                 <div className="bg-white rounded-lg shadow-xl border border-gray-200 w-full max-w-3xl max-h-[90vh] overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100">
                 {/* Header */}

@@ -46,7 +46,6 @@ export default function ProyectoModal({ isOpen, onClose, proyecto, refetch }: Pr
             const formData = new FormData();
             formData.append("Titulo", titulo.trim());
             formData.append("Descripcion", descripcion.trim());
-            formData.append("Id_Estado_Proyecto", proyecto.Estado.Id_Estado_Proyecto.toString());
             
             // Solo agregar imagen si se seleccionó una nueva
             if (imagen instanceof File) {

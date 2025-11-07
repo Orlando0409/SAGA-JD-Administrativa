@@ -103,7 +103,7 @@ const EditModal: React.FC<EditModalProps> = ({ isOpen, onClose, persona }) => {
             return {
                 Nombre: afiliado.Nombre,
                 Apellido1: afiliado.Apellido1,
-                Apellido2: afiliado.Apellido2 || '',
+                Apellido2: afiliado.Apellido2?.includes('No Proporcionado') ? '' : afiliado.Apellido2 || '',
                 Tipo_Identificacion: (afiliado as any).Tipo_Identificacion || 'Cedula Nacional' as 'Cedula Nacional' | 'Dimex' | 'Pasaporte',
                 Identificacion: afiliado.Identificacion,
                 Numero_Telefono: afiliado.Numero_Telefono,

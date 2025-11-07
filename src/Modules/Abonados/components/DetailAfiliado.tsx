@@ -42,7 +42,7 @@ const DetailAbonados: React.FC<DetailAbonadosProps> = ({ persona, isOpen, onClos
             const afiliado = datos as AfiliadoFisico;
             return {
                 id: afiliado.Id_Afiliado,
-                nombre: `${afiliado.Nombre} ${afiliado.Apellido1} ${afiliado.Apellido2 || ''}`.trim(),
+                nombre: `${afiliado.Nombre} ${afiliado.Apellido1} ${afiliado.Apellido2?.includes('No Proporcionado') ? '' : afiliado.Apellido2 || ''}`.trim(),
                 documento: afiliado.Identificacion,
                 
                 telefono: afiliado.Numero_Telefono,

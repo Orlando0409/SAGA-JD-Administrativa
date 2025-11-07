@@ -166,7 +166,7 @@ export default function AbonadosTable() {
                     if (!datosOriginales.Nombre && !datosOriginales.Apellido1) {
                         return 'Datos no disponibles';
                     }
-                    const nombreCompleto = `${datosOriginales.Nombre || ''} ${datosOriginales.Apellido1 || ''} ${datosOriginales.Apellido2 || ''}`.trim();
+                    const nombreCompleto = `${datosOriginales.Nombre || ''} ${datosOriginales.Apellido1 || ''} ${datosOriginales.Apellido2?.includes('No Proporcionado') ? '' : datosOriginales.Apellido2 || ''}`.trim();
                     return nombreCompleto || 'Sin nombre';
                 } else {
                     const datosOriginales = fila.datos_originales as AfiliadoJuridico;

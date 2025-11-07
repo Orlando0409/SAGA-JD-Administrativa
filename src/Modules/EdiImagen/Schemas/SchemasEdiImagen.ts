@@ -20,12 +20,12 @@ export const CreateImagenSchema = z.object({
 export const UpdateImagenSchema = z.object({
   Nombre_Imagen: z
     .string()
+    .nonempty("El nombre de la imagen es obligatorio.")
     .max(50, "El nombre no puede superar los 50 caracteres.")
     .regex(/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/, "El nombre solo puede contener letras y espacios.")
     .refine((val) => val.trim().length > 0, {
       message: "El nombre no puede estar vacío o solo contener espacios.",
-    })
-    .optional(),
+    }),
 
   Imagen: z
     .instanceof(File, { message: "Debe seleccionar una imagen válida." })

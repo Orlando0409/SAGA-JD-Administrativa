@@ -24,7 +24,7 @@ export const createProyecto = async (formData: FormData): Promise<Proyecto> => {
   return res.data;
 };
 
-// Editar un proyecto existente - CAMBIADO A FormData
+// Editar un proyecto existente 
 export const updateProyecto = async (id: number, formData: FormData): Promise<Proyecto> => {
   const res = await apiAuth.put(`/proyectos/update/${id}`, formData, {
     headers: {
