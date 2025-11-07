@@ -4,7 +4,7 @@ export interface Auditoria {
   Id_Auditoria: number;
   Modulo: string;
   Accion: string;
-  Nombre_Registro: string;
+  Registro_Afectado: string;
   Datos_Anteriores: string | null;
   Datos_Nuevos: string | null;
   Fecha_Accion: string | Date | null; 

@@ -8,11 +8,15 @@ import {
     getSortedRowModel,
     getFilteredRowModel,
 } from '@tanstack/react-table';
-import { User, Building} from 'lucide-react';
+import { User, Building } from 'lucide-react';
 
 // Importar hooks de solicitudes
 import { useSolicitudesFisicas } from '../Hooks/HookSolicitudesFisicas';
 import { useSolicitudesJuridicas } from '../Hooks/HookSolicitudesJuridicas';
+
+// Importar hooks unificados para cambio de estados
+import { useMarcarEnRevision } from '../Hooks/HookEstadosSolicitudes';
+import { mapearTipoSolicitud, mapearTipoPersona } from '../Service/EstadoSolicitudes';
 
 // Importar tipos
 import type { SolicitudFisica } from '../Models/ModelosFisicas';
@@ -46,8 +50,10 @@ export default function SolicitudesTable() {
     const { data: solicitudesFisicas, isLoading: loadingFisicas, isError: errorFisicos } = useSolicitudesFisicas();
     const { data: solicitudesJuridicas, isLoading: loadingJuridicas, isError: errorJuridicos } = useSolicitudesJuridicas();
 
-    // Debug INMEDIATO al cargar el componente
-  
+    // Hook unificado para cambiar estado a "En Revisión" (estado 1 → 2)
+    const marcarEnRevisionMutation = useMarcarEnRevision();
+
+
     const [globalFilter, setGlobalFilter] = useState('');
 
     // Estados para el modal de edición
@@ -77,16 +83,83 @@ export default function SolicitudesTable() {
     const pageSizeOptions = [5, 10, 20, 50];
     // Función para unificar los datos de solicitudes
     const datosUnificados = useMemo((): SolicitudUnificada[] => {
-      
+        console.log('📦 Datos originales físicas:', solicitudesFisicas);
+        console.log('📦 Datos originales jurídicas:', solicitudesJuridicas);
 
+        // Función para normalizar el nombre del tipo de solicitud
+        const normalizarTipoSolicitud = (tipo: string): 'Afiliacion' | 'Desconexion' | 'Cambio de Medidor' | 'Asociado' => {
+            const tipoLower = tipo.toLowerCase().trim();
+            let resultado: string;
 
-        
+            if (tipoLower.includes('afiliacion')) {
+                resultado = 'Afiliacion';
+            } else if (tipoLower.includes('desconexion')) {
+                resultado = 'Desconexion';
+            } else if (tipoLower.includes('cambio') && tipoLower.includes('medidor')) {
+                resultado = 'Cambio de Medidor';
+            } else if (tipoLower.includes('asociado')) {
+                resultado = 'Asociado';
+            } else {
+                resultado = tipo; // Fallback al tipo original
+                console.warn('⚠️ Tipo de solicitud no reconocido:', tipo);
+            }
 
-        // Validar que los datos sean arrays
-        const solicitudesFisicasArray = Array.isArray(solicitudesFisicas) ? solicitudesFisicas : [];
-        const solicitudesJuridicasArray = Array.isArray(solicitudesJuridicas) ? solicitudesJuridicas : [];
+            console.log(`🔄 Normalización: "${tipo}" → "${resultado}"`);
+            return resultado as any;
+        };
 
-       
+        // Función para aplanar la estructura agrupada por tipo de solicitud
+        const aplanarSolicitudes = (datos: any): any[] => {
+            if (!datos) {
+                console.log('⚠️ No hay datos para aplanar');
+                return [];
+            }
+
+            // Si ya es un array, devolverlo directamente
+            if (Array.isArray(datos)) {
+                console.log('✅ Los datos ya son un array:', datos.length, 'elementos');
+                return datos;
+            }
+
+            // Si es un objeto agrupado por tipo (Afiliacion, Desconexion, etc.)
+            console.log('📦 Datos agrupados detectados. Claves:', Object.keys(datos));
+            const solicitudesPlanas: any[] = [];
+
+            Object.keys(datos).forEach(tipoSolicitud => {
+                const solicitudesDelTipo = datos[tipoSolicitud];
+                console.log(`  📂 Procesando tipo: "${tipoSolicitud}"`, {
+                    esArray: Array.isArray(solicitudesDelTipo),
+                    cantidad: Array.isArray(solicitudesDelTipo) ? solicitudesDelTipo.length : 0,
+                    datos: solicitudesDelTipo
+                });
+
+                if (Array.isArray(solicitudesDelTipo) && solicitudesDelTipo.length > 0) {
+                    // Agregar el Tipo_Solicitud a cada solicitud si no lo tiene
+                    solicitudesDelTipo.forEach((solicitud, idx) => {
+                        const solicitudConTipo = {
+                            ...solicitud,
+                            Tipo_Solicitud: solicitud.Tipo_Solicitud || tipoSolicitud
+                        };
+                        console.log(`    ➕ Agregando solicitud ${idx + 1}:`, {
+                            Id: solicitud.Id_Solicitud,
+                            Tipo_Original: solicitud.Tipo_Solicitud,
+                            Tipo_Asignado: solicitudConTipo.Tipo_Solicitud
+                        });
+                        solicitudesPlanas.push(solicitudConTipo);
+                    });
+                }
+            });
+
+            console.log('✅ Total de solicitudes aplanadas:', solicitudesPlanas.length);
+            return solicitudesPlanas;
+        };
+
+        // Aplanar las solicitudes físicas y jurídicas
+        const solicitudesFisicasArray = aplanarSolicitudes(solicitudesFisicas);
+        const solicitudesJuridicasArray = aplanarSolicitudes(solicitudesJuridicas);
+
+        console.log('📋 Solicitudes físicas aplanadas:', solicitudesFisicasArray);
+        console.log('📋 Solicitudes jurídicas aplanadas:', solicitudesJuridicasArray);
 
         // Solicitudes Físicas
         const solicitudesFisicasUnificadas: SolicitudUnificada[] = solicitudesFisicasArray.map((solicitud: SolicitudFisica, index: number) => {
@@ -95,13 +168,13 @@ export default function SolicitudesTable() {
             // Buscar ID real en la solicitud (backend usa Id_Solicitud)
             const solicitudConId = solicitud as any;
             const idReal = solicitudConId.Id_Solicitud || solicitudConId.id || solicitudConId.Id || solicitudConId.ID;
-            
+
             return {
                 id: `fisico-${index}`, // ID interno único para la tabla
                 Id: idReal || (index + 1), // Usar ID real del backend o secuencial como fallback
                 Nombre_Completo: `${solicitud.Nombre || ''} ${solicitud.Apellido1 || ''} ${solicitud.Apellido2 || ''}`.trim() || 'Sin nombre',
-                Cedula_Documento: solicitud.Identificacion  || 'Sin identificación',
-                Tipo_Solicitud: solicitud.Tipo_Solicitud,
+                Cedula_Documento: solicitud.Identificacion || 'Sin identificación',
+                Tipo_Solicitud: normalizarTipoSolicitud(solicitud.Tipo_Solicitud || 'Afiliacion'),
                 Estado: {
                     Id_Estado: solicitud.Estado?.Id_Estado_Solicitud || 0,
                     Nombre_Estado: solicitud.Estado?.Nombre_Estado || 'Sin estado'
@@ -114,17 +187,17 @@ export default function SolicitudesTable() {
 
         // Solicitudes Jurídicas
         const solicitudesJuridicasUnificadas: SolicitudUnificada[] = solicitudesJuridicasArray.map((solicitud: SolicitudJuridica, index: number) => {
-      
+
             // Buscar ID real en la solicitud (backend usa Id_Solicitud)
             const solicitudConId = solicitud as any;
             const idReal = solicitudConId.Id_Solicitud || solicitudConId.id || solicitudConId.Id || solicitudConId.ID;
-       
+
             return {
                 id: `juridico-${index}`, // ID interno único para la tabla
                 Id: idReal || (solicitudesFisicasUnificadas.length + index + 1), // Usar ID real del backend o continuar secuencia
                 Nombre_Completo: solicitud.Razon_Social || 'Sin razón social',
                 Cedula_Documento: solicitud.Cedula_Juridica || 'Sin cédula jurídica',
-                Tipo_Solicitud: solicitud.Tipo_Solicitud,
+                Tipo_Solicitud: normalizarTipoSolicitud(solicitud.Tipo_Solicitud || 'Afiliacion'),
                 Estado: {
                     Id_Estado: solicitud.Estado?.Id_Estado_Solicitud || 0,
                     Nombre_Estado: solicitud.Estado?.Nombre_Estado || 'Sin estado'
@@ -140,22 +213,21 @@ export default function SolicitudesTable() {
             ...solicitudesJuridicasUnificadas
         ].sort((a, b) => a.Id - b.Id);
 
-        console.log(' Datos unificados finales:', resultado);
-        console.log(' IDs finales en la tabla:', resultado.map(s => ({ Id: s.Id, Cedula: s.Cedula_Documento, Tipo: s.Tipo_Persona })));
+        console.log('═══════════════════════════════════════');
+        console.log('📊 RESUMEN FINAL DE SOLICITUDES');
+        console.log('═══════════════════════════════════════');
+        console.log(`✅ Total físicas: ${solicitudesFisicasUnificadas.length}`);
+        console.log(`✅ Total jurídicas: ${solicitudesJuridicasUnificadas.length}`);
+        console.log(`✅ Total general: ${resultado.length}`);
+        console.log('═══════════════════════════════════════');
+        console.log('📋 Detalle de solicitudes:');
+        resultado.forEach((s, idx) => {
+            console.log(`  ${idx + 1}. ID:${s.Id} | ${s.Tipo_Solicitud} | ${s.Estado.Nombre_Estado} | ${s.Tipo_Persona} | ${s.Nombre_Completo}`);
+        });
+        console.log('═══════════════════════════════════════');
+
         return resultado;
     }, [solicitudesFisicas, solicitudesJuridicas]);
-
-    // Función para abrir el modal de gestión (aprobar/rechazar)
-    const handleViewDetail = (solicitud: SolicitudUnificada) => {
-        // Determinar el tipo según Tipo_Persona
-        const tipo = solicitud.Tipo_Persona === 'Físico' ? 'solicitud-fisica' : 'solicitud-juridica';
-
-        setSelectedSolicitudForGestion({
-            tipo: tipo,
-            datos: solicitud.datos_originales
-        });
-        setShowGestionModal(true);
-    };
 
     const filteredData = useMemo(() => {
         if (!globalFilter) return datosUnificados;
@@ -291,48 +363,97 @@ export default function SolicitudesTable() {
             size: 120,
         }),
         columnHelper.display({
-    id: 'acciones',
-    header: 'Acciones',
-    cell: ({ row }) => {
-        const solicitud = row.original;
+            id: 'acciones',
+            header: 'Acciones',
+            cell: ({ row }) => {
+                const solicitud = row.original;
 
-        return (
-            <div className="flex items-center gap-2">
-                {/* Ver detalles */}
-                <button
-                    onClick={(e) => {
-                        e.stopPropagation(); // Evita que se dispare el click de la fila
-                        handleViewDetail(solicitud);
-                    }}
-                      className="px-4 py-1 bg-gray-600 text-white text-xs rounded hover:bg-gray-700 transition-colors"
-                    title="Ver detalles"
-                >
-                    Ver
-                </button>
+                return (
+                    <div className="flex items-center gap-2">
+                        {/* Ver detalles */}
+                        <button
+                            onClick={async (e) => {
+                                e.stopPropagation(); // Evita que se dispare el click de la fila
 
-                {/* Editar */}
-                <button
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        setSelectedSolicitud({
-                            tipo: solicitud.Tipo_Persona === 'Físico'
-                                ? 'solicitud-fisica'
-                                : 'solicitud-juridica',
-                            datos: solicitud.datos_originales
-                        });
-                        setShowEditModal(true);
-                    }}
-                      className="px-4 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition-colors"
-                    title="Editar solicitud"
-                >
-                    Editar
-                </button>
+                                const tipo = solicitud.Tipo_Persona === 'Físico' ? 'solicitud-fisica' : 'solicitud-juridica';
 
-                
-            </div>
-        );
-    }
-}),
+                                // Si el estado actual es "Registro" (1), marcarlo como "En Revisión" (2)
+                                if (solicitud.Estado.Id_Estado === 1) {
+                                    try {
+                                        console.log('🔄 Cambiando estado 1 → 2 (En Revisión)...');
+                                        console.log('📋 ID en tabla:', solicitud.Id);
+                                        console.log('📋 Datos originales completos:', solicitud.datos_originales);
+                                        console.log('📋 Tipo Solicitud:', solicitud.Tipo_Solicitud);
+                                        console.log('📋 Tipo Persona:', solicitud.Tipo_Persona);
+
+                                        // Obtener el ID real del backend
+                                        const datosOriginales = solicitud.datos_originales as any;
+                                        const idReal = datosOriginales.Id_Solicitud || datosOriginales.id || datosOriginales.Id || datosOriginales.ID;
+                                        console.log('📋 ID REAL del backend:', idReal);
+
+                                        // ⚠️ IMPORTANTE: Usar Tipo_Entidad de los datos originales, no el tipo de la tabla
+                                        // Tipo_Entidad: 1 = Física, 2 = Jurídica
+                                        const tipoEntidad = datosOriginales.Tipo_Entidad || datosOriginales.Id_Tipo_Entidad;
+                                        const tipoPersonaReal = tipoEntidad === 1 ? 'Físico' : 'Jurídico';
+                                        console.log('📋 Tipo_Entidad del backend:', tipoEntidad, '→', tipoPersonaReal);
+
+                                        // Mapear los tipos para el servicio unificado
+                                        const tipoSolicitudMapeado = mapearTipoSolicitud(solicitud.Tipo_Solicitud);
+                                        const tipoPersonaMapeado = mapearTipoPersona(tipoPersonaReal); // ✅ Usar tipo real del backend
+
+                                        console.log('🔀 Tipo mapeado:', tipoSolicitudMapeado, tipoPersonaMapeado);
+
+                                        // Usar el hook unificado (params: tipoSolicitud, tipoPersona, solicitudId)
+                                        // IMPORTANTE: Usar el ID real del backend, no el ID de la tabla
+                                        await marcarEnRevisionMutation.mutateAsync(
+                                            tipoSolicitudMapeado,
+                                            tipoPersonaMapeado,
+                                            idReal  // ✅ Usar ID real del backend
+                                        );
+
+                                        console.log('✅ Estado cambiado exitosamente');
+                                    } catch (error) {
+                                        console.error('❌ Error al cambiar estado:', error);
+                                    }
+                                }
+
+                                // Abrir el modal
+                                setSelectedSolicitudForGestion({
+                                    tipo: tipo,
+                                    datos: solicitud.datos_originales
+                                });
+                                setShowGestionModal(true);
+                            }}
+                            disabled={marcarEnRevisionMutation.isPending}
+                            className="px-4 py-1 bg-gray-600 text-white text-xs rounded hover:bg-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            title="Ver detalles"
+                        >
+                            Ver
+                        </button>
+
+                        {/* Editar */}
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedSolicitud({
+                                    tipo: solicitud.Tipo_Persona === 'Físico'
+                                        ? 'solicitud-fisica'
+                                        : 'solicitud-juridica',
+                                    datos: solicitud.datos_originales
+                                });
+                                setShowEditModal(true);
+                            }}
+                            className="px-4 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition-colors"
+                            title="Editar solicitud"
+                        >
+                            Editar
+                        </button>
+
+
+                    </div>
+                );
+            }
+        }),
     ];
 
     // Declarar la tabla aquí, fuera de columns
@@ -349,12 +470,12 @@ export default function SolicitudesTable() {
         },
         onGlobalFilterChange: setGlobalFilter,
         onPaginationChange: setPagination,
-         initialState: {
+        initialState: {
             pagination: {
                 pageSize: 5,
                 pageIndex: 0,
             },
-         },
+        },
     });
 
     if (isLoading) {
@@ -404,148 +525,151 @@ export default function SolicitudesTable() {
             </div>
 
 
-                 <div className="bg-white rounded-2xl shadow-sm border border-sky-100 overflow-hidden max-h-[calc(100vh-300px)] overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100">
-                     <div className="overflow-x-auto">
-                         <table className="min-w-full table-auto">
-                             <thead className="bg-sky-50">
-                                 {table.getHeaderGroups().map(headerGroup => (
-                                     <tr key={headerGroup.id} className="text-left text-xs sm:text-sm text-sky-700">
-                                         {headerGroup.headers.map((header) => (
-                                             <th key={header.id} className={`px-2 sm:px-4 py-3 font-medium border-b border-sky-100 text-left`}>
-                                                 {(() => {
-                                                     if (header.isPlaceholder) {
-                                                         return null;
-                                                     }
-                                                     if (header.column.getCanSort()) {
-                                                         return (
-                                                             <button
-                                                                 type="button"
-                                                                 className={`cursor-pointer select-none flex items-center gap-2 bg-transparent border-none p-0 justify-start`}
-                                                                 onClick={header.column.getToggleSortingHandler()}
-                                                                 onKeyDown={e => {
-                                                                     if (e.key === 'Enter' || e.key === ' ') {
-                                                                         e.preventDefault();
-                                                                         header.column.getToggleSortingHandler()?.(e);
-                                                                     }
-                                                                 }}
-                                                                 tabIndex={0}
-                                                                 aria-label={`Ordenar por ${header.column.columnDef.header as string}`}
-                                                             >
-                                                                 <span className="flex items-center gap-1">
-                                                                     {header.column.columnDef.header as string}
-                                                                     {header.column.getIsSorted() === 'asc' && <MdKeyboardArrowUp className="inline" />}
-                                                                     {header.column.getIsSorted() === 'desc' && <MdKeyboardArrowDown className="inline" />}
-                                                                 </span>
-                                                             </button>
-                                                         );
-                                                     }
-                                                     return (
-                                                         <span className="text-left">
-                                                             {header.column.columnDef.header as string}
-                                                         </span>
-                                                     );
-                                                 })()}
-                                             </th>
-                                         ))}
-                                     </tr>
-                                 ))}
-                             </thead>
-                             <tbody className="bg-white divide-y divide-sky-50">
-                                 {table.getRowModel().rows.length === 0 ? (
-                                     <tr>
-                                         <td colSpan={5} className="px-2 sm:px-4 py-8 text-center text-slate-500">
-                                             {globalFilter ? 'No se encontraron actas que coincidan con la búsqueda' : 'No hay actas registradas'}
-                                         </td>
-                                     </tr>
-                                 ) : (
-                                     table.getRowModel().rows.map(row => (
-                                         <tr key={row.id} className="hover:bg-sky-50 cursor-pointer transition-colors">
-                                             {row.getVisibleCells().map((cell) => {
-                                                 let cellContent: React.ReactNode;
-     
-                                                 if (cell.column.columnDef.cell) {
-                                                     if (typeof cell.column.columnDef.cell === 'function') {
-                                                         cellContent = cell.column.columnDef.cell(cell.getContext());
-                                                     } else {
-                                                         cellContent = cell.column.columnDef.cell;
-                                                     }
-                                                 } else {
-                                                     cellContent = cell.getValue() as React.ReactNode;
-                                                 }
-     
-                                                 return (
-                                                     <td key={cell.id} className={`px-2 sm:px-4 py-3 text-xs sm:text-sm text-slate-700 align-top text-left`}>
-                                                         {cellContent}
-                                                     </td>
-                                                 );
-                                             })}
-                                         </tr>
-                                     ))
-                                 )}
-                             </tbody>
-                         </table>
-                     </div>
-     
-                     <div className="px-6 py-3 bg-gray-50 border-t border-gray-200">
-                         <div className="flex items-center justify-between">
-                             <div className="flex items-center gap-4">
-                                 <div className="flex items-center gap-2">
-                                     <span className="text-sm text-gray-700">Filas por página:</span>
-                                     <select
-                                         value={table.getState().pagination.pageSize}
-                                         onChange={(e) => {
-                                             table.setPageSize(Number(e.target.value));
-                                         }}
-                                         className="px-3 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                     >
-                                         {pageSizeOptions.map((pageSize) => (
-                                             <option key={pageSize} value={pageSize}>
-                                                 {pageSize}
-                                             </option>
-                                         ))}
-                                     </select>
-                                 </div>
-                             </div>
-                             <div className="flex items-center gap-2">
-                                 <button
-                                     onClick={() => table.setPageIndex(0)}
-                                     disabled={!table.getCanPreviousPage()}
-                                     className="p-2 rounded-md border text-gray-600 hover:text-gray-900 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                                     title="Primera página"
-                                 >
-                                     <MdKeyboardDoubleArrowLeft className="w-4 h-4" />
-                                 </button>
-                                 <button
-                                     onClick={() => table.previousPage()}
-                                     disabled={!table.getCanPreviousPage()}
-                                     className="p-2 rounded-md border text-gray-600 hover:text-gray-900 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                                     title="Página anterior"
-                                 >
-                                     <MdKeyboardArrowLeft className="w-4 h-4" />
-                                 </button>
-                                 <span className="text-sm text-gray-700">
-                                     Página {table.getState().pagination.pageIndex + 1} de {table.getPageCount()}
-                                 </span>
-                                 <button
-                                     onClick={() => table.nextPage()}
-                                     disabled={!table.getCanNextPage()}
-                                     className="p-2 rounded-md border text-gray-600 hover:text-gray-900 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                                     title="Página siguiente"
-                                 >
-                                     <MdKeyboardArrowRight className="w-4 h-4" />
-                                 </button>
-                                 <button
-                                     onClick={() => table.setPageIndex(table.getPageCount() - 1)}
-                                     disabled={!table.getCanNextPage()}
-                                     className="p-2 rounded-md border text-gray-600 hover:text-gray-900 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                                     title="Última página"
-                                 >
-                                     <MdKeyboardDoubleArrowRight className="w-4 h-4" />
-                                 </button>
-                             </div>
-                         </div>
-                     </div>
-                 </div>
+            <div className="bg-white rounded-2xl shadow-sm border border-sky-100 overflow-hidden max-h-[calc(100vh-300px)] overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100">
+                <div className="overflow-x-auto">
+                    <table className="min-w-full table-auto">
+                        <thead className="bg-sky-50">
+                            {table.getHeaderGroups().map(headerGroup => (
+                                <tr key={headerGroup.id} className="text-left text-xs sm:text-sm text-sky-700">
+                                    {headerGroup.headers.map((header, index) => (
+                                        <th key={header.id} className={`px-2 sm:px-4 py-3 font-medium border-b border-sky-100 ${index === 0 ? 'text-left' : 'text-center'
+                                            }`}>
+                                            {(() => {
+                                                if (header.isPlaceholder) {
+                                                    return null;
+                                                }
+                                                if (header.column.getCanSort()) {
+                                                    return (
+                                                        <button
+                                                            type="button"
+                                                            className={`cursor-pointer select-none flex items-center gap-2 bg-transparent border-none p-0 ${index === 0 ? 'justify-start' : 'justify-center'
+                                                                }`}
+                                                            onClick={header.column.getToggleSortingHandler()}
+                                                            onKeyDown={e => {
+                                                                if (e.key === 'Enter' || e.key === ' ') {
+                                                                    e.preventDefault();
+                                                                    header.column.getToggleSortingHandler()?.(e);
+                                                                }
+                                                            }}
+                                                            tabIndex={0}
+                                                            aria-label={`Ordenar por ${header.column.columnDef.header as string}`}
+                                                        >
+                                                            <span className="flex items-center justify-center gap-1">
+                                                                {header.column.columnDef.header as string}
+                                                                {header.column.getIsSorted() === 'asc' && <MdKeyboardArrowUp className="inline" />}
+                                                                {header.column.getIsSorted() === 'desc' && <MdKeyboardArrowDown className="inline" />}
+                                                            </span>
+                                                        </button>
+                                                    );
+                                                }
+                                                return (
+                                                    <span className={index === 0 ? 'text-left' : 'text-center'}>
+                                                        {header.column.columnDef.header as string}
+                                                    </span>
+                                                );
+                                            })()}
+                                        </th>
+                                    ))}
+                                </tr>
+                            ))}
+                        </thead>
+                        <tbody className="bg-white divide-y divide-sky-50">
+                            {table.getRowModel().rows.length === 0 ? (
+                                <tr>
+                                    <td colSpan={columns.length} className="px-2 sm:px-4 py-8 text-center text-slate-500">
+                                        {globalFilter ? 'No se encontraron resultados que coincidan con la búsqueda' : 'No hay solicitudes registradas'}
+                                    </td>
+                                </tr>
+                            ) : (
+                                table.getRowModel().rows.map(row => (
+                                    <tr key={row.id} className="hover:bg-sky-50 cursor-pointer transition-colors">
+                                        {row.getVisibleCells().map((cell, index) => {
+                                            let cellContent: React.ReactNode;
+
+                                            if (cell.column.columnDef.cell) {
+                                                if (typeof cell.column.columnDef.cell === 'function') {
+                                                    cellContent = cell.column.columnDef.cell(cell.getContext());
+                                                } else {
+                                                    cellContent = cell.column.columnDef.cell;
+                                                }
+                                            } else {
+                                                cellContent = cell.getValue() as React.ReactNode;
+                                            }
+
+                                            return (
+                                                <td key={cell.id} className={`px-2 sm:px-4 py-3 text-xs sm:text-sm text-slate-700 align-top ${index === 0 ? 'text-left' : 'text-center'
+                                                    }`}>
+                                                    {cellContent}
+                                                </td>
+                                            );
+                                        })}
+                                    </tr>
+                                ))
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div className="px-6 py-3 bg-gray-50 border-t border-gray-200">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                            <div className="flex items-center gap-2">
+                                <span className="text-sm text-gray-700">Filas por página:</span>
+                                <select
+                                    value={table.getState().pagination.pageSize}
+                                    onChange={(e) => {
+                                        table.setPageSize(Number(e.target.value));
+                                    }}
+                                    className="px-3 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                >
+                                    {pageSizeOptions.map((pageSize) => (
+                                        <option key={pageSize} value={pageSize}>
+                                            {pageSize}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <button
+                                onClick={() => table.setPageIndex(0)}
+                                disabled={!table.getCanPreviousPage()}
+                                className="p-2 rounded-md border text-gray-600 hover:text-gray-900 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                                title="Primera página"
+                            >
+                                <MdKeyboardDoubleArrowLeft className="w-4 h-4" />
+                            </button>
+                            <button
+                                onClick={() => table.previousPage()}
+                                disabled={!table.getCanPreviousPage()}
+                                className="p-2 rounded-md border text-gray-600 hover:text-gray-900 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                                title="Página anterior"
+                            >
+                                <MdKeyboardArrowLeft className="w-4 h-4" />
+                            </button>
+                            <span className="text-sm text-gray-700">
+                                Página {table.getState().pagination.pageIndex + 1} de {table.getPageCount()}
+                            </span>
+                            <button
+                                onClick={() => table.nextPage()}
+                                disabled={!table.getCanNextPage()}
+                                className="p-2 rounded-md border text-gray-600 hover:text-gray-900 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                                title="Página siguiente"
+                            >
+                                <MdKeyboardArrowRight className="w-4 h-4" />
+                            </button>
+                            <button
+                                onClick={() => table.setPageIndex(table.getPageCount() - 1)}
+                                disabled={!table.getCanNextPage()}
+                                className="p-2 rounded-md border text-gray-600 hover:text-gray-900 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                                title="Última página"
+                            >
+                                <MdKeyboardDoubleArrowRight className="w-4 h-4" />
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
             {/* Modal de edición */}
             {showEditModal && selectedSolicitud && (
@@ -574,5 +698,5 @@ export default function SolicitudesTable() {
 
         </div>
     );
-    }
+}
 

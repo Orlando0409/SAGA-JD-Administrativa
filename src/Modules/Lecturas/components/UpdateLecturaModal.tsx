@@ -13,9 +13,9 @@ export default function UpdateLecturaModal({ lectura, onClose }: UpdateLecturaMo
   const { data: tarifas } = useGetTarifas();
 
   const [formData, setFormData] = useState<UpdateLecturaDTO>({
-    Id_Tipo_Tarifa_Lectura: lectura.Tipo_Tarifa.Id_Tipo_Tarifa_Lectura,
-    Valor_Lectura_Actual: lectura.Valor_Lectura_Actual,
-    Fecha_Lectura: lectura.Fecha_Lectura.split("T")[0],
+    Id_Tipo_Tarifa: lectura.Tipo_Tarifa?.Id_Tipo_Tarifa_Lectura ?? 1,
+    Valor_Lectura: lectura.Valor_Lectura_Actual,
+    Numero_Medidor: lectura.Medidor.Numero_Medidor,
   });
 
   const [errors, setErrors] = useState({
@@ -25,16 +25,16 @@ export default function UpdateLecturaModal({ lectura, onClose }: UpdateLecturaMo
 
   useEffect(() => {
     setFormData({
-      Id_Tipo_Tarifa_Lectura: lectura.Tipo_Tarifa.Id_Tipo_Tarifa_Lectura,
-      Valor_Lectura_Actual: lectura.Valor_Lectura_Actual,
-      Fecha_Lectura: lectura.Fecha_Lectura.split("T")[0],
+      Id_Tipo_Tarifa: lectura.Tipo_Tarifa?.Id_Tipo_Tarifa_Lectura ?? 1,
+      Valor_Lectura: lectura.Valor_Lectura_Actual,
+      Numero_Medidor: lectura.Medidor.Numero_Medidor,
     });
     setErrors({ lecturaActual: "", fecha: "" });
   }, [lectura]);
 
   const handleLecturaActualChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseFloat(e.target.value);
-    setFormData({ ...formData, Valor_Lectura_Actual: value });
+    setFormData({ ...formData, Valor_Lectura: value });
 
     if (isNaN(value) || value < 0) {
       setErrors({ ...errors, lecturaActual: "Debe ingresar un valor válido mayor o igual a 0" });
@@ -48,24 +48,13 @@ export default function UpdateLecturaModal({ lectura, onClose }: UpdateLecturaMo
     }
   };
 
-  const handleFechaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setFormData({ ...formData, Fecha_Lectura: value });
-
-    if (!value) {
-      setErrors({ ...errors, fecha: "La fecha es obligatoria" });
-    } else {
-      setErrors({ ...errors, fecha: "" });
-    }
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     // Validaciones finales
     if (
-      formData.Valor_Lectura_Actual < lectura.Valor_Lectura_Anterior ||
-      !formData.Fecha_Lectura ||
+      formData.Valor_Lectura < lectura.Valor_Lectura_Anterior ||
       errors.lecturaActual ||
       errors.fecha
     ) {
@@ -80,11 +69,11 @@ export default function UpdateLecturaModal({ lectura, onClose }: UpdateLecturaMo
     onClose();
   };
 
-  const consumoCalculado = formData.Valor_Lectura_Actual - lectura.Valor_Lectura_Anterior;
+  const consumoCalculado = formData.Valor_Lectura - lectura.Valor_Lectura_Anterior;
 
   return (
     <div className="fixed inset-0 backdrop-blur-sm  bg-opacity-10 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+      <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100">
         {/* Header */}
         <div className="sticky top-0 bg-white border-b border-gray-200 p-6 flex items-center justify-between">
           <h2 className="text-2xl font-semibold text-gray-800">Editar Lectura</h2>
@@ -109,7 +98,7 @@ export default function UpdateLecturaModal({ lectura, onClose }: UpdateLecturaMo
               <div>
                 <p className="text-sm text-gray-600">Afiliado</p>
                 <p className="font-medium text-gray-800">
-                  {lectura.Medidor.Afiliado.Nombre_Afiliado}
+                  {lectura.Afiliado?.Nombre_Afiliado}
                 </p>
               </div>
             </div>
@@ -133,9 +122,9 @@ export default function UpdateLecturaModal({ lectura, onClose }: UpdateLecturaMo
             </label>
             <select
               id="tarifa"
-              value={formData.Id_Tipo_Tarifa_Lectura}
+              value={formData.Id_Tipo_Tarifa}
               onChange={(e) =>
-                setFormData({ ...formData, Id_Tipo_Tarifa_Lectura: parseInt(e.target.value) })
+                setFormData({ ...formData, Id_Tipo_Tarifa: parseInt(e.target.value) })
               }
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               required
@@ -157,7 +146,7 @@ export default function UpdateLecturaModal({ lectura, onClose }: UpdateLecturaMo
             <input
               type="number"
               id="lecturaActual"
-              value={formData.Valor_Lectura_Actual}
+              value={formData.Valor_Lectura}
               onChange={handleLecturaActualChange}
               step="0.01"
               min={lectura.Valor_Lectura_Anterior}
@@ -169,24 +158,6 @@ export default function UpdateLecturaModal({ lectura, onClose }: UpdateLecturaMo
             {errors.lecturaActual && (
               <p className="mt-1 text-sm text-red-500">{errors.lecturaActual}</p>
             )}
-          </div>
-
-          {/* Fecha de Lectura */}
-          <div>
-            <label htmlFor="fecha" className="block text-sm font-medium text-gray-700 mb-2">
-              Fecha de Lectura <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="date"
-              id="fecha"
-              value={formData.Fecha_Lectura}
-              onChange={handleFechaChange}
-              className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                errors.fecha ? "border-red-500" : "border-gray-300"
-              }`}
-              required
-            />
-            {errors.fecha && <p className="mt-1 text-sm text-red-500">{errors.fecha}</p>}
           </div>
 
           {/* Consumo Calculado */}
@@ -208,7 +179,7 @@ export default function UpdateLecturaModal({ lectura, onClose }: UpdateLecturaMo
                 updateLecturaMutation.isPending ||
                 !!errors.lecturaActual ||
                 !!errors.fecha ||
-                formData.Valor_Lectura_Actual < lectura.Valor_Lectura_Anterior
+                formData.Valor_Lectura < lectura.Valor_Lectura_Anterior
               }
               className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed font-medium"
             >
@@ -217,7 +188,7 @@ export default function UpdateLecturaModal({ lectura, onClose }: UpdateLecturaMo
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-6 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors font-medium"
+             className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors"
             >
               Cancelar
             </button>

@@ -1,16 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, User, Check, XCircle } from 'lucide-react';
-import { useAlerts } from '@/Modules/Global/context/AlertContext';
-import { useAprobarSolicitudAfiliacion, useRechazarSolicitudAfiliacion } from '../Hooks/Fisico Update/HookAfiliadoFisico';
 import type { SolicitudFisica } from '../Models/ModelosFisicas';
 import type { SolicitudJuridica } from '../Models/ModelosJuridicos';
-import { useAprobarSolicitudCambioMedidor, useRechazarSolicitudCambioMedidor } from '../Hooks/Fisico Update/HookCambioMedidorFisico';
-import { useAprobarSolicitudAsociado, useRechazarSolicitudAsociado } from '../Hooks/Fisico Update/HookAsociadoFisico';
-import { useAprobarSolicitudDesconexion, useRechazarSolicitudDesconexion } from '../Hooks/Fisico Update/HookDesconexionMedidorFisico';
-import { useAprobarSolicitudAfiliacionJuridica, useRechazarSolicitudAfiliacionJuridica } from '../Hooks/Juridico Update/HookAfiliadoJuridico';
-import { useAprobarSolicitudAsociadoJuridico, useRechazarSolicitudAsociadoJuridico } from '../Hooks/Juridico Update/HookAsociadoJuridico';
-import { useAprobarSolicitudCambioMedidorJuridica, useRechazarSolicitudCambioMedidorJuridica } from '../Hooks/Juridico Update/HookCambioMedidorJuridico';
-import { useAprobarSolicitudDesconexionJuridica, useRechazarSolicitudDesconexionJuridica } from '../Hooks/Juridico Update/HookDesconexionMedidor';
+import ModalMedidor from './ModalMedidor';
+import { useMarcarEnRevision, useAprobarYEnEspera, useCompletar, useRechazar } from '../Hooks/HookEstadosSolicitudes';
+import { mapearTipoSolicitud, mapearTipoPersona } from '../Service/EstadoSolicitudes';
+import type { TipoSolicitud, TipoPersona } from '../Types/EstadoSolicitudes';
+import { useAlerts } from '@/Modules/Global/context/AlertContext';
 
 interface ModalSolicitudProps {
     isOpen: boolean;
@@ -24,31 +20,17 @@ interface ModalSolicitudProps {
 
 //Modal simple para gestionar estados de solicitudes
 const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solicitud }) => {
-    // Hooks para manejar los cambios de estado
-    const aprobarAfiliacionMutation = useAprobarSolicitudAfiliacion();
-    const rechazarAfiliacionMutation = useRechazarSolicitudAfiliacion();
-    const aprobarCambioMedidorMutation = useAprobarSolicitudCambioMedidor();
-    const rechazarCambioMedidorMutation = useRechazarSolicitudCambioMedidor();
-    const aprobarAsociadoMutation = useAprobarSolicitudAsociado();
-    const rechazarAsociadoMutation = useRechazarSolicitudAsociado();
-    const aprobarDesconexionMutation = useAprobarSolicitudDesconexion();
-    const rechazarDesconexionMutation = useRechazarSolicitudDesconexion();
-    const aprobarAfiliacionJuridicaMutation = useAprobarSolicitudAfiliacionJuridica();
-    const rechazarAfiliacionJuridicaMutation = useRechazarSolicitudAfiliacionJuridica();
-    const aprobarAsociadoJuridicoMutation = useAprobarSolicitudAsociadoJuridico();
-    const rechazarAsociadoJuridicoMutation = useRechazarSolicitudAsociadoJuridico();
-    const aprobarCambioMedidorJuridicoMutation = useAprobarSolicitudCambioMedidorJuridica();
-    const rechazarCambioMedidorJuridicoMutation = useRechazarSolicitudCambioMedidorJuridica();
-    const aprobarDesconexionJuridicoMutation = useAprobarSolicitudDesconexionJuridica();
-    const rechazarDesconexionJuridicoMutation = useRechazarSolicitudDesconexionJuridica();
-    
-    // Hook para notificaciones
-    const { showSuccess, showError } = useAlerts();
-    
-    // Estado para controlar el modal de confirmación
-    const [showConfirmModal, setShowConfirmModal] = useState(false);
-    const [showRejectModal, setShowRejectModal] = useState(false);
-    
+    // Estado para controlar el modal de asignación de medidor
+    const [showModalMedidor, setShowModalMedidor] = useState(false);
+
+    // 🎯 HOOKS UNIFICADOS - Reemplaza a los 16+ hooks anteriores
+    const marcarEnRevisionMutation = useMarcarEnRevision();
+    const aprobarYEnEsperaMutation = useAprobarYEnEspera();
+    const completarMutation = useCompletar();
+    const rechazarMutation = useRechazar();
+
+    // Sistema de alertas (para mensajes de advertencia)
+    const { showWarning } = useAlerts();
     // Extraer información básica de la solicitud
     const getSolicitudInfo = () => {
         console.log(' Datos completos de la solicitud:', solicitud.datos);
@@ -68,13 +50,20 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
                 solicitudId = datos.Cedula || `temp-${Date.now()}`;
             }
 
+            // ⚠️ IMPORTANTE: Usar Tipo_Entidad de los datos originales
+            // Tipo_Entidad: 1 = Física, 2 = Jurídica
+            const tipoEntidad = datos.Tipo_Entidad || datos.Id_Tipo_Entidad || 1;
+            const tipoPersonaReal = tipoEntidad === 1 ? 'Físico' : 'Jurídico';
+            console.log('📋 Modal - Tipo_Entidad:', tipoEntidad, '→', tipoPersonaReal);
+
             return {
                 id: solicitudId,
                 nombre: `${datos.Nombre || ''} ${datos.Apellido1 || ''} ${datos.Apellido2 || ''}`.trim() || 'Sin nombre',
                 documento: datos.Cedula || 'Sin cédula',
-                tipo: 'Física',
+                tipo: tipoPersonaReal, // ✅ Usar tipo real del backend
                 tipoSolicitud: datos.Tipo_Solicitud || 'Sin tipo',
                 estado: datos.Estado?.Nombre_Estado || 'Sin estado',
+                estadoId: datos.Estado?.Id_Estado_Solicitud || 0,
                 // Información personal completa
                 Nombre: datos.Nombre || 'No especificado',
                 Apellido1: datos.Apellido1 || 'No especificado',
@@ -108,16 +97,20 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
                 solicitudId = datos.Cedula_Juridica || `temp-${Date.now()}`;
             }
 
-
-            
+            // ⚠️ IMPORTANTE: Usar Tipo_Entidad de los datos originales
+            // Tipo_Entidad: 1 = Física, 2 = Jurídica
+            const tipoEntidad = datos.Tipo_Entidad || datos.Id_Tipo_Entidad || 2;
+            const tipoPersonaReal = tipoEntidad === 1 ? 'Físico' : 'Jurídico';
+            console.log('📋 Modal - Tipo_Entidad:', tipoEntidad, '→', tipoPersonaReal);
 
             return {
                 id: solicitudId,
                 nombre: datos.Razon_Social || 'Sin razón social',
                 documento: datos.Cedula_Juridica || 'Sin cédula jurídica',
-                tipo: 'Jurídica',
+                tipo: tipoPersonaReal, // ✅ Usar tipo real del backend
                 tipoSolicitud: datos.Tipo_Solicitud || 'Sin tipo',
                 estado: datos.Estado?.Nombre_Estado || 'Sin estado',
+                estadoId: datos.Estado?.Id_Estado_Solicitud || 0,
                 // Información empresarial completa
                 Razon_Social: datos.Razon_Social || 'Sin razón social',
                 Cedula_Juridica: datos.Cedula_Juridica || 'Sin cédula jurídica',
@@ -142,156 +135,128 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
 
     const info = getSolicitudInfo();
 
-    // Función para manejar aprobación por casos
-    const handleAprobar = async () => {
-        setShowConfirmModal(true);
-    };
+    // useEffect para cambiar automáticamente a estado 2 (En Revisión) cuando se abre el modal
+    useEffect(() => {
+        const cambiarAEnRevision = async () => {
+            if (isOpen && info.estadoId === 1) {
+                try {
+                    // Mapear los tipos a los valores internos
+                    const tipoSolicitud: TipoSolicitud = mapearTipoSolicitud(info.tipoSolicitud);
+                    const tipoPersona: TipoPersona = mapearTipoPersona(info.tipo);
 
-    // Función para confirmar la aprobación
-    const confirmarAprobacion = async () => {
-            try {
-                const tipoSolicitud = solicitud.tipoSolicitud || info.tipoSolicitud;
-                const tipoPersona = solicitud.tipo; // 'solicitud-fisica' o 'solicitud-juridica'
+                    console.log('🔄 Cambiando solicitud a estado En Revisión...');
+                    console.log(`📋 Tipo: ${tipoSolicitud} | Persona: ${tipoPersona}`);
 
-                console.log(` Aprobando solicitud: Tipo Persona: ${tipoPersona}, Tipo Solicitud: ${tipoSolicitud}`);
-
-                // Determinar qué mutación usar basado en tipo de persona y tipo de solicitud
-                if (tipoPersona === 'solicitud-fisica') {
-                    switch (tipoSolicitud) {
-                        case 'Afiliacion':
-                            await aprobarAfiliacionMutation.mutateAsync(info.id);
-                            break;
-                        case 'Cambio de Medidor':
-                            await aprobarCambioMedidorMutation.mutateAsync(info.id);
-                            break;
-                        case 'Asociado':
-                            await aprobarAsociadoMutation.mutateAsync(info.id);
-                            break;
-                        case 'Desconexion':
-                            await aprobarDesconexionMutation.mutateAsync(info.id);
-                            break;
-                        default:
-                            // Fallback a afiliación física si no se especifica tipo
-                            await aprobarAfiliacionMutation.mutateAsync(info.id);
-                            console.warn(' Tipo de solicitud física no especificado, usando Afiliación como fallback');
-                    }
-                } else if (tipoPersona === 'solicitud-juridica') {
-                    switch (tipoSolicitud) {
-                        case 'Afiliacion':
-                            await aprobarAfiliacionJuridicaMutation.mutateAsync(info.id);
-                            break;
-                        case 'Cambio de Medidor':
-                            await aprobarCambioMedidorJuridicoMutation.mutateAsync(info.id);
-                            break;
-                        case 'Asociado':
-                            await aprobarAsociadoJuridicoMutation.mutateAsync(info.id);
-                            break;
-                        case 'Desconexion':
-                            await aprobarDesconexionJuridicoMutation.mutateAsync(info.id);
-                            break;
-                        default:
-                            // Fallback a afiliación jurídica si no se especifica tipo
-                            await aprobarAfiliacionJuridicaMutation.mutateAsync(info.id);
-                            console.warn(' Tipo de solicitud jurídica no especificado, usando Afiliación como fallback');
-                    }
-                } else {
-                    console.error(' Tipo de persona no reconocido:', tipoPersona);
-                    throw new Error('Tipo de solicitud no válido');
+                    await marcarEnRevisionMutation.mutateAsync(tipoSolicitud, tipoPersona, info.id);
+                    console.log('✅ Solicitud cambiada a En Revisión');
+                } catch (error) {
+                    console.error('❌ Error al cambiar a En Revisión:', error);
                 }
-
-                showSuccess('Solicitud Aprobada', `La solicitud de ${info.nombre} ha sido aprobada exitosamente`);
-                onClose(); // Cerrar modal después del éxito
-                setShowConfirmModal(false); // Cerrar modal de confirmación
-            } catch (error) {
-                console.error('Error al aprobar:', error);
-                showError('Error al Aprobar', 'Hubo un problema al aprobar la solicitud. Intente nuevamente.');
-                setShowConfirmModal(false); // Cerrar modal de confirmación aunque haya error
             }
+        };
+
+        cambiarAEnRevision();
+    }, [isOpen, info.estadoId, info.id, info.tipoSolicitud, info.tipo]);
+
+    // Función para manejar aprobación por casos usando hooks unificados
+    const handleCambiarEstado = async () => {
+        const estadoActual = info.estadoId;
+
+        // Mapear los tipos
+        const tipoSolicitud: TipoSolicitud = mapearTipoSolicitud(info.tipoSolicitud);
+        const tipoPersona: TipoPersona = mapearTipoPersona(info.tipo);
+
+        // Verificar si requiere asignación de medidor (Afiliación o Cambio de Medidor)
+        const requiereAsignacionMedidor = info.tipoSolicitud === 'Afiliacion' || info.tipoSolicitud === 'Cambio de Medidor';
+
+        // Estado 2 (En Revisión) → Decidir flujo según tipo de solicitud
+        if (estadoActual === 2) {
+            if (requiereAsignacionMedidor) {
+                // Para Afiliación y Cambio de Medidor: Preguntar y si confirma, marcar En Espera y abrir modal de medidor
+                const ok = window.confirm(`¿Desea aprobar la solicitud de ${info.nombre} y ponerla en espera?`);
+                if (!ok) return;
+
+                try {
+                    console.log(`✅ Aprobando y poniendo en espera: ${tipoSolicitud} - ${tipoPersona}`);
+                    await aprobarYEnEsperaMutation.mutateAsync(tipoSolicitud, tipoPersona, info.id);
+                } catch (error) {
+                    console.error('❌ Error al marcar en aprobada y en espera:', error);
+                }
+            } else {
+                // Para Asociado y Desconexión: Estado 2 → Estado 4 (Completada) directamente
+                const ok = window.confirm(`¿Desea completar la solicitud de ${info.nombre}? (no requiere asignación de medidor)`);
+                if (!ok) return;
+
+                try {
+                    console.log(`🎉 Completando solicitud ${info.tipoSolicitud} directamente desde Estado 2 (sin medidor)`);
+                    await completarMutation.mutateAsync(tipoSolicitud, tipoPersona, info.id);
+                    onClose();
+                } catch (error) {
+                    console.error('❌ Error al completar solicitud:', error);
+                }
+            }
+        }
+        // Estado 3 (Aprobada y en espera) → Solo llega aquí si requiere medidor (Afiliación o Cambio de Medidor)
+        else if (estadoActual === 3) {
+            // Abrir modal de medidor directamente → Al asignar cambia a Estado 4 (Completada)
+            console.log('Abriendo modal de medidor para asignar');
+            setShowModalMedidor(true);
+        }
+        // Si ya está completada (Estado 4)
+        else if (estadoActual === 4) {
+            showWarning('Solicitud completada', 'Esta solicitud ya está completada');
+        }
     };
 
-    // Función para manejar rechazo por casos
+    // Nueva función para aprobar después de asignar el medidor usando hooks unificados
+    const aprobarSolicitudDespuesDeAsignar = async () => {
+        try {
+            // Mapear los tipos a los valores internos
+            const tipoSolicitudInterno: TipoSolicitud = mapearTipoSolicitud(solicitud.tipoSolicitud || info.tipoSolicitud);
+            const tipoPersonaInterno: TipoPersona = mapearTipoPersona(info.tipo);
+
+            console.log(`🎉 Completando solicitud: ${tipoSolicitudInterno} - ${tipoPersonaInterno}`);
+
+            // Usar el hook unificado para completar (Estado 3 → 4)
+            await completarMutation.mutateAsync(tipoSolicitudInterno, tipoPersonaInterno, info.id);
+
+            onClose(); // Cerrar modal principal después de aprobar
+        } catch (error) {
+            console.error('❌ Error al completar solicitud:', error);
+        }
+    };
+
+    // Función para manejar rechazo usando hooks unificados
     const handleRechazar = async () => {
-        setShowRejectModal(true);
+        const ok = window.confirm(`¿Está seguro de RECHAZAR la solicitud de ${info.nombre}?`);
+        if (!ok) return;
+
+        try {
+            // Mapear los tipos a los valores internos
+            const tipoSolicitudInterno: TipoSolicitud = mapearTipoSolicitud(solicitud.tipoSolicitud || info.tipoSolicitud);
+            const tipoPersonaInterno: TipoPersona = mapearTipoPersona(info.tipo);
+
+            console.log(`❌ Rechazando solicitud: ${tipoSolicitudInterno} - ${tipoPersonaInterno}`);
+
+            // Usar el hook unificado para rechazar (Cualquier estado → 5)
+            await rechazarMutation.mutateAsync(tipoSolicitudInterno, tipoPersonaInterno, info.id);
+
+            onClose(); // Cerrar modal después del éxito
+        } catch (error) {
+            console.error('❌ Error al rechazar:', error);
+        }
     };
 
-    // Función para confirmar el rechazo
-    const confirmarRechazo = async () => {
-            try {
-                const tipoSolicitud = solicitud.tipoSolicitud || info.tipoSolicitud;
-                const tipoPersona = solicitud.tipo; // 'solicitud-fisica' o 'solicitud-juridica'
-
-                console.log(` Rechazando solicitud: Tipo Persona: ${tipoPersona}, Tipo Solicitud: ${tipoSolicitud}`);
-
-                // Determinar qué mutación usar basado en tipo de persona y tipo de solicitud
-                if (tipoPersona === 'solicitud-fisica') {
-                    switch (tipoSolicitud) {
-                        case 'Afiliacion':
-                            await rechazarAfiliacionMutation.mutateAsync(info.id);
-                            break;
-                        case 'Cambio de Medidor':
-                            await rechazarCambioMedidorMutation.mutateAsync(info.id);
-                            break;
-                        case 'Asociado':
-                            await rechazarAsociadoMutation.mutateAsync(info.id);
-                            break;
-                        case 'Desconexion':
-                            await rechazarDesconexionMutation.mutateAsync(info.id);
-                            break;
-                        default:
-                            // Fallback a afiliación física si no se especifica tipo
-                            await rechazarAfiliacionMutation.mutateAsync(info.id);
-                            console.warn(' Tipo de solicitud física no especificado, usando Afiliación como fallback');
-                    }
-                } else if (tipoPersona === 'solicitud-juridica') {
-                    switch (tipoSolicitud) {
-                        case 'Afiliacion':
-                            await rechazarAfiliacionJuridicaMutation.mutateAsync(info.id);
-                            break;
-                        case 'Cambio de Medidor':
-                            await rechazarCambioMedidorJuridicoMutation.mutateAsync(info.id);
-                            break;
-                        case 'Asociado':
-                            await rechazarAsociadoJuridicoMutation.mutateAsync(info.id);
-                            break;
-                        case 'Desconexion':
-                            await rechazarDesconexionJuridicoMutation.mutateAsync(info.id);
-                            break;
-                        default:
-                            // Fallback a afiliación jurídica si no se especifica tipo
-                            await rechazarAfiliacionJuridicaMutation.mutateAsync(info.id);
-                            console.warn(' Tipo de solicitud jurídica no especificado, usando Afiliación como fallback');
-                    }
-                } else {
-                    console.error(' Tipo de persona no reconocido:', tipoPersona);
-                    throw new Error('Tipo de solicitud no válido');
-                }
-
-                showSuccess('Solicitud Rechazada', `La solicitud de ${info.nombre} ha sido rechazada`);
-                onClose(); // Cerrar modal después del éxito
-                setShowRejectModal(false); // Cerrar modal de confirmación
-            } catch (error) {
-                console.error('Error al rechazar:', error);
-                showError('Error al Rechazar', 'Hubo un problema al rechazar la solicitud. Intente nuevamente.');
-                setShowRejectModal(false); // Cerrar modal de confirmación aunque haya error
-            }
-    };
-
+    // 🎯 Estado de carga unificado - Mucho más simple ahora
     const isLoading =
-        // Mutaciones físicas
-        aprobarAfiliacionMutation.isPending || rechazarAfiliacionMutation.isPending ||
-        aprobarCambioMedidorMutation.isPending || rechazarCambioMedidorMutation.isPending ||
-        aprobarAsociadoMutation.isPending || rechazarAsociadoMutation.isPending ||
-        aprobarDesconexionMutation.isPending || rechazarDesconexionMutation.isPending ||
-        // Mutaciones jurídicas
-        aprobarAfiliacionJuridicaMutation.isPending || rechazarAfiliacionJuridicaMutation.isPending ||
-        aprobarCambioMedidorJuridicoMutation.isPending || rechazarCambioMedidorJuridicoMutation.isPending ||
-        aprobarAsociadoJuridicoMutation.isPending || rechazarAsociadoJuridicoMutation.isPending ||
-        aprobarDesconexionJuridicoMutation.isPending || rechazarDesconexionJuridicoMutation.isPending;
+        marcarEnRevisionMutation.isPending ||
+        aprobarYEnEsperaMutation.isPending ||
+        completarMutation.isPending ||
+        rechazarMutation.isPending;
 
     if (!isOpen) return null;
 
     return (
-        <>
             <div className="fixed inset-0 backdrop-blur bg-opacity-10 flex items-center justify-center z-50 p-4">
                 <div className="bg-white rounded-lg shadow-xl border border-gray-200 w-full max-w-3xl max-h-[90vh] overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100">
                 {/* Header */}
@@ -480,182 +445,79 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
                         </div>
                     </div>
 
-              
+
                 </div>
 
                 <div className="sticky bottom-0 flex justify-end gap-3 p-6 border-t bg-gray-50 z-10">
-                            <button
-                                onClick={handleAprobar}
-                                disabled={isLoading || info.estado === 'Aprobada'}
-                                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm hover:shadow-md flex items-center gap-2 text-sm font-medium"
-                            >
-                                {isLoading ? (
-                                    <>
-                                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                                        Aprobando...
-                                    </>
-                                ) : (
-                                    <>
-                                        <Check className="w-4 h-4" />
-                                        Aprobar Solicitud
-                                    </>
-                                )}
-                            </button>
+                    <button
+                        onClick={handleCambiarEstado}
+                        disabled={isLoading || info.estadoId === 4 || info.estadoId === 5}
+                        className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm hover:shadow-md flex items-center gap-2 text-sm font-medium"
+                    >
+                        {isLoading ? (
+                            <>
+                                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                {info.estadoId === 2 ? 'Procesando...' : 'Aprobando...'}
+                            </>
+                        ) : (
+                            <>
+                                <Check className="w-4 h-4" />
+                                {info.estadoId === 2
+                                    ? (info.tipoSolicitud === 'Afiliacion' || info.tipoSolicitud === 'Cambio de Medidor'
+                                        ? 'Aprobar y poner en espera'
+                                        : 'Completar solicitud')
+                                    : info.estadoId === 3
+                                        ? 'Completar y asignar medidor'
+                                        : 'Aprobar Solicitud'}
+                            </>
+                        )}
+                    </button>
 
-                            <button
-                                onClick={handleRechazar}
-                                disabled={isLoading || info.estado === 'Aprobada' || info.estado === 'Rechazada'}
-                                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm hover:shadow-md flex items-center gap-2 text-sm font-medium"
-                            >
-                                {isLoading ? (
-                                    <>
-                                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                                        Rechazando...
-                                    </>
-                                ) : (
-                                    <>
-                                        <XCircle className="w-4 h-4" />
-                                        Rechazar Solicitud
-                                    </>
-                                )}
-                            </button>
+                    <button
+                        onClick={handleRechazar}
+                        disabled={isLoading || info.estadoId === 4 || info.estadoId === 5}
+                        className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm hover:shadow-md flex items-center gap-2 text-sm font-medium"
+                    >
+                        {isLoading ? (
+                            <>
+                                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                Rechazando...
+                            </>
+                        ) : (
+                            <>
+                                <XCircle className="w-4 h-4" />
+                                Rechazar solicitud
+                            </>
+                        )}
+                    </button>
 
-                            <button
-                                onClick={onClose}
-                                disabled={isLoading}
-                                className="px-4 py-2 text-gray-600 hover:text-gray-800 bg-gray-100 hover:bg-gray-200 rounded-lg transition-all disabled:opacity-50 text-sm font-medium shadow-sm hover:shadow-md"
-                            >
-                                Cancelar
-                            </button>
-                        
-                    </div>
+                    <button
+                        onClick={onClose}
+                        disabled={isLoading}
+                        className="px-4 py-2 text-gray-600 hover:text-gray-800 bg-gray-100 hover:bg-gray-200 rounded-lg transition-all disabled:opacity-50 text-sm font-medium shadow-sm hover:shadow-md"
+                    >
+                        Cancelar
+                    </button>
+
                 </div>
             </div>
 
-            {/* Modal de confirmación para aprobar solicitud */}
-            {showConfirmModal && (
-                <div className="fixed inset-0 bg-white/5 backdrop-blur-sm flex items-center justify-center z-[60] p-4">
-                    <div className="bg-white rounded-2xl shadow-2xl border border-gray-200 w-full max-w-sm transform transition-all duration-300 scale-100">
-                        {/* Header del modal */}
-                        <div className="p-4 border-b border-gray-100">
-                            <div className="flex items-center gap-2">
-                                <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                                    <Check className="w-4 h-4 text-green-600" />
-                                </div>
-                                <div>
-                                    <h3 className="text-lg font-bold text-gray-900">
-                                        Confirmar Aprobación
-                                    </h3>
-                                    <p className="text-xs text-gray-500">
-                                        Esta acción no se puede deshacer
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Contenido del modal */}
-                        <div className="p-4">
-                            <div className="text-center">
-                                <div className="mb-3">
-                                    <div className="w-12 h-12 bg-gradient-to-br from-green-100 to-emerald-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                                        <User className="w-6 h-6 text-green-600" />
-                                    </div>
-                                    <p className="text-sm text-gray-900 font-medium mb-2">
-                                        ¿Está seguro de <span className="font-bold text-green-600">APROBAR</span> la solicitud de
-                                    </p>
-                                    <p className="text-lg font-bold text-gray-900 bg-gray-50 px-3 py-2 rounded-lg">
-                                        {info.nombre}
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Footer del modal */}
-                        <div className="p-4 border-t border-gray-100 bg-gray-50 rounded-b-2xl">
-                            <div className="flex flex-col gap-2">
-                                <button
-                                    onClick={confirmarAprobacion}
-                                    className="w-full px-4 py-2 text-white bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 rounded-lg transition-all duration-200 font-medium shadow-lg hover:shadow-xl transform hover:scale-105"
-                                >
-                                    <div className="flex items-center justify-center gap-2">
-                                        <Check className="w-4 h-4" />
-                                        Sí, Aprobar
-                                    </div>
-                                </button>
-                                <button
-                                    onClick={() => setShowConfirmModal(false)}
-                                    className="w-full px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-all duration-200 font-medium shadow-sm"
-                                >
-                                    Cancelar
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            {/* Modal de Asignación de Medidor */}
+            {showModalMedidor && (
+                <ModalMedidor
+                    isOpen={showModalMedidor}
+                    onClose={() => {
+                        setShowModalMedidor(false);
+                        // No cerrar el modal de solicitud automáticamente
+                    }}
+                    onMedidorAsignado={aprobarSolicitudDespuesDeAsignar}
+                    afiliado={{
+                        tipo: solicitud.tipo,
+                        datos: solicitud.datos
+                    }}
+                />
             )}
-
-            {/* Modal de confirmación para rechazar solicitud */}
-            {showRejectModal && (
-                <div className="fixed inset-0 bg-white/5 backdrop-blur-sm flex items-center justify-center z-[60] p-4">
-                    <div className="bg-white rounded-2xl shadow-2xl border border-gray-200 w-full max-w-sm transform transition-all duration-300 scale-100">
-                        {/* Header del modal */}
-                        <div className="p-4 border-b border-gray-100">
-                            <div className="flex items-center gap-2">
-                                <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
-                                    <XCircle className="w-4 h-4 text-red-600" />
-                                </div>
-                                <div>
-                                    <h3 className="text-lg font-bold text-gray-900">
-                                        Confirmar Rechazo
-                                    </h3>
-                                    <p className="text-xs text-gray-500">
-                                        Esta acción no se puede deshacer
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Contenido del modal */}
-                        <div className="p-4">
-                            <div className="text-center">
-                                <div className="mb-3">
-                                    <div className="w-12 h-12 bg-gradient-to-br from-red-100 to-rose-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                                        <User className="w-6 h-6 text-red-600" />
-                                    </div>
-                                    <p className="text-sm text-gray-900 font-medium mb-2">
-                                        ¿Está seguro de <span className="font-bold text-red-600">RECHAZAR</span> la solicitud de
-                                    </p>
-                                    <p className="text-lg font-bold text-gray-900 bg-gray-50 px-3 py-2 rounded-lg">
-                                        {info.nombre}
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Footer del modal */}
-                        <div className="p-4 border-t border-gray-100 bg-gray-50 rounded-b-2xl">
-                            <div className="flex flex-col gap-2">
-                                <button
-                                    onClick={confirmarRechazo}
-                                    className="w-full px-4 py-2 text-white bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 rounded-lg transition-all duration-200 font-medium shadow-lg hover:shadow-xl transform hover:scale-105"
-                                >
-                                    <div className="flex items-center justify-center gap-2">
-                                        <XCircle className="w-4 h-4" />
-                                        Sí, Rechazar
-                                    </div>
-                                </button>
-                                <button
-                                    onClick={() => setShowRejectModal(false)}
-                                    className="w-full px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-all duration-200 font-medium shadow-sm"
-                                >
-                                    Cancelar
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
-        </>
+        </div>
     );
 };
 

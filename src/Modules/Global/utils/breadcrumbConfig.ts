@@ -33,7 +33,7 @@ export const breadcrumbConfig: BreadcrumbConfig = {
     label: 'Gestión de Usuarios',
     icon: FaUsers as LucideIcon,
   },
-  '/Abonados': {
+  '/Afiliados': {
     label: 'Gestión de Abonados',
     icon: FaUserFriends as LucideIcon,
   },
@@ -118,8 +118,8 @@ export const breadcrumbConfig: BreadcrumbConfig = {
     icon: FaTachometerAlt as LucideIcon,
   },
 
-  // Sub-ruta de Abonados
-  '/Lecturas': {
+  // Sub-ruta de Afiliados
+  '/Afiliados/Lecturas': {
     label: 'Lecturas',
     icon: IoDocumentTextOutline as LucideIcon,
   },

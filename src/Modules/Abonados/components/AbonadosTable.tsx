@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { createColumnHelper, getCoreRowModel, getFilteredRowModel, getSortedRowModel, getPaginationRowModel, useReactTable, type ColumnDef } from '@tanstack/react-table';
-import { User, Building, Plus, BookOpen } from 'lucide-react';
+import { User, Building, Plus } from 'lucide-react';
 import { MdKeyboardArrowLeft, MdKeyboardArrowRight, MdKeyboardDoubleArrowLeft, MdKeyboardDoubleArrowRight, MdKeyboardArrowDown, MdKeyboardArrowUp } from 'react-icons/md';
 import { LuSearch } from 'react-icons/lu';
 import { useNavigate } from '@tanstack/react-router';
@@ -9,7 +9,7 @@ import { useAfiliadosJuridicos } from '../Hook/HookAfiliadoJuridico';
 import { formatCedulaJuridica } from '../Helper/formatUtils';
 import DetailAbonados from './DetailAfiliado';
 import CreateModal from './CreateModal';
-import EditModal from './EditModal'; // ✅ Agregar import
+import EditModal from './EditModal'; 
 import {
   AlertDialog,
   AlertDialogTrigger,
@@ -166,7 +166,7 @@ export default function AbonadosTable() {
                     if (!datosOriginales.Nombre && !datosOriginales.Apellido1) {
                         return 'Datos no disponibles';
                     }
-                    const nombreCompleto = `${datosOriginales.Nombre || ''} ${datosOriginales.Apellido1 || ''} ${datosOriginales.Apellido2 || ''}`.trim();
+                    const nombreCompleto = `${datosOriginales.Nombre || ''} ${datosOriginales.Apellido1 || ''} ${datosOriginales.Apellido2?.includes('No Proporcionado') ? '' : datosOriginales.Apellido2 || ''}`.trim();
                     return nombreCompleto || 'Sin nombre';
                 } else {
                     const datosOriginales = fila.datos_originales as AfiliadoJuridico;
@@ -433,7 +433,7 @@ export default function AbonadosTable() {
                             onClick={() => navigate({ to: '/Afiliados/Lecturas' })}
                             className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-md flex items-center gap-2 transition-colors"
                         >
-                            <BookOpen className="w-4 h-4" />
+             
                             Lecturas
                         </button>
                     </div>

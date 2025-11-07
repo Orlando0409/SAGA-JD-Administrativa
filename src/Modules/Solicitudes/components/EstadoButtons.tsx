@@ -1,7 +1,6 @@
 import React from 'react';
 import {
-
-    useAprobarSolicitudAfiliacion,
+    useCompletarSolicitudAfiliacion,
     useMutateEstadoSolicitud,
     useRechazarSolicitudAfiliacion
 } from '../Hooks/Fisico Update/HookAfiliadoFisico';
@@ -12,9 +11,6 @@ import { useAprobarSolicitudAfiliacionJuridica, useRechazarSolicitudAfiliacionJu
 import { useAprobarSolicitudAsociadoJuridico, useRechazarSolicitudAsociadoJuridico } from '../Hooks/Juridico Update/HookAsociadoJuridico';
 import { useAprobarSolicitudCambioMedidorJuridica, useRechazarSolicitudCambioMedidorJuridica } from '../Hooks/Juridico Update/HookCambioMedidorJuridico';
 import { useAprobarSolicitudDesconexionJuridica, useRechazarSolicitudDesconexionJuridica } from '../Hooks/Juridico Update/HookDesconexionMedidor';
-
-
-
 
 interface EstadoButtonsProps {
     solicitudId: string | number;
@@ -36,7 +32,7 @@ const EstadoButtons: React.FC<EstadoButtonsProps> = ({
     onEstadoChanged
 }) => {
     // Hooks de mutación específicos
-    const aprobarAfiliacionMutation = useAprobarSolicitudAfiliacion();
+    const completarAfiliacionMutation = useCompletarSolicitudAfiliacion();
     const rechazarAfiliacionMutation = useRechazarSolicitudAfiliacion();
     const aprobarCambioMedidorMutation = useAprobarSolicitudCambioMedidor();
     const rechazarCambioMedidorMutation = useRechazarSolicitudCambioMedidor();
@@ -65,7 +61,7 @@ const EstadoButtons: React.FC<EstadoButtonsProps> = ({
                 if (tipoPersona === 'solicitud-fisica') {
                     switch (tipoSolicitud) {
                         case 'Afiliacion':
-                            await aprobarAfiliacionMutation.mutateAsync(solicitudId);
+                            await completarAfiliacionMutation.mutateAsync(solicitudId);
                             break;
                         case 'Cambio de Medidor':
                             await aprobarCambioMedidorMutation.mutateAsync(solicitudId);
@@ -78,7 +74,7 @@ const EstadoButtons: React.FC<EstadoButtonsProps> = ({
                             break;
                         default:
                             console.warn('⚠️ Tipo de solicitud física no reconocido:', tipoSolicitud);
-                            await aprobarAfiliacionMutation.mutateAsync(solicitudId);
+                            await completarAfiliacionMutation.mutateAsync(solicitudId);
                     }
                 } else if (tipoPersona === 'solicitud-juridica') {
                     switch (tipoSolicitud) {
@@ -185,7 +181,7 @@ const EstadoButtons: React.FC<EstadoButtonsProps> = ({
 
     const isLoading =
         // Mutaciones físicas
-        aprobarAfiliacionMutation.isPending || rechazarAfiliacionMutation.isPending ||
+        completarAfiliacionMutation.isPending || rechazarAfiliacionMutation.isPending ||
         aprobarCambioMedidorMutation.isPending || rechazarCambioMedidorMutation.isPending ||
         aprobarAsociadoMutation.isPending || rechazarAsociadoMutation.isPending ||
         aprobarDesconexionMutation.isPending || rechazarDesconexionMutation.isPending ||

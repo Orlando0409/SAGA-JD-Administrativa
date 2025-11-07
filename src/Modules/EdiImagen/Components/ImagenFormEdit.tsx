@@ -31,7 +31,7 @@ export default function ImagenFormEdit({ onClose, refetch, imagen }: ImagenFormE
   const validateAll = () => {
     const result = UpdateImagenSchema.safeParse({
       Nombre_Imagen: nombre.trim(),
-      Imagen: file ?? imagen.Imagen,
+      Imagen: file ?? undefined, // Cambiado a undefined si no hay archivo nuevo
     });
     setIsValid(result.success);
     setNombreError(result.success ? "" : result.error.errors[0]?.message || "");
@@ -55,7 +55,9 @@ export default function ImagenFormEdit({ onClose, refetch, imagen }: ImagenFormE
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selected = e.target.files?.[0] || null;
     setFile(selected);
-    if (selected) setPreview(URL.createObjectURL(selected));
+    if (selected) {
+      setPreview(URL.createObjectURL(selected));
+    }
     validateAll();
   };
 
@@ -65,7 +67,7 @@ export default function ImagenFormEdit({ onClose, refetch, imagen }: ImagenFormE
     try {
       UpdateImagenSchema.parse({
         Nombre_Imagen: nombre.trim(),
-        Imagen: file ?? imagen.Imagen,
+        Imagen: file ?? undefined, // Cambiado a undefined si no hay archivo nuevo
       });
 
       const formData = new FormData();
@@ -134,7 +136,7 @@ export default function ImagenFormEdit({ onClose, refetch, imagen }: ImagenFormE
             {/* Campo imagen */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Cambiar imagen
+                Cambiar imagen <span className="text-gray-500 font-normal">(opcional)</span>
               </label>
               <div className="relative">
                 <input
@@ -153,7 +155,7 @@ export default function ImagenFormEdit({ onClose, refetch, imagen }: ImagenFormE
                 </div>
               </div>
               <p className="text-xs text-gray-500 mt-1">
-                Formatos permitidos: JPG, PNG, GIF, WEBP
+                Formatos permitidos: JPG, PNG, GIF, WEBP. Deja vacío si no deseas cambiar la imagen.
               </p>
             </div>
 
