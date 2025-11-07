@@ -114,7 +114,7 @@ const CatálogoAuditorias = () => {
         );
       },
     }),
-    columnHelper.accessor('Nombre_Registro', {
+    columnHelper.accessor('Registro_Afectado', {
       header: 'Registro Afectado',
       cell: (info) => (
         <div className="flex justify-between">
