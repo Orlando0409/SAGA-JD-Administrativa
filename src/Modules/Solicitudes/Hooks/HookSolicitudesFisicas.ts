@@ -12,21 +12,21 @@ export const useRefetchAllSolicitudesFisicas = () => {
     const refetchAll = async () => {
         try {
             // Invalidar todas las queries relacionadas con solicitudes físicas
-            await queryClient.invalidateQueries({ 
-                queryKey: ['solicitudes-fisicas'] 
+            await queryClient.invalidateQueries({
+                queryKey: ['solicitudes-fisicas']
             });
-            
+
             // También invalidar solicitudes jurídicas para cross-invalidation
-            await queryClient.invalidateQueries({ 
-                queryKey: ['solicitudes-juridicas'] 
+            await queryClient.invalidateQueries({
+                queryKey: ['solicitudes-juridicas']
             });
-            
+
             console.log('Todas las consultas de solicitudes físicas refrescadas');
         } catch (error) {
             console.error('Error al refrescar consultas de solicitudes físicas:', error);
         }
     };
-    
+
     return { refetchAll };
 };
 
@@ -42,7 +42,6 @@ export const useSolicitudesFisicas = () => {
     });
 };
 
-
 export const useSolicitudesFisicasPendientes = () => {
     return useQuery<SolicitudFisica[], Error>({
         queryKey: ['solicitudes-fisicas', 'pendientes'],
@@ -53,7 +52,6 @@ export const useSolicitudesFisicasPendientes = () => {
         retry: 2,
     });
 };
-
 
 export const useSolicitudesFisicasPorEstado = (estado: string, enabled: boolean = true) => {
     return useQuery<SolicitudFisica[], Error>({
@@ -66,7 +64,6 @@ export const useSolicitudesFisicasPorEstado = (estado: string, enabled: boolean 
         retry: 2,
     });
 };
-
 
 export const useSolicitudesFisicasPorTipo = (
     tipo: 'Afiliacion' | 'Desconexion' | 'Cambio de Medidor' | 'Asociado',

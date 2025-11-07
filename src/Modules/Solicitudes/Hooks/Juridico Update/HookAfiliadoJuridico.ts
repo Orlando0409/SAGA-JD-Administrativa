@@ -1,114 +1,190 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { ServiceSolicitudAfiliacionJuridicas } from '../../Service/EstadoSolicitudesJuridicas/ServiceSolicitudAfiliacionJuridica';
+import { ServiceSolicitudAfiliacionJuridica } from '../../Service/EstadoSolicitudesJuridicas/ServiceSolicitudAfiliacionJuridica';
 
-/**
- * 🎣 Hook para actualizar estado de solicitudes jurídicas
- * Basado en el patrón useMutation de React Query
- */
-export const useMutateEstadoSolicitudJuridica = () => {
+export const useMutateEstadoSolicitud = () => {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: ({ solicitudId, nuevoEstadoId }: { 
-            solicitudId: string | number; 
-            nuevoEstadoId: string | number; 
+        mutationFn: ({ solicitudId, nuevoEstadoId }: {
+            solicitudId: string | number;
+            nuevoEstadoId: string | number;
         }) => {
-            return ServiceSolicitudAfiliacionJuridicas.updateEstado(solicitudId, nuevoEstadoId);
+            return ServiceSolicitudAfiliacionJuridica.updateEstado(solicitudId, nuevoEstadoId);
         },
         onSuccess: (data, variables) => {
             try {
                 // 1. Actualizar la caché de la solicitud individual
                 queryClient.setQueryData(
-                    ['solicitud-afiliacion-juridica', { id: variables.solicitudId }], 
+                    ['solicitud-afiliacion-juridica', { id: variables.solicitudId }],
                     data
                 );
 
                 // 2. Cross-invalidation: invalidar todas las consultas relacionadas
-                queryClient.invalidateQueries({ 
-                    queryKey: ['solicitud-afiliacion-juridica'] 
+                queryClient.invalidateQueries({
+                    queryKey: ['solicitud-afiliacion-juridica']
                 });
-                queryClient.invalidateQueries({ 
-                    queryKey: ['solicitudes-juridicas'] 
+                queryClient.invalidateQueries({
+                    queryKey: ['solicitudes-fisicas']
                 });
-                queryClient.invalidateQueries({ 
-                    queryKey: ['solicitudes-fisicas'] 
+                queryClient.invalidateQueries({
+                    queryKey: ['solicitudes-juridicas']
                 });
 
-                console.log('✅ Estado jurídico actualizado exitosamente con cross-invalidation:', data);
+                console.log('✅ Estado actualizado exitosamente con cross-invalidation:', data);
             } catch (error) {
-                console.error('❌ Error en onSuccess jurídico:', error);
+                console.error('❌ Error en onSuccess del estado:', error);
             }
         },
         onError: (error: any) => {
-            console.error(' Error al actualizar estado:', error);
+            console.error('❌ Error al actualizar estado:', error);
         },
     });
 };
 
-/**
- * 🎣 Hook específico para aprobar solicitudes jurídicas
- */
-export const useAprobarSolicitudAfiliacionJuridica = () => {
+export const useEnRevisionSolicitudAfiliacion = () => {
     const queryClient = useQueryClient();
 
     return useMutation({
         mutationFn: (solicitudId: string | number) => {
-            return ServiceSolicitudAfiliacionJuridicas.aprobar(solicitudId);
+            return ServiceSolicitudAfiliacionJuridica.EnRevision(solicitudId);
         },
         onSuccess: (data, solicitudId) => {
             try {
-                // Actualizar caché individual
+                // Actualizar caché de la solicitud individual
                 queryClient.setQueryData(
-                    ['solicitud-afiliacion-juridica', { id: solicitudId }], 
+                    ['solicitud-afiliacion-juridica', { id: solicitudId }],
                     data
                 );
-                
-                // Cross-invalidation
-                queryClient.invalidateQueries({ 
-                    queryKey: ['solicitud-afiliacion-juridica'] 
+
+                // Cross-invalidation: invalidar todas las consultas relacionadas
+                queryClient.invalidateQueries({
+                    queryKey: ['solicitud-afiliacion-fisica']
                 });
-                queryClient.invalidateQueries({ 
-                    queryKey: ['solicitudes-juridicas'] 
+                queryClient.invalidateQueries({
+                    queryKey: ['solicitudes-fisicas']
                 });
-                queryClient.invalidateQueries({ 
-                    queryKey: ['solicitudes-fisicas'] 
+                queryClient.invalidateQueries({
+                    queryKey: ['solicitudes-juridicas']
                 });
 
-                console.log('✅ Solicitud jurídica aprobada exitosamente con cross-invalidation:', data);
+                console.log('✅ Solicitud marcada como pendiente exitosamente con cross-invalidation:', data);
             } catch (error) {
-                console.error('❌ Error en onSuccess aprobación jurídica:', error);
+                console.error('❌ Error en onSuccess de marcar pendiente:', error);
             }
         },
         onError: (error: any) => {
-            console.error('❌ Error al aprobar solicitud jurídica:', error);
+            console.error('❌ Error al marcar solicitud como pendiente:', error);
         },
     });
 };
 
-/**
- * 🎣 Hook específico para rechazar solicitudes jurídicas
- */
-export const useRechazarSolicitudAfiliacionJuridica = () => {
+export const useAprobarEnEsperaSolicitudAfiliacion = () => {
     const queryClient = useQueryClient();
 
     return useMutation({
         mutationFn: (solicitudId: string | number) => {
-            return ServiceSolicitudAfiliacionJuridicas.rechazar(solicitudId);
+            return ServiceSolicitudAfiliacionJuridica.AprobarYEnEspera(solicitudId);
         },
         onSuccess: (data, solicitudId) => {
-            // Actualizar cachés
-            queryClient.setQueryData(
-                ['solicitud-afiliacion-juridica', { id: solicitudId }], 
-                data
-            );
-            queryClient.invalidateQueries({ 
-                queryKey: ['solicitud-afiliacion-juridica'] 
-            });
+            try {
+                // Actualizar caché de la solicitud individual
+                queryClient.setQueryData(
+                    ['solicitud-afiliacion-juridica', { id: solicitudId }],
+                    data
+                );
 
-            console.log('✅ Solicitud jurídica rechazada exitosamente:', data);
+                // Cross-invalidation: invalidar todas las consultas relacionadas
+                queryClient.invalidateQueries({
+                    queryKey: ['solicitud-afiliacion-fisica']
+                });
+                queryClient.invalidateQueries({
+                    queryKey: ['solicitudes-fisicas']
+                });
+                queryClient.invalidateQueries({
+                    queryKey: ['solicitudes-juridicas']
+                });
+
+                console.log('✅ Solicitud marcada en proceso exitosamente con cross-invalidation:', data);
+            } catch (error) {
+                console.error('❌ Error en onSuccess de marcar en proceso:', error);
+            }
         },
         onError: (error: any) => {
-            console.error('❌ Error al rechazar solicitud jurídica:', error);
+            console.error('❌ Error al marcar solicitud en proceso:', error);
+        },
+    });
+};
+
+export const useCompletarSolicitudAfiliacion = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: (solicitudId: string | number) => {
+            return ServiceSolicitudAfiliacionJuridica.Completado(solicitudId);
+        },
+        onSuccess: (data, solicitudId) => {
+            try {
+                // Actualizar caché de la solicitud individual
+                queryClient.setQueryData(
+                    ['solicitud-afiliacion-juridica', { id: solicitudId }],
+                    data
+                );
+
+                // Cross-invalidation: invalidar todas las consultas relacionadas
+                queryClient.invalidateQueries({
+                    queryKey: ['solicitud-afiliacion-fisica']
+                });
+                queryClient.invalidateQueries({
+                    queryKey: ['solicitudes-fisicas']
+                });
+                queryClient.invalidateQueries({
+                    queryKey: ['solicitudes-juridicas']
+                });
+
+                console.log('✅ Solicitud aprobada exitosamente con cross-invalidation:', data);
+            } catch (error) {
+                console.error('❌ Error en onSuccess de aprobación:', error);
+            }
+        },
+        onError: (error: any) => {
+            console.error('❌ Error al aprobar solicitud:', error);
+        },
+    });
+};
+
+export const useRechazarSolicitudAfiliacion = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: (solicitudId: string | number) => {
+            return ServiceSolicitudAfiliacionJuridica.Rechazar(solicitudId);
+        },
+        onSuccess: (data, solicitudId) => {
+            try {
+                // Actualizar caché de la solicitud individual
+                queryClient.setQueryData(
+                    ['solicitud-afiliacion-juridica', { id: solicitudId }],
+                    data
+                );
+
+                // Cross-invalidation: invalidar todas las consultas relacionadas
+                queryClient.invalidateQueries({
+                    queryKey: ['solicitud-afiliacion-fisica']
+                });
+                queryClient.invalidateQueries({
+                    queryKey: ['solicitudes-fisicas']
+                });
+                queryClient.invalidateQueries({
+                    queryKey: ['solicitudes-juridicas']
+                });
+
+                console.log('✅ Solicitud rechazada exitosamente con cross-invalidation:', data);
+            } catch (error) {
+                console.error('❌ Error en onSuccess de rechazo:', error);
+            }
+        },
+        onError: (error: any) => {
+            console.error('❌ Error al rechazar solicitud:', error);
         },
     });
 };
