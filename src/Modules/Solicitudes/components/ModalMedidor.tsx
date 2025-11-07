@@ -1,5 +1,16 @@
 import { useState, useEffect } from 'react';
 import { LuX, LuSearch, LuPlus } from 'react-icons/lu';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from '@/Modules/Global/components/Sidebar/ui/alert-dialog';
+import { useAlerts } from '@/Modules/Global/context/AlertContext';
 import type { SolicitudFisica } from '../Models/ModelosFisicas';
 import type { SolicitudJuridica } from '../Models/ModelosJuridicos';
 import CreateMedidorModal from '@/Modules/Inventario/components/Medidores/CreateMedidorModal';
@@ -26,6 +37,7 @@ interface Medidor {
 
 const ModalMedidor = ({ isOpen, onClose, onMedidorAsignado, afiliado }: ModalMedidorProps) => {
     const asignarMedidorMutation = useAsignarMedidor();
+    const { showError } = useAlerts();
 
     // Hook para obtener solo medidores NO instalados
     const { data: medidores, isLoading: loadingMedidores, refetch } = useQuery({
@@ -37,6 +49,7 @@ const ModalMedidor = ({ isOpen, onClose, onMedidorAsignado, afiliado }: ModalMed
     const [busquedaMedidor, setBusquedaMedidor] = useState('');
     const [medidorSeleccionado, setMedidorSeleccionado] = useState<Medidor | null>(null);
     const [showCreateMedidor, setShowCreateMedidor] = useState(false);
+    const [showConfirmDialog, setShowConfirmDialog] = useState(false);
 
     // Resetear selección cuando se abre el modal
     useEffect(() => {
@@ -78,31 +91,39 @@ const ModalMedidor = ({ isOpen, onClose, onMedidorAsignado, afiliado }: ModalMed
         return numero.includes(busqueda);
     });
 
-    // Asignar medidor
-    const handleAsignarMedidor = async () => {
+    // Abrir diálogo de confirmación
+    const handleAsignarMedidor = () => {
         if (!medidorSeleccionado) {
-            alert('Por favor seleccione un medidor');
+            showError(
+                'Medidor no seleccionado',
+                'Por favor seleccione un medidor antes de continuar'
+            );
             return;
         }
+        setShowConfirmDialog(true);
+    };
 
-        if (confirm(`¿Desea asignar el medidor ${medidorSeleccionado.Numero_Medidor} a ${afiliadoInfo.nombre}?`)) {
-            try {
-                await asignarMedidorMutation.mutateAsync({
-                    Id_Medidor: medidorSeleccionado.Id_Medidor,
-                    Id_Tipo_Entidad: afiliado.tipo === 'solicitud-fisica' ? 1 : 2,
-                    Id_Solicitud: afiliadoInfo.Id_Afiliado
-                });
-                alert('✅ Medidor asignado correctamente');
-                onClose();
+    // Confirmar y ejecutar asignación
+    const handleConfirmAsignacion = async () => {
+        if (!medidorSeleccionado) return;
 
-                // Ejecutar callback para aprobar la solicitud después de asignar
-                if (onMedidorAsignado) {
-                    await onMedidorAsignado();
-                }
-            } catch (error) {
-                console.error('Error al asignar medidor:', error);
-                alert('❌ Error al asignar medidor');
+        try {
+            await asignarMedidorMutation.mutateAsync({
+                Id_Medidor: medidorSeleccionado.Id_Medidor,
+                Id_Tipo_Entidad: afiliado.tipo === 'solicitud-fisica' ? 1 : 2,
+                Id_Solicitud: afiliadoInfo.Id_Afiliado
+            });
+            
+            setShowConfirmDialog(false);
+            onClose();
+
+            // Ejecutar callback para aprobar la solicitud después de asignar
+            if (onMedidorAsignado) {
+                await onMedidorAsignado();
             }
+        } catch (error) {
+            console.error('Error al asignar medidor:', error);
+            setShowConfirmDialog(false);
         }
     };
 
@@ -312,6 +333,31 @@ const ModalMedidor = ({ isOpen, onClose, onMedidorAsignado, afiliado }: ModalMed
                     }}
                 />
             )}
+
+            {/* AlertDialog para confirmar asignación */}
+            <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>¿Asignar medidor a afiliado?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            ¿Está seguro de asignar el medidor <strong>#{medidorSeleccionado?.Numero_Medidor}</strong> a <strong>{afiliadoInfo.nombre}</strong>?
+                            <br /><br />
+                            Esta acción actualizará el estado del medidor y lo vinculará permanentemente con el afiliado.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel disabled={asignarMedidorMutation.isPending}>
+                            Cancelar
+                        </AlertDialogCancel>
+                        <AlertDialogAction 
+                            onClick={handleConfirmAsignacion}
+                            disabled={asignarMedidorMutation.isPending}
+                        >
+                            {asignarMedidorMutation.isPending ? 'Asignando...' : 'Confirmar asignación'}
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </>
     );
 };
