@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import { LuX, LuSearch, LuPlus } from 'react-icons/lu';
-import { useAsignarMedidor } from '../Hooks/Fisico Update/HookMedidorAfiliado';
 import type { SolicitudFisica } from '../Models/ModelosFisicas';
 import type { SolicitudJuridica } from '../Models/ModelosJuridicos';
 import CreateMedidorModal from '@/Modules/Inventario/components/Medidores/CreateMedidorModal';
 import { useQuery } from '@tanstack/react-query';
 import { getMedidoresNoInstalados } from '@/Modules/Inventario/service/MedidorServices';
+import { useAsignarMedidor } from '../Hooks/HookAfiliadoMedidor';
 
 interface ModalMedidorProps {
     isOpen: boolean;
