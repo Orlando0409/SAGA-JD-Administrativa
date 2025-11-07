@@ -159,19 +159,30 @@ export default function ImagenForm({ onClose, refetch }: ImagenFormProps) {
         <div className="flex justify-end gap-4">
           <button
             type="submit"
-            className={`px-4 py-2 rounded-lg shadow-sm text-sm ${
-              isValid && file
+            className={`px-4 py-2 rounded-lg shadow-sm text-sm transition-colors ${
+              isValid && file && !isPending
                 ? "bg-blue-600 text-white hover:bg-blue-700"
                 : "bg-gray-300 text-gray-600 cursor-not-allowed"
             }`}
-            disabled={!isValid || !file || isPending }
+            disabled={!isValid || !file || isPending}
           >
-            Subir Imagen
+            {isPending ? (
+              <span className="flex items-center gap-2">
+                Subiendo...
+              </span>
+            ) : (
+              "Subir Imagen"
+            )}
           </button>
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 rounded-lg bg-gray-200 text-gray-800 hover:bg-gray-300 shadow-sm text-sm"
+            disabled={isPending}
+            className={`px-4 py-2 rounded-lg shadow-sm text-sm transition-colors ${
+              isPending
+                ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                : "bg-gray-200 text-gray-800 hover:bg-gray-300"
+            }`}
           >
             Cancelar
           </button>

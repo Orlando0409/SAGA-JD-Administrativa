@@ -28,7 +28,7 @@ export const MODULOS = [
   'Medidor',
   'Calidad de Agua',
   'Proveedor',
-  'Movimiento',
+  'Inventario',
   'Usuario',
   'Rol',
   'Edicion de imagenes',

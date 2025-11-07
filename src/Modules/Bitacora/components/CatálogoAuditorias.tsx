@@ -314,8 +314,8 @@ const CatálogoAuditorias = () => {
             <tbody className="bg-white divide-y divide-sky-50">
               {table.getRowModel().rows.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="px-2 sm:px-4 py-8 text-center text-slate-500">
-                    {globalFilter ? 'No se encontraron categorías que coincidan con la búsqueda' : 'No hay categorías registradas'}
+                  <td colSpan={columns.length} className="px-2 sm:px-4 py-8 text-center text-slate-500">
+                    {globalFilter ? 'No se encontraron registros que coincidan con la búsqueda' : 'No hay auditorías registradas'}
                   </td>
                 </tr>
               ) : (
