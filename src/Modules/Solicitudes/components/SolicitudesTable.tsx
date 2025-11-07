@@ -8,7 +8,7 @@ import {
     getSortedRowModel,
     getFilteredRowModel,
 } from '@tanstack/react-table';
-import { User, Building} from 'lucide-react';
+import { User, Building } from 'lucide-react';
 
 // Importar hooks de solicitudes
 import { useSolicitudesFisicas } from '../Hooks/HookSolicitudesFisicas';
@@ -22,6 +22,7 @@ import type { SolicitudJuridica } from '../Models/ModelosJuridicos';
 import EditSolicitudModal from './EditSolicitudModal';
 import ModalSolicitud from './ModalSolicitud';
 import { MdKeyboardArrowUp, MdKeyboardArrowDown, MdKeyboardDoubleArrowLeft, MdKeyboardArrowLeft, MdKeyboardArrowRight, MdKeyboardDoubleArrowRight } from 'react-icons/md';
+import { useEnRevisionSolicitudAfiliacion } from '../Hooks/Fisico Update/HookAfiliadoFisico';
 
 // Tipo unificado para la tabla de solicitudes
 type SolicitudUnificada = {
@@ -45,9 +46,10 @@ export default function SolicitudesTable() {
     // Hooks para ambos tipos de solicitudes
     const { data: solicitudesFisicas, isLoading: loadingFisicas, isError: errorFisicos } = useSolicitudesFisicas();
     const { data: solicitudesJuridicas, isLoading: loadingJuridicas, isError: errorJuridicos } = useSolicitudesJuridicas();
+    const marcarEnRevisionMutation = useEnRevisionSolicitudAfiliacion();
 
     // Debug INMEDIATO al cargar el componente
-  
+
     const [globalFilter, setGlobalFilter] = useState('');
 
     // Estados para el modal de edición
@@ -77,16 +79,16 @@ export default function SolicitudesTable() {
     const pageSizeOptions = [5, 10, 20, 50];
     // Función para unificar los datos de solicitudes
     const datosUnificados = useMemo((): SolicitudUnificada[] => {
-      
 
 
-        
+
+
 
         // Validar que los datos sean arrays
         const solicitudesFisicasArray = Array.isArray(solicitudesFisicas) ? solicitudesFisicas : [];
         const solicitudesJuridicasArray = Array.isArray(solicitudesJuridicas) ? solicitudesJuridicas : [];
 
-       
+
 
         // Solicitudes Físicas
         const solicitudesFisicasUnificadas: SolicitudUnificada[] = solicitudesFisicasArray.map((solicitud: SolicitudFisica, index: number) => {
@@ -95,12 +97,12 @@ export default function SolicitudesTable() {
             // Buscar ID real en la solicitud (backend usa Id_Solicitud)
             const solicitudConId = solicitud as any;
             const idReal = solicitudConId.Id_Solicitud || solicitudConId.id || solicitudConId.Id || solicitudConId.ID;
-            
+
             return {
                 id: `fisico-${index}`, // ID interno único para la tabla
                 Id: idReal || (index + 1), // Usar ID real del backend o secuencial como fallback
                 Nombre_Completo: `${solicitud.Nombre || ''} ${solicitud.Apellido1 || ''} ${solicitud.Apellido2 || ''}`.trim() || 'Sin nombre',
-                Cedula_Documento: solicitud.Identificacion  || 'Sin identificación',
+                Cedula_Documento: solicitud.Identificacion || 'Sin identificación',
                 Tipo_Solicitud: solicitud.Tipo_Solicitud,
                 Estado: {
                     Id_Estado: solicitud.Estado?.Id_Estado_Solicitud || 0,
@@ -114,11 +116,11 @@ export default function SolicitudesTable() {
 
         // Solicitudes Jurídicas
         const solicitudesJuridicasUnificadas: SolicitudUnificada[] = solicitudesJuridicasArray.map((solicitud: SolicitudJuridica, index: number) => {
-      
+
             // Buscar ID real en la solicitud (backend usa Id_Solicitud)
             const solicitudConId = solicitud as any;
             const idReal = solicitudConId.Id_Solicitud || solicitudConId.id || solicitudConId.Id || solicitudConId.ID;
-       
+
             return {
                 id: `juridico-${index}`, // ID interno único para la tabla
                 Id: idReal || (solicitudesFisicasUnificadas.length + index + 1), // Usar ID real del backend o continuar secuencia
@@ -291,48 +293,68 @@ export default function SolicitudesTable() {
             size: 120,
         }),
         columnHelper.display({
-    id: 'acciones',
-    header: 'Acciones',
-    cell: ({ row }) => {
-        const solicitud = row.original;
+            id: 'acciones',
+            header: 'Acciones',
+            cell: ({ row }) => {
+                const solicitud = row.original;
 
-        return (
-            <div className="flex items-center gap-2">
-                {/* Ver detalles */}
-                <button
-                    onClick={(e) => {
-                        e.stopPropagation(); // Evita que se dispare el click de la fila
-                        handleViewDetail(solicitud);
-                    }}
-                      className="px-4 py-1 bg-gray-600 text-white text-xs rounded hover:bg-gray-700 transition-colors"
-                    title="Ver detalles"
-                >
-                    Ver
-                </button>
+                return (
+                    <div className="flex items-center gap-2">
+                        {/* Ver detalles */}
+                        <button
+                            onClick={async (e) => {
+                                e.stopPropagation(); // Evita que se dispare el click de la fila
 
-                {/* Editar */}
-                <button
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        setSelectedSolicitud({
-                            tipo: solicitud.Tipo_Persona === 'Físico'
-                                ? 'solicitud-fisica'
-                                : 'solicitud-juridica',
-                            datos: solicitud.datos_originales
-                        });
-                        setShowEditModal(true);
-                    }}
-                      className="px-4 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition-colors"
-                    title="Editar solicitud"
-                >
-                    Editar
-                </button>
+                                const tipo = solicitud.Tipo_Persona === 'Físico' ? 'solicitud-fisica' : 'solicitud-juridica';
 
-                
-            </div>
-        );
-    }
-}),
+                                // Si el estado actual NO es "Pendiente" (2), marcarlo como pendiente
+                                if (solicitud.Estado.Id_Estado === 1) {
+                                    try {
+                                        console.log(' Marcando solicitud como pendiente...', solicitud.Id);
+                                        await marcarEnRevisionMutation.mutateAsync(solicitud.Id);
+                                        console.log(' Solicitud marcada como pendiente');
+                                    } catch (error) {
+                                        console.error(' Error al marcar como pendiente:', error);
+                                    }
+                                }
+
+                                // Abrir el modal
+                                setSelectedSolicitudForGestion({
+                                    tipo: tipo,
+                                    datos: solicitud.datos_originales
+                                });
+                                setShowGestionModal(true);
+                            }}
+                            disabled={marcarEnRevisionMutation.isPending}
+                            className="px-4 py-1 bg-gray-600 text-white text-xs rounded hover:bg-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            title="Ver detalles"
+                        >
+                            Ver
+                        </button>
+
+                        {/* Editar */}
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedSolicitud({
+                                    tipo: solicitud.Tipo_Persona === 'Físico'
+                                        ? 'solicitud-fisica'
+                                        : 'solicitud-juridica',
+                                    datos: solicitud.datos_originales
+                                });
+                                setShowEditModal(true);
+                            }}
+                            className="px-4 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition-colors"
+                            title="Editar solicitud"
+                        >
+                            Editar
+                        </button>
+
+
+                    </div>
+                );
+            }
+        }),
     ];
 
     // Declarar la tabla aquí, fuera de columns
@@ -349,12 +371,12 @@ export default function SolicitudesTable() {
         },
         onGlobalFilterChange: setGlobalFilter,
         onPaginationChange: setPagination,
-         initialState: {
+        initialState: {
             pagination: {
                 pageSize: 5,
                 pageIndex: 0,
             },
-         },
+        },
     });
 
     if (isLoading) {
@@ -404,148 +426,151 @@ export default function SolicitudesTable() {
             </div>
 
 
-                 <div className="bg-white rounded-2xl shadow-sm border border-sky-100 overflow-hidden max-h-[calc(100vh-300px)] overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100">
-                     <div className="overflow-x-auto">
-                         <table className="min-w-full table-auto">
-                             <thead className="bg-sky-50">
-                                 {table.getHeaderGroups().map(headerGroup => (
-                                     <tr key={headerGroup.id} className="text-left text-xs sm:text-sm text-sky-700">
-                                         {headerGroup.headers.map((header) => (
-                                             <th key={header.id} className={`px-2 sm:px-4 py-3 font-medium border-b border-sky-100 text-left`}>
-                                                 {(() => {
-                                                     if (header.isPlaceholder) {
-                                                         return null;
-                                                     }
-                                                     if (header.column.getCanSort()) {
-                                                         return (
-                                                             <button
-                                                                 type="button"
-                                                                 className={`cursor-pointer select-none flex items-center gap-2 bg-transparent border-none p-0 justify-start`}
-                                                                 onClick={header.column.getToggleSortingHandler()}
-                                                                 onKeyDown={e => {
-                                                                     if (e.key === 'Enter' || e.key === ' ') {
-                                                                         e.preventDefault();
-                                                                         header.column.getToggleSortingHandler()?.(e);
-                                                                     }
-                                                                 }}
-                                                                 tabIndex={0}
-                                                                 aria-label={`Ordenar por ${header.column.columnDef.header as string}`}
-                                                             >
-                                                                 <span className="flex items-center gap-1">
-                                                                     {header.column.columnDef.header as string}
-                                                                     {header.column.getIsSorted() === 'asc' && <MdKeyboardArrowUp className="inline" />}
-                                                                     {header.column.getIsSorted() === 'desc' && <MdKeyboardArrowDown className="inline" />}
-                                                                 </span>
-                                                             </button>
-                                                         );
-                                                     }
-                                                     return (
-                                                         <span className="text-left">
-                                                             {header.column.columnDef.header as string}
-                                                         </span>
-                                                     );
-                                                 })()}
-                                             </th>
-                                         ))}
-                                     </tr>
-                                 ))}
-                             </thead>
-                             <tbody className="bg-white divide-y divide-sky-50">
-                                 {table.getRowModel().rows.length === 0 ? (
-                                     <tr>
-                                         <td colSpan={5} className="px-2 sm:px-4 py-8 text-center text-slate-500">
-                                             {globalFilter ? 'No se encontraron actas que coincidan con la búsqueda' : 'No hay actas registradas'}
-                                         </td>
-                                     </tr>
-                                 ) : (
-                                     table.getRowModel().rows.map(row => (
-                                         <tr key={row.id} className="hover:bg-sky-50 cursor-pointer transition-colors">
-                                             {row.getVisibleCells().map((cell) => {
-                                                 let cellContent: React.ReactNode;
-     
-                                                 if (cell.column.columnDef.cell) {
-                                                     if (typeof cell.column.columnDef.cell === 'function') {
-                                                         cellContent = cell.column.columnDef.cell(cell.getContext());
-                                                     } else {
-                                                         cellContent = cell.column.columnDef.cell;
-                                                     }
-                                                 } else {
-                                                     cellContent = cell.getValue() as React.ReactNode;
-                                                 }
-     
-                                                 return (
-                                                     <td key={cell.id} className={`px-2 sm:px-4 py-3 text-xs sm:text-sm text-slate-700 align-top text-left`}>
-                                                         {cellContent}
-                                                     </td>
-                                                 );
-                                             })}
-                                         </tr>
-                                     ))
-                                 )}
-                             </tbody>
-                         </table>
-                     </div>
-     
-                     <div className="px-6 py-3 bg-gray-50 border-t border-gray-200">
-                         <div className="flex items-center justify-between">
-                             <div className="flex items-center gap-4">
-                                 <div className="flex items-center gap-2">
-                                     <span className="text-sm text-gray-700">Filas por página:</span>
-                                     <select
-                                         value={table.getState().pagination.pageSize}
-                                         onChange={(e) => {
-                                             table.setPageSize(Number(e.target.value));
-                                         }}
-                                         className="px-3 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                     >
-                                         {pageSizeOptions.map((pageSize) => (
-                                             <option key={pageSize} value={pageSize}>
-                                                 {pageSize}
-                                             </option>
-                                         ))}
-                                     </select>
-                                 </div>
-                             </div>
-                             <div className="flex items-center gap-2">
-                                 <button
-                                     onClick={() => table.setPageIndex(0)}
-                                     disabled={!table.getCanPreviousPage()}
-                                     className="p-2 rounded-md border text-gray-600 hover:text-gray-900 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                                     title="Primera página"
-                                 >
-                                     <MdKeyboardDoubleArrowLeft className="w-4 h-4" />
-                                 </button>
-                                 <button
-                                     onClick={() => table.previousPage()}
-                                     disabled={!table.getCanPreviousPage()}
-                                     className="p-2 rounded-md border text-gray-600 hover:text-gray-900 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                                     title="Página anterior"
-                                 >
-                                     <MdKeyboardArrowLeft className="w-4 h-4" />
-                                 </button>
-                                 <span className="text-sm text-gray-700">
-                                     Página {table.getState().pagination.pageIndex + 1} de {table.getPageCount()}
-                                 </span>
-                                 <button
-                                     onClick={() => table.nextPage()}
-                                     disabled={!table.getCanNextPage()}
-                                     className="p-2 rounded-md border text-gray-600 hover:text-gray-900 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                                     title="Página siguiente"
-                                 >
-                                     <MdKeyboardArrowRight className="w-4 h-4" />
-                                 </button>
-                                 <button
-                                     onClick={() => table.setPageIndex(table.getPageCount() - 1)}
-                                     disabled={!table.getCanNextPage()}
-                                     className="p-2 rounded-md border text-gray-600 hover:text-gray-900 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                                     title="Última página"
-                                 >
-                                     <MdKeyboardDoubleArrowRight className="w-4 h-4" />
-                                 </button>
-                             </div>
-                         </div>
-                     </div>
-                 </div>
+            <div className="bg-white rounded-2xl shadow-sm border border-sky-100 overflow-hidden max-h-[calc(100vh-300px)] overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100">
+                <div className="overflow-x-auto">
+                    <table className="min-w-full table-auto">
+                        <thead className="bg-sky-50">
+                            {table.getHeaderGroups().map(headerGroup => (
+                                <tr key={headerGroup.id} className="text-left text-xs sm:text-sm text-sky-700">
+                                    {headerGroup.headers.map((header, index) => (
+                                        <th key={header.id} className={`px-2 sm:px-4 py-3 font-medium border-b border-sky-100 ${index === 0 ? 'text-left' : 'text-center'
+                                            }`}>
+                                            {(() => {
+                                                if (header.isPlaceholder) {
+                                                    return null;
+                                                }
+                                                if (header.column.getCanSort()) {
+                                                    return (
+                                                        <button
+                                                            type="button"
+                                                            className={`cursor-pointer select-none flex items-center gap-2 bg-transparent border-none p-0 ${index === 0 ? 'justify-start' : 'justify-center'
+                                                                }`}
+                                                            onClick={header.column.getToggleSortingHandler()}
+                                                            onKeyDown={e => {
+                                                                if (e.key === 'Enter' || e.key === ' ') {
+                                                                    e.preventDefault();
+                                                                    header.column.getToggleSortingHandler()?.(e);
+                                                                }
+                                                            }}
+                                                            tabIndex={0}
+                                                            aria-label={`Ordenar por ${header.column.columnDef.header as string}`}
+                                                        >
+                                                            <span className="flex items-center gap-1">
+                                                                {header.column.columnDef.header as string}
+                                                                {header.column.getIsSorted() === 'asc' && <MdKeyboardArrowUp className="inline" />}
+                                                                {header.column.getIsSorted() === 'desc' && <MdKeyboardArrowDown className="inline" />}
+                                                            </span>
+                                                        </button>
+                                                    );
+                                                }
+                                                return (
+                                                    <span className={index === 0 ? 'text-left' : 'text-center'}>
+                                                        {header.column.columnDef.header as string}
+                                                    </span>
+                                                );
+                                            })()}
+                                        </th>
+                                    ))}
+                                </tr>
+                            ))}
+                        </thead>
+                        <tbody className="bg-white divide-y divide-sky-50">
+                            {table.getRowModel().rows.length === 0 ? (
+                                <tr>
+                                    <td colSpan={5} className="px-2 sm:px-4 py-8 text-center text-slate-500">
+                                        {globalFilter ? 'No se encontraron actas que coincidan con la búsqueda' : 'No hay actas registradas'}
+                                    </td>
+                                </tr>
+                            ) : (
+                                table.getRowModel().rows.map(row => (
+                                    <tr key={row.id} className="hover:bg-sky-50 cursor-pointer transition-colors">
+                                        {row.getVisibleCells().map((cell, index) => {
+                                            let cellContent: React.ReactNode;
+
+                                            if (cell.column.columnDef.cell) {
+                                                if (typeof cell.column.columnDef.cell === 'function') {
+                                                    cellContent = cell.column.columnDef.cell(cell.getContext());
+                                                } else {
+                                                    cellContent = cell.column.columnDef.cell;
+                                                }
+                                            } else {
+                                                cellContent = cell.getValue() as React.ReactNode;
+                                            }
+
+                                            return (
+                                                <td key={cell.id} className={`px-2 sm:px-4 py-3 text-xs sm:text-sm text-slate-700 align-top ${index === 0 ? 'text-left' : 'text-center'
+                                                    }`}>
+                                                    {cellContent}
+                                                </td>
+                                            );
+                                        })}
+                                    </tr>
+                                ))
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div className="px-6 py-3 bg-gray-50 border-t border-gray-200">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                            <div className="flex items-center gap-2">
+                                <span className="text-sm text-gray-700">Filas por página:</span>
+                                <select
+                                    value={table.getState().pagination.pageSize}
+                                    onChange={(e) => {
+                                        table.setPageSize(Number(e.target.value));
+                                    }}
+                                    className="px-3 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                >
+                                    {pageSizeOptions.map((pageSize) => (
+                                        <option key={pageSize} value={pageSize}>
+                                            {pageSize}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <button
+                                onClick={() => table.setPageIndex(0)}
+                                disabled={!table.getCanPreviousPage()}
+                                className="p-2 rounded-md border text-gray-600 hover:text-gray-900 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                                title="Primera página"
+                            >
+                                <MdKeyboardDoubleArrowLeft className="w-4 h-4" />
+                            </button>
+                            <button
+                                onClick={() => table.previousPage()}
+                                disabled={!table.getCanPreviousPage()}
+                                className="p-2 rounded-md border text-gray-600 hover:text-gray-900 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                                title="Página anterior"
+                            >
+                                <MdKeyboardArrowLeft className="w-4 h-4" />
+                            </button>
+                            <span className="text-sm text-gray-700">
+                                Página {table.getState().pagination.pageIndex + 1} de {table.getPageCount()}
+                            </span>
+                            <button
+                                onClick={() => table.nextPage()}
+                                disabled={!table.getCanNextPage()}
+                                className="p-2 rounded-md border text-gray-600 hover:text-gray-900 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                                title="Página siguiente"
+                            >
+                                <MdKeyboardArrowRight className="w-4 h-4" />
+                            </button>
+                            <button
+                                onClick={() => table.setPageIndex(table.getPageCount() - 1)}
+                                disabled={!table.getCanNextPage()}
+                                className="p-2 rounded-md border text-gray-600 hover:text-gray-900 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                                title="Última página"
+                            >
+                                <MdKeyboardDoubleArrowRight className="w-4 h-4" />
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
             {/* Modal de edición */}
             {showEditModal && selectedSolicitud && (
@@ -574,5 +599,5 @@ export default function SolicitudesTable() {
 
         </div>
     );
-    }
+}
 
