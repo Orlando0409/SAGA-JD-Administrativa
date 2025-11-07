@@ -2,7 +2,7 @@ import apiAuth from "@/Api/apiAuth";
 import type { SolicitudFisica } from "../../Models/ModelosFisicas";
 
 
-export class ServiceSolicitudAfiliacion {
+export class ServiceSolicitudAfiliacionFisica {
 
     static async updateEstado(
         solicitudId: string | number,
