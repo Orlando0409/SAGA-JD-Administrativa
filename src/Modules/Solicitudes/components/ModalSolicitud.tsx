@@ -173,14 +173,12 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
         if (estadoActual === 2) {
             if (requiereAsignacionMedidor) {
                 // Para Afiliación y Cambio de Medidor: Preguntar y si confirma, marcar En Espera y abrir modal de medidor
-                const ok = window.confirm(`¿Desea aprobar la solicitud de ${info.nombre} y ponerla en espera para asignar medidor?`);
+                const ok = window.confirm(`¿Desea aprobar la solicitud de ${info.nombre} y ponerla en espera?`);
                 if (!ok) return;
 
                 try {
                     console.log(`✅ Aprobando y poniendo en espera: ${tipoSolicitud} - ${tipoPersona}`);
                     await aprobarYEnEsperaMutation.mutateAsync(tipoSolicitud, tipoPersona, info.id);
-                    // Abrir modal para asignar medidor inmediatamente después de cambiar a estado 3
-                    setShowModalMedidor(true);
                 } catch (error) {
                     console.error('❌ Error al marcar en aprobada y en espera:', error);
                 }
@@ -201,7 +199,7 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
         // Estado 3 (Aprobada y en espera) → Solo llega aquí si requiere medidor (Afiliación o Cambio de Medidor)
         else if (estadoActual === 3) {
             // Abrir modal de medidor directamente → Al asignar cambia a Estado 4 (Completada)
-            console.log('🔓 Abriendo modal de medidor para asignar');
+            console.log('Abriendo modal de medidor para asignar');
             setShowModalMedidor(true);
         }
         // Si ya está completada (Estado 4)
