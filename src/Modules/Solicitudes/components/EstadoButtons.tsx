@@ -1,220 +1,200 @@
-import React from 'react';
-
-import { useAprobarSolicitudCambioMedidor, useRechazarSolicitudCambioMedidor } from '../Hooks/Fisico Update/HookCambioMedidorFisico';
-import { useAprobarSolicitudAsociado, useRechazarSolicitudAsociado } from '../Hooks/Fisico Update/HookAsociadoFisico';
-import { useAprobarSolicitudDesconexion, useRechazarSolicitudDesconexion } from '../Hooks/Fisico Update/HookDesconexionMedidorFisico';
-import {  useCompletarSolicitudAsociadoJuridico, useMutateEstadoSolicitud, useRechazarSolicitudAsociadoJuridico } from '../Hooks/Juridico Update/HookAsociadoJuridico';
-import { useAprobarSolicitudCambioMedidorJuridica, useRechazarSolicitudCambioMedidorJuridica } from '../Hooks/Juridico Update/HookCambioMedidorJuridico';
-import { useAprobarSolicitudDesconexionJuridica, useRechazarSolicitudDesconexionJuridica } from '../Hooks/Juridico Update/HookDesconexionMedidor';
-import { useCompletarSolicitudAfiliacion, useRechazarSolicitudAfiliacion } from '../Hooks/Juridico Update/HookAfiliadoJuridico';
+import { useState } from 'react';
+import {
+    useAprobarYEnEspera,
+    useCompletar,
+    useRechazar
+} from '../Hooks/HookEstadosSolicitudes';
+import type { TipoSolicitud, TipoPersona } from '../Types/EstadoSolicitudes';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/Modules/Global/components/Sidebar/ui/alert-dialog";
 
 interface EstadoButtonsProps {
     solicitudId: string | number;
     estadoActual?: string;
-    tipoSolicitud: 'Afiliacion' | 'Cambio de Medidor' | 'Asociado' | 'Desconexion'; // Tipo de solicitud requerido
-    tipoPersona: 'solicitud-fisica' | 'solicitud-juridica'; // Nuevo campo para identificar si es física o jurídica
+    tipoSolicitud: TipoSolicitud;
+    tipoPersona: TipoPersona;
     onEstadoChanged?: (nuevoEstado: string) => void;
 }
 
 /**
- *  Componente de botones para cambiar estados de solicitudes
- * Ejemplo de uso de los hooks de mutación
+ * Componente de botones para cambiar estados de solicitudes
+ * Usa los hooks unificados de HookEstadosSolicitudes
  */
 const EstadoButtons: React.FC<EstadoButtonsProps> = ({
     solicitudId,
     estadoActual,
-    tipoSolicitud, // Nueva prop para identificar el tipo
-    tipoPersona, // Nueva prop para identificar si es física o jurídica
+    tipoSolicitud,
+    tipoPersona,
     onEstadoChanged
 }) => {
-    // Hooks de mutación específicos
-    const completarAfiliacionMutation = useCompletarSolicitudAfiliacion();
-    const rechazarAfiliacionMutation = useRechazarSolicitudAfiliacion();
-    const aprobarCambioMedidorMutation = useAprobarSolicitudCambioMedidor();
-    const rechazarCambioMedidorMutation = useRechazarSolicitudCambioMedidor();
-    const aprobarAsociadoMutation = useAprobarSolicitudAsociado();
-    const rechazarAsociadoMutation = useRechazarSolicitudAsociado();
-    const aprobarDesconexionMutation = useAprobarSolicitudDesconexion();
-    const rechazarDesconexionMutation = useRechazarSolicitudDesconexion();
-    const aprobarAsociadoJuridicoMutation = useCompletarSolicitudAsociadoJuridico();
-    const rechazarAsociadoJuridicoMutation = useRechazarSolicitudAsociadoJuridico();
-    const aprobarCambioMedidorJuridicoMutation = useAprobarSolicitudCambioMedidorJuridica();
-    const rechazarCambioMedidorJuridicoMutation = useRechazarSolicitudCambioMedidorJuridica();
-    const aprobarDesconexionJuridicoMutation = useAprobarSolicitudDesconexionJuridica();
-    const rechazarDesconexionJuridicoMutation = useRechazarSolicitudDesconexionJuridica();
-    // Hook genérico para cualquier estado
-    const updateEstadoMutation = useMutateEstadoSolicitud();
+    const [showAprobarDialog, setShowAprobarDialog] = useState(false);
+    const [showCompletarDialog, setShowCompletarDialog] = useState(false);
+    const [showRechazarDialog, setShowRechazarDialog] = useState(false);
 
-    // Handle para aprobar según el tipo de solicitud
-    const handleAprobar = async () => {
-        if (confirm('¿Está seguro de aprobar esta solicitud?')) {
-            try {
-                console.log(`🎯 Aprobando solicitud: Tipo Persona: ${tipoPersona}, Tipo Solicitud: ${tipoSolicitud}`);
+    // Hooks unificados
+    const aprobarMutation = useAprobarYEnEspera();
+    const completarMutation = useCompletar();
+    const rechazarMutation = useRechazar();
 
-                // Determinar qué mutación usar basado en tipo de persona y tipo de solicitud
-                if (tipoPersona === 'solicitud-fisica') {
-                    switch (tipoSolicitud) {
-                        case 'Afiliacion':
-                            await completarAfiliacionMutation.mutateAsync(solicitudId);
-                            break;
-                        case 'Cambio de Medidor':
-                            await aprobarCambioMedidorMutation.mutateAsync(solicitudId);
-                            break;
-                        case 'Asociado':
-                            await aprobarAsociadoMutation.mutateAsync(solicitudId);
-                            break;
-                        case 'Desconexion':
-                            await aprobarDesconexionMutation.mutateAsync(solicitudId);
-                            break;
-                        default:
-                            console.warn('⚠️ Tipo de solicitud física no reconocido:', tipoSolicitud);
-                            await completarAfiliacionMutation.mutateAsync(solicitudId);
-                    }
-                } else if (tipoPersona === 'solicitud-juridica') {
-                    switch (tipoSolicitud) {
-                        case 'Afiliacion':
-                            await completarAfiliacionMutation.mutateAsync(solicitudId);
-                            break;
-                        case 'Cambio de Medidor':
-                            await aprobarCambioMedidorJuridicoMutation.mutateAsync(solicitudId);
-                            break;
-                        case 'Asociado':
-                            await aprobarAsociadoJuridicoMutation.mutateAsync(solicitudId);
-                            break;
-                        case 'Desconexion':
-                            await aprobarDesconexionJuridicoMutation.mutateAsync(solicitudId);
-                            break;
-                        default:
-                            console.warn(' Tipo de solicitud jurídica no reconocido:', tipoSolicitud);
-                            await aprobarAsociadoJuridicoMutation.mutateAsync(solicitudId);
-                    }
-                } else {
-                    console.error(' Tipo de persona no reconocido:', tipoPersona);
-                    throw new Error('Tipo de solicitud no válido');
-                }
-
-                onEstadoChanged?.('Aprobada');
-                alert(' Solicitud aprobada exitosamente');
-            } catch (error) {
-                console.error(' Error al aprobar solicitud:', error);
-                alert(' Error al aprobar la solicitud');
-            }
-        }
-    };
-
-    // Handle para rechazar según el tipo de solicitud
-    const handleRechazar = async () => {
-        if (confirm('¿Está seguro de rechazar esta solicitud?')) {
-            try {
-                console.log(` Rechazando solicitud: Tipo Persona: ${tipoPersona}, Tipo Solicitud: ${tipoSolicitud}`);
-
-                // Determinar qué mutación usar basado en tipo de persona y tipo de solicitud
-                if (tipoPersona === 'solicitud-fisica') {
-                    switch (tipoSolicitud) {
-                        case 'Afiliacion':
-                            await rechazarAfiliacionMutation.mutateAsync(solicitudId);
-                            break;
-                        case 'Cambio de Medidor':
-                            await rechazarCambioMedidorMutation.mutateAsync(solicitudId);
-                            break;
-                        case 'Asociado':
-                            await rechazarAsociadoMutation.mutateAsync(solicitudId);
-                            break;
-                        case 'Desconexion':
-                            await rechazarDesconexionMutation.mutateAsync(solicitudId);
-                            break;
-                        default:
-                            console.warn(' Tipo de solicitud física no reconocido:', tipoSolicitud);
-                            await rechazarAfiliacionMutation.mutateAsync(solicitudId);
-                    }
-                } else if (tipoPersona === 'solicitud-juridica') {
-                    switch (tipoSolicitud) {
-                        case 'Afiliacion':
-                            await rechazarAfiliacionMutation.mutateAsync(solicitudId);
-                            break;
-                        case 'Cambio de Medidor':
-                            await rechazarCambioMedidorJuridicoMutation.mutateAsync(solicitudId);
-                            break;
-                        case 'Asociado':
-                            await rechazarAsociadoJuridicoMutation.mutateAsync(solicitudId);
-                            break;
-                        case 'Desconexion':
-                            await rechazarDesconexionJuridicoMutation.mutateAsync(solicitudId);
-                            break;
-                        default:
-                            console.warn(' Tipo de solicitud jurídica no reconocido:', tipoSolicitud);
-                            await rechazarAfiliacionMutation.mutateAsync(solicitudId);
-                    }
-                } else {
-                    console.error(' Tipo de persona no reconocido:', tipoPersona);
-                    throw new Error('Tipo de solicitud no válido');
-                }
-
-                onEstadoChanged?.('Rechazada');
-                alert(' Solicitud rechazada');
-            } catch (error) {
-                console.error(' Error al rechazar solicitud:', error);
-                alert(' Error al rechazar la solicitud');
-            }
-        }
-    };
-
-    // Función genérica para cambiar a cualquier estado
-    const handleCambiarEstado = async (nuevoEstadoId: number, nombreEstado: string) => {
+    // Handle para aprobar y poner en espera
+    const handleConfirmAprobar = async () => {
         try {
-            await updateEstadoMutation.mutateAsync({
-                solicitudId,
-                nuevoEstadoId
-            });
-            onEstadoChanged?.(nombreEstado);
-            alert(` Estado cambiado a: ${nombreEstado}`);
+            console.log(`🎯 Aprobando solicitud: ${tipoPersona} - ${tipoSolicitud} - ID: ${solicitudId}`);
+            
+            await aprobarMutation.mutateAsync(tipoSolicitud, tipoPersona, solicitudId);
+            
+            setShowAprobarDialog(false);
+            onEstadoChanged?.('Aprobada en Espera');
         } catch (error) {
-            alert(' Error al cambiar estado');
+            console.error('❌ Error al aprobar solicitud:', error);
+            setShowAprobarDialog(false);
         }
     };
 
-    const isLoading =
-        // Mutaciones físicas
-        completarAfiliacionMutation.isPending || rechazarAfiliacionMutation.isPending ||
-        aprobarCambioMedidorMutation.isPending || rechazarCambioMedidorMutation.isPending ||
-        aprobarAsociadoMutation.isPending || rechazarAsociadoMutation.isPending ||
-        aprobarDesconexionMutation.isPending || rechazarDesconexionMutation.isPending ||
-        // Mutaciones jurídicas
-        aprobarAsociadoJuridicoMutation.isPending || rechazarAfiliacionMutation.isPending ||
-        aprobarCambioMedidorJuridicoMutation.isPending || rechazarCambioMedidorJuridicoMutation.isPending ||
-        aprobarAsociadoJuridicoMutation.isPending || rechazarAsociadoJuridicoMutation.isPending ||
-        aprobarDesconexionJuridicoMutation.isPending || rechazarDesconexionJuridicoMutation.isPending ||
-        // Mutación genérica
-        updateEstadoMutation.isPending;
+    // Handle para completar solicitud
+    const handleConfirmCompletar = async () => {
+        try {
+            console.log(`✅ Completando solicitud: ${tipoPersona} - ${tipoSolicitud} - ID: ${solicitudId}`);
+            
+            await completarMutation.mutateAsync(tipoSolicitud, tipoPersona, solicitudId);
+            
+            setShowCompletarDialog(false);
+            onEstadoChanged?.('Completada');
+        } catch (error) {
+            console.error('❌ Error al completar solicitud:', error);
+            setShowCompletarDialog(false);
+        }
+    };
+
+    // Handle para rechazar solicitud
+    const handleConfirmRechazar = async () => {
+        try {
+            console.log(`🚫 Rechazando solicitud: ${tipoPersona} - ${tipoSolicitud} - ID: ${solicitudId}`);
+            
+            await rechazarMutation.mutateAsync(tipoSolicitud, tipoPersona, solicitudId);
+            
+            setShowRechazarDialog(false);
+            onEstadoChanged?.('Rechazada');
+        } catch (error) {
+            console.error('❌ Error al rechazar solicitud:', error);
+            setShowRechazarDialog(false);
+        }
+    };
+
+    const isLoading = aprobarMutation.isPending || completarMutation.isPending || rechazarMutation.isPending;
 
     return (
-        <div className="flex flex-wrap gap-2">
-            {/* Botones de acciones específicas */}
-            <button
-                onClick={handleAprobar}
-                disabled={isLoading || estadoActual === 'Aprobada'}
-                className="px-3 py-1 rounded-md bg-green-100 text-green-700 hover:bg-green-200 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium border border-green-200"
-            >
-                {isLoading ? 'Procesando' : 'Aprobar'}
-            </button>
+        <>
+            <div className="flex flex-wrap gap-2">
+                {/* Botón para aprobar y poner en espera */}
+                <button
+                    onClick={() => setShowAprobarDialog(true)}
+                    disabled={isLoading || estadoActual === 'Aprobada en Espera' || estadoActual === 'Completada'}
+                    className="px-3 py-1 rounded-md bg-green-100 text-green-700 hover:bg-green-200 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium border border-green-200"
+                >
+                    {aprobarMutation.isPending ? 'Procesando...' : '✓ Aprobar'}
+                </button>
 
-            <button
-                onClick={handleRechazar}
-                disabled={isLoading || estadoActual === 'Rechazada'}
-                className="px-3 py-1 rounded-md bg-red-100 text-red-700 hover:bg-red-200 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium border border-red-200"
-            >
-                {isLoading ? 'Procesando' : 'Rechazar'}
-            </button>
+                {/* Botón para completar */}
+                <button
+                    onClick={() => setShowCompletarDialog(true)}
+                    disabled={isLoading || estadoActual === 'Completada' || estadoActual === 'Rechazada'}
+                    className="px-3 py-1 rounded-md bg-blue-100 text-blue-700 hover:bg-blue-200 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium border border-blue-200"
+                >
+                    {completarMutation.isPending ? 'Procesando...' : '✓ Completar'}
+                </button>
 
-            {/* Ejemplo de botón con estado personalizado */}
-            <button
-                onClick={() => handleCambiarEstado(5, 'Completada')}
-                disabled={isLoading || estadoActual === 'Completada'}
-                className="px-3 py-1 rounded-md bg-purple-100 text-purple-700 hover:bg-purple-200 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium border border-purple-200"
-            >
-                {updateEstadoMutation.isPending ? 'Procesando' : 'Completar'}
-            </button>
-        </div>
+                {/* Botón para rechazar */}
+                <button
+                    onClick={() => setShowRechazarDialog(true)}
+                    disabled={isLoading || estadoActual === 'Rechazada' || estadoActual === 'Completada'}
+                    className="px-3 py-1 rounded-md bg-red-100 text-red-700 hover:bg-red-200 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium border border-red-200"
+                >
+                    {rechazarMutation.isPending ? 'Procesando...' : '✗ Rechazar'}
+                </button>
+            </div>
+
+            {/* AlertDialog para Aprobar */}
+            <AlertDialog open={showAprobarDialog} onOpenChange={setShowAprobarDialog}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>¿Aprobar solicitud?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Esta acción cambiará el estado de la solicitud a "Aprobada en Espera". 
+                            La solicitud quedará lista para ser completada posteriormente.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel disabled={aprobarMutation.isPending}>
+                            Cancelar
+                        </AlertDialogCancel>
+                        <AlertDialogAction 
+                            onClick={handleConfirmAprobar}
+                            disabled={aprobarMutation.isPending}
+                        >
+                            {aprobarMutation.isPending ? 'Aprobando...' : 'Aprobar'}
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+
+            {/* AlertDialog para Completar */}
+            <AlertDialog open={showCompletarDialog} onOpenChange={setShowCompletarDialog}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>¿Completar solicitud?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Esta acción marcará la solicitud como "Completada". 
+                            Asegúrese de que todos los procesos relacionados han sido finalizados.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel disabled={completarMutation.isPending}>
+                            Cancelar
+                        </AlertDialogCancel>
+                        <AlertDialogAction 
+                            onClick={handleConfirmCompletar}
+                            disabled={completarMutation.isPending}
+                        >
+                            {completarMutation.isPending ? 'Completando...' : 'Completar'}
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+
+            {/* AlertDialog para Rechazar */}
+            <AlertDialog open={showRechazarDialog} onOpenChange={setShowRechazarDialog}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>¿Rechazar solicitud?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Esta acción cambiará el estado de la solicitud a "Rechazada". 
+                            Esta decisión puede ser definitiva según las políticas de la organización.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel disabled={rechazarMutation.isPending}>
+                            Cancelar
+                        </AlertDialogCancel>
+                        <AlertDialogAction 
+                            onClick={handleConfirmRechazar}
+                            disabled={rechazarMutation.isPending}
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        >
+                            {rechazarMutation.isPending ? 'Rechazando...' : 'Rechazar'}
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+        </>
     );
 };
 

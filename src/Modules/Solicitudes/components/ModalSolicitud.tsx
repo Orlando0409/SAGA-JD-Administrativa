@@ -1,5 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { X, User, Check, XCircle } from 'lucide-react';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from '@/Modules/Global/components/Sidebar/ui/alert-dialog';
 import type { SolicitudFisica } from '../Models/ModelosFisicas';
 import type { SolicitudJuridica } from '../Models/ModelosJuridicos';
 import ModalMedidor from './ModalMedidor';
@@ -22,6 +32,11 @@ interface ModalSolicitudProps {
 const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solicitud }) => {
     // Estado para controlar el modal de asignación de medidor
     const [showModalMedidor, setShowModalMedidor] = useState(false);
+    
+    // Estados para controlar los AlertDialog
+    const [showAprobarDialog, setShowAprobarDialog] = useState(false);
+    const [showCompletarDialog, setShowCompletarDialog] = useState(false);
+    const [showRechazarDialog, setShowRechazarDialog] = useState(false);
 
     // 🎯 HOOKS UNIFICADOS - Reemplaza a los 16+ hooks anteriores
     const marcarEnRevisionMutation = useMarcarEnRevision();
@@ -162,38 +177,17 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
     const handleCambiarEstado = async () => {
         const estadoActual = info.estadoId;
 
-        // Mapear los tipos
-        const tipoSolicitud: TipoSolicitud = mapearTipoSolicitud(info.tipoSolicitud);
-        const tipoPersona: TipoPersona = mapearTipoPersona(info.tipo);
-
         // Verificar si requiere asignación de medidor (Afiliación o Cambio de Medidor)
         const requiereAsignacionMedidor = info.tipoSolicitud === 'Afiliacion' || info.tipoSolicitud === 'Cambio de Medidor';
 
         // Estado 2 (En Revisión) → Decidir flujo según tipo de solicitud
         if (estadoActual === 2) {
             if (requiereAsignacionMedidor) {
-                // Para Afiliación y Cambio de Medidor: Preguntar y si confirma, marcar En Espera y abrir modal de medidor
-                const ok = window.confirm(`¿Desea aprobar la solicitud de ${info.nombre} y ponerla en espera?`);
-                if (!ok) return;
-
-                try {
-                    console.log(`✅ Aprobando y poniendo en espera: ${tipoSolicitud} - ${tipoPersona}`);
-                    await aprobarYEnEsperaMutation.mutateAsync(tipoSolicitud, tipoPersona, info.id);
-                } catch (error) {
-                    console.error('❌ Error al marcar en aprobada y en espera:', error);
-                }
+                // Para Afiliación y Cambio de Medidor: Abrir diálogo de confirmación
+                setShowAprobarDialog(true);
             } else {
-                // Para Asociado y Desconexión: Estado 2 → Estado 4 (Completada) directamente
-                const ok = window.confirm(`¿Desea completar la solicitud de ${info.nombre}? (no requiere asignación de medidor)`);
-                if (!ok) return;
-
-                try {
-                    console.log(`🎉 Completando solicitud ${info.tipoSolicitud} directamente desde Estado 2 (sin medidor)`);
-                    await completarMutation.mutateAsync(tipoSolicitud, tipoPersona, info.id);
-                    onClose();
-                } catch (error) {
-                    console.error('❌ Error al completar solicitud:', error);
-                }
+                // Para Asociado y Desconexión: Abrir diálogo de completar directamente
+                setShowCompletarDialog(true);
             }
         }
         // Estado 3 (Aprobada y en espera) → Solo llega aquí si requiere medidor (Afiliación o Cambio de Medidor)
@@ -228,9 +222,42 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
 
     // Función para manejar rechazo usando hooks unificados
     const handleRechazar = async () => {
-        const ok = window.confirm(`¿Está seguro de RECHAZAR la solicitud de ${info.nombre}?`);
-        if (!ok) return;
+        setShowRechazarDialog(true);
+    };
 
+    // Confirmar aprobación y poner en espera (para solicitudes con medidor)
+    const handleConfirmAprobar = async () => {
+        const tipoSolicitud: TipoSolicitud = mapearTipoSolicitud(info.tipoSolicitud);
+        const tipoPersona: TipoPersona = mapearTipoPersona(info.tipo);
+
+        try {
+            console.log(`✅ Aprobando y poniendo en espera: ${tipoSolicitud} - ${tipoPersona}`);
+            await aprobarYEnEsperaMutation.mutateAsync(tipoSolicitud, tipoPersona, info.id);
+            setShowAprobarDialog(false);
+        } catch (error) {
+            console.error('❌ Error al marcar en aprobada y en espera:', error);
+            setShowAprobarDialog(false);
+        }
+    };
+
+    // Confirmar completar (para solicitudes sin medidor)
+    const handleConfirmCompletar = async () => {
+        const tipoSolicitud: TipoSolicitud = mapearTipoSolicitud(info.tipoSolicitud);
+        const tipoPersona: TipoPersona = mapearTipoPersona(info.tipo);
+
+        try {
+            console.log(`🎉 Completando solicitud ${info.tipoSolicitud} directamente desde Estado 2 (sin medidor)`);
+            await completarMutation.mutateAsync(tipoSolicitud, tipoPersona, info.id);
+            setShowCompletarDialog(false);
+            onClose();
+        } catch (error) {
+            console.error('❌ Error al completar solicitud:', error);
+            setShowCompletarDialog(false);
+        }
+    };
+
+    // Confirmar rechazo
+    const handleConfirmRechazar = async () => {
         try {
             // Mapear los tipos a los valores internos
             const tipoSolicitudInterno: TipoSolicitud = mapearTipoSolicitud(solicitud.tipoSolicitud || info.tipoSolicitud);
@@ -241,9 +268,11 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
             // Usar el hook unificado para rechazar (Cualquier estado → 5)
             await rechazarMutation.mutateAsync(tipoSolicitudInterno, tipoPersonaInterno, info.id);
 
+            setShowRechazarDialog(false);
             onClose(); // Cerrar modal después del éxito
         } catch (error) {
             console.error('❌ Error al rechazar:', error);
+            setShowRechazarDialog(false);
         }
     };
 
@@ -517,6 +546,82 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
                     }}
                 />
             )}
+
+            {/* AlertDialog para aprobar y poner en espera */}
+            <AlertDialog open={showAprobarDialog} onOpenChange={setShowAprobarDialog}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>¿Aprobar solicitud y poner en espera?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            ¿Desea aprobar la solicitud de <strong>{info.nombre}</strong> y ponerla en espera?
+                            <br /><br />
+                            Esta acción cambiará el estado a "Aprobada en Espera" y permitirá la asignación del medidor.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel disabled={aprobarYEnEsperaMutation.isPending}>
+                            Cancelar
+                        </AlertDialogCancel>
+                        <AlertDialogAction 
+                            onClick={handleConfirmAprobar}
+                            disabled={aprobarYEnEsperaMutation.isPending}
+                        >
+                            {aprobarYEnEsperaMutation.isPending ? 'Aprobando...' : 'Aprobar'}
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+
+            {/* AlertDialog para completar directamente (sin medidor) */}
+            <AlertDialog open={showCompletarDialog} onOpenChange={setShowCompletarDialog}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>¿Completar solicitud?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            ¿Desea completar la solicitud de <strong>{info.nombre}</strong>?
+                            <br /><br />
+                            Esta solicitud no requiere asignación de medidor y será marcada como completada directamente.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel disabled={completarMutation.isPending}>
+                            Cancelar
+                        </AlertDialogCancel>
+                        <AlertDialogAction 
+                            onClick={handleConfirmCompletar}
+                            disabled={completarMutation.isPending}
+                        >
+                            {completarMutation.isPending ? 'Completando...' : 'Completar'}
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+
+            {/* AlertDialog para rechazar */}
+            <AlertDialog open={showRechazarDialog} onOpenChange={setShowRechazarDialog}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>¿Rechazar solicitud?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            ¿Está seguro de RECHAZAR la solicitud de <strong>{info.nombre}</strong>?
+                            <br /><br />
+                            Esta acción marcará la solicitud como rechazada y no podrá ser revertida fácilmente.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel disabled={rechazarMutation.isPending}>
+                            Cancelar
+                        </AlertDialogCancel>
+                        <AlertDialogAction 
+                            onClick={handleConfirmRechazar}
+                            disabled={rechazarMutation.isPending}
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        >
+                            {rechazarMutation.isPending ? 'Rechazando...' : 'Rechazar'}
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     );
 };

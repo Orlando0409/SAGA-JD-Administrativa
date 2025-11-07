@@ -1,5 +1,6 @@
 import { useState, useRef } from "react";
 import { Upload, FileText } from "lucide-react";
+import { useAlerts } from '@/Modules/Global/context/AlertContext';
 
 interface CSVUploadFormProps {
   onUpload: (file: File) => Promise<void>;
@@ -11,6 +12,7 @@ export default function CSVUploadForm({ onUpload, onCancel, isUploading }: CSVUp
   const [csvFile, setCsvFile] = useState<File | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { showError } = useAlerts();
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -18,7 +20,10 @@ export default function CSVUploadForm({ onUpload, onCancel, isUploading }: CSVUp
       setCsvFile(file);
     } else {
       setCsvFile(null);
-      alert("Por favor seleccione un archivo CSV válido");
+      showError(
+        'Archivo inválido',
+        'Por favor seleccione un archivo CSV válido'
+      );
     }
   };
 
@@ -38,7 +43,10 @@ export default function CSVUploadForm({ onUpload, onCancel, isUploading }: CSVUp
     if (file && file.type === "text/csv") {
       setCsvFile(file);
     } else {
-      alert("Por favor suelte un archivo CSV válido");
+      showError(
+        'Archivo inválido',
+        'Por favor suelte un archivo CSV válido'
+      );
     }
   };
 

@@ -4,6 +4,7 @@ import { User, Building, Plus } from 'lucide-react';
 import { MdKeyboardArrowLeft, MdKeyboardArrowRight, MdKeyboardDoubleArrowLeft, MdKeyboardDoubleArrowRight, MdKeyboardArrowDown, MdKeyboardArrowUp } from 'react-icons/md';
 import { LuSearch } from 'react-icons/lu';
 import { useNavigate } from '@tanstack/react-router';
+import { useAlerts } from '@/Modules/Global/context/AlertContext';
 import { useAfiliadosFisicos } from '../Hook/HookAfiliadoFisico';
 import { useAfiliadosJuridicos } from '../Hook/HookAfiliadoJuridico';
 import { formatCedulaJuridica } from '../Helper/formatUtils';
@@ -44,6 +45,7 @@ export default function AbonadosTable() {
     const { afiliadosFisicos, isLoading: loadingFisicos, isError: errorFisicos, updateEstadoAfiliadoFisico: updateEstadoMutationFisico } = useAfiliadosFisicos();
     const { afiliadosJuridicos, isLoading: loadingJuridicos, isError: errorJuridicos, updateEstadoAfiliadoJuridico: updateEstadoMutationJuridico } = useAfiliadosJuridicos();
     const navigate = useNavigate();
+    const { showError } = useAlerts();
 
     const [globalFilter, setGlobalFilter] = useState('');
     const [estadoFilter, setEstadoFilter] = useState<string>('Todos'); // Filtro de estado
@@ -151,7 +153,10 @@ export default function AbonadosTable() {
             console.log('Estado actualizado exitosamente');
         } catch (error) {
             console.error('Error al actualizar estado:', error);
-            alert('Error al actualizar el estado. Intente nuevamente.');
+            showError(
+                'Error al actualizar estado',
+                'No se pudo actualizar el estado del afiliado. Por favor, intente nuevamente.'
+            );
         }
     };
 

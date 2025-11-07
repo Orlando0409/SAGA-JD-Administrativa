@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useAlerts } from "@/Modules/Global/context/AlertContext";
 import { 
   getProveedoresFisicos, 
   getProveedorFisicoById,
@@ -43,15 +44,17 @@ export const useProveedorFisico = (id: number) => {
 
 export const useCreateProveedorFisico = () => {
   const queryClient = useQueryClient();
+  const { showSuccess, showError } = useAlerts();
   
   const createMutation = useMutation({
     mutationFn: (data: CreateProveedorData) => createProveedorFisico(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["proveedoresFisicos"] });
-      console.log("Proveedor físico creado con éxito");
+      showSuccess('Proveedor creado', 'El proveedor físico se ha creado exitosamente');
     },
-    onError: (error) => {
-      console.error("Error al crear el proveedor físico:", error);
+    onError: (error: any) => {
+      const errorMessage = error?.response?.data?.message || 'Error al crear el proveedor físico';
+      showError('Error', errorMessage);
     },
   });
    
@@ -67,21 +70,19 @@ export const useCreateProveedorFisico = () => {
 
 export const useUpdateProveedorFisico = () => {
   const queryClient = useQueryClient();
+  const { showSuccess, showError } = useAlerts();
   
   const updateMutation = useMutation({
     mutationFn: ({ id, data }: { id: number; data: UpdateProveedorData }) => 
       updateProveedorFisico(id, data),
     onSuccess: (updatedProveedor, { id }) => {
-      // Invalidar la lista de proveedores para refrescar la tabla
       queryClient.invalidateQueries({ queryKey: ["proveedoresFisicos"] });
-      
-      // Actualizar el cache del proveedor específico si existe
       queryClient.setQueryData(['proveedorFisico', id], updatedProveedor);
-      
-      console.log("Proveedor físico actualizado con éxito");
+      showSuccess('Proveedor actualizado', 'El proveedor físico se ha actualizado exitosamente');
     },
-    onError: (error) => {
-      console.error("Error al actualizar el proveedor físico:", error);
+    onError: (error: any) => {
+      const errorMessage = error?.response?.data?.message || 'Error al actualizar el proveedor físico';
+      showError('Error', errorMessage);
     },
   });
    
@@ -97,20 +98,18 @@ export const useUpdateProveedorFisico = () => {
 
 export const useDeleteProveedorFisico = () => {
   const queryClient = useQueryClient();
+  const { showSuccess, showError } = useAlerts();
   
   const deleteMutation = useMutation({
     mutationFn: (id: number) => deleteProveedorFisico(id),
     onSuccess: (_, deletedId) => {
-      // Invalidar la lista de proveedores para refrescar la tabla
       queryClient.invalidateQueries({ queryKey: ["proveedoresFisicos"] });
-      
-      // Remover el proveedor específico del cache
       queryClient.removeQueries({ queryKey: ['proveedorFisico', deletedId] });
-      
-      console.log("Proveedor físico eliminado con éxito");
+      showSuccess('Proveedor eliminado', 'El proveedor físico se ha eliminado exitosamente');
     },
-    onError: (error) => {
-      console.error("Error al eliminar el proveedor físico:", error);
+    onError: (error: any) => {
+      const errorMessage = error?.response?.data?.message || 'Error al eliminar el proveedor físico';
+      showError('Error', errorMessage);
     },
   });
    
@@ -127,21 +126,19 @@ export const useDeleteProveedorFisico = () => {
 // Hook para cambiar el estado de un proveedor físico (Activo/Inactivo)
 export const useChangeProveedorFisicoStatus = () => {
   const queryClient = useQueryClient();
+  const { showSuccess, showError } = useAlerts();
   
   const changeStatusMutation = useMutation({
     mutationFn: ({ id, nuevoEstado }: { id: number; nuevoEstado: number }) => 
       changeProveedorFisicoStatus(id, nuevoEstado),
     onSuccess: (updatedProveedor, { id }) => {
-      // Invalidar la lista de proveedores para refrescar la tabla
       queryClient.invalidateQueries({ queryKey: ["proveedoresFisicos"] });
-      
-      // Actualizar el cache del proveedor específico si existe
       queryClient.setQueryData(['proveedorFisico', id], updatedProveedor);
-      
-      console.log("Estado del proveedor físico cambiado con éxito");
+      showSuccess('Estado actualizado', 'El estado del proveedor se ha actualizado exitosamente');
     },
-    onError: (error) => {
-      console.error("Error al cambiar el estado del proveedor físico:", error);
+    onError: (error: any) => {
+      const errorMessage = error?.response?.data?.message || 'Error al cambiar el estado del proveedor físico';
+      showError('Error', errorMessage);
     },
   });
    

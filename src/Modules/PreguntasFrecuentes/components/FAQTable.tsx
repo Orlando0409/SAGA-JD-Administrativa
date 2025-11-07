@@ -23,22 +23,18 @@ import {
   AlertDialogHeader,
   AlertDialogFooter
 } from "@/Modules/Global/components/Sidebar/ui/alert-dialog";
-import { useFAQ } from "../Hook/FAQHook";
+import { useFAQs, useDeleteFAQ, useToggleFAQVisible } from "../Hook/FAQHook";
 import { Eye, EyeOff } from "lucide-react";
 import type { FAQ } from "../Models/FAQModels";
 import FAQForm from "./FAQForm";
 import FAQModal from "./FAQModal";
 import FAQEdit from "./FAQEdit";
+import { Button } from "@/Modules/Global/components/Sidebar/ui/button";
 
 export default function FAQTable() {
-    const {
-        faqs,
-        loading,
-        error,
-        fetchAll,
-        removeFAQ,
-        toggleVisible,
-    } = useFAQ(true); // true = modo admin
+    const { data: faqs = [], isLoading, error } = useFAQs(true);
+    const deleteFAQMutation = useDeleteFAQ();
+    const toggleVisibleMutation = useToggleFAQVisible();
 
     const [globalFilter, setGlobalFilter] = useState('');
     const [formVisible, setFormVisible] = useState(false);
@@ -104,9 +100,10 @@ export default function FAQTable() {
                 <button
                     onClick={(e) => {
                         e.stopPropagation();
-                        toggleVisible(info.row.original.Id_FAQ);
+                        handleToggleVisibility(info.row.original);
                     }}
-                    className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium transition-colors ${
+                    disabled={toggleVisibleMutation.isPending}
+                    className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
                         info.getValue()
                             ? "bg-green-100 text-green-700 hover:bg-green-200"
                             : "bg-red-100 text-red-700 hover:bg-red-200"
@@ -147,32 +144,32 @@ export default function FAQTable() {
                     </button>
                     <AlertDialog>
                         <AlertDialogTrigger asChild>
-                            <button
-                                className="px-2 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-700 transition-colors"
-                                disabled={loading}
+                            <Button
+                                className="px-2 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                disabled={deleteFAQMutation.isPending}
                                 title="Eliminar pregunta"
                             >
                                 Eliminar
-                            </button>
+                            </Button>
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                             <AlertDialogHeader>
                                 <AlertDialogTitle>
-                                    <span>¿Eliminar pregunta?</span>
+                                    ¿Eliminar pregunta?
                                 </AlertDialogTitle>
                                 <AlertDialogDescription>
-                                    <span>¿Estás seguro de que deseas eliminar la pregunta "{info.row.original.Pregunta}"? Esta acción no se puede deshacer.</span>
+                                    ¿Estás seguro de que deseas eliminar la pregunta "{info.row.original.Pregunta}"? Esta acción no se puede deshacer.
                                 </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
                                 <AlertDialogAction
                                     onClick={() => handleDelete(info.row.original)}
-                                    disabled={loading}
+                                    disabled={deleteFAQMutation.isPending}
                                 >
-                                    <span>Eliminar</span>
+                                    {deleteFAQMutation.isPending ? 'Eliminando...' : 'Eliminar'}
                                 </AlertDialogAction>
                                 <AlertDialogCancel>
-                                    <span>Cancelar</span>
+                                    Cancelar
                                 </AlertDialogCancel>
                             </AlertDialogFooter>
                         </AlertDialogContent>
@@ -180,7 +177,7 @@ export default function FAQTable() {
                 </div>
             ),
         }),
-    ], [loading]);
+    ], [isLoading, deleteFAQMutation.isPending, toggleVisibleMutation.isPending]);
 
     // Funciones para manejar las acciones
     const handleViewDetail = (faq: FAQ) => {
@@ -193,10 +190,20 @@ export default function FAQTable() {
         setEditVisible(true);
     };
 
-    const handleDelete = (faq: FAQ) => {
-        removeFAQ(faq.Id_FAQ).then(() => {
-            fetchAll();
-        });
+    const handleDelete = async (faq: FAQ) => {
+        try {
+            await deleteFAQMutation.mutateAsync(faq.Id_FAQ);
+        } catch (error) {
+            console.error("Error al eliminar pregunta:", error);
+        }
+    };
+
+    const handleToggleVisibility = async (faq: FAQ) => {
+        try {
+            await toggleVisibleMutation.mutateAsync(faq.Id_FAQ);
+        } catch (error) {
+            console.error("Error al cambiar visibilidad:", error);
+        }
     };
 
     // Crear la tabla con TanStack Table
@@ -248,7 +255,7 @@ export default function FAQTable() {
             </div>
 
             {/* Mostrar errores */}
-            {error && <div className="text-red-600 mb-2">{error}</div>}
+            {error && <div className="text-red-600 mb-2">{error.message}</div>}
 
             <div className="bg-white rounded-2xl shadow-sm border border-sky-100 overflow-hidden max-h-[calc(100vh-300px)] overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100">
                 <div className="overflow-x-auto">
@@ -403,7 +410,6 @@ export default function FAQTable() {
             {formVisible && (
                 <FAQForm
                     onClose={() => setFormVisible(false)}
-                    refetch={fetchAll}
                 />
             )}
 
@@ -415,7 +421,6 @@ export default function FAQTable() {
                         setEditVisible(false);
                         setFaqSeleccionada(null);
                     }}
-                    refetch={fetchAll}
                 />
             )}
 

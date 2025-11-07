@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useAlerts } from "@/Modules/Global/context/AlertContext";
 import {
   getFAQ,
   getFAQAdmin,
@@ -10,7 +11,111 @@ import {
   toggleFAQVisible,
 } from "../Services/FAQService";
 import type { FAQ } from "../Models/FAQModels";
+import { AxiosError } from "axios";
 
+// Hook con React Query para obtener todas las FAQs
+export const useFAQs = (isAdmin: boolean = false) => {
+  return useQuery({
+    queryKey: ['faqs', isAdmin],
+    queryFn: () => isAdmin ? getFAQAdmin() : getFAQ(),
+  });
+};
+
+// Hook con React Query para obtener una FAQ por ID
+export const useFAQById = (id: number) => {
+  return useQuery({
+    queryKey: ['faq', id],
+    queryFn: () => getFAQById(id),
+    enabled: !!id,
+  });
+};
+
+// Hook para crear una FAQ
+export const useCreateFAQ = () => {
+  const queryClient = useQueryClient();
+  const { showSuccess, showError } = useAlerts();
+
+  return useMutation({
+    mutationFn: (data: Partial<FAQ>) => createFAQ(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['faqs'] });
+      showSuccess('Pregunta creada', 'La pregunta frecuente se ha creado exitosamente');
+    },
+    onError: (error: any) => {
+      let errMsg = 'Error al crear la pregunta frecuente';
+      if (error instanceof AxiosError) {
+        errMsg = error.response?.data?.message || error.message;
+      }
+      showError('Error', errMsg);
+    },
+  });
+};
+
+// Hook para actualizar una FAQ
+export const useUpdateFAQ = () => {
+  const queryClient = useQueryClient();
+  const { showSuccess, showError } = useAlerts();
+
+  return useMutation({
+    mutationFn: ({ id, data }: { id: number; data: Partial<FAQ> }) => updateFAQ(id, data),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['faqs'] });
+      queryClient.invalidateQueries({ queryKey: ['faq', variables.id] });
+      showSuccess('Pregunta actualizada', 'Los cambios se han guardado exitosamente');
+    },
+    onError: (error: any) => {
+      let errMsg = 'Error al actualizar la pregunta frecuente';
+      if (error instanceof AxiosError) {
+        errMsg = error.response?.data?.message || error.message;
+      }
+      showError('Error', errMsg);
+    },
+  });
+};
+
+// Hook para eliminar una FAQ
+export const useDeleteFAQ = () => {
+  const queryClient = useQueryClient();
+  const { showSuccess, showError } = useAlerts();
+
+  return useMutation({
+    mutationFn: (id: number) => deleteFAQ(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['faqs'] });
+      showSuccess('Pregunta eliminada', 'La pregunta frecuente se ha eliminado exitosamente');
+    },
+    onError: (error: any) => {
+      let errMsg = 'Error al eliminar la pregunta frecuente';
+      if (error instanceof AxiosError) {
+        errMsg = error.response?.data?.message || error.message;
+      }
+      showError('Error', errMsg);
+    },
+  });
+};
+
+// Hook para cambiar visibilidad de una FAQ
+export const useToggleFAQVisible = () => {
+  const queryClient = useQueryClient();
+  const { showSuccess, showError } = useAlerts();
+
+  return useMutation({
+    mutationFn: (id: number) => toggleFAQVisible(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['faqs'] });
+      showSuccess('Visibilidad actualizada correctamente');
+    },
+    onError: (error: any) => {
+      let errMsg = 'Error al cambiar la visibilidad';
+      if (error instanceof AxiosError) {
+        errMsg = error.response?.data?.message || error.message;
+      }
+      showError('Error', errMsg);
+    },
+  });
+};
+
+// Hook legacy para compatibilidad con código existente
 export const useFAQ = (isAdmin: boolean = false) => {
   const [faqs, setFaqs] = useState<FAQ[]>([]);
   const [faq, setFaq] = useState<FAQ | null>(null);
