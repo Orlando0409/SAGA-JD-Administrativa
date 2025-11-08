@@ -4,7 +4,7 @@ import { GrHelpBook } from "react-icons/gr";
 import { IoDocumentTextOutline } from "react-icons/io5";
 export const modules = [
   // Gestión
-  { name: 'Gestión De afiliados', icon: <FaUserFriends />, path: '/Afiliados', section: 'Gestión', Permiso: 'abonados', hidden: false },
+  { name: 'Gestión de afiliados', icon: <FaUserFriends />, path: '/Afiliados', section: 'Gestión', Permiso: 'abonados', hidden: false },
   { name: 'Gestión de actas', icon: <FaBook />, path: '/Actas', section: 'Gestión', Permiso: 'actas', hidden: false },
   { name: 'Revisión de solicitudes', icon: <FaClipboardList />, path: '/Solicitudes', section: 'Gestión', Permiso: 'solicitudes', hidden: false },
   { name: 'Gestión de inventario', icon: <FaBoxes />, path: '/Inventario', section: 'Gestión', Permiso: 'inventario', hidden: false },

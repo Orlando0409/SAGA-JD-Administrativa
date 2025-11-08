@@ -1,8 +1,4 @@
-import { useState } from 'react';
 import { LuX, LuUser, LuMail, LuPhone, LuMapPin, LuCalendar, LuBuilding, LuFileText, LuMap, LuInfo, LuGauge } from 'react-icons/lu';
-import { Accordion, AccordionHeader, AccordionBody } from "@material-tailwind/react"
-import { FiChevronDown, FiChevronRight } from 'react-icons/fi'
-import { CUSTOM_ANIMATION } from '@/Modules/Global/types/Sections';
 import { formatCedulaJuridica } from '../Helper/formatUtils';
 import type { AfiliadoFisico } from '../Models/TablaAfiliados/ModeloAfiliadoFisico';
 import type { AfiliadoJuridico } from '../Models/TablaAfiliados/ModeloAfiliadoJuridico';
@@ -21,19 +17,6 @@ interface DetailAbonadosProps {
 }
 
 const DetailAbonados: React.FC<DetailAbonadosProps> = ({ persona, isOpen, onClose }) => {
-
-    const [openSections, setOpenSections] = useState<number[]>([1, 2, 3, 4, 5]); // Abrir por defecto (agregado 4 para medidores)
-
-    const handleAccordion = (id: number) => {
-        setOpenSections(prev =>
-            prev.includes(id)
-                ? prev.filter(sectionId => sectionId !== id)
-                : [...prev, id]
-        )
-    }
-
-
-
 
     const getPersonaInfo = () => {
         const { tipo, datos } = persona;
@@ -114,10 +97,6 @@ const DetailAbonados: React.FC<DetailAbonadosProps> = ({ persona, isOpen, onClos
         }
     };
 
-    const getTipoPersonaIcon = (tipo: string) => {
-        return tipo === 'Físico' ? LuUser : LuBuilding;
-    };
-
     const getTipoAfiliadoColor = (tipo: string) => {
         return tipo === 'Físico'
             ? 'bg-blue-100 text-blue-800 border-blue-200'
@@ -135,377 +114,363 @@ const DetailAbonados: React.FC<DetailAbonadosProps> = ({ persona, isOpen, onClos
         }
     };
 
-    const getHeaderIcon = () => {
-        const Icon = getTipoPersonaIcon(personaInfo.tipoPersona);
-        return <Icon className="w-8 h-8 text-blue-600" />;
-    };
-
     if (!isOpen) return null;
 
     const personaInfo = getPersonaInfo();
 
     return (
-        <div className="fixed inset-0 backdrop-blur flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-lg shadow-2xl border border-gray-200 w-full max-w-3xl max-h-[90vh] overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100">
+        <div className="fixed inset-0 bg-opacity-10 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-lg shadow-2xl border border-gray-200 w-full max-w-3xl flex flex-col overflow-hidden max-h-[90vh]">
                 {/* Header */}
-                <div className="sticky top-0 bg-white border-b border-gray-200 p-6 z-10">
+                <div className="sticky top-0 bg-white border-b border-gray-200 p-4 z-10">
                     <div className="flex items-center justify-between">
-                        <h1 className="text-3xl font-bold text-gray-900">{getModalTitle()}</h1>
+                        <h1 className="text-xl font-bold text-gray-900 flex items-center gap-3">{getModalTitle()}</h1>
                         <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors">
-                            <LuX className="w-6 h-6" />
+                            <LuX className="w-5 h-5" />
                         </button>
                     </div>
                 </div>
 
                 {/* Content */}
-                <div className="p-6">
-                    {/* Header Card */}
-                    <div className="bg-gradient-to-r from-blue-600 to-blue-700 p-6 rounded-lg mb-6">
-                        <div className="flex items-center gap-4">
-                            <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center">
-                                {getHeaderIcon()}
+                <div className="p-6 overflow-y-auto max-h-[calc(90vh-180px)] space-y-6 scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100">
+                    
+                    {/* Información Personal */}
+                    <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
+                        <div className="bg-gray-50 px-5 py-3 border-b border-gray-200">
+                            <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                                    <LuUser className="w-4 h-4 text-blue-600" />
+                                </div>
+                                <h3 className="text-base font-bold text-gray-900">Información Personal</h3>
                             </div>
-                            <div>
-                                <h2 className="text-2xl font-bold text-white">{personaInfo.nombre}</h2>
-                                <p className="text-blue-100">{personaInfo.correo}</p>
-                                <div className="flex items-center gap-2 mt-2">
-                                    <span className="text-blue-200 text-sm">ID: {personaInfo.id}</span>
-                                    <span className="text-blue-200">•</span>
-                                    <span className="text-blue-200 text-sm">{personaInfo.tipoPersona}</span>
-                                    <span className="text-blue-200">•</span>
-                                    <span className="text-blue-200 text-sm">{personaInfo.tipoAfiliado}</span>
+                        </div>
+
+                        <div className="p-5">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {/* Nombre/Razón Social */}
+                                <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-lg border border-gray-200 md:col-span-2">
+                                    <div className="p-2 rounded-lg">
+                                        <LuUser className="w-5 h-5 text-blue-600" />
+                                    </div>
+                                    <div className="flex-1">
+                                        <p className="text-xs font-medium text-gray-500 uppercase">
+                                            {personaInfo.tipoPersona === 'Físico' ? 'Nombre Completo' : 'Razón Social'}
+                                        </p>
+                                        <p className="text-base font-semibold text-gray-900 mt-1">
+                                            {personaInfo.nombre}
+                                        </p>
+                                    </div>
+                                </div>
+
+                                {/* Documento */}
+                                <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                                    <div className="p-2 rounded-lg">
+                                        <LuFileText className="w-5 h-5 text-blue-600" />
+                                    </div>
+                                    <div className="flex-1">
+                                        <p className="text-xs font-medium text-gray-500 uppercase">
+                                            {personaInfo.tipoPersona === 'Físico' ? 'Identificación' : 'Cédula Jurídica'}
+                                        </p>
+                                        <p className="text-base font-semibold text-gray-900 mt-1">
+                                            {personaInfo.documento}
+                                        </p>
+                                    </div>
+                                </div>
+
+                                {/* Edad (solo para físicos) */}
+                                {personaInfo.edad && (
+                                    <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                                        <div className="p-2 rounded-lg">
+                                            <LuCalendar className="w-5 h-5 text-blue-600" />
+                                        </div>
+                                        <div className="flex-1">
+                                            <p className="text-xs font-medium text-gray-500 uppercase">
+                                                Edad
+                                            </p>
+                                            <p className="text-base font-medium text-gray-900 mt-1">
+                                                {personaInfo.edad} años
+                                            </p>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Tipo de Persona */}
+                                <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                                    <div className="p-2 rounded-lg">
+                                        <LuBuilding className="w-5 h-5 text-blue-600" />
+                                    </div>
+                                    <div className="flex-1">
+                                        <p className="text-xs font-medium text-gray-500 uppercase">
+                                            Tipo de Persona
+                                        </p>
+                                        <p className="text-base font-medium text-gray-900 mt-1">
+                                            {personaInfo.tipoPersona}
+                                        </p>
+                                    </div>
+                                </div>
+
+                                {/* Tipo de Afiliado */}
+                                <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                                    <div className="p-2 rounded-lg">
+                                        <LuUser className="w-5 h-5 text-blue-600" />
+                                    </div>
+                                    <div className="flex-1">
+                                        <p className="text-xs font-medium text-gray-500 uppercase">
+                                            Tipo de Afiliado
+                                        </p>
+                                        <span
+                                            className={`inline-block px-3 py-1 rounded-full text-sm font-medium border mt-1 ${getTipoAfiliadoColor(personaInfo.tipoAfiliado)}`}
+                                        >
+                                            {personaInfo.tipoAfiliado}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                {/* Escritura del Terreno */}
+                                {personaInfo.escritura && (
+                                    <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                                        <div className="p-2 rounded-lg">
+                                            <LuFileText className="w-5 h-5 text-blue-600" />
+                                        </div>
+                                        <div className="flex-1">
+                                            <p className="text-xs font-medium text-gray-500 uppercase">
+                                                Escritura del Terreno
+                                            </p>
+                                            <a
+                                                href={personaInfo.escritura}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="text-blue-600 hover:text-blue-800 font-medium underline mt-1 inline-block"
+                                            >
+                                                Ver documento
+                                            </a>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Planos del Terreno */}
+                                {personaInfo.planos && (
+                                    <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                                        <div className="p-2 rounded-lg">
+                                            <LuMap className="w-5 h-5 text-blue-600" />
+                                        </div>
+                                        <div className="flex-1">
+                                            <p className="text-xs font-medium text-gray-500 uppercase">
+                                                Planos del Terreno
+                                            </p>
+                                            <a
+                                                href={personaInfo.planos}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="text-blue-600 hover:text-blue-800 font-medium underline mt-1 inline-block"
+                                            >
+                                                Ver documento
+                                            </a>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Información de Contacto */}
+                    <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
+                        <div className="bg-gray-50 px-5 py-3 border-b border-gray-200">
+                            <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                                    <LuPhone className="w-4 h-4 text-blue-600" />
+                                </div>
+                                <h3 className="text-base font-bold text-gray-900">Información de Contacto</h3>
+                            </div>
+                        </div>
+
+                        <div className="p-5">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {/* Dirección */}
+                                {personaInfo.direccion && (
+                                    <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-lg border border-gray-200 md:col-span-2">
+                                        <div className="p-2 rounded-lg">
+                                            <LuMapPin className="w-5 h-5 text-blue-600" />
+                                        </div>
+                                        <div className="flex-1">
+                                            <p className="text-xs font-medium text-gray-500 uppercase">
+                                                Dirección Exacta
+                                            </p>
+                                            <p className="text-base font-medium text-gray-900 mt-1">
+                                                {personaInfo.direccion}
+                                            </p>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Correo */}
+                                <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                                    <div className="p-2 rounded-lg">
+                                        <LuMail className="w-5 h-5 text-blue-600" />
+                                    </div>
+                                    <div className="flex-1">
+                                        <p className="text-xs font-medium text-gray-500 uppercase">
+                                            Correo Electrónico
+                                        </p>
+                                        <p className="text-base font-medium text-gray-900 mt-1">
+                                            {personaInfo.correo}
+                                        </p>
+                                    </div>
+                                </div>
+
+                                {/* Teléfono */}
+                                <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                                    <div className="p-2 rounded-lg">
+                                        <LuPhone className="w-5 h-5 text-blue-600" />
+                                    </div>
+                                    <div className="flex-1">
+                                        <p className="text-xs font-medium text-gray-500 uppercase">
+                                            Teléfono
+                                        </p>
+                                        <p className="text-base font-medium text-gray-900 mt-1">
+                                            {personaInfo.telefono}
+                                        </p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    {/* Accordion Sections */}
-                    <div className="space-y-4">
-                        {/* Información Personal */}
-                        <Accordion
-                            open={openSections.includes(1)}
-                            animate={CUSTOM_ANIMATION}
-                            className="border border-gray-200 rounded-lg shadow-sm bg-white"
-                            {...({} as any)}
-                        >
-                            <AccordionHeader
-                                onClick={() => handleAccordion(1)}
-                                className="text-base font-semibold px-6 py-4 border-b-0 hover:bg-gray-50"
-                                {...({} as any)}
-                            >
-                                <div className="flex items-center justify-between w-full">
-                                    <div className="flex items-center gap-3">
-                                        <LuUser className="w-5 h-5 text-blue-600" />
-                                        <span className="text-gray-900">Información Personal</span>
+                    {/* Medidores Asignados */}
+                    {personaInfo.medidores && personaInfo.medidores.length > 0 && (
+                        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
+                            <div className="bg-gray-50 px-5 py-3 border-b border-gray-200">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                                        <LuGauge className="w-4 h-4 text-blue-600" />
                                     </div>
-                                    <span className="text-gray-500">
-                                        {openSections.includes(1) ? <FiChevronDown size={20} /> : <FiChevronRight size={20} />}
-                                    </span>
+                                    <h3 className="text-base font-bold text-gray-900">
+                                        Medidores Asignados ({personaInfo.medidores.length})
+                                    </h3>
                                 </div>
-                            </AccordionHeader>
-                            <AccordionBody className="px-6 pb-6" placeholder="">
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-500 mb-1">
-                                            {personaInfo.tipoPersona === 'Físico' ? 'Nombre Completo' : 'Razón Social'}
-                                        </label>
-                                        <p className="text-gray-900 font-medium">{personaInfo.nombre}</p>
-                                    </div>
+                            </div>
 
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-500 mb-1">{personaInfo.tipoDocumento}</label>
-                                        <p className="text-gray-900 font-medium">{personaInfo.documento}</p>
-                                    </div>
-
-                                    {personaInfo.edad && (
-                                        <div>
-                                            <label htmlFor='Edad' className="block text-sm font-medium text-gray-500 mb-1">Edad</label>
-                                            <p className="text-gray-900 font-medium">{personaInfo.edad} años</p>
-                                        </div>
-                                    )}
-
-                                    <div>
-                                        <label htmlFor='Estado' className="block text-sm font-medium text-gray-500 mb-2">Estado</label>
-                                        <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${getStatusColor(personaInfo.estadoId)}`}>
-                                            {personaInfo.estado}
-                                        </span>
-                                    </div>
-
-                                    <div>
-                                        <label htmlFor='TipoPersona' className="block text-sm font-medium text-gray-500 mb-2">Tipo de Persona</label>
-                                        <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800 border border-gray-200">
-                                            {personaInfo.tipoPersona}
-                                        </span>
-                                    </div>
-
-                                    <div>
-                                        <label htmlFor='TipoAfiliado' className="block text-sm font-medium text-gray-500 mb-2">Tipo de Afiliado</label>
-                                        <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${getTipoAfiliadoColor(personaInfo.tipoAfiliado)}`}>
-                                            {personaInfo.tipoAfiliado}
-                                        </span>
-                                    </div>
-                                </div>
-                            </AccordionBody>
-                        </Accordion>
-
-                        {/* Información de Contacto */}
-                        <Accordion
-                            open={openSections.includes(2)}
-                            animate={CUSTOM_ANIMATION}
-                            className="border border-gray-200 rounded-lg shadow-sm bg-white"
-                            {...({} as any)}
-                        >
-                            <AccordionHeader
-                                onClick={() => handleAccordion(2)}
-                                className="text-base font-semibold px-6 py-4 border-b-0 hover:bg-gray-50"
-                                {...({} as any)}
-                            >
-                                <div className="flex items-center justify-between w-full">
-                                    <div className="flex items-center gap-3">
-                                        <LuPhone className="w-5 h-5 text-blue-600" />
-                                        <span className="text-gray-900">Información de Contacto</span>
-                                    </div>
-                                    <span className="text-gray-500">
-                                        {openSections.includes(2) ? <FiChevronDown size={20} /> : <FiChevronRight size={20} />}
-                                    </span>
-                                </div>
-                            </AccordionHeader>
-                            <AccordionBody className="px-6 pb-6" placeholder="">
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div className="flex items-center gap-3">
-                                        <LuPhone className="w-5 h-5 text-gray-400" />
-                                        <div>
-                                            <label htmlFor='Telefono' className="block text-sm font-medium text-gray-500 mb-1">Teléfono</label>
-                                            <p className="text-gray-900 font-medium">{personaInfo.telefono}</p>
-                                        </div>
-                                    </div>
-
-                                    <div className="flex items-center gap-3">
-                                        <LuMail className="w-5 h-5 text-gray-400" />
-                                        <div>
-                                            <label htmlFor='Correo' className="block text-sm font-medium text-gray-500 mb-1">Correo Electrónico</label>
-                                            <p className="text-gray-900 font-medium">{personaInfo.correo}</p>
-                                        </div>
-                                    </div>
-
-                                    {personaInfo.direccion && (
-                                        <div className="md:col-span-2 flex items-start gap-3">
-                                            <LuMapPin className="w-5 h-5 text-gray-400 mt-1" />
-                                            <div>
-                                                <label htmlFor='Direccion' className="block text-sm font-medium text-gray-500 mb-1">Dirección Exacta</label>
-                                                <p className="text-gray-900 font-medium">{personaInfo.direccion}</p>
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
-                            </AccordionBody>
-                        </Accordion>
-
-                        {/* Documentos (solo para afiliados) */}
-                        {(persona.tipo === 'afiliado-fisico' || persona.tipo === 'afiliado-juridico') && (
-                            <Accordion
-                                open={openSections.includes(3)}
-                                animate={CUSTOM_ANIMATION}
-                                className="border border-gray-200 rounded-lg shadow-sm bg-white"
-                                {...({} as any)}
-                            >
-                                <AccordionHeader
-                                    onClick={() => handleAccordion(3)}
-                                    className="text-base font-semibold px-6 py-4 border-b-0 hover:bg-gray-50"
-                                    {...({} as any)}
-                                >
-                                    <div className="flex items-center justify-between w-full">
-                                        <div className="flex items-center gap-3">
-                                            <LuFileText className="w-5 h-5 text-blue-600" />
-                                            <span className="text-gray-900">Documentos</span>
-                                        </div>
-                                        <span className="text-gray-500">
-                                            {openSections.includes(3) ? <FiChevronDown size={20} /> : <FiChevronRight size={20} />}
-                                        </span>
-                                    </div>
-                                </AccordionHeader>
-                                <AccordionBody className="px-6 pb-6" placeholder="">
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                        <div className="flex items-center gap-3">
-                                            <LuFileText className="w-5 h-5 text-gray-400" />
-                                            <div>
-                                                <label htmlFor='EscrituraTerreno' className="block text-sm font-medium text-gray-500 mb-1">Escritura del Terreno</label>
-                                                {personaInfo.escritura ? (
-                                                    <a
-                                                        href={personaInfo.escritura}
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        className="text-blue-600 hover:text-blue-800 font-medium underline"
-                                                    >
-                                                        Ver documento
-                                                    </a>
-                                                ) : (
-                                                    <p className="text-gray-500">No disponible</p>
-                                                )}
-                                            </div>
-                                        </div>
-
-                                        <div className="flex items-center gap-3">
-                                            <LuMap className="w-5 h-5 text-gray-400" />
-                                            <div>
-                                                <label htmlFor='PlanosTerreno' className="block text-sm font-medium text-gray-500 mb-1">Planos del Terreno</label>
-                                                {personaInfo.planos ? (
-                                                    <a
-                                                        href={personaInfo.planos}
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        className="text-blue-600 hover:text-blue-800 font-medium underline"
-                                                    >
-                                                        Ver documento
-                                                    </a>
-                                                ) : (
-                                                    <p className="text-gray-500">No disponible</p>
-                                                )}
-                                            </div>
-                                        </div>
-
-                                        {personaInfo.motivo && (
-                                            <div className="md:col-span-2 flex items-start gap-3">
-                                                <LuInfo className="w-5 h-5 text-gray-400 mt-1" />
-                                                <div>
-                                                    <label htmlFor='MotivoAfiliacion' className="block text-sm font-medium text-gray-500 mb-1">Motivo de Afiliación</label>
-                                                    <p className="text-gray-900 font-medium">{personaInfo.motivo}</p>
+                            <div className="p-5">
+                                <div className="space-y-4">
+                                    {personaInfo.medidores.map((medidor) => (
+                                        <div
+                                            key={medidor.Id_Medidor}
+                                            className="p-4 bg-gray-50 rounded-lg border border-gray-200"
+                                        >
+                                            <div className="flex items-start justify-between mb-3">
+                                                <div className="flex items-center gap-2">
+                                                    <LuGauge className="w-5 h-5 text-blue-600" />
+                                                    <h4 className="text-base font-bold text-gray-900">
+                                                        Medidor #{medidor.Numero_Medidor}
+                                                    </h4>
                                                 </div>
                                             </div>
-                                        )}
-                                    </div>
-                                </AccordionBody>
-                            </Accordion>
-                        )}
-
-                        {/* Medidores Asignados */}
-                        <Accordion
-                            open={openSections.includes(4)}
-                            animate={CUSTOM_ANIMATION}
-                            className="border border-gray-200 rounded-lg shadow-sm bg-white"
-                            {...({} as any)}
-                        >
-                            <AccordionHeader
-                                onClick={() => handleAccordion(4)}
-                                className="text-base font-semibold px-6 py-4 border-b-0 hover:bg-gray-50"
-                                {...({} as any)}
-                            >
-                                <div className="flex items-center justify-between w-full">
-                                    <div className="flex items-center gap-3">
-                                        <LuGauge className="w-5 h-5 text-blue-600" />
-                                        <span className="text-gray-900">Medidores Asignados</span>
-                                        {personaInfo.medidores && personaInfo.medidores.length > 0 && (
-                                            <span className="ml-2 px-2 py-0.5 bg-blue-100 text-blue-800 text-xs font-medium rounded-full">
-                                                {personaInfo.medidores.length}
-                                            </span>
-                                        )}
-                                    </div>
-                                    <span className="text-gray-500">
-                                        {openSections.includes(4) ? <FiChevronDown size={20} /> : <FiChevronRight size={20} />}
-                                    </span>
-                                </div>
-                            </AccordionHeader>
-                            <AccordionBody className="px-6 pb-6" placeholder="">
-                                {personaInfo.medidores && personaInfo.medidores.length > 0 ? (
-                                    <div className="space-y-4">
-                                        {personaInfo.medidores.map((medidor) => (
-                                            <div
-                                                key={medidor.Id_Medidor}
-                                                className="bg-gradient-to-r from-blue-50 to-blue-100 border border-blue-200 rounded-lg p-4 hover:shadow-md transition-shadow"
-                                            >
-                                                <div className="flex items-start justify-between">
-                                                    <div className="flex items-center gap-3 flex-1">
-                                                        <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center shadow-md">
-                                                            <LuGauge className="w-6 h-6 text-white" />
-                                                        </div>
-                                                        <div className="flex-1">
-                                                            <div className="flex items-center gap-2 mb-1">
-                                                                <h4 className="text-lg font-bold text-gray-900">
-                                                                    Medidor #{medidor.Numero_Medidor}
-                                                                </h4>
-                                                                <span className={`px-2 py-1 rounded-full text-xs font-semibold ${medidor.Estado_Medidor.Id_Estado_Medidor === 1
-                                                                    ? 'bg-green-100 text-green-800 border border-green-300'
-                                                                    : 'bg-gray-100 text-gray-800 border border-gray-300'
-                                                                    }`}>
-                                                                    {medidor.Estado_Medidor.Nombre_Estado_Medidor}
-                                                                </span>
-                                                            </div>
-                                                            <div className="grid grid-cols-2 gap-3 mt-3">
-                                                                <div>
-                                                                    <p className="text-xs text-gray-500 mb-1">ID Medidor</p>
-                                                                    <p className="text-sm font-medium text-gray-900">{medidor.Id_Medidor}</p>
-                                                                </div>
-                                                                <div>
-                                                                    <p className="text-xs text-gray-500 mb-1">ID Solicitud</p>
-                                                                    <p className="text-sm font-medium text-gray-900">{medidor.Id_Solicitud}</p>
-                                                                </div>
-                                                                <div>
-                                                                    <p className="text-xs text-gray-500 mb-1">Fecha Creación</p>
-                                                                    <p className="text-sm font-medium text-gray-900">{formatDate(medidor.Fecha_Creacion)}</p>
-                                                                </div>
-                                                                <div>
-                                                                    <p className="text-xs text-gray-500 mb-1">Última Actualización</p>
-                                                                    <p className="text-sm font-medium text-gray-900">{formatDate(medidor.Fecha_Actualizacion)}</p>
-                                                                </div>
-                                                            </div>
-                                                        </div>
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <div className="flex items-start gap-3 p-4 bg-white rounded-lg border border-gray-100">
+                                                    <div className="p-2 rounded-lg">
+                                                        <LuInfo className="w-5 h-5 text-blue-600" />
+                                                    </div>
+                                                    <div className="flex-1">
+                                                        <p className="text-xs font-medium text-gray-500 uppercase">ID Medidor</p>
+                                                        <p className="text-base font-medium text-gray-900 mt-1">{medidor.Id_Medidor}</p>
+                                                    </div>
+                                                </div>
+                                                <div className="flex items-start gap-3 p-4 bg-white rounded-lg border border-gray-100">
+                                                    <div className="p-2 rounded-lg">
+                                                        <LuFileText className="w-5 h-5 text-blue-600" />
+                                                    </div>
+                                                    <div className="flex-1">
+                                                        <p className="text-xs font-medium text-gray-500 uppercase">ID Solicitud</p>
+                                                        <p className="text-base font-medium text-gray-900 mt-1">{medidor.Id_Solicitud}</p>
+                                                    </div>
+                                                </div>
+                                                <div className="flex items-start gap-3 p-4 bg-white rounded-lg border border-gray-100">
+                                                    <div className="p-2 rounded-lg">
+                                                        <LuGauge className="w-5 h-5 text-blue-600" />
+                                                    </div>
+                                                    <div className="flex-1">
+                                                        <p className="text-xs font-medium text-gray-500 uppercase">Estado Actual</p>
+                                                        <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium border mt-1 ${
+                                                            medidor.Estado_Medidor.Id_Estado_Medidor === 2
+                                                                ? 'bg-green-100 text-green-800 border-green-200'
+                                                                : 'bg-gray-100 text-gray-800 border-gray-200'
+                                                        }`}>
+                                                            {medidor.Estado_Medidor.Nombre_Estado_Medidor}
+                                                        </span>
                                                     </div>
                                                 </div>
                                             </div>
-                                        ))}
-                                    </div>
-                                ) : (
-                                    <div className="text-center py-8">
-                                        <LuGauge className="w-16 h-16 text-gray-300 mx-auto mb-3" />
-                                        <p className="text-gray-500 font-medium">No hay medidores asignados</p>
-                                        <p className="text-sm text-gray-400 mt-1">Este afiliado aún no tiene medidores registrados</p>
-                                    </div>
-                                )}
-                            </AccordionBody>
-                        </Accordion>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    )}
 
-                        {/* Información del Sistema */}
-                        <Accordion
-                            open={openSections.includes(5)}
-                            animate={CUSTOM_ANIMATION}
-                            className="border border-gray-200 rounded-lg shadow-sm bg-white"
-                            {...({} as any)}
-                        >
-                            <AccordionHeader
-                                onClick={() => handleAccordion(5)}
-                                className="text-base font-semibold px-6 py-4 border-b-0 hover:bg-gray-50"
-                                {...({} as any)}
-                            >
-                                <div className="flex items-center justify-between w-full">
-                                    <div className="flex items-center gap-3">
+                    {/* Información del Sistema */}
+                    <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
+                        <div className="bg-gray-50 px-5 py-3 border-b border-gray-200">
+                            <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                                    <LuCalendar className="w-4 h-4 text-blue-600" />
+                                </div>
+                                <h3 className="text-base font-bold text-gray-900">Información del Sistema</h3>
+                            </div>
+                        </div>
+
+                        <div className="p-5">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {/* Estado */}
+                                <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                                    <div className="p-2 rounded-lg">
+                                        <LuInfo className="w-5 h-5 text-blue-600" />
+                                    </div>
+                                    <div className="flex-1">
+                                        <p className="text-xs font-medium text-gray-500 uppercase">
+                                            Estado
+                                        </p>
+                                        <span
+                                            className={`inline-block px-3 py-1 rounded-full text-sm font-medium border mt-1 ${getStatusColor(personaInfo.estadoId)}`}
+                                        >
+                                            {personaInfo.estado}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                {/* Espacio vacío para alineación */}
+                                <div></div>
+
+                                {/* Fecha de Creación */}
+                                <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                                    <div className="p-2 rounded-lg">
                                         <LuCalendar className="w-5 h-5 text-blue-600" />
-                                        <span className="text-gray-900">Información del Sistema</span>
                                     </div>
-                                    <span className="text-gray-500">
-                                        {openSections.includes(5) ? <FiChevronDown size={20} /> : <FiChevronRight size={20} />}
-                                    </span>
+                                    <div className="flex-1">
+                                        <p className="text-xs font-medium text-gray-500 uppercase">
+                                            Fecha de Creación
+                                        </p>
+                                        <p className="text-base font-medium text-gray-900 mt-1">
+                                            {formatDate(personaInfo.fechaCreacion)}
+                                        </p>
+                                    </div>
                                 </div>
-                            </AccordionHeader>
-                            <AccordionBody className="px-6 pb-6" placeholder="">
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div className="flex items-center gap-3">
-                                        <LuCalendar className="w-5 h-5 text-gray-400" />
-                                        <div>
-                                            <label htmlFor='FechaCreacion' className="block text-sm font-medium text-gray-500 mb-1">Fecha de Creación</label>
-                                            <p className="text-gray-900 font-medium">{formatDate(personaInfo.fechaCreacion)}</p>
-                                        </div>
-                                    </div>
 
-                                    <div className="flex items-center gap-3">
-                                        <LuCalendar className="w-5 h-5 text-gray-400" />
-                                        <div>
-                                            <label htmlFor='FechaActualizacion' className="block text-sm font-medium text-gray-500 mb-1">Última Actualización</label>
-                                            <p className="text-gray-900 font-medium">{formatDate(personaInfo.fechaActualizacion)}</p>
-                                        </div>
+                                {/* Fecha de Actualización */}
+                                <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                                    <div className="p-2 rounded-lg">
+                                        <LuCalendar className="w-5 h-5 text-blue-600" />
+                                    </div>
+                                    <div className="flex-1">
+                                        <p className="text-xs font-medium text-gray-500 uppercase">
+                                            Última Actualización
+                                        </p>
+                                        <p className="text-base font-medium text-gray-900 mt-1">
+                                            {formatDate(personaInfo.fechaActualizacion)}
+                                        </p>
                                     </div>
                                 </div>
-                            </AccordionBody>
-                        </Accordion>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 {/* Action Buttons */}
