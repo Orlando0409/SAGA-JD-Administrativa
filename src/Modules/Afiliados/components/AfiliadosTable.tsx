@@ -7,19 +7,19 @@ import { useNavigate } from '@tanstack/react-router';
 import { useAfiliadosFisicos } from '../Hook/HookAfiliadoFisico';
 import { useAfiliadosJuridicos } from '../Hook/HookAfiliadoJuridico';
 import { formatCedulaJuridica } from '../Helper/formatUtils';
-import DetailAbonados from './DetailAfiliado';
-import CreateModal from './CreateModal';
-import EditModal from './EditModal'; 
+import DetailAbonados from './DetailAfiliadoModal';
+import CreateModal from './CreateAfiliadoModal';
+import EditModal from './EditAfiliadoModal';
 import {
-  AlertDialog,
-  AlertDialogTrigger,
-  AlertDialogContent,
-  AlertDialogTitle,
-  AlertDialogDescription,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogHeader,
-  AlertDialogFooter
+    AlertDialog,
+    AlertDialogTrigger,
+    AlertDialogContent,
+    AlertDialogTitle,
+    AlertDialogDescription,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogHeader,
+    AlertDialogFooter
 } from "@/Modules/Global/components/Sidebar/ui/alert-dialog";
 import type { AfiliadoFisico } from '../Models/TablaAfiliados/ModeloAfiliadoFisico';
 import type { AfiliadoJuridico } from '../Models/TablaAfiliados/ModeloAfiliadoJuridico';
@@ -181,7 +181,7 @@ export default function AbonadosTable() {
                 const fila = info.row.original;
                 const tipoIdentificacion = fila.Tipo_Identificacion || 'Sin dato';
                 const identificacion = info.getValue() || 'Sin dato';
-                
+
                 return (
                     <div className='flex flex-col items-start justify-start'>
                         <div className="font-medium text-gray-900">{identificacion}</div>
@@ -392,7 +392,7 @@ export default function AbonadosTable() {
         <div className="space-y-6">
             {/* Encabezado con filtro de estado, búsqueda y botón */}
             <div className="bg-white rounded-lg p-3">
-                 <div className="flex items-start gap-4 flex-col justify-start">
+                <div className="flex items-start gap-4 flex-col justify-start">
                     <h2 className="text-2xl font-bold text-gray-900">Gestión de afiliados</h2>
                     <p className="text-sm text-gray-600 pb-4">Gestiona los afiliados de la ASADA</p>
                 </div>
@@ -433,7 +433,7 @@ export default function AbonadosTable() {
                             onClick={() => navigate({ to: '/Afiliados/Lecturas' })}
                             className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-md flex items-center gap-2 transition-colors"
                         >
-             
+
                             Lecturas
                         </button>
                     </div>

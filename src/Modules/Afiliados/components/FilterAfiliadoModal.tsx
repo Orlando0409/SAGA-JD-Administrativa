@@ -23,9 +23,6 @@ const FilterModal: React.FC<FilterModalProps> = ({ isOpen, onClose, onApplyFilte
         onClose();
     };
 
-
-
-    
     const handleClear = () => {
         const clearFilters: FilterOptions = {
             estado: '',
@@ -155,13 +152,13 @@ const FilterModal: React.FC<FilterModalProps> = ({ isOpen, onClose, onApplyFilte
                         onClick={handleClear}
                         className="flex-1 px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
                     >
-                         Limpiar Todo
+                        Limpiar Todo
                     </button>
                     <button
                         onClick={handleApply}
                         className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                     >
-                         Aplicar Filtros
+                        Aplicar Filtros
                     </button>
                 </div>
             </div>

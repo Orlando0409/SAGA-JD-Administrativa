@@ -1,4 +1,4 @@
-import ImagenesTable from '@/Modules/EdiImagen/Components/EdiImagenTable'
+import ImagenesTable from '@/Modules/Imagenes/Components/ImagenesTable';
 import { createFileRoute } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/(app)/(Edicion)/Imagenes')({
