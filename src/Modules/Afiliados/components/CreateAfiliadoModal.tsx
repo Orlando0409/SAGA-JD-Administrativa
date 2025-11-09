@@ -7,7 +7,7 @@ import { useAfiliadosFisicos } from '../Hook/HookAfiliadoFisico';
 import { useAfiliadosJuridicos } from '../Hook/HookAfiliadoJuridico';
 import PhoneInput from "react-phone-number-input";
 import "react-phone-number-input/style.css";
-import { User, Building2 } from 'lucide-react';
+import { User, Building2, X } from 'lucide-react';
 
 interface CreateModalProps {
     isOpen: boolean;
@@ -42,11 +42,6 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
 
     // Estado para errores de validación personalizados
     const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
-
-    const tabs = [
-        { id: 'afiliado-fisico', label: 'Afiliado Físico', icon: User },
-        { id: 'afiliado-juridico', label: 'Afiliado Jurídico', icon: Building2 },
-    ] as const;
 
     const getDefaultValues = () => {
         if (tipoActivo === 'afiliado-fisico') {
@@ -264,128 +259,7 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
 
     const renderFormularioFisico = () => (
         <>
-            <form.Field
-                name="Nombre"
-                validators={{
-                    onChange: ({ value }) => {
-                        const result = nombreSchema.safeParse(value);
-                        return result.success ? undefined : result.error.errors[0].message;
-                    },
-                }}
-            >
-                {(field) => (
-                    <div>
-                        <label htmlFor="Nombre" className="block text-sm font-medium text-gray-700 mb-1">
-                            Nombre *
-                        </label>
-                        <input
-                            id="Nombre"
-                            type="text"
-                            value={field.state.value}
-                            onChange={createInputHandler('Nombre', field.handleChange, 50)}
-                            onBlur={field.handleBlur}
-                            className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-colors ${
-                                (field.state.meta.errors.length > 0 || validationErrors.Nombre)
-                                    ? 'border-red-300 focus:ring-red-500'
-                                    : 'border-gray-300 focus:ring-blue-500'
-                            }`}
-                            placeholder="Nombre"
-                            maxLength={50}
-                            required
-                        />
-                        
-                        {renderCharCounter(
-                            fieldCharCounts.Nombre,
-                            50,
-                            field.state.meta.errors.length > 0 || !!validationErrors.Nombre
-                        )}
-
-                        {renderError('Nombre', field.state.meta.errors)}
-                    </div>
-                )}
-            </form.Field>
-
-            <form.Field
-                name="Apellido1"
-                validators={{
-                    onChange: ({ value }) => {
-                        const result = apellidoSchema.safeParse(value);
-                        return result.success ? undefined : result.error.errors[0].message;
-                    },
-                }}
-            >
-                {(field) => (
-                    <div>
-                        <label htmlFor="Apellido1" className="block text-sm font-medium text-gray-700 mb-1">
-                            Primer Apellido *
-                        </label>
-                        <input
-                            id="Apellido1"
-                            type="text"
-                            value={field.state.value}
-                            onChange={createInputHandler('Apellido1', field.handleChange, 50)}
-                            onBlur={field.handleBlur}
-                            className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-colors ${
-                                (field.state.meta.errors.length > 0 || validationErrors.Apellido1)
-                                    ? 'border-red-300 focus:ring-red-500'
-                                    : 'border-gray-300 focus:ring-blue-500'
-                            }`}
-                            placeholder="Primer apellido"
-                            maxLength={50}
-                            required
-                        />
-                        
-                        {renderCharCounter(
-                            fieldCharCounts.Apellido1,
-                            50,
-                            field.state.meta.errors.length > 0 || !!validationErrors.Apellido1
-                        )}
-
-                        {renderError('Apellido1', field.state.meta.errors)}
-                    </div>
-                )}
-            </form.Field>
-
-            <form.Field
-                name="Apellido2"
-                validators={{
-                    onChange: ({ value }) => {
-                        const result = apellido2Schema.safeParse(value);
-                        return result.success ? undefined : result.error.errors[0].message;
-                    },
-                }}
-            >
-                {(field) => (
-                    <div>
-                        <label htmlFor="Apellido2" className="block text-sm font-medium text-gray-700 mb-1">
-                            Segundo Apellido
-                        </label>
-                        <input
-                            id="Apellido2"
-                            type="text"
-                            value={field.state.value}
-                            onChange={createInputHandler('Apellido2', field.handleChange, 50)}
-                            onBlur={field.handleBlur}
-                            className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-colors ${
-                                (field.state.meta.errors.length > 0 || validationErrors.Apellido2)
-                                    ? 'border-red-300 focus:ring-red-500'
-                                    : 'border-gray-300 focus:ring-blue-500'
-                            }`}
-                            placeholder="Segundo apellido (opcional)"
-                            maxLength={50}
-                        />
-                        
-                        {renderCharCounter(
-                            fieldCharCounts.Apellido2,
-                            50,
-                            field.state.meta.errors.length > 0 || !!validationErrors.Apellido2
-                        )}
-
-                        {renderError('Apellido2', field.state.meta.errors)}
-                    </div>
-                )}
-            </form.Field>
-
+            {/* Tipo de Identificación */}
             <form.Field
                 name="Tipo_Identificacion"
                 validators={{
@@ -398,7 +272,7 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                 {(field) => (
                     <div>
                         <label htmlFor="Tipo_Identificacion" className="block text-sm font-medium text-gray-700 mb-1">
-                            Tipo de Identificación *
+                            Tipo de Identificación <span className="text-red-500">*</span>
                         </label>
                         <select
                             id="Tipo_Identificacion"
@@ -415,10 +289,12 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                             <option value="Dimex">DIMEX</option>
                             <option value="Pasaporte">Pasaporte</option>
                         </select>
+                        {renderError('Tipo_Identificacion', field.state.meta.errors)}
                     </div>
                 )}
             </form.Field>
 
+            {/* Identificación */}
             <form.Field
                 name="Identificacion"
                 validators={{
@@ -431,7 +307,7 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                 {(field) => (
                     <div>
                         <label htmlFor="Identificacion" className="block text-sm font-medium text-gray-700 mb-1">
-                            Número de Identificación *
+                            Número de Identificación <span className="text-red-500">*</span>
                         </label>
                         <input
                             id="Identificacion"
@@ -444,7 +320,7 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                                     ? 'border-red-300 focus:ring-red-500'
                                     : 'border-gray-300 focus:ring-blue-500'
                             }`}
-                            placeholder="Ingrese el número según el tipo seleccionado"
+                            placeholder="123456789"
                             maxLength={20}
                             required
                         />
@@ -456,12 +332,132 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                         )}
 
                         {renderError('Identificacion', field.state.meta.errors)}
+                    </div>
+                )}
+            </form.Field>
+
+            {/* Nombre */}
+            <form.Field
+                name="Nombre"
+                validators={{
+                    onChange: ({ value }) => {
+                        const result = nombreSchema.safeParse(value);
+                        return result.success ? undefined : result.error.errors[0].message;
+                    },
+                }}
+            >
+                {(field) => (
+                    <div>
+                        <label htmlFor="Nombre" className="block text-sm font-medium text-gray-700 mb-1">
+                            Nombre <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                            id="Nombre"
+                            type="text"
+                            value={field.state.value}
+                            onChange={createInputHandler('Nombre', field.handleChange, 50)}
+                            onBlur={field.handleBlur}
+                            className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-colors ${
+                                (field.state.meta.errors.length > 0 || validationErrors.Nombre)
+                                    ? 'border-red-300 focus:ring-red-500'
+                                    : 'border-gray-300 focus:ring-blue-500'
+                            }`}
+                            placeholder="Tu nombre"
+                            maxLength={50}
+                            required
+                        />
                         
-                        <p className="text-xs text-gray-500 mt-1">
-                            {field.form.getFieldValue('Tipo_Identificacion') === 'Cedula Nacional' && 'Formato: 9-10 dígitos (ej: 123456789)'}
-                            {field.form.getFieldValue('Tipo_Identificacion') === 'Dimex' && 'Formato: 11-12 dígitos (ej: 123456789012)'}
-                            {field.form.getFieldValue('Tipo_Identificacion') === 'Pasaporte' && 'Formato: 6-20 caracteres alfanuméricos (ej: AB123456)'}
-                        </p>
+                        {renderCharCounter(
+                            fieldCharCounts.Nombre,
+                            50,
+                            field.state.meta.errors.length > 0 || !!validationErrors.Nombre
+                        )}
+
+                        {renderError('Nombre', field.state.meta.errors)}
+                    </div>
+                )}
+            </form.Field>
+
+            {/* Primer Apellido */}
+            <form.Field
+                name="Apellido1"
+                validators={{
+                    onChange: ({ value }) => {
+                        const result = apellidoSchema.safeParse(value);
+                        return result.success ? undefined : result.error.errors[0].message;
+                    },
+                }}
+            >
+                {(field) => (
+                    <div>
+                        <label htmlFor="Apellido1" className="block text-sm font-medium text-gray-700 mb-1">
+                            Primer Apellido <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                            id="Apellido1"
+                            type="text"
+                            value={field.state.value}
+                            onChange={createInputHandler('Apellido1', field.handleChange, 50)}
+                            onBlur={field.handleBlur}
+                            className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-colors ${
+                                (field.state.meta.errors.length > 0 || validationErrors.Apellido1)
+                                    ? 'border-red-300 focus:ring-red-500'
+                                    : 'border-gray-300 focus:ring-blue-500'
+                            }`}
+                            placeholder="Tu primer apellido"
+                            maxLength={50}
+                            required
+                        />
+                        
+                        {renderCharCounter(
+                            fieldCharCounts.Apellido1,
+                            50,
+                            field.state.meta.errors.length > 0 || !!validationErrors.Apellido1
+                        )}
+
+                        {renderError('Apellido1', field.state.meta.errors)}
+                    </div>
+                )}
+            </form.Field>
+
+            {/* Segundo Apellido */}
+            <form.Field
+                name="Apellido2"
+                validators={{
+                    onChange: ({ value }) => {
+                        const result = apellido2Schema.safeParse(value);
+                        return result.success ? undefined : result.error.errors[0].message;
+                    },
+                }}
+            >
+                {(field) => (
+                    <div>
+                        <label htmlFor="Apellido2" className="block text-sm font-medium text-gray-700 mb-1">
+                            Segundo Apellido <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                            id="Apellido2"
+                            type="text"
+                            value={field.state.value}
+                            onChange={createInputHandler('Apellido2', field.handleChange, 50)}
+                            onBlur={field.handleBlur}
+                            className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-colors ${
+                                (field.state.meta.errors.length > 0 || validationErrors.Apellido2)
+                                    ? 'border-red-300 focus:ring-red-500'
+                                    : 'border-gray-300 focus:ring-blue-500'
+                            }`}
+                            placeholder="Tu segundo apellido"
+                            maxLength={50}
+                            required
+                        />
+                        
+                        {renderCharCounter(
+                            fieldCharCounts.Apellido2,
+                            50,
+                            field.state.meta.errors.length > 0 || !!validationErrors.Apellido2
+                        )}
+
+                        {renderError('Apellido2', field.state.meta.errors)}
                     </div>
                 )}
             </form.Field>
@@ -478,7 +474,7 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                 {(field) => (
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Teléfono *
+                            Teléfono <span className="text-red-500">*</span>
                         </label>
                         <PhoneInput
                             international
@@ -500,12 +496,10 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                                 {String(field.state.meta.errors[0])}
                             </p>
                         )}
-                        <p className="text-xs text-gray-500 mt-1">
-                            Ejemplo: +506 8888 8888
-                        </p>
                     </div>
                 )}
             </form.Field>
+
             <form.Field
                 name="Correo"
                 validators={{
@@ -518,7 +512,7 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                 {(field) => (
                     <div>
                         <label htmlFor="Correo" className="block text-sm font-medium text-gray-700 mb-1">
-                            Correo Electrónico *
+                            Correo Electrónico <span className="text-red-500">*</span>
                         </label>
                         <input
                             id="Correo"
@@ -559,7 +553,7 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                 {(field) => (
                     <div>
                         <label htmlFor="Direccion_Exacta" className="block text-sm font-medium text-gray-700 mb-1">
-                            Dirección Exacta *
+                            Dirección Exacta <span className="text-red-500">*</span>
                         </label>
                         <textarea
                             id="Direccion_Exacta"
@@ -599,7 +593,7 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                 {(field) => (
                     <div>
                         <label htmlFor="Edad" className="block text-sm font-medium text-gray-700 mb-1">
-                            Edad *
+                            Edad <span className="text-red-500">*</span>
                         </label>
                         <input
                             id="Edad"
@@ -630,7 +624,7 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                 {(field) => (
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Escritura del Terreno
+                            Escritura del Terreno <span className="text-red-500">*</span>
                         </label>
                         <div className="relative">
                             <input
@@ -668,7 +662,7 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                 {(field) => (
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Planos del Terreno
+                            Planos del Terreno <span className="text-red-500">*</span>
                         </label>
                         <div className="relative">
                             <input
@@ -707,6 +701,49 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
 
     const renderFormularioJuridico = () => (
         <>
+            {/* Cédula Jurídica */}
+            <form.Field
+                name="Cedula_Juridica"
+                validators={{
+                    onChange: ({ value }) => {
+                        const result = cedulaJuridicaSchema.safeParse(value);
+                        return result.success ? undefined : result.error.errors[0].message;
+                    },
+                }}
+            >
+                {(field) => (
+                    <div>
+                        <label htmlFor="Cedula_Juridica" className="block text-sm font-medium text-gray-700 mb-1">
+                            Cédula Jurídica <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                            id="Cedula_Juridica"
+                            type="text"
+                            value={field.state.value}
+                            onChange={createInputHandler('Cedula_Juridica', field.handleChange, 12)}
+                            onBlur={field.handleBlur}
+                            className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-colors ${
+                                (field.state.meta.errors.length > 0 || validationErrors.Cedula_Juridica)
+                                    ? 'border-red-300 focus:ring-red-500'
+                                    : 'border-gray-300 focus:ring-blue-500'
+                            }`}
+                            placeholder="3-XXX-XXXXXX"
+                            maxLength={12}
+                            required
+                        />
+                        
+                        {renderCharCounter(
+                            fieldCharCounts.Cedula_Juridica,
+                            12,
+                            field.state.meta.errors.length > 0 || !!validationErrors.Cedula_Juridica
+                        )}
+
+                        {renderError('Cedula_Juridica', field.state.meta.errors)}
+                    </div>
+                )}
+            </form.Field>
+
+            {/* Razón Social */}
             <form.Field
                 name="Razon_Social"
                 validators={{
@@ -719,7 +756,7 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                 {(field) => (
                     <div>
                         <label htmlFor="Razon_Social" className="block text-sm font-medium text-gray-700 mb-1">
-                            Razón Social *
+                            Razón Social <span className="text-red-500">*</span>
                         </label>
                         <input
                             id="Razon_Social"
@@ -748,51 +785,7 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                 )}
             </form.Field>
 
-            <form.Field
-                name="Cedula_Juridica"
-                validators={{
-                    onChange: ({ value }) => {
-                        const result = cedulaJuridicaSchema.safeParse(value);
-                        return result.success ? undefined : result.error.errors[0].message;
-                    },
-                }}
-            >
-                {(field) => (
-                    <div>
-                        <label htmlFor="Cedula_Juridica" className="block text-sm font-medium text-gray-700 mb-1">
-                            Cédula Jurídica *
-                        </label>
-                        <input
-                            id="Cedula_Juridica"
-                            type="text"
-                            value={field.state.value}
-                            onChange={createInputHandler('Cedula_Juridica', field.handleChange, 15)}
-                            onBlur={field.handleBlur}
-                            className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-colors ${
-                                (field.state.meta.errors.length > 0 || validationErrors.Cedula_Juridica)
-                                    ? 'border-red-300 focus:ring-red-500'
-                                    : 'border-gray-300 focus:ring-blue-500'
-                            }`}
-                            placeholder="3-101-123456"
-                            maxLength={15}
-                            required
-                        />
-                        
-                        {renderCharCounter(
-                            fieldCharCounts.Cedula_Juridica,
-                            15,
-                            field.state.meta.errors.length > 0 || !!validationErrors.Cedula_Juridica
-                        )}
-
-                        {renderError('Cedula_Juridica', field.state.meta.errors)}
-                        
-                        <p className="text-xs text-gray-500 mt-1">
-                            Formato: 3-XXX-XXXXXX (ej: 3-101-123456)
-                        </p>
-                    </div>
-                )}
-            </form.Field>
-
+            {/* Número de Teléfono */}
             <form.Field
                 name="Numero_Telefono"
                 validators={{
@@ -805,7 +798,7 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                 {(field) => (
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Teléfono *
+                            Teléfono <span className="text-red-500">*</span>
                         </label>
                         <PhoneInput
                             international
@@ -846,7 +839,7 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                 {(field) => (
                     <div>
                         <label htmlFor="Correo_Juridico" className="block text-sm font-medium text-gray-700 mb-1">
-                            Correo Electrónico *
+                            Correo Electrónico <span className="text-red-500">*</span>
                         </label>
                         <input
                             id="Correo_Juridico"
@@ -887,7 +880,7 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                 {(field) => (
                     <div>
                         <label htmlFor="Direccion_Exacta_Juridico" className="block text-sm font-medium text-gray-700 mb-1">
-                            Dirección Exacta *
+                            Dirección Exacta <span className="text-red-500">*</span>
                         </label>
                         <textarea
                             id="Direccion_Exacta_Juridico"
@@ -919,7 +912,7 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                 {(field) => (
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Escritura del Terreno
+                            Escritura del Terreno <span className="text-red-500">*</span>
                         </label>
                         <div className="relative">
                             <input
@@ -957,7 +950,7 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                 {(field) => (
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Planos del Terreno
+                            Planos del Terreno <span className="text-red-500">*</span>
                         </label>
                         <div className="relative">
                             <input
@@ -1002,47 +995,69 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
     };
 
     return (
-        <div className="fixed inset-0 backdrop-blur bg-opacity-10 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-hidden">
+        <div className="fixed inset-0 bg-opacity-10 backdrop-blur-sm flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg shadow-2xl border border-gray-200 w-full max-w-md mx-4 max-h-[90vh] overflow-hidden">
                 {/* Header */}
                 <div className="flex items-center justify-between p-6 border-b border-gray-200">
-                    <h2 className="text-xl font-semibold text-gray-800">Nueva Solicitud</h2>
-                    <button
-                        onClick={onClose}
-                        className="p-1 hover:bg-gray-100 rounded-full transition-colors"
-                    >
-                        <div className="w-5 h-5 text-gray-500 flex items-center justify-center">✕</div>
+                    <div className="flex items-center gap-3">
+                        {tipoActivo === 'afiliado-fisico' ? (
+                            <User className="w-6 h-6 text-blue-600" />
+                        ) : (
+                            <Building2 className="w-6 h-6 text-blue-600" />
+                        )}
+                        <h2 className="text-xl font-semibold text-gray-900">
+                            Nuevo afiliado {tipoActivo === 'afiliado-fisico' ? 'físico' : 'jurídico'}
+                        </h2>
+                    </div>
+                    <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors">
+                        <X className="w-6 h-6" />
                     </button>
                 </div>
 
-                {/* Tabs */}
-                <div className="border-b border-gray-200">
-                    <div className="flex overflow-x-auto">
-                        {tabs.map((tab) => (
-                            <button
-                                key={tab.id}
-                                onClick={() => {
-                                    setTipoActivo(tab.id);
-                                    // Reiniciar el formulario con los valores por defecto del nuevo tipo
-                                    form.reset();
-                                    // Limpiar archivos
-                                    setEscrituraFile(null);
-                                    setPlanosFile(null);
-                                }}
-                                className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${tipoActivo === tab.id
-                                    ? 'border-blue-500 text-blue-600 bg-blue-50'
-                                    : 'border-transparent text-gray-600 hover:text-gray-800 hover:bg-gray-50'
-                                    }`}
-                            >
-                                <tab.icon size={18} />
-                                {tab.label}
-                            </button>
-                        ))}
+                {/* Botones para cambiar tipo de afiliado */}
+                <div className="p-4 border-b border-gray-100 bg-gray-50">
+                    <div className="flex gap-2">
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setTipoActivo('afiliado-fisico');
+                                form.reset();
+                                setEscrituraFile(null);
+                                setPlanosFile(null);
+                                setValidationErrors({});
+                            }}
+                            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors flex-1 justify-center ${
+                                tipoActivo === 'afiliado-fisico'
+                                    ? 'bg-blue-100 text-blue-700 border-2 border-blue-300'
+                                    : 'bg-white text-gray-600 border-2 border-gray-200 hover:bg-gray-50'
+                            }`}
+                        >
+                            <User className="w-4 h-4" />
+                            Físico
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setTipoActivo('afiliado-juridico');
+                                form.reset();
+                                setEscrituraFile(null);
+                                setPlanosFile(null);
+                                setValidationErrors({});
+                            }}
+                            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors flex-1 justify-center ${
+                                tipoActivo === 'afiliado-juridico'
+                                    ? 'bg-blue-100 text-blue-700 border-2 border-blue-300'
+                                    : 'bg-white text-gray-600 border-2 border-gray-200 hover:bg-gray-50'
+                            }`}
+                        >
+                            <Building2 className="w-4 h-4" />
+                            Jurídico
+                        </button>
                     </div>
                 </div>
 
                 {/* Contenido del formulario */}
-                <div className="p-6 overflow-y-auto max-h-[calc(90vh-200px)] scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100">
+                <div className="p-6 overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100 max-h-[calc(90vh-280px)]">
                     <form
                         id="afiliado-form"
                         onSubmit={(e) => {
@@ -1056,31 +1071,28 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                 </div>
 
                 {/* Botones de acción */}
-                <div className="sticky bottom-0 flex justify-end gap-3 p-6 border-t bg-gray-50 z-10">
+                <div className="flex gap-3 p-6 border-t border-gray-200">
                     <button
                         type="submit"
                         form="afiliado-form"
                         disabled={isSubmitting}
-                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+                        className={`flex-1 px-4 py-2 text-white rounded-lg transition-colors ${
+                            isSubmitting
+                                ? 'bg-blue-300 cursor-not-allowed'
+                                : 'bg-blue-600 hover:bg-blue-700'
+                        }`}
                     >
-                        {isSubmitting ? (
-                            <>
-                                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                                <span>Creando...</span>
-                            </>
-                        ) : (
-                            `Crear ${tipoActivo.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}`
-                        )}
+                        {isSubmitting ? 'Creando...' : `Crear Afiliado ${tipoActivo === 'afiliado-fisico' ? 'Físico' : 'Jurídico'}`}
                     </button>
                     <button
                         type="button"
                         onClick={onClose}
-                        className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors"
+                        className="flex-1 px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                        disabled={isSubmitting}
                     >
                         Cancelar
                     </button>
                 </div>
-    
             </div>
         </div>
     );

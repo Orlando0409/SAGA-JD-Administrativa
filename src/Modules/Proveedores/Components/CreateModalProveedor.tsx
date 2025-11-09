@@ -5,8 +5,8 @@ import { useState } from 'react';
 import { LuX, LuUser, LuBuilding2 } from 'react-icons/lu';
 import PhoneInput, { isValidPhoneNumber } from 'react-phone-number-input';
 import 'react-phone-number-input/style.css';
-import { 
-  CreateProveedorSchemaWithIdentificacionValidation, 
+import {
+  CreateProveedorSchemaWithIdentificacionValidation,
   type CreateProveedorSchemaData,
   VALIDATION_LIMITS,
   TIPOS_IDENTIFICACION_OPTIONS,
@@ -48,14 +48,14 @@ const CreateModalProveedor = ({ onClose, setShowCreateModal }: CreateModalProvee
   const { showSuccess, showError, showWarning } = useAlerts();
 
   // Hook para crear proveedor físico
-  const { 
-    createProveedorFisico, 
+  const {
+    createProveedorFisico,
     isCreating: isCreatingFisico
   } = useCreateProveedorFisico();
 
   // Hook para crear proveedor jurídico
-  const { 
-    createProveedorJuridico, 
+  const {
+    createProveedorJuridico,
     isCreating: isCreatingJuridico
   } = useCreateProveedorJuridico();
 
@@ -71,25 +71,25 @@ const CreateModalProveedor = ({ onClose, setShowCreateModal }: CreateModalProvee
   const createCedulaJuridicaHandler = (fieldHandleChange: (value: string) => void) => {
     return (e: React.ChangeEvent<HTMLInputElement>) => {
       let value = e.target.value;
-      
+
       // Permitir solo dígitos y guiones
       value = value.replace(/[^\d-]/g, '');
-      
+
       // Remover guiones para validar longitud (máximo 10 dígitos)
       const digitsOnly = value.replace(/-/g, '');
       if (digitsOnly.length > 10) {
         return; // No permitir más de 10 dígitos
       }
-      
+
       // Actualizar contador de caracteres
       setFieldCharCounts(prev => ({
         ...prev,
         Cedula_Juridica: value.length
       }));
-      
+
       // Llamar al handler del campo
       fieldHandleChange(value);
-      
+
       // Validar en tiempo real
       validateFieldRealTime('Cedula_Juridica', value);
     };
@@ -113,7 +113,7 @@ const CreateModalProveedor = ({ onClose, setShowCreateModal }: CreateModalProvee
       case 'Identificacion':
         if (value && tipoIdentificacion) {
           const cleanValue = value.replace(/[\s\-]/g, '').toUpperCase();
-          
+
           switch (tipoIdentificacion) {
             case 'Cedula Nacional':
               if (!/^\d*$/.test(cleanValue)) {
@@ -157,7 +157,7 @@ const CreateModalProveedor = ({ onClose, setShowCreateModal }: CreateModalProvee
         if (value) {
           // Normalizar removiendo guiones para validación
           const normalizedValue = value.replace(/-/g, '').trim();
-          
+
           // Validar que solo contenga dígitos después de la normalización
           if (!/^\d+$/.test(normalizedValue)) {
             error = 'La cédula jurídica debe contener solo dígitos';
@@ -199,7 +199,7 @@ const CreateModalProveedor = ({ onClose, setShowCreateModal }: CreateModalProvee
   const createInputHandler = (fieldName: string, handleChange: (value: string) => void, maxLength: number, tipoIdentificacion?: string) => {
     return (e: React.ChangeEvent<HTMLInputElement>) => {
       const value = e.target.value;
-      
+
       if (value.length <= maxLength) {
         handleChange(value);
         setFieldCharCounts(prev => ({ ...prev, [fieldName]: value.length }));
@@ -211,35 +211,35 @@ const CreateModalProveedor = ({ onClose, setShowCreateModal }: CreateModalProvee
   // Función para manejar errores de API específicos
   const handleApiError = (error: any) => {
     console.error('Error creating proveedor:', error);
-    
+
     if (error?.response?.status === 409) {
       const errorMessage = error.response?.data?.message || error.message || '';
-      
+
       if (errorMessage.toLowerCase().includes('nombre') || errorMessage.toLowerCase().includes('name')) {
         showWarning('⚠️ Ya existe un proveedor con este nombre. Por favor, utiliza un nombre diferente.');
         return;
       }
-      
+
       if (errorMessage.toLowerCase().includes('identificacion') || errorMessage.toLowerCase().includes('identification')) {
         showWarning('⚠️ Ya existe un proveedor con esta identificación. Por favor, verifica el número de identificación.');
         return;
       }
-      
+
       showWarning('⚠️ Ya existe un proveedor con esa identificación. Por favor, verifica la información ingresada.');
       return;
     }
-    
+
     if (error?.response?.status === 400) {
       const errorMessage = error.response?.data?.message || 'Datos inválidos';
       showError(`Error de validación: ${errorMessage}`);
       return;
     }
-    
+
     if (error?.response?.status >= 500) {
       showError('Error del servidor. Por favor, intenta nuevamente más tarde.');
       return;
     }
-    
+
     const errorMessage = error?.message || 'Error desconocido al crear el proveedor';
     showError(`Error al crear el proveedor: ${errorMessage}`);
   };
@@ -279,7 +279,7 @@ const CreateModalProveedor = ({ onClose, setShowCreateModal }: CreateModalProvee
         };
 
         await createProveedorFisico(payload);
-        
+
         showSuccess('¡Proveedor físico creado exitosamente!');
         handleClose();
         formFisico.reset();
@@ -326,7 +326,7 @@ const CreateModalProveedor = ({ onClose, setShowCreateModal }: CreateModalProvee
         };
 
         await createProveedorJuridico(payload);
-        
+
         showSuccess('¡Proveedor jurídico creado exitosamente!');
         handleClose();
         formJuridico.reset();
@@ -342,15 +342,14 @@ const CreateModalProveedor = ({ onClose, setShowCreateModal }: CreateModalProvee
   const renderCharCounter = (current: number, max: number, hasError: boolean) => {
     const remaining = max - current;
     const isNearLimit = remaining <= 5;
-    
+
     return (
       <div className="flex justify-between items-center mt-1">
         <span className="text-xs text-gray-500">
           {hasError ? '' : `Máximo ${max} caracteres`}
         </span>
-        <span className={`text-xs font-medium ${
-          isNearLimit ? 'text-orange-600' : 'text-gray-500'
-        }`}>
+        <span className={`text-xs font-medium ${isNearLimit ? 'text-orange-600' : 'text-gray-500'
+          }`}>
           {current}/{max}
           {isNearLimit && current < max && (
             <span className="ml-1 text-orange-600">
@@ -363,7 +362,7 @@ const CreateModalProveedor = ({ onClose, setShowCreateModal }: CreateModalProvee
   };
 
   return (
-    
+
     <div className="fixed inset-0 bg-opacity-10 backdrop-blur-sm flex items-center justify-center z-50">
       <div className="bg-white rounded-lg shadow-2xl border border-gray-200 w-full max-w-md mx-4 max-h-[90vh] overflow-hidden">
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
@@ -392,11 +391,10 @@ const CreateModalProveedor = ({ onClose, setShowCreateModal }: CreateModalProvee
                 setFormErrors({});
                 formFisico.reset();
               }}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${
-                tipoProveedor === 'fisico'
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${tipoProveedor === 'fisico'
                   ? 'bg-blue-100 text-blue-700 border-2 border-blue-300'
                   : 'bg-white text-gray-600 border-2 border-gray-200 hover:bg-gray-50'
-              }`}
+                }`}
             >
               <LuUser className="w-4 h-4" />
               Físico
@@ -408,11 +406,10 @@ const CreateModalProveedor = ({ onClose, setShowCreateModal }: CreateModalProvee
                 setFormErrors({});
                 formJuridico.reset();
               }}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${
-                tipoProveedor === 'juridico'
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${tipoProveedor === 'juridico'
                   ? 'bg-blue-100 text-blue-700 border-2 border-blue-300'
                   : 'bg-white text-gray-600 border-2 border-gray-200 hover:bg-gray-50'
-              }`}
+                }`}
             >
               <LuBuilding2 className="w-4 h-4" />
               Jurídico
@@ -443,18 +440,17 @@ const CreateModalProveedor = ({ onClose, setShowCreateModal }: CreateModalProvee
                         type="text"
                         value={field.state.value}
                         onChange={createInputHandler('Nombre_Proveedor', field.handleChange, VALIDATION_LIMITS.NOMBRE_MAX_LENGTH)}
-                        className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-colors ${
-                          (formErrors.Nombre_Proveedor || field.state.meta.errors?.length) 
-                            ? 'border-red-300 focus:ring-red-500' 
+                        className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-colors ${(formErrors.Nombre_Proveedor || field.state.meta.errors?.length)
+                            ? 'border-red-300 focus:ring-red-500'
                             : 'border-gray-300 focus:ring-blue-500'
-                        }`}
+                          }`}
                         placeholder="Ingrese el nombre del proveedor (mín. 2 caracteres)"
                         maxLength={VALIDATION_LIMITS.NOMBRE_MAX_LENGTH}
                       />
-                      
+
                       {renderCharCounter(
-                        fieldCharCounts.Nombre_Proveedor, 
-                        VALIDATION_LIMITS.NOMBRE_MAX_LENGTH, 
+                        fieldCharCounts.Nombre_Proveedor,
+                        VALIDATION_LIMITS.NOMBRE_MAX_LENGTH,
                         !!(formErrors.Nombre_Proveedor || field.state.meta.errors?.length)
                       )}
 
@@ -478,11 +474,10 @@ const CreateModalProveedor = ({ onClose, setShowCreateModal }: CreateModalProvee
                       <select
                         value={field.state.value}
                         onChange={(e) => field.handleChange(e.target.value as any)}
-                        className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-colors ${
-                          (formErrors.Tipo_Identificacion || field.state.meta.errors?.length) 
-                            ? 'border-red-300 focus:ring-red-500' 
+                        className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-colors ${(formErrors.Tipo_Identificacion || field.state.meta.errors?.length)
+                            ? 'border-red-300 focus:ring-red-500'
                             : 'border-gray-300 focus:ring-blue-500'
-                        }`}
+                          }`}
                       >
                         <option value="">Seleccione un tipo de identificación</option>
                         {TIPOS_IDENTIFICACION_OPTIONS.map((tipo) => (
@@ -519,19 +514,18 @@ const CreateModalProveedor = ({ onClose, setShowCreateModal }: CreateModalProvee
                               type="text"
                               value={field.state.value}
                               onChange={createInputHandler('Identificacion', field.handleChange, maxLength, tipoIdentificacion)}
-                              className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-colors ${
-                                (formErrors.Identificacion || field.state.meta.errors?.length) 
-                                  ? 'border-red-300 focus:ring-red-500' 
+                              className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-colors ${(formErrors.Identificacion || field.state.meta.errors?.length)
+                                  ? 'border-red-300 focus:ring-red-500'
                                   : 'border-gray-300 focus:ring-blue-500'
-                              }`}
+                                }`}
                               placeholder={placeholder}
                               maxLength={maxLength}
                               disabled={!tipoIdentificacion}
                             />
-                            
+
                             {renderCharCounter(
-                              fieldCharCounts.Identificacion, 
-                              maxLength, 
+                              fieldCharCounts.Identificacion,
+                              maxLength,
                               !!(formErrors.Identificacion || field.state.meta.errors?.length)
                             )}
 
@@ -565,11 +559,10 @@ const CreateModalProveedor = ({ onClose, setShowCreateModal }: CreateModalProvee
                         }}
                         defaultCountry="CR"
                         placeholder="Ingrese el número de teléfono"
-                        className={`phone-input ${
-                          (formErrors.Telefono_Proveedor || field.state.meta.errors?.length) 
-                            ? 'phone-input-error' 
+                        className={`phone-input ${(formErrors.Telefono_Proveedor || field.state.meta.errors?.length)
+                            ? 'phone-input-error'
                             : 'phone-input-success'
-                        }`}
+                          }`}
                       />
                       {field.state.meta.errors?.map((err) => (
                         <p key={err} className="text-red-500 text-xs mt-1">{err}</p>
@@ -595,18 +588,17 @@ const CreateModalProveedor = ({ onClose, setShowCreateModal }: CreateModalProvee
                         type="text"
                         value={field.state.value}
                         onChange={createInputHandler('Nombre_Proveedor', field.handleChange, JURIDICO_VALIDATION_LIMITS.NOMBRE_MAX_LENGTH)}
-                        className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-colors ${
-                          formErrors.Nombre_Proveedor
-                            ? 'border-red-300 focus:ring-red-500' 
+                        className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-colors ${formErrors.Nombre_Proveedor
+                            ? 'border-red-300 focus:ring-red-500'
                             : 'border-gray-300 focus:ring-blue-500'
-                        }`}
+                          }`}
                         placeholder="Ingrese el nombre del proveedor (mín. 2 caracteres)"
                         maxLength={JURIDICO_VALIDATION_LIMITS.NOMBRE_MAX_LENGTH}
                       />
-                      
+
                       {renderCharCounter(
-                        fieldCharCounts.Nombre_Proveedor, 
-                        JURIDICO_VALIDATION_LIMITS.NOMBRE_MAX_LENGTH, 
+                        fieldCharCounts.Nombre_Proveedor,
+                        JURIDICO_VALIDATION_LIMITS.NOMBRE_MAX_LENGTH,
                         !!formErrors.Nombre_Proveedor
                       )}
 
@@ -628,18 +620,17 @@ const CreateModalProveedor = ({ onClose, setShowCreateModal }: CreateModalProvee
                         type="text"
                         value={field.state.value}
                         onChange={createCedulaJuridicaHandler(field.handleChange)}
-                        className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-colors ${
-                          formErrors.Cedula_Juridica
-                            ? 'border-red-300 focus:ring-red-500' 
+                        className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-colors ${formErrors.Cedula_Juridica
+                            ? 'border-red-300 focus:ring-red-500'
                             : 'border-gray-300 focus:ring-blue-500'
-                        }`}
+                          }`}
                         placeholder="Ej: 3-101-654321 (10 dígitos, inicia con 2,3,4 o 5)"
                         maxLength={JURIDICO_VALIDATION_LIMITS.CEDULA_JURIDICA_MAX_LENGTH}
                       />
-                      
+
                       {renderCharCounter(
-                        fieldCharCounts.Cedula_Juridica, 
-                        JURIDICO_VALIDATION_LIMITS.CEDULA_JURIDICA_MAX_LENGTH, 
+                        fieldCharCounts.Cedula_Juridica,
+                        JURIDICO_VALIDATION_LIMITS.CEDULA_JURIDICA_MAX_LENGTH,
                         !!formErrors.Cedula_Juridica
                       )}
 
@@ -661,18 +652,17 @@ const CreateModalProveedor = ({ onClose, setShowCreateModal }: CreateModalProvee
                         type="text"
                         value={field.state.value}
                         onChange={createInputHandler('Razon_Social', field.handleChange, JURIDICO_VALIDATION_LIMITS.RAZON_SOCIAL_MAX_LENGTH)}
-                        className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-colors ${
-                          formErrors.Razon_Social
-                            ? 'border-red-300 focus:ring-red-500' 
+                        className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-colors ${formErrors.Razon_Social
+                            ? 'border-red-300 focus:ring-red-500'
                             : 'border-gray-300 focus:ring-blue-500'
-                        }`}
+                          }`}
                         placeholder="Ingrese la razón social (mín. 2 caracteres)"
                         maxLength={JURIDICO_VALIDATION_LIMITS.RAZON_SOCIAL_MAX_LENGTH}
                       />
-                      
+
                       {renderCharCounter(
-                        fieldCharCounts.Razon_Social, 
-                        JURIDICO_VALIDATION_LIMITS.RAZON_SOCIAL_MAX_LENGTH, 
+                        fieldCharCounts.Razon_Social,
+                        JURIDICO_VALIDATION_LIMITS.RAZON_SOCIAL_MAX_LENGTH,
                         !!formErrors.Razon_Social
                       )}
 
@@ -700,11 +690,10 @@ const CreateModalProveedor = ({ onClose, setShowCreateModal }: CreateModalProvee
                         }}
                         defaultCountry="CR"
                         placeholder="Ingrese el número de teléfono"
-                        className={`phone-input ${
-                          formErrors.Telefono_Proveedor
-                            ? 'phone-input-error' 
+                        className={`phone-input ${formErrors.Telefono_Proveedor
+                            ? 'phone-input-error'
                             : 'phone-input-success-juridico'
-                        }`}
+                          }`}
                       />
                       {formErrors.Telefono_Proveedor && (
                         <p className="text-red-500 text-xs mt-1">{formErrors.Telefono_Proveedor}</p>
@@ -719,15 +708,14 @@ const CreateModalProveedor = ({ onClose, setShowCreateModal }: CreateModalProvee
               <button
                 type="submit"
                 disabled={isCreating}
-                className={`px-4 py-2 text-white rounded-lg transition-colors ${
-                  isCreating 
-                    ? 'bg-blue-300 cursor-not-allowed' 
-                    : 'bg-blue-600 hover:bg-blue-700' 
-                }`}
+                className={`px-4 py-2 text-white rounded-lg transition-colors ${isCreating
+                    ? 'bg-blue-300 cursor-not-allowed'
+                    : 'bg-blue-600 hover:bg-blue-700'
+                  }`}
               >
                 {isCreating ? 'Creando...' : `Crear Proveedor ${tipoProveedor === 'fisico' ? 'Físico' : 'Jurídico'}`}
               </button>
-                   <button
+              <button
                 type="button"
                 onClick={handleClose}
                 className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
