@@ -11,10 +11,22 @@ export interface Medidor {
   Estado_Medidor: EstadoMedidor;
   Afiliado?: {
     Id_Afiliado: number;
-    Numero_Afiliado: string;
-    Nombre_Completo?: string;
+    Tipo_Entidad: number;
+    Correo: string;
+    Numero: string;
+    // Campos para persona física (Tipo_Entidad = 1)
+    Tipo_Identificacion?: string;
+    Identificacion?: string;
+    Nombre?: string;
+    Primer_Apellido?: string;
+    Segundo_Apellido?: string;
+    // Campos para persona jurídica (Tipo_Entidad = 2)
+    Cedula_Juridica: string;
     Razon_Social?: string;
-    Tipo_Afiliado: string;
+    // Campos legacy (por compatibilidad)
+    Numero_Afiliado?: string;
+    Nombre_Completo?: string;
+    Tipo_Afiliado?: string;
   } | null;
   Usuario: {
     Id_Usuario: number;

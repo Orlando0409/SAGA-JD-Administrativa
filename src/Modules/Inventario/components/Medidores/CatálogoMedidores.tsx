@@ -158,9 +158,24 @@ const CatalogoMedidores: React.FC<CatalogoMedidoresProps> = () => {
             );
           }
 
+          // Determinar el nombre según el tipo de entidad
+          let nombre: string;
+          if (afiliado.Tipo_Entidad === 1) {
+            // Persona Física - construir nombre completo
+            nombre = `${afiliado.Nombre || ''} ${afiliado.Primer_Apellido || ''} ${afiliado.Segundo_Apellido || ''}`.trim();
+            // Fallback a campo legacy si no hay datos nuevos
+            if (!nombre) nombre = afiliado.Nombre_Completo || 'Sin nombre';
+          } else if (afiliado.Tipo_Entidad === 2) {
+            // Persona Jurídica - usar razón social
+            nombre = afiliado.Razon_Social || afiliado.Nombre_Completo || 'Sin nombre';
+          } else {
+            // Fallback para datos legacy
+            nombre = afiliado.Nombre_Completo || afiliado.Razon_Social || 'Sin nombre';
+          }
+
           return (
             <div className="flex justify-start">
-              <span className='text-gray-600 text-left max-w-xs truncate'>{afiliado.Nombre_Completo || afiliado.Razon_Social}</span>
+              <span className='text-gray-600 text-left max-w-xs truncate'>{nombre}</span>
             </div>
           );
         },
