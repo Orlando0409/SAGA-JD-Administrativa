@@ -4,10 +4,12 @@ import CalidadAguaModal from "./CalidadAguaModal";
 import CalidadAguaEdit from "./CalidadAguaEdit";
 import FormularioCalidadAgua from "./FormularioCalidadAgua";
 import { Plus, Eye, EyeOff } from "lucide-react";
-import { MdKeyboardArrowLeft, MdKeyboardArrowRight, MdKeyboardDoubleArrowLeft,
+import {
+  MdKeyboardArrowLeft, MdKeyboardArrowRight, MdKeyboardDoubleArrowLeft,
   MdKeyboardDoubleArrowRight,
   MdKeyboardArrowDown,
-  MdKeyboardArrowUp} from "react-icons/md";
+  MdKeyboardArrowUp
+} from "react-icons/md";
 import type { ArchivoCalidadAgua } from "../Models/CalidadDeAgua";
 import {
   useReactTable,
@@ -92,7 +94,7 @@ export default function CalidadAguaTable() {
       ),
     }),
     columnHelper.accessor('Fecha_Creacion', {
-      header: 'Fecha de creación',
+      header: 'Fecha de Creación',
       cell: info => (
         <div className="flex justify-center items-center">
           <span className="text-gray-600 text-left">{new Date(info.getValue()).toLocaleDateString("es-ES")}</span>
@@ -100,7 +102,7 @@ export default function CalidadAguaTable() {
       ),
     }),
     columnHelper.accessor('Fecha_Actualizacion', {
-      header: 'Fecha de actualización',
+      header: 'Última Actualización',
       cell: info => (
         <div className="flex justify-center items-center">
           <span className="text-gray-600 text-left">{info.getValue() ? new Date(info.getValue()).toLocaleDateString("es-ES") : "Sin actualizar"}</span>
@@ -113,11 +115,10 @@ export default function CalidadAguaTable() {
         <div className="flex items-center justify-center">
           <button
             onClick={(e) => handleToggleVisible(e, info.row.original.Id_Calidad_Agua)}
-            className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium transition-colors ${
-              info.getValue()
+            className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium transition-colors ${info.getValue()
                 ? 'bg-green-100 text-green-700 hover:bg-green-200'
                 : 'bg-red-100 text-red-700 hover:bg-red-200'
-            }`}
+              }`}
             disabled={toggleVisibilidad.isPending}
           >
             {info.getValue() ? (
@@ -185,11 +186,11 @@ export default function CalidadAguaTable() {
     <div className="w-full">
       {/* Header responsive */}
       <div className="flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0 mb-4">
-           <div className="flex items-start gap-4 flex-col justify-start">
-            <h2 className="text-2xl font-bold text-gray-900">Gestión de Calidad de Agua</h2>
-            <p className="text-sm text-gray-600 pb-4">Gestiona los documentos de los resultados de la calidad de agua</p>
+        <div className="flex items-start gap-4 flex-col justify-start">
+          <h2 className="text-2xl font-bold text-gray-900">Gestión de Calidad de Agua</h2>
+          <p className="text-sm text-gray-600 pb-4">Gestiona los documentos de los resultados de la calidad de agua</p>
         </div>
-      
+
         <div className="flex flex-col space-y-2 sm:flex-row sm:items-center sm:space-y-0 sm:space-x-4">
           <input
             type="text"
@@ -200,7 +201,7 @@ export default function CalidadAguaTable() {
           />
           <button
             onClick={() => setFormVisible(true)}
-           className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md flex items-center gap-2 transition-colors"
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md flex items-center gap-2 transition-colors"
           >
             <Plus size={18} />
             <span className="hidden xs:inline">Crear Archivo</span>
@@ -221,12 +222,11 @@ export default function CalidadAguaTable() {
                 {headerGroup.headers.map((header, index) => (
                   <th
                     key={header.id}
-                    className={`px-2 py-2 sm:px-4 sm:py-3 font-medium border-b border-sky-100 text-center ${
-                      index === 0 ? 'min-w-[200px] text-left' :
-                      index === 1 || index === 2 ? 'min-w-[120px]' :
-                      index === 3 ? 'min-w-[100px]' :
-                      'min-w-[120px]'
-                    }`}
+                    className={`px-2 py-2 sm:px-4 sm:py-3 font-medium border-b border-sky-100 text-center ${index === 0 ? 'min-w-[200px] text-left' :
+                        index === 1 || index === 2 ? 'min-w-[120px]' :
+                          index === 3 ? 'min-w-[100px]' :
+                            'min-w-[120px]'
+                      }`}
                   >
                     {(() => {
                       if (header.isPlaceholder) {
@@ -295,9 +295,8 @@ export default function CalidadAguaTable() {
                   {row.getVisibleCells().map((cell, index) => (
                     <td
                       key={cell.id}
-                      className={`px-2 py-2 sm:px-4 sm:py-3 text-slate-700 align-top ${
-                        index === 0 ? 'text-left' : 'text-center'
-                      }`}
+                      className={`px-2 py-2 sm:px-4 sm:py-3 text-slate-700 align-top ${index === 0 ? 'text-left' : 'text-center'
+                        }`}
                     >
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </td>
@@ -336,45 +335,45 @@ export default function CalidadAguaTable() {
             </div>
 
             {/* Controles de navegación */}
-               <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => table.setPageIndex(0)}
-                    disabled={!table.getCanPreviousPage()}
-                    className="p-1 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition"
-                    title="Primera página"
-                  >
-                    <MdKeyboardDoubleArrowLeft className="w-5 h-5 text-gray-600" />
-                  </button>
-                  <button
-                    onClick={() => table.previousPage()}
-                    disabled={!table.getCanPreviousPage()}
-                    className="p-1 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition"
-                    title="Página anterior"
-                  >
-                    <MdKeyboardArrowLeft className="w-5 h-5 text-gray-600" />
-                  </button>
-                  <span className="text-sm text-gray-700 min-w-[120px] text-center">
-                    Página {table.getState().pagination.pageIndex + 1} de {table.getPageCount()}
-                  </span>
-                  <button
-                    onClick={() => table.nextPage()}
-                    disabled={!table.getCanNextPage()}
-                    className="p-1 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition"
-                    title="Página siguiente"
-                  >
-                    <MdKeyboardArrowRight className="w-5 h-5 text-gray-600" />
-                  </button>
-                  <button
-                    onClick={() => table.setPageIndex(table.getPageCount() - 1)}
-                    disabled={!table.getCanNextPage()}
-                    className="p-1 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition"
-                    title="Última página"
-                  >
-                    <MdKeyboardDoubleArrowRight className="w-5 h-5 text-gray-600" />
-                  </button>
-                </div>
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => table.setPageIndex(0)}
+                  disabled={!table.getCanPreviousPage()}
+                  className="p-1 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                  title="Primera página"
+                >
+                  <MdKeyboardDoubleArrowLeft className="w-5 h-5 text-gray-600" />
+                </button>
+                <button
+                  onClick={() => table.previousPage()}
+                  disabled={!table.getCanPreviousPage()}
+                  className="p-1 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                  title="Página anterior"
+                >
+                  <MdKeyboardArrowLeft className="w-5 h-5 text-gray-600" />
+                </button>
+                <span className="text-sm text-gray-700 min-w-[120px] text-center">
+                  Página {table.getState().pagination.pageIndex + 1} de {table.getPageCount()}
+                </span>
+                <button
+                  onClick={() => table.nextPage()}
+                  disabled={!table.getCanNextPage()}
+                  className="p-1 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                  title="Página siguiente"
+                >
+                  <MdKeyboardArrowRight className="w-5 h-5 text-gray-600" />
+                </button>
+                <button
+                  onClick={() => table.setPageIndex(table.getPageCount() - 1)}
+                  disabled={!table.getCanNextPage()}
+                  className="p-1 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                  title="Última página"
+                >
+                  <MdKeyboardDoubleArrowRight className="w-5 h-5 text-gray-600" />
+                </button>
               </div>
+            </div>
           </div>
         </div>
       </div>

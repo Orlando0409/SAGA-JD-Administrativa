@@ -71,12 +71,12 @@ export default function ImagenesTable() {
             ),
         }),
         columnHelper.accessor('Fecha_Creacion', {
-            header: 'Fecha creación',
+            header: 'Fecha de Creación',
             cell: info =>
                 <div className="flex items-center justify-start">{new Date(info.getValue()).toLocaleDateString("es-ES")}</div>,
         }),
         columnHelper.accessor('Fecha_Actualizacion', {
-            header: 'Última actualización',
+            header: 'Última Actualización',
             cell: info => (
                 <div className="flex items-center justify-start">
                     {info.getValue()
