@@ -5,15 +5,15 @@ import { useProveedoresJuridicos } from '../Hook/hookjuridicoproveedor';
 import { formatCedulaJuridica, formatPhoneNumberDisplay } from '../Schema/SchemaProveedorJuridico';
 import type { ProveedorFisico } from '../Models/TablaProveedo/tablaFisicoProveedor';
 import type { ProveedorJuridico } from '../Models/TablaProveedo/tablaJuridicoProveedor';
-import CreateModalProveedor from './CreateModalProveedor';
+import { LuFilter, LuSearch } from 'react-icons/lu';
+import { MdKeyboardArrowUp, MdKeyboardArrowDown, MdKeyboardDoubleArrowLeft, MdKeyboardArrowLeft, MdKeyboardArrowRight, MdKeyboardDoubleArrowRight } from 'react-icons/md';
+import ActionButtons from './ActionButtons';
+import FilterProveedorModal from './FilterProveedorModal';
 import ProveedorDetailModal from './DetailFisicoProveedor';
 import ProveedorJuridicoDetailModal from './DetailJuridicoProveedor';
 import EditFisicoProveedoresModal from './EditFisicoProveedoresModal';
 import EditJuridicoProveedorModal from './EditJuridicoProveedorModal';
-import FilterProveedorModal from './FilterProveedorModal';
-import { LuFilter, LuSearch } from 'react-icons/lu';
-import { MdKeyboardArrowUp, MdKeyboardArrowDown, MdKeyboardDoubleArrowLeft, MdKeyboardArrowLeft, MdKeyboardArrowRight, MdKeyboardDoubleArrowRight } from 'react-icons/md';
-import ActionButtons from './ActionButtons';
+import CreateModalProveedor from './CreateModalProveedor';
 
 
 // Tipo unificado para la tabla (similar al patrón de AbonadosTable)
