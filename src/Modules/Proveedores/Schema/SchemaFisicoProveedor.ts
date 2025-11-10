@@ -168,7 +168,7 @@ export const IDENTIFICACION_LIMITS_BY_TYPE = {
 
 // Formatos de placeholder para cada tipo de identificación
 export const IDENTIFICACION_PLACEHOLDERS = {
-  'Cedula Nacional': '123456789 (1-7)',
+  'Cedula Nacional': '123456789',
   'Dimex': '123456789012', 
   'Pasaporte': 'ABC123456',
   default: 'Seleccione un tipo primero'
