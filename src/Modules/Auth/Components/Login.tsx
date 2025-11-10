@@ -67,13 +67,27 @@ export default function LoginForm() {
   return (
     <section className="min-h-screen min-w-screen flex bg-gray-100">
 
-      {/* Imagen */}
-      <div className="hidden md:block md:w-[50vw] bg-cover bg-center">
+      {/* Imagen con overlay y texto */}
+      <div className="hidden md:block md:w-[50vw] relative">
+        {/* Imagen de fondo */}
         <img
-          src="\ASADA_JUAN_D.png"
+          src="\LoginPhoto.jpg"
           alt="Imagen"
-          className="w-full h-full object-cover rounded-xl shadow-2xl"
+          className="w-full h-full object-cover"
         />
+        
+        {/* Overlay oscuro */}
+      <div className="absolute inset-0 bg-black/40"></div>
+        
+        {/* Texto sobre la imagen */}
+        <div className="absolute inset-0 flex flex-col items-center justify-center text-white px-8">
+          <h1 className="text-5xl font-bold text-center mb-4 drop-shadow-lg">
+            ASADA Juan Díaz
+          </h1>
+          <p className="text-2xl font-light text-center drop-shadow-md">
+            Panel Administrativo
+          </p>
+        </div>
       </div>
 
       {/* Formulario */}
