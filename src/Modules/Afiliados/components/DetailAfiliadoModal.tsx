@@ -285,7 +285,7 @@ const DetailAbonados: React.FC<DetailAbonadosProps> = ({ persona, isOpen, onClos
                         </div>
 
                         <div className="p-5">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 gap-4">
                                 {/* Dirección */}
                                 {personaInfo.direccion && (
                                     <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-lg border border-gray-200 md:col-span-2">
@@ -304,7 +304,8 @@ const DetailAbonados: React.FC<DetailAbonadosProps> = ({ persona, isOpen, onClos
                                 )}
 
                                 {/* Correo */}
-                                <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                                {personaInfo.correo && (
+                                <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-lg border border-gray-200 md:col-span-2">
                                     <div className="p-2 rounded-lg">
                                         <LuMail className="w-5 h-5 text-blue-600" />
                                     </div>
@@ -317,9 +318,11 @@ const DetailAbonados: React.FC<DetailAbonadosProps> = ({ persona, isOpen, onClos
                                         </p>
                                     </div>
                                 </div>
+                                )}
 
                                 {/* Teléfono */}
-                                <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                                {personaInfo.telefono && (
+                                <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-lg border border-gray-200 md:col-span-2">
                                     <div className="p-2 rounded-lg">
                                         <LuPhone className="w-5 h-5 text-blue-600" />
                                     </div>
@@ -332,6 +335,7 @@ const DetailAbonados: React.FC<DetailAbonadosProps> = ({ persona, isOpen, onClos
                                         </p>
                                     </div>
                                 </div>
+                                )}
                             </div>
                         </div>
                     </div>

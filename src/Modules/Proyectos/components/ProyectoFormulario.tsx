@@ -163,7 +163,7 @@ export default function FormularioProyecto({
         const formData = new FormData();
         formData.append("Titulo", titulo.trim());
         formData.append("Descripcion", descripcion.trim());
-        formData.append("Imagen_Proyecto", imagen);
+        formData.append("Imagen_Url", imagen);
 
         createProyectoMutation.mutate(
             { formData, },
