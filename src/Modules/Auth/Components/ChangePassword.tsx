@@ -3,7 +3,18 @@ import { useForm } from "@tanstack/react-form";
 import { LuEye, LuEyeOff } from "react-icons/lu";
 import { useChangePassword } from "../Hooks/AuthHook";
 import { useAlerts } from "@/Modules/Global/context/AlertContext";
-
+import {
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogHeader,
+  AlertDialogFooter
+} from "@/Modules/Global/components/Sidebar/ui/alert-dialog";
+import { Button } from "@material-tailwind/react";
 interface ChangePasswordModalProps {
     onClose: () => void;
     open: boolean;
@@ -28,6 +39,12 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
         new: false,
         confirm: false
     });
+    const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+    const [pendingValues, setPendingValues] = useState<{
+        currentPassword: string;
+        newPassword: string;
+        confirmPassword: string;
+    } | null>(null);
     const { mutateAsync } = useChangePassword();
     const { showSuccess, showError } = useAlerts();
 
@@ -82,32 +99,50 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
                 return;
             }
 
-            try {
-                await mutateAsync({
-                    UsuarioId: userId,
-                    Contraseña_Actual: value.currentPassword,
-                    Nueva_Contraseña: value.newPassword,
-                });
-                showSuccess('Contraseña cambiada', 'La contraseña se ha cambiado exitosamente');
-                onClose();
-                form.reset();
-            } catch (err: any) {
-
-          // Verifica si el error es por usuario deshabilitado
-          const errorMsg = err?.response?.data?.message || err?.message || '';
-          if (errorMsg.includes('deshabilitado')) {
-            setFormErrors({
-              general: 'No se pudo cambiar la contraseña. El usuario está deshabilitado. Contacta al administrador.',
-            });
-          } else {
-            setFormErrors({
-              general: 'Credenciales incorrectas o error en el servidor',
-            });
-          }
-          showError('Error al cambiar la contraseña');
-        }
+            // Guardar valores y mostrar dialog de confirmación
+            setPendingValues(value);
+            setShowConfirmDialog(true);
         },
     });
+
+    // Función para ejecutar el cambio de contraseña después de confirmar
+    const handleConfirmChange = async () => {
+        if (!pendingValues) return;
+
+        try {
+            await mutateAsync({
+                UsuarioId: userId,
+                Contraseña_Actual: pendingValues.currentPassword,
+                Nueva_Contraseña: pendingValues.newPassword,
+            });
+            showSuccess('Contraseña cambiada', 'La contraseña se ha cambiado exitosamente');
+            setShowConfirmDialog(false);
+            setPendingValues(null);
+            onClose();
+            form.reset();
+        } catch (err: any) {
+            // Verifica si el error es por usuario deshabilitado
+            const errorMsg = err?.response?.data?.message || err?.message || '';
+            if (errorMsg.includes('deshabilitado')) {
+                setFormErrors({
+                    general: 'No se pudo cambiar la contraseña. El usuario está deshabilitado. Contacta al administrador.',
+                });
+            } else {
+                setFormErrors({
+                    general: 'Error al cambiar la contraseña',
+                });
+            }
+            showError(errorMsg);
+            setShowConfirmDialog(false);
+            setPendingValues(null);
+        }
+    };
+
+    // Función para cancelar el cambio
+    const handleCancelChange = () => {
+        setShowConfirmDialog(false);
+        setPendingValues(null);
+    };
 
     // Función para renderizar contador de caracteres
     const renderCharCounter = (current: number, max: number, hasError: boolean, showMin = true) => {
@@ -299,13 +334,7 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
 
                         {/* Footer */}
                         <div className="flex gap-3 pt-4 border-t border-gray-200">
-                            <button
-                                type="button"
-                                onClick={onClose}
-                                className="flex-1 px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
-                            >
-                                Cancelar
-                            </button>
+                        
                             <button
                                 type="submit"
                                 className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:bg-blue-300 disabled:cursor-not-allowed"
@@ -319,8 +348,37 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
                             >
                                 Cambiar Contraseña
                             </button>
+                            <button
+                                id="changePassword-form"
+                                type="button"
+                                onClick={onClose}
+                                className="flex-1 px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                            >
+                                Cancelar
+                            </button>
                         </div>
+
                     </form>
+
+                    {/* AlertDialog de Confirmación */}
+                    <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+                        <AlertDialogContent>
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                    Esta acción cambiará tu contraseña. Asegúrate de recordar la nueva contraseña.
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                                <AlertDialogAction onClick={handleConfirmChange}>
+                                    Confirmar
+                                </AlertDialogAction>
+                                <AlertDialogCancel onClick={handleCancelChange}>
+                                    Cancelar
+                                </AlertDialogCancel>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
                 </div>
             </div>
         </div>

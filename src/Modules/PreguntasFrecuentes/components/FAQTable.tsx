@@ -8,20 +8,22 @@ import {
     createColumnHelper,
 } from '@tanstack/react-table';
 import { LuPlus, LuSearch } from 'react-icons/lu';
-import { MdKeyboardArrowLeft, MdKeyboardArrowRight, MdKeyboardDoubleArrowLeft,
-  MdKeyboardDoubleArrowRight,
-  MdKeyboardArrowDown,
-  MdKeyboardArrowUp} from "react-icons/md";
 import {
-  AlertDialog,
-  AlertDialogTrigger,
-  AlertDialogContent,
-  AlertDialogTitle,
-  AlertDialogDescription,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogHeader,
-  AlertDialogFooter
+    MdKeyboardArrowLeft, MdKeyboardArrowRight, MdKeyboardDoubleArrowLeft,
+    MdKeyboardDoubleArrowRight,
+    MdKeyboardArrowDown,
+    MdKeyboardArrowUp
+} from "react-icons/md";
+import {
+    AlertDialog,
+    AlertDialogTrigger,
+    AlertDialogContent,
+    AlertDialogTitle,
+    AlertDialogDescription,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogHeader,
+    AlertDialogFooter
 } from "@/Modules/Global/components/Sidebar/ui/alert-dialog";
 import { useFAQs, useDeleteFAQ, useToggleFAQVisible } from "../Hook/FAQHook";
 import { Eye, EyeOff } from "lucide-react";
@@ -81,18 +83,18 @@ export default function FAQTable() {
             ),
         }),
         columnHelper.accessor('Fecha_Creacion', {
-            header: 'Fecha creación',
+            header: 'Fecha de Creación',
             cell: info =>
                 <div className="flex items-center justify-start">{new Date(info.getValue()).toLocaleDateString("es-ES")}</div>,
         }),
         columnHelper.accessor('Fecha_Actualizacion', {
-            header: 'Actualización',
+            header: 'Última Actualización',
             cell: info =>
                 <div className="flex items-center justify-start">
                     {info.getValue()
-                    ? new Date(info.getValue()).toLocaleDateString("es-ES")
-                    : "Sin cambios"}
-                    </div>
+                        ? new Date(info.getValue()).toLocaleDateString("es-ES")
+                        : "Sin cambios"}
+                </div>
         }),
         columnHelper.accessor('Visible', {
             header: 'Visibilidad',
@@ -103,11 +105,10 @@ export default function FAQTable() {
                         handleToggleVisibility(info.row.original);
                     }}
                     disabled={toggleVisibleMutation.isPending}
-                    className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
-                        info.getValue()
+                    className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${info.getValue()
                             ? "bg-green-100 text-green-700 hover:bg-green-200"
                             : "bg-red-100 text-red-700 hover:bg-red-200"
-                    }`}
+                        }`}
                 >
                     {info.getValue() ? (
                         <>
@@ -227,7 +228,7 @@ export default function FAQTable() {
         <div className="space-y-6">
             {/* Encabezado con búsqueda y botón */}
             <div className="bg-white rounded-lg p-3">
-               <div className="flex items-start gap-4 flex-col justify-start">
+                <div className="flex items-start gap-4 flex-col justify-start">
                     <h2 className="text-2xl font-bold text-gray-900">Edición de Preguntas Frecuentes</h2>
                     <p className="text-sm text-gray-600 pb-4">Gestiona las preguntas frecuentes de la ASADA</p>
                 </div>
@@ -264,9 +265,8 @@ export default function FAQTable() {
                             {table.getHeaderGroups().map(headerGroup => (
                                 <tr key={headerGroup.id} className="text-left text-xs sm:text-sm text-sky-700">
                                     {headerGroup.headers.map((header, index) => (
-                                        <th key={header.id} className={`px-2 sm:px-4 py-3 font-medium border-b border-sky-100 ${
-                                            index === 0 ? 'text-left' : 'text-center'
-                                        }`}>
+                                        <th key={header.id} className={`px-2 sm:px-4 py-3 font-medium border-b border-sky-100 ${index === 0 ? 'text-left' : 'text-center'
+                                            }`}>
                                             {(() => {
                                                 if (header.isPlaceholder) {
                                                     return null;
@@ -275,9 +275,8 @@ export default function FAQTable() {
                                                     return (
                                                         <button
                                                             type="button"
-                                                            className={`cursor-pointer select-none flex items-center gap-2 bg-transparent border-none p-0 ${
-                                                                index === 0 ? 'justify-start' : 'justify-center'
-                                                            }`}
+                                                            className={`cursor-pointer select-none flex items-center gap-2 bg-transparent border-none p-0 ${index === 0 ? 'justify-start' : 'justify-center'
+                                                                }`}
                                                             onClick={header.column.getToggleSortingHandler()}
                                                             onKeyDown={e => {
                                                                 if (e.key === 'Enter' || e.key === ' ') {
@@ -331,9 +330,8 @@ export default function FAQTable() {
                                             }
 
                                             return (
-                                                <td key={cell.id} className={`px-2 sm:px-4 py-3 text-xs sm:text-sm text-slate-700 align-top ${
-                                                    index === 0 ? 'text-left' : 'text-center'
-                                                }`}>
+                                                <td key={cell.id} className={`px-2 sm:px-4 py-3 text-xs sm:text-sm text-slate-700 align-top ${index === 0 ? 'text-left' : 'text-center'
+                                                    }`}>
                                                     {cellContent}
                                                 </td>
                                             );

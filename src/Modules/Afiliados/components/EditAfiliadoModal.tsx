@@ -6,8 +6,7 @@ import { useAlerts } from '@/Modules/Global/context/AlertContext';
 import { useAfiliadosFisicos } from '../Hook/HookAfiliadoFisico';
 import { useAfiliadosJuridicos } from '../Hook/HookAfiliadoJuridico';
 import { formatCedulaJuridica } from '../Helper/formatUtils';
-import PhoneInput from "react-phone-number-input";
-import "react-phone-number-input/style.css";
+import PhoneInputComponent from '@/Modules/Global/components/PhoneInputComponent';
 import { AfiliadoFisicoEditSchema } from '../Schemas/AfiliadoFisico';
 import { AfiliacionJuridicaEditSchema } from '../Schemas/AfiliadoJuridico';
 
@@ -499,26 +498,20 @@ const EditModal: React.FC<EditModalProps> = ({ isOpen, onClose, persona }) => {
                                         <label className="block text-sm font-medium text-gray-700 mb-1">
                                             Teléfono *
                                         </label>
-                                        <PhoneInput
-                                            value={field.state.value as any}
+                                        <PhoneInputComponent
+                                            value={field.state.value || ''}
                                             onChange={(value) => {
-                                                field.handleChange(value || '');
+                                                field.handleChange(value);
 
                                                 // Validación en tiempo real
-                                                const validationError = validateField('Numero_Telefono', value || '', persona.tipo);
+                                                const validationError = validateField('Numero_Telefono', value, persona.tipo);
                                                 if (validationError) {
                                                     setFormErrors(prev => ({ ...prev, Numero_Telefono: validationError }));
                                                 } else {
                                                     setFormErrors(prev => ({ ...prev, Numero_Telefono: '' }));
                                                 }
                                             }}
-                                            defaultCountry="CR"
-                                            placeholder="Ingrese número de teléfono"
-                                            className="w-full"
-                                            numberInputProps={{
-                                                className: `w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-colors ${formErrors.Numero_Telefono ? 'border-red-300 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'
-                                                    }`
-                                            }}
+                                            hasError={!!formErrors.Numero_Telefono}
                                         />
                                         {formErrors.Numero_Telefono && (
                                             <p className="text-red-500 text-xs mt-1">{formErrors.Numero_Telefono}</p>

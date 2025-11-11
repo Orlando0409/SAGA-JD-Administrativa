@@ -10,7 +10,7 @@ export const ProyectoSchema = z.object({
       /^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\s!?¿¡().,-]+$/,
       "El título contiene caracteres no permitidos."
     ),
-  
+
   Descripcion: z
     .string()
     .min(10, "La descripción debe tener al menos 10 caracteres.")
@@ -19,7 +19,7 @@ export const ProyectoSchema = z.object({
       /^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\s!?¿¡().,:;-]+$/,
       "La descripción contiene caracteres no permitidos."
     ),
-  
+
   Imagen_Url: z
     .instanceof(File)
     .optional()
@@ -27,7 +27,7 @@ export const ProyectoSchema = z.object({
       if (!file) return true; // Opcional para edición
       return ["image/jpeg", "image/png", "image/heic", "application/pdf"].includes(file.type);
     }, "Solo se permiten imágenes JPG, PNG, HEIC o archivos PDF"),
-  
+
 });
 
 // Esquema para actualización (todos los campos opcionales excepto ID)
@@ -54,7 +54,7 @@ export const ProyectoUpdateSchema = z.object({
     )
     .optional(),
 
-  Imagen_Proyecto: z
+  Imagen_Url: z
     .instanceof(File)
     .optional()
     .refine((file) => {

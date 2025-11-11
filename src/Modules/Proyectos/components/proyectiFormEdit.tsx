@@ -28,7 +28,7 @@ export default function ProyectoFormEdit({ proyecto, onClose }: ProyectoFormEdit
     const [errors, setErrors] = useState<{
         Titulo?: string;
         Descripcion?: string;
-        Imagen_Proyecto?: string;
+        Imagen_Url?: string;
     }>({});
 
     const updateProyectoMutation = useUpdateProyecto();
@@ -83,12 +83,12 @@ export default function ProyectoFormEdit({ proyecto, onClose }: ProyectoFormEdit
         }
 
         try {
-            ProyectoUpdateSchema.shape.Imagen_Proyecto.parse(file);
-            setErrors(prev => ({ ...prev, Imagen_Proyecto: undefined }));
+            ProyectoUpdateSchema.shape.Imagen_Url.parse(file);
+            setErrors(prev => ({ ...prev, Imagen_Url: undefined }));
             setImagen(file);
         } catch (error) {
             if (error instanceof z.ZodError) {
-                setErrors(prev => ({ ...prev, Imagen_Proyecto: error.errors[0].message }));
+                setErrors(prev => ({ ...prev, Imagen_Url: error.errors[0].message }));
                 setImagen(null);
             }
         }
@@ -129,7 +129,7 @@ export default function ProyectoFormEdit({ proyecto, onClose }: ProyectoFormEdit
         
         // Solo agregar imagen si se seleccionó una nueva
         if (imagen instanceof File) {
-            formData.append("imagen", imagen);
+            formData.append("Imagen_Url", imagen);
         }
 
         updateProyectoMutation.mutate(
@@ -150,7 +150,7 @@ export default function ProyectoFormEdit({ proyecto, onClose }: ProyectoFormEdit
         );
     };
 
-    const isFormValid = !errors.Titulo && !errors.Descripcion && !errors.Imagen_Proyecto && titulo.trim().length >= 5 && descripcion.trim().length >= 10;
+    const isFormValid = !errors.Titulo && !errors.Descripcion && !errors.Imagen_Url && titulo.trim().length >= 5 && descripcion.trim().length >= 10;
 
     return (
         <>
@@ -230,7 +230,7 @@ export default function ProyectoFormEdit({ proyecto, onClose }: ProyectoFormEdit
                             </p>
                         )}
                         
-                        {errors.Imagen_Proyecto && <p className="text-xs text-red-500 mt-1">{errors.Imagen_Proyecto}</p>}
+                        {errors.Imagen_Url && <p className="text-xs text-red-500 mt-1">{errors.Imagen_Url}</p>}
                         
                         <p className="text-xs text-gray-500 mt-1">
                             Deja vacío si no deseas cambiar el archivo actual

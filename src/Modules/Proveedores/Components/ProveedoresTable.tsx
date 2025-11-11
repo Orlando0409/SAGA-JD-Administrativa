@@ -5,15 +5,15 @@ import { useProveedoresJuridicos } from '../Hook/hookjuridicoproveedor';
 import { formatCedulaJuridica, formatPhoneNumberDisplay } from '../Schema/SchemaProveedorJuridico';
 import type { ProveedorFisico } from '../Models/TablaProveedo/tablaFisicoProveedor';
 import type { ProveedorJuridico } from '../Models/TablaProveedo/tablaJuridicoProveedor';
-import CreateModalProveedor from './CreateModalProveedor';
+import { LuFilter, LuSearch } from 'react-icons/lu';
+import { MdKeyboardArrowUp, MdKeyboardArrowDown, MdKeyboardDoubleArrowLeft, MdKeyboardArrowLeft, MdKeyboardArrowRight, MdKeyboardDoubleArrowRight } from 'react-icons/md';
+import ActionButtons from './ActionButtons';
+import FilterProveedorModal from './FilterProveedorModal';
 import ProveedorDetailModal from './DetailFisicoProveedor';
 import ProveedorJuridicoDetailModal from './DetailJuridicoProveedor';
 import EditFisicoProveedoresModal from './EditFisicoProveedoresModal';
 import EditJuridicoProveedorModal from './EditJuridicoProveedorModal';
-import FilterProveedorModal from './FilterProveedorModal';
-import { LuFilter, LuSearch } from 'react-icons/lu';
-import { MdKeyboardArrowUp, MdKeyboardArrowDown, MdKeyboardDoubleArrowLeft, MdKeyboardArrowLeft, MdKeyboardArrowRight, MdKeyboardDoubleArrowRight } from 'react-icons/md';
-import ActionButtons from './ActionButtons';
+import CreateModalProveedor from './CreateModalProveedor';
 
 
 // Tipo unificado para la tabla (similar al patrón de AbonadosTable)
@@ -294,7 +294,7 @@ export default function ProveedoresTable() {
                             </span>
                         )}
                     </button>
-,
+
                     <div className="relative flex-1 max-w-md">
                         <LuSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                         <input

@@ -8,20 +8,22 @@ import {
     createColumnHelper,
 } from '@tanstack/react-table';
 import { LuPlus, LuSearch } from 'react-icons/lu';
-import { MdKeyboardArrowLeft, MdKeyboardArrowRight, MdKeyboardDoubleArrowLeft,
-  MdKeyboardDoubleArrowRight,
-  MdKeyboardArrowDown,
-  MdKeyboardArrowUp} from "react-icons/md";
 import {
-  AlertDialog,
-  AlertDialogTrigger,
-  AlertDialogContent,
-  AlertDialogTitle,
-  AlertDialogDescription,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogHeader,
-  AlertDialogFooter
+    MdKeyboardArrowLeft, MdKeyboardArrowRight, MdKeyboardDoubleArrowLeft,
+    MdKeyboardDoubleArrowRight,
+    MdKeyboardArrowDown,
+    MdKeyboardArrowUp
+} from "react-icons/md";
+import {
+    AlertDialog,
+    AlertDialogTrigger,
+    AlertDialogContent,
+    AlertDialogTitle,
+    AlertDialogDescription,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogHeader,
+    AlertDialogFooter
 } from "@/Modules/Global/components/Sidebar/ui/alert-dialog";
 import {
     useGetProyectos,
@@ -110,7 +112,7 @@ export default function ProyectoTable() {
             },
         }),
         columnHelper.accessor('Fecha_Creacion', {
-            header: 'Fecha de creación',
+            header: 'Última Actualización',
             cell: info => (
                 <div className="text-gray-600 text-left">
                     {new Date(info.getValue()).toLocaleDateString("es-ES")}
@@ -123,11 +125,10 @@ export default function ProyectoTable() {
                 const visible = info.getValue();
                 return (
                     <button className="flex justify-start" onClick={() => toggleVisibilidad(info.row.original.Id_Proyecto)}>
-                        <span className={`inline-flex items-center gap-2 px-2 py-1 rounded-full text-xs font-medium ${
-                            visible
+                        <span className={`inline-flex items-center gap-2 px-2 py-1 rounded-full text-xs font-medium ${visible
                                 ? 'bg-green-100 text-green-700'
                                 : 'bg-red-100 text-red-700'
-                        }`}>
+                            }`}>
                             {visible ? <Eye size={14} /> : <EyeOff size={14} />}
                             {visible ? 'Visible' : 'Oculto'}
                         </span>
@@ -155,7 +156,7 @@ export default function ProyectoTable() {
                         Editar
                     </button>
                     {(() => {
-        
+
                         const estadoId = info.row.original.Estado?.Id_Estado_Proyecto;
 
                         switch (estadoId) {
@@ -354,10 +355,10 @@ export default function ProyectoTable() {
         <div className="space-y-6">
             {/* Encabezado con filtro de estado, búsqueda y botón */}
             <div className="bg-white rounded-lg p-3">
-             <div className="flex items-start gap-4 flex-col justify-start">
-                <h2 className="text-2xl font-bold text-gray-900">Edición de Proyectos</h2>
-                <p className="text-sm text-gray-600 pb-4">Gestiona los proyectos de la ASADA</p>
-            </div>
+                <div className="flex items-start gap-4 flex-col justify-start">
+                    <h2 className="text-2xl font-bold text-gray-900">Edición de Proyectos</h2>
+                    <p className="text-sm text-gray-600 pb-4">Gestiona los proyectos de la ASADA</p>
+                </div>
                 <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
                     <div className="flex items-center gap-4">
                         <label htmlFor='estado' className="text-sm font-medium text-gray-700">Estado:</label>
@@ -402,9 +403,8 @@ export default function ProyectoTable() {
                             {table.getHeaderGroups().map(headerGroup => (
                                 <tr key={headerGroup.id} className="text-left text-xs sm:text-sm text-sky-700">
                                     {headerGroup.headers.map((header, index) => (
-                                        <th key={header.id} className={`px-2 sm:px-4 py-3 font-medium border-b border-sky-100 ${
-                                            index === 0 ? 'text-left' : 'text-center'
-                                        }`}>
+                                        <th key={header.id} className={`px-2 sm:px-4 py-3 font-medium border-b border-sky-100 ${index === 0 ? 'text-left' : 'text-center'
+                                            }`}>
                                             {(() => {
                                                 if (header.isPlaceholder) {
                                                     return null;
@@ -413,9 +413,8 @@ export default function ProyectoTable() {
                                                     return (
                                                         <button
                                                             type="button"
-                                                            className={`cursor-pointer select-none flex items-center gap-2 bg-transparent border-none p-0 ${
-                                                                index === 0 ? 'justify-start' : 'justify-center'
-                                                            }`}
+                                                            className={`cursor-pointer select-none flex items-center gap-2 bg-transparent border-none p-0 ${index === 0 ? 'justify-start' : 'justify-center'
+                                                                }`}
                                                             onClick={header.column.getToggleSortingHandler()}
                                                             onKeyDown={e => {
                                                                 if (e.key === 'Enter' || e.key === ' ') {
@@ -469,9 +468,8 @@ export default function ProyectoTable() {
                                             }
 
                                             return (
-                                                <td key={cell.id} className={`px-2 sm:px-4 py-3 text-xs sm:text-sm text-slate-700 align-top ${
-                                                    index === 0 ? 'text-left' : 'text-center'
-                                                }`}>
+                                                <td key={cell.id} className={`px-2 sm:px-4 py-3 text-xs sm:text-sm text-slate-700 align-top ${index === 0 ? 'text-left' : 'text-center'
+                                                    }`}>
                                                     {cellContent}
                                                 </td>
                                             );

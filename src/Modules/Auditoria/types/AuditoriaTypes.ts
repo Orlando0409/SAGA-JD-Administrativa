@@ -10,8 +10,8 @@ export interface FilterModalProps {
 export interface AuditoriaFilterOptions {
   modulo?: string;
   accion?: string;
-  fechaInicio?: string;
-  fechaFin?: string;
+  mis_auditorias?: boolean;
+  por_usuario?: number;
 }
 
 export interface DetailAuditoriaModalProps {
@@ -22,25 +22,27 @@ export interface DetailAuditoriaModalProps {
 
 // Constantes para los filtros
 export const MODULOS = [
-  'Unidad de Medicion',
-  'Categoria',
-  'Material',
-  'Medidor',
+  'Actas',
   'Calidad de Agua',
-  'Proveedor',
-  'Movimiento',
-  'Usuario',
-  'Rol',
+  'Categoria',
   'Edicion de imagenes',
   'FAQ',
-  'Manuales de Usuario',
-  'Proyecto',
   'Lecturas',
-  'Actas',
+  'Login',
+  'Logout',
+  'Manuales de Usuario',
+  'Material',
+  'Medidores',
+  'Movimientos',
+  'Proveedores',
+  'Proyectos',
   'Quejas',
+  'Reportes',
+  'Rol',
+  'Solicitudes',
   'Sugerencias',
-  'Reportes'
-
+  'Unidad de Medicion',
+  'Usuario',
 ] as const;
 
 export const ACCIONES = [

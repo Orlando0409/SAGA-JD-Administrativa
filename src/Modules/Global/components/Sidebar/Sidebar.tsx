@@ -84,7 +84,7 @@ export function AppSidebar({ allowedModules }: Readonly<AppSidebarProps>) {
         className="transition-all duration-300 z-40"
       >
         <SidebarHeader className="border-b border-sidebar-border">
-          <div className="flex flex-col items-center p-2">    
+          <div className="flex flex-col items-center p-2">
             <Link to={'/Home'} className='w-15 h-15 rounded-lg flex items-center justify-center text-white font-bold'>
               <img src="/Logo_ASADA_Juan_Díaz.png" alt='logo' className='w-15 h-15 rounded-full group-data-[collapsible=icon]:h-8 group-data-[collapsible=icon]:w-8' />
             </Link>
@@ -102,7 +102,7 @@ export function AppSidebar({ allowedModules }: Readonly<AppSidebarProps>) {
 
             return (
               <Accordion
-                key={`section-${section.id}`} 
+                key={`section-${section.id}`}
                 open={isOpen}
                 animate={CUSTOM_ANIMATION}
                 className="border-none shadow-none bg-transparent"
@@ -122,11 +122,11 @@ export function AppSidebar({ allowedModules }: Readonly<AppSidebarProps>) {
                     </span>
                   </div>
                 </AccordionHeader>
-                
+
                 <AccordionBody className="p-0" placeholder="">
                   <ul>
                     {sectionModules.filter(mod => !mod.hidden).map((mod, index) => (
-                      <li key={`${mod.name}-${mod.path}-${index}`}> 
+                      <li key={`${mod.name}-${mod.path}-${index}`}>
                         <Link
                           to={mod.path}
                           className={`flex items-center px-4 py-2 rounded-lg transition-colors
@@ -137,7 +137,7 @@ export function AppSidebar({ allowedModules }: Readonly<AppSidebarProps>) {
                         >
                           <span className="w-6 h-6 flex items-center justify-center">{mod.icon}</span>
                           <span className="ml-2 group-data-[collapsible=icon]:hidden">{mod.name}</span>
-              
+
                           {(mod.name === 'Revisión de Solicitudes' || mod.path === '/Solicitudes') && totalPendientes > 0 && (
                             <span className="ml-auto bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-medium group-data-[collapsible=icon]:hidden">
                               {totalPendientes > 9 ? '9+' : totalPendientes}
@@ -221,7 +221,7 @@ export function AppSidebar({ allowedModules }: Readonly<AppSidebarProps>) {
           </ul>
         </SidebarFooter>
       </Sidebar>
-      
+
       <ChangePasswordModal
         open={showChangePasswordModal}
         onClose={() => setShowChangePasswordModal(false)}

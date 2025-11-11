@@ -480,8 +480,9 @@ const Usuarios = () => {
                 </table>
               </div>
 
-              <div className="px-6 py-3 bg-white border-t border-gray-200">
+              <div className="px-6 py-3 bg-gray-50 border-t border-gray-200">
                 <div className="flex items-center justify-between">
+      
                   <div className="flex items-center gap-4">
                     <div className="flex items-center gap-2">
                       <span className="text-sm text-gray-700">Filas por página:</span>
@@ -490,55 +491,52 @@ const Usuarios = () => {
                         onChange={(e) => {
                           table.setPageSize(Number(e.target.value));
                         }}
-                        className="px-2 py-1 border border-gray-300 rounded-lg bg-white text-sm"
+                        className="px-3 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                       >
-                        {pageSizeOptions.map(size => (
-                          <option key={size} value={size}>
-                            {size}
+                        {pageSizeOptions.map((pageSize) => (
+                          <option key={pageSize} value={pageSize}>
+                            {pageSize}
                           </option>
                         ))}
                       </select>
                     </div>
                   </div>
-
-                  <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => table.setPageIndex(0)}
-                        disabled={!table.getCanPreviousPage()}
-                        className="p-1 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition"
-                        title="Primera página"
-                      >
-                        <MdKeyboardDoubleArrowLeft className="w-5 h-5 text-gray-600" />
-                      </button>
-                      <button
-                        onClick={() => table.previousPage()}
-                        disabled={!table.getCanPreviousPage()}
-                        className="p-1 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition"
-                        title="Página anterior"
-                      >
-                        <MdKeyboardArrowLeft className="w-5 h-5 text-gray-600" />
-                      </button>
-                      <span className="text-sm text-gray-700 min-w-[120px] text-center">
-                        Página {table.getState().pagination.pageIndex + 1} de {table.getPageCount()}
-                      </span>
-                      <button
-                        onClick={() => table.nextPage()}
-                        disabled={!table.getCanNextPage()}
-                        className="p-1 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition"
-                        title="Página siguiente"
-                      >
-                        <MdKeyboardArrowRight className="w-5 h-5 text-gray-600" />
-                      </button>
-                      <button
-                        onClick={() => table.setPageIndex(table.getPageCount() - 1)}
-                        disabled={!table.getCanNextPage()}
-                        className="p-1 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition"
-                        title="Última página"
-                      >
-                        <MdKeyboardDoubleArrowRight className="w-5 h-5 text-gray-600" />
-                      </button>
-                    </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => table.setPageIndex(0)}
+                      disabled={!table.getCanPreviousPage()}
+                      className="p-2 rounded-md border text-gray-600 hover:text-gray-900 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                      title="Primera página"
+                    >
+                      <MdKeyboardDoubleArrowLeft className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => table.previousPage()}
+                      disabled={!table.getCanPreviousPage()}
+                      className="p-2 rounded-md border text-gray-600 hover:text-gray-900 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                      title="Página anterior"
+                    >
+                      <MdKeyboardArrowLeft className="w-4 h-4" />
+                    </button>
+                    <span className="text-sm text-gray-700">
+                      Página {table.getState().pagination.pageIndex + 1} de {table.getPageCount()}
+                    </span>
+                    <button
+                      onClick={() => table.nextPage()}
+                      disabled={!table.getCanNextPage()}
+                      className="p-2 rounded-md border text-gray-600 hover:text-gray-900 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                      title="Página siguiente"
+                    >
+                      <MdKeyboardArrowRight className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => table.setPageIndex(table.getPageCount() - 1)}
+                      disabled={!table.getCanNextPage()}
+                      className="p-2 rounded-md border text-gray-600 hover:text-gray-900 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                      title="Última página"
+                    >
+                      <MdKeyboardDoubleArrowRight className="w-4 h-4" />
+                    </button>
                   </div>
                 </div>
               </div>

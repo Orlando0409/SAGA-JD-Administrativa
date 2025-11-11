@@ -9,6 +9,13 @@ interface FilterMovimientosModalProps {
   currentFilters: MovimientoFilterOptions;
 }
 
+// Helper function to convert yyyy-mm-dd to dd/mm/yyyy
+const convertDateFormat = (dateStr: string): string => {
+  if (!dateStr) return '';
+  const [year, month, day] = dateStr.split('-');
+  return `${day}-${month}-${year}`;
+};
+
 const FilterMovimientosModal: React.FC<FilterMovimientosModalProps> = ({
   isOpen,
   onClose,
@@ -25,12 +32,24 @@ const FilterMovimientosModal: React.FC<FilterMovimientosModalProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onApplyFilters(filters);
+    // Convert date formats from yyyy-mm-dd to dd/mm/yyyy before sending to backend
+    const formattedFilters = {
+      ...filters,
+      fechaInicio: filters.fechaInicio ? convertDateFormat(filters.fechaInicio) : undefined,
+      fechaFin: filters.fechaFin ? convertDateFormat(filters.fechaFin) : undefined,
+    };
+    onApplyFilters(formattedFilters);
     onClose();
   };
 
   const handleApply = () => {
-    onApplyFilters(filters);
+    // Convert date formats from yyyy-mm-dd to dd/mm/yyyy before sending to backend
+    const formattedFilters = {
+      ...filters,
+      fechaInicio: filters.fechaInicio ? convertDateFormat(filters.fechaInicio) : undefined,
+      fechaFin: filters.fechaFin ? convertDateFormat(filters.fechaFin) : undefined,
+    };
+    onApplyFilters(formattedFilters);
     onClose();
   };
 
