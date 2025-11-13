@@ -200,8 +200,8 @@ const CatálogoAuditorias = () => {
   const hasActiveFilters =
     appliedFilters.modulo ||
     appliedFilters.accion ||
-    appliedFilters.fechaInicio ||
-    appliedFilters.fechaFin;
+    appliedFilters.mis_auditorias ||
+    appliedFilters.por_usuario;
 
 
 
@@ -246,14 +246,14 @@ const CatálogoAuditorias = () => {
             onClick={() => setShowFilterModal(true)}
             className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors text-sm font-medium ${
               hasActiveFilters
-                ? 'bg-sky-600 text-white hover:bg-sky-700'
+                ? 'bg-blue-600 text-white hover:bg-blue-700'
                 : 'border border-gray-300 text-gray-700 hover:bg-gray-100'
             }`}
           >
             <LuFilter className="w-4 h-4" />
             Filtros
             {hasActiveFilters && (
-              <span className="bg-white text-sky-600 rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">
+              <span className="bg-white text-blue-600 rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">
                 {Object.values(appliedFilters).filter(Boolean).length}
               </span>
             )}
@@ -261,7 +261,7 @@ const CatálogoAuditorias = () => {
         </div>
       </div>
 
-<div className="bg-white rounded-2xl shadow-sm border border-sky-100 overflow-hidden max-h-[calc(100vh-300px)] overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100">
+<div className="bg-white rounded-2xl shadow-sm border border-blue-100 overflow-hidden max-h-[calc(100vh-300px)] overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100">
         <div className="overflow-x-auto">
           <table className="min-w-full table-auto">
             <thead className="bg-sky-50">

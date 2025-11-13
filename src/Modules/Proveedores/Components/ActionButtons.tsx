@@ -13,12 +13,12 @@ import {
     AlertDialogFooter
 } from "@/Modules/Global/components/Sidebar/ui/alert-dialog";
 import { useAlerts } from '@/Modules/Global/context/AlertContext';
+import type { ProveedorFisico } from '../Models/TablaProveedo/tablaFisicoProveedor';
+import type { ProveedorJuridico } from '../Models/TablaProveedo/tablaJuridicoProveedor';
 import EditProveedorModal from './EditFisicoProveedoresModal';
 import EditProveedorJuridicoModal from './EditJuridicoProveedorModal';
 import ProveedorDetailModal from './DetailFisicoProveedor';
 import ProveedorJuridicoDetailModal from './DetailJuridicoProveedor';
-import type { ProveedorFisico } from '../Models/TablaProveedo/tablaFisicoProveedor';
-import type { ProveedorJuridico } from '../Models/TablaProveedo/tablaJuridicoProveedor';
 
 interface ActionButtonsProps {
     proveedor: ProveedorFisico | ProveedorJuridico;

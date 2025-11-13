@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { Calendar, RefreshCcw, Image as ImageIcon } from "lucide-react";
 import type { Imagen } from "../Models/ModelsEdiImagen";
 
-
 interface ImagenModalProps {
     isOpen: boolean;
     onClose: () => void;

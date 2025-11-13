@@ -72,7 +72,7 @@ export default function ActasTable() {
             ),
         }),
         columnHelper.accessor('Fecha_Creacion', {
-            header: 'Fecha de creación',
+            header: 'Fecha de Creación',
             cell: info => (
                 <div className="text-gray-600 text-left">
                     {new Date(info.getValue()).toLocaleDateString("es-ES")}
@@ -80,7 +80,7 @@ export default function ActasTable() {
             ),
         }),
         columnHelper.accessor('Fecha_Actualizacion', {
-            header: 'Fecha de actualización',
+            header: 'Última Actualización',
             cell: info => (
                 <div className="text-gray-600 text-left">
                     {info.getValue()

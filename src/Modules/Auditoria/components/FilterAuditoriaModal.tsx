@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { LuX, LuFilter } from 'react-icons/lu';
 import type { FilterModalProps, AuditoriaFilterOptions } from '../types/AuditoriaTypes';
 import { MODULOS, ACCIONES } from '../types/AuditoriaTypes';
+import { useUsers } from '@/Modules/Usuarios/Hooks/userHook';
 
 const FilterAuditoriaModal = ({
   isOpen,
@@ -10,7 +11,7 @@ const FilterAuditoriaModal = ({
   currentFilters,
 }: FilterModalProps) => {
   const [filters, setFilters] = useState<AuditoriaFilterOptions>(currentFilters);
-
+  const { data: users = [], isLoading } = useUsers();
   const handleApply = () => {
     onApplyFilters(filters);
     onClose();
@@ -20,8 +21,8 @@ const FilterAuditoriaModal = ({
     const clearFilters: AuditoriaFilterOptions = {
       modulo: '',
       accion: '',
-      fechaInicio: '',
-      fechaFin: '',
+      mis_auditorias: false,
+      por_usuario: 0,
     };
     setFilters(clearFilters);
     onApplyFilters(clearFilters);
@@ -98,6 +99,48 @@ const FilterAuditoriaModal = ({
                 </option>
               ))}
             </select>
+          </div>
+
+          {/* Filtro por Usuario */}
+          <div>
+            <label  htmlFor="por_usuario" className="block text-sm font-medium text-gray-700 mb-2">
+              Usuario
+            </label>
+            {isLoading ? (
+              <p className="text-sm text-gray-500">Cargando usuarios...</p>
+            ) : 
+            <select
+              id="por_usuario"
+              value={filters.por_usuario ?? ''}
+              onChange={(e) =>
+                setFilters((prev) => ({ ...prev, por_usuario: Number(e.target.value) || 0 }))
+              }
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+            >
+              <option value="">Todos los usuarios</option>
+              {users.map((user) => (
+                <option key={user.Id_Usuario} value={user.Id_Usuario}>
+                  {user.Nombre_Usuario}
+                </option>
+              ))}
+            </select>
+            }
+          </div>
+
+          {/* Filtro por Mis Auditorías */}
+          <div className="flex items-center space-x-2">
+            <input
+              type="checkbox"
+              id="mis_auditorias"
+              checked={filters.mis_auditorias}
+              onChange={(e) =>
+                setFilters((prev) => ({ ...prev, mis_auditorias: e.target.checked }))
+              }
+              className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+            />
+            <label htmlFor="mis_auditorias" className="text-sm font-medium text-gray-700">
+              Mis Auditorías
+            </label>
           </div>
 
         </div>

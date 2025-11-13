@@ -8,27 +8,29 @@ import {
     createColumnHelper,
 } from '@tanstack/react-table';
 import { LuPlus, LuSearch } from 'react-icons/lu';
-import { MdKeyboardArrowLeft, MdKeyboardArrowRight, MdKeyboardDoubleArrowLeft,
-  MdKeyboardDoubleArrowRight,
-  MdKeyboardArrowDown,
-  MdKeyboardArrowUp} from "react-icons/md";
 import {
-  AlertDialog,
-  AlertDialogTrigger,
-  AlertDialogContent,
-  AlertDialogTitle,
-  AlertDialogDescription,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogHeader,
-  AlertDialogFooter
+    MdKeyboardArrowLeft, MdKeyboardArrowRight, MdKeyboardDoubleArrowLeft,
+    MdKeyboardDoubleArrowRight,
+    MdKeyboardArrowDown,
+    MdKeyboardArrowUp
+} from "react-icons/md";
+import {
+    AlertDialog,
+    AlertDialogTrigger,
+    AlertDialogContent,
+    AlertDialogTitle,
+    AlertDialogDescription,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogHeader,
+    AlertDialogFooter
 } from "@/Modules/Global/components/Sidebar/ui/alert-dialog";
 import { useAlerts } from "@/Modules/Global/context/AlertContext";
 import { useDeleteImagen, useGetImagenes } from "../Hook/hookEdiImagen";
 import type { Imagen } from "../Models/ModelsEdiImagen";
-import ImagenForm from "./EdiImagenForm";
-import ImagenModal from "./EdiImagenModal";
-import ImagenFormEdit from "./ImagenFormEdit";
+import ImagenForm from "./CreateImagenModal";
+import ImagenModal from "./DetailImagenModal";
+import ImagenFormEdit from "./EditImagenModal";
 
 
 export default function ImagenesTable() {
@@ -69,18 +71,18 @@ export default function ImagenesTable() {
             ),
         }),
         columnHelper.accessor('Fecha_Creacion', {
-            header: 'Fecha creación',
+            header: 'Fecha de Creación',
             cell: info =>
-              <div className="flex items-center justify-start">{new Date(info.getValue()).toLocaleDateString("es-ES")}</div>,
+                <div className="flex items-center justify-start">{new Date(info.getValue()).toLocaleDateString("es-ES")}</div>,
         }),
         columnHelper.accessor('Fecha_Actualizacion', {
-            header: 'Última actualización',
+            header: 'Última Actualización',
             cell: info => (
-              <div className="flex items-center justify-start">
-                {info.getValue()
-                  ? new Date(info.getValue()).toLocaleDateString("es-ES")
-                  : "Sin cambios"}
-              </div>
+                <div className="flex items-center justify-start">
+                    {info.getValue()
+                        ? new Date(info.getValue()).toLocaleDateString("es-ES")
+                        : "Sin cambios"}
+                </div>
             ),
         }),
         columnHelper.display({
@@ -187,7 +189,7 @@ export default function ImagenesTable() {
         <div className="space-y-6">
             {/* Encabezado con búsqueda y botón */}
             <div className="bg-white rounded-lg p-3">
-                 <div className="flex items-start gap-4 flex-col justify-start">
+                <div className="flex items-start gap-4 flex-col justify-start">
                     <h2 className="text-2xl font-bold text-gray-900">Edición de Imágenes</h2>
                     <p className="text-sm text-gray-600 pb-4">Gestión de imágenes para el apartado de la historia</p>
                 </div>
@@ -226,9 +228,8 @@ export default function ImagenesTable() {
                             {table.getHeaderGroups().map(headerGroup => (
                                 <tr key={headerGroup.id} className="text-left text-xs sm:text-sm text-sky-700">
                                     {headerGroup.headers.map((header, index) => (
-                                        <th key={header.id} className={`px-2 sm:px-4 py-3 font-medium border-b border-sky-100 ${
-                                            index === 0 ? 'text-left' : 'text-center'
-                                        }`}>
+                                        <th key={header.id} className={`px-2 sm:px-4 py-3 font-medium border-b border-sky-100 ${index === 0 ? 'text-left' : 'text-center'
+                                            }`}>
                                             {(() => {
                                                 if (header.isPlaceholder) {
                                                     return null;
@@ -237,9 +238,8 @@ export default function ImagenesTable() {
                                                     return (
                                                         <button
                                                             type="button"
-                                                            className={`cursor-pointer select-none flex items-center gap-2 bg-transparent border-none p-0 ${
-                                                                index === 0 ? 'justify-start' : 'justify-center'
-                                                            }`}
+                                                            className={`cursor-pointer select-none flex items-center gap-2 bg-transparent border-none p-0 ${index === 0 ? 'justify-start' : 'justify-center'
+                                                                }`}
                                                             onClick={header.column.getToggleSortingHandler()}
                                                             onKeyDown={e => {
                                                                 if (e.key === 'Enter' || e.key === ' ') {
@@ -293,9 +293,8 @@ export default function ImagenesTable() {
                                             }
 
                                             return (
-                                                <td key={cell.id} className={`px-2 sm:px-4 py-3 text-xs sm:text-sm text-slate-700 align-top ${
-                                                    index === 0 ? 'text-left' : 'text-center'
-                                                }`}>
+                                                <td key={cell.id} className={`px-2 sm:px-4 py-3 text-xs sm:text-sm text-slate-700 align-top ${index === 0 ? 'text-left' : 'text-center'
+                                                    }`}>
                                                     {cellContent}
                                                 </td>
                                             );
@@ -345,7 +344,7 @@ export default function ImagenesTable() {
                                 <MdKeyboardArrowLeft className="w-4 h-4" />
                             </button>
                             <span className="text-sm text-gray-700">
-                              Página {table.getState().pagination.pageIndex + 1} de {table.getPageCount()}
+                                Página {table.getState().pagination.pageIndex + 1} de {table.getPageCount()}
                             </span>
                             <button
                                 onClick={() => table.nextPage()}

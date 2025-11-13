@@ -12,7 +12,7 @@ const Modulos = () => {
       <div className="p-4">
         <div className="mb-4 flex items-center">
           <h1 className="text-3xl md:text-5xl font-bold text-start py-4">
-            Panel Administrativo ASADA Juan Díaz
+            Panel administrativo ASADA Juan Díaz
           </h1>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:overflow-y-auto max-h-[70vh]">

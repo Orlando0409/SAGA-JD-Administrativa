@@ -1,7 +1,7 @@
 import { useForm } from '@tanstack/react-form';
 import { useState } from 'react';
-import PhoneInput, { isValidPhoneNumber, type Value as PhoneValue } from 'react-phone-number-input';
-import 'react-phone-number-input/style.css';
+import PhoneInputComponent from '@/Modules/Global/components/PhoneInputComponent';
+import { isValidPhoneNumber } from 'react-phone-number-input';
 import { LuX } from 'react-icons/lu';
 import { 
   EditProveedorSchema, 
@@ -254,13 +254,9 @@ const EditProveedorModal: React.FC<EditProveedorModalProps> = ({ isOpen, onClose
                   <label htmlFor='Telefono' className="block text-sm font-medium text-gray-700 mb-1">
                     Teléfono *
                   </label>
-                  <PhoneInput
-                    defaultCountry="CR"
-                    international
-                    countryCallingCodeEditable={false}
-                    value={field.state.value as PhoneValue}
+                  <PhoneInputComponent
+                    value={field.state.value || ''}
                     onChange={(value) => {
-                      // Formatear el número en tiempo real
                       const formattedValue = formatPhoneNumberInput(value || '');
                       field.handleChange(formattedValue);
                       setFieldCharCounts(prev => ({ 
@@ -269,37 +265,8 @@ const EditProveedorModal: React.FC<EditProveedorModalProps> = ({ isOpen, onClose
                       }));
                       validateFieldRealTime('Telefono_Proveedor', value || '');
                     }}
-                    className={`react-phone-number-input ${
-                      (formErrors.Telefono_Proveedor || field.state.meta.errors?.length) 
-                        ? 'react-phone-number-input--error' 
-                        : ''
-                    }`}
-                    style={{
-                      '--PhoneInput-color--focus': '#3b82f6',
-                      '--PhoneInputCountrySelect-marginRight': '0.5rem',
-                      '--PhoneInputCountryFlag-aspectRatio': '1.5',
-                      '--PhoneInputCountryFlag-height': '1rem',
-                      '--PhoneInputCountrySelectArrow-color': '#6b7280',
-                      '--PhoneInputCountrySelectArrow-color--focus': '#3b82f6',
-                    } as React.CSSProperties}
-                    inputProps={{
-                      autoComplete: 'tel',
-                      'aria-label': 'Número de teléfono internacional',
-                      className: `w-full px-3 py-2 border rounded-r-lg focus:ring-2 focus:border-transparent transition-colors ${
-                        (formErrors.Telefono_Proveedor || field.state.meta.errors?.length) 
-                          ? 'border-red-300 focus:ring-red-500' 
-                          : 'border-gray-300 focus:ring-blue-500'
-                      }`,
-                      placeholder: 'Número de teléfono'
-                    }}
-                    countrySelectProps={{
-                      'aria-label': 'Seleccionar país',
-                      className: `border rounded-l-lg px-2 py-2 bg-white hover:bg-gray-50 focus:ring-2 focus:border-transparent transition-colors ${
-                        (formErrors.Telefono_Proveedor || field.state.meta.errors?.length) 
-                          ? 'border-red-300 focus:ring-red-500' 
-                          : 'border-gray-300 focus:ring-blue-500'
-                      }`
-                    }}
+                    onBlur={field.handleBlur}
+                    hasError={!!(formErrors.Telefono_Proveedor || field.state.meta.errors?.length)}
                   />
                   
                   <div className="flex justify-between items-center mt-1">

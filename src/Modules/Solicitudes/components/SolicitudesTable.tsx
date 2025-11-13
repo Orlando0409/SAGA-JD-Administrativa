@@ -344,7 +344,7 @@ export default function SolicitudesTable() {
             size: 120,
         }),
         columnHelper.accessor('Fecha_Creacion', {
-            header: 'Fecha Creación',
+            header: 'Fecha de Envío',
             cell: (info) => {
                 const fecha = info.getValue();
                 if (!fecha) return 'Sin fecha';

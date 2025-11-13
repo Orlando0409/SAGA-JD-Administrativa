@@ -1,6 +1,7 @@
 import { LuX, LuUser, LuCalendar } from 'react-icons/lu';
 import type { DetailMedidorModalProps } from '../../types/MedidorTypes';
 import { FaTachometerAlt, FaUsers } from 'react-icons/fa';
+import { formatCedulaJuridica } from '@/Modules/Afiliados/Helper/formatUtils';
 
 const DetailMedidorModal = ({ isOpen, onClose, medidor }: DetailMedidorModalProps) => {
   if (!isOpen) return null;
@@ -26,6 +27,65 @@ const DetailMedidorModal = ({ isOpen, onClose, medidor }: DetailMedidorModalProp
       hour: '2-digit',
       minute: '2-digit',
     });
+  };
+
+
+
+  // Función para obtener el nombre completo del afiliado
+  const getNombreAfiliado = () => {
+    if (!medidor.Afiliado) return null;
+    
+    const { Tipo_Entidad, Nombre, Primer_Apellido, Segundo_Apellido, Razon_Social, Nombre_Completo } = medidor.Afiliado;
+    
+    // Tipo 1: Persona Física
+    if (Tipo_Entidad === 1) {
+      if (Nombre && Primer_Apellido) {
+        return `${Nombre} ${Primer_Apellido} ${Segundo_Apellido || ''}`.trim();
+      }
+      return Nombre_Completo || 'No especificado';
+    }
+    
+    // Tipo 2: Persona Jurídica
+    if (Tipo_Entidad === 2) {
+      return Razon_Social || 'No especificado';
+    }
+    
+    // Fallback para casos legacy
+    return Nombre_Completo || Razon_Social || 'No especificado';
+  };
+
+  // Función para obtener el número de identificación
+  const getIdentificacion = () => {
+    if (!medidor.Afiliado) return null;
+    
+    const { Tipo_Entidad, Identificacion, Cedula_Juridica } = medidor.Afiliado;
+    
+    if (Tipo_Entidad === 1) {
+      return Identificacion || 'No especificado';
+    }
+    
+    if (Tipo_Entidad === 2) {
+      return formatCedulaJuridica(Cedula_Juridica) || 'No especificado';
+    }
+    
+    return Identificacion || Cedula_Juridica || 'No especificado';
+  };
+
+  // Función para obtener el tipo de afiliado
+  const getTipoAfiliado = () => {
+    if (!medidor.Afiliado) return null;
+    
+    const { Tipo_Entidad, Tipo_Afiliado } = medidor.Afiliado;
+    
+    if (Tipo_Entidad === 1) {
+      return 'Persona Física';
+    }
+    
+    if (Tipo_Entidad === 2) {
+      return 'Persona Jurídica';
+    }
+    
+    return Tipo_Afiliado || 'No especificado';
   };
 
   return (
@@ -95,19 +155,37 @@ const DetailMedidorModal = ({ isOpen, onClose, medidor }: DetailMedidorModalProp
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   <div className="bg-gray-50 p-4 rounded-lg">
                     <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
-                      Nombre/Razón Social
+                      {medidor.Afiliado.Tipo_Entidad === 2 ? 'Razón Social' : 'Nombre Completo'}
                     </label>
-                    <p className="text-xs text-gray-900 font-medium">
-                      {medidor.Afiliado.Nombre_Completo || medidor.Afiliado.Razon_Social}
+                    <p className="text-sm text-gray-900 font-medium">
+                      {getNombreAfiliado()}
                     </p>
                   </div>
 
                   <div className="bg-gray-50 p-4 rounded-lg">
                     <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
-                      Número de Afiliado
+                      {medidor.Afiliado.Tipo_Entidad === 2 ? 'Cédula Jurídica' : 'Identificación'}
                     </label>
                     <p className="text-sm text-gray-900 font-mono">
-                      #{medidor.Afiliado.Numero_Afiliado}
+                      {getIdentificacion()}
+                    </p>
+                  </div>
+
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
+                      Correo Electrónico
+                    </label>
+                    <p className="text-sm text-gray-900">
+                      {medidor.Afiliado.Correo || 'No especificado'}
+                    </p>
+                  </div>
+
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
+                      Número de Teléfono
+                    </label>
+                    <p className="text-sm text-gray-900 font-mono">
+                      {medidor.Afiliado.Numero || 'No especificado'}
                     </p>
                   </div>
 
@@ -116,7 +194,7 @@ const DetailMedidorModal = ({ isOpen, onClose, medidor }: DetailMedidorModalProp
                       Tipo de Afiliado
                     </label>
                     <span className="inline-flex items-center px-3 py-1 rounded-lg text-xs font-semibold bg-blue-100 text-blue-800 border border-blue-200">
-                      {medidor.Afiliado.Tipo_Afiliado}
+                      {getTipoAfiliado()}
                     </span>
                   </div>
                 </div>
