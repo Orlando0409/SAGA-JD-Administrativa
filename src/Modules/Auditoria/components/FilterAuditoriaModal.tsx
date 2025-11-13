@@ -11,7 +11,7 @@ const FilterAuditoriaModal = ({
   currentFilters,
 }: FilterModalProps) => {
   const [filters, setFilters] = useState<AuditoriaFilterOptions>(currentFilters);
-  const { data: users = [], isLoading, refetch } = useUsers();
+  const { data: users = [], isLoading } = useUsers();
   const handleApply = () => {
     onApplyFilters(filters);
     onClose();

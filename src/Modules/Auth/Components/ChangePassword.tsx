@@ -5,7 +5,6 @@ import { useChangePassword } from "../Hooks/AuthHook";
 import { useAlerts } from "@/Modules/Global/context/AlertContext";
 import {
   AlertDialog,
-  AlertDialogTrigger,
   AlertDialogContent,
   AlertDialogTitle,
   AlertDialogDescription,
@@ -14,7 +13,7 @@ import {
   AlertDialogHeader,
   AlertDialogFooter
 } from "@/Modules/Global/components/Sidebar/ui/alert-dialog";
-import { Button } from "@material-tailwind/react";
+
 interface ChangePasswordModalProps {
     onClose: () => void;
     open: boolean;

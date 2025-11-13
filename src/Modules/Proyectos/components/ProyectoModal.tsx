@@ -1,8 +1,6 @@
-import { useState } from "react";
 import { useToggleVisibilidadProyecto } from "../Hook/HookProyecto";
 import { Calendar, RefreshCcw, Eye, EyeOff } from "lucide-react";
 import type { Proyecto } from "../Models/ProyectoModels";
-import ProyectoFormEdit from "./proyectiFormEdit";
 
 interface ProyectoModalProps {
     isOpen: boolean;
