@@ -12,7 +12,6 @@ interface ProyectoModalProps {
 }
 
 export default function ProyectoModal({ isOpen, onClose, proyecto, refetch }: ProyectoModalProps) {
-    const [showEditModal, setShowEditModal] = useState(false);
     const toggleVisibilidad = useToggleVisibilidadProyecto();
 
     if (!isOpen) return null;
@@ -23,13 +22,7 @@ export default function ProyectoModal({ isOpen, onClose, proyecto, refetch }: Pr
         });
     };
 
-    const handleEditClose = () => {
-        setShowEditModal(false);
-        refetch();
-    };
-
     return (
-        <>
             <div className="fixed inset-0 backdrop-blur bg-opacity-50 flex items-center justify-center z-50 p-4">
                 <div 
                     className="bg-white rounded-lg shadow-xl w-full max-w-lg max-h-[85vh] overflow-y-auto"
@@ -128,13 +121,6 @@ export default function ProyectoModal({ isOpen, onClose, proyecto, refetch }: Pr
 
                         {/* Botones de acción */}
                         <div className="flex justify-end gap-3 pt-2">
-                            <button 
-                                type="button" 
-                                onClick={() => setShowEditModal(true)} 
-                                className="px-4 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600 shadow-sm text-sm"
-                            >
-                                Editar
-                            </button>
                             <button
                                 type="button"
                                 onClick={onClose}
@@ -146,14 +132,5 @@ export default function ProyectoModal({ isOpen, onClose, proyecto, refetch }: Pr
                     </div>
                 </div>
             </div>
-
-            {/* Modal de edición */}
-            {showEditModal && (
-                <ProyectoFormEdit 
-                    proyecto={proyecto} 
-                    onClose={handleEditClose}
-                />
-            )}
-        </>
     );
 }

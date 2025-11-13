@@ -273,13 +273,13 @@ export default function ProyectoFormEdit({ proyecto, onClose }: ProyectoFormEdit
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
                         <AlertDialogAction 
                             onClick={handleConfirmedSubmit}
                             disabled={updateProyectoMutation.isPending}
                         >
                             {updateProyectoMutation.isPending ? 'Guardando...' : 'Confirmar'}
                         </AlertDialogAction>
+                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>

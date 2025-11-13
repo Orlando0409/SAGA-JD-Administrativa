@@ -35,6 +35,7 @@ import { Eye, EyeOff } from "lucide-react";
 import type { Proyecto } from "../Models/ProyectoModels";
 import FormularioProyecto from "./ProyectoFormulario";
 import ProyectoModal from "./ProyectoModal";
+import ProyectoFormEdit from "./proyectiFormEdit";
 
 
 export default function ProyectoTable() {
@@ -45,6 +46,7 @@ export default function ProyectoTable() {
     const [globalFilter, setGlobalFilter] = useState('');
     const [estadoFilter, setEstadoFilter] = useState<string>('Todos'); // Por defecto mostrar todos
     const [modalOpen, setModalOpen] = useState(false);
+    const [editModalOpen, setEditModalOpen] = useState(false);
     const [formVisible, setFormVisible] = useState(false);
     const [proyectoSeleccionado, setProyectoSeleccionado] = useState<Proyecto | null>(null);
 
@@ -302,7 +304,7 @@ export default function ProyectoTable() {
 
     const handleEdit = (proyecto: Proyecto) => {
         setProyectoSeleccionado(proyecto);
-        setModalOpen(true);
+        setEditModalOpen(true);
     };
 
     const handleToggleEstado = async (proyecto: Proyecto) => {
@@ -542,7 +544,7 @@ export default function ProyectoTable() {
                 </div>
             </div>
 
-            {/* Modal para editar */}
+            {/* Modal para ver */}
             {modalOpen && proyectoSeleccionado && (
                 <ProyectoModal
                     isOpen={modalOpen}
@@ -552,6 +554,17 @@ export default function ProyectoTable() {
                     }}
                     proyecto={proyectoSeleccionado}
                     refetch={refetch}
+                />
+            )}
+
+            {/* Modal para editar */}
+            {editModalOpen && proyectoSeleccionado && (
+                <ProyectoFormEdit
+                    onClose={() => {
+                        setEditModalOpen(false);
+                        setProyectoSeleccionado(null);
+                    }}
+                    proyecto={proyectoSeleccionado}
                 />
             )}
 
