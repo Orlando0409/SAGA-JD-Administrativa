@@ -1,5 +1,5 @@
 import { useForm } from '@tanstack/react-form';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { z } from 'zod';
 import { parsePhoneNumberFromString } from 'libphonenumber-js';
 import { useAlerts } from '@/Modules/Global/context/AlertContext';
@@ -287,6 +287,25 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
             }
         },
     });
+
+    // Resetear el formulario cuando cambie el tipo de afiliado
+    useEffect(() => {
+        form.reset();
+        setFieldCharCounts({
+            Nombre: 0,
+            Apellido1: 0,
+            Apellido2: 0,
+            Identificacion: 0,
+            Numero_Telefono: 0,
+            Correo: 0,
+            Direccion_Exacta: 0,
+            Razon_Social: 0,
+            Cedula_Juridica: 0
+        });
+        setValidationErrors({});
+        setEscrituraFile(null);
+        setPlanosFile(null);
+    }, [tipoActivo]);
 
     // Mover la verificación de isOpen DESPUÉS de todos los hooks
     if (!isOpen) return null;
