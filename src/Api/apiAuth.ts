@@ -6,7 +6,7 @@ const axiosPrivate = axios.create({
   //Url render=https://saga-jd-back-end-1.onrender.com/api
   //URL API RAILWAY = https://saga-jd-back-end-production.up.railway.app/api
   
-  baseURL: 'http://localhost:3000/api',
+  baseURL: 'https://saga-jd-back-end-production.up.railway.app/api',
   headers: { 'Content-Type': 'application/json' },
   withCredentials: true, 
 })
