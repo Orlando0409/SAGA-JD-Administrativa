@@ -113,7 +113,7 @@ export default function ProyectoTable() {
                 );
             },
         }),
-        columnHelper.accessor('Fecha_Creacion', {
+        columnHelper.accessor('Fecha_Actualizacion', {
             header: 'Última Actualización',
             cell: info => (
                 <div className="text-gray-600 text-left">
