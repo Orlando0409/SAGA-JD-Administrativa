@@ -93,7 +93,7 @@ const DetailCategoriaModal: React.FC<DetailCategoriaModalProps> = ({ isOpen, onC
                       Creado por
                     </label>
                     <p className="text-sm text-gray-900">
-                      {categoria.Usuario_Creador?.Nombre_Usuario || 'Desconocido'}
+                      {categoria.Usuario?.Nombre_Usuario || 'Desconocido'}
                     </p>
                   </div>
                 </div>

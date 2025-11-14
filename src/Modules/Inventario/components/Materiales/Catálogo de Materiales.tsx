@@ -194,15 +194,21 @@ const CatalogoMateriales: React.FC<CatalogoMaterialesProps> = () => {
         header: 'Material',
         cell: info => (
           <div className="text-gray-600">
-            {info.getValue()}
+            {info.getValue().length > 12
+              ? `${info.getValue().slice(0, 12)}...`
+              : info.getValue()}
           </div>
         ),
       }),
       columnHelper.accessor('Descripcion', {
         header: 'Descripción',
         cell: info => (
-          <div className="text-gray-600 max-w-[200px] truncate">
-            {info.getValue() || 'Sin descripción'}
+          <div className="text-gray-600">
+            {info.getValue()
+              ? (info.getValue().length > 15
+                ? `${info.getValue().slice(0, 15)}...`
+                : info.getValue())
+              : 'Sin descripción'}
           </div>
         ),
       }),
@@ -216,11 +222,18 @@ const CatalogoMateriales: React.FC<CatalogoMaterialesProps> = () => {
       }),
       columnHelper.accessor((row) => row.Unidad_Medicion?.Nombre_Unidad_Medicion, {
         header: 'Unidad de medida',
-        cell: info => (
-          <div className="text-sm text-gray-600">
-            {info.getValue() || 'Sin unidad'}
-          </div>
-        ),
+        cell: info => {
+          const unidad = info.getValue();
+          return (
+            <div className="text-sm text-gray-600">
+              {unidad
+                ? (unidad.length > 8
+                  ? `${unidad.slice(0, 8)}...`
+                  : unidad)
+                : 'Sin unidad'}
+            </div>
+          );
+        },
       }),
       columnHelper.accessor('Precio_Unitario', {
         header: 'Precio Unitario',
@@ -271,13 +284,17 @@ const CatalogoMateriales: React.FC<CatalogoMaterialesProps> = () => {
               {categorias.slice(0, 2).map((cat: any, index: number) => {
                 const categoria = cat.Categoria || cat;
                 const key = cat.Id_Material_Categoria || cat.Id_Categoria || index;
+                const nombreCategoria = categoria.Nombre_Categoria || 'N/A';
                 
                 return (
                   <span 
                     key={key} 
                     className="inline-flex items-center px-2 py-1 rounded-lg text-xs font-semibold bg-blue-100 text-blue-800 border border-blue-200"
+                    title={nombreCategoria.length > 12 ? nombreCategoria : undefined}
                   >
-                    {categoria.Nombre_Categoria || 'N/A'}
+                    {nombreCategoria.length > 12
+                      ? `${nombreCategoria.slice(0, 12)}...`
+                      : nombreCategoria}
                   </span>
                 );
               })}
@@ -618,17 +635,7 @@ const CatalogoMateriales: React.FC<CatalogoMaterialesProps> = () => {
             </select>
           </div>
           <div className="flex items-center gap-4 w-full sm:w-auto">
-            <div className="relative flex-1 max-w-md">
-              <LuSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-              <input
-                type="text"
-                placeholder="Buscar materiales..."
-                value={globalFilter ?? ''}
-                onChange={(e) => setGlobalFilter(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-            <button
+              <button
               onClick={() => setShowFilterModal(true)}
               className={`px-4 py-2 border rounded-md flex items-center gap-2 transition-colors ${
                 activeFiltersCount > 0
@@ -644,6 +651,17 @@ const CatalogoMateriales: React.FC<CatalogoMaterialesProps> = () => {
                 </span>
               )}
             </button>
+            <div className="relative flex-1 max-w-md">
+              <LuSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <input
+                type="text"
+                placeholder="Buscar materiales..."
+                value={globalFilter ?? ''}
+                onChange={(e) => setGlobalFilter(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+
             <button 
               onClick={() => setShowCreateModal(true)}
               className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md flex items-center gap-2 transition-colors"
@@ -661,10 +679,10 @@ const CatalogoMateriales: React.FC<CatalogoMaterialesProps> = () => {
         </div>
       </div>
 
-<div className="bg-white rounded-2xl shadow-sm border border-sky-100 overflow-hidden max-h-[calc(100vh-300px)] overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100">
-        <div className="overflow-x-auto">
+<div className="bg-white rounded-2xl shadow-sm border border-sky-100 overflow-hidden">
+        <div className="overflow-x-auto max-h-[calc(100vh-300px)] overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100">
           <table className="min-w-full table-auto">
-            <thead className="bg-sky-50">
+            <thead className="bg-sky-50 sticky top-0 z-10">
               {table.getHeaderGroups().map((headerGroup) => (
                 <tr key={headerGroup.id} className="text-left text-xs sm:text-sm text-sky-700">
                   {headerGroup.headers.map((header) => (

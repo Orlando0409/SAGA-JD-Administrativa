@@ -34,7 +34,7 @@ export const breadcrumbConfig: BreadcrumbConfig = {
     icon: FaUsers as LucideIcon,
   },
   '/Afiliados': {
-    label: 'Gestión de Abonados',
+    label: 'Gestión de Afiliados',
     icon: FaUserFriends as LucideIcon,
   },
   '/Inventario': {
@@ -114,13 +114,13 @@ export const breadcrumbConfig: BreadcrumbConfig = {
   },
 
   '/Inventario/Materiales/Medidores': {
-    label: 'Medidores',
+    label: 'Gestión deMedidores',
     icon: FaTachometerAlt as LucideIcon,
   },
 
   // Sub-ruta de Afiliados
   '/Afiliados/Lecturas': {
-    label: 'Lecturas',
+    label: 'Gestión de Lecturas',
     icon: IoDocumentTextOutline as LucideIcon,
   },
 

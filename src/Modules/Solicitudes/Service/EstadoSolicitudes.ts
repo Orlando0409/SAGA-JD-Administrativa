@@ -226,5 +226,6 @@ export const mapearTipoSolicitud = (tipoBackend: string): TipoSolicitud => {
  * 🔄 Mapeo de tipo de persona desde el backend
  */
 export const mapearTipoPersona = (tipoBackend: string): TipoPersona => {
-    return tipoBackend === 'Físico' ? 'fisica' : 'juridica';
+    // Acepta tanto 'Física'/'Físico' como 'Jurídica'/'Jurídico'
+    return (tipoBackend === 'Física' || tipoBackend === 'Físico') ? 'fisica' : 'juridica';
 };

@@ -340,7 +340,7 @@ const handleArchive = async (item: ContactoItem) => {
         <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
           <div className="flex items-center gap-4">
             <label htmlFor="estado-filter" className="block text-sm font-medium text-gray-700 mb-2">
-              Estado
+              Estado: 
             </label>
             <select
               id="estado-filter"
@@ -358,16 +358,6 @@ const handleArchive = async (item: ContactoItem) => {
             </select>
           </div>
           <div className="flex items-center gap-4 w-full sm:w-auto">
-            <div className="relative flex-1 max-w-md">
-              <LuSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-              <input
-                type="text"
-                placeholder="Buscar por nombre, mensaje..."
-                value={globalFilter ?? ''}
-                onChange={(e) => setGlobalFilter(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
             <button
               onClick={() => setIsFilterModalOpen(true)}
               className={`px-4 py-2 border rounded-md flex items-center gap-2 transition-colors ${
@@ -384,6 +374,17 @@ const handleArchive = async (item: ContactoItem) => {
                 </span>
               )}
             </button>
+            <div className="relative flex-1 max-w-md">
+              <LuSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <input
+                type="text"
+                placeholder="Buscar por nombre, mensaje..."
+                value={globalFilter ?? ''}
+                onChange={(e) => setGlobalFilter(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+            
           </div>
         </div>
       </div>
@@ -426,9 +427,9 @@ const handleArchive = async (item: ContactoItem) => {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={6} className="px-2 sm:px-4 py-8 text-center text-slate-500">
+                  <td colSpan={columns.length} className="px-2 sm:px-4 py-8 text-center text-slate-500">
                     {globalFilter 
-                      ? 'No se encontraron registros que coincidan con la búsqueda' 
+                      ? 'No se encontraron quejas, sugerencias o reportes que coincidan con la búsqueda' 
                       : 'No hay registros de quejas, sugerencias o reportes'}
                   </td>
                 </tr>

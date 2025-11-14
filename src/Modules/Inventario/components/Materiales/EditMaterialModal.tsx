@@ -4,10 +4,10 @@ import { useUpdateMaterial } from '../../hooks/useMaterials';
 import { useUnidadesMedicionActivas } from '../../hooks/HookUnidadMedicion';
 import { useAlerts } from '@/Modules/Global/context/AlertContext';
 import { UpdateMaterialSchema } from '../../schema/UpdateMaterialSchema';
-import { 
-  NOMBRE_MATERIAL_MAX_LENGTH, 
-  DESCRIPCION_MAX_LENGTH, 
-  PRECIO_MIN, 
+import {
+  NOMBRE_MATERIAL_MAX_LENGTH,
+  DESCRIPCION_MAX_LENGTH,
+  PRECIO_MIN,
   type EditMaterialModalProps
 } from '../../types/MaterialTypes';
 import type { UpdateMaterialData } from '../../models/Material';
@@ -39,7 +39,7 @@ const EditMaterialModal: React.FC<EditMaterialModalProps> = ({
   const { data: unidadesMedicion = [] } = useUnidadesMedicionActivas();
   const [isCreateCategoriaModalOpen, setIsCreateCategoriaModalOpen] = useState(false);
   const [isCreateUnidadMedicionModalOpen, setIsCreateUnidadMedicionModalOpen] = useState(false);
-    
+
   const [formData, setFormData] = useState<UpdateMaterialData>({
     Nombre_Material: '',
     Descripcion: '',
@@ -58,10 +58,10 @@ const EditMaterialModal: React.FC<EditMaterialModalProps> = ({
 
   useEffect(() => {
     if (isOpen && material) {
-      const categorias = (material.Categorias && material.Categorias.length > 0) 
-        ? material.Categorias 
+      const categorias = (material.Categorias && material.Categorias.length > 0)
+        ? material.Categorias
         : (material.Categorias || []);
-      
+
       const categoriaIds = categorias.map(cat => {
         if (cat) {
           return cat.Id_Categoria;
@@ -90,19 +90,19 @@ const EditMaterialModal: React.FC<EditMaterialModalProps> = ({
   const createInputHandler = (fieldName: string, maxLength?: number) => {
     return (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
       const value = e.target.value;
-      
+
       if (maxLength && value.length > maxLength) {
         return;
       }
-      
+
       setFormData(prev => ({ ...prev, [fieldName]: value }));
-      
+
       if (fieldName === 'Nombre_Material') {
         setFieldCharCounts(prev => ({ ...prev, nombreMaterial: value.length }));
       } else if (fieldName === 'Descripcion') {
         setFieldCharCounts(prev => ({ ...prev, descripcion: value.length }));
       }
-      
+
       if (formErrors[fieldName]) {
         setFormErrors(prev => ({ ...prev, [fieldName]: '' }));
       }
@@ -117,12 +117,12 @@ const EditMaterialModal: React.FC<EditMaterialModalProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     const validationResult = UpdateMaterialSchema.safeParse({
       ...formData,
       IDS_Categorias: selectedCategorias,
     });
-    
+
     if (!validationResult.success) {
       const errors: { [key: string]: string } = {};
       validationResult.error.errors.forEach((error: any) => {
@@ -131,11 +131,11 @@ const EditMaterialModal: React.FC<EditMaterialModalProps> = ({
         }
       });
       setFormErrors(errors);
-      
+
       showError('Por favor, corrige los errores en el formulario');
       return;
     }
-    
+
     setIsSubmitting(true);
 
     try {
@@ -159,8 +159,8 @@ const EditMaterialModal: React.FC<EditMaterialModalProps> = ({
   };
 
   const handleCategoriaChange = (categoriaId: number, checked: boolean) => {
-    setSelectedCategorias(prev => 
-      checked 
+    setSelectedCategorias(prev =>
+      checked
         ? [...prev, categoriaId]
         : prev.filter(id => id !== categoriaId)
     );
@@ -177,168 +177,164 @@ const EditMaterialModal: React.FC<EditMaterialModalProps> = ({
 
         <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100">
           <form id="edit-material-form" onSubmit={handleSubmit} className="p-6 space-y-4">
-          <div className="space-y-4">
-            <div>
-              <div className="flex justify-between items-center mb-1">
-                <label htmlFor="nombre" className="block text-sm flex gap-2 font-medium text-gray-700">
-                  Nombre del Material
+            <div className="space-y-4">
+              <div>
+                <div className="flex justify-between items-center mb-1">
+                  <label htmlFor="nombre" className="block text-sm flex gap-2 font-medium text-gray-700">
+                    Nombre del Material
+                    <p className="text-red-500">*</p>
+                  </label>
+                  {renderCharCounter(fieldCharCounts.nombreMaterial, NOMBRE_MATERIAL_MAX_LENGTH)}
+                </div>
+                <input
+                  type="text"
+                  id="nombre"
+                  value={formData.Nombre_Material}
+                  onChange={createInputHandler('Nombre_Material', NOMBRE_MATERIAL_MAX_LENGTH)}
+                  className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${formErrors.Nombre_Material
+                      ? 'border-red-500 focus:ring-red-500 focus:border-red-500'
+                      : 'border-gray-300'
+                    }`}
+                  required
+                />
+                {formErrors.Nombre_Material && (
+                  <p className="mt-1 text-sm text-red-600">{formErrors.Nombre_Material}</p>
+                )}
+              </div>
+
+              <div>
+                <label htmlFor="unidad" className="block text-sm flex justify-between font-medium text-gray-700 mb-1">
+                  <span className="flex gap-1 items-center justify-center">Unidad de Medición <p className="text-red-500">*</p></span>
+                  <button
+                    type="button"
+                    onClick={() => setIsCreateUnidadMedicionModalOpen(true)}
+                    className="flex items-center gap-1 px-2 py-1 text-xs text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded transition-colors"
+                  >
+                    <LuPlus className="w-3 h-3" />
+                    Nueva
+                  </button>
+                </label>
+                <select
+                  id="unidad"
+                  value={formData.Id_Unidad_Medicion || ''}
+                  onChange={(e) => {
+                    const value = parseInt(e.target.value) || 0;
+                    setFormData({ ...formData, Id_Unidad_Medicion: value });
+                    if (formErrors.Id_Unidad_Medicion) {
+                      setFormErrors(prev => ({ ...prev, Id_Unidad_Medicion: '' }));
+                    }
+                  }}
+                  className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${formErrors.Id_Unidad_Medicion
+                      ? 'border-red-500 focus:ring-red-500 focus:border-red-500'
+                      : 'border-gray-300'
+                    }`}
+                  required
+                >
+                  <option value="">Seleccionar unidad de medición</option>
+                  {unidadesMedicion.map((unidad) => (
+                    <option key={unidad.Id_Unidad_Medicion} value={unidad.Id_Unidad_Medicion}>
+                      {unidad.Nombre_Unidad || unidad.Nombre_Unidad_Medicion}
+                    </option>
+                  ))}
+                </select>
+                {formErrors.Id_Unidad_Medicion && (
+                  <p className="mt-1 text-sm text-red-600">{formErrors.Id_Unidad_Medicion}</p>
+                )}
+              </div>
+
+              <div>
+                <label htmlFor="precio" className="block text-sm flex gap-2 font-medium text-gray-700 mb-1">
+                  Precio Unitario (₡)
                   <p className="text-red-500">*</p>
                 </label>
-                {renderCharCounter(fieldCharCounts.nombreMaterial, NOMBRE_MATERIAL_MAX_LENGTH)}
+                <input
+                  type="number"
+                  id="precio"
+                  min={PRECIO_MIN}
+                  step="0.01"
+                  value={formData.Precio_Unitario}
+                  onChange={(e) => {
+                    const value = parseFloat(e.target.value) || 0;
+                    setFormData({ ...formData, Precio_Unitario: value });
+                    if (formErrors.Precio_Unitario) {
+                      setFormErrors(prev => ({ ...prev, Precio_Unitario: '' }));
+                    }
+                  }}
+                  className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${formErrors.Precio_Unitario
+                      ? 'border-red-500 focus:ring-red-500 focus:border-red-500'
+                      : 'border-gray-300'
+                    }`}
+                  required
+                />
+                {formErrors.Precio_Unitario && (
+                  <p className="mt-1 text-sm text-red-600">{formErrors.Precio_Unitario}</p>
+                )}
               </div>
-              <input
-                type="text"
-                id="nombre"
-                value={formData.Nombre_Material}
-                onChange={createInputHandler('Nombre_Material', NOMBRE_MATERIAL_MAX_LENGTH)}
-                className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
-                  formErrors.Nombre_Material 
-                    ? 'border-red-500 focus:ring-red-500 focus:border-red-500' 
+            </div>
+
+            <div>
+              <div className="flex justify-between items-center mb-1">
+                <label htmlFor="descripcion" className="block text-sm flex gap-2 font-medium text-gray-700">
+                  Descripción (Opcional)
+                </label>
+                {renderCharCounter(fieldCharCounts.descripcion, DESCRIPCION_MAX_LENGTH)}
+              </div>
+              <textarea
+                id="descripcion"
+                rows={3}
+                value={formData.Descripcion}
+                onChange={createInputHandler('Descripcion', DESCRIPCION_MAX_LENGTH)}
+                className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100 focus:ring-blue-500 focus:border-blue-500 ${formErrors.Descripcion
+                    ? 'border-red-500 focus:ring-red-500 focus:border-red-500'
                     : 'border-gray-300'
-                }`}
+                  }`}
+                placeholder="Descripción del material..."
                 required
               />
-              {formErrors.Nombre_Material && (
-                <p className="mt-1 text-sm text-red-600">{formErrors.Nombre_Material}</p>
+              {formErrors.Descripcion && (
+                <p className="mt-1 text-sm text-red-600">{formErrors.Descripcion}</p>
               )}
             </div>
 
             <div>
-              <label htmlFor="unidad" className="block text-sm flex justify-between font-medium text-gray-700 mb-1">
-                <span className="flex gap-1 items-center justify-center">Unidad de Medición <p className="text-red-500">*</p></span>
+              <div className="block text-sm font-medium flex justify-between text-gray-700 mb-2">
+                <span>Categorías (Opcional)</span>
                 <button
                   type="button"
-                  onClick={() => setIsCreateUnidadMedicionModalOpen(true)}
+                  onClick={() => setIsCreateCategoriaModalOpen(true)}
                   className="flex items-center gap-1 px-2 py-1 text-xs text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded transition-colors"
                 >
                   <LuPlus className="w-3 h-3" />
                   Nueva
                 </button>
-              </label>
-              <select
-                id="unidad"
-                value={formData.Id_Unidad_Medicion || ''}
-                onChange={(e) => {
-                  const value = parseInt(e.target.value) || 0;
-                  setFormData({ ...formData, Id_Unidad_Medicion: value });
-                  if (formErrors.Id_Unidad_Medicion) {
-                    setFormErrors(prev => ({ ...prev, Id_Unidad_Medicion: '' }));
-                  }
-                }}
-                className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
-                  formErrors.Id_Unidad_Medicion 
-                    ? 'border-red-500 focus:ring-red-500 focus:border-red-500' 
-                    : 'border-gray-300'
-                }`}
-                required
-              >
-                <option value="">Seleccionar unidad de medición</option>
-                {unidadesMedicion.map((unidad) => (
-                  <option key={unidad.Id_Unidad_Medicion} value={unidad.Id_Unidad_Medicion}>
-                    {unidad.Nombre_Unidad || unidad.Nombre_Unidad_Medicion}
-                  </option>
-                ))}
-              </select>
-              {formErrors.Id_Unidad_Medicion && (
-                <p className="mt-1 text-sm text-red-600">{formErrors.Id_Unidad_Medicion}</p>
-              )}
-            </div>
+              </div>
 
-            <div>
-              <label htmlFor="precio" className="block text-sm flex gap-2 font-medium text-gray-700 mb-1">
-                Precio Unitario (₡) 
-                <p className="text-red-500">*</p>
-              </label>
-              <input
-                type="number"
-                id="precio"
-                min={PRECIO_MIN}
-                step="0.01"
-                value={formData.Precio_Unitario}
-                onChange={(e) => {
-                  const value = parseFloat(e.target.value) || 0;
-                  setFormData({ ...formData, Precio_Unitario: value });
-                  if (formErrors.Precio_Unitario) {
-                    setFormErrors(prev => ({ ...prev, Precio_Unitario: '' }));
-                  }
-                }}
-                className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
-                  formErrors.Precio_Unitario 
-                    ? 'border-red-500 focus:ring-red-500 focus:border-red-500' 
-                    : 'border-gray-300'
-                }`}
-                required
-              />
-              {formErrors.Precio_Unitario && (
-                <p className="mt-1 text-sm text-red-600">{formErrors.Precio_Unitario}</p>
-              )}
-            </div>
-          </div>
-
-          <div>
-            <div className="flex justify-between items-center mb-1">
-              <label htmlFor="descripcion" className="block text-sm flex gap-2 font-medium text-gray-700">
-                Descripción (Opcional)
-              </label>
-              {renderCharCounter(fieldCharCounts.descripcion, DESCRIPCION_MAX_LENGTH)}
-            </div>
-            <textarea
-              id="descripcion"
-              rows={3}
-              value={formData.Descripcion}
-              onChange={createInputHandler('Descripcion', DESCRIPCION_MAX_LENGTH)}
-              className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100 focus:ring-blue-500 focus:border-blue-500 ${
-                formErrors.Descripcion 
-                  ? 'border-red-500 focus:ring-red-500 focus:border-red-500' 
+              <div className={`grid grid-cols-2 md:grid-cols-3 gap-2 max-h-40 overflow-y-auto border rounded-md p-3 ${formErrors.IDS_Categorias
+                  ? 'border-red-500'
                   : 'border-gray-300'
-              }`}
-              placeholder="Descripción del material..."
-              required
-            />
-            {formErrors.Descripcion && (
-              <p className="mt-1 text-sm text-red-600">{formErrors.Descripcion}</p>
-            )}
-          </div>
-
-          <div>
-            <div className="block text-sm font-medium flex justify-between text-gray-700 mb-2">
-              <span>Categorías (Opcional)</span>
-                <button
-                type="button"
-                onClick={() => setIsCreateCategoriaModalOpen(true)}
-                className="flex items-center gap-1 px-2 py-1 text-xs text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded transition-colors"
-              >
-                <LuPlus className="w-3 h-3" />
-                Nueva
-              </button>
+                }`}>
+                {categorias.map((categoria) => (
+                  <label key={categoria.Id_Categoria} className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      checked={selectedCategorias.includes(categoria.Id_Categoria)}
+                      onChange={(e) => {
+                        handleCategoriaChange(categoria.Id_Categoria, e.target.checked);
+                        if (formErrors.IDS_Categorias) {
+                          setFormErrors(prev => ({ ...prev, IDS_Categorias: '' }));
+                        }
+                      }}
+                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 overflow-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100"
+                    />
+                    <span className="text-sm text-gray-700">{categoria.Nombre_Categoria.length > 15 ? `${categoria.Nombre_Categoria.slice(0, 9)}...` : categoria.Nombre_Categoria}
+                    </span>
+                  </label>
+                ))}
+              </div>
+              {formErrors.IDS_Categorias && (
+                <p className="mt-1 text-sm text-red-600">{formErrors.IDS_Categorias}</p>
+              )}
             </div>
-
-            <div className={`grid grid-cols-2 md:grid-cols-3 gap-2 max-h-40 overflow-y-auto border rounded-md p-3 ${
-              formErrors.IDS_Categorias 
-                ? 'border-red-500' 
-                : 'border-gray-300'
-            }`}>
-              {categorias.map((categoria) => (
-                <label key={categoria.Id_Categoria} className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    checked={selectedCategorias.includes(categoria.Id_Categoria)}
-                    onChange={(e) => {
-                      handleCategoriaChange(categoria.Id_Categoria, e.target.checked);
-                      if (formErrors.IDS_Categorias) {
-                        setFormErrors(prev => ({ ...prev, IDS_Categorias: '' }));
-                      }
-                    }}
-                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                  />
-                  <span className="text-sm text-gray-700">{categoria.Nombre_Categoria}</span>
-                </label>
-              ))}
-            </div>
-            {formErrors.IDS_Categorias && (
-              <p className="mt-1 text-sm text-red-600">{formErrors.IDS_Categorias}</p>
-            )}
-          </div>
           </form>
         </div>
 

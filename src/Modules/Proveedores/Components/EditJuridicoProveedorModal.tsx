@@ -3,8 +3,8 @@ import { useForm } from '@tanstack/react-form';
 import PhoneInputComponent from '@/Modules/Global/components/PhoneInputComponent';
 import { isValidPhoneNumber } from 'react-phone-number-input';
 import { LuX } from 'react-icons/lu';
-import { 
-  EditProveedorJuridicoSchema, 
+import {
+  EditProveedorJuridicoSchema,
   type EditProveedorJuridicoSchemaData,
   JURIDICO_VALIDATION_LIMITS,
   formatPhoneNumberInput
@@ -19,20 +19,20 @@ interface EditProveedorJuridicoModalProps {
   proveedor: ProveedorJuridico;
 }
 
-const EditProveedorJuridicoModal: React.FC<EditProveedorJuridicoModalProps> = ({ 
-  isOpen, 
-  onClose, 
-  proveedor 
+const EditProveedorJuridicoModal: React.FC<EditProveedorJuridicoModalProps> = ({
+  isOpen,
+  onClose,
+  proveedor
 }) => {
   // Hook de alertas
   const { showSuccess, showError, showWarning } = useAlerts();
-  
+
   // Hook para actualizar proveedor jurídico
-  const { 
-    updateProveedorJuridico, 
-    isUpdating 
+  const {
+    updateProveedorJuridico,
+    isUpdating
   } = useUpdateProveedorJuridico();
-  
+
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [fieldCharCounts, setFieldCharCounts] = useState({
     Nombre_Proveedor: proveedor.Nombre_Proveedor.length,
@@ -87,12 +87,12 @@ const EditProveedorJuridicoModal: React.FC<EditProveedorJuridicoModalProps> = ({
   const createInputHandler = (fieldName: string, handleChange: (value: string) => void, maxLength: number) => {
     return (e: React.ChangeEvent<HTMLInputElement>) => {
       const value = e.target.value;
-      
+
       // Limitar caracteres al máximo permitido
       if (value.length <= maxLength) {
         handleChange(value);
         setFieldCharCounts(prev => ({ ...prev, [fieldName]: value.length }));
-        
+
         // Validar en tiempo real
         validateFieldRealTime(fieldName, value);
       }
@@ -102,39 +102,39 @@ const EditProveedorJuridicoModal: React.FC<EditProveedorJuridicoModalProps> = ({
   // Función para manejar errores de API específicos
   const handleApiError = (error: any) => {
     console.error('❌ Error al actualizar proveedor jurídico:', error);
-    
+
     // Manejar errores HTTP 409 (conflictos de duplicación) - ALERTAS AMARILLAS
     if (error?.response?.status === 409) {
       const errorMessage = error.response?.data?.message || error.message || '';
-      
+
       if (errorMessage.toLowerCase().includes('nombre') || errorMessage.toLowerCase().includes('name')) {
         showWarning('⚠️ Ya existe un proveedor con este nombre. Por favor, utiliza un nombre diferente.');
         return;
       }
-      
+
       if (errorMessage.toLowerCase().includes('razon') || errorMessage.toLowerCase().includes('social')) {
         showWarning('⚠️ Ya existe un proveedor con esta razón social. Por favor, utiliza una razón social diferente.');
         return;
       }
-      
+
       // Error 409 genérico - también amarillo
       showWarning('⚠️ Ya existe un proveedor con esa información. Por favor, verifica los datos ingresados.');
       return;
     }
-    
+
     // Otros errores de validación del servidor
     if (error?.response?.status === 400) {
       const errorMessage = error.response?.data?.message || 'Datos inválidos';
       showError(`Error de validación: ${errorMessage}`);
       return;
     }
-    
+
     // Errores de red o servidor
     if (error?.response?.status >= 500) {
       showError('Error del servidor. Por favor, intenta nuevamente más tarde.');
       return;
     }
-    
+
     // Error genérico
     const errorMessage = error?.message || 'Error desconocido al actualizar el proveedor jurídico';
     showError(`Error al actualizar el proveedor jurídico: ${errorMessage}`);
@@ -171,11 +171,11 @@ const EditProveedorJuridicoModal: React.FC<EditProveedorJuridicoModalProps> = ({
         };
 
         // Usar el hook para actualizar el proveedor jurídico
-        await updateProveedorJuridico({ 
-          id: proveedor.Id_Proveedor, 
-          data: payload 
+        await updateProveedorJuridico({
+          id: proveedor.Id_Proveedor,
+          data: payload
         });
-        
+
         showSuccess('¡Proveedor jurídico actualizado exitosamente!');
         onClose();
       } catch (error) {
@@ -188,15 +188,14 @@ const EditProveedorJuridicoModal: React.FC<EditProveedorJuridicoModalProps> = ({
   const renderCharCounter = (current: number, max: number, hasError: boolean) => {
     const remaining = max - current;
     const isNearLimit = remaining <= 5;
-    
+
     return (
       <div className="flex justify-between items-center mt-1">
         <span className="text-xs text-gray-500">
           {hasError ? '' : `Máximo ${max} caracteres`}
         </span>
-        <span className={`text-xs font-medium ${
-          isNearLimit ? 'text-orange-600' : 'text-gray-500'
-        }`}>
+        <span className={`text-xs font-medium ${isNearLimit ? 'text-orange-600' : 'text-gray-500'
+          }`}>
           {current}/{max}
           {isNearLimit && current < max && (
             <span className="ml-1 text-orange-600">
@@ -233,25 +232,24 @@ const EditProveedorJuridicoModal: React.FC<EditProveedorJuridicoModalProps> = ({
             <form.Field name="Nombre_Proveedor">
               {(field) => (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Nombre del Proveedor *
+                  <label className="block text-left text-sm font-medium text-gray-700 mb-1">
+                    Nombre del Proveedor <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
                     value={field.state.value}
                     onChange={createInputHandler('Nombre_Proveedor', field.handleChange, JURIDICO_VALIDATION_LIMITS.NOMBRE_MAX_LENGTH)}
-                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-colors ${
-                      (formErrors.Nombre_Proveedor || field.state.meta.errors?.length) 
-                        ? 'border-red-300 focus:ring-red-500' 
+                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-colors ${(formErrors.Nombre_Proveedor || field.state.meta.errors?.length)
+                        ? 'border-red-300 focus:ring-red-500'
                         : 'border-gray-300 focus:ring-blue-500'
-                    }`}
+                      }`}
                     placeholder="Ingrese el nombre del proveedor (mín. 2 caracteres)"
                     maxLength={JURIDICO_VALIDATION_LIMITS.NOMBRE_MAX_LENGTH}
                   />
-                  
+
                   {renderCharCounter(
-                    fieldCharCounts.Nombre_Proveedor, 
-                    JURIDICO_VALIDATION_LIMITS.NOMBRE_MAX_LENGTH, 
+                    fieldCharCounts.Nombre_Proveedor,
+                    JURIDICO_VALIDATION_LIMITS.NOMBRE_MAX_LENGTH,
                     !!(formErrors.Nombre_Proveedor || field.state.meta.errors?.length)
                   )}
 
@@ -269,25 +267,24 @@ const EditProveedorJuridicoModal: React.FC<EditProveedorJuridicoModalProps> = ({
             <form.Field name="Razon_Social">
               {(field) => (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Razón Social *
+                  <label className="block text-left text-left text-sm font-medium text-gray-700 mb-1">
+                    Razón Social <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
                     value={field.state.value}
                     onChange={createInputHandler('Razon_Social', field.handleChange, JURIDICO_VALIDATION_LIMITS.RAZON_SOCIAL_MAX_LENGTH)}
-                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-colors ${
-                      (formErrors.Razon_Social || field.state.meta.errors?.length) 
-                        ? 'border-red-300 focus:ring-red-500' 
+                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-colors ${(formErrors.Razon_Social || field.state.meta.errors?.length)
+                        ? 'border-red-300 focus:ring-red-500'
                         : 'border-gray-300 focus:ring-blue-500'
-                    }`}
+                      }`}
                     placeholder="Ingrese la razón social (mín. 2 caracteres)"
                     maxLength={JURIDICO_VALIDATION_LIMITS.RAZON_SOCIAL_MAX_LENGTH}
                   />
-                  
+
                   {renderCharCounter(
-                    fieldCharCounts.Razon_Social, 
-                    JURIDICO_VALIDATION_LIMITS.RAZON_SOCIAL_MAX_LENGTH, 
+                    fieldCharCounts.Razon_Social,
+                    JURIDICO_VALIDATION_LIMITS.RAZON_SOCIAL_MAX_LENGTH,
                     !!(formErrors.Razon_Social || field.state.meta.errors?.length)
                   )}
 
@@ -305,30 +302,29 @@ const EditProveedorJuridicoModal: React.FC<EditProveedorJuridicoModalProps> = ({
             <form.Field name="Telefono_Proveedor">
               {(field) => (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Teléfono *
+                  <label className="block text-left text-sm font-medium text-gray-700 mb-1">
+                    Teléfono <span className="text-red-500">*</span>
                   </label>
                   <PhoneInputComponent
                     value={field.state.value || ''}
                     onChange={(value) => {
                       const formattedValue = formatPhoneNumberInput(value || '');
                       field.handleChange(formattedValue);
-                      setFieldCharCounts(prev => ({ 
-                        ...prev, 
-                        Telefono_Proveedor: formattedValue.length 
+                      setFieldCharCounts(prev => ({
+                        ...prev,
+                        Telefono_Proveedor: formattedValue.length
                       }));
                       validateFieldRealTime('Telefono_Proveedor', value || '');
                     }}
                     onBlur={field.handleBlur}
                     hasError={!!(formErrors.Telefono_Proveedor || field.state.meta.errors?.length)}
                   />
-                  
+
                   <div className="flex justify-between items-center mt-1">
                     <span className="text-xs text-gray-500">
                       Seleccione país y ingrese su número
                     </span>
-                    <span className={`text-xs ${
-                      (() => {
+                    <span className={`text-xs ${(() => {
                         if (field.state.value && isValidPhoneNumber(field.state.value)) {
                           return 'text-green-600';
                         }
@@ -337,14 +333,14 @@ const EditProveedorJuridicoModal: React.FC<EditProveedorJuridicoModalProps> = ({
                         }
                         return 'text-gray-500';
                       })()
-                    }`}>
-                      {field.state.value 
+                      }`}>
+                      {field.state.value
                         ? (isValidPhoneNumber(field.state.value) ? '✓ Válido' : '✗ Inválido')
                         : 'Pendiente'
                       }
                     </span>
                   </div>
-                  
+
                   {field.state.meta.errors?.map((err: any) => (
                     <p key={err} className="text-red-500 text-xs mt-1">{err}</p>
                   ))}
@@ -356,19 +352,18 @@ const EditProveedorJuridicoModal: React.FC<EditProveedorJuridicoModalProps> = ({
             </form.Field>
 
             <div className="flex justify-end gap-3 pt-4">
-            
+
               <button
                 type="submit"
                 disabled={isUpdating}
-                className={`px-4 py-2 text-white rounded-lg transition-colors ${
-                  isUpdating 
-                    ? 'bg-blue-300 cursor-not-allowed' 
-                    : 'bg-blue-600 hover:bg-blue-700' 
-                }`}
+                className={`px-4 py-2 text-white rounded-lg transition-colors ${isUpdating
+                    ? 'bg-blue-300 cursor-not-allowed'
+                    : 'bg-blue-600 hover:bg-blue-700'
+                  }`}
               >
                 {isUpdating ? 'Actualizando...' : 'Actualizar Proveedor'}
               </button>
-                <button
+              <button
                 type="button"
                 onClick={onClose}
                 className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"

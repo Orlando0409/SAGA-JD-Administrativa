@@ -292,11 +292,11 @@ const DetailAbonados: React.FC<DetailAbonadosProps> = ({ persona, isOpen, onClos
                                         <div className="p-2 rounded-lg">
                                             <LuMapPin className="w-5 h-5 text-blue-600" />
                                         </div>
-                                        <div className="flex-1">
+                                        <div className="flex-1 min-w-0">
                                             <p className="text-xs font-medium text-gray-500 uppercase">
                                                 Dirección Exacta
                                             </p>
-                                            <p className="text-base font-medium text-gray-900 mt-1">
+                                            <p className="text-base font-medium text-gray-900 mt-1 break-words">
                                                 {personaInfo.direccion}
                                             </p>
                                         </div>
@@ -349,7 +349,7 @@ const DetailAbonados: React.FC<DetailAbonadosProps> = ({ persona, isOpen, onClos
                                         <LuGauge className="w-4 h-4 text-blue-600" />
                                     </div>
                                     <h3 className="text-base font-bold text-gray-900">
-                                        Medidores Asignados ({personaInfo.medidores.length})
+                                        Medidores Asignados
                                     </h3>
                                 </div>
                             </div>
@@ -365,7 +365,7 @@ const DetailAbonados: React.FC<DetailAbonadosProps> = ({ persona, isOpen, onClos
                                                 <div className="flex items-center gap-2">
                                                     <LuGauge className="w-5 h-5 text-blue-600" />
                                                     <h4 className="text-base font-bold text-gray-900">
-                                                        Medidor #{medidor.Numero_Medidor}
+                                                        Medidor #{medidor.Id_Medidor}
                                                     </h4>
                                                 </div>
                                             </div>
@@ -375,29 +375,21 @@ const DetailAbonados: React.FC<DetailAbonadosProps> = ({ persona, isOpen, onClos
                                                         <LuInfo className="w-5 h-5 text-blue-600" />
                                                     </div>
                                                     <div className="flex-1">
-                                                        <p className="text-xs font-medium text-gray-500 uppercase">ID Medidor</p>
-                                                        <p className="text-base font-medium text-gray-900 mt-1">{medidor.Id_Medidor}</p>
+                                                        <p className="text-xs font-medium text-gray-500 uppercase">Número de Medidor</p>
+                                                        <p className="text-base font-medium text-gray-900 mt-1">{medidor.Numero_Medidor}</p>
                                                     </div>
                                                 </div>
-                                                <div className="flex items-start gap-3 p-4 bg-white rounded-lg border border-gray-100">
-                                                    <div className="p-2 rounded-lg">
-                                                        <LuFileText className="w-5 h-5 text-blue-600" />
-                                                    </div>
-                                                    <div className="flex-1">
-                                                        <p className="text-xs font-medium text-gray-500 uppercase">ID Solicitud</p>
-                                                        <p className="text-base font-medium text-gray-900 mt-1">{medidor.Id_Solicitud}</p>
-                                                    </div>
-                                                </div>
+                                                
                                                 <div className="flex items-start gap-3 p-4 bg-white rounded-lg border border-gray-100">
                                                     <div className="p-2 rounded-lg">
                                                         <LuGauge className="w-5 h-5 text-blue-600" />
                                                     </div>
                                                     <div className="flex-1">
-                                                        <p className="text-xs font-medium text-gray-500 uppercase">Estado Actual</p>
+                                                        <p className="text-xs font-medium text-gray-500 uppercase">Estado Actual del medidor</p>
                                                         <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium border mt-1 ${
                                                             medidor.Estado_Medidor.Id_Estado_Medidor === 2
                                                                 ? 'bg-green-100 text-green-800 border-green-200'
-                                                                : 'bg-gray-100 text-gray-800 border-gray-200'
+                                                                : 'bg-red-100 text-red-700 border border-red-300'
                                                         }`}>
                                                             {medidor.Estado_Medidor.Nombre_Estado_Medidor}
                                                         </span>

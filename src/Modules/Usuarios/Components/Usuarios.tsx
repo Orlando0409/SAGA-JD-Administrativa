@@ -346,7 +346,27 @@ const Usuarios = () => {
 
           {(hasEditPermission || filteredUsers.length > 1) && (
             <div className="p-6">
-              <div className="flex justify-between items-center gap-4">
+              <div className="flex justify-end items-center gap-4">
+
+
+                {hasEditPermission && (
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => setShowFilterModal(true)}
+                      className={`px-4 py-2 border rounded-md flex items-center gap-2 transition-colors ${
+                        activeFiltersCount > 0
+                          ? 'border-blue-500 bg-blue-50 text-blue-700'
+                          : 'border-gray-300 hover:bg-gray-50'
+                      }`}
+                    >
+                      <LuFilter className="w-4 h-4" />
+                      Filtros
+                      {activeFiltersCount > 0 && (
+                        <span className="bg-blue-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                          {activeFiltersCount}
+                        </span>
+                      )}
+                    </button>
 
                   <div className="relative flex-1 max-w-md">
                     <LuSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -358,25 +378,6 @@ const Usuarios = () => {
                       className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
                   </div>
-
-                {hasEditPermission && (
-                  <div className="flex gap-3">
-                    <button 
-                      onClick={() => setShowFilterModal(true)}
-                      className={`px-4 py-2 rounded-lg hover:bg-gray-200 transition flex items-center gap-2 ${
-                        activeFiltersCount > 0 
-                          ? 'bg-blue-100 text-blue-700 border border-blue-300' 
-                          : 'bg-gray-100 text-gray-700'
-                      }`}
-                    >
-                      <LuFilter className="w-4 h-4" />
-                      Filtros
-                      {activeFiltersCount > 0 && (
-                        <span className="bg-blue-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                          {activeFiltersCount}
-                        </span>
-                      )}
-                    </button>
 
                     {hasEditPermission && (
                       <button
@@ -456,7 +457,7 @@ const Usuarios = () => {
                   <tbody className="bg-white divide-y divide-sky-50">
                     {table.getRowModel().rows.length === 0 ? (
                       <tr>
-                        <td colSpan={5} className="px-2 sm:px-4 py-8 text-center text-slate-500">
+                        <td colSpan={columns.length} className="px-2 sm:px-4 py-8 text-center text-slate-500">
                           {globalFilter ? 'No se encontraron usuarios que coincidan con la búsqueda' : 'No hay usuarios registrados'}
                         </td>
                       </tr>

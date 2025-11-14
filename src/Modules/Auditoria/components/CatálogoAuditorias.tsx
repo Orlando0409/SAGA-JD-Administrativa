@@ -197,14 +197,6 @@ const CatálogoAuditorias = () => {
   });
 
 
-  const hasActiveFilters =
-    appliedFilters.modulo ||
-    appliedFilters.accion ||
-    appliedFilters.mis_auditorias ||
-    appliedFilters.por_usuario;
-
-
-
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -230,7 +222,26 @@ const CatálogoAuditorias = () => {
 
       {/* Search & Filter Bar */}
       <div className="p-4 flex flex-col md:flex-row md:items-center md:justify-end gap-4">
-        <div className="relative flex-1 max-w-lg">
+
+        <div className='flex items-center gap-3'>
+          <button
+              onClick={() => setShowFilterModal(true)}
+              className={`px-4 py-2 border rounded-md flex items-center gap-2 transition-colors ${
+                 Object.values(appliedFilters).filter(Boolean).length > 0
+                  ? 'border-blue-500 bg-blue-50 text-blue-700'
+                  : 'border-gray-300 hover:bg-gray-50'
+              }`}
+            >
+              <LuFilter className="w-4 h-4" />
+              Filtros
+              {Object.values(appliedFilters).filter(Boolean).length > 0 && (
+                <span className="bg-blue-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                  {Object.values(appliedFilters).filter(Boolean).length}
+                </span>
+              )}
+            </button>
+        </div>
+         <div className="relative flex-1 max-w-md">
           <LuSearch className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
           <input
             type="text"
@@ -239,25 +250,6 @@ const CatálogoAuditorias = () => {
             onChange={(e) => setGlobalFilter(e.target.value)}
             className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-1 focus:ring-sky-500 focus:border-sky-500"
           />
-        </div>
-
-        <div className='flex items-center gap-3'>
-          <button
-            onClick={() => setShowFilterModal(true)}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors text-sm font-medium ${
-              hasActiveFilters
-                ? 'bg-blue-600 text-white hover:bg-blue-700'
-                : 'border border-gray-300 text-gray-700 hover:bg-gray-100'
-            }`}
-          >
-            <LuFilter className="w-4 h-4" />
-            Filtros
-            {hasActiveFilters && (
-              <span className="bg-white text-blue-600 rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">
-                {Object.values(appliedFilters).filter(Boolean).length}
-              </span>
-            )}
-          </button>
         </div>
       </div>
 

@@ -38,112 +38,79 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
     const [showCompletarDialog, setShowCompletarDialog] = useState(false);
     const [showRechazarDialog, setShowRechazarDialog] = useState(false);
 
-    // 🎯 HOOKS UNIFICADOS - Reemplaza a los 16+ hooks anteriores
     const marcarEnRevisionMutation = useMarcarEnRevision();
     const aprobarYEnEsperaMutation = useAprobarYEnEspera();
     const completarMutation = useCompletar();
     const rechazarMutation = useRechazar();
-
-    // Sistema de alertas (para mensajes de advertencia)
     const { showWarning } = useAlerts();
     // Extraer información básica de la solicitud
     const getSolicitudInfo = () => {
-        console.log(' Datos completos de la solicitud:', solicitud.datos);
-
         if (solicitud.tipo === 'solicitud-fisica') {
-            const datos = solicitud.datos as any; // Usamos any para acceder a propiedades no tipadas
+            const datos = solicitud.datos as any;
 
-            // Buscar el ID real en diferentes posibles propiedades
-            let solicitudId = datos.id || datos.Id || datos.ID || datos.solicitudId || datos.Id_Solicitud;
+            let solicitudId = datos.Id_Solicitud || datos.id || datos.Id || datos.ID || datos.solicitudId;
 
-            console.log(' ID encontrado para solicitud física:', solicitudId);
-            console.log(' Todas las propiedades disponibles:', Object.keys(datos));
-
-            // Si no encontramos ID, usamos la cédula como fallback (temporal)
             if (!solicitudId) {
-                console.warn(' No se encontró ID real, usando cédula como fallback');
-                solicitudId = datos.Cedula || `temp-${Date.now()}`;
+                solicitudId = datos.Identificacion || datos.Cedula || `temp-${Date.now()}`;
             }
 
-            // ⚠️ IMPORTANTE: Usar Tipo_Entidad de los datos originales
-            // Tipo_Entidad: 1 = Física, 2 = Jurídica
-            const tipoEntidad = datos.Tipo_Entidad || datos.Id_Tipo_Entidad || 1;
-            const tipoPersonaReal = tipoEntidad === 1 ? 'Físico' : 'Jurídico';
-            console.log('📋 Modal - Tipo_Entidad:', tipoEntidad, '→', tipoPersonaReal);
+            const tipoEntidad = datos.Tipo_Entidad;
+            const tipoPersonaReal = tipoEntidad === 1 ? 'Física' : 'Jurídica';
 
             return {
                 id: solicitudId,
                 nombre: `${datos.Nombre || ''} ${datos.Apellido1 || ''} ${datos.Apellido2 || ''}`.trim() || 'Sin nombre',
-                documento: datos.Cedula || 'Sin cédula',
-                tipo: tipoPersonaReal, // ✅ Usar tipo real del backend
-                tipoSolicitud: datos.Tipo_Solicitud || 'Sin tipo',
+                documento: datos.Identificacion || datos.Cedula || 'Sin identificación',
+                tipo: tipoPersonaReal,
+                tipoSolicitud: solicitud.tipoSolicitud || datos.Tipo_Solicitud || 'Sin tipo',
                 estado: datos.Estado?.Nombre_Estado || 'Sin estado',
                 estadoId: datos.Estado?.Id_Estado_Solicitud || 0,
-                // Información personal completa
                 Nombre: datos.Nombre || 'No especificado',
                 Apellido1: datos.Apellido1 || 'No especificado',
                 Apellido2: datos.Apellido2 || 'No especificado',
-                Cedula: datos.Cedula || 'Sin cédula',
+                Tipo_Identificacion: datos.Tipo_Identificacion || 'No especificado',
+                Identificacion: datos.Identificacion || datos.Cedula || 'Sin identificación',
                 Numero_Telefono: datos.Numero_Telefono || 'No especificado',
                 Correo: datos.Correo || 'No especificado',
                 Direccion_Exacta: datos.Direccion_Exacta || 'No especificada',
                 Edad: datos.Edad || 'No especificada',
-                // Información de la solicitud
                 Motivo_Solicitud: datos.Motivo_Solicitud || 'No especificado',
-                // Documentos (para todas las solicitudes)
                 Escritura_Terreno: datos.Escritura_Terreno || 'No proporcionada',
                 Planos_Terreno: datos.Planos_Terreno || 'No proporcionados',
-                // Campos específicos para diferentes tipos de solicitud
                 Numero_Medidor_Actual: datos.Numero_Medidor_Actual || 'No especificado',
-
             };
         } else {
-            const datos = solicitud.datos as any; // Usamos any para acceder a propiedades no tipadas
+            const datos = solicitud.datos as any;
 
-            // Buscar el ID real en diferentes posibles propiedades
-            let solicitudId = datos.id || datos.Id || datos.ID || datos.solicitudId || datos.Id_Solicitud;
+            let solicitudId = datos.Id_Solicitud || datos.id || datos.Id || datos.ID || datos.solicitudId;
 
-            console.log(' ID encontrado para solicitud jurídica:', solicitudId);
-            console.log(' Todas las propiedades disponibles:', Object.keys(datos));
-
-            // Si no encontramos ID, usamos la cédula jurídica como fallback (temporal)
             if (!solicitudId) {
-                console.warn(' No se encontró ID real, usando cédula jurídica como fallback');
                 solicitudId = datos.Cedula_Juridica || `temp-${Date.now()}`;
             }
 
-            // ⚠️ IMPORTANTE: Usar Tipo_Entidad de los datos originales
-            // Tipo_Entidad: 1 = Física, 2 = Jurídica
-            const tipoEntidad = datos.Tipo_Entidad || datos.Id_Tipo_Entidad || 2;
-            const tipoPersonaReal = tipoEntidad === 1 ? 'Físico' : 'Jurídico';
-            console.log('📋 Modal - Tipo_Entidad:', tipoEntidad, '→', tipoPersonaReal);
+            const tipoEntidad = datos.Tipo_Entidad;
+            const tipoPersonaReal = tipoEntidad === 1 ? 'Física' : 'Jurídica';
 
             return {
                 id: solicitudId,
                 nombre: datos.Razon_Social || 'Sin razón social',
                 documento: datos.Cedula_Juridica || 'Sin cédula jurídica',
-                tipo: tipoPersonaReal, // ✅ Usar tipo real del backend
-                tipoSolicitud: datos.Tipo_Solicitud || 'Sin tipo',
+                tipo: tipoPersonaReal,
+                tipoSolicitud: solicitud.tipoSolicitud || datos.Tipo_Solicitud || 'Sin tipo',
                 estado: datos.Estado?.Nombre_Estado || 'Sin estado',
                 estadoId: datos.Estado?.Id_Estado_Solicitud || 0,
-                // Información empresarial completa
                 Razon_Social: datos.Razon_Social || 'Sin razón social',
                 Cedula_Juridica: datos.Cedula_Juridica || 'Sin cédula jurídica',
                 Numero_Telefono: datos.Numero_Telefono || 'No especificado',
                 Correo: datos.Correo || datos.Email || 'No especificado',
                 Direccion_Exacta: datos.Direccion_Exacta || 'No especificada',
-                // Información legal
                 Representante_Legal: datos.Representante_Legal || 'No especificado',
                 Cedula_Representante: datos.Cedula_Representante || 'No especificada',
-                // Información de la solicitud
                 Fecha_Creacion: datos.Fecha_Creacion || datos.Created_At || 'No especificada',
                 Motivo_Solicitud: datos.Motivo_Solicitud || 'No especificado',
-                // Documentos (para todas las solicitudes)
                 Escritura_Terreno: datos.Escritura_Terreno || 'No proporcionada',
                 Planos_Terreno: datos.Planos_Terreno || 'No proporcionados',
-                // Campos específicos para diferentes tipos de solicitud
                 Numero_Medidor_Actual: datos.Numero_Medidor_Actual || 'No especificado',
-
             };
         }
     };
@@ -159,13 +126,9 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
                     const tipoSolicitud: TipoSolicitud = mapearTipoSolicitud(info.tipoSolicitud);
                     const tipoPersona: TipoPersona = mapearTipoPersona(info.tipo);
 
-                    console.log('🔄 Cambiando solicitud a estado En Revisión...');
-                    console.log(`📋 Tipo: ${tipoSolicitud} | Persona: ${tipoPersona}`);
-
                     await marcarEnRevisionMutation.mutateAsync(tipoSolicitud, tipoPersona, info.id);
-                    console.log('✅ Solicitud cambiada a En Revisión');
                 } catch (error) {
-                    console.error('❌ Error al cambiar a En Revisión:', error);
+                    console.error('Error al cambiar a En Revisión:', error);
                 }
             }
         };
@@ -190,13 +153,9 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
                 setShowCompletarDialog(true);
             }
         }
-        // Estado 3 (Aprobada y en espera) → Solo llega aquí si requiere medidor (Afiliación o Cambio de Medidor)
         else if (estadoActual === 3) {
-            // Abrir modal de medidor directamente → Al asignar cambia a Estado 4 (Completada)
-            console.log('Abriendo modal de medidor para asignar');
             setShowModalMedidor(true);
         }
-        // Si ya está completada (Estado 4)
         else if (estadoActual === 4) {
             showWarning('Solicitud completada', 'Esta solicitud ya está completada');
         }
@@ -205,13 +164,9 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
     // Nueva función para aprobar después de asignar el medidor usando hooks unificados
     const aprobarSolicitudDespuesDeAsignar = async () => {
         try {
-            // Mapear los tipos a los valores internos
             const tipoSolicitudInterno: TipoSolicitud = mapearTipoSolicitud(solicitud.tipoSolicitud || info.tipoSolicitud);
             const tipoPersonaInterno: TipoPersona = mapearTipoPersona(info.tipo);
 
-            console.log(`🎉 Completando solicitud: ${tipoSolicitudInterno} - ${tipoPersonaInterno}`);
-
-            // Usar el hook unificado para completar (Estado 3 → 4)
             await completarMutation.mutateAsync(tipoSolicitudInterno, tipoPersonaInterno, info.id);
 
             onClose(); // Cerrar modal principal después de aprobar
@@ -234,6 +189,7 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
             console.log(`✅ Aprobando y poniendo en espera: ${tipoSolicitud} - ${tipoPersona}`);
             await aprobarYEnEsperaMutation.mutateAsync(tipoSolicitud, tipoPersona, info.id);
             setShowAprobarDialog(false);
+            onClose();
         } catch (error) {
             console.error('❌ Error al marcar en aprobada y en espera:', error);
             setShowAprobarDialog(false);
@@ -251,7 +207,7 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
             setShowCompletarDialog(false);
             onClose();
         } catch (error) {
-            console.error('❌ Error al completar solicitud:', error);
+            console.error('Error al completar solicitud:', error);
             setShowCompletarDialog(false);
         }
     };
@@ -346,12 +302,32 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
                                             <p className="text-sm font-medium text-gray-900">{info.nombre}</p>
                                         </div>
 
+                                        {/* Mostrar tipo de identificación solo para personas físicas */}
+                                        {info.tipo === 'Física' && info.Tipo_Identificacion && (
+                                            <div className="bg-gray-50 p-3 rounded-lg">
+                                                <label className="block text-xs font-medium text-gray-600 uppercase tracking-wide mb-1">
+                                                    Tipo de Identificación
+                                                </label>
+                                                <p className="text-sm text-gray-900">{info.Tipo_Identificacion}</p>
+                                            </div>
+                                        )}
+
                                         <div className="bg-gray-50 p-3 rounded-lg">
                                             <label className="block text-xs font-medium text-gray-600 uppercase tracking-wide mb-1">
-                                                {info.tipo === 'Física' ? 'Cédula' : 'Cédula Jurídica'}
+                                                {info.tipo === 'Física' ? 'Identificación' : 'Cédula Jurídica'}
                                             </label>
                                             <p className="text-sm text-gray-900">{info.documento}</p>
                                         </div>
+
+                                        {/* Mostrar edad solo para personas físicas */}
+                                        {info.tipo === 'Física' && info.Edad && info.Edad !== 'No especificada' && (
+                                            <div className="bg-gray-50 p-3 rounded-lg">
+                                                <label className="block text-xs font-medium text-gray-600 uppercase tracking-wide mb-1">
+                                                    Edad
+                                                </label>
+                                                <p className="text-sm text-gray-900">{info.Edad} años</p>
+                                            </div>
+                                        )}
 
                                         <div className="bg-gray-50 p-3 rounded-lg">
                                             <label className="block text-xs font-medium text-gray-600 uppercase tracking-wide mb-1">
@@ -559,15 +535,16 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                        <AlertDialogCancel disabled={aprobarYEnEsperaMutation.isPending}>
-                            Cancelar
-                        </AlertDialogCancel>
+                        
                         <AlertDialogAction 
                             onClick={handleConfirmAprobar}
                             disabled={aprobarYEnEsperaMutation.isPending}
                         >
                             {aprobarYEnEsperaMutation.isPending ? 'Aprobando...' : 'Aprobar'}
                         </AlertDialogAction>
+                        <AlertDialogCancel disabled={aprobarYEnEsperaMutation.isPending}>
+                            Cancelar
+                        </AlertDialogCancel>
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
@@ -584,15 +561,16 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                        <AlertDialogCancel disabled={completarMutation.isPending}>
-                            Cancelar
-                        </AlertDialogCancel>
+                        
                         <AlertDialogAction 
                             onClick={handleConfirmCompletar}
                             disabled={completarMutation.isPending}
                         >
                             {completarMutation.isPending ? 'Completando...' : 'Completar'}
                         </AlertDialogAction>
+                        <AlertDialogCancel disabled={completarMutation.isPending}>
+                            Cancelar
+                        </AlertDialogCancel>
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
@@ -609,9 +587,7 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                        <AlertDialogCancel disabled={rechazarMutation.isPending}>
-                            Cancelar
-                        </AlertDialogCancel>
+                        
                         <AlertDialogAction 
                             onClick={handleConfirmRechazar}
                             disabled={rechazarMutation.isPending}
@@ -619,6 +595,9 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
                         >
                             {rechazarMutation.isPending ? 'Rechazando...' : 'Rechazar'}
                         </AlertDialogAction>
+                        <AlertDialogCancel disabled={rechazarMutation.isPending}>
+                            Cancelar
+                        </AlertDialogCancel>
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>

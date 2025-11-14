@@ -4,6 +4,7 @@ import CalidadAguaModal from "./CalidadAguaModal";
 import CalidadAguaEdit from "./CalidadAguaEdit";
 import FormularioCalidadAgua from "./FormularioCalidadAgua";
 import { Plus, Eye, EyeOff } from "lucide-react";
+import { LuSearch } from "react-icons/lu";
 import {
   MdKeyboardArrowLeft, MdKeyboardArrowRight, MdKeyboardDoubleArrowLeft,
   MdKeyboardDoubleArrowRight,
@@ -18,7 +19,6 @@ import {
   getPaginationRowModel,
   getSortedRowModel,
   createColumnHelper,
-  flexRender,
 } from "@tanstack/react-table";
 
 import { useAlerts } from "@/Modules/Global/context/AlertContext";
@@ -84,8 +84,8 @@ export default function CalidadAguaTable() {
     columnHelper.accessor('Titulo', {
       header: 'Título',
       cell: info => (
-        <div className="flex justify-center items-center">
-          <span className="font-medium text-left flex items-center gap-2 truncate">
+        <div className="font-medium text-left flex items-center gap-2">
+          <span className="truncate">
             {info.getValue().length > 30
               ? `${info.getValue().slice(0, 30)}...`
               : info.getValue()}
@@ -96,23 +96,23 @@ export default function CalidadAguaTable() {
     columnHelper.accessor('Fecha_Creacion', {
       header: 'Fecha de Creación',
       cell: info => (
-        <div className="flex justify-center items-center">
-          <span className="text-gray-600 text-left">{new Date(info.getValue()).toLocaleDateString("es-ES")}</span>
+        <div className="text-gray-600 text-left">
+          {new Date(info.getValue()).toLocaleDateString("es-ES")}
         </div>
       ),
     }),
     columnHelper.accessor('Fecha_Actualizacion', {
       header: 'Última Actualización',
       cell: info => (
-        <div className="flex justify-center items-center">
-          <span className="text-gray-600 text-left">{info.getValue() ? new Date(info.getValue()).toLocaleDateString("es-ES") : "Sin actualizar"}</span>
+        <div className="text-gray-600 text-left">
+          {info.getValue() ? new Date(info.getValue()).toLocaleDateString("es-ES") : "Sin actualizar"}
         </div>
       ),
     }),
     columnHelper.accessor('Visible', {
       header: 'Estado',
       cell: info => (
-        <div className="flex items-center justify-center">
+        <div className="flex items-center justify-start">
           <button
             onClick={(e) => handleToggleVisible(e, info.row.original.Id_Calidad_Agua)}
             className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium transition-colors ${info.getValue()
@@ -183,51 +183,49 @@ export default function CalidadAguaTable() {
   });
 
   return (
-    <div className="w-full">
-      {/* Header responsive */}
-      <div className="flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0 mb-4">
+    <div className="space-y-6">
+      {/* Encabezado con búsqueda y botón */}
+      <div className="bg-white rounded-lg p-3">
         <div className="flex items-start gap-4 flex-col justify-start">
           <h2 className="text-2xl font-bold text-gray-900">Gestión de Calidad de Agua</h2>
           <p className="text-sm text-gray-600 pb-4">Gestiona los documentos de los resultados de la calidad de agua</p>
         </div>
-
-        <div className="flex flex-col space-y-2 sm:flex-row sm:items-center sm:space-y-0 sm:space-x-4">
-          <input
-            type="text"
-            placeholder="Buscar archivos..."
-            value={globalFilter}
-            onChange={(e) => setGlobalFilter(e.target.value)}
-            className="w-full sm:w-64 px-3 py-2 rounded-lg border border-sky-200 focus:outline-none focus:ring-2 focus:ring-sky-500 text-sm"
-          />
-          <button
-            onClick={() => setFormVisible(true)}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md flex items-center gap-2 transition-colors"
-          >
-            <Plus size={18} />
-            <span className="hidden xs:inline">Crear Archivo</span>
-            <span className="xs:hidden">Crear</span>
-          </button>
+        <div className="flex flex-col sm:flex-row gap-4 items-center justify-end">
+          <div className="flex items-center gap-4 w-full sm:w-auto">
+            <div className="relative flex-1 max-w-md">
+              <LuSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <input
+                type="text"
+                placeholder="Buscar archivos..."
+                value={globalFilter ?? ''}
+                onChange={(e) => setGlobalFilter(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+            <button
+              onClick={() => setFormVisible(true)}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md flex items-center gap-2 transition-colors"
+            >
+              <Plus className="w-4 h-4" />
+              Nuevo Archivo
+            </button>
+          </div>
         </div>
       </div>
 
       {/* Mostrar errores */}
       {isError && <div className="text-red-600 mb-2">Error al cargar los archivos.</div>}
 
-      {/* Tabla responsive */}
-      <div className="overflow-x-auto rounded-2xl border border-sky-100 shadow-sm bg-white">
-        <table className="min-w-full table-auto text-xs sm:text-sm">
+      <div className="bg-white rounded-2xl shadow-sm border border-sky-100 overflow-hidden max-h-[calc(100vh-300px)] overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100">
+        <div className="overflow-x-auto">
+        <table className="min-w-full table-auto">
           <thead className="bg-sky-50">
             {table.getHeaderGroups().map(headerGroup => (
-              <tr key={headerGroup.id} className="text-left text-sky-700">
+              <tr key={headerGroup.id} className="text-left text-xs sm:text-sm text-sky-700">
                 {headerGroup.headers.map((header, index) => (
-                  <th
-                    key={header.id}
-                    className={`px-2 py-2 sm:px-4 sm:py-3 font-medium border-b border-sky-100 text-center ${index === 0 ? 'min-w-[200px] text-left' :
-                        index === 1 || index === 2 ? 'min-w-[120px]' :
-                          index === 3 ? 'min-w-[100px]' :
-                            'min-w-[120px]'
-                      }`}
-                  >
+                  <th key={header.id} className={`px-2 sm:px-4 py-3 font-medium border-b border-sky-100 ${
+                    index === 0 ? 'text-left' : 'text-center'
+                  }`}>
                     {(() => {
                       if (header.isPlaceholder) {
                         return null;
@@ -236,7 +234,9 @@ export default function CalidadAguaTable() {
                         return (
                           <button
                             type="button"
-                            className="cursor-pointer select-none flex items-center justify-center gap-1 bg-transparent border-none p-0 text-xs sm:text-sm w-full"
+                            className={`cursor-pointer select-none flex items-center gap-2 bg-transparent border-none p-0 ${
+                              index === 0 ? 'justify-start' : 'justify-center'
+                            }`}
                             onClick={header.column.getToggleSortingHandler()}
                             onKeyDown={e => {
                               if (e.key === 'Enter' || e.key === ' ') {
@@ -247,16 +247,16 @@ export default function CalidadAguaTable() {
                             tabIndex={0}
                             aria-label={`Ordenar por ${header.column.columnDef.header as string}`}
                           >
-                            <span className="flex items-center justify-start gap-1">
+                            <span className="flex items-center justify-left gap-1">
                               {header.column.columnDef.header as string}
-                              {header.column.getIsSorted() === 'asc' && <MdKeyboardArrowUp className="inline w-3 h-3 sm:w-4 sm:h-4" />}
-                              {header.column.getIsSorted() === 'desc' && <MdKeyboardArrowDown className="inline w-3 h-3 sm:w-4 sm:h-4" />}
+                              {header.column.getIsSorted() === 'asc' && <MdKeyboardArrowUp className="inline" />}
+                              {header.column.getIsSorted() === 'desc' && <MdKeyboardArrowDown className="inline" />}
                             </span>
                           </button>
                         );
                       }
                       return (
-                        <span className="text-xs sm:text-sm block text-start">
+                        <span className={index === 0 ? 'text-left' : 'text-center'}>
                           {header.column.columnDef.header as string}
                         </span>
                       );
@@ -266,64 +266,61 @@ export default function CalidadAguaTable() {
               </tr>
             ))}
           </thead>
-          {/* Extraer la lógica de renderizado de filas en una variable */}
-          {(() => {
-            let tableBodyContent;
-            if (isLoading) {
-              tableBodyContent = (
-                <tr>
-                  <td colSpan={columns.length} className="p-4 sm:p-6 text-center text-slate-500 text-sm">
-                    Cargando...
-                  </td>
+          <tbody className="bg-white divide-y divide-sky-50">
+            {isLoading ? (
+              <tr>
+                <td colSpan={columns.length} className="px-2 sm:px-4 py-8 text-center text-slate-500">
+                  Cargando...
+                </td>
+              </tr>
+            ) : table.getRowModel().rows.length === 0 ? (
+              <tr>
+                <td colSpan={columns.length} className="px-2 sm:px-4 py-8 text-center text-slate-500">
+                  {globalFilter ? 'No se encontraron archivos que coincidan con la búsqueda' : 'No hay archivos registrados'}
+                </td>
+              </tr>
+            ) : (
+              table.getRowModel().rows.map(row => (
+                <tr key={row.id} className="hover:bg-sky-50 cursor-pointer transition-colors" onClick={() => handleOpenModal(row.original)}>
+                  {row.getVisibleCells().map((cell, index) => {
+                    let cellContent: React.ReactNode;
+
+                    if (cell.column.columnDef.cell) {
+                      if (typeof cell.column.columnDef.cell === 'function') {
+                        cellContent = cell.column.columnDef.cell(cell.getContext());
+                      } else {
+                        cellContent = cell.column.columnDef.cell;
+                      }
+                    } else {
+                      cellContent = cell.getValue() as React.ReactNode;
+                    }
+
+                    return (
+                      <td key={cell.id} className={`px-2 sm:px-4 py-3 text-xs sm:text-sm text-slate-700 align-top ${
+                        index === 0 ? 'text-left' : 'text-center'
+                      }`}>
+                        {cellContent}
+                      </td>
+                    );
+                  })}
                 </tr>
-              );
-            } else if (table.getRowModel().rows.length === 0) {
-              tableBodyContent = (
-                <tr>
-                  <td colSpan={columns.length} className="p-4 sm:p-6 text-center text-slate-500 text-sm">
-                    No se encontraron registros.
-                  </td>
-                </tr>
-              );
-            } else {
-              tableBodyContent = table.getRowModel().rows.map((row) => (
-                <tr
-                  key={row.id}
-                  className="hover:bg-sky-50 cursor-pointer transition-colors"
-                  onClick={() => handleOpenModal(row.original)}
-                >
-                  {row.getVisibleCells().map((cell, index) => (
-                    <td
-                      key={cell.id}
-                      className={`px-2 py-2 sm:px-4 sm:py-3 text-slate-700 align-top ${index === 0 ? 'text-left' : 'text-center'
-                        }`}
-                    >
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </td>
-                  ))}
-                </tr>
-              ));
-            }
-            return (
-              <tbody className="bg-white divide-y divide-sky-50">
-                {tableBodyContent}
-              </tbody>
-            );
-          })()}
+              ))
+            )}
+          </tbody>
         </table>
-        {/* Paginación responsive */}
-        <div className="px-3 py-3 sm:px-6 bg-gray-50 border-t border-gray-200">
-          <div className="flex flex-col space-y-3 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
-            {/* Información de página y selector de tamaño */}
-            <div className="flex flex-col space-y-2 sm:flex-row sm:items-center sm:space-y-0 sm:space-x-4">
+        </div>
+
+        <div className="px-6 py-3 bg-gray-50 border-t border-gray-200">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
               <div className="flex items-center gap-2">
-                <span className="text-xs sm:text-sm text-gray-700">Filas por página:</span>
+                <span className="text-sm text-gray-700">Filas por página:</span>
                 <select
                   value={table.getState().pagination.pageSize}
                   onChange={(e) => {
                     table.setPageSize(Number(e.target.value));
                   }}
-                  className="px-2 py-1 sm:px-3 text-xs sm:text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="px-3 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   {pageSizeOptions.map((pageSize) => (
                     <option key={pageSize} value={pageSize}>
@@ -333,46 +330,42 @@ export default function CalidadAguaTable() {
                 </select>
               </div>
             </div>
-
-            {/* Controles de navegación */}
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => table.setPageIndex(0)}
-                  disabled={!table.getCanPreviousPage()}
-                  className="p-1 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition"
-                  title="Primera página"
-                >
-                  <MdKeyboardDoubleArrowLeft className="w-5 h-5 text-gray-600" />
-                </button>
-                <button
-                  onClick={() => table.previousPage()}
-                  disabled={!table.getCanPreviousPage()}
-                  className="p-1 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition"
-                  title="Página anterior"
-                >
-                  <MdKeyboardArrowLeft className="w-5 h-5 text-gray-600" />
-                </button>
-                <span className="text-sm text-gray-700 min-w-[120px] text-center">
-                  Página {table.getState().pagination.pageIndex + 1} de {table.getPageCount()}
-                </span>
-                <button
-                  onClick={() => table.nextPage()}
-                  disabled={!table.getCanNextPage()}
-                  className="p-1 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition"
-                  title="Página siguiente"
-                >
-                  <MdKeyboardArrowRight className="w-5 h-5 text-gray-600" />
-                </button>
-                <button
-                  onClick={() => table.setPageIndex(table.getPageCount() - 1)}
-                  disabled={!table.getCanNextPage()}
-                  className="p-1 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition"
-                  title="Última página"
-                >
-                  <MdKeyboardDoubleArrowRight className="w-5 h-5 text-gray-600" />
-                </button>
-              </div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => table.setPageIndex(0)}
+                disabled={!table.getCanPreviousPage()}
+                className="p-2 rounded-md border text-gray-600 hover:text-gray-900 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                title="Primera página"
+              >
+                <MdKeyboardDoubleArrowLeft className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => table.previousPage()}
+                disabled={!table.getCanPreviousPage()}
+                className="p-2 rounded-md border text-gray-600 hover:text-gray-900 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                title="Página anterior"
+              >
+                <MdKeyboardArrowLeft className="w-4 h-4" />
+              </button>
+              <span className="text-sm text-gray-700">
+                Página {table.getState().pagination.pageIndex + 1} de {table.getPageCount()}
+              </span>
+              <button
+                onClick={() => table.nextPage()}
+                disabled={!table.getCanNextPage()}
+                className="p-2 rounded-md border text-gray-600 hover:text-gray-900 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                title="Página siguiente"
+              >
+                <MdKeyboardArrowRight className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => table.setPageIndex(table.getPageCount() - 1)}
+                disabled={!table.getCanNextPage()}
+                className="p-2 rounded-md border text-gray-600 hover:text-gray-900 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                title="Última página"
+              >
+                <MdKeyboardDoubleArrowRight className="w-4 h-4" />
+              </button>
             </div>
           </div>
         </div>
