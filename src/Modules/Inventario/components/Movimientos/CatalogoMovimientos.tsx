@@ -10,8 +10,8 @@ import {
   type ColumnFiltersState,
   type SortingState,
 } from '@tanstack/react-table';
-import { 
-  LuSearch, 
+import {
+  LuSearch,
   LuTrendingUp,
   LuTrendingDown,
   LuCalendar,
@@ -19,19 +19,19 @@ import {
   LuPlus,
   LuFilter
 } from 'react-icons/lu';
-import { 
-  MdKeyboardArrowLeft, 
-  MdKeyboardArrowRight, 
+import {
+  MdKeyboardArrowLeft,
+  MdKeyboardArrowRight,
   MdKeyboardDoubleArrowLeft,
   MdKeyboardDoubleArrowRight,
   MdKeyboardArrowUp,
   MdKeyboardArrowDown
 } from "react-icons/md";
-import { 
-  useGetAllMovimientos, 
-  useGetMovimientosEntradas, 
+import {
+  useGetAllMovimientos,
+  useGetMovimientosEntradas,
   useGetMovimientosSalidas,
-  useGetMovimientosEntreFechas 
+  useGetMovimientosEntreFechas
 } from '../../hooks/useMovimientos';
 import { getMovimientosLoadingState, getMovimientosErrorState } from '../../helper/MovimientosHelpers';
 import DetailMovimientoModal from './DetailMovimientoModal';
@@ -65,7 +65,7 @@ const CatalogoMovimientos: React.FC<CatalogoMovimientosProps> = () => {
   const { data: todosMovimientos = [], isLoading: isLoadingTodos, error: errorTodos, refetch: refetchTodos } = useGetAllMovimientos();
   const { data: movimientosEntradas = [], isLoading: isLoadingEntradas, error: errorEntradas, refetch: refetchEntradas } = useGetMovimientosEntradas();
   const { data: movimientosSalidas = [], isLoading: isLoadingSalidas, error: errorSalidas, refetch: refetchSalidas } = useGetMovimientosSalidas();
-  
+
   // Hook para filtro por fechas - solo se habilita cuando hay fechas aplicadas
   const hasFechas = !!appliedFilters.fechaInicio && !!appliedFilters.fechaFin;
   const { data: movimientosPorFechas = [], isLoading: isLoadingFechas, error: errorFechas, refetch: refetchFechas } = useGetMovimientosEntreFechas(
@@ -80,7 +80,7 @@ const CatalogoMovimientos: React.FC<CatalogoMovimientosProps> = () => {
     if (hasFechas) {
       return movimientosPorFechas;
     }
-    
+
     // Prioridad 2: Filtro por tipo de movimiento
     if (appliedFilters.soloIngresos) {
       return movimientosEntradas;
@@ -88,16 +88,16 @@ const CatalogoMovimientos: React.FC<CatalogoMovimientosProps> = () => {
     if (appliedFilters.soloEgresos) {
       return movimientosSalidas;
     }
-    
+
     // Default: todos los movimientos
     return todosMovimientos;
   }, [
-    hasFechas, 
+    hasFechas,
     movimientosPorFechas,
-    appliedFilters.soloIngresos, 
-    appliedFilters.soloEgresos, 
-    todosMovimientos, 
-    movimientosEntradas, 
+    appliedFilters.soloIngresos,
+    appliedFilters.soloEgresos,
+    todosMovimientos,
+    movimientosEntradas,
     movimientosSalidas
   ]);
 
@@ -111,7 +111,7 @@ const CatalogoMovimientos: React.FC<CatalogoMovimientosProps> = () => {
       fechas: isLoadingFechas
     }
   );
-  
+
   const error = getMovimientosErrorState(
     appliedFilters,
     hasFechas,
@@ -151,39 +151,39 @@ const CatalogoMovimientos: React.FC<CatalogoMovimientosProps> = () => {
     return value !== undefined && value !== null;
   }).length;
 
- 
+
   const filteredMovimientos = React.useMemo(() => {
     let filtered = [...movimientos];
 
 
     // Filtro por tipo de movimiento específico 
     if (appliedFilters.tipoMovimiento && !appliedFilters.soloIngresos && !appliedFilters.soloEgresos && !hasFechas) {
-      filtered = filtered.filter(mov => 
+      filtered = filtered.filter(mov =>
         mov.Tipo_Movimiento === appliedFilters.tipoMovimiento
       );
     }
 
     // Filtros secundarios que NO existen en el backend (material nombre, usuario nombre, cantidad)
     if (appliedFilters.materialNombre) {
-      filtered = filtered.filter(mov => 
+      filtered = filtered.filter(mov =>
         mov.Material?.Nombre_Material?.toLowerCase().includes(appliedFilters.materialNombre!.toLowerCase())
       );
     }
 
     if (appliedFilters.usuario) {
-      filtered = filtered.filter(mov => 
+      filtered = filtered.filter(mov =>
         mov.Usuario?.Nombre_Usuario?.toLowerCase().includes(appliedFilters.usuario!.toLowerCase())
       );
     }
 
     if (appliedFilters.cantidadMinima) {
-      filtered = filtered.filter(mov => 
+      filtered = filtered.filter(mov =>
         mov.Cantidad >= appliedFilters.cantidadMinima!
       );
     }
 
     if (appliedFilters.cantidadMaxima) {
-      filtered = filtered.filter(mov => 
+      filtered = filtered.filter(mov =>
         mov.Cantidad <= appliedFilters.cantidadMaxima!
       );
     }
@@ -200,7 +200,7 @@ const CatalogoMovimientos: React.FC<CatalogoMovimientosProps> = () => {
       cell: ({ row }) => {
         const movimiento = row.original;
         const isIngreso = movimiento.Tipo_Movimiento?.includes('Entrada');
-        
+
         return (
           <div className="flex items-center gap-2">
             {isIngreso ? (
@@ -208,9 +208,8 @@ const CatalogoMovimientos: React.FC<CatalogoMovimientosProps> = () => {
             ) : (
               <LuTrendingDown className="text-red-600" size={16} />
             )}
-            <span className={`text-sm font-medium ${
-              isIngreso ? 'text-green-700' : 'text-red-700'
-            }`}>
+            <span className={`text-sm font-medium ${isIngreso ? 'text-green-700' : 'text-red-700'
+              }`}>
               {movimiento.Tipo_Movimiento || 'N/A'}
             </span>
           </div>
@@ -222,9 +221,14 @@ const CatalogoMovimientos: React.FC<CatalogoMovimientosProps> = () => {
     columnHelper.accessor('Material.Nombre_Material', {
       id: 'material',
       header: 'Material',
-      cell: ({ getValue }) => (
-        <span className="text-sm font-medium">{getValue() || 'N/A'}</span>
-      ),
+      cell: ({ getValue }) => {
+        const nombre = getValue() || 'N/A';
+        return (
+          <span className="text-sm font-medium" title={nombre.length > 12 ? nombre : undefined}>
+            {nombre.length > 12 ? `${nombre.slice(0, 12)}...` : nombre}
+          </span>
+        );
+      },
       size: 200,
     }),
 
@@ -235,7 +239,7 @@ const CatalogoMovimientos: React.FC<CatalogoMovimientosProps> = () => {
         const cantidad = getValue();
         const unidad = row.original.Material?.Unidad_Medicion;
         const nombreUnidad = unidad?.Nombre_Unidad_Medicion || '';
-        
+
         return (
           <span className="text-sm">
             {cantidad?.toLocaleString()} {nombreUnidad}
@@ -263,7 +267,7 @@ const CatalogoMovimientos: React.FC<CatalogoMovimientosProps> = () => {
       cell: ({ getValue }) => {
         const fecha = getValue();
         if (!fecha) return 'N/A';
-        
+
         const fechaObj = new Date(fecha);
         return (
           <div className="flex items-center gap-2">
@@ -287,8 +291,8 @@ const CatalogoMovimientos: React.FC<CatalogoMovimientosProps> = () => {
       cell: ({ row }) => {
         const movimiento = row.original;
         const unidad = movimiento.Material?.Unidad_Medicion;
-        const nombreUnidad = unidad?.Nombre_Unidad_Medicion ||  '';
-        
+        const nombreUnidad = unidad?.Nombre_Unidad_Medicion || '';
+
         return (
           <span className="text-sm text-gray-600">
             {movimiento.Cantidad_Anterior?.toLocaleString() || '0'} {nombreUnidad}
@@ -305,7 +309,7 @@ const CatalogoMovimientos: React.FC<CatalogoMovimientosProps> = () => {
         const movimiento = row.original;
         const unidad = movimiento.Material?.Unidad_Medicion;
         const nombreUnidad = unidad?.Nombre_Unidad_Medicion || '';
-        
+
         return (
           <span className="text-sm font-medium">
             {movimiento.Cantidad_Nueva?.toLocaleString() || '0'} {nombreUnidad}
@@ -396,11 +400,11 @@ const CatalogoMovimientos: React.FC<CatalogoMovimientosProps> = () => {
   return (
     <div className="space-y-4">
       <div className="bg-white rounded-lg p-3">
-          <div className="flex items-start gap-4 flex-col justify-start">
-            <h2 className="text-2xl font-bold text-gray-900">Historial de Movimientos</h2>
-            <p className="text-sm text-gray-600 pb-4">Registra los movimientos de entrada y salida de materiales</p>
+        <div className="flex items-start gap-4 flex-col justify-start">
+          <h2 className="text-2xl font-bold text-gray-900">Historial de Movimientos</h2>
+          <p className="text-sm text-gray-600 pb-4">Registra los movimientos de entrada y salida de materiales</p>
         </div>
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div className="flex items-center justify-start gap-4">
             <label htmlFor="tipo-movimiento-filter-select" className="text-sm font-medium text-gray-700">Tipo:</label>
             <select
@@ -414,47 +418,46 @@ const CatalogoMovimientos: React.FC<CatalogoMovimientosProps> = () => {
               <option value="Salida">Salida</option>
             </select>
           </div>
-        <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
-          <div className="flex items-center gap-4 w-full sm:w-auto">
-            <div className="relative flex-1 max-w-md">
-              <LuSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-              <input
-                type="text"
-                placeholder="Buscar movimientos..."
-                value={globalFilter ?? ''}
-                onChange={(e) => setGlobalFilter(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
+          <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
+            <div className="flex items-center gap-4 w-full sm:w-auto">
+              <div className="relative flex-1 max-w-md">
+                <LuSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <input
+                  type="text"
+                  placeholder="Buscar movimientos..."
+                  value={globalFilter ?? ''}
+                  onChange={(e) => setGlobalFilter(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+              <button
+                onClick={() => setIsFilterModalOpen(true)}
+                className={`px-4 py-2 border rounded-md flex items-center gap-2 transition-colors ${activeFiltersCount > 0
+                    ? 'border-blue-500 bg-blue-50 text-blue-700'
+                    : 'border-gray-300 hover:bg-gray-50'
+                  }`}
+              >
+                <LuFilter className="w-4 h-4" />
+                Filtros
+                {activeFiltersCount > 0 && (
+                  <span className="bg-blue-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                    {activeFiltersCount}
+                  </span>
+                )}
+              </button>
+              <button
+                onClick={() => setIsCreateModalOpen(true)}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md flex items-center gap-2 transition-colors"
+              >
+                <LuPlus className="w-4 h-4" />
+                Nuevo Movimiento
+              </button>
             </div>
-            <button
-              onClick={() => setIsFilterModalOpen(true)}
-              className={`px-4 py-2 border rounded-md flex items-center gap-2 transition-colors ${
-                activeFiltersCount > 0
-                  ? 'border-blue-500 bg-blue-50 text-blue-700'
-                  : 'border-gray-300 hover:bg-gray-50'
-              }`}
-            >
-              <LuFilter className="w-4 h-4" />
-              Filtros
-              {activeFiltersCount > 0 && (
-                <span className="bg-blue-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                  {activeFiltersCount}
-                </span>
-              )}
-            </button>
-            <button 
-              onClick={() => setIsCreateModalOpen(true)}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md flex items-center gap-2 transition-colors"
-            >
-              <LuPlus className="w-4 h-4" />
-              Nuevo Movimiento
-            </button>
           </div>
         </div>
       </div>
-      </div>
 
-<div className="bg-white rounded-2xl shadow-sm border border-sky-100 overflow-hidden max-h-[calc(100vh-300px)] overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100">
+      <div className="bg-white rounded-2xl shadow-sm border border-sky-100 overflow-hidden max-h-[calc(100vh-300px)] overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100">
         <div className="overflow-x-auto">
           <table className="min-w-full table-auto">
             <thead className="bg-sky-50">
@@ -499,7 +502,7 @@ const CatalogoMovimientos: React.FC<CatalogoMovimientosProps> = () => {
           </table>
         </div>
 
-          {movimientos.length === 0 && (
+        {movimientos.length === 0 && (
           <div className="text-center py-12">
             <div className="text-gray-500 text-lg font-medium mb-2">No hay movimientos registrados</div>
             <div className="text-gray-400">Los movimientos de inventario aparecerán aquí</div>
@@ -546,7 +549,7 @@ const CatalogoMovimientos: React.FC<CatalogoMovimientosProps> = () => {
             >
               <MdKeyboardArrowLeft className="w-4 h-4" />
             </button>
-            
+
             <span className="text-sm text-gray-700">
               Página {table.getState().pagination.pageIndex + 1} de {table.getPageCount()}
             </span>

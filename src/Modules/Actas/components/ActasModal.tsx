@@ -12,9 +12,9 @@ const ActasModal = ({ isOpen, onClose, acta }: ActasModalProps) => {
 
     return (
         <div className="fixed inset-0 bg-opacity-10 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-lg shadow-xl w-full max-w-lg">
+            <div className="bg-white rounded-lg shadow-xl w-full max-w-lg flex flex-col overflow-hidden max-h-[90vh]">
                 {/* Header */}
-                <div className="flex items-center justify-between p-6 border-b border-gray-200">
+                <div className="sticky top-0 bg-white flex items-center justify-between p-6 border-b border-gray-200 z-10">
                     <h2 className="text-xl font-semibold text-gray-800">Detalles del Acta</h2>
                     <button
                         onClick={onClose}
@@ -24,7 +24,7 @@ const ActasModal = ({ isOpen, onClose, acta }: ActasModalProps) => {
                     </button>
                 </div>
 
-                <div className="p-6 space-y-6">
+                <div className="p-6 space-y-6 overflow-y-auto max-h-[calc(90vh-180px)] scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100">
                     {/* Tarjeta principal */}
                     <div className="bg-gray-100 p-4 rounded-lg shadow-sm">
                         <div
@@ -82,20 +82,20 @@ const ActasModal = ({ isOpen, onClose, acta }: ActasModalProps) => {
                                                     rel="noopener noreferrer"
                                                     className="px-3 py-1.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white text-xs font-medium rounded-lg hover:from-blue-700 hover:to-blue-800 hover:shadow-lg transform hover:scale-105 active:scale-95 transition-all duration-200 flex items-center gap-1.5 group/btn"
                                                 >
-                                                    <svg 
-                                                        xmlns="http://www.w3.org/2000/svg" 
-                                                        width="14" 
-                                                        height="14" 
-                                                        viewBox="0 0 24 24" 
-                                                        fill="none" 
-                                                        stroke="currentColor" 
-                                                        strokeWidth="2" 
-                                                        strokeLinecap="round" 
+                                                    <svg
+                                                        xmlns="http://www.w3.org/2000/svg"
+                                                        width="14"
+                                                        height="14"
+                                                        viewBox="0 0 24 24"
+                                                        fill="none"
+                                                        stroke="currentColor"
+                                                        strokeWidth="2"
+                                                        strokeLinecap="round"
                                                         strokeLinejoin="round"
                                                         className="group-hover/btn:scale-110 transition-transform"
                                                     >
-                                                        <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
-                                                        <circle cx="12" cy="12" r="3"/>
+                                                        <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
+                                                        <circle cx="12" cy="12" r="3" />
                                                     </svg>
                                                     Ver
                                                 </a>
@@ -135,7 +135,7 @@ const ActasModal = ({ isOpen, onClose, acta }: ActasModalProps) => {
                 </div>
 
                 {/* Botón cerrar */}
-                <div className="flex justify-end p-6 border-t border-gray-200">
+                <div className="sticky bottom-0 flex justify-end p-6 border-t border-gray-200 bg-white z-10">
                     <button
                         type="button"
                         onClick={onClose}
