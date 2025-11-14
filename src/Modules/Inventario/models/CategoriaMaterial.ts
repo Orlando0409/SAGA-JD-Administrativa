@@ -12,7 +12,7 @@ export interface CategoriaMaterial {
   Fecha_Creacion?: Date | string;
   Fecha_Actualizacion?: Date | string;
   Estado_Categoria?: EstadoCategoria;
-  Usuario_Creador?: UsuarioCreador;
+  Usuario?: UsuarioCreador;
 }
 
 export interface EstadoCategoria {
