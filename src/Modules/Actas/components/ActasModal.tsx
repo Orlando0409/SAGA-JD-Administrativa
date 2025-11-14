@@ -39,20 +39,73 @@ const ActasModal = ({ isOpen, onClose, acta }: ActasModalProps) => {
                         >
                             {acta.Descripcion}
                         </p>
-                        <div className="mt-4">
-                            <h3 className="text-sm font-semibold text-gray-700">Archivos:</h3>
-                            {acta?.Archivos?.map((archivo: ArchivoActa) => (
-                                <a
-                                    key={archivo.Id_Archivo_Acta}
-                                    href={archivo.Url_Archivo}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="text-blue-600 hover:underline flex items-center gap-2 mt-2"
-                                >
-                                    <FileText size={18} />
-                                    Ver archivo PDF
-                                </a>
-                            ))}
+                        <div className="mt-6">
+                            <h3 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                                <FileText size={18} className="text-blue-600" />
+                                Archivos Adjuntos
+                            </h3>
+                            {!acta?.Archivos || acta.Archivos.length === 0 ? (
+                                <div className="bg-gradient-to-br from-gray-50 to-gray-100 border border-dashed border-gray-300 rounded-xl p-6 text-center">
+                                    <div className="inline-flex items-center justify-center w-12 h-12 bg-gray-200 rounded-full mb-3">
+                                        <FileText size={24} className="text-gray-400" />
+                                    </div>
+                                    <p className="text-gray-500 text-sm font-medium">No hay archivos disponibles</p>
+                                </div>
+                            ) : (
+                                <div className="space-y-3">
+                                    {acta.Archivos.map((archivo: ArchivoActa, index: number) => (
+                                        <div
+                                            key={archivo.Id_Archivo_Acta || index}
+                                            className="group relative bg-gradient-to-br from-blue-50 via-white to-blue-50 border border-blue-200 rounded-xl p-4 hover:shadow-lg hover:border-blue-400 transition-all duration-300 hover:-translate-y-0.5"
+                                        >
+                                            <div className="flex items-center justify-between">
+                                                <div className="flex items-center gap-3 flex-1">
+                                                    <div className="relative">
+                                                        <div className="bg-gradient-to-br from-blue-500 to-blue-600 p-3 rounded-lg shadow-md group-hover:shadow-lg group-hover:scale-110 transition-all duration-300">
+                                                            <FileText size={24} className="text-white" />
+                                                        </div>
+                                                        <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 border-2 border-white rounded-full animate-pulse"></div>
+                                                    </div>
+                                                    <div className="flex-1">
+                                                        <p className="text-sm font-semibold text-gray-800 group-hover:text-blue-700 transition-colors">
+                                                            Archivo {index + 1}
+                                                        </p>
+                                                        <p className="text-xs text-gray-500 mt-0.5 flex items-center gap-1">
+                                                            <span className="w-1.5 h-1.5 bg-blue-500 rounded-full"></span>
+                                                            Documento PDF
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                <a
+                                                    href={archivo.Url_Archivo}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="px-3 py-1.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white text-xs font-medium rounded-lg hover:from-blue-700 hover:to-blue-800 hover:shadow-lg transform hover:scale-105 active:scale-95 transition-all duration-200 flex items-center gap-1.5 group/btn"
+                                                >
+                                                    <svg 
+                                                        xmlns="http://www.w3.org/2000/svg" 
+                                                        width="14" 
+                                                        height="14" 
+                                                        viewBox="0 0 24 24" 
+                                                        fill="none" 
+                                                        stroke="currentColor" 
+                                                        strokeWidth="2" 
+                                                        strokeLinecap="round" 
+                                                        strokeLinejoin="round"
+                                                        className="group-hover/btn:scale-110 transition-transform"
+                                                    >
+                                                        <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
+                                                        <circle cx="12" cy="12" r="3"/>
+                                                    </svg>
+                                                    Ver
+                                                </a>
+                                            </div>
+                                            {/* Efecto de brillo al hover */}
+                                            <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-transparent via-white to-transparent opacity-0 group-hover:opacity-20 group-hover:animate-shimmer pointer-events-none"></div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
                         </div>
                     </div>
 

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useUpdateActa } from "../Hook/hookActas";
 import { FaFilePdf, FaTimes } from "react-icons/fa";
+import { Alert } from '@/Modules/Global/components/Alert/ui/Alert';
 import type { Acta } from "../Models/ActasModels";
 
 interface ActasEditProps {
@@ -17,6 +18,17 @@ export default function ActasEdit({ acta, onClose, refetch }: ActasEditProps) {
     const [files, setFiles] = useState<File[]>([]);
     const [tituloError, setTituloError] = useState(""); // Validación de título
     const [descripcionError, setDescripcionError] = useState(""); // Validación de descripción
+    const [notification, setNotification] = useState<{
+        type: 'success' | 'error' | 'info';
+        title: string;
+        description?: string;
+    } | null>(null);
+
+    useEffect(() => {
+        if (!notification) return;
+        const t = setTimeout(() => setNotification(null), 3500);
+        return () => clearTimeout(t);
+    }, [notification]);
 
     // Pre-cargar los valores del acta cuando se monta el componente
     useEffect(() => {
@@ -66,19 +78,31 @@ export default function ActasEdit({ acta, onClose, refetch }: ActasEditProps) {
             { id: acta.Id_Acta, formData },
             {
                 onSuccess: () => {
-                    onClose(); // Oculta el modal después de actualizar el acta
                     refetch(); // Refresca la tabla para mostrar los cambios
-                    alert("Acta actualizada con éxito.");
+                    setNotification({ type: 'success', title: 'Acta actualizada con éxito.' });
+                    setTimeout(() => onClose(), 500); // Oculta el modal después de actualizar el acta
                 },
                 onError: (error) => {
                     console.error("Error al actualizar el acta:", error);
-                    alert("Hubo un problema al actualizar el acta.");
+                    setNotification({ type: 'error', title: 'Hubo un problema al actualizar el acta.' });
                 },
             }
         );
     };
 
     return (
+    <>
+        {notification && (
+            <div className="fixed top-4 right-4 z-[200]">
+                <Alert
+                    type={notification.type === 'success' ? 'success' : (notification.type === 'error' ? 'error' : 'info')}
+                    title={notification.title}
+                    description={notification.description}
+                    onClose={() => setNotification(null)}
+                />
+            </div>
+        )}
+
         <div className="fixed inset-0 bg-opacity-10 backdrop-blur-sm flex items-center justify-center z-50">
             <form
                 onSubmit={handleSubmit}
@@ -97,7 +121,6 @@ export default function ActasEdit({ acta, onClose, refetch }: ActasEditProps) {
                         maxLength={100}
                         className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-sky-500 text-sm break-words"
                         style={{ whiteSpace: "normal", overflowWrap: "break-word" }}
-                        required
                     />
                     <div className="text-right text-xs text-gray-500 mt-1">
                         {titulo.length}/100
@@ -118,7 +141,6 @@ export default function ActasEdit({ acta, onClose, refetch }: ActasEditProps) {
                         className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-sky-500 text-sm break-words"
                         style={{ whiteSpace: "normal", overflowWrap: "break-word" }}
                         rows={3}
-                        required
                     />
                     <div className="text-right text-xs text-gray-500 mt-1">
                         {descripcion.length}/200
@@ -242,5 +264,6 @@ export default function ActasEdit({ acta, onClose, refetch }: ActasEditProps) {
                 </div>
             </form>
         </div>
+    </>
     );
 }
