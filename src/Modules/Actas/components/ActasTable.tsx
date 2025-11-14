@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
     useReactTable,
     getCoreRowModel,
@@ -23,6 +23,7 @@ import {
   AlertDialogHeader,
   AlertDialogFooter
 } from "@/Modules/Global/components/Sidebar/ui/alert-dialog";
+import { Alert } from '@/Modules/Global/components/Alert/ui/Alert';
 import { useGetActas, useDeleteActa } from "../Hook/hookActas";
 import type { Acta } from "../Models/ActasModels";
 import FormularioCrearActas from "./FormularioCrearActas";
@@ -37,6 +38,17 @@ export default function ActasTable() {
     const [editVisible, setEditVisible] = useState(false);
     const [modalOpen, setModalOpen] = useState(false);
     const [actaSeleccionada, setActaSeleccionada] = useState<Acta | null>(null);
+    const [notification, setNotification] = useState<{
+        type: 'success' | 'error' | 'info';
+        title: string;
+        description?: string;
+    } | null>(null);
+
+    useEffect(() => {
+        if (!notification) return;
+        const t = setTimeout(() => setNotification(null), 3500);
+        return () => clearTimeout(t);
+    }, [notification]);
 
     const pageSizeOptions = [5, 10, 20, 50];
     const [pagination, setPagination] = useState({
@@ -160,6 +172,11 @@ export default function ActasTable() {
         deleteActaMutation.mutate(acta.Id_Acta, {
             onSuccess: () => {
                 refetch();
+                setNotification({ type: 'success', title: 'Acta eliminada con éxito.' });
+            },
+            onError: (error) => {
+                console.error("Error al eliminar el acta:", error);
+                setNotification({ type: 'error', title: 'Hubo un problema al eliminar el acta.' });
             },
         });
     };
@@ -196,6 +213,17 @@ export default function ActasTable() {
 
     return (
         <div className="space-y-6">
+            {notification && (
+                <div className="fixed top-4 right-4 z-[200]">
+                    <Alert
+                        type={notification.type === 'success' ? 'success' : (notification.type === 'error' ? 'error' : 'info')}
+                        title={notification.title}
+                        description={notification.description}
+                        onClose={() => setNotification(null)}
+                    />
+                </div>
+            )}
+
             {/* Encabezado con búsqueda y botón */}
             <div className="bg-white rounded-lg p-3">
                 <div className="flex items-start gap-4 flex-col justify-start">

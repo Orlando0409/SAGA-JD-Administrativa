@@ -67,7 +67,7 @@ const CatalogoMedidores: React.FC<CatalogoMedidoresProps> = () => {
   let medidores: Medidor[] = [];
   let isLoading = false;
   let error: unknown = null;
-  let refetch = () => {};
+  let refetch = () => { };
 
   if (estadoFilter === 'No instalado') {
     medidores = medidoresNoInstalados.data ?? [];
@@ -118,7 +118,7 @@ const CatalogoMedidores: React.FC<CatalogoMedidoresProps> = () => {
 
 
   const handleToggleEstado = async (medidor: Medidor, nuevoEstadoId: number) => {
-    
+
     try {
       await updateEstadoMutation.mutateAsync({
         idMedidor: medidor.Id_Medidor,
@@ -137,7 +137,7 @@ const CatalogoMedidores: React.FC<CatalogoMedidoresProps> = () => {
       columnHelper.accessor('Numero_Medidor', {
         header: 'Número del Medidor',
         cell: info => (
-          <button 
+          <button
             className="font-medium transition-colors text-left w-full"
             onClick={() => handleViewDetail(info.row.original)}
           >
@@ -149,7 +149,7 @@ const CatalogoMedidores: React.FC<CatalogoMedidoresProps> = () => {
         header: 'Afiliado',
         cell: info => {
           const afiliado = info.row.original.Afiliado;
-          
+
           if (!afiliado) {
             return (
               <div className="text-gray-600 text-left">
@@ -332,7 +332,7 @@ const CatalogoMedidores: React.FC<CatalogoMedidoresProps> = () => {
         pageIndex: 0,
       },
     },
-  });  
+  });
 
   if (isLoading) {
     return (
@@ -354,9 +354,9 @@ const CatalogoMedidores: React.FC<CatalogoMedidoresProps> = () => {
   return (
     <div className="space-y-6">
       <div className="bg-white rounded-lg p-3">
-           <div className="flex items-start gap-4 flex-col justify-start">
-            <h2 className="text-2xl font-bold text-gray-900">Catálogo de Medidores</h2>
-            <p className="text-sm text-gray-600 pb-4">Gestiona los medidores del inventario</p>
+        <div className="flex items-start gap-4 flex-col justify-start">
+          <h2 className="text-2xl font-bold text-gray-900">Catálogo de Medidores</h2>
+          <p className="text-sm text-gray-600 pb-4">Gestiona los medidores del inventario</p>
         </div>
         <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
           <div className="flex items-center gap-4">
@@ -395,16 +395,15 @@ const CatalogoMedidores: React.FC<CatalogoMedidoresProps> = () => {
         </div>
       </div>
 
-<div className="bg-white rounded-2xl shadow-sm border border-sky-100 overflow-hidden max-h-[calc(100vh-300px)] overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100">
+      <div className="bg-white rounded-2xl shadow-sm border border-sky-100 overflow-hidden max-h-[calc(100vh-300px)] overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100">
         <div className="overflow-x-auto">
           <table className="min-w-full table-auto">
             <thead className="bg-sky-50">
               {table.getHeaderGroups().map(headerGroup => (
                 <tr key={headerGroup.id} className="text-left text-xs sm:text-sm text-sky-700">
                   {headerGroup.headers.map((header, index) => (
-                    <th key={header.id} className={`px-2 sm:px-4 py-3 font-medium border-b border-sky-100 ${
-                      index === 0 ? 'text-left' : 'text-center'
-                    }`}>
+                    <th key={header.id} className={`px-2 sm:px-4 py-3 font-medium border-b border-sky-100 ${index === 0 ? 'text-left' : 'text-center'
+                      }`}>
                       {(() => {
                         if (header.isPlaceholder) {
                           return null;
@@ -413,9 +412,8 @@ const CatalogoMedidores: React.FC<CatalogoMedidoresProps> = () => {
                           return (
                             <button
                               type="button"
-                              className={`cursor-pointer select-none flex items-center gap-2 bg-transparent border-none p-0 ${
-                                index === 0 ? 'justify-start' : 'justify-center'
-                              }`}
+                              className={`cursor-pointer select-none flex items-center gap-2 bg-transparent border-none p-0 ${index === 0 ? 'justify-start' : 'justify-center'
+                                }`}
                               onClick={header.column.getToggleSortingHandler()}
                               onKeyDown={e => {
                                 if (e.key === 'Enter' || e.key === ' ') {
@@ -457,7 +455,7 @@ const CatalogoMedidores: React.FC<CatalogoMedidoresProps> = () => {
                   <tr key={row.id} className="hover:bg-sky-50 cursor-pointer transition-colors">
                     {row.getVisibleCells().map((cell, index) => {
                       let cellContent: React.ReactNode;
-                      
+
                       if (cell.column.columnDef.cell) {
                         if (typeof cell.column.columnDef.cell === 'function') {
                           cellContent = cell.column.columnDef.cell(cell.getContext());
@@ -467,11 +465,10 @@ const CatalogoMedidores: React.FC<CatalogoMedidoresProps> = () => {
                       } else {
                         cellContent = cell.getValue() as React.ReactNode;
                       }
-                      
+
                       return (
-                        <td key={cell.id} className={`px-2 sm:px-4 py-3 text-xs sm:text-sm text-slate-700 align-top ${
-                          index === 0 ? 'text-left' : 'text-center'
-                        }`}>
+                        <td key={cell.id} className={`px-2 sm:px-4 py-3 text-xs sm:text-sm text-slate-700 align-top ${index === 0 ? 'text-left' : 'text-center'
+                          }`}>
                           {cellContent}
                         </td>
                       );

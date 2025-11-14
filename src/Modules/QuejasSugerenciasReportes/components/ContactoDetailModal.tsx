@@ -51,62 +51,6 @@ const ContactoDetailModal = ({ item, isOpen, onClose }: ContactoDetailModalProps
         {/* Content */}
         <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100 p-6">
           <div className="space-y-6">
-            {/* Información del Tipo y Usuario */}
-            <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
-              <div className="bg-gray-50 px-5 py-3 border-b border-gray-200">
-                <div className="flex items-center gap-3">
-                  <div className={`w-8 h-8 ${config.color} rounded-lg flex items-center justify-center`}>
-                    <IconComponent className="w-4 h-4" />
-                  </div>
-                  <h3 className="text-base font-bold text-gray-900">Información General</h3>
-                </div>
-              </div>
-
-              <div className="p-5">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  {/* Columna izquierda */}
-                  <div className="space-y-4">
-                    <div className="bg-gray-50 p-4 rounded-lg">
-                      <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
-                        Tipo
-                      </label>
-                      <span className={`inline-flex items-center px-3 py-1 rounded-lg text-xs font-semibold ${config.color} border border-gray-200`}>
-                        {item.tipo}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Columna derecha */}
-                  <div className="space-y-4">
-                    <div className="bg-gray-50 p-4 rounded-lg">
-                      <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
-                        Fecha de Creación
-                      </label>
-                      <p className="text-sm text-gray-900 flex items-center gap-2">
-                        <LuCalendar className="w-4 h-4 text-gray-400" />
-                        {item.fechaCreacion ? 
-                          format(new Date(item.fechaCreacion), 'dd/MM/yyyy HH:mm', { locale: es }) : 
-                          'No disponible'
-                        }
-                      </p>
-                    </div>
-
-                    {item.ubicacion && (
-                      <div className="bg-gray-50 p-4 rounded-lg">
-                        <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
-                          Ubicación
-                        </label>
-                        <p className="text-sm text-gray-900 flex items-start gap-2">
-                          <LuMapPin className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
-                          <span>{item.ubicacion}</span>
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-
             {/* Información Personal (si existe) */}
             {(item.nombre || item.primerApellido || item.segundoApellido) && (
               <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
@@ -162,8 +106,8 @@ const ContactoDetailModal = ({ item, isOpen, onClose }: ContactoDetailModalProps
               </div>
 
               <div className="p-5">
-                <div className="space-y-4">
-                  {/* Mensaje */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                  {/* Mensaje - Columna Izquierda */}
                   <div className="bg-gray-50 p-4 rounded-lg">
                     <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
                       Descripción
@@ -171,7 +115,7 @@ const ContactoDetailModal = ({ item, isOpen, onClose }: ContactoDetailModalProps
                     <p className="text-sm text-gray-900 whitespace-pre-wrap leading-relaxed">{item.mensaje}</p>
                   </div>
 
-                  {/* Archivo Adjunto */}
+                  {/* Archivo Adjunto - Columna Derecha */}
                   <div className="bg-gray-50 p-4 rounded-lg">
                     <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
                       Archivo Adjunto
@@ -190,6 +134,59 @@ const ContactoDetailModal = ({ item, isOpen, onClose }: ContactoDetailModalProps
                       <p className="text-sm text-gray-500">Sin adjuntos</p>
                     )}
                   </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Información del Tipo y Usuario */}
+            <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
+              <div className="bg-gray-50 px-5 py-3 border-b border-gray-200">
+                <div className="flex items-center gap-3">
+                  <div className={`w-8 h-8 ${config.color} rounded-lg flex items-center justify-center`}>
+                    <IconComponent className="w-4 h-4" />
+                  </div>
+                  <h3 className="text-base font-bold text-gray-900">Información General</h3>
+                </div>
+              </div>
+
+              <div className="p-5">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                  {/* Tipo */}
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
+                      Tipo
+                    </label>
+                    <span className={`inline-flex items-center px-3 py-1 rounded-lg text-xs font-semibold ${config.color} border border-gray-200`}>
+                      {item.tipo}
+                    </span>
+                  </div>
+
+                  {/* Fecha de Creación */}
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
+                      Fecha de Creación
+                    </label>
+                    <p className="text-sm text-gray-900 flex items-center gap-2">
+                      <LuCalendar className="w-4 h-4 text-gray-400" />
+                      {item.fechaCreacion ? 
+                        format(new Date(item.fechaCreacion), 'dd/MM/yyyy HH:mm', { locale: es }) : 
+                        'No disponible'
+                      }
+                    </p>
+                  </div>
+
+                  {/* Ubicación */}
+                  {item.ubicacion && (
+                    <div className="bg-gray-50 p-4 rounded-lg">
+                      <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
+                        Ubicación
+                      </label>
+                      <p className="text-sm text-gray-900 flex items-start gap-2">
+                        <LuMapPin className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
+                        <span>{item.ubicacion}</span>
+                      </p>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
