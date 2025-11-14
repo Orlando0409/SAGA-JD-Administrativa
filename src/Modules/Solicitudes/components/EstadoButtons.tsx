@@ -133,15 +133,15 @@ const EstadoButtons: React.FC<EstadoButtonsProps> = ({
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                        <AlertDialogCancel disabled={aprobarMutation.isPending}>
-                            Cancelar
-                        </AlertDialogCancel>
                         <AlertDialogAction 
                             onClick={handleConfirmAprobar}
                             disabled={aprobarMutation.isPending}
                         >
                             {aprobarMutation.isPending ? 'Aprobando...' : 'Aprobar'}
                         </AlertDialogAction>
+                        <AlertDialogCancel disabled={aprobarMutation.isPending}>
+                            Cancelar
+                        </AlertDialogCancel>
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
@@ -157,15 +157,15 @@ const EstadoButtons: React.FC<EstadoButtonsProps> = ({
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                        <AlertDialogCancel disabled={completarMutation.isPending}>
-                            Cancelar
-                        </AlertDialogCancel>
                         <AlertDialogAction 
                             onClick={handleConfirmCompletar}
                             disabled={completarMutation.isPending}
                         >
                             {completarMutation.isPending ? 'Completando...' : 'Completar'}
                         </AlertDialogAction>
+                        <AlertDialogCancel disabled={completarMutation.isPending}>
+                            Cancelar
+                        </AlertDialogCancel>
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
@@ -181,9 +181,7 @@ const EstadoButtons: React.FC<EstadoButtonsProps> = ({
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                        <AlertDialogCancel disabled={rechazarMutation.isPending}>
-                            Cancelar
-                        </AlertDialogCancel>
+
                         <AlertDialogAction 
                             onClick={handleConfirmRechazar}
                             disabled={rechazarMutation.isPending}
@@ -191,6 +189,9 @@ const EstadoButtons: React.FC<EstadoButtonsProps> = ({
                         >
                             {rechazarMutation.isPending ? 'Rechazando...' : 'Rechazar'}
                         </AlertDialogAction>
+                        <AlertDialogCancel disabled={rechazarMutation.isPending}>
+                            Cancelar
+                        </AlertDialogCancel>
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>

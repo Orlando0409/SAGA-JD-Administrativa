@@ -346,15 +346,15 @@ const ModalMedidor = ({ isOpen, onClose, onMedidorAsignado, afiliado }: ModalMed
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                        <AlertDialogCancel disabled={asignarMedidorMutation.isPending}>
-                            Cancelar
-                        </AlertDialogCancel>
                         <AlertDialogAction 
                             onClick={handleConfirmAsignacion}
                             disabled={asignarMedidorMutation.isPending}
                         >
                             {asignarMedidorMutation.isPending ? 'Asignando...' : 'Confirmar asignación'}
                         </AlertDialogAction>
+                        <AlertDialogCancel disabled={asignarMedidorMutation.isPending}>
+                            Cancelar
+                        </AlertDialogCancel>
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
