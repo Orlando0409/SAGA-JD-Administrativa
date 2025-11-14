@@ -274,24 +274,30 @@ export default function ProveedoresTable() {
     });
 
     return (
-        <div className="w-full">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
-                <div className="flex items-start gap-4 flex-col justify-start">
-                    <h2 className="text-2xl font-bold text-gray-900">Gestión de Proveedores</h2>
-                    <p className="text-sm text-gray-600 pb-4">Gestiona los proveedores del sistema</p>
+        <div className="w-full ">
+            <div className="gap-4 mb-4">
+                <div className='p-4'>
+                    <div className="flex items-start gap-4 flex-col justify-start">
+                        <h2 className="text-2xl font-bold text-gray-900">Gestión de Proveedores</h2>
+                        <p className="text-sm text-gray-600 pb-4">Gestiona los proveedores del sistema</p>
+                    </div>
                 </div>
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-                    <button
+                
+                <div className="flex flex-col justify-end sm:flex-row items-stretch sm:items-center gap-3">
+                   <button
                         onClick={() => setIsFilterOpen(true)}
-                        className={`px-4 py-2 rounded-lg hover:bg-gray-200 transition flex items-center gap-2 bg-blue-100 text-blue-700 border border-blue-300`}
-                        aria-pressed={activeFiltersCount > 0}
+                        className={`px-4 py-2 border rounded-md flex items-center gap-2 transition-colors ${
+                        activeFiltersCount > 0
+                            ? 'border-blue-500 bg-blue-50 text-blue-700'
+                            : 'border-gray-300 hover:bg-gray-50'
+                        }`}
                     >
                         <LuFilter className="w-4 h-4" />
                         Filtros
                         {activeFiltersCount > 0 && (
-                            <span className="bg-blue-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                                {activeFiltersCount}
-                            </span>
+                        <span className="bg-blue-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                            {activeFiltersCount}
+                        </span>
                         )}
                     </button>
 
@@ -306,7 +312,7 @@ export default function ProveedoresTable() {
                         />
                     </div>
                     <button
-                        className="px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 shadow-sm text-sm whitespace-nowrap"
+                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center gap-2"
                         onClick={() => setShowCreateModal(true)}
                     >
                         + Nuevo Proveedor
@@ -377,7 +383,7 @@ export default function ProveedoresTable() {
                         <tbody className="bg-white divide-y divide-sky-50">
                             {table.getRowModel().rows.length === 0 ? (
                                 <tr>
-                                    <td colSpan={5} className="px-2 sm:px-4 py-8 text-center text-slate-500">
+                                    <td colSpan={columns.length} className="px-2 sm:px-4 py-8 text-center text-slate-500">
                                         {globalFilter ? 'No se encontraron proveedores que coincidan con la búsqueda' : 'No hay proveedores registrados'}
                                     </td>
                                 </tr>

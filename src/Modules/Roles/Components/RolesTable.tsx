@@ -272,7 +272,23 @@ const Roles = () => {
 
         <div className="p-6">
           <div className="flex justify-between items-center gap-4">
-            <div className="relative flex-1 max-w-md">
+            <div className='gap-2 flex items-center'>
+
+            <label htmlFor='estado' className="text-sm font-medium text-gray-700">Estado:</label>
+            <select
+                id="estado"
+                value={estadoFilter}
+                onChange={(e) => setEstadoFilter(e.target.value)}
+              className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+              >
+                <option value="Todos">Todos los roles</option>
+                <option value="Activo">Activos</option>
+                <option value="Inactivo">Inactivos</option>
+              </select>
+            </div>
+           
+            <div className="flex gap-3">
+              <div className="relative flex-1 max-w-md">
               <LuSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
               <input
                 type="text"
@@ -282,17 +298,6 @@ const Roles = () => {
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
-
-            <div className="flex gap-3">
-              <select
-                value={estadoFilter}
-                onChange={(e) => setEstadoFilter(e.target.value)}
-                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-100 text-gray-700"
-              >
-                <option value="Todos">Todos los roles</option>
-                <option value="Activo">Activos</option>
-                <option value="Inactivo">Inactivos</option>
-              </select>
 
               {canCreate('usuarios') && (
                 <button
@@ -307,7 +312,7 @@ const Roles = () => {
           </div>
         </div>
 
-<div className="bg-white rounded-2xl shadow-sm border border-sky-100 overflow-hidden max-h-[calc(100vh-300px)] overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100">
+      <div className="bg-white rounded-2xl shadow-sm border border-sky-100 overflow-hidden max-h-[calc(100vh-300px)] overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100">
           <div className="overflow-x-auto">
             <table className="min-w-full table-auto">
               <thead className="bg-sky-50">
@@ -363,7 +368,7 @@ const Roles = () => {
               <tbody className="bg-white divide-y divide-sky-50">
                 {table.getRowModel().rows.length === 0 ? (
                   <tr>
-                    <td colSpan={4} className="px-2 sm:px-4 py-8 text-center text-slate-500">
+                    <td colSpan={columns.length} className="px-2 sm:px-4 py-8 text-center text-slate-500">
                       {globalFilter ? 'No se encontraron roles que coincidan con la búsqueda' : 'No hay roles registrados'}
                     </td>
                   </tr>

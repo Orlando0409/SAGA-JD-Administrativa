@@ -416,17 +416,7 @@ const CatalogoMovimientos: React.FC<CatalogoMovimientosProps> = () => {
           </div>
         <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
           <div className="flex items-center gap-4 w-full sm:w-auto">
-            <div className="relative flex-1 max-w-md">
-              <LuSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-              <input
-                type="text"
-                placeholder="Buscar movimientos..."
-                value={globalFilter ?? ''}
-                onChange={(e) => setGlobalFilter(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-            <button
+             <button
               onClick={() => setIsFilterModalOpen(true)}
               className={`px-4 py-2 border rounded-md flex items-center gap-2 transition-colors ${
                 activeFiltersCount > 0
@@ -442,6 +432,17 @@ const CatalogoMovimientos: React.FC<CatalogoMovimientosProps> = () => {
                 </span>
               )}
             </button>
+            <div className="relative flex-1 max-w-md">
+              <LuSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <input
+                type="text"
+                placeholder="Buscar movimientos..."
+                value={globalFilter ?? ''}
+                onChange={(e) => setGlobalFilter(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+           
             <button 
               onClick={() => setIsCreateModalOpen(true)}
               className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md flex items-center gap-2 transition-colors"
@@ -501,8 +502,7 @@ const CatalogoMovimientos: React.FC<CatalogoMovimientosProps> = () => {
 
           {movimientos.length === 0 && (
           <div className="text-center py-12">
-            <div className="text-gray-500 text-lg font-medium mb-2">No hay movimientos registrados</div>
-            <div className="text-gray-400">Los movimientos de inventario aparecerán aquí</div>
+            <div className="text-gray-500 ">No hay movimientos registrados</div>
           </div>
         )}
 
