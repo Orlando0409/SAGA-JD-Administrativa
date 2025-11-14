@@ -26,6 +26,7 @@ import type { SolicitudJuridica } from '../Models/ModelosJuridicos';
 import EditSolicitudModal from './EditSolicitudModal';
 import ModalSolicitud from './ModalSolicitud';
 import { MdKeyboardArrowUp, MdKeyboardArrowDown, MdKeyboardDoubleArrowLeft, MdKeyboardArrowLeft, MdKeyboardArrowRight, MdKeyboardDoubleArrowRight } from 'react-icons/md';
+import { LuSearch } from 'react-icons/lu';
 
 // Tipo unificado para la tabla de solicitudes
 type SolicitudUnificada = {
@@ -508,22 +509,28 @@ export default function SolicitudesTable() {
 
     return (
         <div className="w-full">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
-                <div className="flex items-start gap-4 flex-col justify-start">
+            <div className="flex flex-col gap-4 mb-4">
+                <div className='p-3'>
+                    <div className="flex items-start gap-4 flex-col justify-start">
                     <h2 className="text-2xl font-bold text-gray-900">Revisión de Solicitudes</h2>
                     <p className="text-sm text-gray-600 pb-4">Gestiona las solicitudes de los usuarios</p>
                 </div>
-                <div className="flex items-center gap-3">
-                    <input
-                        value={globalFilter}
-                        onChange={(e) => setGlobalFilter(e.target.value)}
-                        placeholder="Buscar por nombre, cédula, tipo, estado..."
-                        className="w-full sm:w-auto px-3 py-2 rounded-lg border border-sky-200 bg-sky-50 focus:outline-none focus:ring-2 focus:ring-sky-200 text-sm"
-                    />
 
                 </div>
-            </div>
+                <div className='flex justify-end pb-2'>
+                      <div className="relative  flex-1 max-w-md">
+                        <LuSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                        <input
+                            value={globalFilter}
+                            onChange={(e) => setGlobalFilter(e.target.value)}
+                            placeholder="Buscar por nombre, cédula, tipo, estado..."
+                            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        />
 
+                    </div>
+                </div>
+                 
+            </div>
 
             <div className="bg-white rounded-2xl shadow-sm border border-sky-100 overflow-hidden max-h-[calc(100vh-300px)] overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100">
                 <div className="overflow-x-auto">
@@ -577,7 +584,7 @@ export default function SolicitudesTable() {
                             {table.getRowModel().rows.length === 0 ? (
                                 <tr>
                                     <td colSpan={columns.length} className="px-2 sm:px-4 py-8 text-center text-slate-500">
-                                        {globalFilter ? 'No se encontraron resultados que coincidan con la búsqueda' : 'No hay solicitudes registradas'}
+                                        {globalFilter ? 'No se encontraron solicitudes que coincidan con la búsqueda' : 'No hay solicitudes registradas'}
                                     </td>
                                 </tr>
                             ) : (

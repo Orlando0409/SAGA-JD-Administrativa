@@ -207,9 +207,7 @@ export default function AbonadosTable() {
                     return <span className={`${base} bg-emerald-100 text-emerald-700 border border-emerald-300`}>Activo</span>;
                 } else if (estadoNombre.toLowerCase() === 'inactivo') {
                     return <span className={`${base} bg-red-100 text-red-700 border border-red-300`}>Inactivo</span>;
-                } else if (estadoNombre.toLowerCase() === 'pendiente') {
-                    return <span className={`${base} bg-amber-100 text-amber-700 border border-amber-300`}>Pendiente</span>;
-                }
+                } 
 
                 return (
                     <div className='flex items-center justify-start'>
@@ -413,7 +411,6 @@ export default function AbonadosTable() {
                             <option value="Todos">Todos los afiliados</option>
                             <option value="Activo">Activos</option>
                             <option value="Inactivo">Inactivos</option>
-                            <option value="Pendiente">Pendientes</option>
                         </select>
                     </div>
                     <div className="flex items-center gap-4 w-full sm:w-auto">
