@@ -197,14 +197,6 @@ const CatálogoAuditorias = () => {
   });
 
 
-  const hasActiveFilters =
-    appliedFilters.modulo ||
-    appliedFilters.accion ||
-    appliedFilters.mis_auditorias ||
-    appliedFilters.por_usuario;
-
-
-
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">

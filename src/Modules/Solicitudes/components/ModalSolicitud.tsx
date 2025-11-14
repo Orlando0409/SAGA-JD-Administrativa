@@ -189,6 +189,7 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
             console.log(`✅ Aprobando y poniendo en espera: ${tipoSolicitud} - ${tipoPersona}`);
             await aprobarYEnEsperaMutation.mutateAsync(tipoSolicitud, tipoPersona, info.id);
             setShowAprobarDialog(false);
+            onClose();
         } catch (error) {
             console.error('❌ Error al marcar en aprobada y en espera:', error);
             setShowAprobarDialog(false);
@@ -534,15 +535,16 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                        <AlertDialogCancel disabled={aprobarYEnEsperaMutation.isPending}>
-                            Cancelar
-                        </AlertDialogCancel>
+                        
                         <AlertDialogAction 
                             onClick={handleConfirmAprobar}
                             disabled={aprobarYEnEsperaMutation.isPending}
                         >
                             {aprobarYEnEsperaMutation.isPending ? 'Aprobando...' : 'Aprobar'}
                         </AlertDialogAction>
+                        <AlertDialogCancel disabled={aprobarYEnEsperaMutation.isPending}>
+                            Cancelar
+                        </AlertDialogCancel>
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
@@ -559,15 +561,16 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                        <AlertDialogCancel disabled={completarMutation.isPending}>
-                            Cancelar
-                        </AlertDialogCancel>
+                        
                         <AlertDialogAction 
                             onClick={handleConfirmCompletar}
                             disabled={completarMutation.isPending}
                         >
                             {completarMutation.isPending ? 'Completando...' : 'Completar'}
                         </AlertDialogAction>
+                        <AlertDialogCancel disabled={completarMutation.isPending}>
+                            Cancelar
+                        </AlertDialogCancel>
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
@@ -584,9 +587,7 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                        <AlertDialogCancel disabled={rechazarMutation.isPending}>
-                            Cancelar
-                        </AlertDialogCancel>
+                        
                         <AlertDialogAction 
                             onClick={handleConfirmRechazar}
                             disabled={rechazarMutation.isPending}
@@ -594,6 +595,9 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
                         >
                             {rechazarMutation.isPending ? 'Rechazando...' : 'Rechazar'}
                         </AlertDialogAction>
+                        <AlertDialogCancel disabled={rechazarMutation.isPending}>
+                            Cancelar
+                        </AlertDialogCancel>
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
