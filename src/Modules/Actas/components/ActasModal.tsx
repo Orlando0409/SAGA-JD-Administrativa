@@ -39,20 +39,61 @@ const ActasModal = ({ isOpen, onClose, acta }: ActasModalProps) => {
                         >
                             {acta.Descripcion}
                         </p>
-                        <div className="mt-4">
-                            <h3 className="text-sm font-semibold text-gray-700">Archivos:</h3>
-                            {acta?.Archivos?.map((archivo: ArchivoActa) => (
-                                <a
-                                    key={archivo.Id_Archivo_Acta}
-                                    href={archivo.Url_Archivo}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="text-blue-600 hover:underline flex items-center gap-2 mt-2"
-                                >
-                                    <FileText size={18} />
-                                    Ver archivo PDF
-                                </a>
-                            ))}
+                        <div className="mt-6">
+                            <h3 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                                <FileText size={18} className="text-blue-600" />
+                                Archivos Adjuntos
+                            </h3>
+                            {!acta?.Archivos || acta.Archivos.length === 0 ? (
+                                <div className="bg-gray-50 border border-dashed border-gray-300 rounded-lg p-4 text-center">
+                                    <p className="text-gray-500 text-sm">No hay archivos disponibles</p>
+                                </div>
+                            ) : (
+                                <div className="space-y-3">
+                                    {acta.Archivos.map((archivo: ArchivoActa, index: number) => (
+                                        <div
+                                            key={archivo.Id_Archivo_Acta || index}
+                                            className="bg-gradient-to-r from-blue-50 to-white border border-blue-200 rounded-xl p-4 flex items-center justify-between hover:shadow-md hover:border-blue-300 transition-all duration-200 group"
+                                        >
+                                            <div className="flex items-center gap-3">
+                                                <div className="bg-blue-100 p-2.5 rounded-lg group-hover:bg-blue-200 transition-colors">
+                                                    <FileText size={22} className="text-blue-600" />
+                                                </div>
+                                                <div>
+                                                    <span className="text-sm font-medium text-gray-800">
+                                                        Archivo {index + 1}
+                                                    </span>
+                                                    <p className="text-xs text-gray-500 mt-0.5">
+                                                        Documento PDF
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <a
+                                                href={archivo.Url_Archivo}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 hover:shadow-lg transform hover:scale-105 transition-all duration-200 flex items-center gap-2"
+                                            >
+                                                <svg 
+                                                    xmlns="http://www.w3.org/2000/svg" 
+                                                    width="16" 
+                                                    height="16" 
+                                                    viewBox="0 0 24 24" 
+                                                    fill="none" 
+                                                    stroke="currentColor" 
+                                                    strokeWidth="2" 
+                                                    strokeLinecap="round" 
+                                                    strokeLinejoin="round"
+                                                >
+                                                    <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
+                                                    <circle cx="12" cy="12" r="3"/>
+                                                </svg>
+                                                Ver
+                                            </a>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
                         </div>
                     </div>
 
