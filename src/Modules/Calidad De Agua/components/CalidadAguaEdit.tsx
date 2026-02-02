@@ -134,21 +134,7 @@ export default function CalidadAguaEdit({ archivo, onClose, refetch }: CalidadAg
                         {descripcionError && <p className="text-xs text-red-500 mt-1">{descripcionError}</p>}
                     </div>
 
-                    {/* Información del archivo actual */}
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                        <div className="flex items-center gap-2 mb-2">
-                            <FileText size={16} className="text-blue-600" />
-                            <p className="text-sm font-semibold text-blue-700">Archivo actual</p>
-                        </div>
-                        <a
-                            href={archivo.Url_Archivo}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-xs text-blue-600 hover:underline inline-flex items-center gap-1"
-                        >
-                            Ver archivo actual
-                        </a>
-                    </div>
+                   
 
                     {/* Campo de Archivos PDF (opcional para reemplazar) */}
                     <div>
