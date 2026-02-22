@@ -141,6 +141,13 @@ const DetailMaterialModal: React.FC<DetailMaterialModalProps> = ({
 
                   <div className="bg-gray-50 p-4 rounded-lg">
                     <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
+                      Número de Estantería
+                    </label>
+                    <p className="text-sm font-medium text-gray-900">{material.Numero_Estanteria ?? 'N/A'}</p>
+                  </div>
+
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
                       Proveedor
                     </label>
                     <p className="text-sm text-gray-900">{getProveedorNombre(material)}</p>

@@ -39,6 +39,7 @@ const CreateMaterialModal: React.FC<CreateMaterialModalProps> = ({ isOpen, onClo
     Id_Unidad_Medicion: 0,
     Cantidad: 1,
     Precio_Unitario: 5,
+    Numero_Estanteria: 1,
     IDS_Categorias: [],
     Id_Tipo_Proveedor: undefined,
     Id_Proveedor: undefined,
@@ -88,6 +89,7 @@ const CreateMaterialModal: React.FC<CreateMaterialModalProps> = ({ isOpen, onClo
         Id_Unidad_Medicion: formData.Id_Unidad_Medicion,
         Cantidad: formData.Cantidad,
         Precio_Unitario: formData.Precio_Unitario,
+        Numero_Estanteria: formData.Numero_Estanteria,
         IDS_Categorias: formData.IDS_Categorias ?? [],
         Id_Tipo_Proveedor: formData.Id_Tipo_Proveedor,
         Id_Proveedor: formData.Id_Proveedor,
@@ -103,6 +105,7 @@ const CreateMaterialModal: React.FC<CreateMaterialModalProps> = ({ isOpen, onClo
         Id_Unidad_Medicion: 0,
         Cantidad: 1,
         Precio_Unitario: 5,
+        Numero_Estanteria: 1,
         IDS_Categorias: [],
         Id_Tipo_Proveedor: undefined,
         Id_Proveedor: undefined,
@@ -268,6 +271,27 @@ const CreateMaterialModal: React.FC<CreateMaterialModalProps> = ({ isOpen, onClo
               />
               {formErrors.Precio_Unitario && (
                 <p className="text-red-500 text-xs mt-1">{formErrors.Precio_Unitario}</p>
+              )}
+            </div>
+
+            <div>
+              <label htmlFor="numero-estanteria" className="block text-sm font-medium text-gray-700 mb-1">
+                Número de Estantería <span className="text-red-500">*</span>
+              </label>
+              <input
+                id="numero-estanteria"
+                type="number"
+                min="1"
+                max="50"
+                value={formData.Numero_Estanteria}
+                onChange={(e) => setFormData(prev => ({ ...prev, Numero_Estanteria: parseInt(e.target.value) || 1 }))}
+                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                  formErrors.Numero_Estanteria ? 'border-red-500' : 'border-gray-300'
+                }`}
+                placeholder="Ej: 5"
+              />
+              {formErrors.Numero_Estanteria && (
+                <p className="text-red-500 text-xs mt-1">{formErrors.Numero_Estanteria}</p>
               )}
             </div>
 

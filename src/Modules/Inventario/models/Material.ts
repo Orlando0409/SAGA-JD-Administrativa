@@ -32,6 +32,7 @@ export interface Material {
   Descripcion: string;
   Cantidad: number;
   Precio_Unitario: number;
+  Numero_Estanteria: number;
   Fecha_Creacion: NullableDate;
   Fecha_Actualizacion: NullableDate;
   Ultima_Fecha_Baja?: NullableDate;
@@ -59,6 +60,7 @@ export interface CreateMaterialData {
   Id_Unidad_Medicion: number;
   Cantidad: number;
   Precio_Unitario: number;
+  Numero_Estanteria: number;
   IDS_Categorias?: number[];
   Id_Tipo_Proveedor?: number;
   Id_Proveedor?: number;
@@ -69,6 +71,7 @@ export interface UpdateMaterialData {
   Descripcion?: string;
   Id_Unidad_Medicion?: number;
   Precio_Unitario?: number;
+  Numero_Estanteria?: number;
   IDS_Categorias?: number[];
 }
 
