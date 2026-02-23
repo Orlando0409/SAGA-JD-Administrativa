@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
-import { useUpdateActa } from "../Hook/hookActas";
+import { useUpdateActa, useDeleteArchivoActa } from "../Hook/hookActas";
 import { FaFilePdf, FaTimes } from "react-icons/fa";
 import { Alert } from '@/Modules/Global/components/Alert/ui/Alert';
-import type { Acta } from "../Models/ActasModels";
+import type { Acta , ArchivoActa } from "../Models/ActasModels";
 
 interface ActasEditProps {
     acta: Acta;
@@ -12,10 +12,13 @@ interface ActasEditProps {
 
 export default function ActasEdit({ acta, onClose, refetch }: ActasEditProps) {
     const updateActaMutation = useUpdateActa();
+    const deleteArchivoMutation = useDeleteArchivoActa();
 
     const [titulo, setTitulo] = useState(acta.Titulo);
     const [descripcion, setDescripcion] = useState(acta.Descripcion);
     const [files, setFiles] = useState<File[]>([]);
+    const [existingFiles, setExistingFiles] = useState<ArchivoActa[]>(acta.Archivos ?? []);
+    const [deletingId, setDeletingId] = useState<number | null>(null);
     const [tituloError, setTituloError] = useState(""); // Validación de título
     const [descripcionError, setDescripcionError] = useState(""); // Validación de descripción
     const [notification, setNotification] = useState<{
@@ -34,7 +37,23 @@ export default function ActasEdit({ acta, onClose, refetch }: ActasEditProps) {
     useEffect(() => {
         setTitulo(acta.Titulo);
         setDescripcion(acta.Descripcion);
+        setExistingFiles(acta.Archivos ?? []);
     }, [acta]);
+
+    const handleDeleteArchivoExistente = (idArchivo: number) => {
+        setDeletingId(idArchivo);
+        deleteArchivoMutation.mutate({ idActa: acta.Id_Acta, idArchivo }, {
+            onSuccess: () => {
+                setExistingFiles(prev => prev.filter(f => f.Id_Archivo_Acta !== idArchivo));
+                setNotification({ type: 'success', title: 'Archivo eliminado correctamente.' });
+                setDeletingId(null);
+            },
+            onError: () => {
+                setNotification({ type: 'error', title: 'No se pudo eliminar el archivo.' });
+                setDeletingId(null);
+            },
+        });
+    };
 
     const handleTituloChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
@@ -154,10 +173,60 @@ export default function ActasEdit({ acta, onClose, refetch }: ActasEditProps) {
                             )}
                         </div>
 
+                        {/* Archivos existentes del acta */}
+                        {existingFiles.length > 0 && (
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Archivos actuales
+                                </label>
+                                <div className="space-y-1">
+                                    {existingFiles.map((archivo) => {
+                                        const nombreArchivo = archivo.Url_Archivo.split('/').pop() ?? `Archivo ${archivo.Id_Archivo_Acta}`;
+                                        const eliMinando = deletingId === archivo.Id_Archivo_Acta;
+                                        return (
+                                            <div
+                                                key={archivo.Id_Archivo_Acta}
+                                                className="flex items-center justify-between text-xs bg-red-50 border border-red-200 p-2 rounded"
+                                            >
+                                                <div className="flex items-center gap-2 flex-1 min-w-0">
+                                                    <FaFilePdf className="w-4 h-4 text-red-500 flex-shrink-0" />
+                                                    <a
+                                                        href={archivo.Url_Archivo}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="truncate text-blue-600 hover:underline"
+                                                        title={nombreArchivo}
+                                                    >
+                                                        {nombreArchivo}
+                                                    </a>
+                                                </div>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleDeleteArchivoExistente(archivo.Id_Archivo_Acta)}
+                                                    disabled={eliMinando}
+                                                    className="text-red-500 hover:text-red-700 hover:bg-red-100 p-1 rounded flex-shrink-0 disabled:opacity-50"
+                                                    title="Eliminar archivo"
+                                                >
+                                                    {eliMinando ? (
+                                                        <svg className="w-3 h-3 animate-spin" fill="none" viewBox="0 0 24 24">
+                                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+                                                        </svg>
+                                                    ) : (
+                                                        <FaTimes className="w-3 h-3" />
+                                                    )}
+                                                </button>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        )}
+
                         {/* Campo de Archivos (opcional para edición) */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">
-                                Archivos PDF (opcional - reemplazar archivos existentes)
+                                Agregar nuevos archivos PDF
                             </label>
 
                             {/* Botón para seleccionar múltiples archivos */}
