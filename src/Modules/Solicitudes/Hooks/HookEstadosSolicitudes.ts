@@ -3,28 +3,16 @@ import { ServiceEstadoSolicitudes } from "../Service/EstadoSolicitudes";
 import type { TipoSolicitud, TipoPersona, EstadoSolicitud } from "../Types/EstadoSolicitudes";
 import { useAlerts } from "@/Modules/Global/context/AlertContext";
 
-/**
- * 🎯 Hook Unificado para manejo de estados de solicitudes
- * 
- * Centraliza toda la lógica de React Query para cambios de estado
- * Reemplaza a los 16+ hooks individuales anteriores
- */
-
-// ============================================
-// 🔄 Hook Genérico Base
-// ============================================
 
 interface CambiarEstadoParams {
     tipoSolicitud: TipoSolicitud;
     tipoPersona: TipoPersona;
     solicitudId: number | string;
     nuevoEstado: EstadoSolicitud;
+    motivoRechazo?: string;
 }
 
-/**
- * Hook genérico para cambiar el estado de cualquier solicitud
- * Maneja la invalidación automática de cachés y muestra alertas
- */
+
 export const useCambiarEstadoSolicitud = () => {
     const queryClient = useQueryClient();
     const { showSuccess, showError } = useAlerts();
@@ -36,11 +24,11 @@ export const useCambiarEstadoSolicitud = () => {
         onSuccess: async (_, variables) => {
             const emoji = variables.tipoPersona === 'fisica' ? '👤' : '🏢';
             const tipoPersonaTexto = variables.tipoPersona === 'fisica' ? 'Física' : 'Jurídica';
-            
+
             // Determinar el mensaje según el estado
             let titulo = 'Estado actualizado';
             let mensaje = '';
-            
+
             switch (variables.nuevoEstado) {
                 case 2:
                     titulo = 'En Revisión';
@@ -61,7 +49,7 @@ export const useCambiarEstadoSolicitud = () => {
                 default:
                     mensaje = `Estado actualizado para solicitud ${variables.tipoSolicitud} (${tipoPersonaTexto})`;
             }
-            
+
             console.log(`✅ ${emoji} Hook: Estado cambiado exitosamente`, variables);
 
             // Invalidar y refrescar todas las cachés relevantes
@@ -80,7 +68,7 @@ export const useCambiarEstadoSolicitud = () => {
             ]);
 
             console.log(`🔄 ${emoji} Cachés invalidadas y actualizadas`);
-            
+
             // Mostrar alerta de éxito
             showSuccess(titulo, mensaje);
         },
@@ -88,28 +76,18 @@ export const useCambiarEstadoSolicitud = () => {
         onError: (error: any, variables) => {
             const emoji = variables.tipoPersona === 'fisica' ? '👤' : '🏢';
             const tipoPersonaTexto = variables.tipoPersona === 'fisica' ? 'Física' : 'Jurídica';
-            
+
             console.error(`❌ ${emoji} Hook: Error al cambiar estado`, error, variables);
-            
-            const errorMessage = error?.response?.data?.message || 
-                                `Error al actualizar el estado de la solicitud ${variables.tipoSolicitud} (${tipoPersonaTexto})`;
-            
+
+            const errorMessage = error?.response?.data?.message ||
+                `Error al actualizar el estado de la solicitud ${variables.tipoSolicitud} (${tipoPersonaTexto})`;
+
             showError('Error al cambiar estado', errorMessage);
         },
     });
 };
 
-// ============================================
-// 🎁 Hooks de Conveniencia
-// ============================================
 
-/**
- * Hook para marcar solicitud como "En Revisión" (Estado 1 → 2)
- * 
- * @example
- * const marcarEnRevision = useMarcarEnRevision();
- * await marcarEnRevision.mutateAsync('afiliacion', 'fisica', 123);
- */
 export const useMarcarEnRevision = () => {
     const cambiarEstado = useCambiarEstadoSolicitud();
 
@@ -129,13 +107,7 @@ export const useMarcarEnRevision = () => {
     };
 };
 
-/**
- * Hook para aprobar y poner en espera (Estado 2 → 3)
- * 
- * @example
- * const aprobarYEnEspera = useAprobarYEnEspera();
- * await aprobarYEnEspera.mutateAsync('afiliacion', 'fisica', 123);
- */
+
 export const useAprobarYEnEspera = () => {
     const cambiarEstado = useCambiarEstadoSolicitud();
 
@@ -155,13 +127,7 @@ export const useAprobarYEnEspera = () => {
     };
 };
 
-/**
- * Hook para completar solicitud (Estado 3 → 4)
- * 
- * @example
- * const completar = useCompletar();
- * await completar.mutateAsync('afiliacion', 'fisica', 123);
- */
+
 export const useCompletar = () => {
     const cambiarEstado = useCambiarEstadoSolicitud();
 
@@ -181,22 +147,16 @@ export const useCompletar = () => {
     };
 };
 
-/**
- * Hook para rechazar solicitud (Cualquier estado → 5)
- * 
- * @example
- * const rechazar = useRechazar();
- * await rechazar.mutateAsync('afiliacion', 'fisica', 123);
- */
+
 export const useRechazar = () => {
     const cambiarEstado = useCambiarEstadoSolicitud();
 
     return {
-        mutate: (tipoSolicitud: TipoSolicitud, tipoPersona: TipoPersona, solicitudId: number | string) =>
-            cambiarEstado.mutate({ tipoSolicitud, tipoPersona, solicitudId, nuevoEstado: 5 }),
+        mutate: (tipoSolicitud: TipoSolicitud, tipoPersona: TipoPersona, solicitudId: number | string, motivoRechazo?: string) =>
+            cambiarEstado.mutate({ tipoSolicitud, tipoPersona, solicitudId, nuevoEstado: 5, motivoRechazo }),
 
-        mutateAsync: (tipoSolicitud: TipoSolicitud, tipoPersona: TipoPersona, solicitudId: number | string) =>
-            cambiarEstado.mutateAsync({ tipoSolicitud, tipoPersona, solicitudId, nuevoEstado: 5 }),
+        mutateAsync: (tipoSolicitud: TipoSolicitud, tipoPersona: TipoPersona, solicitudId: number | string, motivoRechazo?: string) =>
+            cambiarEstado.mutateAsync({ tipoSolicitud, tipoPersona, solicitudId, nuevoEstado: 5, motivoRechazo }),
 
         isPending: cambiarEstado.isPending,
         isError: cambiarEstado.isError,
@@ -207,32 +167,7 @@ export const useRechazar = () => {
     };
 };
 
-// ============================================
-// 🚀 Hook Compuesto para Flujo Completo
-// ============================================
 
-/**
- * Hook que proporciona todos los métodos de cambio de estado en un solo objeto
- * Útil cuando necesitas múltiples operaciones en el mismo componente
- * 
- * @example
- * const estadoSolicitud = useEstadoSolicitud();
- * 
- * // Marcar en revisión
- * await estadoSolicitud.marcarEnRevision('afiliacion', 'fisica', 123);
- * 
- * // Aprobar y en espera
- * await estadoSolicitud.aprobarYEnEspera('afiliacion', 'fisica', 123);
- * 
- * // Completar
- * await estadoSolicitud.completar('afiliacion', 'fisica', 123);
- * 
- * // Rechazar
- * await estadoSolicitud.rechazar('afiliacion', 'fisica', 123);
- * 
- * // Verificar si alguna operación está en curso
- * const cargando = estadoSolicitud.isLoading;
- */
 export const useEstadoSolicitud = () => {
     const marcarEnRevision = useMarcarEnRevision();
     const aprobarYEnEspera = useAprobarYEnEspera();

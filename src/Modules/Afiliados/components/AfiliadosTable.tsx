@@ -207,7 +207,7 @@ export default function AbonadosTable() {
                     return <span className={`${base} bg-emerald-100 text-emerald-700 border border-emerald-300`}>Activo</span>;
                 } else if (estadoNombre.toLowerCase() === 'inactivo') {
                     return <span className={`${base} bg-red-100 text-red-700 border border-red-300`}>Inactivo</span>;
-                } 
+                }
 
                 return (
                     <div className='flex items-center justify-start'>
