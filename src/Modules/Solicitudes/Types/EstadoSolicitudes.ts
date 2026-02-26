@@ -31,4 +31,5 @@ export interface CambioEstadoRequest {
     tipoPersona: TipoPersona;
     solicitudId: number | string;
     nuevoEstado: EstadoSolicitud;
+    motivoRechazo?: string;
 }
