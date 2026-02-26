@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { useUpdateCalidadAgua } from "../Hook/HookCalidadAgua";
 import { CalidadAguaSchema } from "../schemas/CalidadDeAgua";
 import { z } from "zod";
-import { FileText, X } from "lucide-react";
 import { FaFilePdf, FaTimes } from "react-icons/fa";
 import { useAlerts } from "@/Modules/Global/context/AlertContext";
 import type { ArchivoCalidadAgua } from "../Models/CalidadDeAgua";
