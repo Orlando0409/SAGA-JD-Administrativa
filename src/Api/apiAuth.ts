@@ -1,6 +1,5 @@
 import axios from 'axios'
 import { cookieUtils } from '../Modules/Global/utils/CookieUtils'
-
 const apiURL = import.meta.env.VITE_API_URL;
 const axiosPrivate = axios.create({
   //Url local = http://localhost:3000/api

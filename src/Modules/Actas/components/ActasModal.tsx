@@ -41,7 +41,7 @@ const ActasModal = ({ isOpen, onClose, acta }: ActasModalProps) => {
                         </p>
                         <div className="mt-6">
                             <h3 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                                <FileText size={18} className="text-blue-600" />
+                            
                                 Archivos Adjuntos
                             </h3>
                             {!acta?.Archivos || acta.Archivos.length === 0 ? (
@@ -64,14 +64,14 @@ const ActasModal = ({ isOpen, onClose, acta }: ActasModalProps) => {
                                                         <div className="bg-gradient-to-br from-blue-500 to-blue-600 p-3 rounded-lg shadow-md group-hover:shadow-lg group-hover:scale-110 transition-all duration-300">
                                                             <FileText size={24} className="text-white" />
                                                         </div>
-                                                        <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 border-2 border-white rounded-full animate-pulse"></div>
+            
                                                     </div>
                                                     <div className="flex-1">
                                                         <p className="text-sm font-semibold text-gray-800 group-hover:text-blue-700 transition-colors">
                                                             Archivo {index + 1}
                                                         </p>
                                                         <p className="text-xs text-gray-500 mt-0.5 flex items-center gap-1">
-                                                            <span className="w-1.5 h-1.5 bg-blue-500 rounded-full"></span>
+                                                         
                                                             Documento PDF
                                                         </p>
                                                     </div>

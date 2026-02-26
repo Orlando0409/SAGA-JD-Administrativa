@@ -81,7 +81,7 @@ const CalidadAguaModal = ({ isOpen, onClose, archivo, refetch }: CalidadAguaModa
                         </p>
                         <div className="mt-6">
                             <h3 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                                <FileText size={18} className="text-blue-600" />
+                
                                 Archivo Adjunto
                             </h3>
                             <div className="group relative bg-gradient-to-br from-blue-50 via-white to-blue-50 border border-blue-200 rounded-xl p-4 hover:shadow-lg hover:border-blue-400 transition-all duration-300 hover:-translate-y-0.5">
@@ -91,14 +91,14 @@ const CalidadAguaModal = ({ isOpen, onClose, archivo, refetch }: CalidadAguaModa
                                             <div className="bg-gradient-to-br from-blue-500 to-blue-600 p-3 rounded-lg shadow-md group-hover:shadow-lg group-hover:scale-110 transition-all duration-300">
                                                 <FileText size={24} className="text-white" />
                                             </div>
-                                            <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 border-2 border-white rounded-full animate-pulse"></div>
+
                                         </div>
                                         <div className="flex-1">
                                             <p className="text-sm font-semibold text-gray-800 group-hover:text-blue-700 transition-colors">
                                                 Documento de Calidad de Agua
                                             </p>
                                             <p className="text-xs text-gray-500 mt-0.5 flex items-center gap-1">
-                                                <span className="w-1.5 h-1.5 bg-blue-500 rounded-full"></span>
+
                                                 Documento PDF
                                             </p>
                                         </div>
