@@ -31,6 +31,7 @@ import { useMedidores, useMedidoresPorEstado, useUpdateEstadoMedidor } from '../
 import type { Medidor } from '../../models/Medidor';
 import CreateMedidorModal from './CreateMedidorModal';
 import DetailMedidorModal from './DetailMedidorModal';
+import AsignarAfiliadoMedidorModal from './AsignarAfiliadoMedidorModal';
 
 interface CatalogoMedidoresProps {
   onBack?: () => void;
@@ -41,6 +42,7 @@ const CatalogoMedidores: React.FC<CatalogoMedidoresProps> = () => {
   const [globalFilter, setGlobalFilter] = useState('');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [isAsignarModalOpen, setIsAsignarModalOpen] = useState(false);
   const [selectedMedidor, setSelectedMedidor] = useState<Medidor | null>(null);
   const [estadoFilter, setEstadoFilter] = useState<string>('Todos');
   const [notification, setNotification] = useState<{
@@ -220,13 +222,25 @@ const CatalogoMedidores: React.FC<CatalogoMedidoresProps> = () => {
 
               if (estadoId === 1) {
                 return (
-                  <button
-                    className="px-2 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition-colors"
-                    onClick={() => handleCambiarEstado(info.row.original)}
-                    title="Cambiar estado"
-                  >
-                    Cambiar Estado
-                  </button>
+                  <>
+                    <button
+                      className="px-2 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition-colors"
+                      onClick={() => handleCambiarEstado(info.row.original)}
+                      title="Cambiar estado"
+                    >
+                      Cambiar Estado
+                    </button>
+                    <button
+                      className="px-2 py-1 bg-green-600  text-white text-xs rounded hover:bg-green-700 transition-colors"
+                      onClick={() => {
+                        setSelectedMedidor(info.row.original);
+                        setIsAsignarModalOpen(true);
+                      }}
+                      title="Asignar a afiliado"
+                    >
+                      Asignar
+                    </button> 
+                  </>
                 );
               }
 
@@ -554,6 +568,25 @@ const CatalogoMedidores: React.FC<CatalogoMedidoresProps> = () => {
             setSelectedMedidor(null);
           }}
           medidor={selectedMedidor}
+        />
+      )}
+
+      {selectedMedidor && (
+        <AsignarAfiliadoMedidorModal
+          isOpen={isAsignarModalOpen}
+          onClose={() => {
+            setIsAsignarModalOpen(false);
+            setSelectedMedidor(null);
+          }}
+          medidor={selectedMedidor}
+          onSuccess={() => {
+            refetch();
+            setNotification({
+              type: 'success',
+              title: 'Medidor asignado',
+              description: `El medidor #${selectedMedidor.Numero_Medidor} fue asignado correctamente.`,
+            });
+          }}
         />
       )}
     </div>

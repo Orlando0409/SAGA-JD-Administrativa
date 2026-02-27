@@ -1,9 +1,14 @@
 import apiAuth from "@/Api/apiAuth";
-import type { AfiliadoFisico } from "../Models/TablaAfiliados/ModeloAfiliadoFisico";
+import type { AfiliadoFisico, Medidor } from "../Models/TablaAfiliados/ModeloAfiliadoFisico";
 
 export async function getAfiliadosFisicos(): Promise<AfiliadoFisico[]> {
     const response = await apiAuth.get<AfiliadoFisico[]>("/afiliados/fisico/all");
     console.log('Response del API:', response.data); // 🔍 Debug
+    return response.data;
+}
+
+export async function getAfiliadoFisicoById(id: number): Promise<AfiliadoFisico> {
+    const response = await apiAuth.get<AfiliadoFisico>(`/afiliados/fisico/${id}`);
     return response.data;
 }
 
@@ -31,4 +36,49 @@ export const updateAfiliadoFisico = async (cedula: string, formData: FormData) =
 export const updateEstadoAfiliadoFisico = async (id: string, nuevoEstadoId: number) => {
     const response = await apiAuth.patch(`/afiliados/fisico/${id}/update/estado/${nuevoEstadoId}`);
     return response.data;
+};
+
+export interface MedidorAsignable {
+    Id_Medidor: number;
+    Numero_Medidor: number;
+    Estado_Medidor: {
+        Id_Estado_Medidor: number;
+        Nombre_Estado_Medidor: string;
+    };
+}
+
+export const getMedidoresAsignables = async (): Promise<MedidorAsignable[]> => {
+    const response = await apiAuth.get<MedidorAsignable[]>('/Inventario/medidores/asignables');
+    return response.data;
+};
+
+// Mapea la respuesta del backend (Estado) al formato del frontend (Estado_Medidor)
+const mapearMedidoresDetalle = (medidores: Array<{
+    Id_Medidor: number;
+    Numero_Medidor: number;
+    Estado: { Id_Estado: number; Nombre_Estado: string };
+}>): Medidor[] =>
+    medidores.map((m) => ({
+        Id_Medidor: m.Id_Medidor,
+        Numero_Medidor: m.Numero_Medidor,
+        Estado_Medidor: {
+            Id_Estado_Medidor: m.Estado?.Id_Estado ?? 0,
+            Nombre_Estado_Medidor: m.Estado?.Nombre_Estado ?? 'Sin estado',
+        },
+    }));
+
+export const getMedidoresByAfiliado = async (idAfiliado: number): Promise<Medidor[]> => {
+    const response = await apiAuth.get(`/afiliados/fisico/detail/${idAfiliado}`);
+    const data = response.data as { Medidores?: Array<{ Id_Medidor: number; Numero_Medidor: number; Estado: { Id_Estado: number; Nombre_Estado: string } }> };
+    return mapearMedidoresDetalle(data.Medidores ?? []);
+};
+
+export const getMedidoresByAfiliadoJuridico = async (idAfiliado: number): Promise<Medidor[]> => {
+    const response = await apiAuth.get(`/afiliados/juridico/detail/${idAfiliado}`);
+    const data = response.data as { Medidores?: Array<{ Id_Medidor: number; Numero_Medidor: number; Estado: { Id_Estado: number; Nombre_Estado: string } }> };
+    return mapearMedidoresDetalle(data.Medidores ?? []);
+};
+
+export const asignarMedidorAAfiliado = async (idAfiliado: number, idMedidor: number): Promise<void> => {
+    await apiAuth.patch(`/afiliados/${idAfiliado}/medidores/${idMedidor}/asignar`);
 };

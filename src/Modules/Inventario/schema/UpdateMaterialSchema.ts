@@ -21,6 +21,13 @@ export const UpdateMaterialSchema = z.object({
     .max(10000000, "El precio unitario no puede ser mayor a 10,000,000")
     .optional(),
   
+  Numero_Estanteria: z.number({
+    required_error: "El número de estantería es requerido",
+    invalid_type_error: "El número de estantería debe ser un número"
+  })
+    .min(1, "El número de estantería debe ser al menos 1")
+    .max(50, "El número de estantería no puede ser mayor a 50")
+    .int("El número de estantería debe ser un número entero"),
   IDS_Categorias: z.array(z.number())
     .optional()
 });

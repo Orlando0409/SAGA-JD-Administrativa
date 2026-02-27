@@ -1,7 +1,9 @@
 import { LuX, LuUser, LuMail, LuPhone, LuMapPin, LuCalendar, LuBuilding, LuFileText, LuMap, LuInfo, LuGauge } from 'react-icons/lu';
+import { useState, useEffect } from 'react';
 import { formatCedulaJuridica } from '../Helper/formatUtils';
-import type { AfiliadoFisico } from '../Models/TablaAfiliados/ModeloAfiliadoFisico';
+import type { AfiliadoFisico, Medidor } from '../Models/TablaAfiliados/ModeloAfiliadoFisico';
 import type { AfiliadoJuridico } from '../Models/TablaAfiliados/ModeloAfiliadoJuridico';
+import { getMedidoresByAfiliado, getMedidoresByAfiliadoJuridico } from '../Service/ServiceAfiliadoFisico';
 
 
 // Tipo unificado para identificar qué estamos viendo
@@ -17,6 +19,37 @@ interface DetailAbonadosProps {
 }
 
 const DetailAbonados: React.FC<DetailAbonadosProps> = ({ persona, isOpen, onClose }) => {
+
+    const [medidores, setMedidores] = useState<Medidor[]>([]);
+    const [loadingMedidores, setLoadingMedidores] = useState(false);
+
+    // Cada vez que se abre el modal, cargar los medidores frescos desde el endpoint
+    useEffect(() => {
+        if (!isOpen) return;
+        const idAfiliado = (persona.datos as AfiliadoFisico | AfiliadoJuridico).Id_Afiliado;
+
+        // Primero mostrar los medidores que ya vienen embebidos en los datos del listado
+        const mediadoresEmbebidos =
+            (persona.datos as AfiliadoFisico).Medidores ??
+            (persona.datos as AfiliadoFisico).medidores ??
+            [];
+        setMedidores(mediadoresEmbebidos);
+
+        // Luego hacer el fetch fresco para tener todos los medidores actualizados
+        setLoadingMedidores(true);
+        const fetchFn = persona.tipo === 'afiliado-juridico'
+            ? getMedidoresByAfiliadoJuridico
+            : getMedidoresByAfiliado;
+        fetchFn(idAfiliado)
+            .then((data) => {
+                // Siempre usar el resultado fresco del endpoint
+                setMedidores(data);
+            })
+            .catch(() => {
+                // Silencioso — ya mostramos los embebidos como fallback
+            })
+            .finally(() => setLoadingMedidores(false));
+    }, [isOpen, persona]);
 
     const getPersonaInfo = () => {
         const { tipo, datos } = persona;
@@ -41,7 +74,7 @@ const DetailAbonados: React.FC<DetailAbonadosProps> = ({ persona, isOpen, onClos
                 escritura: afiliado.Escritura_Terreno,
                 planos: afiliado.Planos_Terreno,
                 motivo: null, // Campo no disponible en el modelo actual
-                medidores: afiliado.Medidores || afiliado.medidores || [] // Backend puede enviar Medidores (mayúscula) o medidores (minúscula)
+                medidores // Cargados desde el endpoint por el useEffect
             };
         } else { // afiliado-juridico
             const afiliado = datos as AfiliadoJuridico;
@@ -63,7 +96,7 @@ const DetailAbonados: React.FC<DetailAbonadosProps> = ({ persona, isOpen, onClos
                 escritura: afiliado.Escritura_Terreno,
                 planos: afiliado.Planos_Terreno,
                 motivo: null, // Campo no disponible en el modelo actual
-                medidores: afiliado.Medidores || afiliado.medidores || [] // Backend puede enviar Medidores (mayúscula) o medidores (minúscula)
+                medidores // Cargados desde el endpoint por el useEffect
             };
         }
     };
@@ -273,7 +306,76 @@ const DetailAbonados: React.FC<DetailAbonadosProps> = ({ persona, isOpen, onClos
                         </div>
                     </div>
 
-                    {/* Información de Contacto */}
+                    {/* Medidores Asignados */}
+                    <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
+                        <div className="bg-gray-50 px-5 py-3 border-b border-gray-200">
+                            <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                                    <LuGauge className="w-4 h-4 text-blue-600" />
+                                </div>
+                                <h3 className="text-base font-bold text-gray-900">
+                                    Medidores Asignados
+                                    {loadingMedidores && (
+                                        <span className="ml-2 inline-block w-3 h-3 border-2 border-blue-500 border-t-transparent rounded-full animate-spin align-middle" />
+                                    )}
+                                </h3>
+                            </div>
+                        </div>
+
+                        <div className="p-5">
+                            {personaInfo.medidores && personaInfo.medidores.length > 0 ? (
+                                <div className="space-y-4">
+                                    {personaInfo.medidores.map((medidor) => (
+                                        <div
+                                            key={medidor.Id_Medidor}
+                                            className="p-4 bg-gray-50 rounded-lg border border-gray-200"
+                                        >
+                                            <div className="flex items-start justify-between mb-3">
+                                                <div className="flex items-center gap-2">
+                                                    <LuGauge className="w-5 h-5 text-blue-600" />
+                                                    <h4 className="text-base font-bold text-gray-900">
+                                                        Medidor #{medidor.Id_Medidor}
+                                                    </h4>
+                                                </div>
+                                            </div>
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <div className="flex items-start gap-3 p-4 bg-white rounded-lg border border-gray-100">
+                                                    <div className="p-2 rounded-lg">
+                                                        <LuInfo className="w-5 h-5 text-blue-600" />
+                                                    </div>
+                                                    <div className="flex-1">
+                                                        <p className="text-xs font-medium text-gray-500 uppercase">Número de Medidor</p>
+                                                        <p className="text-base font-medium text-gray-900 mt-1">{medidor.Numero_Medidor}</p>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div className="flex items-start gap-3 p-4 bg-white rounded-lg border border-gray-100">
+                                                    <div className="p-2 rounded-lg">
+                                                        <LuGauge className="w-5 h-5 text-blue-600" />
+                                                    </div>
+                                                    <div className="flex-1">
+                                                        <p className="text-xs font-medium text-gray-500 uppercase">Estado Actual del medidor</p>
+                                                        <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium border mt-1 ${
+                                                            medidor.Estado_Medidor.Id_Estado_Medidor === 2
+                                                                ? 'bg-green-100 text-green-800 border-green-200'
+                                                                : 'bg-red-100 text-red-700 border border-red-300'
+                                                        }`}>
+                                                            {medidor.Estado_Medidor.Nombre_Estado_Medidor}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg border border-dashed border-gray-300">
+                                    <LuGauge className="w-5 h-5 text-gray-400 flex-shrink-0" />
+                                    <p className="text-sm text-gray-500 font-medium">Sin medidores asignados</p>
+                                </div>
+                            )}
+                        </div>
+                    </div>
                     <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
                         <div className="bg-gray-50 px-5 py-3 border-b border-gray-200">
                             <div className="flex items-center gap-3">
@@ -339,69 +441,6 @@ const DetailAbonados: React.FC<DetailAbonadosProps> = ({ persona, isOpen, onClos
                             </div>
                         </div>
                     </div>
-
-                    {/* Medidores Asignados */}
-                    {personaInfo.medidores && personaInfo.medidores.length > 0 && (
-                        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
-                            <div className="bg-gray-50 px-5 py-3 border-b border-gray-200">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                                        <LuGauge className="w-4 h-4 text-blue-600" />
-                                    </div>
-                                    <h3 className="text-base font-bold text-gray-900">
-                                        Medidores Asignados
-                                    </h3>
-                                </div>
-                            </div>
-
-                            <div className="p-5">
-                                <div className="space-y-4">
-                                    {personaInfo.medidores.map((medidor) => (
-                                        <div
-                                            key={medidor.Id_Medidor}
-                                            className="p-4 bg-gray-50 rounded-lg border border-gray-200"
-                                        >
-                                            <div className="flex items-start justify-between mb-3">
-                                                <div className="flex items-center gap-2">
-                                                    <LuGauge className="w-5 h-5 text-blue-600" />
-                                                    <h4 className="text-base font-bold text-gray-900">
-                                                        Medidor #{medidor.Id_Medidor}
-                                                    </h4>
-                                                </div>
-                                            </div>
-                                            <div className="grid grid-cols-2 gap-4">
-                                                <div className="flex items-start gap-3 p-4 bg-white rounded-lg border border-gray-100">
-                                                    <div className="p-2 rounded-lg">
-                                                        <LuInfo className="w-5 h-5 text-blue-600" />
-                                                    </div>
-                                                    <div className="flex-1">
-                                                        <p className="text-xs font-medium text-gray-500 uppercase">Número de Medidor</p>
-                                                        <p className="text-base font-medium text-gray-900 mt-1">{medidor.Numero_Medidor}</p>
-                                                    </div>
-                                                </div>
-                                                
-                                                <div className="flex items-start gap-3 p-4 bg-white rounded-lg border border-gray-100">
-                                                    <div className="p-2 rounded-lg">
-                                                        <LuGauge className="w-5 h-5 text-blue-600" />
-                                                    </div>
-                                                    <div className="flex-1">
-                                                        <p className="text-xs font-medium text-gray-500 uppercase">Estado Actual del medidor</p>
-                                                        <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium border mt-1 ${
-                                                            medidor.Estado_Medidor.Id_Estado_Medidor === 2
-                                                                ? 'bg-green-100 text-green-800 border-green-200'
-                                                                : 'bg-red-100 text-red-700 border border-red-300'
-                                                        }`}>
-                                                            {medidor.Estado_Medidor.Nombre_Estado_Medidor}
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
-                    )}
 
                     {/* Información del Sistema */}
                     <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">

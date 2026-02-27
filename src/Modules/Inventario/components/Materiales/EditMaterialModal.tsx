@@ -45,6 +45,7 @@ const EditMaterialModal: React.FC<EditMaterialModalProps> = ({
     Descripcion: '',
     Id_Unidad_Medicion: 0,
     Precio_Unitario: 0,
+    Numero_Estanteria: 1,
     IDS_Categorias: [],
   });
 
@@ -74,6 +75,7 @@ const EditMaterialModal: React.FC<EditMaterialModalProps> = ({
         Descripcion: material.Descripcion || '',
         Id_Unidad_Medicion: material.Unidad_Medicion.Id_Unidad_Medicion,
         Precio_Unitario: material.Precio_Unitario,
+        Numero_Estanteria: material.Numero_Estanteria,
         IDS_Categorias: categoriaIds,
       });
       setSelectedCategorias(categoriaIds);
@@ -268,6 +270,35 @@ const EditMaterialModal: React.FC<EditMaterialModalProps> = ({
                 />
                 {formErrors.Precio_Unitario && (
                   <p className="mt-1 text-sm text-red-600">{formErrors.Precio_Unitario}</p>
+                )}
+              </div>
+
+              <div>
+                <label htmlFor="numero-estanteria" className="block text-sm flex gap-2 font-medium text-gray-700 mb-1">
+                  Número de Estantería
+                  <p className="text-red-500">*</p>
+                </label>
+                <input
+                  type="number"
+                  id="numero-estanteria"
+                  min="1"
+                  max="50"
+                  value={formData.Numero_Estanteria}
+                  onChange={(e) => {
+                    const value = parseInt(e.target.value) || 1;
+                    setFormData({ ...formData, Numero_Estanteria: value });
+                    if (formErrors.Numero_Estanteria) {
+                      setFormErrors(prev => ({ ...prev, Numero_Estanteria: '' }));
+                    }
+                  }}
+                  className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${formErrors.Numero_Estanteria
+                      ? 'border-red-500 focus:ring-red-500 focus:border-red-500'
+                      : 'border-gray-300'
+                    }`}
+                  required
+                />
+                {formErrors.Numero_Estanteria && (
+                  <p className="mt-1 text-sm text-red-600">{formErrors.Numero_Estanteria}</p>
                 )}
               </div>
             </div>
