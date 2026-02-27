@@ -1,16 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { AfiliadoJuridico } from "../Models/TablaAfiliados/ModeloAfiliadoJuridico";
-import {
-  createAfiliadoJuridico,
-  getAfiliadosJuridicos,
-  updateAfiliadoJuridico,
-  updateEstadoAfiliadoJuridico,
-  updateTipoAfiliadoJuridico,
-} from "../Service/ServiceAfiliadoJuridico";
+import { createAfiliadoJuridico, getAfiliadosJuridicos, updateAfiliadoJuridico, updateEstadoAfiliadoJuridico } from "../Service/ServiceAfiliadoJuridico";
 
 export const useAfiliadosJuridicos = () => {
-  const queryClient = useQueryClient();
+  const queryClient = useQueryClient(); // 🔧 Agregar esta línea
 
+  // Query para obtener todos los afiliados jurídicos
   const {
     data: afiliadosJuridicos = [],
     isLoading,
@@ -20,14 +15,18 @@ export const useAfiliadosJuridicos = () => {
   } = useQuery<AfiliadoJuridico[]>({
     queryKey: ["afiliadosJuridicos"],
     queryFn: getAfiliadosJuridicos,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 5 * 60 * 1000, // 5 minutos
     retry: 3,
   });
 
+
+
+  
   const createMutation = useMutation({
     mutationFn: (data: FormData) => createAfiliadoJuridico(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["afiliadosJuridicos"] });
+      queryClient.invalidateQueries({ queryKey: ["afiliadosJuridicos"] }); // 🔧 Cambiar clave
+      console.log("afiliado juridico creado con exito");
     },
     onError: () => console.error("no se creo el afiliado juridico"),
   });
@@ -36,6 +35,7 @@ export const useAfiliadosJuridicos = () => {
     mutationFn: ({ cedulaJuridica, data }: { cedulaJuridica: string; data: FormData }) => updateAfiliadoJuridico(cedulaJuridica, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["afiliadosJuridicos"] });
+      console.log("afiliado juridico actualizado con exito");
     },
     onError: () => console.error("no se actualizo el afiliado juridico"),
   });
@@ -44,17 +44,9 @@ export const useAfiliadosJuridicos = () => {
     mutationFn: ({ id, nuevoEstadoId }: { id: string; nuevoEstadoId: number }) => updateEstadoAfiliadoJuridico(id, nuevoEstadoId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["afiliadosJuridicos"] });
+      console.log("estado del afiliado juridico actualizado con exito");
     },
     onError: () => console.error("no se actualizo el estado del afiliado juridico"),
-  });
-
-  // PATCH /afiliados/update/tipo/juridico/:id/tipo/:nuevoTipoId
-  const updateTipoMutation = useMutation({
-    mutationFn: ({ id, nuevoTipoId }: { id: number; nuevoTipoId: number }) => updateTipoAfiliadoJuridico(id, nuevoTipoId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["afiliadosJuridicos"] });
-    },
-    onError: () => console.error("no se actualizo el tipo del afiliado juridico"),
   });
 
   return {
@@ -66,6 +58,5 @@ export const useAfiliadosJuridicos = () => {
     createAfiliadoJuridico: createMutation.mutateAsync,
     updateAfiliadoJuridico: updateMutation.mutateAsync,
     updateEstadoAfiliadoJuridico: updateEstadoMutation,
-    updateTipoAfiliadoJuridico: updateTipoMutation,
   };
 }
