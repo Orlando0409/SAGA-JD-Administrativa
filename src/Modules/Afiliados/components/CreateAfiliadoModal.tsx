@@ -158,7 +158,7 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
 
     const edadSchema = z.coerce.number()
         .min(18, 'La edad mínima es 18 años')
-        .max(120, 'La edad máxima es 120 años');
+        .max(90, 'La edad máxima es 90 años');
 
     const tipoIdSchema = z.enum(['Cedula Nacional', 'Dimex', 'Pasaporte']);
 
@@ -837,7 +837,7 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                                     ? 'border-red-300 focus:ring-red-500'
                                     : 'border-gray-300 focus:ring-blue-500'
                                 }`}
-                            placeholder="25"
+                            placeholder="19"
                             min="18"
                             max="120"
                             required
