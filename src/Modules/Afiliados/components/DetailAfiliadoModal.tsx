@@ -2,6 +2,7 @@ import { LuX, LuUser, LuMail, LuPhone, LuMapPin, LuCalendar, LuBuilding, LuFileT
 import { formatCedulaJuridica } from '../Helper/formatUtils';
 import type { AfiliadoFisico } from '../Models/TablaAfiliados/ModeloAfiliadoFisico';
 import type { AfiliadoJuridico } from '../Models/TablaAfiliados/ModeloAfiliadoJuridico';
+import { useMedidoresAfiliado } from '@/Modules/Inventario/hooks/useMedidores';
 
 
 // Tipo unificado para identificar qué estamos viendo
@@ -114,9 +115,13 @@ const DetailAbonados: React.FC<DetailAbonadosProps> = ({ persona, isOpen, onClos
         }
     };
 
-    if (!isOpen) return null;
-
+    // Siempre llamar hooks antes de cualquier return condicional
     const personaInfo = getPersonaInfo();
+    const { data: medidoresFetched = [], isLoading: loadingMedidores } = useMedidoresAfiliado(
+        isOpen ? personaInfo.id : 0
+    );
+
+    if (!isOpen) return null;
 
     return (
         <div className="fixed inset-0 bg-opacity-10 backdrop-blur-sm flex items-center justify-center z-50 p-4">
@@ -341,22 +346,38 @@ const DetailAbonados: React.FC<DetailAbonadosProps> = ({ persona, isOpen, onClos
                     </div>
 
                     {/* Medidores Asignados */}
-                    {personaInfo.medidores && personaInfo.medidores.length > 0 && (
-                        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
-                            <div className="bg-gray-50 px-5 py-3 border-b border-gray-200">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                                        <LuGauge className="w-4 h-4 text-blue-600" />
-                                    </div>
-                                    <h3 className="text-base font-bold text-gray-900">
-                                        Medidores Asignados
-                                    </h3>
+                    <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
+                        <div className="bg-gray-50 px-5 py-3 border-b border-gray-200">
+                            <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                                    <LuGauge className="w-4 h-4 text-blue-600" />
                                 </div>
+                                <h3 className="text-base font-bold text-gray-900">
+                                    Medidores Asignados
+                                    {!loadingMedidores && (
+                                        <span className="ml-2 text-sm font-normal text-gray-400">
+                                            ({medidoresFetched.length})
+                                        </span>
+                                    )}
+                                </h3>
                             </div>
+                        </div>
 
-                            <div className="p-5">
+                        <div className="p-5">
+                            {loadingMedidores ? (
+                                <div className="flex items-center justify-center py-6 gap-2 text-sm text-gray-500">
+                                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600" />
+                                    Cargando medidores...
+                                </div>
+                            ) : medidoresFetched.length === 0 ? (
+                                <div className="flex flex-col items-center justify-center py-8 text-gray-400">
+                                    <LuGauge className="w-10 h-10 mb-2 opacity-30" />
+                                    <p className="text-sm font-medium">Sin medidores asignados</p>
+                                    <p className="text-xs mt-1">Este afiliado no tiene ningún medidor asociado.</p>
+                                </div>
+                            ) : (
                                 <div className="space-y-4">
-                                    {personaInfo.medidores.map((medidor) => (
+                                    {medidoresFetched.map((medidor) => (
                                         <div
                                             key={medidor.Id_Medidor}
                                             className="p-4 bg-gray-50 rounded-lg border border-gray-200"
@@ -365,7 +386,7 @@ const DetailAbonados: React.FC<DetailAbonadosProps> = ({ persona, isOpen, onClos
                                                 <div className="flex items-center gap-2">
                                                     <LuGauge className="w-5 h-5 text-blue-600" />
                                                     <h4 className="text-base font-bold text-gray-900">
-                                                        Medidor #{medidor.Id_Medidor}
+                                                        Medidor #{medidor.Numero_Medidor}
                                                     </h4>
                                                 </div>
                                             </div>
@@ -379,19 +400,19 @@ const DetailAbonados: React.FC<DetailAbonadosProps> = ({ persona, isOpen, onClos
                                                         <p className="text-base font-medium text-gray-900 mt-1">{medidor.Numero_Medidor}</p>
                                                     </div>
                                                 </div>
-                                                
+
                                                 <div className="flex items-start gap-3 p-4 bg-white rounded-lg border border-gray-100">
                                                     <div className="p-2 rounded-lg">
                                                         <LuGauge className="w-5 h-5 text-blue-600" />
                                                     </div>
                                                     <div className="flex-1">
-                                                        <p className="text-xs font-medium text-gray-500 uppercase">Estado Actual del medidor</p>
+                                                        <p className="text-xs font-medium text-gray-500 uppercase">Estado</p>
                                                         <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium border mt-1 ${
-                                                            medidor.Estado_Medidor.Id_Estado_Medidor === 2
+                                                            medidor.Estado_Medidor?.Id_Estado_Medidor === 2
                                                                 ? 'bg-green-100 text-green-800 border-green-200'
                                                                 : 'bg-red-100 text-red-700 border border-red-300'
                                                         }`}>
-                                                            {medidor.Estado_Medidor.Nombre_Estado_Medidor}
+                                                            {medidor.Estado_Medidor?.Nombre_Estado_Medidor ?? 'Sin estado'}
                                                         </span>
                                                     </div>
                                                 </div>
@@ -399,9 +420,9 @@ const DetailAbonados: React.FC<DetailAbonadosProps> = ({ persona, isOpen, onClos
                                         </div>
                                     ))}
                                 </div>
-                            </div>
+                            )}
                         </div>
-                    )}
+                    </div>
 
                     {/* Información del Sistema */}
                     <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">

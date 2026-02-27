@@ -1,10 +1,15 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { createAfiliadoFisico, getAfiliadosFisicos, updateAfiliadoFisico, updateEstadoAfiliadoFisico } from "../Service/ServiceAfiliadoFisico";
+import {
+  createAfiliadoFisico,
+  getAfiliadosFisicos,
+  updateAfiliadoFisico,
+  updateEstadoAfiliadoFisico,
+  updateTipoAfiliadoFisico,
+} from "../Service/ServiceAfiliadoFisico";
 import type { AfiliadoFisico } from "../Models/TablaAfiliados/ModeloAfiliadoFisico";
 
 export const useAfiliadosFisicos = () => {
-  // Query para obtener todos los afiliados físicos
-  const queryClient = useQueryClient(); // 🔧 Agregar esta línea
+  const queryClient = useQueryClient();
 
   const {
     data: afiliadosFisicos = [],
@@ -15,15 +20,14 @@ export const useAfiliadosFisicos = () => {
   } = useQuery<AfiliadoFisico[]>({
     queryKey: ["afiliadosFisicos"],
     queryFn: getAfiliadosFisicos,
-    staleTime: 5 * 60 * 1000, // 5 minutos
+    staleTime: 5 * 60 * 1000,
     retry: 3,
   });
 
   const createMutation = useMutation({
     mutationFn: (data: FormData) => createAfiliadoFisico(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["afiliadosFisicos"] }); // 🔧 Cambiar clave
-      console.log("afiliado creado con exito ");
+      queryClient.invalidateQueries({ queryKey: ["afiliadosFisicos"] });
     },
     onError: () => console.error("no se creo el afiliado"),
   });
@@ -32,7 +36,6 @@ export const useAfiliadosFisicos = () => {
     mutationFn: ({ cedula, data }: { cedula: string; data: FormData }) => updateAfiliadoFisico(cedula, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["afiliadosFisicos"] });
-      console.log("afiliado actualizado con exito");
     },
     onError: () => console.error("no se actualizo el afiliado"),
   });
@@ -41,9 +44,17 @@ export const useAfiliadosFisicos = () => {
     mutationFn: ({ id, nuevoEstadoId }: { id: string; nuevoEstadoId: number }) => updateEstadoAfiliadoFisico(id, nuevoEstadoId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["afiliadosFisicos"] });
-      console.log("estado del afiliado actualizado con exito");
     },
     onError: () => console.error("no se actualizo el estado del afiliado"),
+  });
+
+  // PATCH /afiliados/update/tipo/fisico/:id/tipo/:nuevoTipoId
+  const updateTipoMutation = useMutation({
+    mutationFn: ({ id, nuevoTipoId }: { id: number; nuevoTipoId: number }) => updateTipoAfiliadoFisico(id, nuevoTipoId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["afiliadosFisicos"] });
+    },
+    onError: () => console.error("no se actualizo el tipo del afiliado"),
   });
 
   return {
@@ -55,5 +66,6 @@ export const useAfiliadosFisicos = () => {
     createAfiliadoFisico: createMutation.mutateAsync,
     updateAfiliadoFisico: updateMutation.mutateAsync,
     updateEstadoAfiliadoFisico: updateEstadoMutation,
+    updateTipoAfiliadoFisico: updateTipoMutation,
   };
 }

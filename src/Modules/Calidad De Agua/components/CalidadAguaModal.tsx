@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useToggleVisibilidadCalidadAgua } from "../Hook/HookCalidadAgua";
-import { FileText, Calendar, RefreshCcw, Eye, EyeOff, X } from "lucide-react";
+import { FileText, Calendar, RefreshCcw, Eye, EyeOff } from "lucide-react";
 import { useAlerts } from "@/Modules/Global/context/AlertContext";
 
 interface CalidadAguaModalProps {

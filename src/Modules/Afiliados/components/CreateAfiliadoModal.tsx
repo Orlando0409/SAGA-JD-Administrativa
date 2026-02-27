@@ -7,7 +7,9 @@ import { useAfiliadosFisicos } from '../Hook/HookAfiliadoFisico';
 import { useAfiliadosJuridicos } from '../Hook/HookAfiliadoJuridico';
 import PhoneInputComponent from '@/Modules/Global/components/PhoneInputComponent';
 import { useCedulaLookup } from '../Hook/useCedulaLookup';
-import { User, Building2, X } from 'lucide-react';
+import { User, Building2, X, Gauge, PlusCircle, Link2, Search, CheckCircle2 } from 'lucide-react';
+import { getMedidoresDisponibles, createMedidor, asignarMedidorAAfiliado } from '@/Modules/Inventario/service/MedidorServices';
+import type { Medidor } from '@/Modules/Inventario/models/Medidor';
 
 interface CreateModalProps {
     isOpen: boolean;
@@ -15,6 +17,12 @@ interface CreateModalProps {
 }
 
 type TipoFormulario = 'afiliado-fisico' | 'afiliado-juridico';
+
+type PanelMedidor = 'cerrado' | 'asignar' | 'agregar';
+
+type MedidorPendiente =
+    | { uid: string; tipo: 'asignar'; idMedidor: number; numeroMedidor: number | string }
+    | { uid: string; tipo: 'agregar'; numeroMedidor: number };
 
 const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
     const [tipoActivo, setTipoActivo] = useState<TipoFormulario>('afiliado-fisico');
@@ -24,6 +32,14 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
     const { showSuccess, showError } = useAlerts();
     const { createAfiliadoFisico } = useAfiliadosFisicos();
     const { createAfiliadoJuridico } = useAfiliadosJuridicos();
+
+    // Estado medidores (múltiples)
+    const [medidoresPendientes, setMedidoresPendientes] = useState<MedidorPendiente[]>([]);
+    const [panelMedidor, setPanelMedidor] = useState<PanelMedidor>('cerrado');
+    const [medidoresDisponibles, setMedidoresDisponibles] = useState<Medidor[]>([]);
+    const [loadingMedidores, setLoadingMedidores] = useState(false);
+    const [searchMedidor, setSearchMedidor] = useState('');
+    const [numeroNuevoMedidor, setNumeroNuevoMedidor] = useState('');
 
     const { lookup, isLoading: loadingCedula } = useCedulaLookup()
 
@@ -49,12 +65,12 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                 Nombre: '',
                 Apellido1: '',
                 Apellido2: '',
-                Tipo_Identificacion: 'Cedula Nacional' as 'Cedula Nacional' | 'DIMEX' | 'Pasaporte',
+                Tipo_Identificacion: 'Cedula Nacional' as 'Cedula Nacional' | 'Dimex' | 'Pasaporte',
                 Identificacion: '',
                 Numero_Telefono: '',
                 Correo: '',
                 Direccion_Exacta: '',
-                Edad: 0,
+                Edad: '' as unknown as number,
                 Escritura_Terreno: '',
                 Planos_Terreno: '',
             };
@@ -146,7 +162,7 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
         .min(18, 'La edad mínima es 18 años')
         .max(120, 'La edad máxima es 120 años');
 
-    const tipoIdSchema = z.enum(['Cedula Nacional', 'DIMEX', 'Pasaporte']);
+    const tipoIdSchema = z.enum(['Cedula Nacional', 'Dimex', 'Pasaporte']);
 
     const identificacionSchema = z.string().min(1, 'La identificación no puede estar vacía');
 
@@ -255,8 +271,22 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                     if (escrituraFile) formData.append('Escritura_Terreno', escrituraFile);
                     if (planosFile) formData.append('Planos_Terreno', planosFile);
 
-                    await createAfiliadoFisico(formData);
-                    showSuccess('Afiliado físico creado exitosamente');
+                    const creado = await createAfiliadoFisico(formData);
+                    const idCreado: number = creado?.Id_Afiliado ?? creado?.id ?? null;
+
+                    // Procesar lista de medidores pendientes
+                    if (idCreado && medidoresPendientes.length > 0) {
+                        for (const mp of medidoresPendientes) {
+                            if (mp.tipo === 'asignar') {
+                                await asignarMedidorAAfiliado(mp.idMedidor, idCreado);
+                            } else {
+                                const nuevo = await createMedidor({ Numero_Medidor: mp.numeroMedidor });
+                                await asignarMedidorAAfiliado(nuevo.Id_Medidor, idCreado);
+                            }
+                        }
+                    }
+
+                    showSuccess('Éxito', 'Afiliado físico creado exitosamente.');
                 } else {
                     // Agregar campos de afiliado jurídico
                     formData.append('Razon_Social', value.Razon_Social || '');
@@ -269,19 +299,39 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                     if (escrituraFile) formData.append('Escritura_Terreno', escrituraFile);
                     if (planosFile) formData.append('Planos_Terreno', planosFile);
 
-                    await createAfiliadoJuridico(formData);
-                    showSuccess('Afiliado jurídico creado exitosamente');
+                    const creado = await createAfiliadoJuridico(formData);
+                    const idCreado: number = creado?.Id_Afiliado ?? creado?.id ?? null;
+
+                    // Procesar lista de medidores pendientes
+                    if (idCreado && medidoresPendientes.length > 0) {
+                        for (const mp of medidoresPendientes) {
+                            if (mp.tipo === 'asignar') {
+                                await asignarMedidorAAfiliado(mp.idMedidor, idCreado);
+                            } else {
+                                const nuevo = await createMedidor({ Numero_Medidor: mp.numeroMedidor });
+                                await asignarMedidorAAfiliado(nuevo.Id_Medidor, idCreado);
+                            }
+                        }
+                    }
+
+                    showSuccess('Éxito', 'Afiliado jurídico creado exitosamente.');
                 }
 
-                // Cerrar modal y resetear formulario
+                // Cerrar modal y resetear
                 onClose();
                 form.reset();
                 setEscrituraFile(null);
                 setPlanosFile(null);
+                setMedidoresPendientes([]);
+                setPanelMedidor('cerrado');
+                setNumeroNuevoMedidor('');
+                setSearchMedidor('');
 
-            } catch (error) {
+            } catch (error: any) {
                 console.error('Error creando registro:', error);
-                showError('Error al crear el registro. Por favor intente nuevamente.');
+                const raw = error?.response?.data?.message;
+                const errorMsg = Array.isArray(raw) ? raw.join('\n') : raw || 'Error al crear el registro. Por favor intente nuevamente.';
+                showError('Error', errorMsg);
             } finally {
                 setIsSubmitting(false);
             }
@@ -305,6 +355,10 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
         setValidationErrors({});
         setEscrituraFile(null);
         setPlanosFile(null);
+        setMedidoresPendientes([]);
+        setPanelMedidor('cerrado');
+        setNumeroNuevoMedidor('');
+        setSearchMedidor('');
     }, [tipoActivo]);
 
     // Mover la verificación de isOpen DESPUÉS de todos los hooks
@@ -330,7 +384,7 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                         <select
                             id="Tipo_Identificacion"
                             value={field.state.value}
-                            onChange={(e) => field.handleChange(e.target.value as 'Cedula Nacional' | 'DIMEX' | 'Pasaporte')}
+                            onChange={(e) => field.handleChange(e.target.value as 'Cedula Nacional' | 'Dimex' | 'Pasaporte')}
                             className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-colors ${field.state.meta.errors.length > 0
                                     ? 'border-red-300 focus:ring-red-500'
                                     : 'border-gray-300 focus:ring-blue-500'
@@ -338,7 +392,7 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                             required
                         >
                             <option value="Cedula Nacional">Cédula Nacional</option>
-                            <option value="DIMEX">DIMEX</option>
+                            <option value="Dimex">DIMEX</option>
                             <option value="Pasaporte">Pasaporte</option>
                         </select>
                         {renderError('Tipo_Identificacion', field.state.meta.errors)}
@@ -651,8 +705,11 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                         <input
                             id="Edad"
                             type="number"
-                            value={field.state.value}
-                            onChange={(e) => field.handleChange(parseInt(e.target.value) || 0)}
+                            value={field.state.value || ''}
+                            onChange={(e) => {
+                                const raw = e.target.value;
+                                field.handleChange(raw === '' ? ('' as unknown as number) : parseInt(raw));
+                            }}
                             onBlur={field.handleBlur}
                             className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-colors ${field.state.meta.errors.length > 0
                                     ? 'border-red-300 focus:ring-red-500'
@@ -1018,6 +1075,213 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
         }
     };
 
+    // ─── Medidores múltiples ──────────────────────────────────────────────────────
+    const handleAbrirPanel = async (panel: PanelMedidor) => {
+        setPanelMedidor(panel);
+        setSearchMedidor('');
+        setNumeroNuevoMedidor('');
+        if (panel === 'asignar') {
+            setLoadingMedidores(true);
+            try {
+                const lista = await getMedidoresDisponibles();
+                // Filtrar los que ya están en lista pendiente
+                setMedidoresDisponibles(lista);
+            } catch {
+                showError('Error', 'No se pudieron cargar los medidores disponibles.');
+            } finally {
+                setLoadingMedidores(false);
+            }
+        }
+    };
+
+    const handleAgregarAsignar = (m: Medidor) => {
+        if (medidoresPendientes.some(p => p.tipo === 'asignar' && p.idMedidor === m.Id_Medidor)) return;
+        setMedidoresPendientes(prev => [
+            ...prev,
+            { uid: crypto.randomUUID(), tipo: 'asignar', idMedidor: m.Id_Medidor, numeroMedidor: m.Numero_Medidor },
+        ]);
+        setPanelMedidor('cerrado');
+    };
+
+    const handleAgregarNuevo = () => {
+        const num = parseInt(numeroNuevoMedidor);
+        if (isNaN(num) || num < 1) {
+            showError('Error', 'Ingresa un número de medidor válido.');
+            return;
+        }
+        setMedidoresPendientes(prev => [
+            ...prev,
+            { uid: crypto.randomUUID(), tipo: 'agregar', numeroMedidor: num },
+        ]);
+        setNumeroNuevoMedidor('');
+        setPanelMedidor('cerrado');
+    };
+
+    const handleQuitarMedidor = (uid: string) => {
+        setMedidoresPendientes(prev => prev.filter(p => p.uid !== uid));
+    };
+
+    const medidoresFiltrados = medidoresDisponibles.filter((m) => {
+        const yaEnLista = medidoresPendientes.some(p => p.tipo === 'asignar' && p.idMedidor === m.Id_Medidor);
+        if (yaEnLista) return false;
+        if (!searchMedidor.trim()) return true;
+        return String(m.Numero_Medidor).includes(searchMedidor.trim());
+    });
+
+    const renderSeccionMedidor = () => (
+        <div className="mt-6 pt-5 border-t border-gray-200 space-y-4">
+            {/* Encabezado */}
+            <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                    <Gauge className="w-4 h-4 text-blue-600" />
+                    <h3 className="text-sm font-semibold text-gray-700">
+                        Medidores{' '}
+                        <span className="text-gray-400 font-normal">(opcional)</span>
+                    </h3>
+                </div>
+                {medidoresPendientes.length > 0 && (
+                    <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-medium">
+                        {medidoresPendientes.length} en lista
+                    </span>
+                )}
+            </div>
+
+            {/* Lista de medidores pendientes */}
+            {medidoresPendientes.length > 0 && (
+                <ul className="space-y-2">
+                    {medidoresPendientes.map((mp) => (
+                        <li key={mp.uid} className="flex items-center justify-between bg-gray-50 border border-gray-200 rounded-lg px-3 py-2">
+                            <div className="flex items-center gap-2">
+                                {mp.tipo === 'asignar' ? (
+                                    <Link2 className="w-4 h-4 text-blue-500" />
+                                ) : (
+                                    <PlusCircle className="w-4 h-4 text-blue-500" />
+                                )}
+                                <span className="text-sm font-medium text-gray-800">Medidor #{mp.numeroMedidor}</span>
+                                <span className={`text-xs px-1.5 py-0.5 rounded-full ${
+                                    mp.tipo === 'asignar'
+                                        ? 'bg-blue-100 text-blue-600'
+                                        : 'bg-blue-100 text-blue-600'
+                                }`}>
+                                    {mp.tipo === 'asignar' ? 'Asignar' : 'Nuevo'}
+                                </span>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => handleQuitarMedidor(mp.uid)}
+                                className="text-gray-400 hover:text-red-500 transition-colors"
+                            >
+                                <X className="w-4 h-4" />
+                            </button>
+                        </li>
+                    ))}
+                </ul>
+            )}
+
+            {/* Botones para agregar otro medidor */}
+            {panelMedidor === 'cerrado' && (
+                <div className="flex gap-2">
+                    <button
+                        type="button"
+                        onClick={() => handleAbrirPanel('asignar')}
+                        className="flex items-center gap-1.5 px-3 py-2 text-sm text-blue-600 border border-blue-200 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
+                    >
+                        <Link2 className="w-4 h-4" />
+                        Asignar existente
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => handleAbrirPanel('agregar')}
+                        className="flex items-center gap-1.5 px-3 py-2 text-sm text-blue-600 border border-blue-200 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
+                    >
+                        <PlusCircle className="w-4 h-4" />
+                        Agregar nuevo
+                    </button>
+                </div>
+            )}
+
+            {/* Panel asignar existente */}
+            {panelMedidor === 'asignar' && (
+                <div className="border border-blue-200 rounded-xl p-3 space-y-3 bg-blue-50">
+                    <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium text-blue-700">Seleccionar medidor existente</span>
+                        <button type="button" onClick={() => setPanelMedidor('cerrado')} className="text-blue-400 hover:text-blue-600">
+                            <X className="w-4 h-4" />
+                        </button>
+                    </div>
+                    <div className="relative">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+                        <input
+                            type="text"
+                            placeholder="Buscar por número..."
+                            value={searchMedidor}
+                            onChange={(e) => setSearchMedidor(e.target.value)}
+                            className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                        />
+                    </div>
+                    <div className="border border-gray-200 rounded-lg overflow-hidden max-h-44 overflow-y-auto bg-white">
+                        {loadingMedidores ? (
+                            <div className="flex items-center justify-center py-6 gap-2 text-sm text-gray-500">
+                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600" />
+                                Cargando medidores...
+                            </div>
+                        ) : medidoresFiltrados.length === 0 ? (
+                            <p className="py-6 text-center text-sm text-gray-400">No hay medidores disponibles</p>
+                        ) : (
+                            <ul className="divide-y divide-gray-100">
+                                {medidoresFiltrados.map((m) => (
+                                    <li key={m.Id_Medidor}>
+                                        <button
+                                            type="button"
+                                            onClick={() => handleAgregarAsignar(m)}
+                                            className="w-full text-left px-4 py-3 flex items-center justify-between hover:bg-blue-50 transition-colors text-sm"
+                                        >
+                                            <span className="font-medium text-gray-800">Medidor #{m.Numero_Medidor}</span>
+                                            <span className="text-xs text-gray-500">{m.Estado_Medidor?.Nombre_Estado_Medidor}</span>
+                                            <CheckCircle2 className="w-4 h-4 text-blue-400 ml-2 flex-shrink-0 opacity-0 group-hover:opacity-100" />
+                                        </button>
+                                    </li>
+                                ))}
+                            </ul>
+                        )}
+                    </div>
+                </div>
+            )}
+
+            {/* Panel agregar nuevo */}
+            {panelMedidor === 'agregar' && (
+                <div className="border border-blue-200 rounded-xl p-3 space-y-3 bg-blue-50">
+                    <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium text-blue-700">Crear nuevo medidor</span>
+                        <button type="button" onClick={() => setPanelMedidor('cerrado')} className="text-blue-400 hover:text-blue-600">
+                            <X className="w-4 h-4" />
+                        </button>
+                    </div>
+                    <div className="flex gap-2">
+                        <input
+                            type="number"
+                            min={1}
+                            value={numeroNuevoMedidor}
+                            onChange={(e) => setNumeroNuevoMedidor(e.target.value)}
+                            onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAgregarNuevo())}
+                            placeholder="Ej: 10023"
+                            className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                        />
+                        <button
+                            type="button"
+                            onClick={handleAgregarNuevo}
+                            disabled={!numeroNuevoMedidor.trim()}
+                            className="px-3 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            Añadir
+                        </button>
+                    </div>
+                    <p className="text-xs text-blue-600">Se creará el medidor y se asignará automáticamente al afiliado.</p>
+                </div>
+            )}
+        </div>
+    );
+
     return (
         <div className="fixed inset-0 bg-opacity-10 backdrop-blur-sm flex items-center justify-center z-50">
             <div className="bg-white rounded-lg shadow-2xl border border-gray-200 w-full max-w-md mx-4 max-h-[90vh] overflow-hidden">
@@ -1030,7 +1294,7 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                             <Building2 className="w-6 h-6 text-blue-600" />
                         )}
                         <h2 className="text-xl font-semibold text-gray-900">
-                            Nuevo afiliado {tipoActivo === 'afiliado-fisico' ? 'físico' : 'jurídico'}
+                            {`Nuevo afiliado ${tipoActivo === 'afiliado-fisico' ? 'físico' : 'jurídico'}`}
                         </h2>
                     </div>
                     <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors">
@@ -1038,7 +1302,7 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                     </button>
                 </div>
 
-                {/* Botones para cambiar tipo de afiliado */}
+                {/* Selector de tipo */}
                 <div className="p-4 border-b border-gray-100 bg-gray-50">
                     <div className="flex gap-2">
                         <button
@@ -1078,7 +1342,7 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                     </div>
                 </div>
 
-                {/* Contenido del formulario */}
+                {/* Área principal scrollable */}
                 <div className="p-6 overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100 max-h-[calc(90vh-280px)]">
                     <form
                         id="afiliado-form"
@@ -1090,18 +1354,20 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                     >
                         {renderFormulario()}
                     </form>
+
+                    {/* Sección de medidor integrada */}
+                    {renderSeccionMedidor()}
                 </div>
 
-                {/* Botones de acción */}
+                {/* Footer */}
                 <div className="flex gap-3 p-6 border-t border-gray-200">
                     <button
                         type="submit"
                         form="afiliado-form"
                         disabled={isSubmitting}
-                        className={`flex-1 px-4 py-2 text-white rounded-lg transition-colors ${isSubmitting
-                                ? 'bg-blue-300 cursor-not-allowed'
-                                : 'bg-blue-600 hover:bg-blue-700'
-                            }`}
+                        className={`flex-1 px-4 py-2 text-white rounded-lg transition-colors ${
+                            isSubmitting ? 'bg-blue-300 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'
+                        }`}
                     >
                         {isSubmitting ? 'Creando...' : `Crear Afiliado ${tipoActivo === 'afiliado-fisico' ? 'Físico' : 'Jurídico'}`}
                     </button>

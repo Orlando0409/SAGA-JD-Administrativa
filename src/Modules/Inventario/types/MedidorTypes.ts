@@ -31,5 +31,12 @@ export interface CambiarEstadoMedidorModalProps {
   medidor: Medidor;
 }
 
+export interface AsignarAfiliadoMedidorModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  medidor: Medidor;
+  onSuccess?: () => void;
+}
+
 export const NUMERO_MEDIDOR_MIN = 1;
 export const NUMERO_MEDIDOR_MAX = 999999999;
