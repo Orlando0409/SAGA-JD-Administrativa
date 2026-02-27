@@ -2,10 +2,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import type { SolicitudJuridica } from '../Models/ModelosJuridicos';
 import { getSolicitudesJuridicas, getSolicitudesPendientes, getSolicitudesPorEstado, getSolicitudesPorTipo } from '../Service/SolicitudesJuridicas';
 
-/**
- * 🔄 Función para refrescar todas las consultas de solicitudes jurídicas
- * Útil para refresh manual después de operaciones CRUD
- */
+
 export const useRefetchAllSolicitudesJuridicas = () => {
     const queryClient = useQueryClient();
 
@@ -42,8 +39,6 @@ export const useSolicitudesJuridicas = () => {
     });
 };
 
-
- // Hook para obtener solicitudes jurídicas pendientes (usa cache cuando es posible)
 
 export const useSolicitudesJuridicasPendientes = () => {
     return useQuery<SolicitudJuridica[], Error>({
@@ -94,23 +89,17 @@ export const useSolicitudesJuridicasAfiliacion = () => {
     return useSolicitudesJuridicasPorTipo('Afiliacion');
 }
 
-/**
- *  Hook para obtener solicitudes de desconexión jurídicas
- */
+
 export const useSolicitudesJuridicasDesconexion = () => {
     return useSolicitudesJuridicasPorTipo('Desconexion');
 };
 
-/**
- *  Hook para obtener solicitudes de cambio de medidor jurídicas
- */
+
 export const useSolicitudesJuridicasCambioMedidor = () => {
     return useSolicitudesJuridicasPorTipo('Cambio de Medidor');
 };
 
-/**
- *  Hook para obtener solicitudes de asociado jurídicas
- */
+
 export const useSolicitudesJuridicasAsociado = () => {
     return useSolicitudesJuridicasPorTipo('Asociado');
 };

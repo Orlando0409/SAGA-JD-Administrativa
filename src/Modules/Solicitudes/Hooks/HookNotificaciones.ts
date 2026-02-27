@@ -1,4 +1,4 @@
-// src/Modules/Solicitudes/Hooks/useNotificacionesSolicitudes.ts
+
 import { useMemo } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useSolicitudesFisicas } from './HookSolicitudesFisicas';
@@ -6,10 +6,6 @@ import { useSolicitudesJuridicas } from './HookSolicitudesJuridicas';
 import type { SolicitudFisica } from '../Models/ModelosFisicas';
 import type { SolicitudJuridica } from '../Models/ModelosJuridicos';
 
-/**
- * 🔄 Hook para refrescar todas las notificaciones de solicitudes
- * Útil para refresh manual después de operaciones CRUD
- */
 
 
 
@@ -95,7 +91,7 @@ export const useNotificacionesSolicitudes = () => {
         });
       });
 
-    // Ordenar por fecha de creación (más recientes primero)
+    // Ordenar por fecha de creación 
     return notificacionesArray.sort((a, b) => {
       const fechaA = new Date(a.fechaCreacion).getTime();
       const fechaB = new Date(b.fechaCreacion).getTime();
