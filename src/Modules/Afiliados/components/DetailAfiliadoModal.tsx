@@ -39,10 +39,8 @@ const DetailAbonados: React.FC<DetailAbonadosProps> = ({ persona, isOpen, onClos
         setLoadingMedidores(true);
         getMedidoresByAfiliado(idAfiliado)
             .then((data) => {
-                // Tomar el resultado con más medidores (el fetch puede traer más que el embedding)
-                if (data.length >= mediadoresEmbebidos.length) {
-                    setMedidores(data);
-                }
+                // Siempre usar el resultado fresco del endpoint
+                setMedidores(data);
             })
             .catch(() => {
                 // Silencioso — ya mostramos los embebidos como fallback

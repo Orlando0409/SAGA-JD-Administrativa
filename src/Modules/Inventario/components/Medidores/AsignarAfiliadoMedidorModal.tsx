@@ -1,16 +1,20 @@
 import { useState, useEffect, useMemo } from 'react';
 import { LuX, LuSearch, LuUserCheck, LuUser } from 'react-icons/lu';
 import { FaTachometerAlt } from 'react-icons/fa';
+import { useQueryClient } from '@tanstack/react-query';
 import type { AsignarAfiliadoMedidorModalProps } from '../../types/MedidorTypes';
 import { asignarMedidorAAfiliado } from '../../service/MedidorServices';
 import { getAfiliadosFisicos } from '@/Modules/Afiliados/Service/ServiceAfiliadoFisico';
 import type { AfiliadoFisico } from '@/Modules/Afiliados/Models/TablaAfiliados/ModeloAfiliadoFisico';
+import { getAfiliadosJuridicos } from '@/Modules/Afiliados/Service/ServiceAfiliadoJuridico';
+import type { AfiliadoJuridico } from '@/Modules/Afiliados/Models/TablaAfiliados/ModeloAfiliadoJuridico';
 
 interface AfiliadoOpcion {
   Id_Afiliado: number;
   nombre: string;
   identificacion: string;
   correo?: string;
+  tipo: 'fisico' | 'juridico';
 }
 
 const AsignarAfiliadoMedidorModal = ({
@@ -19,6 +23,7 @@ const AsignarAfiliadoMedidorModal = ({
   medidor,
   onSuccess,
 }: AsignarAfiliadoMedidorModalProps) => {
+  const queryClient = useQueryClient();
   const [afiliados, setAfiliados] = useState<AfiliadoOpcion[]>([]);
   const [loadingAfiliados, setLoadingAfiliados] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -35,15 +40,23 @@ const AsignarAfiliadoMedidorModal = ({
     setSearchTerm('');
     setSuccessMsg(null);
 
-    getAfiliadosFisicos()
-      .then((data: AfiliadoFisico[]) => {
-        const lista: AfiliadoOpcion[] = data.map((a) => ({
+    Promise.all([getAfiliadosFisicos(), getAfiliadosJuridicos()])
+      .then(([fisicos, juridicos]: [AfiliadoFisico[], AfiliadoJuridico[]]) => {
+        const listaFisicos: AfiliadoOpcion[] = fisicos.map((a) => ({
           Id_Afiliado: a.Id_Afiliado,
           nombre: `${a.Nombre} ${a.Apellido1} ${a.Apellido2 ?? ''}`.trim(),
           identificacion: a.Identificacion,
           correo: a.Correo,
+          tipo: 'fisico' as const,
         }));
-        setAfiliados(lista);
+        const listaJuridicos: AfiliadoOpcion[] = juridicos.map((a) => ({
+          Id_Afiliado: a.Id_Afiliado,
+          nombre: a.Razon_Social,
+          identificacion: a.Cedula_Juridica,
+          correo: a.Correo,
+          tipo: 'juridico' as const,
+        }));
+        setAfiliados([...listaFisicos, ...listaJuridicos]);
       })
       .catch(() => setErrorMsg('Error al cargar los afiliados.'))
       .finally(() => setLoadingAfiliados(false));
@@ -66,6 +79,9 @@ const AsignarAfiliadoMedidorModal = ({
     setErrorMsg(null);
     try {
       await asignarMedidorAAfiliado(medidor.Id_Medidor, selectedAfiliado.Id_Afiliado);
+      // Invalidar caches de afiliados para que el DetailAfiliadoModal muestre los medidores actualizados
+      await queryClient.invalidateQueries({ queryKey: ['afiliadosFisicos'] });
+      await queryClient.invalidateQueries({ queryKey: ['afiliadosJuridicos'] });
       setSuccessMsg(
         `Medidor #${medidor.Numero_Medidor} asignado correctamente a ${selectedAfiliado.nombre}.`
       );
@@ -172,7 +188,16 @@ const AsignarAfiliadoMedidorModal = ({
                         <LuUser className="w-4 h-4 text-gray-500" />
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className="font-medium text-sm text-gray-900 truncate">{a.nombre}</p>
+                        <div className="flex items-center gap-2">
+                          <p className="font-medium text-sm text-gray-900 truncate">{a.nombre}</p>
+                          <span className={`flex-shrink-0 px-1.5 py-0.5 text-[10px] font-semibold rounded-full ${
+                            a.tipo === 'juridico'
+                              ? 'bg-purple-100 text-purple-700'
+                              : 'bg-blue-100 text-blue-700'
+                          }`}>
+                            {a.tipo === 'juridico' ? 'Jurídico' : 'Físico'}
+                          </span>
+                        </div>
                         <p className="text-xs text-gray-500 truncate">{a.identificacion}</p>
                       </div>
                       {selectedAfiliado?.Id_Afiliado === a.Id_Afiliado && (
@@ -191,9 +216,16 @@ const AsignarAfiliadoMedidorModal = ({
               <p className="font-semibold text-blue-800 flex items-center gap-1">
                 <LuUserCheck className="w-4 h-4" /> Afiliado seleccionado
               </p>
-              <p className="text-blue-700 mt-1">
+              <p className="text-blue-700 mt-1 flex items-center gap-2">
                 {selectedAfiliado.nombre}{' '}
                 <span className="text-blue-500">({selectedAfiliado.identificacion})</span>
+                <span className={`px-1.5 py-0.5 text-[10px] font-semibold rounded-full ${
+                  selectedAfiliado.tipo === 'juridico'
+                    ? 'bg-purple-100 text-purple-700'
+                    : 'bg-blue-100 text-blue-700'
+                }`}>
+                  {selectedAfiliado.tipo === 'juridico' ? 'Jurídico' : 'Físico'}
+                </span>
               </p>
             </div>
           )}
