@@ -239,7 +239,7 @@ const CatalogoMedidores: React.FC<CatalogoMedidoresProps> = () => {
                       title="Asignar a afiliado"
                     >
                       Asignar
-                    </button>
+                    </button> 
                   </>
                 );
               }

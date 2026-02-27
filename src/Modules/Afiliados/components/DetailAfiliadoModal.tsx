@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { formatCedulaJuridica } from '../Helper/formatUtils';
 import type { AfiliadoFisico, Medidor } from '../Models/TablaAfiliados/ModeloAfiliadoFisico';
 import type { AfiliadoJuridico } from '../Models/TablaAfiliados/ModeloAfiliadoJuridico';
-import { getMedidoresByAfiliado } from '../Service/ServiceAfiliadoFisico';
+import { getMedidoresByAfiliado, getMedidoresByAfiliadoJuridico } from '../Service/ServiceAfiliadoFisico';
 
 
 // Tipo unificado para identificar qué estamos viendo
@@ -37,7 +37,10 @@ const DetailAbonados: React.FC<DetailAbonadosProps> = ({ persona, isOpen, onClos
 
         // Luego hacer el fetch fresco para tener todos los medidores actualizados
         setLoadingMedidores(true);
-        getMedidoresByAfiliado(idAfiliado)
+        const fetchFn = persona.tipo === 'afiliado-juridico'
+            ? getMedidoresByAfiliadoJuridico
+            : getMedidoresByAfiliado;
+        fetchFn(idAfiliado)
             .then((data) => {
                 // Siempre usar el resultado fresco del endpoint
                 setMedidores(data);
