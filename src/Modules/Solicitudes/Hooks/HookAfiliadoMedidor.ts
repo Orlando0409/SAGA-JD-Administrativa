@@ -39,7 +39,7 @@ export const useAsignarMedidor = () => {
         },
 
         onMutate: async (dto) => {
-            console.log("⏳ Iniciando asignación de medidor...", dto);
+            console.log(" Iniciando asignación de medidor...", dto);
         },
     });
 };

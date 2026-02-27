@@ -8,8 +8,6 @@ import type {
     SolicitudAsociadoJuridica
 } from "../Models/ModelosJuridicos";
 
-// GET - Obtener todas las solicitudes jurídicas
-
 export async function getSolicitudesJuridicas(): Promise<SolicitudJuridica[]> {
     try {
         let response;

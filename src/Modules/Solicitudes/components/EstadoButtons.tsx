@@ -24,10 +24,7 @@ interface EstadoButtonsProps {
     onEstadoChanged?: (nuevoEstado: string) => void;
 }
 
-/**
- * Componente de botones para cambiar estados de solicitudes
- * Usa los hooks unificados de HookEstadosSolicitudes
- */
+
 const EstadoButtons: React.FC<EstadoButtonsProps> = ({
     solicitudId,
     estadoActual,
@@ -47,14 +44,14 @@ const EstadoButtons: React.FC<EstadoButtonsProps> = ({
     // Handle para aprobar y poner en espera
     const handleConfirmAprobar = async () => {
         try {
-            console.log(`🎯 Aprobando solicitud: ${tipoPersona} - ${tipoSolicitud} - ID: ${solicitudId}`);
+            console.log(` Aprobando solicitud: ${tipoPersona} - ${tipoSolicitud} - ID: ${solicitudId}`);
             
             await aprobarMutation.mutateAsync(tipoSolicitud, tipoPersona, solicitudId);
             
             setShowAprobarDialog(false);
             onEstadoChanged?.('Aprobada en Espera');
         } catch (error) {
-            console.error('❌ Error al aprobar solicitud:', error);
+            console.error(' Error al aprobar solicitud:', error);
             setShowAprobarDialog(false);
         }
     };
@@ -62,14 +59,14 @@ const EstadoButtons: React.FC<EstadoButtonsProps> = ({
     // Handle para completar solicitud
     const handleConfirmCompletar = async () => {
         try {
-            console.log(`✅ Completando solicitud: ${tipoPersona} - ${tipoSolicitud} - ID: ${solicitudId}`);
+            console.log(` Completando solicitud: ${tipoPersona} - ${tipoSolicitud} - ID: ${solicitudId}`);
             
             await completarMutation.mutateAsync(tipoSolicitud, tipoPersona, solicitudId);
             
             setShowCompletarDialog(false);
             onEstadoChanged?.('Completada');
         } catch (error) {
-            console.error('❌ Error al completar solicitud:', error);
+            console.error(' Error al completar solicitud:', error);
             setShowCompletarDialog(false);
         }
     };
@@ -77,7 +74,7 @@ const EstadoButtons: React.FC<EstadoButtonsProps> = ({
     // Handle para rechazar solicitud
     const handleConfirmRechazar = async () => {
         try {
-            console.log(`🚫 Rechazando solicitud: ${tipoPersona} - ${tipoSolicitud} - ID: ${solicitudId}`);
+            console.log(`Rechazando solicitud: ${tipoPersona} - ${tipoSolicitud} - ID: ${solicitudId}`);
             
             await rechazarMutation.mutateAsync(tipoSolicitud, tipoPersona, solicitudId);
             

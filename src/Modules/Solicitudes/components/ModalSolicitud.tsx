@@ -118,7 +118,7 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
 
     const info = getSolicitudInfo();
 
-    // useEffect para cambiar automáticamente a estado 2 (En Revisión) cuando se abre el modal
+   
     useEffect(() => {
         const cambiarAEnRevision = async () => {
             if (isOpen && info.estadoId === 1) {
@@ -172,7 +172,7 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
 
             onClose(); // Cerrar modal principal después de aprobar
         } catch (error) {
-            console.error('❌ Error al completar solicitud:', error);
+            console.error(' Error al completar solicitud:', error);
         }
     };
 
@@ -187,12 +187,12 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
         const tipoPersona: TipoPersona = mapearTipoPersona(info.tipo);
 
         try {
-            console.log(`✅ Aprobando y poniendo en espera: ${tipoSolicitud} - ${tipoPersona}`);
+            console.log(` Aprobando y poniendo en espera: ${tipoSolicitud} - ${tipoPersona}`);
             await aprobarYEnEsperaMutation.mutateAsync(tipoSolicitud, tipoPersona, info.id);
             setShowAprobarDialog(false);
             onClose();
         } catch (error) {
-            console.error('❌ Error al marcar en aprobada y en espera:', error);
+            console.error(' Error al marcar en aprobada y en espera:', error);
             setShowAprobarDialog(false);
         }
     };
@@ -220,7 +220,7 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
             const tipoSolicitudInterno: TipoSolicitud = mapearTipoSolicitud(solicitud.tipoSolicitud || info.tipoSolicitud);
             const tipoPersonaInterno: TipoPersona = mapearTipoPersona(info.tipo);
 
-            console.log(`❌ Rechazando solicitud: ${tipoSolicitudInterno} - ${tipoPersonaInterno}`);
+            console.log(`Rechazando solicitud: ${tipoSolicitudInterno} - ${tipoPersonaInterno}`);
 
             // Usar el hook unificado para rechazar (Cualquier estado → 5) con el motivo
             await rechazarMutation.mutateAsync(tipoSolicitudInterno, tipoPersonaInterno, info.id, motivoRechazo.trim());
@@ -229,12 +229,12 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
             setShowRechazarDialog(false);
             onClose(); // Cerrar modal después del éxito
         } catch (error) {
-            console.error('❌ Error al rechazar:', error);
+            console.error(' Error al rechazar:', error);
             setShowRechazarDialog(false);
         }
     };
 
-    // 🎯 Estado de carga unificado - Mucho más simple ahora
+
     const isLoading =
         marcarEnRevisionMutation.isPending ||
         aprobarYEnEsperaMutation.isPending ||

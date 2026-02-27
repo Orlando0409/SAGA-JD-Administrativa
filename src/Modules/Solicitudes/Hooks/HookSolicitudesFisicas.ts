@@ -2,10 +2,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import type { SolicitudFisica } from '../Models/ModelosFisicas';
 import { getSolicitudesFisicas, getSolicitudesPendientes, getSolicitudesPorEstado, getSolicitudesPorTipo } from '../Service/SolicitudesFisicas';
 
-/**
- * 🔄 Función para refrescar todas las consultas de solicitudes físicas
- * Útil para refresh manual después de operaciones CRUD
- */
+
 export const useRefetchAllSolicitudesFisicas = () => {
     const queryClient = useQueryClient();
 
@@ -16,7 +13,7 @@ export const useRefetchAllSolicitudesFisicas = () => {
                 queryKey: ['solicitudes-fisicas']
             });
 
-            // También invalidar solicitudes jurídicas para cross-invalidation
+            // También invalidar solicitudes jurídicas
             await queryClient.invalidateQueries({
                 queryKey: ['solicitudes-juridicas']
             });
@@ -85,23 +82,17 @@ export const useSolicitudesFisicasAfiliacion = () => {
     return useSolicitudesFisicasPorTipo('Afiliacion');
 };
 
-/**
- *  Hook para obtener solicitudes de desconexión físicas
- */
+
 export const useSolicitudesFisicasDesconexion = () => {
     return useSolicitudesFisicasPorTipo('Desconexion');
 };
 
-/**
- *  Hook para obtener solicitudes de cambio de medidor físicas
- */
+
 export const useSolicitudesFisicasCambioMedidor = () => {
     return useSolicitudesFisicasPorTipo('Cambio de Medidor');
 };
 
-/**
- *  Hook para obtener solicitudes de asociado físicas
- */
+
 export const useSolicitudesFisicasAsociado = () => {
     return useSolicitudesFisicasPorTipo('Asociado');
 };
