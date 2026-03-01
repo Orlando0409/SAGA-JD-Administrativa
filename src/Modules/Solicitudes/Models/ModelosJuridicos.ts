@@ -12,6 +12,13 @@ export interface SolicitudJuridicaBase {
     };
     Fecha_Creacion: string;
     Fecha_Actualizacion: string;
+    Id_Medidor?: number;
+    Numero_Medidor?: string | number;
+    Numero_Medidor_Actual?: string | number;
+    Medidor?: {
+        Id_Medidor?: number;
+        Numero_Medidor?: string | number;
+    };
 }
 
 
@@ -36,12 +43,11 @@ export interface SolicitudCambioMedidorJuridica extends SolicitudJuridicaBase {
 }
 export interface SolicitudAsociadoJuridica extends SolicitudJuridicaBase {
     Motivo_Solicitud: string;
-    
+
 }
 
-export type SolicitudJuridica = 
-    | SolicitudAfiliacionJuridica 
-    | SolicitudDesconexionJuridica 
-    | SolicitudCambioMedidorJuridica 
-    | SolicitudAsociadoJuridica; 
-   
+export type SolicitudJuridica =
+    | SolicitudAfiliacionJuridica
+    | SolicitudDesconexionJuridica
+    | SolicitudCambioMedidorJuridica
+    | SolicitudAsociadoJuridica;

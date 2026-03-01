@@ -17,4 +17,11 @@ export interface AsignarMedidorResponse {
     };
 }
 
+interface Medidor {
+    Id_Medidor: number;
+    Numero_Medidor: number;
+    Estado_Medidor?: any;
+    Fecha_Creacion?: string | Date;
+}
+
 export type AsignarMedidorDTO = Asignar;

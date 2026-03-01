@@ -4,6 +4,7 @@ import type { Medidor, CreateMedidorData } from '../models/Inventario';
 // Obtener todos los medidores
 export const getAllMedidores = async (): Promise<Medidor[]> => {
   const response = await axiosPrivate.get(`/Inventario/all/medidores`);
+  console.log('getAllMedidores response:', response.data);
   return response.data;
 };
 
@@ -17,11 +18,12 @@ export const getMedidoresNoInstalados = async (): Promise<Medidor[]> => {
 export const getMedidoresDisponibles = async (): Promise<Medidor[]> => {
   const response = await axiosPrivate.get(`/Inventario/medidores/no-instalados`);
   return response.data;
-};  
+};
 
 // Obtener medidores instalados
 export const getMedidoresInstalados = async (): Promise<Medidor[]> => {
   const response = await axiosPrivate.get(`/Inventario/medidores/instalados`);
+  console.log('getMedidoresInstalados response:', response.data);
   return response.data;
 };
 
@@ -44,7 +46,7 @@ export const createMedidor = async (data: CreateMedidorData): Promise<Medidor> =
 };
 
 // Actualizar el estado de un medidor
-export const updateEstadoMedidor = async ( idMedidor: number, nuevoEstado: number ): Promise<Medidor> => {
+export const updateEstadoMedidor = async (idMedidor: number, nuevoEstado: number): Promise<Medidor> => {
   const response = await axiosPrivate.patch(`/Inventario/update/estado/medidor/${idMedidor}/${nuevoEstado}/`);
   return response.data;
 };
