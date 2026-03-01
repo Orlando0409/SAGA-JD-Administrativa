@@ -38,6 +38,7 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
     const [loadingMedidores, setLoadingMedidores] = useState(false);
     const [searchMedidor, setSearchMedidor] = useState('');
     const [numeroNuevoMedidor, setNumeroNuevoMedidor] = useState('');
+    const [errorNuevoMedidor, setErrorNuevoMedidor] = useState('');
 
     const { lookup, isLoading: loadingCedula } = useCedulaLookup()
 
@@ -382,7 +383,9 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
 
     const handleAgregarNuevo = () => {
         const num = parseInt(numeroNuevoMedidor);
-        if (isNaN(num) || num < 1) { showError('Error', 'Ingresa un número de medidor válido.'); return; }
+        if (isNaN(num) || num < 100000) { setErrorNuevoMedidor('El número de medidor debe tener al menos 6 dígitos y no puede empezar con 0.'); return; }
+        if (num > 99999999) { setErrorNuevoMedidor('El número de medidor no puede tener más de 8 dígitos.'); return; }
+        setErrorNuevoMedidor('');
         setMedidoresPendientes(prev => [...prev, { uid: crypto.randomUUID(), tipo: 'agregar', numeroMedidor: num }]);
         setNumeroNuevoMedidor('');
         setPanelMedidor('cerrado');
@@ -477,9 +480,10 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                         <button type="button" onClick={() => setPanelMedidor('cerrado')} className="text-blue-400 hover:text-blue-600"><X className="w-4 h-4" /></button>
                     </div>
                     <div className="flex gap-2">
-                        <input type="number" min={1} value={numeroNuevoMedidor} onChange={e => setNumeroNuevoMedidor(e.target.value)} onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), handleAgregarNuevo())} placeholder="Ej: 10023" className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white" />
+                        <input type="number" min={1} value={numeroNuevoMedidor} onChange={e => { if (e.target.value.length <= 8) { setNumeroNuevoMedidor(e.target.value); if (errorNuevoMedidor) setErrorNuevoMedidor(''); } }} onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), handleAgregarNuevo())} placeholder="Ej: 100230" className={`flex-1 px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white ${errorNuevoMedidor ? 'border-red-400 bg-red-50' : 'border-gray-300'}`} />
                         <button type="button" onClick={handleAgregarNuevo} disabled={!numeroNuevoMedidor.trim()} className="px-3 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">Añadir</button>
                     </div>
+                    {errorNuevoMedidor && <p className="text-red-500 text-xs">{errorNuevoMedidor}</p>}
                     <p className="text-xs text-blue-600">Se creará el medidor y se asignará automáticamente al afiliado.</p>
                 </div>
             )}
@@ -511,7 +515,6 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                                     ? 'border-red-300 focus:ring-red-500'
                                     : 'border-gray-300 focus:ring-blue-500'
                                 }`}
-                            required
                         >
                             <option value="Cedula Nacional">Cédula Nacional</option>
                             <option value="Dimex">DIMEX</option>
@@ -556,7 +559,6 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                                     }`}
                                 placeholder="123456789"
                                 maxLength={20}
-                                required
                                 disabled={loadingCedula}
                             />
                             {loadingCedula && (
@@ -606,7 +608,6 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                                 }`}
                             placeholder="Tu nombre"
                             maxLength={50}
-                            required
                         />
 
                         {renderCharCounter(
@@ -647,7 +648,6 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                                 }`}
                             placeholder="Tu primer apellido"
                             maxLength={50}
-                            required
                         />
 
                         {renderCharCounter(
@@ -688,7 +688,6 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                                 }`}
                             placeholder="Tu segundo apellido"
                             maxLength={50}
-                            required
                         />
 
                         {renderCharCounter(
@@ -722,11 +721,7 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                             onBlur={field.handleBlur}
                             hasError={field.state.meta.errors.length > 0}
                         />
-                        {field.state.meta.errors.length > 0 && (
-                            <p className="text-red-500 text-xs mt-1">
-                                {String(field.state.meta.errors[0])}
-                            </p>
-                        )}
+                        {renderError('Numero_Telefono', field.state.meta.errors)}
                     </div>
                 )}
             </form.Field>
@@ -757,7 +752,6 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                                 }`}
                             placeholder="ejemplo@email.com"
                             maxLength={100}
-                            required
                         />
 
                         {renderCharCounter(
@@ -840,18 +834,18 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                             placeholder="19"
                             min="18"
                             max="120"
-                            required
                         />
-                        {field.state.meta.errors.length > 0 && (
-                            <p className="text-red-500 text-xs mt-1">
-                                {String(field.state.meta.errors[0])}
-                            </p>
-                        )}
+                        {renderError('Edad', field.state.meta.errors)}
                     </div>
                 )}
             </form.Field>
 
-            <form.Field name="Escritura_Terreno">
+            <form.Field
+                name="Escritura_Terreno"
+                validators={{
+                    onChange: ({ value }) => !value ? 'La escritura del terreno es requerida' : undefined,
+                }}
+            >
                 {(field) => (
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -873,7 +867,7 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                                 }}
                                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                             />
-                            <div className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 flex items-center justify-between cursor-pointer hover:bg-gray-100 transition-colors">
+                            <div className={`w-full px-3 py-2 border rounded-lg bg-gray-50 flex items-center justify-between cursor-pointer hover:bg-gray-100 transition-colors ${field.state.meta.errors.length > 0 ? 'border-red-300' : 'border-gray-300'}`}>
                                 <span className="text-gray-700">
                                     {field.state.value || 'Seleccionar archivo...'}
                                 </span>
@@ -882,11 +876,17 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                                 </span>
                             </div>
                         </div>
+                        {renderError('Escritura_Terreno', field.state.meta.errors)}
                     </div>
                 )}
             </form.Field>
 
-            <form.Field name="Planos_Terreno">
+            <form.Field
+                name="Planos_Terreno"
+                validators={{
+                    onChange: ({ value }) => !value ? 'Los planos del terreno son requeridos' : undefined,
+                }}
+            >
                 {(field) => (
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -908,7 +908,7 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                                 }}
                                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                             />
-                            <div className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 flex items-center justify-between cursor-pointer hover:bg-gray-100 transition-colors">
+                            <div className={`w-full px-3 py-2 border rounded-lg bg-gray-50 flex items-center justify-between cursor-pointer hover:bg-gray-100 transition-colors ${field.state.meta.errors.length > 0 ? 'border-red-300' : 'border-gray-300'}`}>
                                 <span className="text-gray-700">
                                     {field.state.value || 'Seleccionar archivo...'}
                                 </span>
@@ -917,6 +917,7 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                                 </span>
                             </div>
                         </div>
+                        {renderError('Planos_Terreno', field.state.meta.errors)}
                     </div>
                 )}
             </form.Field>
@@ -953,7 +954,6 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                                 }`}
                             placeholder="3-XXX-XXXXXX"
                             maxLength={12}
-                            required
                         />
 
                         {renderCharCounter(
@@ -994,7 +994,6 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                                 }`}
                             placeholder="Empresa S.A."
                             maxLength={100}
-                            required
                         />
 
                         {renderCharCounter(
@@ -1029,11 +1028,7 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                             onBlur={field.handleBlur}
                             hasError={field.state.meta.errors.length > 0}
                         />
-                        {field.state.meta.errors.length > 0 && (
-                            <p className="text-red-500 text-xs mt-1">
-                                {String(field.state.meta.errors[0])}
-                            </p>
-                        )}
+                        {renderError('Numero_Telefono', field.state.meta.errors)}
                     </div>
                 )}
             </form.Field>
@@ -1064,7 +1059,6 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                                 }`}
                             placeholder="ejemplo@email.com"
                             maxLength={100}
-                            required
                         />
 
                         {renderCharCounter(
@@ -1117,7 +1111,12 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                 )}
             </form.Field>
 
-            <form.Field name="Escritura_Terreno">
+            <form.Field
+                name="Escritura_Terreno"
+                validators={{
+                    onChange: ({ value }) => !value ? 'La escritura del terreno es requerida' : undefined,
+                }}
+            >
                 {(field) => (
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -1139,7 +1138,7 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                                 }}
                                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                             />
-                            <div className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 flex items-center justify-between cursor-pointer hover:bg-gray-100 transition-colors">
+                            <div className={`w-full px-3 py-2 border rounded-lg bg-gray-50 flex items-center justify-between cursor-pointer hover:bg-gray-100 transition-colors ${field.state.meta.errors.length > 0 ? 'border-red-300' : 'border-gray-300'}`}>
                                 <span className="text-gray-700">
                                     {field.state.value || 'Seleccionar archivo...'}
                                 </span>
@@ -1148,11 +1147,17 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                                 </span>
                             </div>
                         </div>
+                        {renderError('Escritura_Terreno', field.state.meta.errors)}
                     </div>
                 )}
             </form.Field>
 
-            <form.Field name="Planos_Terreno">
+            <form.Field
+                name="Planos_Terreno"
+                validators={{
+                    onChange: ({ value }) => !value ? 'Los planos del terreno son requeridos' : undefined,
+                }}
+            >
                 {(field) => (
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -1174,7 +1179,7 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                                 }}
                                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                             />
-                            <div className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 flex items-center justify-between cursor-pointer hover:bg-gray-100 transition-colors">
+                            <div className={`w-full px-3 py-2 border rounded-lg bg-gray-50 flex items-center justify-between cursor-pointer hover:bg-gray-100 transition-colors ${field.state.meta.errors.length > 0 ? 'border-red-300' : 'border-gray-300'}`}>
                                 <span className="text-gray-700">
                                     {field.state.value || 'Seleccionar archivo...'}
                                 </span>
@@ -1183,6 +1188,7 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                                 </span>
                             </div>
                         </div>
+                        {renderError('Planos_Terreno', field.state.meta.errors)}
                     </div>
                 )}
             </form.Field>

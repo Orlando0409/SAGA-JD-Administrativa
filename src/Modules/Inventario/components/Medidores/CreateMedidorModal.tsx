@@ -92,6 +92,7 @@ const CreateMedidorModal = ({ isOpen, onClose }: CreateMedidorModalProps) => {
                   formErrors.Numero_Medidor ? 'border-red-300 bg-red-50' : 'border-gray-300'
                 }`}
                 placeholder="Ej: 123456"
+                maxLength={8}
                 min="1"
                 autoComplete="off"
               />
