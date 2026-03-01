@@ -42,6 +42,18 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
 
     const { lookup, isLoading: loadingCedula } = useCedulaLookup()
 
+  
+    const IDENTIFICACION_LIMITS_BY_TYPE: Record<string, number> = {
+        'Cedula Nacional': 9,
+        'Dimex': 12,
+        'Pasaporte': 12,
+    };
+    const IDENTIFICACION_PLACEHOLDERS_MAP: Record<string, string> = {
+        'Cedula Nacional': 'Ej: 123456789',
+        'Dimex': 'Ej: 120000000000',
+        'Pasaporte': 'Ej: ABC123456',
+    };
+
     // Estado para contadores de caracteres
     const [fieldCharCounts, setFieldCharCounts] = useState({
         Nombre: 0,
@@ -55,8 +67,9 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
         Cedula_Juridica: 0
     });
 
-    // Estado para errores de validación personalizados
     const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+
+    const [formErrors, setFormErrors] = useState<Record<string, string>>({});
 
     const getDefaultValues = () => {
         if (tipoActivo === 'afiliado-fisico') {
@@ -86,31 +99,21 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
         }
     };
 
-    // Función para manejar el cambio de cédula con búsqueda automática
-    const handleCedulaChange = async (cedula: string) => {
+   
+    const handleCedulaChange = async (cedula: string, tipoIdentificacion: string) => {
         form.setFieldValue('Identificacion', cedula);
+        
+        validateIdentificacionRealTime(cedula, tipoIdentificacion);
 
-        // Limpiar errores
-        setValidationErrors(prev => {
-            const newErrors = { ...prev };
-            delete newErrors['Identificacion'];
-            return newErrors;
-        });
-
-        // Buscar datos solo si es cédula nacional y tiene 9 dígitos
-        if (form.state.values.Tipo_Identificacion === 'Cedula Nacional' && /^\d{9}$/.test(cedula)) {
+        if (tipoIdentificacion === 'Cedula Nacional' && /^\d{9}$/.test(cedula)) {
             const resultado = await lookup(cedula);
             if (resultado) {
-                // Autocompletar campos con los datos de la API
                 const nombre = resultado.firstname || '';
                 const apellido1 = resultado.lastname1 || '';
                 const apellido2 = resultado.lastname2 || '';
-                
                 form.setFieldValue('Nombre', nombre);
                 form.setFieldValue('Apellido1', apellido1);
                 form.setFieldValue('Apellido2', apellido2);
-                
-                // Actualizar contadores de caracteres
                 setFieldCharCounts(prev => ({
                     ...prev,
                     Nombre: nombre.length,
@@ -119,6 +122,54 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                 }));
             }
         }
+    };
+
+   
+    const validateIdentificacionRealTime = (value: string, tipoIdentificacion: string) => {
+        let error = '';
+
+        if (value && tipoIdentificacion) {
+            const cleanValue = value.replace(/[\s\-]/g, '').toUpperCase();
+
+            switch (tipoIdentificacion) {
+                case 'Cedula Nacional':
+                    if (!/^\d*$/.test(cleanValue)) {
+                        error = 'La cédula solo puede contener números';
+                    } else if (cleanValue.length > 0 && !/^[1-7]/.test(cleanValue)) {
+                        error = 'La cédula nacional debe comenzar con un número del 1 al 7';
+                    } else if (cleanValue.length > 0 && cleanValue.length !== 9 && cleanValue.length === value.length) {
+                        error = 'La cédula debe tener exactamente 9 dígitos';
+                    }
+                    break;
+
+                case 'Dimex':
+                    if (!/^\d*$/.test(cleanValue)) {
+                        error = 'El DIMEX solo puede contener números';
+                    } else if (cleanValue.length > 0 && cleanValue[0] === '0') {
+                        error = 'El DIMEX no puede empezar con 0';
+                    } else if (cleanValue.length > 0 && cleanValue.length !== 12 && cleanValue.length === value.length) {
+                        error = 'El DIMEX debe tener exactamente 12 dígitos';
+                    }
+                    break;
+
+                case 'Pasaporte':
+                    if (!/^[A-Z0-9]*$/.test(cleanValue)) {
+                        error = 'El pasaporte solo puede contener letras y números';
+                    } else if (cleanValue.length > 0 && cleanValue.length < 6) {
+                        error = 'El pasaporte debe tener al menos 6 caracteres';
+                    } else if (cleanValue.length >= 6) {
+                        const letters = cleanValue.match(/[A-Z]/g);
+                        if (!letters || letters.length === 0) {
+                            error = 'El pasaporte debe tener al menos 1 letra';
+                        } else if (letters.length > 3) {
+                            error = 'El pasaporte puede tener máximo 3 letras';
+                        }
+                    }
+                    break;
+            }
+        }
+
+        setValidationErrors(prev => ({ ...prev, Identificacion: error }));
     };
 
     // Validaciones individuales
@@ -172,7 +223,46 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
 
     const cedulaJuridicaSchema = z.string()
         .min(1, 'La cédula jurídica no puede estar vacía')
-        .regex(/^3-\d{3}-\d{6}$/, 'La cédula jurídica debe tener el formato 3-XXX-XXXXXX');
+        .refine((val) => {
+            const clean = val.replace(/[\s-]/g, '');
+            return /^\d{10}$/.test(clean);
+        }, 'La cédula jurídica debe tener exactamente 10 dígitos')
+        .refine((val) => {
+            const clean = val.replace(/[\s-]/g, '');
+            return /^[2345]/.test(clean);
+        }, 'La cédula jurídica debe comenzar con 2, 3, 4 o 5');
+
+    const createCedulaJuridicaHandler = (fieldHandleChange: (value: string) => void) => {
+        return (e: React.ChangeEvent<HTMLInputElement>) => {
+            let value = e.target.value;
+
+            value = value.replace(/[^\d\s-]/g, '');
+
+            const digitsOnly = value.replace(/[\s-]/g, '');
+            if (digitsOnly.length > 10) return;
+
+            setFieldCharCounts(prev => ({ ...prev, Cedula_Juridica: value.length }));
+
+            fieldHandleChange(value);
+
+            validateCedulaJuridicaRealTime(value);
+        };
+    };
+
+    const validateCedulaJuridicaRealTime = (value: string) => {
+        let error = '';
+        if (value) {
+            const normalizedValue = value.replace(/[\s-]/g, '').trim();
+            if (!/^\d+$/.test(normalizedValue)) {
+                error = 'La cédula jurídica debe contener solo dígitos';
+            } else if (normalizedValue.length !== 10) {
+                error = 'La cédula jurídica debe tener exactamente 10 dígitos';
+            } else if (!/^[2345]\d{9}$/.test(normalizedValue)) {
+                error = 'La cédula jurídica debe comenzar con 2, 3, 4 o 5';
+            }
+        }
+        setValidationErrors(prev => ({ ...prev, Cedula_Juridica: error }));
+    };
 
     // Función para crear el handler de input con validación
     const createInputHandler = (fieldName: string, handleChange: (value: string) => void, maxLength: number) => {
@@ -231,11 +321,11 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
         );
     };
 
-    // Función para mostrar errores (de validación del form o errores personalizados)
     const renderError = (fieldName: string, fieldErrors: any[]) => {
         const customError = validationErrors[fieldName];
+        const submitError = formErrors[fieldName];
         const formError = fieldErrors.length > 0 ? String(fieldErrors[0]) : null;
-        const errorMessage = customError || formError;
+        const errorMessage = customError || submitError || formError;
 
         if (errorMessage) {
             return <p className="text-red-500 text-xs mt-1">{errorMessage}</p>;
@@ -247,6 +337,33 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
         defaultValues: getDefaultValues(),
         onSubmit: async ({ value }) => {
             if (isSubmitting) return;
+
+            setFormErrors({});
+
+            if (tipoActivo === 'afiliado-fisico') {
+                const fisicoData = {
+                    Nombre: value.Nombre || '',
+                    Apellido1: value.Apellido1 || '',
+                    Apellido2: value.Apellido2 || undefined,
+                    Tipo_Identificacion: (value.Tipo_Identificacion as any) || 'Cedula Nacional',
+                    Identificacion: value.Identificacion || '',
+                    Numero_Telefono: value.Numero_Telefono || '',
+                    Correo: value.Correo || '',
+                    Direccion_Exacta: value.Direccion_Exacta || '',
+                    Edad: value.Edad,
+                };
+                const { AfiliadoFisicoSchema } = await import('../Schemas/AfiliadoFisico');
+                const validation = AfiliadoFisicoSchema.safeParse(fisicoData);
+                if (!validation.success) {
+                    const fieldErrors: Record<string, string> = {};
+                    validation.error.errors.forEach((err) => {
+                        const field = err.path[0] as string;
+                        if (!fieldErrors[field]) fieldErrors[field] = err.message;
+                    });
+                    setFormErrors(fieldErrors);
+                    return;
+                }
+            }
 
             try {
                 setIsSubmitting(true);
@@ -286,7 +403,7 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                 } else {
                     // Agregar campos de afiliado jurídico
                     formData.append('Razon_Social', value.Razon_Social || '');
-                    formData.append('Cedula_Juridica', value.Cedula_Juridica || '');
+                    formData.append('Cedula_Juridica', (value.Cedula_Juridica || '').replace(/[\s-]/g, ''));
                     formData.append('Numero_Telefono', value.Numero_Telefono || '');
                     formData.append('Correo', value.Correo || '');
                     formData.append('Direccion_Exacta', value.Direccion_Exacta || '');
@@ -346,6 +463,7 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
             Cedula_Juridica: 0
         });
         setValidationErrors({});
+        setFormErrors({});
         setEscrituraFile(null);
         setPlanosFile(null);
         setMedidoresPendientes([]);
@@ -480,7 +598,7 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                         <button type="button" onClick={() => setPanelMedidor('cerrado')} className="text-blue-400 hover:text-blue-600"><X className="w-4 h-4" /></button>
                     </div>
                     <div className="flex gap-2">
-                        <input type="number" min={1} value={numeroNuevoMedidor} onChange={e => { if (e.target.value.length <= 8) { setNumeroNuevoMedidor(e.target.value); if (errorNuevoMedidor) setErrorNuevoMedidor(''); } }} onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), handleAgregarNuevo())} placeholder="Ej: 100230" className={`flex-1 px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white ${errorNuevoMedidor ? 'border-red-400 bg-red-50' : 'border-gray-300'}`} />
+                        <input type="text" inputMode="numeric" value={numeroNuevoMedidor} onChange={e => { const val = e.target.value.replace(/\D/g, ''); if (val.length <= 8) { setNumeroNuevoMedidor(val); if (errorNuevoMedidor) setErrorNuevoMedidor(''); } }} onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), handleAgregarNuevo())} placeholder="Ej: 100230" className={`flex-1 px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white ${errorNuevoMedidor ? 'border-red-400 bg-red-50' : 'border-gray-300'}`} />
                         <button type="button" onClick={handleAgregarNuevo} disabled={!numeroNuevoMedidor.trim()} className="px-3 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">Añadir</button>
                     </div>
                     {errorNuevoMedidor && <p className="text-red-500 text-xs">{errorNuevoMedidor}</p>}
@@ -510,8 +628,16 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                         <select
                             id="Tipo_Identificacion"
                             value={field.state.value}
-                            onChange={(e) => field.handleChange(e.target.value as 'Cedula Nacional' | 'Dimex' | 'Pasaporte')}
-                            className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-colors ${field.state.meta.errors.length > 0
+                            onChange={(e) => {
+                                field.handleChange(e.target.value as 'Cedula Nacional' | 'Dimex' | 'Pasaporte');
+                                // Al cambiar tipo, limpiar identificación y sus errores
+                                form.setFieldValue('Identificacion', '');
+                                setFieldCharCounts(prev => ({ ...prev, Identificacion: 0 }));
+                                setValidationErrors(prev => ({ ...prev, Identificacion: '' }));
+                                setFormErrors(prev => ({ ...prev, Identificacion: '' }));
+                            }}
+                            className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-colors ${
+                                (field.state.meta.errors.length > 0 || formErrors.Tipo_Identificacion)
                                     ? 'border-red-300 focus:ring-red-500'
                                     : 'border-gray-300 focus:ring-blue-500'
                                 }`}
@@ -536,48 +662,57 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                 }}
             >
                 {(field) => (
-                    <div>
-                        <label htmlFor="Identificacion" className="block text-sm font-medium text-gray-700 mb-1">
-                            Número de Identificación <span className="text-red-500">*</span>
-                        </label>
-                        <div className="relative">
-                            <input
-                                id="Identificacion"
-                                type="text"
-                                value={field.state.value}
-                                onChange={async (e) => {
-                                    const value = e.target.value;
-                                    if (value.length <= 20) {
-                                        setFieldCharCounts(prev => ({ ...prev, Identificacion: value.length }));
-                                        await handleCedulaChange(value);
-                                    }
-                                }}
-                                onBlur={field.handleBlur}
-                                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-colors ${(field.state.meta.errors.length > 0 || validationErrors.Identificacion)
-                                        ? 'border-red-300 focus:ring-red-500'
-                                        : 'border-gray-300 focus:ring-blue-500'
-                                    }`}
-                                placeholder="123456789"
-                                maxLength={20}
-                                disabled={loadingCedula}
-                            />
-                            {loadingCedula && (
-                                <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
+                    <form.Field name="Tipo_Identificacion">
+                        {(tipoField) => {
+                            const tipoIdentificacion: string = (tipoField.state.value as string) ?? 'Cedula Nacional';
+                            const maxLength = IDENTIFICACION_LIMITS_BY_TYPE[tipoIdentificacion] ?? 20;
+                            const placeholder = IDENTIFICACION_PLACEHOLDERS_MAP[tipoIdentificacion] ?? 'Ingrese la identificación';
+
+                            return (
+                                <div>
+                                    <label htmlFor="Identificacion" className="block text-sm font-medium text-gray-700 mb-1">
+                                        {tipoIdentificacion || 'Identificación'} <span className="text-red-500">*</span>
+                                    </label>
+                                    <div className="relative">
+                                        <input
+                                            id="Identificacion"
+                                            type="text"
+                                            value={field.state.value}
+                                            onChange={async (e) => {
+                                                const value = e.target.value;
+                                                if (value.length <= maxLength) {
+                                                    setFieldCharCounts(prev => ({ ...prev, Identificacion: value.length }));
+                                                    await handleCedulaChange(value, tipoIdentificacion);
+                                                }
+                                            }}
+                                            onBlur={field.handleBlur}
+                                            className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-colors ${
+                                                (field.state.meta.errors.length > 0 || validationErrors.Identificacion || formErrors.Identificacion)
+                                                    ? 'border-red-300 focus:ring-red-500'
+                                                    : 'border-gray-300 focus:ring-blue-500'
+                                            }`}
+                                            placeholder={placeholder}
+                                            maxLength={maxLength}
+                                            disabled={!tipoIdentificacion || loadingCedula}
+                                        />
+                                        {loadingCedula && (
+                                            <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                                                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {renderCharCounter(
+                                        fieldCharCounts.Identificacion,
+                                        maxLength,
+                                        field.state.meta.errors.length > 0 || !!validationErrors.Identificacion || !!formErrors.Identificacion
+                                    )}
+
+                                    {renderError('Identificacion', field.state.meta.errors)}
                                 </div>
-                            )}
-                        </div>
-
-                        {renderCharCounter(
-                            fieldCharCounts.Identificacion,
-                            20,
-                            field.state.meta.errors.length > 0 || !!validationErrors.Identificacion
-                        )}
-
-                        {renderError('Identificacion', field.state.meta.errors)}
-                        
-                        {form.state.values.Tipo_Identificacion === 'Cedula Nacional'}
-                    </div>
+                            );
+                        }}
+                    </form.Field>
                 )}
             </form.Field>
 
@@ -946,20 +1081,20 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                             id="Cedula_Juridica"
                             type="text"
                             value={field.state.value}
-                            onChange={createInputHandler('Cedula_Juridica', field.handleChange, 12)}
+                            onChange={createCedulaJuridicaHandler(field.handleChange)}
                             onBlur={field.handleBlur}
-                            className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-colors ${(field.state.meta.errors.length > 0 || validationErrors.Cedula_Juridica)
+                            className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-colors ${(field.state.meta.errors.length > 0 || validationErrors.Cedula_Juridica || formErrors.Cedula_Juridica)
                                     ? 'border-red-300 focus:ring-red-500'
                                     : 'border-gray-300 focus:ring-blue-500'
                                 }`}
-                            placeholder="3-XXX-XXXXXX"
-                            maxLength={12}
+                            placeholder="Ej: 3101654321 o 3-101-654321"
+                            maxLength={14}
                         />
 
                         {renderCharCounter(
                             fieldCharCounts.Cedula_Juridica,
-                            12,
-                            field.state.meta.errors.length > 0 || !!validationErrors.Cedula_Juridica
+                            13,
+                            field.state.meta.errors.length > 0 || !!validationErrors.Cedula_Juridica || !!formErrors.Cedula_Juridica
                         )}
 
                         {renderError('Cedula_Juridica', field.state.meta.errors)}
