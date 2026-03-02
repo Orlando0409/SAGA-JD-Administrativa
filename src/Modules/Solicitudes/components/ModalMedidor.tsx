@@ -21,7 +21,8 @@ import { useAsignarMedidor } from '../Hooks/HookAfiliadoMedidor';
 interface ModalMedidorProps {
     isOpen: boolean;
     onClose: () => void;
-    onMedidorAsignado?: (numeroMedidorAsignado?: string | number) => void | Promise<void>; // Callback para ejecutar después de asignar medidor
+    onMedidorAsignado?: () => void; // Callback para ejecutar después de asignar medidor
+    tipoSolicitud?: 'Afiliacion' | 'Cambio de Medidor' | 'Asociado' | 'Desconexion';
     afiliado: {
         tipo: 'solicitud-fisica' | 'solicitud-juridica';
         datos: SolicitudFisica | SolicitudJuridica;
@@ -35,7 +36,7 @@ interface Medidor {
     Fecha_Creacion?: string | Date;
 }
 
-const ModalMedidor = ({ isOpen, onClose, onMedidorAsignado, afiliado }: ModalMedidorProps) => {
+const ModalMedidor = ({ isOpen, onClose, onMedidorAsignado, tipoSolicitud, afiliado }: ModalMedidorProps) => {
     const asignarMedidorMutation = useAsignarMedidor();
     const queryClient = useQueryClient();
     const { showError } = useAlerts();
@@ -112,7 +113,8 @@ const ModalMedidor = ({ isOpen, onClose, onMedidorAsignado, afiliado }: ModalMed
             await asignarMedidorMutation.mutateAsync({
                 Id_Medidor: medidorSeleccionado.Id_Medidor,
                 Id_Tipo_Entidad: afiliado.tipo === 'solicitud-fisica' ? 1 : 2,
-                Id_Solicitud: afiliadoInfo.Id_Afiliado
+                Id_Solicitud: afiliadoInfo.Id_Afiliado,
+                tipoSolicitud: tipoSolicitud
             });
 
             setShowConfirmDialog(false);

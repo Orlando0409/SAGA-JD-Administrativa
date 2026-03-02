@@ -17,7 +17,7 @@ import { useMarcarEnRevision, useAprobarYEnEspera, useCompletar, useRechazar } f
 import { mapearTipoSolicitud, mapearTipoPersona } from '../Service/EstadoSolicitudes';
 import type { TipoSolicitud, TipoPersona } from '../Types/EstadoSolicitudes';
 import { useAlerts } from '@/Modules/Global/context/AlertContext';
-import type { waitForDebugger } from 'inspector';
+import { updateEstadoMedidor } from '@/Modules/Inventario/service/MedidorServices';
 
 interface ModalSolicitudProps {
     isOpen: boolean;
@@ -84,7 +84,9 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
                 Motivo_Solicitud: datos.Motivo_Solicitud || 'No especificado',
                 Escritura_Terreno: datos.Escritura_Terreno || 'No proporcionada',
                 Planos_Terreno: datos.Planos_Terreno || 'No proporcionados',
-                Numero_Medidor_Actual: numeroMedidorActual,
+                Numero_Medidor_Actual: datos.Numero_Medidor_Actual || 'No especificado',
+                Numero_Medidor: datos.Numero_Medidor ?? null,
+                Id_Medidor: datos.Id_Medidor ?? null,
             };
         } else {
             const datos = solicitud.datos as any;
@@ -121,7 +123,9 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
                 Motivo_Solicitud: datos.Motivo_Solicitud || 'No especificado',
                 Escritura_Terreno: datos.Escritura_Terreno || 'No proporcionada',
                 Planos_Terreno: datos.Planos_Terreno || 'No proporcionados',
-                Numero_Medidor_Actual: numeroMedidorActual,
+                Numero_Medidor_Actual: datos.Numero_Medidor_Actual || 'No especificado',
+                Numero_Medidor: datos.Numero_Medidor ?? null,
+                Id_Medidor: datos.Id_Medidor ?? null,
             };
         }
     };
@@ -184,6 +188,17 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
         try {
             const tipoSolicitudInterno: TipoSolicitud = mapearTipoSolicitud(solicitud.tipoSolicitud || info.tipoSolicitud);
             const tipoPersonaInterno: TipoPersona = mapearTipoPersona(info.tipo);
+
+            // Si es Cambio de Medidor y hay un medidor registrado, marcarlo como Averiado (estado 3)
+            if (info.tipoSolicitud === 'Cambio de Medidor' && info.Id_Medidor) {
+                try {
+                    await updateEstadoMedidor(info.Id_Medidor, 3);
+                    console.log(`Medidor #${info.Id_Medidor} marcado como Averiado`);
+                } catch (medidorError) {
+                    console.error('Error al marcar medidor como averiado:', medidorError);
+                    // No interrumpir el flujo principal si falla el cambio de estado del medidor
+                }
+            }
 
             await completarMutation.mutateAsync(tipoSolicitudInterno, tipoPersonaInterno, info.id);
 
@@ -396,7 +411,7 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
                             </div>
 
                             {/* Detalles de la Solicitud */}
-                            {(info.Numero_Medidor_Actual || info.Motivo_Solicitud) && (
+                            {(info.Numero_Medidor_Actual || info.Motivo_Solicitud || info.Numero_Medidor != null) && (
                                 <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
                                     <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-3">
                                         <div className="flex items-center gap-2">
@@ -406,7 +421,17 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
 
                                     <div className="p-4">
                                         <div className="grid grid-cols-1 gap-3">
-                                            {info.Numero_Medidor_Actual && (
+                                            {/* Número de medidor seleccionado por el usuario (sólo Cambio de Medidor) */}
+                                            {info.tipoSolicitud === 'Cambio de Medidor' && info.Numero_Medidor != null && (
+                                                <div className="bg-blue-50 border border-blue-200 p-3 rounded-lg">
+                                                    <label className="block text-xs font-medium text-blue-700 uppercase tracking-wide mb-1">
+                                                        Número de Medidor Seleccionado
+                                                    </label>
+                                                    <p className="text-base font-bold text-blue-900">{info.Numero_Medidor}</p>
+                                                </div>
+                                            )}
+
+                                            {info.Numero_Medidor_Actual && info.Numero_Medidor_Actual !== 'No especificado' && (
                                                 <div className="bg-gray-50 p-3 rounded-lg">
                                                     <label className="block text-xs font-medium text-gray-600 uppercase tracking-wide mb-1">
                                                         Número de Medidor Actual
@@ -415,7 +440,7 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
                                                 </div>
                                             )}
 
-                                            {info.Motivo_Solicitud && (
+                                            {info.Motivo_Solicitud && info.Motivo_Solicitud !== 'No especificado' && (
                                                 <div className="bg-gray-50 p-3 rounded-lg">
                                                     <label className="block text-xs font-medium text-gray-600 uppercase tracking-wide mb-1">
                                                         Motivo de la Solicitud
@@ -533,14 +558,9 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
                         isOpen={showModalMedidor}
                         onClose={() => {
                             setShowModalMedidor(false);
-                            // No cerrar el modal de solicitud automáticamente
                         }}
-                        onMedidorAsignado={async (numero) => {
-                            if (numero !== undefined && numero !== null) {
-                                setNumeroMedidorAsignado(numero);
-                            }
-                            await aprobarSolicitudDespuesDeAsignar();
-                        }}
+                        onMedidorAsignado={aprobarSolicitudDespuesDeAsignar}
+                        tipoSolicitud={solicitud.tipoSolicitud || (info.tipoSolicitud as any)}
                         afiliado={{
                             tipo: solicitud.tipo,
                             datos: solicitud.datos
