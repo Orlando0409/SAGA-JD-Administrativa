@@ -126,7 +126,7 @@ const ModalMedidor = ({ isOpen, onClose, onMedidorAsignado, tipoSolicitud, afili
 
             // Ejecutar callback para aprobar la solicitud después de asignar
             if (onMedidorAsignado) {
-                await onMedidorAsignado(medidorSeleccionado.Numero_Medidor);
+                await onMedidorAsignado();
             }
         } catch (error) {
             console.error('Error al asignar medidor:', error);
