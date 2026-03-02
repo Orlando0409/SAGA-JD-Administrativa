@@ -189,14 +189,13 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
             const tipoSolicitudInterno: TipoSolicitud = mapearTipoSolicitud(solicitud.tipoSolicitud || info.tipoSolicitud);
             const tipoPersonaInterno: TipoPersona = mapearTipoPersona(info.tipo);
 
-            // Si es Cambio de Medidor y hay un medidor registrado, marcarlo como Averiado (estado 3)
             if (info.tipoSolicitud === 'Cambio de Medidor' && info.Id_Medidor) {
                 try {
                     await updateEstadoMedidor(info.Id_Medidor, 3);
                     console.log(`Medidor #${info.Id_Medidor} marcado como Averiado`);
                 } catch (medidorError) {
                     console.error('Error al marcar medidor como averiado:', medidorError);
-                    // No interrumpir el flujo principal si falla el cambio de estado del medidor
+            
                 }
             }
 
