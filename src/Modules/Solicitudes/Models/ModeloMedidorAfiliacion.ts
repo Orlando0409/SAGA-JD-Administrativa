@@ -4,6 +4,7 @@ export interface Asignar {
     Id_Medidor: number;
     Id_Tipo_Entidad: number;
     Id_Solicitud: number;
+    tipoSolicitud?: 'Afiliacion' | 'Cambio de Medidor' | 'Asociado' | 'Desconexion';
 }
 
 export interface AsignarMedidorResponse {

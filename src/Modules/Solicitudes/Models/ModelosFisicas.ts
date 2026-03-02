@@ -43,6 +43,7 @@ export interface SolicitudCambioMedidorFisica extends SolicitudFisicaBase {
     Direccion_Exacta: string;
     Motivo_Solicitud: string;
     Numero_Medidor_Anterior: string;
+    Numero_Medidor?: string | number;
 }
 
 export interface SolicitudAsociadoFisica extends SolicitudFisicaBase {
