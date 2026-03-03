@@ -16,10 +16,17 @@ export interface SolicitudFisicaBase {
     };
     Fecha_Creacion: string;
     Fecha_Actualizacion: string;
+    Id_Medidor?: number;
+    Numero_Medidor?: string | number;
+    Numero_Medidor_Actual?: string | number;
+    Medidor?: {
+        Id_Medidor?: number;
+        Numero_Medidor?: string | number;
+    };
     Planos_Terreno?: File | string;
     Escritura_Terreno?: File | string;
     // Mantener Cedula por compatibilidad pero priorizar Identificacion
-   
+
 }
 
 
@@ -43,6 +50,7 @@ export interface SolicitudCambioMedidorFisica extends SolicitudFisicaBase {
     Direccion_Exacta: string;
     Motivo_Solicitud: string;
     Numero_Medidor_Anterior: string;
+    Numero_Medidor?: string | number;
 }
 
 export interface SolicitudAsociadoFisica extends SolicitudFisicaBase {

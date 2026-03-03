@@ -55,7 +55,7 @@ export const useCreateProveedorJuridico = () => {
   });
 
   return {
-    createProveedorJuridico: createMutation.mutate,
+    createProveedorJuridico: createMutation.mutateAsync,
     isCreating: createMutation.isPending,
     createError: createMutation.error,
     createSuccess: createMutation.isSuccess,

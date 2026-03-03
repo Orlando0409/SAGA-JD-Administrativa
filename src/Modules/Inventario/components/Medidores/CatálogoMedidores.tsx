@@ -152,6 +152,9 @@ const CatalogoMedidores: React.FC<CatalogoMedidoresProps> = () => {
         cell: info => {
           const afiliado = info.row.original.Afiliado;
 
+          // Log de debugging para verificar qué recibimos del backend
+          console.log('Medidor:', info.row.original.Numero_Medidor, 'Afiliado:', afiliado);
+
           if (!afiliado) {
             return (
               <div className="text-gray-600 text-left">
@@ -239,7 +242,7 @@ const CatalogoMedidores: React.FC<CatalogoMedidoresProps> = () => {
                       title="Asignar a afiliado"
                     >
                       Asignar
-                    </button> 
+                    </button>
                   </>
                 );
               }

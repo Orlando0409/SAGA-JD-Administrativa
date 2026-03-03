@@ -18,14 +18,17 @@ export const useAsignarMedidor = () => {
                 'El medidor se ha asignado correctamente al afiliado'
             );
 
-            // Invalida las cachés relacionadas para actualizar las listas
-            queryClient.invalidateQueries({ queryKey: ["afiliados"] });
-            queryClient.invalidateQueries({ queryKey: ["medidores"] });
+            // Módulo de solicitudes
             queryClient.invalidateQueries({ queryKey: ["solicitudes-fisicas"] });
             queryClient.invalidateQueries({ queryKey: ["solicitudes-juridicas"] });
+            // Módulo de afiliados (físicos y jurídicos)
+            queryClient.invalidateQueries({ queryKey: ["afiliadosFisicos"] });
+            queryClient.invalidateQueries({ queryKey: ["afiliadosJuridicos"] });
+            queryClient.invalidateQueries({ queryKey: ["afiliados"] });
             queryClient.invalidateQueries({ queryKey: ["afiliado-medidor"] });
+            // Módulo de medidores
+            queryClient.invalidateQueries({ queryKey: ["medidores"] });
             queryClient.invalidateQueries({ queryKey: ["medidores-no-instalados"] });
-
         },
 
         onError: (error, variables) => {

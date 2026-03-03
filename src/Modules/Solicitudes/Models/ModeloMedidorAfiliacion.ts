@@ -4,6 +4,7 @@ export interface Asignar {
     Id_Medidor: number;
     Id_Tipo_Entidad: number;
     Id_Solicitud: number;
+    tipoSolicitud?: 'Afiliacion' | 'Cambio de Medidor' | 'Asociado' | 'Desconexion';
 }
 
 export interface AsignarMedidorResponse {
@@ -15,6 +16,13 @@ export interface AsignarMedidorResponse {
         Id_Medidor: number;
 
     };
+}
+
+interface Medidor {
+    Id_Medidor: number;
+    Numero_Medidor: number;
+    Estado_Medidor?: any;
+    Fecha_Creacion?: string | Date;
 }
 
 export type AsignarMedidorDTO = Asignar;

@@ -3,7 +3,6 @@ import { isValidPhoneNumber, parsePhoneNumber, formatIncompletePhoneNumber } fro
 
 // Expresiones regulares para validaciones basadas en el backend
 const NOMBRE_NO_SOLO_ESPACIOS = /\S/; // No puede contener solo espacios
-const RAZON_SOCIAL_REGEX = /^[a-zA-ZÀ-ÿ\u00f1\u00d1\s]+$/; // Solo letras y espacios, sin números
 // Validación específica para cédula jurídica según backend: 10 dígitos, empezar con 2, 3, 4 o 5
 const CEDULA_JURIDICA_REGEX = /^[2345]\d{9}$/; // Formato de cédula jurídica costarricense (10 dígitos)
 
@@ -60,13 +59,10 @@ export const CreateProveedorJuridicoSchema = z.object({
 
   Razon_Social: z.string({ message: "La razón social debe ser un texto" })
     .min(1, { message: 'La razón social no puede estar vacía' })
-    .max(20, { message: 'La razón social no debe superar los 20 caracteres' })
+    .max(150, { message: 'La razón social no debe superar los 150 caracteres' })
     .transform((val) => val.trim())
     .refine((val) => NOMBRE_NO_SOLO_ESPACIOS.test(val), {
       message: 'La razon social no puede contener solo espacios'
-    })
-    .refine((val) => RAZON_SOCIAL_REGEX.test(val), {
-      message: 'La razón social solo puede contener letras y espacios, sin números'
     }),
 
   Cedula_Juridica: z.string({ message: "La cédula jurídica debe ser texto" })
@@ -108,13 +104,10 @@ export const EditProveedorJuridicoSchema = z.object({
 
   Razon_Social: z.string({ message: "La razón social debe ser un texto" })
     .min(1, { message: 'La razón social no puede estar vacía' })
-    .max(20, { message: 'La razón social no debe superar los 20 caracteres' })
+    .max(150, { message: 'La razón social no debe superar los 150 caracteres' })
     .transform((val) => val.trim())
     .refine((val) => NOMBRE_NO_SOLO_ESPACIOS.test(val), {
       message: 'La razon social no puede contener solo espacios'
-    })
-    .refine((val) => RAZON_SOCIAL_REGEX.test(val), {
-      message: 'La razón social solo puede contener letras y espacios, sin números'
     }),
 
   Telefono_Proveedor: z.string({ message: 'El número de teléfono debe ser un string' })
@@ -133,7 +126,7 @@ export type EditProveedorJuridicoSchemaData = z.infer<typeof EditProveedorJuridi
 export const JURIDICO_VALIDATION_LIMITS = {
   NOMBRE_MIN_LENGTH: 2,
   NOMBRE_MAX_LENGTH: 40, // Actualizado a 40 caracteres
-  RAZON_SOCIAL_MAX_LENGTH: 20, // Actualizado a 20 caracteres
+  RAZON_SOCIAL_MAX_LENGTH: 150, // Actualizado a 150 caracteres
   CEDULA_JURIDICA_LENGTH: 10, // Exactamente 10 dígitos
   CEDULA_JURIDICA_MAX_LENGTH: 10, // Para el input maxLength
   TELEFONO_MAX_LENGTH: 20,
