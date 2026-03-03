@@ -1,14 +1,56 @@
 export async function fetchCedulaData(cedula: string) {
-    const res = await fetch(`https://apis.gometa.org/cedulas/${cedula}`)
-    if (!res.ok) throw new Error("Error al consultar la API")
-    const data = await res.json()
+  const res = await fetch(`https://apis.gometa.org/cedulas/${cedula}`)
+  if (!res.ok) throw new Error("Error al consultar la API")
+  const data = await res.json()
 
-    if (!data.results || data.results.length === 0) throw new Error("Sin resultados")
+  if (!data.results || data.results.length === 0) throw new Error("Sin resultados")
 
-    const persona = data.results[0]
-    if (persona.fullname?.toUpperCase().includes("NO REGISTRADA")) {
-        throw new Error("Cédula no registrada")
-    }
+  const persona = data.results[0]
+  if (persona.fullname?.toUpperCase().includes("NO REGISTRADA")) {
+    throw new Error("Cédula no registrada")
+  }
 
-    return persona
+  return persona
+}
+
+async function tryFetch(url: string): Promise<any> {
+  try {
+    const res = await fetch(url)
+    if (!res.ok) return null
+    return await res.json()
+  } catch {
+    return null
+  }
+}
+
+export async function fetchCedulaJuridicaData(cedula: string): Promise<string | null> {
+  const digits = cedula.replaceAll(/\D/g, "")
+
+  // 1) GoMeta (proxy/cache de Hacienda)
+  try {
+    const d = await tryFetch(`https://apis.gometa.org/cedulas/${digits}`)
+    const nombre: string =
+      d?.razon_social ||
+      d?.razonsocial ||
+      d?.nombre_comercial ||
+      d?.nombreComercial ||
+      d?.nombre ||
+      ""
+    if (nombre?.trim()) return nombre.trim()
+  } catch {}
+
+  // 2) Hacienda directa
+  try {
+    const d = await tryFetch(`https://api.hacienda.go.cr/fe/ae?identificacion=${digits}`)
+    const nombre: string =
+      d?.razon_social ||
+      d?.razonsocial ||
+      d?.nombre_comercial ||
+      d?.nombreComercial ||
+      d?.nombre ||
+      ""
+    if (nombre?.trim()) return nombre.trim()
+  } catch {}
+
+  return null
 }
