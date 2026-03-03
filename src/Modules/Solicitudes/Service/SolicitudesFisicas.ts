@@ -36,7 +36,6 @@ export async function getSolicitudesFisicas(): Promise<SolicitudFisica[]> {
                     case 2: tipo = 'Desconexion'; break;
                     case 3: tipo = 'Cambio de Medidor'; break;
                     case 4: tipo = 'Asociado'; break;
-                    case 5: tipo = 'Medidor Extra'; break;
                     default: tipo = 'Afiliacion';
                 }
 
@@ -54,8 +53,7 @@ export async function getSolicitudesFisicas(): Promise<SolicitudFisica[]> {
                 { key: 'Afiliacion', tipo: 'Afiliacion' },
                 { key: 'Asociado', tipo: 'Asociado' },
                 { key: 'Cambio De Medidor', tipo: 'Cambio de Medidor' },  // ⚠️ Key exacta del backend
-                { key: 'Desconexion', tipo: 'Desconexion' },
-                { key: 'Medidor Extra', tipo: 'Medidor Extra' }
+                { key: 'Desconexion', tipo: 'Desconexion' }
             ];
 
             tiposSolicitud.forEach(({ key, tipo }) => {
@@ -148,16 +146,6 @@ export async function getSolicitudesAsociado(): Promise<SolicitudAsociadoFisica[
         return response.data;
     } catch (error) {
         console.error(' Error al obtener solicitudes de asociado físicas:', error);
-        throw error;
-    }
-}
-
-export async function getSolicitudesMedidorExtra(): Promise<SolicitudFisica[]> {
-    try {
-        const response = await apiAuth.get('/solicitudes-fisicas/tipo/Medidor Extra');
-        return response.data;
-    } catch (error) {
-        console.error(' Error al obtener solicitudes de medidor extra físicas:', error);
         throw error;
     }
 }

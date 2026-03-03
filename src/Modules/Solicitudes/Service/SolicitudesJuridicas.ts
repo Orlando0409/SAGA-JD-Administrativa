@@ -34,7 +34,6 @@ export async function getSolicitudesJuridicas(): Promise<SolicitudJuridica[]> {
                     case 2: tipo = 'Desconexion'; break;
                     case 3: tipo = 'Cambio de Medidor'; break;
                     case 4: tipo = 'Asociado'; break;
-                    case 5: tipo = 'Medidor Extra'; break;
                     default: tipo = 'Afiliacion';
                 }
 
@@ -52,8 +51,7 @@ export async function getSolicitudesJuridicas(): Promise<SolicitudJuridica[]> {
                 { key: 'Afiliacion', tipo: 'Afiliacion' },
                 { key: 'Asociado', tipo: 'Asociado' },
                 { key: 'Cambio De Medidor', tipo: 'Cambio de Medidor' },  // ⚠️ Key exacta del backend
-                { key: 'Desconexion', tipo: 'Desconexion' },
-                { key: 'Medidor Extra', tipo: 'Medidor Extra' }
+                { key: 'Desconexion', tipo: 'Desconexion' }
             ];
 
             tiposSolicitud.forEach(({ key, tipo }) => {
@@ -146,16 +144,6 @@ export async function getSolicitudesAsociado(): Promise<SolicitudAsociadoJuridic
         return response.data;
     } catch (error) {
         console.error(' Error al obtener solicitudes de asociado jurídicas:', error);
-        throw error;
-    }
-}
-
-export async function getSolicitudesMedidorExtra(): Promise<SolicitudJuridica[]> {
-    try {
-        const response = await apiAuth.get('/solicitudes-juridicas/tipo/Medidor Extra');
-        return response.data;
-    } catch (error) {
-        console.error(' Error al obtener solicitudes de medidor extra jurídicas:', error);
         throw error;
     }
 }
