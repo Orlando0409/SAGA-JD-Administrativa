@@ -40,7 +40,7 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
     const [numeroNuevoMedidor, setNumeroNuevoMedidor] = useState('');
     const [errorNuevoMedidor, setErrorNuevoMedidor] = useState('');
 
-    const { lookup, isLoading: loadingCedula } = useCedulaLookup()
+    const { lookup, isLoading: loadingCedula, lookupJuridico, isLoadingJuridico: loadingCedulaJuridica } = useCedulaLookup()
 
   
     const IDENTIFICACION_LIMITS_BY_TYPE: Record<string, number> = {
@@ -232,21 +232,22 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
             return /^[2345]/.test(clean);
         }, 'La cédula jurídica debe comenzar con 2, 3, 4 o 5');
 
-    const createCedulaJuridicaHandler = (fieldHandleChange: (value: string) => void) => {
-        return (e: React.ChangeEvent<HTMLInputElement>) => {
-            let value = e.target.value;
+    const handleCedulaJuridicaChange = async (cedula: string) => {
+        const value = cedula.replace(/[^\d\s-]/g, '');
+        const digitsOnly = value.replace(/[\s-]/g, '');
+        if (digitsOnly.length > 10) return;
 
-            value = value.replace(/[^\d\s-]/g, '');
+        form.setFieldValue('Cedula_Juridica', value);
+        setFieldCharCounts(prev => ({ ...prev, Cedula_Juridica: value.length }));
+        validateCedulaJuridicaRealTime(value);
 
-            const digitsOnly = value.replace(/[\s-]/g, '');
-            if (digitsOnly.length > 10) return;
-
-            setFieldCharCounts(prev => ({ ...prev, Cedula_Juridica: value.length }));
-
-            fieldHandleChange(value);
-
-            validateCedulaJuridicaRealTime(value);
-        };
+        if (digitsOnly.length === 10) {
+            const nombre = await lookupJuridico(digitsOnly);
+            if (nombre) {
+                form.setFieldValue('Razon_Social', nombre);
+                setFieldCharCounts(prev => ({ ...prev, Razon_Social: nombre.length }));
+            }
+        }
     };
 
     const validateCedulaJuridicaRealTime = (value: string) => {
@@ -1077,19 +1078,27 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                         <label htmlFor="Cedula_Juridica" className="block text-sm font-medium text-gray-700 mb-1">
                             Cédula Jurídica <span className="text-red-500">*</span>
                         </label>
-                        <input
-                            id="Cedula_Juridica"
-                            type="text"
-                            value={field.state.value}
-                            onChange={createCedulaJuridicaHandler(field.handleChange)}
-                            onBlur={field.handleBlur}
-                            className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-colors ${(field.state.meta.errors.length > 0 || validationErrors.Cedula_Juridica || formErrors.Cedula_Juridica)
-                                    ? 'border-red-300 focus:ring-red-500'
-                                    : 'border-gray-300 focus:ring-blue-500'
-                                }`}
-                            placeholder="Ej: 3101654321 o 3-101-654321"
-                            maxLength={14}
-                        />
+                        <div className="relative">
+                            <input
+                                id="Cedula_Juridica"
+                                type="text"
+                                value={field.state.value}
+                                onChange={async (e) => { await handleCedulaJuridicaChange(e.target.value); }}
+                                onBlur={field.handleBlur}
+                                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-colors ${(field.state.meta.errors.length > 0 || validationErrors.Cedula_Juridica || formErrors.Cedula_Juridica)
+                                        ? 'border-red-300 focus:ring-red-500'
+                                        : 'border-gray-300 focus:ring-blue-500'
+                                    }`}
+                                placeholder="Ej: 3101654321 o 3-101-654321"
+                                maxLength={14}
+                                disabled={loadingCedulaJuridica}
+                            />
+                            {loadingCedulaJuridica && (
+                                <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
+                                </div>
+                            )}
+                        </div>
 
                         {renderCharCounter(
                             fieldCharCounts.Cedula_Juridica,
