@@ -9,21 +9,21 @@ export const useRefetchAllSolicitudesJuridicas = () => {
     const refetchAll = async () => {
         try {
             // Invalidar todas las queries relacionadas con solicitudes jurídicas
-            await queryClient.invalidateQueries({ 
-                queryKey: ['solicitudes-juridicas'] 
+            await queryClient.invalidateQueries({
+                queryKey: ['solicitudes-juridicas']
             });
-            
+
             // También invalidar solicitudes físicas para cross-invalidation
-            await queryClient.invalidateQueries({ 
-                queryKey: ['solicitudes-fisicas'] 
+            await queryClient.invalidateQueries({
+                queryKey: ['solicitudes-fisicas']
             });
-            
+
             console.log('✅ Todas las consultas de solicitudes jurídicas refrescadas');
         } catch (error) {
             console.error('❌ Error al refrescar consultas de solicitudes jurídicas:', error);
         }
     };
-    
+
     return { refetchAll };
 };
 
@@ -51,13 +51,13 @@ export const useSolicitudesJuridicasPendientes = () => {
     });
 };
 
- //Hook personalizable para filtrar solicitudes jurídicas por estado
+//Hook personalizable para filtrar solicitudes jurídicas por estado
 
- 
+
 export const useSolicitudesJuridicasPorEstado = (estado: string, enabled: boolean = true) => {
     return useQuery<SolicitudJuridica[], Error>({
         queryKey: ['solicitudes-juridicas', 'estado', estado],
-        queryFn: () =>  getSolicitudesPorEstado(estado),
+        queryFn: () => getSolicitudesPorEstado(estado),
         enabled: enabled && !!estado,
         staleTime: 3 * 60 * 1000, // 3 minutos
         gcTime: 8 * 60 * 1000,    // 8 minutos
@@ -66,10 +66,10 @@ export const useSolicitudesJuridicasPorEstado = (estado: string, enabled: boolea
     });
 };
 
-  //Hook personalizable para filtrar solicitudes jurídicas por tipo
+//Hook personalizable para filtrar solicitudes jurídicas por tipo
 
 export const useSolicitudesJuridicasPorTipo = (
-    tipo: 'Afiliacion' | 'Desconexion' | 'Cambio de Medidor' | 'Asociado',
+    tipo: 'Afiliacion' | 'Desconexion' | 'Cambio de Medidor' | 'Asociado' | 'Medidor Extra',
     enabled: boolean = true
 ) => {
     return useQuery<SolicitudJuridica[], Error>({
@@ -102,4 +102,8 @@ export const useSolicitudesJuridicasCambioMedidor = () => {
 
 export const useSolicitudesJuridicasAsociado = () => {
     return useSolicitudesJuridicasPorTipo('Asociado');
+};
+
+export const useSolicitudesJuridicasMedidorExtra = () => {
+    return useSolicitudesJuridicasPorTipo('Medidor Extra');
 };

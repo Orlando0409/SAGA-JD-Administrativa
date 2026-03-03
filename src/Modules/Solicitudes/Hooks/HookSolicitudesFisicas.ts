@@ -63,7 +63,7 @@ export const useSolicitudesFisicasPorEstado = (estado: string, enabled: boolean 
 };
 
 export const useSolicitudesFisicasPorTipo = (
-    tipo: 'Afiliacion' | 'Desconexion' | 'Cambio de Medidor' | 'Asociado',
+    tipo: 'Afiliacion' | 'Desconexion' | 'Cambio de Medidor' | 'Asociado' | 'Medidor Extra',
     enabled: boolean = true
 ) => {
     return useQuery<SolicitudFisica[], Error>({
@@ -95,4 +95,8 @@ export const useSolicitudesFisicasCambioMedidor = () => {
 
 export const useSolicitudesFisicasAsociado = () => {
     return useSolicitudesFisicasPorTipo('Asociado');
+};
+
+export const useSolicitudesFisicasMedidorExtra = () => {
+    return useSolicitudesFisicasPorTipo('Medidor Extra');
 };

@@ -22,7 +22,7 @@ interface ModalMedidorProps {
     isOpen: boolean;
     onClose: () => void;
     onMedidorAsignado?: () => void; // Callback para ejecutar después de asignar medidor
-    tipoSolicitud?: 'Afiliacion' | 'Cambio de Medidor' | 'Asociado' | 'Desconexion';
+    tipoSolicitud?: 'Afiliacion' | 'Cambio de Medidor' | 'Asociado' | 'Desconexion' | 'Medidor Extra';
     afiliado: {
         tipo: 'solicitud-fisica' | 'solicitud-juridica';
         datos: SolicitudFisica | SolicitudJuridica;
@@ -123,6 +123,9 @@ const ModalMedidor = ({ isOpen, onClose, onMedidorAsignado, tipoSolicitud, afili
             // Refrescar queries de solicitudes para que ModalSolicitud reciba datos actualizados
             await queryClient.refetchQueries({ queryKey: ["solicitudes-fisicas"] });
             await queryClient.refetchQueries({ queryKey: ["solicitudes-juridicas"] });
+            await queryClient.refetchQueries({ queryKey: ["afiliadosFisicos"] });
+            await queryClient.refetchQueries({ queryKey: ["afiliadosJuridicos"] });
+            await queryClient.refetchQueries({ queryKey: ["afiliados"] });
 
             // Ejecutar callback para aprobar la solicitud después de asignar
             if (onMedidorAsignado) {

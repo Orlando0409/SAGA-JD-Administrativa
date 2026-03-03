@@ -33,6 +33,10 @@ export class ServiceEstadoSolicitudes {
             'desconexion': {
                 'fisica': '/solicitudes-fisicas/update/estado/desconexion',
                 'juridica': '/solicitudes-juridicas/update/estado/desconexion'
+            },
+            'medidor-extra': {
+                'fisica': '/solicitudes-fisicas/update/estado/medidor-extra',
+                'juridica': '/solicitudes-juridicas/update/estado/medidor-extra'
             }
         };
         const baseEndpoint = endpointMap[tipoSolicitud][tipoPersona];
@@ -170,7 +174,8 @@ export const mapearTipoSolicitud = (tipoBackend: string): TipoSolicitud => {
         'Afiliacion': 'afiliacion',
         'Asociado': 'asociado',
         'Cambio de Medidor': 'cambio-medidor',
-        'Desconexion': 'desconexion'
+        'Desconexion': 'desconexion',
+        'Medidor Extra': 'medidor-extra'
     };
 
     return mapeo[tipoBackend] || 'afiliacion';

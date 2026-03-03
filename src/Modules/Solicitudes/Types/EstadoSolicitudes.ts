@@ -4,7 +4,8 @@ export type TipoSolicitud =
     | 'afiliacion'
     | 'asociado'
     | 'cambio-medidor'
-    | 'desconexion';
+    | 'desconexion'
+    | 'medidor-extra';
 
 export type TipoPersona = 'fisica' | 'juridica';
 
