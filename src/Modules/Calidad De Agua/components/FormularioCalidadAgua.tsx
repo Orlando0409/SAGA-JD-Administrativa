@@ -152,11 +152,9 @@ export default function FormularioCalidadAgua({ onClose, refetch }: FormularioCa
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                             </svg>
                             <span className="text-sky-600 font-medium">
-                                {file ? "Cambiar Archivo" : "Seleccionar Archivo PDF"}
+                                {file ? "Cambiar Archivo" : "Haz clic para  seleccionar Archivo PDF"}
                             </span>
-                            <span className="text-xs text-gray-500">
-                                Haz clic para elegir un archivo PDF
-                            </span>
+
                         </button>
                     </div>
 
