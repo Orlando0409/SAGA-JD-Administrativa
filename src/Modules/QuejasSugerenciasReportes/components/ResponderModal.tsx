@@ -1,31 +1,41 @@
 import React, { useState } from 'react';
-
+import { ZodError } from 'zod';
 import { LuX } from 'react-icons/lu';
 import { useResponderContacto } from '../hook/HookContacto';
+import { RespuestaSchema } from '../schemas/ContactoSchemas';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/Modules/Global/components/Sidebar/ui/alert-dialog';
 import type { ContactoItem } from '../types/ContactoTypes';
 
 interface ResponderModalProps {
-    item: ContactoItem;
-    isOpen: boolean;
-    onClose: () => void;
+  item: ContactoItem;
+  isOpen: boolean;
+  onClose: () => void;
 }
 
 const ResponderModal: React.FC<ResponderModalProps> = ({ item, isOpen, onClose }) => {
   const [respuesta, setRespuesta] = useState('');
+  const [validationError, setValidationError] = useState('');
   const { mutate: sendRespuesta, isPending, error } = useResponderContacto(item);
 
   if (!isOpen) return null;
 
   const handleSendResponse = () => {
-    sendRespuesta(respuesta, {
-      onSuccess: () => {
-        setRespuesta('');
-        setTimeout(() => {
-          onClose();
-        }, 1200);
-      },
-    });
+    try {
+      RespuestaSchema.parse({ respuesta });
+      setValidationError('');
+      sendRespuesta(respuesta, {
+        onSuccess: () => {
+          setRespuesta('');
+          setTimeout(() => {
+            onClose();
+          }, 1200);
+        },
+      });
+    } catch (err) {
+      if (err instanceof ZodError) {
+        setValidationError(err.errors[0]?.message || 'Error de validación');
+      }
+    }
   };
 
   return (
@@ -64,12 +74,11 @@ const ResponderModal: React.FC<ResponderModalProps> = ({ item, isOpen, onClose }
             value={respuesta}
             onChange={e => setRespuesta(e.target.value)}
             disabled={isPending}
-          />
-          {error && <div className="text-red-600 mt-2 text-sm">{error.message}</div>}
+          />          {validationError && <div className="text-red-600 mt-2 text-sm">{validationError}</div>}          {error && <div className="text-red-600 mt-2 text-sm">{error.message}</div>}
         </div>
 
         <div className="p-6 border-t border-gray-200 flex justify-end space-x-4">
-         <AlertDialog>
+          <AlertDialog>
             <AlertDialogTrigger asChild>
               <button
                 type="button"
@@ -93,7 +102,7 @@ const ResponderModal: React.FC<ResponderModalProps> = ({ item, isOpen, onClose }
                 >
                   {isPending ? 'Enviando...' : 'Confirmar'}
                 </AlertDialogAction>
-                 <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                <AlertDialogCancel>Cancelar</AlertDialogCancel>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
