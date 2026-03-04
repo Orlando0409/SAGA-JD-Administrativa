@@ -138,7 +138,7 @@ export default function CalidadAguaEdit({ archivo, onClose, refetch }: CalidadAg
                     {/* Campo de Archivos PDF (opcional para reemplazar) */}
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Archivo PDF (opcional - reemplazar archivo existente)
+                           Opcional reemplzar el Archivo PDF
                         </label>
 
                         {/* Botón para seleccionar archivo */}
@@ -164,9 +164,7 @@ export default function CalidadAguaEdit({ archivo, onClose, refetch }: CalidadAg
                                 <span className="text-sky-600 font-medium">
                                     {file ? "Cambiar Archivo" : "Seleccionar Archivo PDF"}
                                 </span>
-                                <span className="text-xs text-gray-500">
-                                    Opcional - Solo si deseas reemplazar el archivo
-                                </span>
+                               
                             </button>
                         </div>
 
