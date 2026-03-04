@@ -157,13 +157,11 @@ export default function ImagenFormEdit({ onClose, refetch, imagen }: ImagenFormE
                     {file ? file.name : "Seleccionar nueva imagen..."}
                   </span>
                   <span className="bg-blue-500 text-white px-3 py-1 rounded text-sm">
-                    Examinar
+                    Seleccionar imagen
                   </span>
                 </div>
               </div>
-              <p className="text-xs text-gray-500 mt-1">
-                Formatos permitidos: JPG, PNG, GIF, WEBP. Deja vacío si no deseas cambiar la imagen.
-              </p>
+
             </div>
 
             {/* Preview de la imagen */}
@@ -190,11 +188,10 @@ export default function ImagenFormEdit({ onClose, refetch, imagen }: ImagenFormE
             type="submit"
             form="edit-imagen-form"
             disabled={!isValid || isSubmitting}
-            className={`px-4 py-2 rounded-lg shadow-sm text-sm transition-colors ${
-              isValid && !isSubmitting
-                ? "bg-blue-600 text-white hover:bg-blue-700"
-                : "bg-gray-300 text-gray-600 cursor-not-allowed"
-            }`}
+            className={`px-4 py-2 rounded-lg shadow-sm text-sm transition-colors ${isValid && !isSubmitting
+              ? "bg-blue-600 text-white hover:bg-blue-700"
+              : "bg-gray-300 text-gray-600 cursor-not-allowed"
+              }`}
           >
             {isSubmitting ? (
               <span className="flex items-center gap-2">
@@ -208,11 +205,10 @@ export default function ImagenFormEdit({ onClose, refetch, imagen }: ImagenFormE
             type="button"
             onClick={onClose}
             disabled={isSubmitting}
-            className={`px-4 py-2 rounded-lg shadow-sm text-sm transition-colors ${
-              isSubmitting
-                ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                : "bg-gray-200 text-gray-800 hover:bg-gray-300"
-            }`}
+            className={`px-4 py-2 rounded-lg shadow-sm text-sm transition-colors ${isSubmitting
+              ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+              : "bg-gray-200 text-gray-800 hover:bg-gray-300"
+              }`}
           >
             Cancelar
           </button>
