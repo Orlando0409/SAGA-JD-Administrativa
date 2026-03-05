@@ -4,7 +4,7 @@ import { getAllMedidores, getMedidoresNoInstalados, getMedidoresInstalados, getM
 import { useAlerts } from '@/Modules/Global/context/AlertContext';
 
 // Hook para obtener todos los medidores
-export const useMedidores = (p0: any) => {
+export const useMedidores = () => {
   return useQuery({
     queryKey: ['medidores'],
     queryFn: getAllMedidores,

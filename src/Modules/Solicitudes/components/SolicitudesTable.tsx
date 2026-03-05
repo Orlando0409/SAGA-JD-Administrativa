@@ -34,7 +34,7 @@ type SolicitudUnificada = {
     Id: number;
     Nombre_Completo: string;
     Cedula_Documento: string;
-    Tipo_Solicitud: 'Afiliacion' | 'Desconexion' | 'Cambio de Medidor' | 'Asociado';
+    Tipo_Solicitud: 'Afiliacion' | 'Desconexion' | 'Cambio de Medidor' | 'Asociado' | 'Agregar Medidor';
     Estado: {
         Id_Estado: number;
         Nombre_Estado: string;
@@ -88,7 +88,7 @@ export default function SolicitudesTable() {
         console.log(' Datos originales jurídicas:', solicitudesJuridicas);
 
         // Función para normalizar el nombre del tipo de solicitud
-        const normalizarTipoSolicitud = (tipo: string): 'Afiliacion' | 'Desconexion' | 'Cambio de Medidor' | 'Asociado' => {
+        const normalizarTipoSolicitud = (tipo: string): 'Afiliacion' | 'Desconexion' | 'Cambio de Medidor' | 'Asociado' | 'Agregar Medidor' => {
             const tipoLower = tipo.toLowerCase().trim();
             let resultado: string;
 
@@ -100,6 +100,8 @@ export default function SolicitudesTable() {
                 resultado = 'Cambio de Medidor';
             } else if (tipoLower.includes('asociado')) {
                 resultado = 'Asociado';
+            } else if (tipoLower.includes('agregar') && tipoLower.includes('medidor')) {
+                resultado = 'Agregar Medidor';
             } else {
                 resultado = tipo; // Fallback al tipo original
                 console.warn(' Tipo de solicitud no reconocido:', tipo);

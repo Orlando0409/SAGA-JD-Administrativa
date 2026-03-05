@@ -1,6 +1,6 @@
 export interface SolicitudJuridicaBase {
     Id_Solicitud?: number; // ID del backend
-    Tipo_Solicitud: "Afiliacion" | "Desconexion" | "Cambio de Medidor" | "Asociado";
+    Tipo_Solicitud: "Afiliacion" | "Desconexion" | "Cambio de Medidor" | "Asociado" | "Agregar Medidor";
     Razon_Social: string;
     Cedula_Juridica: string;
     Direccion_Exacta?: string;
@@ -47,8 +47,15 @@ export interface SolicitudAsociadoJuridica extends SolicitudJuridicaBase {
 
 }
 
+export interface SolicitudAgregarMedidorJuridica extends SolicitudJuridicaBase {
+    Direccion_Exacta: string;
+    Motivo_Solicitud: string;
+    Numero_Medidor_Nuevo?: string | number;
+}
+
 export type SolicitudJuridica =
     | SolicitudAfiliacionJuridica
     | SolicitudDesconexionJuridica
     | SolicitudCambioMedidorJuridica
-    | SolicitudAsociadoJuridica;
+    | SolicitudAsociadoJuridica
+    | SolicitudAgregarMedidorJuridica;

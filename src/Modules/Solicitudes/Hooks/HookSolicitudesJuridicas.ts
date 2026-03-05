@@ -1,6 +1,6 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import type { SolicitudJuridica } from '../Models/ModelosJuridicos';
-import { getSolicitudesJuridicas, getSolicitudesPendientes, getSolicitudesPorEstado, getSolicitudesPorTipo } from '../Service/SolicitudesJuridicas';
+import type { SolicitudJuridica, SolicitudAgregarMedidorJuridica } from '../Models/ModelosJuridicos';
+import { getSolicitudesJuridicas, getSolicitudesPendientes, getSolicitudesPorEstado, getSolicitudesPorTipo, getSolicitudesAgregarMedidorJuridicas } from '../Service/SolicitudesJuridicas';
 
 
 export const useRefetchAllSolicitudesJuridicas = () => {
@@ -102,4 +102,15 @@ export const useSolicitudesJuridicasCambioMedidor = () => {
 
 export const useSolicitudesJuridicasAsociado = () => {
     return useSolicitudesJuridicasPorTipo('Asociado');
+};
+
+export const useSolicitudesJuridicasAgregarMedidor = () => {
+    return useQuery<SolicitudAgregarMedidorJuridica[], Error>({
+        queryKey: ['solicitudes-juridicas', 'agregar-medidor'],
+        queryFn: () => getSolicitudesAgregarMedidorJuridicas(),
+        staleTime: 3 * 60 * 1000,
+        gcTime: 8 * 60 * 1000,
+        refetchOnWindowFocus: false,
+        retry: 2,
+    });
 };

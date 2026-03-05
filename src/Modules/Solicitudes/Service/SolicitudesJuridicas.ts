@@ -5,7 +5,8 @@ import type {
     SolicitudAfiliacionJuridica,
     SolicitudDesconexionJuridica,
     SolicitudCambioMedidorJuridica,
-    SolicitudAsociadoJuridica
+    SolicitudAsociadoJuridica,
+    SolicitudAgregarMedidorJuridica
 } from "../Models/ModelosJuridicos";
 
 export async function getSolicitudesJuridicas(): Promise<SolicitudJuridica[]> {
@@ -34,6 +35,7 @@ export async function getSolicitudesJuridicas(): Promise<SolicitudJuridica[]> {
                     case 2: tipo = 'Desconexion'; break;
                     case 3: tipo = 'Cambio de Medidor'; break;
                     case 4: tipo = 'Asociado'; break;
+                    case 5: tipo = 'Agregar Medidor'; break;
                     default: tipo = 'Afiliacion';
                 }
 
@@ -50,8 +52,9 @@ export async function getSolicitudesJuridicas(): Promise<SolicitudJuridica[]> {
             const tiposSolicitud = [
                 { key: 'Afiliacion', tipo: 'Afiliacion' },
                 { key: 'Asociado', tipo: 'Asociado' },
-                { key: 'Cambio De Medidor', tipo: 'Cambio de Medidor' },  // ⚠️ Key exacta del backend
-                { key: 'Desconexion', tipo: 'Desconexion' }
+                { key: 'Cambio De Medidor', tipo: 'Cambio de Medidor' },  
+                { key: 'Desconexion', tipo: 'Desconexion' },
+                { key: 'Agregar Medidor', tipo: 'Agregar Medidor' }
             ];
 
             tiposSolicitud.forEach(({ key, tipo }) => {
@@ -144,6 +147,70 @@ export async function getSolicitudesAsociado(): Promise<SolicitudAsociadoJuridic
         return response.data;
     } catch (error) {
         console.error(' Error al obtener solicitudes de asociado jurídicas:', error);
+        throw error;
+    }
+}
+
+export async function getSolicitudesAgregarMedidorJuridicas(): Promise<SolicitudAgregarMedidorJuridica[]> {
+    try {
+        const response = await apiAuth.get("/solicitudes-juridicas/agregar-medidor");
+        return response.data;
+    } catch (error) {
+        console.error(' Error al obtener solicitudes de agregar medidor jurídicas:', error);
+        throw error;
+    }
+}
+
+export async function getSolicitudAgregarMedidorJuridicaById(id: number): Promise<SolicitudAgregarMedidorJuridica> {
+    try {
+        const response = await apiAuth.get(`/solicitudes-juridicas/agregar-medidor/${id}`);
+        return response.data;
+    } catch (error) {
+        console.error(` Error al obtener solicitud de agregar medidor jurídica #${id}:`, error);
+        throw error;
+    }
+}
+
+export async function createSolicitudAgregarMedidorJuridica(
+    data: Omit<SolicitudAgregarMedidorJuridica, 'Id_Solicitud' | 'Estado' | 'Fecha_Creacion' | 'Fecha_Actualizacion'>
+): Promise<SolicitudAgregarMedidorJuridica> {
+    try {
+        const response = await apiAuth.post("/solicitudes-juridicas/create/agregar-medidor", data);
+        return response.data;
+    } catch (error) {
+        console.error(' Error al crear solicitud de agregar medidor jurídica:', error);
+        throw error;
+    }
+}
+
+export async function updateSolicitudAgregarMedidorJuridica(
+    id: number,
+    idUsuario: number,
+    data: Partial<SolicitudAgregarMedidorJuridica>
+): Promise<SolicitudAgregarMedidorJuridica> {
+    try {
+        const response = await apiAuth.put(
+            `/solicitudes-juridicas/update/agregar-medidor/${id}?idUsuario=${idUsuario}`,
+            data
+        );
+        return response.data;
+    } catch (error) {
+        console.error(` Error al actualizar solicitud de agregar medidor jurídica #${id}:`, error);
+        throw error;
+    }
+}
+
+export async function cambiarEstadoAgregarMedidorJuridica(
+    idSolicitud: number,
+    idEstado: number,
+    idUsuario: number
+): Promise<void> {
+    try {
+        await apiAuth.patch(
+            `/solicitudes-juridicas/update/estado/agregar-medidor/${idSolicitud}/${idEstado}?idUsuario=${idUsuario}`
+        );
+    } catch (error) {
+        console.error(` Error al cambiar estado de agregar medidor jurídica #${idSolicitud}:`, error);
         throw error;
     }
 }

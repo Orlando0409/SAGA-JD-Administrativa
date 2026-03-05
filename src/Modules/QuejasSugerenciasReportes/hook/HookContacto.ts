@@ -2,8 +2,6 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { responderQueja, responderSugerencia, responderReporte, obtenerQuejas, obtenerSugerencias, obtenerReportes, actualizarEstadoReporte, actualizarEstadoSugerencia, actualizarEstadoQueja } from '../service/ContactoService';
 import { useAlerts } from '@/Modules/Global/context/AlertContext';
 import type { ContactoItem } from '../types/ContactoTypes';
-import { RespuestaSchema } from '../schemas/ContactoSchemas';
-import { ZodError } from 'zod';
 
 
 export const useQuejas = () => {
