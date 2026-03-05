@@ -151,28 +151,40 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
             setNumeroMedidorAsignado(null);
         }
     }, [isOpen]);
- 
+
     // Función para manejar aprobación por casos usando hooks unificados
     const handleCambiarEstado = async () => {
         const estadoActual = info.estadoId;
 
-        // Verificar si requiere asignación de medidor (Afiliación, Cambio de Medidor o Agregar Medidor)
-        const requiereAsignacionMedidor = info.tipoSolicitud === 'Afiliacion' || info.tipoSolicitud === 'Cambio de Medidor' || info.tipoSolicitud === 'Agregar Medidor';
+        // Si aún viene como estado 1 en el objeto local, garantizar transición 1 -> 2 antes de aprobar.
+        // Esto evita que el botón no haga nada cuando el backend ya avanzó o está por avanzar a En Revisión.
+        if (estadoActual === 1) {
+            try {
+                const tipoSolicitud: TipoSolicitud = mapearTipoSolicitud(info.tipoSolicitud);
+                const tipoPersona: TipoPersona = mapearTipoPersona(info.tipo);
 
-        // Estado 2 (En Revisión) → Decidir flujo según tipo de solicitud
-        if (estadoActual === 2) {
-            if (requiereAsignacionMedidor) {
-                // Para Afiliación y Cambio de Medidor: Abrir diálogo de confirmación
-                setShowAprobarDialog(true);
-            } else {
-                // Para Asociado y Desconexión: Abrir diálogo de completar directamente
-                setShowCompletarDialog(true);
+                await marcarEnRevisionMutation.mutateAsync(tipoSolicitud, tipoPersona, info.id);
+            } catch (error) {
+                console.error('Error al mover solicitud a En Revisión antes de aprobar:', error);
+                return;
             }
+
+            await handleConfirmAprobar();
+            return;
         }
-        else if (estadoActual === 3) {
+
+        // Estado 2 (En Revisión) → Poner en espera directamente
+        if (estadoActual === 2) {
+            await handleConfirmAprobar();
+            return;
+        }
+
+        if (estadoActual === 3) {
             setShowModalMedidor(true);
+            return;
         }
-        else if (estadoActual === 4) {
+
+        if (estadoActual === 4) {
             showWarning('Solicitud completada', 'Esta solicitud ya está completada');
         }
     };
@@ -189,7 +201,7 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
                     console.log(`Medidor #${info.Id_Medidor} marcado como Averiado`);
                 } catch (medidorError) {
                     console.error('Error al marcar medidor como averiado:', medidorError);
-            
+
                 }
             }
 
@@ -500,18 +512,14 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
                             {isLoading ? (
                                 <>
                                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                                    {info.estadoId === 2 ? 'Procesando...' : 'Aprobando...'}
+                                    Procesando...
                                 </>
                             ) : (
                                 <>
                                     <Check className="w-4 h-4" />
-                                    {info.estadoId === 2
-                                        ? (info.tipoSolicitud === 'Afiliacion' || info.tipoSolicitud === 'Cambio de Medidor' || info.tipoSolicitud === 'Agregar Medidor'
-                                            ? 'Aprobar y poner en espera'
-                                            : 'Completar solicitud')
-                                        : info.estadoId === 3
-                                            ? 'Completar y asignar medidor'
-                                            : 'Aprobar Solicitud'}
+                                    {info.estadoId === 3
+                                        ? 'Completar y asignar medidor'
+                                        : 'Poner en espera'}
                                 </>
                             )}
                         </button>
