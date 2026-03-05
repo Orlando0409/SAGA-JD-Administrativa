@@ -20,6 +20,16 @@ export class ServiceAsignarMedidor {
                     baseUrl,
                     { Id_Nuevo_Medidor: dto.Id_Medidor }
                 );
+            } else if (dto.tipoSolicitud === 'Agregar Medidor') {
+
+                const baseUrl = dto.Id_Tipo_Entidad === 1
+                    ? `/solicitudes-fisicas/update/agregar-medidor/${dto.Id_Solicitud}`
+                    : `/solicitudes-juridicas/update/agregar-medidor/${dto.Id_Solicitud}`;
+
+                response = await apiAuth.put<AsignarMedidorResponse>(
+                    baseUrl,
+                    { Id_Nuevo_Medidor: dto.Id_Medidor }
+                );
             } else {
                 
                 response = await apiAuth.post<AsignarMedidorResponse>(

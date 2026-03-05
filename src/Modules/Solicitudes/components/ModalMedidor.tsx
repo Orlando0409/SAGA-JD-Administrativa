@@ -22,7 +22,7 @@ interface ModalMedidorProps {
     isOpen: boolean;
     onClose: () => void;
     onMedidorAsignado?: () => void; // Callback para ejecutar después de asignar medidor
-    tipoSolicitud?: 'Afiliacion' | 'Cambio de Medidor' | 'Asociado' | 'Desconexion';
+    tipoSolicitud?: 'Afiliacion' | 'Cambio de Medidor' | 'Asociado' | 'Desconexion' | 'Agregar Medidor';
     afiliado: {
         tipo: 'solicitud-fisica' | 'solicitud-juridica';
         datos: SolicitudFisica | SolicitudJuridica;

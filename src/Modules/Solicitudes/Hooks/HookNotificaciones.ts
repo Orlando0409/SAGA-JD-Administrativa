@@ -40,7 +40,7 @@ export const useRefreshNotificaciones = () => {
 export interface NotificacionSolicitud {
   id: string;
   tipo: 'fisica' | 'juridica';
-  tipoSolicitud: 'Afiliacion' | 'Desconexion' | 'Cambio de Medidor' | 'Asociado';
+  tipoSolicitud: 'Afiliacion' | 'Desconexion' | 'Cambio de Medidor' | 'Asociado' | 'Agregar Medidor';
   nombre: string;
   cedula: string;
   fechaCreacion: string;

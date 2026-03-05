@@ -1,6 +1,6 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import type { SolicitudFisica } from '../Models/ModelosFisicas';
-import { getSolicitudesFisicas, getSolicitudesPendientes, getSolicitudesPorEstado, getSolicitudesPorTipo } from '../Service/SolicitudesFisicas';
+import type { SolicitudFisica, SolicitudAgregarMedidorFisica } from '../Models/ModelosFisicas';
+import { getSolicitudesFisicas, getSolicitudesPendientes, getSolicitudesPorEstado, getSolicitudesPorTipo, getSolicitudesAgregarMedidorFisicas } from '../Service/SolicitudesFisicas';
 
 
 export const useRefetchAllSolicitudesFisicas = () => {
@@ -95,4 +95,15 @@ export const useSolicitudesFisicasCambioMedidor = () => {
 
 export const useSolicitudesFisicasAsociado = () => {
     return useSolicitudesFisicasPorTipo('Asociado');
+};
+
+export const useSolicitudesFisicasAgregarMedidor = () => {
+    return useQuery<SolicitudAgregarMedidorFisica[], Error>({
+        queryKey: ['solicitudes-fisicas', 'agregar-medidor'],
+        queryFn: () => getSolicitudesAgregarMedidorFisicas(),
+        staleTime: 3 * 60 * 1000,
+        gcTime: 8 * 60 * 1000,
+        refetchOnWindowFocus: false,
+        retry: 2,
+    });
 };

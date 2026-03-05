@@ -38,7 +38,7 @@ const FilterModal: React.FC<FilterModalProps> = ({ isOpen, onClose, onApplyFilte
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 backdrop-blur flex items-start justify-end z-50">
+        <div className="fixed inset-0 flex items-start justify-end z-50">
             <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4 max-h-[90vh] overflow-hidden">
                 {/* Header */}
                 <div className="flex items-center justify-between p-6 border-b border-gray-200">
@@ -46,10 +46,7 @@ const FilterModal: React.FC<FilterModalProps> = ({ isOpen, onClose, onApplyFilte
                         <LuFilter className="w-5 h-5" />
                         Filtros Avanzados
                     </h2>
-                    <button
-                        onClick={onClose}
-                        className="text-gray-400 hover:text-gray-600 transition-colors"
-                    >
+                    <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors">
                         <LuX className="w-6 h-6" />
                     </button>
                 </div>
@@ -57,45 +54,30 @@ const FilterModal: React.FC<FilterModalProps> = ({ isOpen, onClose, onApplyFilte
                 {/* Body */}
                 <div className="p-6 space-y-4 overflow-y-auto max-h-[calc(90vh-140px)]">
 
-                    {/* Filtro por Estado */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Estado
-                        </label>
-                        <select
-                            value={filters.estado || ''}
-                            onChange={(e) => setFilters(prev => ({ ...prev, estado: e.target.value as 'activo' | 'inactivo' | 'pendiente' | '' }))}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        >
-                            <option value="">Todos los estados</option>
-                            <option value="activo">Activo</option>
-                            <option value="inactivo">Inactivo</option>
-                            <option value="pendiente">Pendiente</option>
-                        </select>
-                    </div>
-
                     {/* Filtro por Tipo de Persona */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Tipo de Persona
+                        <label htmlFor="tipoPersona" className="block text-sm font-medium text-gray-700 mb-2">
+                            Filtrar por Tipo
                         </label>
                         <select
+                            id="tipoPersona"
                             value={filters.tipoPersona || ''}
                             onChange={(e) => setFilters(prev => ({ ...prev, tipoPersona: e.target.value as 'Físico' | 'Jurídico' | '' }))}
                             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         >
                             <option value="">Todos los tipos</option>
-                            <option value="Físico">Persona Física</option>
-                            <option value="Jurídico">Persona Jurídica</option>
+                            <option value="Físico">Físico</option>
+                            <option value="Jurídico">Jurídico</option>
                         </select>
                     </div>
 
                     {/* Filtro por Tipo de Afiliado */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <label htmlFor="tipoAfiliado" className="block text-sm font-medium text-gray-700 mb-2">
                             Tipo de Afiliado
                         </label>
                         <select
+                            id="tipoAfiliado"
                             value={filters.tipoAfiliado || ''}
                             onChange={(e) => setFilters(prev => ({ ...prev, tipoAfiliado: e.target.value as 'Abonado' | 'Asociado' | '' }))}
                             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -106,60 +88,47 @@ const FilterModal: React.FC<FilterModalProps> = ({ isOpen, onClose, onApplyFilte
                         </select>
                     </div>
 
-                    {/* Búsqueda Avanzada */}
+                    {/* Filtro por Estado */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Búsqueda Avanzada
+                        <label htmlFor="estado" className="block text-sm font-medium text-gray-700 mb-2">
+                            Estado del Afiliado
                         </label>
-                        <input
-                            type="text"
-                            value={filters.busquedaAvanzada}
-                            onChange={(e) => setFilters(prev => ({ ...prev, busquedaAvanzada: e.target.value }))}
-                            placeholder="Buscar por nombre, cédula, correo..."
+                        <select
+                            id="estado"
+                            value={filters.estado || ''}
+                            onChange={(e) => setFilters(prev => ({ ...prev, estado: e.target.value as 'activo' | 'inactivo' | 'pendiente' | '' }))}
                             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        />
-                        <p className="text-xs text-gray-500 mt-1">
-                            Busca en: Nombre completo, Cédula, Correo electrónico
-                        </p>
-                    </div>
-
-                    {/* Información de filtros activos */}
-                    <div className="bg-blue-50 p-3 rounded-lg">
-                        <h4 className="text-sm font-medium text-blue-800 mb-2">📊 Filtros Activos:</h4>
-                        <div className="space-y-1 text-xs text-blue-700">
-                            {filters.estado && (
-                                <div>• Estado: <span className="font-medium">{filters.estado}</span></div>
-                            )}
-                            {filters.tipoPersona && (
-                                <div>• Tipo Persona: <span className="font-medium">{filters.tipoPersona}</span></div>
-                            )}
-                            {filters.tipoAfiliado && (
-                                <div>• Tipo Afiliado: <span className="font-medium">{filters.tipoAfiliado}</span></div>
-                            )}
-                            {filters.busquedaAvanzada && (
-                                <div>• Búsqueda: <span className="font-medium">"{filters.busquedaAvanzada}"</span></div>
-                            )}
-                            {!filters.estado && !filters.tipoPersona && !filters.tipoAfiliado && !filters.busquedaAvanzada && (
-                                <div className="text-gray-500">Sin filtros aplicados</div>
-                            )}
-                        </div>
+                        >
+                            <option value="">Todos</option>
+                            <option value="activo">Activo</option>
+                            <option value="inactivo">Inactivo</option>
+                            <option value="pendiente">Pendiente</option>
+                        </select>
                     </div>
                 </div>
 
                 {/* Footer */}
-                <div className="flex gap-3 p-6 border-t border-gray-200">
-                    <button
-                        onClick={handleClear}
-                        className="flex-1 px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
-                    >
-                        Limpiar Todo
-                    </button>
-                    <button
-                        onClick={handleApply}
-                        className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                    >
-                        Aplicar Filtros
-                    </button>
+                <div className="sticky bottom-0 bg-gray-50 border-t border-gray-200 p-4 sm:p-6 z-10">
+                    <div className="flex flex-col-reverse sm:flex-row gap-2 sm:gap-3 sm:justify-end">
+                        <button
+                            onClick={handleApply}
+                            className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+                        >
+                            Aplicar Filtros
+                        </button>
+                        <button
+                            onClick={handleClear}
+                            className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+                        >
+                            Limpiar Todo
+                        </button>
+                        <button
+                            onClick={onClose}
+                            className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+                        >
+                            Cancelar
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>

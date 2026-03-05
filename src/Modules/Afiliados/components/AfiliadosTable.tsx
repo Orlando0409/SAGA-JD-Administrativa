@@ -2,7 +2,8 @@ import { useMemo, useState } from 'react';
 import { createColumnHelper, getCoreRowModel, getFilteredRowModel, getSortedRowModel, getPaginationRowModel, useReactTable, type ColumnDef } from '@tanstack/react-table';
 import { User, Building, Plus } from 'lucide-react';
 import { MdKeyboardArrowLeft, MdKeyboardArrowRight, MdKeyboardDoubleArrowLeft, MdKeyboardDoubleArrowRight, MdKeyboardArrowDown, MdKeyboardArrowUp } from 'react-icons/md';
-import { LuSearch } from 'react-icons/lu';
+import { LuSearch, LuFilter } from 'react-icons/lu';
+import FilterModal, { type FilterOptions } from './FilterAfiliadoModal';
 import { useNavigate } from '@tanstack/react-router';
 import { useAlerts } from '@/Modules/Global/context/AlertContext';
 import { useAfiliadosFisicos } from '../Hook/HookAfiliadoFisico';
@@ -48,7 +49,13 @@ export default function AbonadosTable() {
     const { showError } = useAlerts();
 
     const [globalFilter, setGlobalFilter] = useState('');
-    const [estadoFilter, setEstadoFilter] = useState<string>('Todos'); // Filtro de estado
+    const [activeFilters, setActiveFilters] = useState<FilterOptions>({
+        estado: '',
+        tipoPersona: '',
+        tipoAfiliado: '',
+        busquedaAvanzada: ''
+    });
+    const [isFilterOpen, setIsFilterOpen] = useState(false);
     const [showDetailModal, setShowDetailModal] = useState(false);
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false); // ✅ Agregar estado para EditModal
@@ -103,24 +110,44 @@ export default function AbonadosTable() {
         ].sort((a, b) => a.Id - b.Id);
     }, [afiliadosFisicos, afiliadosJuridicos]);
 
-    // Filtrar por estado
-    const filteredByEstado = useMemo(() => {
-        if (estadoFilter === 'Todos') return datosUnificados;
-        return datosUnificados.filter(afiliado => afiliado.Estado.Nombre_Estado === estadoFilter);
-    }, [datosUnificados, estadoFilter]);
+    // Conteo de filtros activos para el badge
+    const activeFiltersCount = useMemo(() => {
+        let count = 0;
+        if (activeFilters.estado) count++;
+        if (activeFilters.tipoPersona) count++;
+        if (activeFilters.tipoAfiliado) count++;
+        if (activeFilters.busquedaAvanzada) count++;
+        if (globalFilter) count++;
+        return count;
+    }, [activeFilters, globalFilter]);
 
-    // Filtrar por búsqueda global
+    // Filtrar por estado, tipo persona y tipo afiliado
     const filteredData = useMemo(() => {
-        if (!globalFilter) return filteredByEstado;
-        const q = globalFilter.toLowerCase();
-        return filteredByEstado.filter((afiliado) =>
-            [afiliado.Nombre_Completo, afiliado.Cedula_Documento, afiliado.Identificacion, afiliado.Estado.Nombre_Estado, afiliado.Tipo_Persona, afiliado.Tipo_Afiliado, afiliado.Tipo_Identificacion]
-                .filter(Boolean)
-                .join(' ')
-                .toLowerCase()
-                .includes(q)
-        );
-    }, [filteredByEstado, globalFilter]);
+        let data = datosUnificados;
+
+        if (activeFilters.estado) {
+            data = data.filter(a => a.Estado.Nombre_Estado.toLowerCase() === activeFilters.estado.toLowerCase());
+        }
+        if (activeFilters.tipoPersona) {
+            data = data.filter(a => a.Tipo_Persona === activeFilters.tipoPersona);
+        }
+        if (activeFilters.tipoAfiliado) {
+            data = data.filter(a => a.Tipo_Afiliado === activeFilters.tipoAfiliado);
+        }
+
+        const q = (activeFilters.busquedaAvanzada || globalFilter || '').toLowerCase();
+        if (q) {
+            data = data.filter(a =>
+                [a.Nombre_Completo, a.Cedula_Documento, a.Identificacion, a.Estado.Nombre_Estado, a.Tipo_Persona, a.Tipo_Afiliado, a.Tipo_Identificacion]
+                    .filter(Boolean)
+                    .join(' ')
+                    .toLowerCase()
+                    .includes(q)
+            );
+        }
+
+        return data;
+    }, [datosUnificados, activeFilters, globalFilter]);
 
     const handleViewDetail = (persona: AfiliadoUnificado) => {
         const tipo = persona.Tipo_Persona === 'Físico' ? 'afiliado-fisico' : 'afiliado-juridico';
@@ -399,21 +426,24 @@ export default function AbonadosTable() {
                     <h2 className="text-2xl font-bold text-gray-900">Gestión de afiliados</h2>
                     <p className="text-sm text-gray-600 pb-4">Gestiona los afiliados de la ASADA</p>
                 </div>
-                <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
-                    <div className="flex items-center gap-4">
-                        <label htmlFor='estado' className="text-sm font-medium text-gray-700">Estado:</label>
-                        <select
-                            id='estado'
-                            value={estadoFilter}
-                            onChange={(e) => setEstadoFilter(e.target.value)}
-                            className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                        >
-                            <option value="Todos">Todos los afiliados</option>
-                            <option value="Activo">Activos</option>
-                            <option value="Inactivo">Inactivos</option>
-                        </select>
-                    </div>
+                <div className="flex flex-col sm:flex-row gap-4 items-center justify-end">
                     <div className="flex items-center gap-4 w-full sm:w-auto">
+                        <button
+                            onClick={() => setIsFilterOpen(true)}
+                            className={`px-4 py-2 border rounded-md flex items-center gap-2 transition-colors ${
+                                activeFiltersCount > 0
+                                    ? 'border-blue-500 bg-blue-50 text-blue-700'
+                                    : 'border-gray-300 hover:bg-gray-50'
+                            }`}
+                        >
+                            <LuFilter className="w-4 h-4" />
+                            Filtros
+                            {activeFiltersCount > 0 && (
+                                <span className="bg-blue-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                                    {activeFiltersCount}
+                                </span>
+                            )}
+                        </button>
                         <div className="relative flex-1 max-w-md">
                             <LuSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                             <input
@@ -441,6 +471,14 @@ export default function AbonadosTable() {
                     </div>
                 </div>
             </div>
+
+            {/* Modal de filtros */}
+            <FilterModal
+                isOpen={isFilterOpen}
+                onClose={() => setIsFilterOpen(false)}
+                currentFilters={activeFilters}
+                onApplyFilters={(f) => setActiveFilters(f)}
+            />
 
             {/* Tabla con scroll vertical y horizontal */}
             <div className="bg-white rounded-2xl shadow-sm border border-sky-100 overflow-hidden max-h-[calc(100vh-300px)] overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100">

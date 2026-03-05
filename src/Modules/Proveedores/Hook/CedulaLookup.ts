@@ -1,7 +1,7 @@
 import { useState } from "react"
-import { fetchCedulaData, fetchCedulaJuridicaData } from "../Service/CedulaApiService"
+import { fetchCedulaData, fetchCedulaJuridicaData } from "../Services/CedulaApiService"
 
-export function useCedulaLookup() {
+export function CedulaLookup() {
     const [isLoading, setIsLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const [isLoadingJuridico, setIsLoadingJuridico] = useState(false)

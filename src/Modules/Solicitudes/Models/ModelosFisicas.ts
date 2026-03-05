@@ -1,6 +1,6 @@
 export interface SolicitudFisicaBase {
     Id_Solicitud?: number; // ID del backend
-    Tipo_Solicitud: "Afiliacion" | "Desconexion" | "Cambio de Medidor" | "Asociado";
+    Tipo_Solicitud: "Afiliacion" | "Desconexion" | "Cambio de Medidor" | "Asociado" | "Agregar Medidor";
     Nombre: string;
     Apellido1: string;
     Apellido2?: string;
@@ -57,8 +57,15 @@ export interface SolicitudAsociadoFisica extends SolicitudFisicaBase {
     Motivo_Solicitud: string;
 }
 
+export interface SolicitudAgregarMedidorFisica extends SolicitudFisicaBase {
+    Direccion_Exacta: string;
+    Motivo_Solicitud: string;
+    Numero_Medidor_Nuevo?: string | number;
+}
+
 export type SolicitudFisica =
     | SolicitudAfiliacionFisica
     | SolicitudDesconexionFisica
     | SolicitudCambioMedidorFisica
-    | SolicitudAsociadoFisica;
+    | SolicitudAsociadoFisica
+    | SolicitudAgregarMedidorFisica;

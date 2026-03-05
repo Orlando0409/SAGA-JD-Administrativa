@@ -25,7 +25,7 @@ interface ModalSolicitudProps {
     solicitud: {
         tipo: 'solicitud-fisica' | 'solicitud-juridica';
         datos: SolicitudFisica | SolicitudJuridica;
-        tipoSolicitud?: 'Afiliacion' | 'Cambio de Medidor' | 'Asociado' | 'Desconexion'; // Nuevo campo para identificar el subtipo
+        tipoSolicitud?: 'Afiliacion' | 'Cambio de Medidor' | 'Asociado' | 'Desconexion' | 'Agregar Medidor'; // Nuevo campo para identificar el subtipo
     };
 }
 
@@ -51,9 +51,6 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
         if (solicitud.tipo === 'solicitud-fisica') {
             const datos = solicitud.datos as any;
             const numeroMedidorRaw = numeroMedidorAsignado ?? datos.Numero_Medidor_Actual ?? datos.Numero_Medidor ?? datos.Medidor?.Numero_Medidor ?? null;
-            const numeroMedidorActual = numeroMedidorRaw !== null && numeroMedidorRaw !== undefined && `${numeroMedidorRaw}`.trim() !== ''
-                ? `#${numeroMedidorRaw}`
-                : 'No especificado';
 
             let solicitudId = datos.Id_Solicitud || datos.id || datos.Id || datos.ID || datos.solicitudId;
 
@@ -84,16 +81,13 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
                 Motivo_Solicitud: datos.Motivo_Solicitud || 'No especificado',
                 Escritura_Terreno: datos.Escritura_Terreno || 'No proporcionada',
                 Planos_Terreno: datos.Planos_Terreno || 'No proporcionados',
-                Numero_Medidor_Actual: datos.Numero_Medidor_Actual || 'No especificado',
+                Numero_Medidor_Actual: numeroMedidorRaw != null ? String(numeroMedidorRaw) : (datos.Numero_Medidor_Actual || 'No especificado'),
                 Numero_Medidor: datos.Numero_Medidor ?? null,
                 Id_Medidor: datos.Id_Medidor ?? null,
             };
         } else {
             const datos = solicitud.datos as any;
             const numeroMedidorRaw = numeroMedidorAsignado ?? datos.Numero_Medidor_Actual ?? datos.Numero_Medidor ?? datos.Medidor?.Numero_Medidor ?? null;
-            const numeroMedidorActual = numeroMedidorRaw !== null && numeroMedidorRaw !== undefined && `${numeroMedidorRaw}`.trim() !== ''
-                ? `#${numeroMedidorRaw}`
-                : 'No especificado';
 
             let solicitudId = datos.Id_Solicitud || datos.id || datos.Id || datos.ID || datos.solicitudId;
 
@@ -123,7 +117,7 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
                 Motivo_Solicitud: datos.Motivo_Solicitud || 'No especificado',
                 Escritura_Terreno: datos.Escritura_Terreno || 'No proporcionada',
                 Planos_Terreno: datos.Planos_Terreno || 'No proporcionados',
-                Numero_Medidor_Actual: datos.Numero_Medidor_Actual || 'No especificado',
+                Numero_Medidor_Actual: numeroMedidorRaw != null ? String(numeroMedidorRaw) : (datos.Numero_Medidor_Actual || 'No especificado'),
                 Numero_Medidor: datos.Numero_Medidor ?? null,
                 Id_Medidor: datos.Id_Medidor ?? null,
             };
@@ -162,8 +156,8 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
     const handleCambiarEstado = async () => {
         const estadoActual = info.estadoId;
 
-        // Verificar si requiere asignación de medidor (Afiliación o Cambio de Medidor)
-        const requiereAsignacionMedidor = info.tipoSolicitud === 'Afiliacion' || info.tipoSolicitud === 'Cambio de Medidor';
+        // Verificar si requiere asignación de medidor (Afiliación, Cambio de Medidor o Agregar Medidor)
+        const requiereAsignacionMedidor = info.tipoSolicitud === 'Afiliacion' || info.tipoSolicitud === 'Cambio de Medidor' || info.tipoSolicitud === 'Agregar Medidor';
 
         // Estado 2 (En Revisión) → Decidir flujo según tipo de solicitud
         if (estadoActual === 2) {
@@ -512,7 +506,7 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
                                 <>
                                     <Check className="w-4 h-4" />
                                     {info.estadoId === 2
-                                        ? (info.tipoSolicitud === 'Afiliacion' || info.tipoSolicitud === 'Cambio de Medidor'
+                                        ? (info.tipoSolicitud === 'Afiliacion' || info.tipoSolicitud === 'Cambio de Medidor' || info.tipoSolicitud === 'Agregar Medidor'
                                             ? 'Aprobar y poner en espera'
                                             : 'Completar solicitud')
                                         : info.estadoId === 3
