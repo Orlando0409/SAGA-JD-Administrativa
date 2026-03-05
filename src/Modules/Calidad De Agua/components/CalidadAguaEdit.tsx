@@ -5,6 +5,17 @@ import { z } from "zod";
 import { FaFilePdf, FaTimes } from "react-icons/fa";
 import { useAlerts } from "@/Modules/Global/context/AlertContext";
 import type { ArchivoCalidadAgua } from "../Models/CalidadDeAgua";
+import {
+    AlertDialog,
+    AlertDialogTrigger,
+    AlertDialogContent,
+    AlertDialogTitle,
+    AlertDialogDescription,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogHeader,
+    AlertDialogFooter
+} from "@/Modules/Global/components/Sidebar/ui/alert-dialog";
 
 interface CalidadAguaEditProps {
     archivo: ArchivoCalidadAgua;
@@ -21,6 +32,7 @@ export default function CalidadAguaEdit({ archivo, onClose, refetch }: CalidadAg
     const [file, setFile] = useState<File | null>(null);
     const [tituloError, setTituloError] = useState("");
     const [descripcionError, setDescripcionError] = useState("");
+    const [showConfirmDialog, setShowConfirmDialog] = useState(false);
 
     useEffect(() => {
         setTitulo(archivo.Titulo || "");
@@ -54,8 +66,10 @@ export default function CalidadAguaEdit({ archivo, onClose, refetch }: CalidadAg
         }
     };
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
+    const handleSubmit = async (e?: React.FormEvent) => {
+        if (e) {
+            e.preventDefault();
+        }
 
         try {
             CalidadAguaSchema.parse({
@@ -72,7 +86,7 @@ export default function CalidadAguaEdit({ archivo, onClose, refetch }: CalidadAg
 
             await updateCalidadAguaMutation.mutateAsync({ id: archivo.Id_Calidad_Agua, formData });
 
-            showSuccess("Registro actualizado con éxito.");
+            showSuccess("¡Registro actualizado con éxito!");
             refetch();
             onClose();
         } catch (error) {
@@ -203,15 +217,39 @@ export default function CalidadAguaEdit({ archivo, onClose, refetch }: CalidadAg
                 </div>
 
                 <div className="sticky bottom-0 flex justify-end gap-4 p-6 border-t border-gray-200 bg-white z-10">
-                    <button
-                        type="submit"
-                        className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 shadow-sm text-sm"
-                        disabled={updateCalidadAguaMutation.status === "pending"}
-                    >
-                        {updateCalidadAguaMutation.status === "pending"
-                            ? "Actualizando..."
-                            : "Actualizar Registro"}
-                    </button>
+                    <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+                        <AlertDialogTrigger asChild>
+                            <button
+                                type="button"
+                                className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 shadow-sm text-sm"
+                                disabled={updateCalidadAguaMutation.status === "pending" || !!tituloError || !!descripcionError}
+                            >
+                                {updateCalidadAguaMutation.status === "pending"
+                                    ? "Actualizando..."
+                                    : "Actualizar Registro"}
+                            </button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>¿Confirmar actualización?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                    ¿Estás seguro de que deseas actualizar este registro de calidad de agua? Esta acción modificará la información existente.
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                               
+                                <AlertDialogAction
+                                    onClick={() => {
+                                        setShowConfirmDialog(false);
+                                        handleSubmit();
+                                    }}
+                                >
+                                    Confirmar
+                                </AlertDialogAction>
+                                 <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
                     <button
                         type="button"
                         onClick={onClose}

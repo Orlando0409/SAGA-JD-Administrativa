@@ -22,6 +22,7 @@ import {
 } from "@tanstack/react-table";
 
 import { useAlerts } from "@/Modules/Global/context/AlertContext";
+import { useUserPermissions } from '@/Modules/Auth/Hooks/PermissionHook';
 
 
 export default function CalidadAguaTable() {
@@ -29,6 +30,11 @@ export default function CalidadAguaTable() {
   const toggleVisibilidad = useToggleVisibilidadCalidadAgua();
 
   const { showSuccess, showError } = useAlerts();
+  const { canCreate, canEdit, canView } = useUserPermissions();
+
+  const hasCreatePermission = canCreate('calidadAgua');
+  const hasEditPermission = canEdit('calidadAgua');
+  const hasViewPermission = canView('calidadAgua');
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
@@ -141,20 +147,24 @@ export default function CalidadAguaTable() {
       header: 'Acciones',
       cell: info => (
         <div className="flex justify-center gap-1">
-          <button
-            className="px-4 py-1 bg-gray-600 text-white text-xs rounded hover:bg-gray-700 transition-colors"
-            onClick={() => handleOpenModal(info.row.original)}
-            title="Ver detalles"
-          >
-            Ver
-          </button>
-          <button
-            className="px-2 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition-colors"
-            onClick={() => handleOpenEditModal(info.row.original)}
-            title="Editar"
-          >
-            Editar
-          </button>
+          {hasViewPermission && (
+            <button
+              className="px-4 py-1 bg-gray-600 text-white text-xs rounded hover:bg-gray-700 transition-colors"
+              onClick={() => handleOpenModal(info.row.original)}
+              title="Ver detalles"
+            >
+              Ver
+            </button>
+          )}
+          {hasEditPermission && (
+            <button
+              className="px-2 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition-colors"
+              onClick={() => handleOpenEditModal(info.row.original)}
+              title="Editar"
+            >
+              Editar
+            </button>
+          )}
         </div>
       ),
     }),
@@ -202,13 +212,15 @@ export default function CalidadAguaTable() {
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
-            <button
-              onClick={() => setFormVisible(true)}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md flex items-center gap-2 transition-colors"
-            >
-              <Plus className="w-4 h-4" />
-              Nuevo Archivo
-            </button>
+            {hasCreatePermission && (
+              <button
+                onClick={() => setFormVisible(true)}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md flex items-center gap-2 transition-colors"
+              >
+                <Plus className="w-4 h-4" />
+                Nuevo Archivo
+              </button>
+            )}
           </div>
         </div>
       </div>

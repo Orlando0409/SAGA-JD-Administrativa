@@ -119,6 +119,12 @@ const Usuarios = () => {
 
   const handleDeactivate = async (userId: number) => {
     try {
+      // Validar que no sea el usuario admin
+      const user = usersToShow.find(u => u.Id_Usuario === userId);
+      if (user?.Nombre_Usuario.toLowerCase() === 'admin') {
+        console.warn('No se puede desactivar el usuario admin');
+        return;
+      }
       await deactivateUserMutation.mutateAsync({ id: userId });
     } catch (error) {
       console.error('Error deactivating user:', error);
@@ -213,9 +219,9 @@ const Usuarios = () => {
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
                         <button
-                          className="px-2 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-700 transition-colors"
-                          disabled={deactivateUserMutation.isPending}
-                          title="Desactivar usuario"
+                          className="px-2 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                          disabled={deactivateUserMutation.isPending || info.row.original.Nombre_Usuario.toLowerCase() === 'admin'}
+                          title={info.row.original.Nombre_Usuario.toLowerCase() === 'admin' ? 'No se puede desactivar el usuario admin' : 'Desactivar usuario'}
                         >
                           Desactivar
                         </button>

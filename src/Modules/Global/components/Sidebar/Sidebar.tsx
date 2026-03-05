@@ -154,7 +154,7 @@ export function AppSidebar({ allowedModules }: Readonly<AppSidebarProps>) {
         </SidebarContent>
 
         <SidebarFooter className="border-t border-sidebar-border">
-          <div className="flex items-center space-x-3 p-2 group-data-[collapsible=icon]:justify-center">
+          <div className="flex space-x-3 m-2 ">
             {isLoading ? (
               <div className="w-8 h-8 bg-gray-300 rounded-full animate-pulse" />
             ) : (
@@ -171,7 +171,7 @@ export function AppSidebar({ allowedModules }: Readonly<AppSidebarProps>) {
           </div>
 
           <SidebarSeparator />
-          <ul className="p-2 space-y-1">
+          <ul className="space-y-1 p-2 flex flex-col group-data-[collapsible=icon]:items-center">
             <li>
               <Button
                 variant="outline"

@@ -14,10 +14,6 @@ import { User, Building } from 'lucide-react';
 import { useSolicitudesFisicas } from '../Hooks/HookSolicitudesFisicas';
 import { useSolicitudesJuridicas } from '../Hooks/HookSolicitudesJuridicas';
 
-// Importar hooks unificados para cambio de estados
-import { useMarcarEnRevision } from '../Hooks/HookEstadosSolicitudes';
-import { mapearTipoSolicitud, mapearTipoPersona } from '../Service/EstadoSolicitudes';
-
 // Importar tipos
 import type { SolicitudFisica } from '../Models/ModelosFisicas';
 import type { SolicitudJuridica } from '../Models/ModelosJuridicos';
@@ -27,6 +23,7 @@ import EditSolicitudModal from './EditSolicitudModal';
 import ModalSolicitud from './ModalSolicitud';
 import { MdKeyboardArrowUp, MdKeyboardArrowDown, MdKeyboardDoubleArrowLeft, MdKeyboardArrowLeft, MdKeyboardArrowRight, MdKeyboardDoubleArrowRight } from 'react-icons/md';
 import { LuSearch } from 'react-icons/lu';
+import { useUserPermissions } from '@/Modules/Auth/Hooks/PermissionHook';
 
 // Tipo unificado para la tabla de solicitudes
 type SolicitudUnificada = {
@@ -48,12 +45,12 @@ type SolicitudUnificada = {
 
 export default function SolicitudesTable() {
     // Hooks para ambos tipos de solicitudes
+    const { canEdit, canView } = useUserPermissions();
+
+    const hasEditPermission = canEdit('solicitudes');
+    const hasViewPermission = canView('solicitudes');
     const { data: solicitudesFisicas, isLoading: loadingFisicas, isError: errorFisicos } = useSolicitudesFisicas();
     const { data: solicitudesJuridicas, isLoading: loadingJuridicas, isError: errorJuridicos } = useSolicitudesJuridicas();
-
-    // Hook unificado para cambiar estado a "En Revisión" (estado 1 → 2)
-    const marcarEnRevisionMutation = useMarcarEnRevision();
-
 
     const [globalFilter, setGlobalFilter] = useState('');
 
@@ -367,76 +364,45 @@ export default function SolicitudesTable() {
                 return (
                     <div className="flex items-center gap-2">
                         {/* Ver detalles */}
-                        <button
-                            onClick={async (e) => {
-                                e.stopPropagation(); // Evita que se dispare el click de la fila
-
-                                const tipo = solicitud.Tipo_Persona === 'Físico' ? 'solicitud-fisica' : 'solicitud-juridica';
-
-                                // Si el estado actual es "Registro" (1), marcarlo como "En Revisión" (2)
-                                if (solicitud.Estado.Id_Estado === 1) {
-                                    try {
+                        {hasViewPermission && (
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    const tipo = solicitud.Tipo_Persona === 'Físico' ? 'solicitud-fisica' : 'solicitud-juridica';
                                     
-                                        // Obtener el ID real del backend
-                                        const datosOriginales = solicitud.datos_originales as any;
-                                        const idReal = datosOriginales.Id_Solicitud || datosOriginales.id || datosOriginales.Id || datosOriginales.ID;
-                                        console.log(' ID REAL del backend:', idReal);
-
-                                     
-                                        const tipoEntidad = datosOriginales.Tipo_Entidad || datosOriginales.Id_Tipo_Entidad;
-                                        const tipoPersonaReal = tipoEntidad === 1 ? 'Físico' : 'Jurídico';
-                                        console.log(' Tipo_Entidad del backend:', tipoEntidad, '→', tipoPersonaReal);
-
-                                        // Mapear los tipos para el servicio unificado
-                                        const tipoSolicitudMapeado = mapearTipoSolicitud(solicitud.Tipo_Solicitud);
-                                        const tipoPersonaMapeado = mapearTipoPersona(tipoPersonaReal); // ✅ Usar tipo real del backend
-
-                                        console.log(' Tipo mapeado:', tipoSolicitudMapeado, tipoPersonaMapeado);
-
-                                    
-                                        await marcarEnRevisionMutation.mutateAsync(
-                                            tipoSolicitudMapeado,
-                                            tipoPersonaMapeado,
-                                            idReal  // ✅ Usar ID real del backend
-                                        );
-
-                                        console.log(' Estado cambiado exitosamente');
-                                    } catch (error) {
-                                        console.error(' Error al cambiar estado:', error);
-                                    }
-                                }
-
-                                // Abrir el modal
-                                setSelectedSolicitudForGestion({
-                                    tipo: tipo,
-                                    datos: solicitud.datos_originales
-                                });
-                                setShowGestionModal(true);
-                            }}
-                            disabled={marcarEnRevisionMutation.isPending}
-                            className="px-4 py-1 bg-gray-600 text-white text-xs rounded hover:bg-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                            title="Ver detalles"
-                        >
-                            Ver
-                        </button>
+                                    // Abrir el modal (el cambio de estado se maneja dentro del modal)
+                                    setSelectedSolicitudForGestion({
+                                        tipo: tipo,
+                                        datos: solicitud.datos_originales
+                                    });
+                                    setShowGestionModal(true);
+                                }}
+                                className="px-4 py-1 bg-gray-600 text-white text-xs rounded hover:bg-gray-700 transition-colors"
+                                title="Ver detalles"
+                            >
+                                Ver
+                            </button>
+                        )}
 
                         {/* Editar */}
-                        <button
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                setSelectedSolicitud({
-                                    tipo: solicitud.Tipo_Persona === 'Físico'
-                                        ? 'solicitud-fisica'
-                                        : 'solicitud-juridica',
-                                    datos: solicitud.datos_originales
-                                });
-                                setShowEditModal(true);
-                            }}
-                            className="px-4 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition-colors"
-                            title="Editar solicitud"
-                        >
-                            Editar
-                        </button>
+                        {hasEditPermission && (
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setSelectedSolicitud({
+                                        tipo: solicitud.Tipo_Persona === 'Físico'
+                                            ? 'solicitud-fisica'
+                                            : 'solicitud-juridica',
+                                        datos: solicitud.datos_originales
+                                    });
+                                    setShowEditModal(true);
+                                }}
+                                className="px-4 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition-colors"
+                                title="Editar solicitud"
+                            >
+                                Editar
+                            </button>
+                        )}
 
 
                     </div>

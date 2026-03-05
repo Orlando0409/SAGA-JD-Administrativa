@@ -193,7 +193,7 @@ const CatalogoMateriales: React.FC<CatalogoMaterialesProps> = () => {
       columnHelper.accessor('Nombre_Material', {
         header: 'Material',
         cell: info => (
-          <div className="text-gray-600">
+          <div className="flex justify-center text-gray-600">
             {info.getValue().length > 12
               ? `${info.getValue().slice(0, 12)}...`
               : info.getValue()}
@@ -203,7 +203,7 @@ const CatalogoMateriales: React.FC<CatalogoMaterialesProps> = () => {
       columnHelper.accessor('Descripcion', {
         header: 'Descripción',
         cell: info => (
-          <div className="text-gray-600">
+          <div className="flex justify-center text-gray-600">
             {info.getValue()
               ? (info.getValue().length > 15
                 ? `${info.getValue().slice(0, 15)}...`
@@ -215,7 +215,7 @@ const CatalogoMateriales: React.FC<CatalogoMaterialesProps> = () => {
       columnHelper.accessor('Cantidad', {
         header: 'Cantidad',
         cell: info => (
-          <div className={` ${info.getValue() <= 0 ? 'text-red-600' : 'text-green-600'}`}>
+          <div className={` flex justify-center ${info.getValue() <= 0 ? 'text-red-600' : 'text-green-600'}`}>
             {info.getValue()}
           </div>
         ),
@@ -225,7 +225,7 @@ const CatalogoMateriales: React.FC<CatalogoMaterialesProps> = () => {
         cell: info => {
           const unidad = info.getValue();
           return (
-            <div className="text-sm text-gray-600">
+            <div className="flex justify-center text-sm text-gray-600">
               {unidad
                 ? (unidad.length > 8
                   ? `${unidad.slice(0, 8)}...`
@@ -238,7 +238,7 @@ const CatalogoMateriales: React.FC<CatalogoMaterialesProps> = () => {
       columnHelper.accessor('Precio_Unitario', {
         header: 'Precio Unitario',
         cell: info => (
-          <div className="font-medium">
+          <div className="font-medium flex justify-center">
             ₡{info.getValue().toLocaleString('es-CR', { minimumFractionDigits: 2 })}
           </div>
         ),
@@ -260,9 +260,11 @@ const CatalogoMateriales: React.FC<CatalogoMaterialesProps> = () => {
           }
           
           return (
-            <span className={`px-3 py-1 rounded-full text-xs font-semibold ${colorClass}`}>
-              {estado}
-            </span>
+            <div className="flex justify-center">
+              <span className={`px-3 py-1 rounded-full text-xs font-semibold ${colorClass}`}>
+                {estado}
+              </span>
+            </div>
           );
         },
       }),
@@ -280,7 +282,7 @@ const CatalogoMateriales: React.FC<CatalogoMaterialesProps> = () => {
           }
           
           return (
-            <div className="flex gap-1 max-w-xs">
+            <div className="flex gap-1 justify-center max-w-xs">
               {categorias.slice(0, 2).map((cat: any, index: number) => {
                 const categoria = cat.Categoria || cat;
                 const key = cat.Id_Material_Categoria || cat.Id_Categoria || index;
@@ -311,7 +313,7 @@ const CatalogoMateriales: React.FC<CatalogoMaterialesProps> = () => {
         id: 'acciones',
         header: 'Acciones',
         cell: info => (
-          <div className="flex justify-start gap-1">
+          <div className="flex justify-center gap-1">
             <button
               className="px-2 py-1 bg-gray-600 text-white text-xs rounded hover:bg-gray-700 transition-colors"
               onClick={() => handleViewDetail(info.row.original)}

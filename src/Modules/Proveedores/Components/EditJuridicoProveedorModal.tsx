@@ -4,6 +4,17 @@ import PhoneInputComponent from '@/Modules/Global/components/PhoneInputComponent
 import { isValidPhoneNumber } from 'react-phone-number-input';
 import { LuX } from 'react-icons/lu';
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/Modules/Global/components/Sidebar/ui/alert-dialog';
+import {
   EditProveedorJuridicoSchema,
   type EditProveedorJuridicoSchemaData,
   JURIDICO_VALIDATION_LIMITS,
@@ -39,6 +50,7 @@ const EditProveedorJuridicoModal: React.FC<EditProveedorJuridicoModalProps> = ({
     Razon_Social: proveedor.Razon_Social.length,
     Telefono_Proveedor: proveedor.Telefono_Proveedor.length
   });
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
 
   // Función para validar en tiempo real (solo campos editables)
   const validateFieldRealTime = (fieldName: string, value: string) => {
@@ -352,17 +364,45 @@ const EditProveedorJuridicoModal: React.FC<EditProveedorJuridicoModalProps> = ({
             </form.Field>
 
             <div className="flex justify-end gap-3 pt-4">
-
-              <button
-                type="submit"
-                disabled={isUpdating}
-                className={`px-4 py-2 text-white rounded-lg transition-colors ${isUpdating
-                    ? 'bg-blue-300 cursor-not-allowed'
-                    : 'bg-blue-600 hover:bg-blue-700'
-                  }`}
-              >
-                {isUpdating ? 'Actualizando...' : 'Actualizar Proveedor'}
-              </button>
+              <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+                <AlertDialogTrigger asChild>
+                  <button
+                    type="button"
+                    disabled={isUpdating}
+                    className={`px-4 py-2 text-white rounded-lg transition-colors ${isUpdating
+                        ? 'bg-blue-300 cursor-not-allowed'
+                        : 'bg-blue-600 hover:bg-blue-700'
+                      }`}
+                  >
+                    {isUpdating ? 'Actualizando...' : 'Actualizar Proveedor'}
+                  </button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>
+                      <span>¿Actualizar proveedor?</span>
+                    </AlertDialogTitle>
+                    <AlertDialogDescription>
+                      <span>¿Estás seguro de que deseas actualizar el proveedor "{form.state.values.Nombre_Proveedor}"?</span>
+                      <br />
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogAction
+                      onClick={() => {
+                        setShowConfirmDialog(false);
+                        form.handleSubmit();
+                      }}
+                      disabled={isUpdating}
+                    >
+                      <span>{isUpdating ? 'Actualizando...' : 'Actualizar'}</span>
+                    </AlertDialogAction>
+                    <AlertDialogCancel disabled={isUpdating}>
+                      <span>Cancelar</span>
+                    </AlertDialogCancel>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
               <button
                 type="button"
                 onClick={onClose}

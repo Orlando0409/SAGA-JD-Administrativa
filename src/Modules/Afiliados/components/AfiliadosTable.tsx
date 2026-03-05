@@ -12,6 +12,7 @@ import { formatCedulaJuridica } from '../Helper/formatUtils';
 import DetailAbonados from './DetailAfiliadoModal';
 import CreateModal from './CreateAfiliadoModal';
 import EditModal from './EditAfiliadoModal';
+import { useUserPermissions } from '@/Modules/Auth/Hooks/PermissionHook';
 import {
     AlertDialog,
     AlertDialogTrigger,
@@ -47,6 +48,10 @@ export default function AbonadosTable() {
     const { afiliadosJuridicos, isLoading: loadingJuridicos, isError: errorJuridicos, updateEstadoAfiliadoJuridico: updateEstadoMutationJuridico } = useAfiliadosJuridicos();
     const navigate = useNavigate();
     const { showError } = useAlerts();
+    const { canCreate, canEdit } = useUserPermissions();
+
+    const hasCreatePermission = canCreate('abonados');
+    const hasEditPermission = canEdit('abonados');
 
     const [globalFilter, setGlobalFilter] = useState('');
     const [activeFilters, setActiveFilters] = useState<FilterOptions>({
@@ -294,17 +299,19 @@ export default function AbonadosTable() {
                         >
                             Ver
                         </button>
-                        <button
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                handleEdit(persona); // ✅ Cambiar para abrir EditModal
-                            }}
-                            className="px-2 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition-colors"
-                            title="Editar"
-                        >
-                            Editar
-                        </button>
-                        {persona.Estado.Nombre_Estado === 'Activo' ? (
+                        {hasEditPermission && (
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleEdit(persona); // ✅ Cambiar para abrir EditModal
+                                }}
+                                className="px-2 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition-colors"
+                                title="Editar"
+                            >
+                                Editar
+                            </button>
+                        )}
+                        {hasEditPermission && persona.Estado.Nombre_Estado === 'Activo' ? (
                             <AlertDialog>
                                 <AlertDialogTrigger asChild>
                                     <button
@@ -339,7 +346,7 @@ export default function AbonadosTable() {
                                     </AlertDialogFooter>
                                 </AlertDialogContent>
                             </AlertDialog>
-                        ) : (
+                        ) : hasEditPermission ? (
                             <AlertDialog>
                                 <AlertDialogTrigger asChild>
                                     <button
@@ -372,7 +379,7 @@ export default function AbonadosTable() {
                                     </AlertDialogFooter>
                                 </AlertDialogContent>
                             </AlertDialog>
-                        )}
+                        ) : null}
                     </div>
                 );
             },
@@ -454,13 +461,15 @@ export default function AbonadosTable() {
                                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                             />
                         </div>
-                        <button
-                            onClick={() => setShowCreateModal(true)}
-                            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md flex items-center gap-2 transition-colors"
-                        >
-                            <Plus className="w-4 h-4" />
-                            Nuevo Afiliado
-                        </button>
+                        {hasCreatePermission && (
+                            <button
+                                onClick={() => setShowCreateModal(true)}
+                                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md flex items-center gap-2 transition-colors"
+                            >
+                                <Plus className="w-4 h-4" />
+                                Nuevo Afiliado
+                            </button>
+                        )}
                         <button
                             onClick={() => navigate({ to: '/Afiliados/Lecturas' })}
                             className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-md flex items-center gap-2 transition-colors"

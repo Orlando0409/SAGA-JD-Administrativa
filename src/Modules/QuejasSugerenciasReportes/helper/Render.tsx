@@ -8,6 +8,8 @@ interface ArchiveMutations {
   actualizarEstadoSugerenciaMutation: { isPending: boolean; mutateAsync: (args: any) => Promise<any> };
   actualizarEstadoReporteMutation: { isPending: boolean; mutateAsync: (args: any) => Promise<any> };
   handleArchive: (item: ContactoItem) => Promise<void>;
+  hasViewPermission: boolean;
+  hasEditPermission: boolean;
 }
 
 
@@ -96,7 +98,9 @@ export const renderAccionesCell = (item: ContactoItem, mutations: ArchiveMutatio
     actualizarEstadoQuejaMutation, 
     actualizarEstadoSugerenciaMutation, 
     actualizarEstadoReporteMutation, 
-    handleArchive 
+    handleArchive,
+    hasViewPermission,
+    hasEditPermission
   } = mutations;
   
   // Determinar si alguna mutación está pendiente
@@ -113,15 +117,17 @@ export const renderAccionesCell = (item: ContactoItem, mutations: ArchiveMutatio
 
   return (
     <div className="flex items-center gap-2">
-      <button
-        className="px-4 py-1 bg-gray-600 text-white text-xs rounded hover:bg-gray-700 transition-colors"
-        title="Ver detalles"
-        onClick={() => window.dispatchEvent(new CustomEvent('openContactoDetail', { detail: item }))}
-      >
-        Ver
-      </button>
+      {hasViewPermission && (
+        <button
+          className="px-4 py-1 bg-gray-600 text-white text-xs rounded hover:bg-gray-700 transition-colors"
+          title="Ver detalles"
+          onClick={() => window.dispatchEvent(new CustomEvent('openContactoDetail', { detail: item }))}
+        >
+          Ver
+        </button>
+      )}
       {/* El botón Responder solo se muestra si NO está archivado */}
-      {!isArchived && item.estado === 'Pendiente' && ( 
+      {hasEditPermission && !isArchived && item.estado === 'Pendiente' && ( 
         <button
           className="px-4 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition-colors"
           title="Responder"
@@ -130,7 +136,7 @@ export const renderAccionesCell = (item: ContactoItem, mutations: ArchiveMutatio
           Responder
         </button>
       )}
-      {(item.estado === 'Contestado' || item.estado === 'Archivado') && (
+      {hasEditPermission && (item.estado === 'Contestado' || item.estado === 'Archivado') && (
       <AlertDialog>
         <AlertDialogTrigger asChild>
           <button

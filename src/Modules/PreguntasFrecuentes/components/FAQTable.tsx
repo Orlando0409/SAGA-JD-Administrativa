@@ -31,12 +31,18 @@ import type { FAQ } from "../Models/FAQModels";
 import FAQForm from "./FAQForm";
 import FAQModal from "./FAQModal";
 import FAQEdit from "./FAQEdit";
-import { Button } from "@/Modules/Global/components/Sidebar/ui/button";
+import { useUserPermissions } from '@/Modules/Auth/Hooks/PermissionHook';
 
 export default function FAQTable() {
     const { data: faqs = [], isLoading, error } = useFAQs(true);
     const deleteFAQMutation = useDeleteFAQ();
     const toggleVisibleMutation = useToggleFAQVisible();
+    const { canCreate, canEdit, canView } = useUserPermissions();
+
+    const hasCreatePermission = canCreate('faq');
+    const hasEditPermission = canEdit('faq');
+    const hasViewPermission = canView('faq');
+    const hasDeletePermission = canEdit('faq'); // Eliminar requiere permiso de edicion
 
     const [globalFilter, setGlobalFilter] = useState('');
     const [formVisible, setFormVisible] = useState(false);
@@ -99,29 +105,48 @@ export default function FAQTable() {
         columnHelper.accessor('Visible', {
             header: 'Visibilidad',
             cell: info => (
-                <button
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        handleToggleVisibility(info.row.original);
-                    }}
-                    disabled={toggleVisibleMutation.isPending}
-                    className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${info.getValue()
-                            ? "bg-green-100 text-green-700 hover:bg-green-200"
-                            : "bg-red-100 text-red-700 hover:bg-red-200"
-                        }`}
-                >
-                    {info.getValue() ? (
-                        <>
-                            <Eye size={14} />
-                            Visible
-                        </>
-                    ) : (
-                        <>
-                            <EyeOff size={14} />
-                            Oculto
-                        </>
-                    )}
-                </button>
+                hasEditPermission ? (
+                    <button
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            handleToggleVisibility(info.row.original);
+                        }}
+                        disabled={toggleVisibleMutation.isPending}
+                        className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${info.getValue()
+                                ? "bg-green-100 text-green-700 hover:bg-green-200"
+                                : "bg-red-100 text-red-700 hover:bg-red-200"
+                            }`}
+                    >
+                        {info.getValue() ? (
+                            <>
+                                <Eye size={14} />
+                                Visible
+                            </>
+                        ) : (
+                            <>
+                                <EyeOff size={14} />
+                                Oculto
+                            </>
+                        )}
+                    </button>
+                ) : (
+                    <span className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${info.getValue()
+                            ? "bg-green-100 text-green-700"
+                            : "bg-gray-100 text-gray-700"
+                        }`}>
+                        {info.getValue() ? (
+                            <>
+                                <Eye size={14} />
+                                Visible
+                            </>
+                        ) : (
+                            <>
+                                <EyeOff size={14} />
+                                Oculto
+                            </>
+                        )}
+                    </span>
+                )
             ),
         }),
         columnHelper.display({
@@ -129,29 +154,34 @@ export default function FAQTable() {
             header: 'Acciones',
             cell: info => (
                 <div className="flex justify-center gap-1">
-                    <button
-                        className="px-4 py-1 bg-gray-600 text-white text-xs rounded hover:bg-gray-700 transition-colors"
-                        onClick={() => handleViewDetail(info.row.original)}
-                        title="Ver detalles"
-                    >
-                        Ver
-                    </button>
-                    <button
-                        className="px-2 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition-colors"
-                        onClick={() => handleEdit(info.row.original)}
-                        title="Editar"
-                    >
-                        Editar
-                    </button>
-                    <AlertDialog>
+                    {hasViewPermission && (
+                        <button
+                            className="px-4 py-1 bg-gray-600 text-white text-xs rounded hover:bg-gray-700 transition-colors"
+                            onClick={() => handleViewDetail(info.row.original)}
+                            title="Ver detalles"
+                        >
+                            Ver
+                        </button>
+                    )}
+                    {hasEditPermission && (
+                        <button
+                            className="px-2 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition-colors"
+                            onClick={() => handleEdit(info.row.original)}
+                            title="Editar"
+                        >
+                            Editar
+                        </button>
+                    )}
+                    {hasDeletePermission && (
+                        <AlertDialog>
                         <AlertDialogTrigger asChild>
-                            <Button
+                            <button
                                 className="px-2 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                 disabled={deleteFAQMutation.isPending}
                                 title="Eliminar pregunta"
                             >
                                 Eliminar
-                            </Button>
+                            </button>
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                             <AlertDialogHeader>
@@ -175,6 +205,7 @@ export default function FAQTable() {
                             </AlertDialogFooter>
                         </AlertDialogContent>
                     </AlertDialog>
+                    )}
                 </div>
             ),
         }),
@@ -244,13 +275,15 @@ export default function FAQTable() {
                                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                             />
                         </div>
-                        <button
-                            onClick={() => setFormVisible(true)}
-                            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md flex items-center gap-2 transition-colors"
-                        >
-                            <LuPlus className="w-4 h-4" />
-                            Crear Pregunta
-                        </button>
+                        {hasCreatePermission && (
+                            <button
+                                onClick={() => setFormVisible(true)}
+                                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md flex items-center gap-2 transition-colors"
+                            >
+                                <LuPlus className="w-4 h-4" />
+                                Crear Pregunta
+                            </button>
+                        )}
                     </div>
                 </div>
             </div>

@@ -6,6 +6,7 @@ import { CreateUserSchema, type CreateUserSchemaData } from '../Schema/CreateUse
 import type { Role } from '@/Modules/Roles/Models/Role';
 import { useRoles } from '@/Modules/Roles/Hooks/RoleHook';
 import { type CreateUserProps, NOMBRE_MAX_LENGTH, EMAIL_MAX_LENGTH, PASSWORD_MAX_LENGTH, PASSWORD_MIN_LENGTH } from '../Types/UserTypes';
+import { LuEye, LuEyeOff } from 'react-icons/lu';
 
 
 
@@ -20,6 +21,8 @@ const CreateUserModal = ({ onClose, setShowCreateModal }: CreateUserProps) => {
     password: 0,
     confirmPassword: 0
   });
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleClose = () => {
     if (onClose) onClose();
@@ -207,19 +210,29 @@ const CreateUserModal = ({ onClose, setShowCreateModal }: CreateUserProps) => {
                   <label htmlFor="Contraseña" className="block text-sm font-medium text-gray-700 mb-1">
                     Contraseña
                   </label>
-                  <input
-                    id="Contraseña"
-                    type="password"
-                    value={field.state.value}
-                    onChange={createInputHandler('password', field.handleChange, PASSWORD_MAX_LENGTH)}
-                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-colors ${
-                      (formErrors.Contraseña || field.state.meta.errors?.length) 
-                        ? 'border-red-300 focus:ring-red-500' 
-                        : 'border-gray-300 focus:ring-blue-500'
-                    }`}
-                    placeholder={`Mínimo ${PASSWORD_MIN_LENGTH} caracteres`}
-                    maxLength={PASSWORD_MAX_LENGTH}
-                  />
+                  <div className="relative">
+                    <input
+                      id="Contraseña"
+                      type={showPassword ? "text" : "password"}
+                      value={field.state.value}
+                      onChange={createInputHandler('password', field.handleChange, PASSWORD_MAX_LENGTH)}
+                      className={`w-full px-3 py-2 pr-10 border rounded-lg focus:ring-2 focus:border-transparent transition-colors ${
+                        (formErrors.Contraseña || field.state.meta.errors?.length) 
+                          ? 'border-red-300 focus:ring-red-500' 
+                          : 'border-gray-300 focus:ring-blue-500'
+                      }`}
+                      placeholder={`Mínimo ${PASSWORD_MIN_LENGTH} caracteres`}
+                      maxLength={PASSWORD_MAX_LENGTH}
+                    />
+                    <button
+                      type="button"
+                      tabIndex={-1}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-blue-600"
+                      onClick={() => setShowPassword(!showPassword)}
+                    >
+                      {showPassword ? <LuEyeOff className="w-4 h-4" /> : <LuEye className="w-4 h-4" />}
+                    </button>
+                  </div>
                   
                   {renderCharCounter(
                     fieldCharCounts.password, 
@@ -244,19 +257,29 @@ const CreateUserModal = ({ onClose, setShowCreateModal }: CreateUserProps) => {
                   <label htmlFor="confirmarPassword" className="block text-sm font-medium text-gray-700 mb-1">
                     Confirme la Contraseña
                   </label>
-                  <input
-                    id="confirmarPassword"
-                    type="password"
-                    value={field.state.value}
-                    onChange={createInputHandler('confirmPassword', field.handleChange, PASSWORD_MAX_LENGTH)}
-                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-colors ${
-                      (formErrors.confirmarPassword || field.state.meta.errors?.length) 
-                        ? 'border-red-300 focus:ring-red-500' 
-                        : 'border-gray-300 focus:ring-blue-500'
-                    }`}
-                    placeholder="Repita su contraseña"
-                    maxLength={PASSWORD_MAX_LENGTH}
-                  />
+                  <div className="relative">
+                    <input
+                      id="confirmarPassword"
+                      type={showConfirmPassword ? "text" : "password"}
+                      value={field.state.value}
+                      onChange={createInputHandler('confirmPassword', field.handleChange, PASSWORD_MAX_LENGTH)}
+                      className={`w-full px-3 py-2 pr-10 border rounded-lg focus:ring-2 focus:border-transparent transition-colors ${
+                        (formErrors.confirmarPassword || field.state.meta.errors?.length) 
+                          ? 'border-red-300 focus:ring-red-500' 
+                          : 'border-gray-300 focus:ring-blue-500'
+                      }`}
+                      placeholder="Repita su contraseña"
+                      maxLength={PASSWORD_MAX_LENGTH}
+                    />
+                    <button
+                      type="button"
+                      tabIndex={-1}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-blue-600"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    >
+                      {showConfirmPassword ? <LuEyeOff className="w-4 h-4" /> : <LuEye className="w-4 h-4" />}
+                    </button>
+                  </div>
                   
                   {renderCharCounter(
                     fieldCharCounts.confirmPassword, 

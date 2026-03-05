@@ -22,9 +22,15 @@ import {
   flexRender,
 } from "@tanstack/react-table";
 import InsertarLecturaModal from "./InsertarLecturaModal";
+import { useUserPermissions } from '@/Modules/Auth/Hooks/PermissionHook';
 
 export default function LecturaTable() {
   const { data: lecturas, isLoading, isError } = useGetLecturas();
+  const { canCreate, canEdit, canView } = useUserPermissions();
+
+  const hasCreatePermission = canCreate('abonados');
+  const hasEditPermission = canEdit('abonados');
+  const hasViewPermission = canView('abonados');
 
   const [detailModalOpen, setDetailModalOpen] = useState(false);
   const [updateModalOpen, setUpdateModalOpen] = useState(false);
@@ -131,19 +137,23 @@ export default function LecturaTable() {
       header: "Acciones",
       cell: (info) => (
         <div className="flex items-center justify-center gap-2">
-          <button
-            onClick={() => handleOpenDetailModal(info.row.original)}
-            className="px-4 py-1 bg-gray-600 text-white text-xs rounded hover:bg-gray-700 transition-colors"
-            title="Ver detalles"
-          >
-            Ver
-          </button>
-          <button
-            onClick={() => handleOpenUpdateModal(info.row.original)}
-            className="px-2 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition-colors"
-          >
-            Editar
-          </button>
+          {hasViewPermission && (
+            <button
+              onClick={() => handleOpenDetailModal(info.row.original)}
+              className="px-4 py-1 bg-gray-600 text-white text-xs rounded hover:bg-gray-700 transition-colors"
+              title="Ver detalles"
+            >
+              Ver
+            </button>
+          )}
+          {hasEditPermission && (
+            <button
+              onClick={() => handleOpenUpdateModal(info.row.original)}
+              className="px-2 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition-colors"
+            >
+              Editar
+            </button>
+          )}
         </div>
       ),
     }),
@@ -206,13 +216,15 @@ export default function LecturaTable() {
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
             </div>
-            <button
-            onClick={handleOpenInsertModal}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors w-full sm:w-auto justify-center"
-            >
-            <Plus size={20} />
-            <span>Nueva Lectura</span>
-            </button>
+            {hasCreatePermission && (
+              <button
+                onClick={handleOpenInsertModal}
+                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors w-full sm:w-auto justify-center"
+              >
+                <Plus size={20} />
+                <span>Nueva Lectura</span>
+              </button>
+            )}
         </div>
 
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { X, User, Check, XCircle } from 'lucide-react';
 import {
     AlertDialog,
@@ -39,7 +39,8 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
     const [showAprobarDialog, setShowAprobarDialog] = useState(false);
     const [showCompletarDialog, setShowCompletarDialog] = useState(false);
     const [showRechazarDialog, setShowRechazarDialog] = useState(false);
-    const [motivoRechazo, setMotivoRechazo] = useState(''); // ✅ AGREGAR ESTE ESTADO
+    const [motivoRechazo, setMotivoRechazo] = useState('');
+    const hasChangedToRevision = useRef(false);
 
     const marcarEnRevisionMutation = useMarcarEnRevision();
     const aprobarYEnEsperaMutation = useAprobarYEnEspera();
@@ -126,24 +127,66 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
 
     const info = getSolicitudInfo();
 
-
+    // Cambiar a "En Revisión" solo una vez cuando se abre el modal  
     useEffect(() => {
-        const cambiarAEnRevision = async () => {
-            if (isOpen && info.estadoId === 1) {
-                try {
-                    // Mapear los tipos a los valores internos
-                    const tipoSolicitud: TipoSolicitud = mapearTipoSolicitud(info.tipoSolicitud);
-                    const tipoPersona: TipoPersona = mapearTipoPersona(info.tipo);
+        if (!isOpen) {
+            // Resetear cuando el modal se cierra
+            hasChangedToRevision.current = false;
+            return;
+        }
 
-                    await marcarEnRevisionMutation.mutateAsync(tipoSolicitud, tipoPersona, info.id);
-                } catch (error) {
-                    console.error('Error al cambiar a En Revisión:', error);
-                }
+        // Solo ejecutar si aún no se ha cambiado
+        if (hasChangedToRevision.current) {
+            return;
+        }
+
+        // Obtener el estadoId directamente de los datos dentro del useEffect
+        const datos = solicitud.datos as any;
+        const estadoActual = datos.Estado?.Id_Estado_Solicitud || datos.Estado?.Id_Estado || 0;
+        
+        // Solo cambiar si está en estado Registro (1)
+        if (estadoActual !== 1) {
+            return;
+        }
+
+        // Marcar como cambiado ANTES de la llamada asíncrona
+        hasChangedToRevision.current = true;
+
+        // Extraer los datos necesarios dentro del useEffect
+        let solicitudId: any;
+        let tipoSolicitudStr: string;
+        let tipoPersonaStr: string;
+
+        if (solicitud.tipo === 'solicitud-fisica') {
+            solicitudId = datos.Id_Solicitud || datos.id || datos.Id || datos.ID || datos.Identificacion;
+            tipoSolicitudStr = solicitud.tipoSolicitud || datos.Tipo_Solicitud || 'Sin tipo';
+            const tipoEntidad = datos.Tipo_Entidad;
+            tipoPersonaStr = tipoEntidad === 1 ? 'Física' : 'Jurídica';
+        } else {
+            solicitudId = datos.Id_Solicitud || datos.id || datos.Id || datos.ID || datos.Cedula_Juridica;
+            tipoSolicitudStr = solicitud.tipoSolicitud || datos.Tipo_Solicitud || 'Sin tipo';
+            const tipoEntidad = datos.Tipo_Entidad;
+            tipoPersonaStr = tipoEntidad === 1 ? 'Física' : 'Jurídica';
+        }
+
+        // Ejecutar la mutación
+        const cambiarAEnRevision = async () => {
+            try {
+                const tipoSolicitud: TipoSolicitud = mapearTipoSolicitud(tipoSolicitudStr);
+                const tipoPersona: TipoPersona = mapearTipoPersona(tipoPersonaStr);
+
+                console.log('🔄 Cambiando estado a En Revisión...', { tipoSolicitud, tipoPersona, id: solicitudId });
+                await marcarEnRevisionMutation.mutateAsync(tipoSolicitud, tipoPersona, solicitudId);
+                console.log('✅ Estado cambiado exitosamente');
+            } catch (error) {
+                console.error('❌ Error al cambiar a En Revisión:', error);
+                // Si falla, permitir reintento
+                hasChangedToRevision.current = false;
             }
         };
 
         cambiarAEnRevision();
-    }, [isOpen, info.estadoId, info.id, info.tipoSolicitud, info.tipo]);
+    }, [isOpen]);
 
     // Resetear el número de medidor asignado cuando el modal se abre (para traer datos frescos del backend)
     useEffect(() => {
@@ -266,10 +309,15 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
         completarMutation.isPending ||
         rechazarMutation.isPending;
 
+    // Solo deshabilitar el cierre durante operaciones críticas (no durante la carga inicial)
+    const canClose = !aprobarYEnEsperaMutation.isPending && 
+                     !completarMutation.isPending && 
+                     !rechazarMutation.isPending;
+
     if (!isOpen) return null;
 
     return (
-        <>
+
             <div className="fixed inset-0 backdrop-blur bg-opacity-10 flex items-center justify-center z-50 p-4">
                 <div className="bg-white rounded-lg shadow-xl border border-gray-200 w-full max-w-3xl max-h-[90vh] overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100">
                     {/* Header */}
@@ -278,7 +326,7 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
                             <h1 className="text-xl font-semibold text-gray-900">Gestionar Solicitud</h1>
                             <button
                                 onClick={onClose}
-                                disabled={isLoading}
+                                disabled={!canClose}
                                 className="text-gray-400 hover:text-gray-600 transition-colors disabled:opacity-50"
                             >
                                 <X className="w-5 h-5" />
@@ -536,7 +584,7 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
 
                         <button
                             onClick={onClose}
-                            disabled={isLoading}
+                            disabled={!canClose}
                             className="px-4 py-2 text-gray-600 hover:text-gray-800 bg-gray-100 hover:bg-gray-200 rounded-lg transition-all disabled:opacity-50 text-sm font-medium shadow-sm hover:shadow-md"
                         >
                             Cancelar
@@ -669,7 +717,7 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
                     </AlertDialogContent>
                 </AlertDialog>
             </div>
-        </>
+        
     );
 };
 

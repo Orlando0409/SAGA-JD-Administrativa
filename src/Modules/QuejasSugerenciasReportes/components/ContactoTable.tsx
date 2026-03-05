@@ -29,6 +29,7 @@ import { ESTADO_IDS, type ContactoFilterOptions, type ContactoItem, type EstadoC
 import FilterContactoModal from './FilterContactoModal';
 import ContactoDetailModal from './ContactoDetailModal';
 import { renderTipoCell, renderPersonaCell, renderMensajeCell, renderEstadoCell, renderFechaCell, renderAccionesCell } from '../helper/Render';
+import { useUserPermissions } from '@/Modules/Auth/Hooks/PermissionHook';
 
 
 
@@ -55,6 +56,11 @@ const ContactoTable = () => {
   const actualizarEstadoQuejaMutation = useUpdateQuejaEstado();
   const actualizarEstadoSugerenciaMutation = useUpdateSugerenciaEstado();
   const actualizarEstadoReporteMutation = useUpdateReporteEstado();
+
+  const { canEdit, canView } = useUserPermissions();
+
+  const hasEditPermission = canEdit('contacto');
+  const hasViewPermission = canView('contacto');
 
   const isLoading = loadingQuejas || loadingSugerencias || loadingReportes;
 
@@ -250,6 +256,8 @@ const handleArchive = async (item: ContactoItem) => {
           actualizarEstadoSugerenciaMutation,
           actualizarEstadoReporteMutation,
           handleArchive,
+          hasViewPermission,
+          hasEditPermission,
         }),
      enableSorting: false,
    }),

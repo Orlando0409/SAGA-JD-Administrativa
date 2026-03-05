@@ -36,12 +36,18 @@ import type { Proyecto } from "../Models/ProyectoModels";
 import FormularioProyecto from "./ProyectoFormulario";
 import ProyectoModal from "./ProyectoModal";
 import ProyectoFormEdit from "./proyectiFormEdit";
+import { useUserPermissions } from '@/Modules/Auth/Hooks/PermissionHook';
 
 
 export default function ProyectoTable() {
     const { data: proyectos, isLoading, isError, refetch } = useGetProyectos();
     const { mutate: toggleVisibilidad } = useToggleVisibilidadProyecto();
     const updateEstadoMutation = useUpdateEstadoProyecto();
+    const { canCreate, canEdit, canView } = useUserPermissions();
+
+    const hasCreatePermission = canCreate('proyectos');
+    const hasEditPermission = canEdit('proyectos');
+    const hasViewPermission = canView('proyectos');
 
     const [globalFilter, setGlobalFilter] = useState('');
     const [estadoFilter, setEstadoFilter] = useState<string>('Todos'); // Por defecto mostrar todos
@@ -125,7 +131,7 @@ export default function ProyectoTable() {
             header: 'Visibilidad',
             cell: info => {
                 const visible = info.getValue();
-                return (
+                return hasEditPermission ? (
                     <button className="flex justify-start" onClick={() => toggleVisibilidad(info.row.original.Id_Proyecto)}>
                         <span className={`inline-flex items-center gap-2 px-2 py-1 rounded-full text-xs font-medium ${visible
                                 ? 'bg-green-100 text-green-700'
@@ -135,6 +141,14 @@ export default function ProyectoTable() {
                             {visible ? 'Visible' : 'Oculto'}
                         </span>
                     </button>
+                ) : (
+                    <span className={`inline-flex items-center gap-2 px-2 py-1 rounded-full text-xs font-medium ${visible
+                            ? 'bg-green-100 text-green-700'
+                            : 'bg-gray-100 text-gray-700'
+                        }`}>
+                        {visible ? <Eye size={14} /> : <EyeOff size={14} />}
+                        {visible ? 'Visible' : 'Oculto'}
+                    </span>
                 );
             },
         }),
@@ -143,21 +157,25 @@ export default function ProyectoTable() {
             header: 'Acciones',
             cell: info => (
                 <div className="flex justify-center gap-1">
-                    <button
-                        className="px-4 py-1 bg-gray-600 text-white text-xs rounded hover:bg-gray-700 transition-colors"
-                        onClick={() => handleViewDetail(info.row.original)}
-                        title="Ver detalles"
-                    >
-                        Ver
-                    </button>
-                    <button
-                        className="px-2 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition-colors"
-                        onClick={() => handleEdit(info.row.original)}
-                        title="Editar"
-                    >
-                        Editar
-                    </button>
-                    {(() => {
+                    {hasViewPermission && (
+                        <button
+                            className="px-4 py-1 bg-gray-600 text-white text-xs rounded hover:bg-gray-700 transition-colors"
+                            onClick={() => handleViewDetail(info.row.original)}
+                            title="Ver detalles"
+                        >
+                            Ver
+                        </button>
+                    )}
+                    {hasEditPermission && (
+                        <button
+                            className="px-2 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition-colors"
+                            onClick={() => handleEdit(info.row.original)}
+                            title="Editar"
+                        >
+                            Editar
+                        </button>
+                    )}
+                    {hasEditPermission && (() => {
 
                         const estadoId = info.row.original.Estado?.Id_Estado_Proyecto;
 
@@ -387,13 +405,15 @@ export default function ProyectoTable() {
                                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                             />
                         </div>
-                        <button
-                            onClick={() => setFormVisible(true)}
-                            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md flex items-center gap-2 transition-colors"
-                        >
-                            <LuPlus className="w-4 h-4" />
-                            Nuevo Proyecto
-                        </button>
+                        {hasCreatePermission && (
+                            <button
+                                onClick={() => setFormVisible(true)}
+                                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md flex items-center gap-2 transition-colors"
+                            >
+                                <LuPlus className="w-4 h-4" />
+                                Nuevo Proyecto
+                            </button>
+                        )}
                     </div>
                 </div>
             </div>

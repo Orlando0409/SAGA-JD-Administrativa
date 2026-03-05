@@ -129,7 +129,7 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
         let error = '';
 
         if (value && tipoIdentificacion) {
-            const cleanValue = value.replace(/[\s\-]/g, '').toUpperCase();
+            const cleanValue = value.replaceAll(/[\s-]/g, '').toUpperCase();
 
             switch (tipoIdentificacion) {
                 case 'Cedula Nacional':
@@ -145,7 +145,7 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                 case 'Dimex':
                     if (!/^\d*$/.test(cleanValue)) {
                         error = 'El DIMEX solo puede contener números';
-                    } else if (cleanValue.length > 0 && cleanValue[0] === '0') {
+                    } else if (cleanValue.length > 0 && cleanValue.startsWith('0')) {
                         error = 'El DIMEX no puede empezar con 0';
                     } else if (cleanValue.length > 0 && cleanValue.length !== 12 && cleanValue.length === value.length) {
                         error = 'El DIMEX debe tener exactamente 12 dígitos';
@@ -224,17 +224,17 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
     const cedulaJuridicaSchema = z.string()
         .min(1, 'La cédula jurídica no puede estar vacía')
         .refine((val) => {
-            const clean = val.replace(/[\s-]/g, '');
+            const clean = val.replaceAll(/[\s-]/g, '');
             return /^\d{10}$/.test(clean);
         }, 'La cédula jurídica debe tener exactamente 10 dígitos')
         .refine((val) => {
-            const clean = val.replace(/[\s-]/g, '');
+            const clean = val.replaceAll(/[\s-]/g, '');
             return /^[2345]/.test(clean);
         }, 'La cédula jurídica debe comenzar con 2, 3, 4 o 5');
 
     const handleCedulaJuridicaChange = async (cedula: string) => {
-        const value = cedula.replace(/[^\d\s-]/g, '');
-        const digitsOnly = value.replace(/[\s-]/g, '');
+        const value = cedula.replaceAll(/[^\d\s-]/g, '');
+        const digitsOnly = value.replaceAll(/[\s-]/g, '');
         if (digitsOnly.length > 10) return;
 
         form.setFieldValue('Cedula_Juridica', value);
@@ -253,7 +253,7 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
     const validateCedulaJuridicaRealTime = (value: string) => {
         let error = '';
         if (value) {
-            const normalizedValue = value.replace(/[\s-]/g, '').trim();
+            const normalizedValue = value.replaceAll(/[\s-]/g, '').trim();
             if (!/^\d+$/.test(normalizedValue)) {
                 error = 'La cédula jurídica debe contener solo dígitos';
             } else if (normalizedValue.length !== 10) {
@@ -404,7 +404,7 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                 } else {
                     // Agregar campos de afiliado jurídico
                     formData.append('Razon_Social', value.Razon_Social || '');
-                    formData.append('Cedula_Juridica', (value.Cedula_Juridica || '').replace(/[\s-]/g, ''));
+                    formData.append('Cedula_Juridica', (value.Cedula_Juridica || '').replaceAll(/[\s-]/g, ''));
                     formData.append('Numero_Telefono', value.Numero_Telefono || '');
                     formData.append('Correo', value.Correo || '');
                     formData.append('Direccion_Exacta', value.Direccion_Exacta || '');
@@ -502,7 +502,7 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
 
     const handleAgregarNuevo = () => {
         const num = parseInt(numeroNuevoMedidor);
-        if (isNaN(num) || num < 100000) { setErrorNuevoMedidor('El número de medidor debe tener al menos 6 dígitos y no puede empezar con 0.'); return; }
+        if (Number.isNaN(num) || num < 100000) { setErrorNuevoMedidor('El número de medidor debe tener al menos 6 dígitos y no puede empezar con 0.'); return; }
         if (num > 99999999) { setErrorNuevoMedidor('El número de medidor no puede tener más de 8 dígitos.'); return; }
         setErrorNuevoMedidor('');
         setMedidoresPendientes(prev => [...prev, { uid: crypto.randomUUID(), tipo: 'agregar', numeroMedidor: num }]);
@@ -519,6 +519,35 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
         if (!searchMedidor.trim()) return true;
         return String(m.Numero_Medidor).includes(searchMedidor.trim());
     });
+
+    const renderMedidoresList = () => {
+        if (loadingMedidores) {
+            return (
+                <div className="flex items-center justify-center py-6 gap-2 text-sm text-gray-500">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600" />
+                    Cargando...
+                </div>
+            );
+        }
+        if (medidoresFiltrados.length === 0) {
+            return <p className="py-6 text-center text-sm text-gray-400">No hay medidores disponibles</p>;
+        }
+        return (
+            <ul className="divide-y divide-gray-100">
+                {medidoresFiltrados.map(m => (
+                    <li key={m.Id_Medidor}>
+                        <button type="button" onClick={() => handleAgregarAsignar(m)} className="w-full text-left px-4 py-3 flex items-center justify-between hover:bg-blue-50 transition-colors text-sm">
+                            <span className="font-medium text-gray-800">Medidor #{m.Numero_Medidor}</span>
+                            <div className="flex items-center gap-2">
+                                <span className="text-xs text-gray-500">{m.Estado_Medidor?.Nombre_Estado_Medidor}</span>
+                                <CheckCircle2 className="w-4 h-4 text-blue-400" />
+                            </div>
+                        </button>
+                    </li>
+                ))}
+            </ul>
+        );
+    };
 
     const renderSeccionMedidor = () => (
         <div className="mt-6 pt-5 border-t border-gray-200 space-y-4">
@@ -569,25 +598,7 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                         <input type="text" placeholder="Buscar por número..." value={searchMedidor} onChange={e => setSearchMedidor(e.target.value)} className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white" />
                     </div>
                     <div className="border border-gray-200 rounded-lg overflow-hidden max-h-44 overflow-y-auto bg-white">
-                        {loadingMedidores ? (
-                            <div className="flex items-center justify-center py-6 gap-2 text-sm text-gray-500"><div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600" />Cargando...</div>
-                        ) : medidoresFiltrados.length === 0 ? (
-                            <p className="py-6 text-center text-sm text-gray-400">No hay medidores disponibles</p>
-                        ) : (
-                            <ul className="divide-y divide-gray-100">
-                                {medidoresFiltrados.map(m => (
-                                    <li key={m.Id_Medidor}>
-                                        <button type="button" onClick={() => handleAgregarAsignar(m)} className="w-full text-left px-4 py-3 flex items-center justify-between hover:bg-blue-50 transition-colors text-sm">
-                                            <span className="font-medium text-gray-800">Medidor #{m.Numero_Medidor}</span>
-                                            <div className="flex items-center gap-2">
-                                                <span className="text-xs text-gray-500">{m.Estado_Medidor?.Nombre_Estado_Medidor}</span>
-                                                <CheckCircle2 className="w-4 h-4 text-blue-400" />
-                                            </div>
-                                        </button>
-                                    </li>
-                                ))}
-                            </ul>
-                        )}
+                        {renderMedidoresList()}
                     </div>
                 </div>
             )}
@@ -599,7 +610,7 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                         <button type="button" onClick={() => setPanelMedidor('cerrado')} className="text-blue-400 hover:text-blue-600"><X className="w-4 h-4" /></button>
                     </div>
                     <div className="flex gap-2">
-                        <input type="text" inputMode="numeric" value={numeroNuevoMedidor} onChange={e => { const val = e.target.value.replace(/\D/g, ''); if (val.length <= 8) { setNumeroNuevoMedidor(val); if (errorNuevoMedidor) setErrorNuevoMedidor(''); } }} onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), handleAgregarNuevo())} placeholder="Ej: 100230" className={`flex-1 px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white ${errorNuevoMedidor ? 'border-red-400 bg-red-50' : 'border-gray-300'}`} />
+                        <input type="text" inputMode="numeric" value={numeroNuevoMedidor} onChange={e => { const val = e.target.value.replaceAll(/\D/g, ''); if (val.length <= 8) { setNumeroNuevoMedidor(val); if (errorNuevoMedidor) setErrorNuevoMedidor(''); } }} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); handleAgregarNuevo(); } }} placeholder="Ej: 100230" className={`flex-1 px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white ${errorNuevoMedidor ? 'border-red-400 bg-red-50' : 'border-gray-300'}`} />
                         <button type="button" onClick={handleAgregarNuevo} disabled={!numeroNuevoMedidor.trim()} className="px-3 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">Añadir</button>
                     </div>
                     {errorNuevoMedidor && <p className="text-red-500 text-xs">{errorNuevoMedidor}</p>}
@@ -960,7 +971,7 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                             value={field.state.value}
                             onChange={(e) => {
                                 const raw = e.target.value;
-                                field.handleChange(raw === '' ? ('' as unknown as number) : parseInt(raw));
+                                field.handleChange(raw === '' ? ('' as unknown as number) : Number.parseInt(raw));
                             }}
                             onBlur={field.handleBlur}
                             className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-colors ${field.state.meta.errors.length > 0
@@ -979,7 +990,7 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
             <form.Field
                 name="Escritura_Terreno"
                 validators={{
-                    onChange: ({ value }) => !value ? 'La escritura del terreno es requerida' : undefined,
+                    onChange: ({ value }) => value ? undefined : 'La escritura del terreno es requerida',
                 }}
             >
                 {(field) => (
@@ -1020,7 +1031,7 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
             <form.Field
                 name="Planos_Terreno"
                 validators={{
-                    onChange: ({ value }) => !value ? 'Los planos del terreno son requeridos' : undefined,
+                    onChange: ({ value }) => value ? undefined : 'Los planos del terreno son requeridos',
                 }}
             >
                 {(field) => (
@@ -1258,7 +1269,7 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
             <form.Field
                 name="Escritura_Terreno"
                 validators={{
-                    onChange: ({ value }) => !value ? 'La escritura del terreno es requerida' : undefined,
+                    onChange: ({ value }) => value ? undefined : 'La escritura del terreno es requerida',
                 }}
             >
                 {(field) => (
@@ -1299,7 +1310,7 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
             <form.Field
                 name="Planos_Terreno"
                 validators={{
-                    onChange: ({ value }) => !value ? 'Los planos del terreno son requeridos' : undefined,
+                    onChange: ({ value }) => value ? undefined : 'Los planos del terreno son requeridos',
                 }}
             >
                 {(field) => (

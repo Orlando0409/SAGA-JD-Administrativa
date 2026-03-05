@@ -9,6 +9,17 @@ import { formatCedulaJuridica } from '../Helper/formatUtils';
 import PhoneInputComponent from '@/Modules/Global/components/PhoneInputComponent';
 import { AfiliadoFisicoEditSchema } from '../Schemas/AfiliadoFisico';
 import { AfiliacionJuridicaEditSchema } from '../Schemas/AfiliadoJuridico';
+import {
+    AlertDialog,
+    AlertDialogTrigger,
+    AlertDialogContent,
+    AlertDialogTitle,
+    AlertDialogDescription,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogHeader,
+    AlertDialogFooter
+} from "@/Modules/Global/components/Sidebar/ui/alert-dialog";
 
 
 
@@ -60,6 +71,7 @@ const EditModal: React.FC<EditModalProps> = ({ isOpen, onClose, persona }) => {
     const [escrituraFile, setEscrituraFile] = useState<File | null>(null);
     const [planosFile, setPlanosFile] = useState<File | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [showConfirmDialog, setShowConfirmDialog] = useState(false);
     const { updateAfiliadoFisico } = useAfiliadosFisicos();
     const { updateAfiliadoJuridico } = useAfiliadosJuridicos();
     const [fieldCharCounts, setFieldCharCounts] = useState({
@@ -159,7 +171,7 @@ const EditModal: React.FC<EditModalProps> = ({ isOpen, onClose, persona }) => {
                     // Usar la identificación como cédula para la ruta
                     const cedula = afiliadoFisico.Identificacion || '';
                     await updateAfiliadoFisico({ cedula, data: formData });
-                    showSuccess('Afiliado físico actualizado exitosamente');
+                    showSuccess('¡Afiliado físico actualizado exitosamente!');
                 } else {
                     const afiliadoJuridico = persona.datos as AfiliadoJuridico;
 
@@ -176,7 +188,7 @@ const EditModal: React.FC<EditModalProps> = ({ isOpen, onClose, persona }) => {
                     // Usar la cédula jurídica para la ruta
                     const cedulaJuridica = afiliadoJuridico.Cedula_Juridica || '';
                     await updateAfiliadoJuridico({ cedulaJuridica, data: formData });
-                    showSuccess('Afiliado jurídico actualizado exitosamente');
+                    showSuccess('¡Afiliado jurídico actualizado exitosamente!');
                 }
                 onClose();
             } catch (error) {
@@ -654,10 +666,10 @@ const EditModal: React.FC<EditModalProps> = ({ isOpen, onClose, persona }) => {
                     </form>
                 </div>
                  <div className="sticky bottom-0 flex justify-end gap-3 p-6 border-t bg-gray-50 z-10">
-       
+                    <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+                        <AlertDialogTrigger asChild>
                             <button
-                                type="submit"
-                                form="edit-afiliado-form"
+                                type="button"
                                 disabled={isSubmitting}
                                 className="px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
                             >
@@ -670,6 +682,30 @@ const EditModal: React.FC<EditModalProps> = ({ isOpen, onClose, persona }) => {
                                     'Actualizar Afiliado'
                                 )}
                             </button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>¿Confirmar actualización?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                    ¿Estás seguro de que deseas actualizar este afiliado? Esta acción modificará la información existente.
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                               
+                                <AlertDialogAction
+                                    onClick={() => {
+                                        setShowConfirmDialog(false);
+                                        document.getElementById('edit-afiliado-form')?.dispatchEvent(
+                                            new Event('submit', { cancelable: true, bubbles: true })
+                                        );
+                                    }}
+                                >
+                                    Confirmar
+                                </AlertDialogAction>
+                                 <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
                             <button
                                 type="button"
                                 onClick={onClose}

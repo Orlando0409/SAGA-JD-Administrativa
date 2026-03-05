@@ -288,8 +288,6 @@ const CreateModalProveedor = ({ onClose, setShowCreateModal }: CreateModalProvee
       return;
     }
 
-    const errorMessage = error?.message || 'Error desconocido al crear el proveedor';
-    showError(`Error al crear el proveedor: ${errorMessage}`);
   };
 
   // Formulario para proveedor físico

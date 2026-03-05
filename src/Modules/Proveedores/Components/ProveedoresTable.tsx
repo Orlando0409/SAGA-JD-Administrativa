@@ -14,6 +14,7 @@ import ProveedorJuridicoDetailModal from './DetailJuridicoProveedor';
 import EditFisicoProveedoresModal from './EditFisicoProveedoresModal';
 import EditJuridicoProveedorModal from './EditJuridicoProveedorModal';
 import CreateModalProveedor from './CreateModalProveedor';
+import { useUserPermissions } from '@/Modules/Auth/Hooks/PermissionHook';
 
 
 // Tipo unificado para la tabla (similar al patrón de AbonadosTable)
@@ -38,6 +39,9 @@ export default function ProveedoresTable() {
     // Hooks para obtener ambos tipos de proveedores
     const { proveedoresFisicos, } = useProveedoresFisicos();
     const { proveedoresJuridicos, } = useProveedoresJuridicos();
+    const { canCreate } = useUserPermissions();
+
+    const hasCreatePermission = canCreate('proveedores');
 
     const [globalFilter, setGlobalFilter] = useState('');
     // Filtros específicos solicitados: por tipo y por estado
@@ -311,12 +315,14 @@ export default function ProveedoresTable() {
                             className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         />
                     </div>
-                    <button
-                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center gap-2"
-                        onClick={() => setShowCreateModal(true)}
-                    >
-                        + Nuevo Proveedor
-                    </button>
+                    {hasCreatePermission && (
+                        <button
+                            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center gap-2"
+                            onClick={() => setShowCreateModal(true)}
+                        >
+                            + Nuevo Proveedor
+                        </button>
+                    )}
                 </div>
             </div>
 
