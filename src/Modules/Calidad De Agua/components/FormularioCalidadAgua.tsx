@@ -14,7 +14,7 @@ interface FormularioCalidadAguaProps {
 export default function FormularioCalidadAgua({ onClose, refetch }: FormularioCalidadAguaProps) {
 
     const uploadCalidadAguaMutation = useUploadCalidadAgua();
-    const { showSuccess, showError } = useAlerts(); // ✅ Hook de alertas
+    const { showSuccess, showError } = useAlerts(); // Hook de alertas
 
     const [descripcion, setDescripcion] = useState("");
     const [titulo, setTitulo] = useState("");
@@ -76,7 +76,7 @@ export default function FormularioCalidadAgua({ onClose, refetch }: FormularioCa
         }
 
         if (!file) {
-            showError("Debe seleccionar un archivo válido."); // ✅ Reemplazado alert por showError
+            showError("Debe seleccionar un archivo válido."); //  Reemplazado alert por showError
             return;
         }
         const formData = new FormData();
