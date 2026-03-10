@@ -116,7 +116,10 @@ export default function ActasTable() {
                     {hasViewPermission && (
                         <button
                             className="px-4 py-1 bg-gray-600 text-white text-xs rounded hover:bg-gray-700 transition-colors"
-                            onClick={() => handleViewDetail(info.row.original)}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                handleViewDetail(info.row.original);
+                            }}
                             title="Ver detalles"
                         >
                             Ver
@@ -125,7 +128,10 @@ export default function ActasTable() {
                     {hasEditPermission && (
                         <button
                             className="px-2 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition-colors"
-                            onClick={() => handleEdit(info.row.original)}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                handleEdit(info.row.original);
+                            }}
                             title="Editar"
                         >
                             Editar
@@ -137,6 +143,7 @@ export default function ActasTable() {
                             <button
                                 className="px-2 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-700 transition-colors"
                                 disabled={deleteActaMutation.isPending}
+                                onClick={(e) => e.stopPropagation()}
                                 title="Eliminar acta"
                             >
                                 Eliminar
@@ -148,7 +155,7 @@ export default function ActasTable() {
                                     <span>¿Eliminar acta?</span>
                                 </AlertDialogTitle>
                                 <AlertDialogDescription>
-                                    <span>¿Estás seguro de que deseas eliminar la acta "{info.row.original.Titulo}"? Esta acción no se puede deshacer.</span>
+                                    <span>¿Estás seguro de que deseas eliminar la acta "{info.row.original.Titulo.length > 30 ? info.row.original.Titulo.substring(0, 30) + '...' : info.row.original.Titulo}"? Esta acción no se puede deshacer.</span>
                                 </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>

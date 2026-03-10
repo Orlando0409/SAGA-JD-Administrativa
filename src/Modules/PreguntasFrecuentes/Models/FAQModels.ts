@@ -1,7 +1,8 @@
 export interface Usuario {
   Id_Usuario: number;
   Nombre_Usuario: string;
-  Nombre_Rol?: string; 
+  Id_Rol: number;
+  Nombre_Rol: string; 
 }
 
 export interface FAQ {

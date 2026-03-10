@@ -1,6 +1,7 @@
 import React from 'react';
 import type { MovimientoMaterial } from '../../models/MovimientoMaterial';
 import { LuX, LuArrowUpDown, LuPackage, LuUser } from 'react-icons/lu';
+import { formatDate } from '../../helper/DateFormater';
 
 interface DetailMovimientoModalProps {
   movimiento: MovimientoMaterial;
@@ -16,7 +17,7 @@ const DetailMovimientoModal: React.FC<DetailMovimientoModalProps> = ({
   if (!isOpen) return null;
 
   const isIngreso = movimiento.Tipo_Movimiento === 'Entrada';
-  const fechaMovimiento = new Date(movimiento.Fecha_Movimiento);
+
 
   return (
     <div className="fixed inset-0 bg-opacity-10 backdrop-blur-sm flex items-center justify-center z-50 p-4">
@@ -85,7 +86,7 @@ const DetailMovimientoModal: React.FC<DetailMovimientoModalProps> = ({
                       <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
                         Observaciones
                       </label>
-                      <p className="text-sm text-gray-900">{movimiento.Observaciones}</p>
+                      <p className="text-sm text-gray-900 break-words">{movimiento.Observaciones}</p>
                     </div>
                   )}
                 </div>
@@ -109,7 +110,7 @@ const DetailMovimientoModal: React.FC<DetailMovimientoModalProps> = ({
                     <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
                       Material
                     </label>
-                    <p className="text-sm font-medium text-gray-900">
+                    <p className="text-sm font-medium text-gray-900 break-words">
                       {movimiento.Material?.Nombre_Material || 'Material no disponible'}
                     </p>
                   </div>
@@ -162,13 +163,7 @@ const DetailMovimientoModal: React.FC<DetailMovimientoModalProps> = ({
                       Fecha del Movimiento
                     </label>
                     <p className="text-sm text-gray-900">
-                      {fechaMovimiento.toLocaleDateString('es-ES', {
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                      })}
+                      {movimiento.Fecha_Movimiento ? formatDate(movimiento.Fecha_Movimiento) : 'N/A'}
                     </p>
                   </div>
                 </div>

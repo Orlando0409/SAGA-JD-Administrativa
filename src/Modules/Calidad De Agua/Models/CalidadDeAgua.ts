@@ -7,7 +7,7 @@ export interface ArchivoCalidadAgua {
   Fecha_Actualizacion: string; // Fecha de actualización
   Descripcion:string
   Visible: boolean;        // Campo de visibilidad (true = visible, false = oculto)
-  Usuario_Creador: {       // Usuario que creó el registro
+  Usuario: {       // Usuario que creó el registro
     Id_Usuario: number;
     Nombre_Usuario: string;
     Id_Rol: number;
@@ -23,7 +23,7 @@ export const ArchivoCalidadAguaInicial: ArchivoCalidadAgua = {
     Fecha_Actualizacion: '',
     Descripcion:'',
     Visible: false, // Por defecto oculto hasta que se active
-    Usuario_Creador: {
+    Usuario: {
         Id_Usuario: 0,
         Nombre_Usuario: '',
         Id_Rol: 0,

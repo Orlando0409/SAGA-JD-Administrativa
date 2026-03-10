@@ -175,7 +175,10 @@ export default function CalidadAguaTable() {
           {hasViewPermission && (
             <button
               className="px-4 py-1 bg-gray-600 text-white text-xs rounded hover:bg-gray-700 transition-colors"
-              onClick={() => handleOpenModal(info.row.original)}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleOpenModal(info.row.original);
+              }}
               title="Ver detalles"
             >
               Ver
@@ -184,7 +187,10 @@ export default function CalidadAguaTable() {
           {hasEditPermission && (
             <button
               className="px-2 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition-colors"
-              onClick={() => handleOpenEditModal(info.row.original)}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleOpenEditModal(info.row.original);
+              }}
               title="Editar"
             >
               Editar
@@ -424,9 +430,9 @@ export default function CalidadAguaTable() {
               <span>¿{accionVisibilidadCapitalizada} archivo?</span>
             </AlertDialogTitle>
             <AlertDialogDescription>
-              <span>
-                ¿Estás seguro de que deseas {accionVisibilidad} el archivo "{archivoPendienteVisibilidad?.Titulo}"?
-              </span>
+                <span>
+                ¿Estás seguro de que deseas {accionVisibilidad} el archivo "{(archivoPendienteVisibilidad?.Titulo ?? '').length > 35 ? `${(archivoPendienteVisibilidad?.Titulo ?? '').slice(0, 35)}...` : archivoPendienteVisibilidad?.Titulo}"?
+                </span>
               <br />
               <span>Esta acción puede revertirse posteriormente.</span>
             </AlertDialogDescription>

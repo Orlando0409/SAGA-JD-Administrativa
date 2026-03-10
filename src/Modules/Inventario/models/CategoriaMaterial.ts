@@ -1,4 +1,4 @@
-export interface UsuarioCreador
+export interface Usuario
 {
     Id_Usuario: number;
     Nombre_Usuario: string;
@@ -12,7 +12,7 @@ export interface CategoriaMaterial {
   Fecha_Creacion?: Date | string;
   Fecha_Actualizacion?: Date | string;
   Estado_Categoria?: EstadoCategoria;
-  Usuario?: UsuarioCreador;
+  Usuario?: Usuario;
 }
 
 export interface EstadoCategoria {

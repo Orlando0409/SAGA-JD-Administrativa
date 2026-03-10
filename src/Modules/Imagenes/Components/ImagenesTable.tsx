@@ -132,7 +132,7 @@ export default function ImagenesTable() {
                                     <span>¿Eliminar imagen?</span>
                                 </AlertDialogTitle>
                                 <AlertDialogDescription>
-                                    <span>¿Estás seguro de que deseas eliminar la imagen "{info.row.original.Nombre_Imagen}"? Esta acción no se puede deshacer.</span>
+                                    <span>¿Estás seguro de que deseas eliminar la imagen "{info.row.original.Nombre_Imagen.length > 25 ? info.row.original.Nombre_Imagen.substring(0, 25) + '...' : info.row.original.Nombre_Imagen}"? Esta acción no se puede deshacer.</span>
                                 </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>

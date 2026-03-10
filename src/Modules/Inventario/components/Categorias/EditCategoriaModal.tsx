@@ -112,15 +112,12 @@ const EditCategoriaModal: React.FC<EditCategoriaModalProps> = ({ isOpen, onClose
     }
   };
 
-  const renderCharCounter = (current: number, max: number, hasError: boolean) => {
+  const renderCharCounter = (current: number, max: number) => {
     const remaining = max - current;
     const isNearLimit = remaining <= 5;
     
     return (
-      <div className="flex justify-between items-center mt-1">
-        <span className="text-xs text-gray-500">
-          {hasError ? 'Corrige los errores antes de continuar' : 'Modifica este campo'}
-        </span>
+      <div className="flex justify-end items-center mt-1">
         <span className={`text-xs font-medium ${
           isNearLimit ? 'text-orange-600' : 'text-gray-500'
         }`}>
@@ -160,7 +157,7 @@ const EditCategoriaModal: React.FC<EditCategoriaModalProps> = ({ isOpen, onClose
                   placeholder="Ej: Tuberías, Herramientas, Químicos"
                   autoComplete="off"
                 />
-                {renderCharCounter(charCount.name, MAX_NAME_LENGTH, !!formErrors.Nombre_Categoria)}
+                {renderCharCounter(charCount.name, MAX_NAME_LENGTH)}
                 {formErrors.Nombre_Categoria && (
                   <p className="text-red-500 text-sm mt-1">{formErrors.Nombre_Categoria}</p>
                 )}
@@ -176,12 +173,12 @@ const EditCategoriaModal: React.FC<EditCategoriaModalProps> = ({ isOpen, onClose
                   value={formData.Descripcion_Categoria}
                   onChange={handleInputChange}
                   rows={3}
-                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors resize-none ${
+                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100 transition-colors resize-none ${
                     formErrors.Descripcion_Categoria ? 'border-red-300 bg-red-50' : 'border-gray-300'
                   }`}
                   placeholder="Describe el tipo de materiales que incluye esta categoría"
                 />
-                {renderCharCounter(charCount.description, MAX_DESC_LENGTH, !!formErrors.Descripcion_Categoria)}
+                {renderCharCounter(charCount.description, MAX_DESC_LENGTH)}
                 {formErrors.Descripcion_Categoria && (
                   <p className="text-red-500 text-sm mt-1">{formErrors.Descripcion_Categoria}</p>
                 )}

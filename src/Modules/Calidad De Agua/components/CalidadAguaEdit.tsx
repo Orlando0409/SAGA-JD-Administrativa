@@ -136,7 +136,7 @@ export default function CalidadAguaEdit({ archivo, onClose, refetch }: CalidadAg
                             value={descripcion}
                             onChange={handleDescripcionChange}
                             maxLength={200}
-                            className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-sky-500 text-sm break-words"
+                            className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-sky-500 text-sm break-words scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100 scrollbar-rounded"
                             style={{ whiteSpace: "normal", overflowWrap: "break-word" }}
                             rows={3}
                             required

@@ -351,7 +351,7 @@ const CatalogoMateriales: React.FC<CatalogoMaterialesProps> = () => {
                           <span>¿Dar de baja material?</span>
                         </AlertDialogTitle>
                         <AlertDialogDescription>
-                          <span>¿Estás seguro de que deseas dar de baja el material "{info.row.original.Nombre_Material}"?</span>
+                          <span>¿Estás seguro de que deseas dar de baja el material "{info.row.original.Nombre_Material.length > 20 ? info.row.original.Nombre_Material.substring(0, 20) + '...' : info.row.original.Nombre_Material}"?</span>
                           <br />
                           <span>Esta acción puede revertirse posteriormente.</span>
                         </AlertDialogDescription>
@@ -399,14 +399,15 @@ const CatalogoMateriales: React.FC<CatalogoMaterialesProps> = () => {
                         <AlertDialogDescription>
                           {cantidad === 0 ? (
                             <>
-                              <span className="text-amber-600 font-semibold">⚠️ Advertencia:</span>
+                              <span className="text-amber-600 font-semibold"> Advertencia:</span>
                               <br />
-                              <span>No se puede activar el material "{info.row.original.Nombre_Material}" porque tiene cantidad 0 en stock.</span>
+                              <span>No se puede activar el material "{info.row.original.Nombre_Material.length > 20 ? info.row.original.Nombre_Material.substring(0, 20) + '...' : info.row.original.Nombre_Material}" porque tiene cantidad 0 en stock.</span>
                               <br />
                               <span>Para activarlo, primero debe realizar un movimiento de ingreso.</span>
                             </>
                           ) : (
-                            <span>¿Estás seguro de que deseas activar el material "{info.row.original.Nombre_Material}"?</span>
+                            <span>¿Estás seguro de que deseas activar este material "{info.row.original.Nombre_Material.length > 20 ? info.row.original.Nombre_Material.substring(0, 20) + '...' : info.row.original.Nombre_Material}"?</span>
+              
                           )}
                         </AlertDialogDescription>
                       </AlertDialogHeader>
@@ -445,7 +446,7 @@ const CatalogoMateriales: React.FC<CatalogoMaterialesProps> = () => {
                           <span>¿Dar de baja material agotado?</span>
                         </AlertDialogTitle>
                         <AlertDialogDescription>
-                          <span>¿Estás seguro de que deseas dar de baja el material "{info.row.original.Nombre_Material}"?</span>
+                          <span>¿Estás seguro de que deseas dar de baja el material "{info.row.original.Nombre_Material.length > 20 ? info.row.original.Nombre_Material.substring(0, 20) + '...' : info.row.original.Nombre_Material}"?</span>
                           <br />
                           <span>El material está agotado y pasará al estado "Agotado y de baja".</span>
                         </AlertDialogDescription>
@@ -493,15 +494,15 @@ const CatalogoMateriales: React.FC<CatalogoMaterialesProps> = () => {
                         <AlertDialogDescription>
                           {cantidad === 0 ? (
                             <>
-                              <span className="text-amber-600 font-semibold">⚠️ Advertencia:</span>
+                              <span className="text-amber-600 font-semibold"> Advertencia:</span>
                               <br />
-                              <span>No se puede quitar de baja el material "{info.row.original.Nombre_Material}" porque tiene cantidad 0 en stock.</span>
+                              <span>No se puede quitar de baja el material "{info.row.original.Nombre_Material.length > 20 ? info.row.original.Nombre_Material.substring(0, 20) + '...' : info.row.original.Nombre_Material}" porque tiene cantidad 0 en stock.</span>
                               <br />
                               <span>Para quitarlo de baja, primero debe realizar un movimiento de ingreso.</span>
                             </>
                           ) : (
                             <>
-                              <span>¿Estás seguro de que deseas quitar el estado de baja del material "{info.row.original.Nombre_Material}"?</span>
+                              <span>¿Estás seguro de que deseas quitar el estado de baja del material "{info.row.original.Nombre_Material.length > 20 ? info.row.original.Nombre_Material.substring(0, 20) + '...' : info.row.original.Nombre_Material}"?</span>
                               <br />
                               <span>El material quedará en estado "Agotado".</span>
                             </>

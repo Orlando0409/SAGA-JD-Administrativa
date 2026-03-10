@@ -82,7 +82,7 @@ export default function FAQForm({ onClose }: Readonly<FAQFormProps>) {
                                 validateField("Pregunta", v);
                             }}
                             maxLength={100}
-                            className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-sky-500 text-sm"
+                            className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-sky-500 text-sm scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100 scrollbar-rounded"
                             rows={2}
                             required
                         />
@@ -110,7 +110,7 @@ export default function FAQForm({ onClose }: Readonly<FAQFormProps>) {
                                 validateField("Respuesta", v);
                             }}
                             maxLength={700}
-                            className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-sky-500 text-sm break-words"
+                            className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-sky-500 text-sm break-words scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100 scrollbar-rounded"
                             style={{ whiteSpace: "normal", overflowWrap: "break-word" }}
                             rows={5}
                             required
