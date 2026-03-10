@@ -22,8 +22,10 @@ import type { SolicitudJuridica } from '../Models/ModelosJuridicos';
 import EditSolicitudModal from './EditSolicitudModal';
 import ModalSolicitud from './ModalSolicitud';
 import { MdKeyboardArrowUp, MdKeyboardArrowDown, MdKeyboardDoubleArrowLeft, MdKeyboardArrowLeft, MdKeyboardArrowRight, MdKeyboardDoubleArrowRight } from 'react-icons/md';
-import { LuSearch } from 'react-icons/lu';
+import { LuSearch, LuFilter } from 'react-icons/lu';
 import { useUserPermissions } from '@/Modules/Auth/Hooks/PermissionHook';
+import type { FilterSolicitudesOptions } from './FilterSolicitudModal';
+import FilterSolicitudModal from './FilterSolicitudModal';
 
 // Tipo unificado para la tabla de solicitudes
 type SolicitudUnificada = {
@@ -53,6 +55,25 @@ export default function SolicitudesTable() {
     const { data: solicitudesJuridicas, isLoading: loadingJuridicas, isError: errorJuridicos } = useSolicitudesJuridicas();
 
     const [globalFilter, setGlobalFilter] = useState('');
+
+    const [activeFilters, setActiveFilters] = useState<FilterSolicitudesOptions>({
+        estado: '',
+        tipoPersona: '',
+        tipoSolicitud: '',
+        busquedaAvanzada: '',
+    });
+    const [isFilterOpen, setIsFilterOpen] = useState(false);
+
+    const activeFiltersCount = useMemo(() => {
+        let count = 0;
+        if (activeFilters.estado) count++;
+        if (activeFilters.tipoPersona) count++;
+        if (activeFilters.tipoSolicitud) count++;
+        if (activeFilters.busquedaAvanzada) count++;
+        if (globalFilter) count++;
+        return count;
+    }, [activeFilters, globalFilter]);
+
 
     // Estados para el modal de edición
     const [showEditModal, setShowEditModal] = useState(false);
@@ -211,34 +232,59 @@ export default function SolicitudesTable() {
         const resultado = [
             ...solicitudesFisicasUnificadas,
             ...solicitudesJuridicasUnificadas
-        ].sort((a, b) => a.Id - b.Id);
+        ].sort((a, b) => b.Id - a.Id);
 
-        
+
         resultado.forEach((s, idx) => {
             console.log(`  ${idx + 1}. ID:${s.Id} | ${s.Tipo_Solicitud} | ${s.Estado.Nombre_Estado} | ${s.Tipo_Persona} | ${s.Nombre_Completo}`);
         });
-        console.log('═══════════════════════════════════════');
 
         return resultado;
     }, [solicitudesFisicas, solicitudesJuridicas]);
 
     const filteredData = useMemo(() => {
-        if (!globalFilter) return datosUnificados;
-        const q = globalFilter.toLowerCase();
-        return datosUnificados.filter((solicitud) =>
-            [
-                solicitud.Nombre_Completo,
-                solicitud.Cedula_Documento,
-                solicitud.Tipo_Solicitud,
-                solicitud.Estado.Nombre_Estado,
-                solicitud.Tipo_Persona
-            ]
-                .filter(Boolean)
-                .join(' ')
-                .toLowerCase()
-                .includes(q)
-        );
-    }, [datosUnificados, globalFilter]);
+        let datos = datosUnificados;
+
+        // Aplicar filtros avanzados
+        if (activeFilters.estado) {
+            datos = datos.filter(s => s.Estado.Nombre_Estado === activeFilters.estado);
+        }
+        if (activeFilters.tipoPersona) {
+            datos = datos.filter(s => s.Tipo_Persona === activeFilters.tipoPersona);
+        }
+        if (activeFilters.tipoSolicitud) {
+            datos = datos.filter(s => s.Tipo_Solicitud === activeFilters.tipoSolicitud);
+        }
+        if (activeFilters.busquedaAvanzada) {
+            const busqueda = activeFilters.busquedaAvanzada.toLowerCase();
+            datos = datos.filter(s =>
+                [
+                    s.Nombre_Completo,
+                    s.Cedula_Documento,
+                ].filter(Boolean).join(' ').toLowerCase().includes(busqueda)
+            );
+        }
+
+        // Aplicar filtro global (búsqueda rápida)
+        if (globalFilter) {
+            const q = globalFilter.toLowerCase();
+            datos = datos.filter((solicitud) =>
+                [
+                    solicitud.Nombre_Completo,
+                    solicitud.Cedula_Documento,
+                    solicitud.Tipo_Solicitud,
+                    solicitud.Estado.Nombre_Estado,
+                    solicitud.Tipo_Persona
+                ]
+                    .filter(Boolean)
+                    .join(' ')
+                    .toLowerCase()
+                    .includes(q)
+            );
+        }
+
+        return datos;
+    }, [datosUnificados, globalFilter, activeFilters]);
 
     const columnHelper = createColumnHelper<SolicitudUnificada>();
     const columns: ColumnDef<SolicitudUnificada, any>[] = [
@@ -369,7 +415,7 @@ export default function SolicitudesTable() {
                                 onClick={(e) => {
                                     e.stopPropagation();
                                     const tipo = solicitud.Tipo_Persona === 'Físico' ? 'solicitud-fisica' : 'solicitud-juridica';
-                                    
+
                                     // Abrir el modal (el cambio de estado se maneja dentro del modal)
                                     setSelectedSolicitudForGestion({
                                         tipo: tipo,
@@ -466,13 +512,31 @@ export default function SolicitudesTable() {
             <div className="flex flex-col gap-4 mb-4">
                 <div className='p-3'>
                     <div className="flex items-start gap-4 flex-col justify-start">
-                    <h2 className="text-2xl font-bold text-gray-900">Revisión de Solicitudes</h2>
-                    <p className="text-sm text-gray-600 pb-4">Gestiona las solicitudes de los usuarios</p>
-                </div>
+                        <h2 className="text-2xl font-bold text-gray-900">Revisión de Solicitudes</h2>
+                        <p className="text-sm text-gray-600 pb-4">Gestiona las solicitudes de los usuarios</p>
+                    </div>
 
                 </div>
-                <div className='flex justify-end pb-2'>
-                      <div className="relative  flex-1 max-w-md">
+                <div className='flex justify-end items-center gap-4 pb-2'>
+                    {/* Botón de filtros */}
+                    <button
+                        onClick={() => setIsFilterOpen(true)}
+                        className={`px-4 py-2 border rounded-md flex items-center gap-2 ${activeFiltersCount > 0
+                            ? 'border-blue-500 bg-blue-50 text-blue-700'
+                            : 'border-gray-300 hover:bg-gray-50'
+                            }`}
+                    >
+                        <LuFilter className="w-4 h-4" />
+                        Filtros
+                        {activeFiltersCount > 0 && (
+                            <span className="bg-blue-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                                {activeFiltersCount}
+                            </span>
+                        )}
+                    </button>
+
+                    {/* Campo de búsqueda */}
+                    <div className="relative flex-1 max-w-md">
                         <LuSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                         <input
                             value={globalFilter}
@@ -480,10 +544,9 @@ export default function SolicitudesTable() {
                             placeholder="Buscar por nombre, cédula, tipo, estado..."
                             className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         />
-
                     </div>
                 </div>
-                 
+
             </div>
 
             <div className="bg-white rounded-2xl shadow-sm border border-sky-100 overflow-hidden max-h-[calc(100vh-300px)] overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100">
@@ -655,6 +718,12 @@ export default function SolicitudesTable() {
                     solicitud={selectedSolicitudForGestion}
                 />
             )}
+            <FilterSolicitudModal
+                isOpen={isFilterOpen}
+                onClose={() => setIsFilterOpen(false)}
+                currentFilters={activeFilters}
+                onApplyFilters={setActiveFilters}
+            />
 
 
         </div>
