@@ -1,5 +1,10 @@
 import type { Material } from '../models/Inventario';
 
+// Validation constants
+export const CANTIDAD_MOVIMIENTO_MIN = 1;
+export const CANTIDAD_MOVIMIENTO_MAX = 100000;
+export const OBSERVACIONES_MAX_LENGTH = 250;
+
 export type MovimientoType = 'entrada' | 'salida';
 
 export interface CreateMovimientoModalProps {

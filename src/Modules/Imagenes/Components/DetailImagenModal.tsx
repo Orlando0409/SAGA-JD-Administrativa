@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Calendar, RefreshCcw, Image as ImageIcon } from "lucide-react";
+import { Calendar, RefreshCcw, Image as ImageIcon, Info } from "lucide-react";
 import type { Imagen } from "../Models/ModelsEdiImagen";
 
 interface ImagenModalProps {
@@ -17,82 +17,119 @@ const ImagenModal = ({ isOpen, onClose, imagen }: ImagenModalProps) => {
 
     if (!isOpen) return null;
 
-
     return (
         <div className="fixed inset-0 backdrop-blur bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-lg shadow-xl w-full max-w-lg">
+            <div className="bg-white rounded-lg shadow-2xl border border-gray-200 w-full max-w-3xl flex flex-col overflow-hidden max-h-[90vh]">
                 {/* Header */}
-                <div className="flex items-center justify-between p-6 border-b border-gray-200">
-                    <h2 className="text-xl font-semibold text-gray-800">
-                        {isEditing ? "Editar Imagen" : "Detalles de la Imagen"}
-                    </h2>
-                    <button
-                        onClick={onClose}
-                        className="p-1 hover:bg-gray-100 rounded-full transition-colors"
-                    >
-                        ✕
-                    </button>
+                <div className="sticky top-0 bg-white border-b border-gray-200 p-4 z-10">
+                    <div className="flex items-center justify-between">
+                        <h1 className="text-xl font-bold text-gray-900">Detalle de Imagen</h1>
+                        <button 
+                            onClick={onClose} 
+                            className="text-gray-400 hover:text-gray-600 transition-colors"
+                        >
+                            ✕
+                        </button>
+                    </div>
                 </div>
 
-                {/* Body */}
-                <div className="p-6 space-y-6 max-h-[80vh] overflow-y-auto scrollbar-thin scrollbar-thumb-sky-400 scrollbar-track-slate-100 scrollbar-rounded">
-
-                            <div className="flex flex-col items-center bg-gray-100 p-4 rounded-lg shadow-sm">
-                                <div className="text-lg font-bold text-gray-800 mb-2 flex items-center gap-2">
-                                    <ImageIcon className="text-sky-600" />
-                                    {imagen.Nombre_Imagen}
-                                </div>
-
-                                {/* Contenedor adaptable */}
-                                <div className="w-full flex justify-center">
-                                    <div className="max-w-full bg-white rounded-xl overflow-hidden border border-gray-300 shadow-sm">
-                                        <img
-                                            src={imagen.Imagen}
-                                            alt={imagen.Nombre_Imagen}
-                                            className="w-full h-auto object-contain max-h-[450px]"
-                                        />
+                {/* Content */}
+                <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100 p-6">
+                    <div className="space-y-6">
+                        {/* Información de la Imagen */}
+                        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
+                            <div className="bg-gray-50 px-5 py-3 border-b border-gray-200">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                                        <ImageIcon className="w-4 h-4 text-blue-600" />
                                     </div>
+                                    <h3 className="text-base font-bold text-gray-900">Información de la Imagen</h3>
                                 </div>
                             </div>
 
-
-                            {/* Fechas */}
-                            <div className="flex gap-4 mt-4">
-                                <div className="flex-1 bg-white border border-gray-300 rounded-lg p-4 shadow-sm flex items-center gap-2">
-                                    <Calendar size={18} className="text-gray-600" />
-                                    <div>
-                                        <h4 className="text-sm font-semibold text-gray-700">
-                                            Fecha de creación
-                                        </h4>
-                                        <p className="text-sm font-bold text-gray-800">
-                                            {new Date(imagen.Fecha_Creacion).toLocaleDateString("es-ES")}
-                                        </p>
+                            <div className="p-5">
+                                <div className="grid grid-cols-1 gap-6">
+                                    <div className="bg-gray-50 p-4 rounded-lg">
+                                        <div className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
+                                            Nombre de la Imagen
+                                        </div>
+                                        <p className="text-sm font-medium text-gray-900 break-words">{imagen.Nombre_Imagen}</p>
                                     </div>
-                                </div>
 
-                                {imagen.Fecha_Actualizacion && (
-                                    <div className="flex-1 bg-white border border-gray-300 rounded-lg p-4 shadow-sm flex items-center gap-2">
-                                        <RefreshCcw size={18} className="text-gray-600" />
-                                        <div>
-                                            <h4 className="text-sm font-semibold text-gray-700">
-                                                Fecha de actualización
-                                            </h4>
-                                            <p className="text-sm font-bold text-gray-800">
-                                                {new Date(imagen.Fecha_Actualizacion).toLocaleDateString("es-ES")}
-                                            </p>
+                                    <div className="bg-gray-50 p-4 rounded-lg">
+                                        <div className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
+                                            Vista Previa
+                                        </div>
+                                        <div className="flex justify-center bg-white rounded-lg overflow-hidden border border-gray-300 shadow-sm">
+                                            <img
+                                                src={imagen.Imagen}
+                                                alt={imagen.Nombre_Imagen}
+                                                className="w-full h-auto object-contain max-h-[400px]"
+                                            />
                                         </div>
                                     </div>
-                                )}
+                                </div>
                             </div>
-                </div>
-                     <div className="sticky bottom-0 flex justify-end gap-3 p-6 border-t bg-gray-50 z-10">
-                        <button
-                            onClick={onClose}
-                            className="px-6 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium"
-                        >
-                            Cerrar
-                        </button>
                         </div>
+
+                        {/* Información de Registro */}
+                        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
+                            <div className="bg-gray-50 px-5 py-3 border-b border-gray-200">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                                        <Info className="w-4 h-4 text-blue-600" />
+                                    </div>
+                                    <h3 className="text-base font-bold text-gray-900">Información de Registro</h3>
+                                </div>
+                            </div>
+
+                            <div className="p-5">
+                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                    <div className="bg-gray-50 p-4 rounded-lg">
+                                        <div className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
+                                            <Calendar size={14} className="inline mr-1" />
+                                            Fecha de Creación
+                                        </div>
+                                        <p className="text-sm text-gray-900">
+                                            {new Date(imagen.Fecha_Creacion).toLocaleDateString("es-ES", {
+                                                year: 'numeric',
+                                                month: 'long',
+                                                day: 'numeric'
+                                            })}
+                                        </p>
+                                    </div>
+
+                                    {imagen.Fecha_Actualizacion && (
+                                        <div className="bg-gray-50 p-4 rounded-lg">
+                                            <div className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
+                                                <RefreshCcw size={14} className="inline mr-1" />
+                                                Última Actualización
+                                            </div>
+                                            <p className="text-sm text-gray-900">
+                                                {new Date(imagen.Fecha_Actualizacion).toLocaleDateString("es-ES", {
+                                                    year: 'numeric',
+                                                    month: 'long',
+                                                    day: 'numeric'
+                                                })}
+                                            </p>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                {/* Footer */}
+                <div className="sticky bottom-0 flex justify-end gap-3 p-6 border-t bg-gray-50 z-10">
+                    <button
+                        onClick={onClose}
+                        className="px-6 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium"
+                    >
+                        Cerrar
+                    </button>
+                </div>
             </div>
         </div>
     );

@@ -1,6 +1,7 @@
 import { useState, useCallback, useMemo } from 'react';
 import type { IngresoEgresoMaterialData, Material, MovimientoMaterial } from '../models/Inventario';
 import type { MovimientoType, MovimientoFormData } from '../types/MovimientoTypes';
+import { CANTIDAD_MOVIMIENTO_MIN, CANTIDAD_MOVIMIENTO_MAX } from '../types/MovimientoTypes';
 import { useGetAllMaterials } from './useMaterials';
 import { useAlerts } from '@/Modules/Global/context/AlertContext';
 import { useAuth } from '@/Modules/Auth/Context/AuthContext';
@@ -100,7 +101,7 @@ export const useMovimientoForm = (initialMaterial?: Material) => {
   const { user } = useAuth();
   const [tipoMovimiento, setTipoMovimiento] = useState<MovimientoType>('entrada');
   const [selectedMaterial, setSelectedMaterial] = useState<Material | null>(initialMaterial || null);
-  const [cantidad, setCantidad] = useState<number>(1);
+  const [cantidad, setCantidad] = useState<number>(CANTIDAD_MOVIMIENTO_MIN);
   const [descripcion, setDescripcion] = useState<string>('');
   const [busquedaMaterial, setBusquedaMaterial] = useState<string>('');
   const [showMaterialSelector, setShowMaterialSelector] = useState<boolean>(!initialMaterial);
@@ -129,16 +130,19 @@ export const useMovimientoForm = (initialMaterial?: Material) => {
   }, []);
 
   const handleCantidadChange = useCallback((delta: number) => {
-    setCantidad(prev => Math.max(1, prev + delta));
+    setCantidad(prev => {
+      const newValue = prev + delta;
+      return Math.max(CANTIDAD_MOVIMIENTO_MIN, Math.min(CANTIDAD_MOVIMIENTO_MAX, newValue));
+    });
   }, []);
 
   const handleDirectCantidadChange = useCallback((newCantidad: number) => {
-    setCantidad(Math.max(1, newCantidad));
+    setCantidad(Math.max(CANTIDAD_MOVIMIENTO_MIN, Math.min(CANTIDAD_MOVIMIENTO_MAX, newCantidad)));
   }, []);
 
   const resetForm = useCallback(() => {
     setSelectedMaterial(initialMaterial || null);
-    setCantidad(1);
+    setCantidad(CANTIDAD_MOVIMIENTO_MIN);
     setDescripcion('');
     setBusquedaMaterial('');
     setShowMaterialSelector(!initialMaterial);
@@ -150,8 +154,8 @@ export const useMovimientoForm = (initialMaterial?: Material) => {
       return false;
     }
 
-    if (cantidad <= 0) {
-      showError('Error', 'La cantidad debe ser mayor a 0');
+    if (cantidad < CANTIDAD_MOVIMIENTO_MIN || cantidad > CANTIDAD_MOVIMIENTO_MAX) {
+      showError('Error', `La cantidad debe estar entre ${CANTIDAD_MOVIMIENTO_MIN} y ${CANTIDAD_MOVIMIENTO_MAX.toLocaleString()}`);
       return false;
     }
 

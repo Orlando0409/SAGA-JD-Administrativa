@@ -132,15 +132,39 @@ export default function ProyectoTable() {
             cell: info => {
                 const visible = info.getValue();
                 return hasEditPermission ? (
-                    <button className="flex justify-start" onClick={() => toggleVisibilidad(info.row.original.Id_Proyecto)}>
-                        <span className={`inline-flex items-center gap-2 px-2 py-1 rounded-full text-xs font-medium ${visible
-                                ? 'bg-green-100 text-green-700'
-                                : 'bg-red-100 text-red-700'
-                            }`}>
-                            {visible ? <Eye size={14} /> : <EyeOff size={14} />}
-                            {visible ? 'Visible' : 'Oculto'}
-                        </span>
-                    </button>
+                    <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                            <button className="flex justify-start">
+                                <span className={`inline-flex items-center gap-2 px-2 py-1 rounded-full text-xs font-medium ${visible
+                                        ? 'bg-green-100 text-green-700 hover:bg-green-200'
+                                        : 'bg-red-100 text-red-700 hover:bg-red-200'
+                                    } transition-colors`}>
+                                    {visible ? <Eye size={14} /> : <EyeOff size={14} />}
+                                    {visible ? 'Visible' : 'Oculto'}
+                                </span>
+                            </button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>
+                                    <span>¿Cambiar visibilidad?</span>
+                                </AlertDialogTitle>
+                                <AlertDialogDescription>
+                                    <span>¿Estás seguro de que deseas {visible ? 'ocultar' : 'mostrar'} el proyecto "{info.row.original.Titulo.length > 30 ? info.row.original.Titulo.substring(0, 30) + '...' : info.row.original.Titulo}"?</span>
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                                <AlertDialogAction
+                                    onClick={() => toggleVisibilidad(info.row.original.Id_Proyecto)}
+                                >
+                                    <span>Confirmar</span>
+                                </AlertDialogAction>
+                                <AlertDialogCancel>
+                                    <span>Cancelar</span>
+                                </AlertDialogCancel>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
                 ) : (
                     <span className={`inline-flex items-center gap-2 px-2 py-1 rounded-full text-xs font-medium ${visible
                             ? 'bg-green-100 text-green-700'
@@ -198,7 +222,7 @@ export default function ProyectoTable() {
                                                     <span>¿Iniciar proyecto?</span>
                                                 </AlertDialogTitle>
                                                 <AlertDialogDescription>
-                                                    <span>¿Estás seguro de que deseas cambiar el estado del proyecto "{info.row.original.Titulo}" a "En Progreso"?</span>
+                                                    <span>¿Estás seguro de que deseas cambiar el estado del proyecto "{info.row.original.Titulo.length > 30 ? info.row.original.Titulo.substring(0, 30) + '...' : info.row.original.Titulo}" a "En Progreso"?</span>
                                                 </AlertDialogDescription>
                                             </AlertDialogHeader>
                                             <AlertDialogFooter>
@@ -233,7 +257,7 @@ export default function ProyectoTable() {
                                                     <span>¿Marcar como terminado?</span>
                                                 </AlertDialogTitle>
                                                 <AlertDialogDescription>
-                                                    <span>¿Estás seguro de que deseas marcar el proyecto "{info.row.original.Titulo}" como terminado?</span>
+                                                    <span>¿Estás seguro de que deseas marcar el proyecto "{info.row.original.Titulo.length > 30 ? info.row.original.Titulo.substring(0, 30) + '...' : info.row.original.Titulo}" como terminado?</span>
                                                 </AlertDialogDescription>
                                             </AlertDialogHeader>
                                             <AlertDialogFooter>
@@ -268,7 +292,7 @@ export default function ProyectoTable() {
                                                     <span>¿Reabrir proyecto?</span>
                                                 </AlertDialogTitle>
                                                 <AlertDialogDescription>
-                                                    <span>¿Estás seguro de que deseas reabrir el proyecto "{info.row.original.Titulo}" y cambiar su estado a "En Progreso"?</span>
+                                                    <span>¿Estás seguro de que deseas reabrir el proyecto "{info.row.original.Titulo.length > 30 ? info.row.original.Titulo.substring(0, 30) + '...' : info.row.original.Titulo}" y cambiar su estado a "En Progreso"?</span>
                                                 </AlertDialogDescription>
                                             </AlertDialogHeader>
                                             <AlertDialogFooter>

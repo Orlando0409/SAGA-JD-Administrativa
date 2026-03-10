@@ -15,15 +15,17 @@ const Modulos = () => {
             Panel administrativo ASADA Juan Díaz
           </h1>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:overflow-y-auto max-h-[70vh]">
-          {visibleModules.map((mod, index) => (
-            <ModuleCard 
-              key={`${mod.name}-${index}`}
-              name={mod.name} 
-              icon={mod.icon} 
-              path={mod.path} 
-            />
-          ))}
+        <div className="overflow-y-auto max-h-[70vh] pr-2 p-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {visibleModules.map((mod, index) => (
+              <ModuleCard 
+                key={`${mod.name}-${index}`}
+                name={mod.name} 
+                icon={mod.icon} 
+                path={mod.path} 
+              />
+            ))}
+          </div>
         </div>
       </div>
     </section>

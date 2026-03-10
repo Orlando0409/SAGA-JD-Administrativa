@@ -16,7 +16,7 @@ export const CreateImagenSchema = z.object({
     .optional(), // Se puede marcar como opcional para el caso de edición
 });
 
-// ✅ Esquema para actualizar una imagen existente
+//  Esquema para actualizar una imagen existente
 export const UpdateImagenSchema = z.object({
   Nombre_Imagen: z
     .string()
@@ -32,6 +32,6 @@ export const UpdateImagenSchema = z.object({
     .optional(),
 });
 
-// ✅ Tipos inferidos (útiles para formularios o props)
+//  Tipos inferidos de los esquemas
 export type CreateImagenForm = z.infer<typeof CreateImagenSchema>;
 export type UpdateImagenForm = z.infer<typeof UpdateImagenSchema>;

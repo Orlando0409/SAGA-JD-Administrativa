@@ -33,7 +33,7 @@ export interface Material {
   Cantidad: number;
   Precio_Unitario: number;
   Numero_Estanteria: number;
-  Fecha_Creacion: NullableDate;
+  Fecha_Entrada: NullableDate;
   Fecha_Actualizacion: NullableDate;
   Ultima_Fecha_Baja?: NullableDate;
   Estado_Material: EstadoMaterial;

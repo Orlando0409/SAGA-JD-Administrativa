@@ -3,7 +3,7 @@ import { useUpdateUser } from '../Hooks/userHook';
 import type { UpdateUserData } from '../Models/Usuario';
 import { useRoles } from '@/Modules/Roles/Hooks/RoleHook';
 import { EMAIL_MAX_LENGTH, NOMBRE_MAX_LENGTH, type EditUserModalProps } from '../Types/UserTypes';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { UpdateUserSchema, type UpdateUserSchemaData } from '../Schema/UpdateUserSchema';
 import type { Role } from '@/Modules/Roles/Models/Role';
 import {
@@ -26,8 +26,8 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ isOpen, onClose, usert })
   const activeRoles = roles.filter((rol: Role) => rol.Fecha_Eliminacion === null);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [fieldCharCounts, setFieldCharCounts] = useState({
-    nombreUsuario: 0,
-    email: 0
+    nombreUsuario: usert.Nombre_Usuario?.length || 0,
+    email: usert.Correo_Electronico?.length || 0
   });
 
 
@@ -52,7 +52,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ isOpen, onClose, usert })
       Nombre_Usuario: usert.Nombre_Usuario,
       Correo_Electronico: usert.Correo_Electronico,
       Contraseña: '',
-      Id_Rol: usert.Id_Rol,
+      Id_Rol: usert.Rol?.Id_Rol || 0,
     },
     onSubmit: async ({ value }: { value: UpdateUserSchemaData }) => {
       setFormErrors({});
@@ -83,7 +83,19 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ isOpen, onClose, usert })
     },
   });
 
-    const renderCharCounter = (current: number, max: number, hasError: boolean) => {
+  // Actualizar los contadores cuando cambie el usuario
+  useEffect(() => {
+    if (isOpen && usert) {
+      setFieldCharCounts({
+        nombreUsuario: usert.Nombre_Usuario?.length || 0,
+        email: usert.Correo_Electronico?.length || 0
+      });
+      
+      setFormErrors({});
+    }
+  }, [usert?.Id_Usuario, isOpen]);
+
+  const renderCharCounter = (current: number, max: number, hasError: boolean) => {
     const remaining = max - current;
     const isNearLimit = remaining <= 5;
     
@@ -118,6 +130,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ isOpen, onClose, usert })
 
         <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
           <form
+            key={usert.Id_Usuario}
             id="edit-user-form"
             onSubmit={(e) => {
               e.preventDefault();
@@ -206,9 +219,15 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ isOpen, onClose, usert })
                 <select
                   id='Id_Rol'
                   value={field.state.value}
-                  onChange={(e) => field.handleChange(Number(e.target.value))}
+                  onChange={(e) => {
+                    const newValue = Number(e.target.value);
+                    field.handleChange(newValue);
+                    if (formErrors.Id_Rol) {
+                      setFormErrors(prev => ({ ...prev, Id_Rol: '' }));
+                    }
+                  }}
                   className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-colors ${
-                    (formErrors.id_rol || field.state.meta.errors?.length) 
+                    (formErrors.Id_Rol || field.state.meta.errors?.length) 
                       ? 'border-red-300 focus:ring-red-500' 
                       : 'border-gray-300 focus:ring-blue-500'
                   }`}
@@ -223,8 +242,8 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ isOpen, onClose, usert })
                 {field.state.meta.errors?.map((err) => (
                   <p key={err} className="text-red-500 text-xs mt-1">{err}</p>
                 ))}
-                {formErrors.id_rol && (
-                  <p className="text-red-500 text-xs mt-1">{formErrors.id_rol}</p>
+                {formErrors.Id_Rol && (
+                  <p className="text-red-500 text-xs mt-1">{formErrors.Id_Rol}</p>
                 )}
               </div>
             )}

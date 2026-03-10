@@ -1,6 +1,7 @@
 import React from 'react';
 import type { UnidadMedicion } from '../../models/Inventario';
-import { LuX, LuRuler, LuCalendar } from 'react-icons/lu';
+import { LuX, LuRuler, LuUser } from 'react-icons/lu';
+import { formatDate } from '../../helper/DateFormater';
 
 interface DetailUnidadMedicionModalProps {
   isOpen: boolean;
@@ -9,23 +10,13 @@ interface DetailUnidadMedicionModalProps {
 }
 
 const DetailUnidadMedicionModal: React.FC<DetailUnidadMedicionModalProps> = ({ isOpen, onClose, unidad }) => {
-  
-  const formatDate = (date: Date | string) => {
-    const dateObj = new Date(date);
-    return dateObj.toLocaleDateString('es-ES', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
 
-       const estado = unidad.Estado_Unidad_Medicion?.Nombre_Estado_Unidad_Medicion || 'Activo';
-       const isActiva = estado === 'Activo';
-       const colorClass = isActiva 
-         ? 'bg-emerald-100 text-emerald-700 border border-emerald-300'
-         : 'bg-slate-200 text-slate-700 border border-slate-400';
+
+  const estado = unidad.Estado_Unidad_Medicion?.Nombre_Estado_Unidad_Medicion || 'Activo';
+  const isActiva = estado === 'Activo';
+  const colorClass = isActiva
+    ? 'bg-emerald-100 text-emerald-700 border border-emerald-300'
+    : 'bg-slate-200 text-slate-700 border border-slate-400';
 
   if (!isOpen) return null;
 
@@ -62,7 +53,7 @@ const DetailUnidadMedicionModal: React.FC<DetailUnidadMedicionModalProps> = ({ i
                     <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
                       Nombre
                     </label>
-                    <p className="text-sm font-medium text-gray-900">
+                    <p className="text-sm font-medium text-gray-900 break-words">
                       {unidad.Nombre_Unidad_Medicion || unidad.Nombre_Unidad}
                     </p>
                   </div>
@@ -71,7 +62,9 @@ const DetailUnidadMedicionModal: React.FC<DetailUnidadMedicionModalProps> = ({ i
                     <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
                       Abreviatura
                     </label>
-                    <p className="text-sm font-medium text-gray-900">{unidad.Abreviatura}</p>
+                    <p className="text-sm font-medium text-gray-900 break-words">
+                      {unidad.Abreviatura}
+                    </p>
                   </div>
 
                   <div className="bg-gray-50 p-4 rounded-lg">
@@ -87,26 +80,28 @@ const DetailUnidadMedicionModal: React.FC<DetailUnidadMedicionModalProps> = ({ i
                     <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
                       Descripción
                     </label>
-                    <p className="text-sm text-gray-900">{unidad.Descripcion || 'Sin descripción'}</p>
+                    <p className="text-sm text-gray-900 break-words">
+                      {unidad.Descripcion || 'Sin descripción'}
+                    </p>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Fechas */}
+            {/* Información de Registro */}
             <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
               <div className="bg-gray-50 px-5 py-3 border-b border-gray-200">
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                    <LuCalendar className="w-4 h-4 text-blue-600" />
+                    <LuUser className="w-4 h-4 text-blue-600" />
                   </div>
-                  <h3 className="text-base font-bold text-gray-900">Fechas</h3>
+                  <h3 className="text-base font-bold text-gray-900">Información de Registro</h3>
                 </div>
               </div>
 
               <div className="p-5">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  <div className="bg-gray-50 p-4 rounded-lg">
+                <div className="grid grid-cols-2 gap-6">
+                    <div className="bg-gray-50 p-4 rounded-lg">
                     <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
                       Fecha de Creación
                     </label>
@@ -119,9 +114,19 @@ const DetailUnidadMedicionModal: React.FC<DetailUnidadMedicionModalProps> = ({ i
                     </label>
                     <p className="text-sm text-gray-900">{formatDate(unidad.Fecha_Actualizacion)}</p>
                   </div>
+
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
+                      Creado por
+                    </label>
+                    <p className="text-sm text-gray-900">
+                      {unidad.Usuario?.Nombre_Usuario || 'Desconocido'} 
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
+
           </div>
         </div>
 

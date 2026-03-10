@@ -31,8 +31,8 @@ export const MaterialInfo: React.FC<{ material: Material; showCategories?: boole
   showCategories = true,
   categoriesProps = {}
 }) => (
-  <div>
-    <p className="font-medium text-gray-900">{material.Nombre_Material}</p>
+  <div className="min-w-0 w-full">
+    <p className="text-sm font-medium text-gray-900 break-words">{material.Nombre_Material}</p>
     {showCategories && (
       <div className="flex flex-wrap gap-1 mt-1">
         <MaterialCategories categorias={material.Categorias} {...categoriesProps} />

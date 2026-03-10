@@ -140,12 +140,12 @@ export default function ImagenFormEdit({ onClose, refetch, imagen }: ImagenFormE
                 type="text"
                 value={nombre}
                 onChange={handleNombreChange}
-                maxLength={100}
+                maxLength={50}
                 className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-sky-500 text-sm"
                 required
               />
               <div className="text-right text-xs text-gray-500 mt-1">
-                {nombre.length}/100
+                {nombre.length}/50
               </div>
               {nombreError && (
                 <p className="text-xs text-red-500 mt-1">{nombreError}</p>
@@ -222,7 +222,7 @@ export default function ImagenFormEdit({ onClose, refetch, imagen }: ImagenFormE
                   <span>¿Guardar cambios?</span>
                 </AlertDialogTitle>
                 <AlertDialogDescription>
-                  <span>¿Estás seguro de que deseas actualizar la imagen "{nombre}"?</span>
+                  <span>¿Estás seguro de que deseas actualizar la imagen "{nombre.length > 30 ? `${nombre.slice(0, 30)}...` : nombre}"?</span>
                   <br />
                 </AlertDialogDescription>
               </AlertDialogHeader>

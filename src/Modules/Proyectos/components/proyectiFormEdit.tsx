@@ -183,7 +183,7 @@ export default function ProyectoFormEdit({ proyecto, onClose }: ProyectoFormEdit
                             value={descripcion}
                             onChange={handleDescripcionChange}
                             maxLength={1000}
-                            className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-sky-500 text-sm break-words"
+                            className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-sky-500 text-sm break-words scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100"
                             style={{ whiteSpace: "normal", overflowWrap: "break-word" }}
                             rows={3}
                             required
@@ -267,7 +267,7 @@ export default function ProyectoFormEdit({ proyecto, onClose }: ProyectoFormEdit
                     <AlertDialogHeader>
                         <AlertDialogTitle>¿Guardar cambios?</AlertDialogTitle>
                         <AlertDialogDescription>
-                            Estás a punto de actualizar el proyecto "{proyecto.Titulo}". 
+                            Estás a punto de actualizar el proyecto "{proyecto.Titulo.length > 30 ? `${proyecto.Titulo.substring(0, 30)}...` : proyecto.Titulo}". 
                             {imagen && " Se reemplazará el archivo actual con el nuevo archivo seleccionado."}
                             {!imagen && " El archivo actual se mantendrá sin cambios."}
                         </AlertDialogDescription>

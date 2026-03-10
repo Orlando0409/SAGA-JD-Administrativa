@@ -119,7 +119,9 @@ const CatálogoAuditorias = () => {
       cell: (info) => (
         <div className="flex justify-between">
           <span className="font-medium text-sm ">
-            {info.getValue() || <span className="text-gray-400">-</span>}
+            {info.getValue().length > 30
+              ? `${info.getValue().slice(0, 30)}...`
+              : info.getValue()}
           </span>
         </div>
       ),

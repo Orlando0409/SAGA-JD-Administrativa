@@ -24,6 +24,10 @@ interface EditUnidadMedicionModalProps {
 const EditUnidadMedicionModal: React.FC<EditUnidadMedicionModalProps> = ({ isOpen, onClose, unidad }) => {
   const updateUnidadMutation = useUpdateUnidadMedicion();
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+  const [charCount, setCharCount] = useState({ name: 0, abreviatura: 0, description: 0 });
+  const MAX_NAME_LENGTH = 50;
+  const MAX_ABREV_LENGTH = 10;
+  const MAX_DESC_LENGTH = 100;
   const [formData, setFormData] = useState<UpdateUnidadMedicionSchemaData>({
     Nombre_Unidad_Medicion: '',
     Abreviatura: '',
@@ -32,19 +36,47 @@ const EditUnidadMedicionModal: React.FC<EditUnidadMedicionModalProps> = ({ isOpe
 
   useEffect(() => {
     if (unidad) {
+      const nombreValue = unidad.Nombre_Unidad_Medicion || unidad.Nombre_Unidad || '';
+      const abrevValue = unidad.Abreviatura || '';
+      const descValue = unidad.Descripcion || '';
+      
       setFormData({
-        Nombre_Unidad_Medicion: unidad.Nombre_Unidad_Medicion || unidad.Nombre_Unidad || '',
-        Abreviatura: unidad.Abreviatura,
-        Descripcion: unidad.Descripcion || '',
+        Nombre_Unidad_Medicion: nombreValue,
+        Abreviatura: abrevValue,
+        Descripcion: descValue,
+      });
+      setCharCount({
+        name: nombreValue.length,
+        abreviatura: abrevValue.length,
+        description: descValue.length,
       });
     }
   }, [unidad]);
 
   const handleInputChange = (field: keyof UpdateUnidadMedicionSchemaData) => 
     (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-      setFormData(prev => ({ ...prev, [field]: e.target.value }));
-      if (formErrors[field]) {
-        setFormErrors(prev => ({ ...prev, [field]: '' }));
+      const { value } = e.target;
+      let maxLength = MAX_DESC_LENGTH;
+      let counterKey: 'name' | 'abreviatura' | 'description' = 'description';
+      
+      if (field === 'Nombre_Unidad_Medicion') {
+        maxLength = MAX_NAME_LENGTH;
+        counterKey = 'name';
+      } else if (field === 'Abreviatura') {
+        maxLength = MAX_ABREV_LENGTH;
+        counterKey = 'abreviatura';
+      } else if (field === 'Descripcion') {
+        maxLength = MAX_DESC_LENGTH;
+        counterKey = 'description';
+      }
+      
+      if (value.length <= maxLength) {
+        setFormData(prev => ({ ...prev, [field]: value }));
+        setCharCount(prev => ({ ...prev, [counterKey]: value.length }));
+        
+        if (formErrors[field]) {
+          setFormErrors(prev => ({ ...prev, [field]: '' }));
+        }
       }
     };
 
@@ -92,6 +124,21 @@ const EditUnidadMedicionModal: React.FC<EditUnidadMedicionModalProps> = ({ isOpe
     }
   };
 
+  const renderCharCounter = (current: number, max: number) => {
+    const remaining = max - current;
+    const isNearLimit = remaining <= 5;
+    
+    return (
+      <div className="flex justify-end items-center mt-1">
+        <span className={`text-xs font-medium ${
+          isNearLimit ? 'text-orange-600' : 'text-gray-500'
+        }`}>
+          {current}/{max}
+        </span>
+      </div>
+    );
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -121,6 +168,7 @@ const EditUnidadMedicionModal: React.FC<EditUnidadMedicionModalProps> = ({ isOpe
                 placeholder="Ej: Kilogramo, Litro, Metro"
                 autoComplete="off"
               />
+              {renderCharCounter(charCount.name, MAX_NAME_LENGTH)}
               {formErrors.Nombre_Unidad_Medicion && (
                 <p className="text-red-500 text-sm mt-1">{formErrors.Nombre_Unidad_Medicion}</p>
               )}
@@ -141,6 +189,7 @@ const EditUnidadMedicionModal: React.FC<EditUnidadMedicionModalProps> = ({ isOpe
                 placeholder="Ej: kg, L, m"
                 autoComplete="off"
               />
+              {renderCharCounter(charCount.abreviatura, MAX_ABREV_LENGTH)}
               {formErrors.Abreviatura && (
                 <p className="text-red-500 text-sm mt-1">{formErrors.Abreviatura}</p>
               )}
@@ -155,11 +204,12 @@ const EditUnidadMedicionModal: React.FC<EditUnidadMedicionModalProps> = ({ isOpe
                 value={formData.Descripcion}
                 onChange={handleInputChange('Descripcion')}
                 rows={3}
-                className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors resize-none ${
+                className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100 resize-none ${
                   formErrors.Descripcion ? 'border-red-300 bg-red-50' : 'border-gray-300'
                 }`}
                 placeholder="Descripción adicional de la unidad de medición"
               />
+              {renderCharCounter(charCount.description, MAX_DESC_LENGTH)}
               {formErrors.Descripcion && (
                 <p className="text-red-500 text-sm mt-1">{formErrors.Descripcion}</p>
               )}

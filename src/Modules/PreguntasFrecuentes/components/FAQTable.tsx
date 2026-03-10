@@ -64,10 +64,7 @@ export default function FAQTable() {
         columnHelper.accessor('Pregunta', {
             header: 'Pregunta',
             cell: info => (
-                <div
-                    className="font-medium transition-colors text-left w-full flex items-center gap-2"
-
-                >
+                <div className="font-medium transition-colors text-left w-full flex items-center gap-2">
                     <span className="truncate">
                         {info.getValue().length > 40
                             ? `${info.getValue().slice(0, 40)}...`
@@ -88,52 +85,61 @@ export default function FAQTable() {
                 </div>
             ),
         }),
-        columnHelper.accessor('Fecha_Creacion', {
-            header: 'Fecha de Creación',
-            cell: info =>
-                <div className="flex items-center justify-start">{new Date(info.getValue()).toLocaleDateString("es-ES")}</div>,
-        }),
-        columnHelper.accessor('Fecha_Actualizacion', {
-            header: 'Última Actualización',
-            cell: info =>
-                <div className="flex items-center justify-start">
-                    {info.getValue()
-                        ? new Date(info.getValue()).toLocaleDateString("es-ES")
-                        : "Sin cambios"}
-                </div>
-        }),
         columnHelper.accessor('Visible', {
             header: 'Visibilidad',
             cell: info => (
                 hasEditPermission ? (
-                    <button
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            handleToggleVisibility(info.row.original);
-                        }}
-                        disabled={toggleVisibleMutation.isPending}
-                        className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${info.getValue()
-                                ? "bg-green-100 text-green-700 hover:bg-green-200"
-                                : "bg-red-100 text-red-700 hover:bg-red-200"
-                            }`}
-                    >
-                        {info.getValue() ? (
-                            <>
-                                <Eye size={14} />
-                                Visible
-                            </>
-                        ) : (
-                            <>
-                                <EyeOff size={14} />
-                                Oculto
-                            </>
-                        )}
-                    </button>
+                    <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                            <button
+                                disabled={toggleVisibleMutation.isPending}
+                                className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+                                    info.getValue()
+                                        ? "bg-green-100 text-green-700 hover:bg-green-200"
+                                        : "bg-red-100 text-red-700 hover:bg-red-200"
+                                }`}
+                            >
+                                {info.getValue() ? (
+                                    <>
+                                        <Eye size={14} />
+                                        Visible
+                                    </>
+                                ) : (
+                                    <>
+                                        <EyeOff size={14} />
+                                        Oculto
+                                    </>
+                                )}
+                            </button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>
+                                    ¿Cambiar visibilidad?
+                                </AlertDialogTitle>
+                                <AlertDialogDescription>
+                                    ¿Estás seguro de que deseas {info.getValue() ? 'ocultar' : 'mostrar'} la pregunta "{info.row.original.Pregunta.length > 30 ? info.row.original.Pregunta.substring(0, 30) + '...' : info.row.original.Pregunta}"?
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                                <AlertDialogAction
+                                    onClick={() => handleToggleVisibility(info.row.original)}
+                                    disabled={toggleVisibleMutation.isPending}
+                                >
+                                    {toggleVisibleMutation.isPending ? 'Actualizando...' : 'Confirmar'}
+                                </AlertDialogAction>
+                                <AlertDialogCancel>
+                                    Cancelar
+                                </AlertDialogCancel>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
                 ) : (
-                    <span className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${info.getValue()
+                    <span className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
+                        info.getValue()
                             ? "bg-green-100 text-green-700"
                             : "bg-gray-100 text-gray-700"
-                        }`}>
+                    }`}>
                         {info.getValue() ? (
                             <>
                                 <Eye size={14} />
@@ -174,42 +180,42 @@ export default function FAQTable() {
                     )}
                     {hasDeletePermission && (
                         <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                            <button
-                                className="px-2 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                                disabled={deleteFAQMutation.isPending}
-                                title="Eliminar pregunta"
-                            >
-                                Eliminar
-                            </button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                            <AlertDialogHeader>
-                                <AlertDialogTitle>
-                                    ¿Eliminar pregunta?
-                                </AlertDialogTitle>
-                                <AlertDialogDescription>
-                                    ¿Estás seguro de que deseas eliminar la pregunta "{info.row.original.Pregunta}"? Esta acción no se puede deshacer.
-                                </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                                <AlertDialogAction
-                                    onClick={() => handleDelete(info.row.original)}
+                            <AlertDialogTrigger asChild>
+                                <button
+                                    className="px-2 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                     disabled={deleteFAQMutation.isPending}
+                                    title="Eliminar pregunta"
                                 >
-                                    {deleteFAQMutation.isPending ? 'Eliminando...' : 'Eliminar'}
-                                </AlertDialogAction>
-                                <AlertDialogCancel>
-                                    Cancelar
-                                </AlertDialogCancel>
-                            </AlertDialogFooter>
-                        </AlertDialogContent>
-                    </AlertDialog>
+                                    Eliminar
+                                </button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                                <AlertDialogHeader>
+                                    <AlertDialogTitle>
+                                        ¿Eliminar pregunta?
+                                    </AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                        ¿Estás seguro de que deseas eliminar la pregunta "{info.row.original.Pregunta.length > 30 ? info.row.original.Pregunta.substring(0, 30) + '...' : info.row.original.Pregunta}"? Esta acción no se puede deshacer.
+                                    </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                    <AlertDialogAction
+                                        onClick={() => handleDelete(info.row.original)}
+                                        disabled={deleteFAQMutation.isPending}
+                                    >
+                                        {deleteFAQMutation.isPending ? 'Eliminando...' : 'Eliminar'}
+                                    </AlertDialogAction>
+                                    <AlertDialogCancel>
+                                        Cancelar
+                                    </AlertDialogCancel>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                        </AlertDialog>
                     )}
                 </div>
             ),
         }),
-    ], [isLoading, deleteFAQMutation.isPending, toggleVisibleMutation.isPending]);
+    ], [hasViewPermission, hasEditPermission, hasDeletePermission, deleteFAQMutation.isPending, toggleVisibleMutation.isPending]);
 
     // Funciones para manejar las acciones
     const handleViewDetail = (faq: FAQ) => {

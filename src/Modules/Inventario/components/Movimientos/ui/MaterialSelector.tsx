@@ -34,13 +34,13 @@ const MaterialSelector: React.FC<MaterialSelectorProps> = ({
       </button>
       </div>
       {selectedMaterial && !showMaterialSelector ? (
-      <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border">
-        <div className="flex items-center gap-3">
+      <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100">
+        <div className="flex items-center gap-3 flex-1 min-w-0">
           <MaterialInfo material={selectedMaterial} />
         </div>
         <button
           onClick={() => setShowMaterialSelector(true)}
-          className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+          className="text-blue-600 hover:text-blue-700 text-sm font-medium whitespace-nowrap ml-2"
         >
           Cambiar
         </button>
@@ -63,7 +63,7 @@ const MaterialSelector: React.FC<MaterialSelectorProps> = ({
             <p className="text-sm text-gray-500 mt-2">Cargando materiales...</p>
           </div>
         ) : (
-          <div className="max-h-64 overflow-y-auto border border-gray-200 rounded-lg">
+          <div className="max-h-64 overflow-y-auto border border-gray-200 rounded-lg scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100">
             {materialesFiltrados.length > 0 ? (
               materialesFiltrados.map((material) => (
                 <button
