@@ -56,3 +56,18 @@ export const asignarMedidorAAfiliado = async (idMedidor: number, idAfiliado: num
   await axiosPrivate.post(`/Inventario/asignar/medidor/afiliado`, { Id_Medidor: idMedidor, Id_Afiliado: idAfiliado });
 };
 
+// Asignar medidor a un afiliado con archivos de documentos del terreno
+export const asignarMedidorConArchivos = async (
+  idMedidor: number,
+  idAfiliado: number,
+  escrituraFile: File,
+  planosFile: File
+): Promise<void> => {
+  const formData = new FormData();
+  formData.append('Id_Medidor', String(idMedidor));
+  formData.append('Id_Afiliado', String(idAfiliado));
+  formData.append('Escritura_Terreno', escrituraFile);
+  formData.append('Planos_Terreno', planosFile);
+  await axiosPrivate.post(`/Inventario/asignar/medidor/afiliado`, formData);
+};
+
