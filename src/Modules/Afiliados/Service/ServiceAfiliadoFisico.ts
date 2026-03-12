@@ -52,30 +52,38 @@ export const getMedidoresAsignables = async (): Promise<MedidorAsignable[]> => {
     return response.data;
 };
 
-// Mapea la respuesta del backend (Estado) al formato del frontend (Estado_Medidor)
-const mapearMedidoresDetalle = (medidores: Array<{
+// Tipo de medidor tal como lo devuelve el backend en el detalle
+type MedidorBackend = {
     Id_Medidor: number;
     Numero_Medidor: number;
-    Estado: { Id_Estado: number; Nombre_Estado: string };
-}>): Medidor[] =>
+    Estado?: { Id_Estado: number; Nombre_Estado: string };
+    Estado_Medidor?: { Id_Estado_Medidor: number; Nombre_Estado_Medidor: string };
+    Escritura_Terreno?: string | null;
+    Planos_Terreno?: string | null;
+};
+
+// Mapea la respuesta del backend al formato del frontend
+const mapearMedidoresDetalle = (medidores: MedidorBackend[]): Medidor[] =>
     medidores.map((m) => ({
         Id_Medidor: m.Id_Medidor,
         Numero_Medidor: m.Numero_Medidor,
-        Estado_Medidor: {
-            Id_Estado_Medidor: m.Estado?.Id_Estado ?? 0,
-            Nombre_Estado_Medidor: m.Estado?.Nombre_Estado ?? 'Sin estado',
-        },
+        Estado_Medidor: m.Estado_Medidor ?? (m.Estado ? {
+            Id_Estado_Medidor: m.Estado.Id_Estado,
+            Nombre_Estado_Medidor: m.Estado.Nombre_Estado,
+        } : undefined),
+        Escritura_Terreno: m.Escritura_Terreno ?? null,
+        Planos_Terreno: m.Planos_Terreno ?? null,
     }));
 
 export const getMedidoresByAfiliado = async (idAfiliado: number): Promise<Medidor[]> => {
     const response = await apiAuth.get(`/afiliados/fisico/detail/${idAfiliado}`);
-    const data = response.data as { Medidores?: Array<{ Id_Medidor: number; Numero_Medidor: number; Estado: { Id_Estado: number; Nombre_Estado: string } }> };
+    const data = response.data as { Medidores?: MedidorBackend[] };
     return mapearMedidoresDetalle(data.Medidores ?? []);
 };
 
 export const getMedidoresByAfiliadoJuridico = async (idAfiliado: number): Promise<Medidor[]> => {
     const response = await apiAuth.get(`/afiliados/juridico/detail/${idAfiliado}`);
-    const data = response.data as { Medidores?: Array<{ Id_Medidor: number; Numero_Medidor: number; Estado: { Id_Estado: number; Nombre_Estado: string } }> };
+    const data = response.data as { Medidores?: MedidorBackend[] };
     return mapearMedidoresDetalle(data.Medidores ?? []);
 };
 

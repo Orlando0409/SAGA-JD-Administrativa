@@ -1,9 +1,9 @@
 import { useState, useEffect, useMemo } from 'react';
-import { LuX, LuSearch, LuUserCheck, LuUser } from 'react-icons/lu';
+import { LuX, LuSearch, LuUserCheck, LuUser, LuFileText, LuMap } from 'react-icons/lu';
 import { FaTachometerAlt } from 'react-icons/fa';
 import { useQueryClient } from '@tanstack/react-query';
 import type { AsignarAfiliadoMedidorModalProps } from '../../types/MedidorTypes';
-import { asignarMedidorAAfiliado } from '../../service/MedidorServices';
+import { asignarMedidorConArchivos } from '../../service/MedidorServices';
 import { getAfiliadosFisicos } from '@/Modules/Afiliados/Service/ServiceAfiliadoFisico';
 import type { AfiliadoFisico } from '@/Modules/Afiliados/Models/TablaAfiliados/ModeloAfiliadoFisico';
 import { getAfiliadosJuridicos } from '@/Modules/Afiliados/Service/ServiceAfiliadoJuridico';
@@ -31,6 +31,8 @@ const AsignarAfiliadoMedidorModal = ({
   const [guardando, setGuardando] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
+  const [escrituraFile, setEscrituraFile] = useState<File | null>(null);
+  const [planosFile, setPlanosFile] = useState<File | null>(null);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -39,6 +41,8 @@ const AsignarAfiliadoMedidorModal = ({
     setSelectedAfiliado(null);
     setSearchTerm('');
     setSuccessMsg(null);
+    setEscrituraFile(null);
+    setPlanosFile(null);
 
     Promise.all([getAfiliadosFisicos(), getAfiliadosJuridicos()])
       .then(([fisicos, juridicos]: [AfiliadoFisico[], AfiliadoJuridico[]]) => {
@@ -74,11 +78,11 @@ const AsignarAfiliadoMedidorModal = ({
   }, [afiliados, searchTerm]);
 
   const handleConfirmar = async () => {
-    if (!selectedAfiliado) return;
+    if (!selectedAfiliado || !escrituraFile || !planosFile) return;
     setGuardando(true);
     setErrorMsg(null);
     try {
-      await asignarMedidorAAfiliado(medidor.Id_Medidor, selectedAfiliado.Id_Afiliado);
+      await asignarMedidorConArchivos(medidor.Id_Medidor, selectedAfiliado.Id_Afiliado, escrituraFile, planosFile);
       // Invalidar caches de afiliados para que el DetailAfiliadoModal muestre los medidores actualizados
       await queryClient.invalidateQueries({ queryKey: ['afiliadosFisicos'] });
       await queryClient.invalidateQueries({ queryKey: ['afiliadosJuridicos'] });
@@ -230,6 +234,57 @@ const AsignarAfiliadoMedidorModal = ({
             </div>
           )}
 
+          {/* Archivos requeridos — aparecen al seleccionar afiliado */}
+          {selectedAfiliado && (
+            <div className="space-y-3">
+              <p className="text-sm font-medium text-gray-700">Documentos del Terreno <span className="text-red-500">*</span></p>
+
+              {/* Escritura */}
+              <div>
+                <label className="block text-xs font-medium text-gray-600 mb-1">Escritura del Terreno</label>
+                <div className="relative">
+                  <input
+                    type="file"
+                    accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                    onChange={(e) => setEscrituraFile(e.target.files?.[0] ?? null)}
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                  />
+                  <div className={`w-full px-3 py-2 border rounded-lg bg-gray-50 flex items-center justify-between cursor-pointer hover:bg-gray-100 transition-colors ${
+                    escrituraFile ? 'border-green-400' : 'border-gray-300'
+                  }`}>
+                    <span className="text-sm text-gray-700 truncate flex items-center gap-2">
+                      <LuFileText className="w-4 h-4 text-gray-400 shrink-0" />
+                      {escrituraFile ? escrituraFile.name : 'Seleccionar archivo...'}
+                    </span>
+                    <span className="bg-blue-500 text-white px-3 py-1 rounded text-xs shrink-0 ml-2">Subir</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Planos */}
+              <div>
+                <label className="block text-xs font-medium text-gray-600 mb-1">Planos del Terreno</label>
+                <div className="relative">
+                  <input
+                    type="file"
+                    accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                    onChange={(e) => setPlanosFile(e.target.files?.[0] ?? null)}
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                  />
+                  <div className={`w-full px-3 py-2 border rounded-lg bg-gray-50 flex items-center justify-between cursor-pointer hover:bg-gray-100 transition-colors ${
+                    planosFile ? 'border-green-400' : 'border-gray-300'
+                  }`}>
+                    <span className="text-sm text-gray-700 truncate flex items-center gap-2">
+                      <LuMap className="w-4 h-4 text-gray-400 shrink-0" />
+                      {planosFile ? planosFile.name : 'Seleccionar archivo...'}
+                    </span>
+                    <span className="bg-blue-500 text-white px-3 py-1 rounded text-xs shrink-0 ml-2">Subir</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Mensajes */}
           {errorMsg && (
             <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-sm text-red-700">
@@ -254,7 +309,7 @@ const AsignarAfiliadoMedidorModal = ({
           </button>
           <button
             onClick={handleConfirmar}
-            disabled={!selectedAfiliado || guardando}
+            disabled={!selectedAfiliado || !escrituraFile || !planosFile || guardando}
             className="px-5 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
           >
             {guardando ? (

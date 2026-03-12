@@ -356,15 +356,45 @@ const DetailAbonados: React.FC<DetailAbonadosProps> = ({ persona, isOpen, onClos
                                                     <div className="flex-1">
                                                         <p className="text-xs font-medium text-gray-500 uppercase">Estado Actual del medidor</p>
                                                         <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium border mt-1 ${
-                                                            medidor.Estado_Medidor.Id_Estado_Medidor === 2
+                                                            medidor.Estado_Medidor?.Id_Estado_Medidor === 2
                                                                 ? 'bg-green-100 text-green-800 border-green-200'
                                                                 : 'bg-red-100 text-red-700 border border-red-300'
                                                         }`}>
-                                                            {medidor.Estado_Medidor.Nombre_Estado_Medidor}
+                                                            {medidor.Estado_Medidor?.Nombre_Estado_Medidor ?? 'Sin estado'}
                                                         </span>
                                                     </div>
                                                 </div>
                                             </div>
+
+                                            {(medidor.Escritura_Terreno || medidor.Planos_Terreno) && (
+                                                <div className="mt-3 pt-3 border-t border-gray-200">
+                                                    <p className="text-xs font-medium text-gray-500 uppercase mb-2">Documentos del Terreno</p>
+                                                    <div className="flex flex-wrap gap-2">
+                                                        {medidor.Escritura_Terreno && (
+                                                            <a
+                                                                href={medidor.Escritura_Terreno}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-700 hover:bg-blue-100 transition-colors font-medium"
+                                                            >
+                                                                <LuFileText className="w-4 h-4" />
+                                                                Ver Escritura
+                                                            </a>
+                                                        )}
+                                                        {medidor.Planos_Terreno && (
+                                                            <a
+                                                                href={medidor.Planos_Terreno}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-700 hover:bg-blue-100 transition-colors font-medium"
+                                                            >
+                                                                <LuMap className="w-4 h-4" />
+                                                                Ver Planos
+                                                            </a>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            )}
                                         </div>
                                     ))}
                                 </div>
