@@ -68,6 +68,8 @@ export const asignarMedidorConArchivos = async (
   formData.append('Id_Afiliado', String(idAfiliado));
   formData.append('Escritura_Terreno', escrituraFile);
   formData.append('Planos_Terreno', planosFile);
-  await axiosPrivate.post(`/Inventario/asignar/medidor/afiliado`, formData);
+  await axiosPrivate.post(`/Inventario/asignar/medidor/afiliado`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
 };
 
