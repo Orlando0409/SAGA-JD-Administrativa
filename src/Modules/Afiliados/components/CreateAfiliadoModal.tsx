@@ -7,9 +7,9 @@ import { useAfiliadosFisicos } from '../Hook/HookAfiliadoFisico';
 import { useAfiliadosJuridicos } from '../Hook/HookAfiliadoJuridico';
 import PhoneInputComponent from '@/Modules/Global/components/PhoneInputComponent';
 import { useCedulaLookup } from '../Hook/useCedulaLookup';
-import { User, Building2, X, Gauge, PlusCircle, Link2, Search, CheckCircle2 } from 'lucide-react';
-import { getMedidoresDisponibles, createMedidor, asignarMedidorAAfiliado } from '@/Modules/Inventario/service/MedidorServices';
-import type { Medidor } from '@/Modules/Inventario/models/Inventario';
+import { User, Building2, X, Gauge, PlusCircle, Link2, FileText } from 'lucide-react';
+import { createMedidor, asignarMedidorConArchivos } from '@/Modules/Inventario/service/MedidorServices';
+import MedidorSelectorModal, { type MedidorPendiente } from './MedidorSelectorModal';
 
 interface CreateModalProps {
     isOpen: boolean;
@@ -17,28 +17,18 @@ interface CreateModalProps {
 }
 
 type TipoFormulario = 'afiliado-fisico' | 'afiliado-juridico';
-type PanelMedidor = 'cerrado' | 'asignar' | 'agregar';
-type MedidorPendiente =
-    | { uid: string; tipo: 'asignar'; idMedidor: number; numeroMedidor: number | string }
-    | { uid: string; tipo: 'agregar'; numeroMedidor: number };
 
 const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
     const [tipoActivo, setTipoActivo] = useState<TipoFormulario>('afiliado-fisico');
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [escrituraFile, setEscrituraFile] = useState<File | null>(null);
-    const [planosFile, setPlanosFile] = useState<File | null>(null);
     const { showSuccess, showError } = useAlerts();
     const { createAfiliadoFisico } = useAfiliadosFisicos();
     const { createAfiliadoJuridico } = useAfiliadosJuridicos();
 
     // Estados para medidores múltiples
     const [medidoresPendientes, setMedidoresPendientes] = useState<MedidorPendiente[]>([]);
-    const [panelMedidor, setPanelMedidor] = useState<PanelMedidor>('cerrado');
-    const [medidoresDisponibles, setMedidoresDisponibles] = useState<Medidor[]>([]);
-    const [loadingMedidores, setLoadingMedidores] = useState(false);
-    const [searchMedidor, setSearchMedidor] = useState('');
-    const [numeroNuevoMedidor, setNumeroNuevoMedidor] = useState('');
-    const [errorNuevoMedidor, setErrorNuevoMedidor] = useState('');
+    const [medidorModalOpen, setMedidorModalOpen] = useState(false);
+    const [medidorModalModo, setMedidorModalModo] = useState<'asignar' | 'agregar'>('asignar');
 
     const { lookup, isLoading: loadingCedula, lookupJuridico, isLoadingJuridico: loadingCedulaJuridica } = useCedulaLookup()
 
@@ -83,8 +73,6 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                 Correo: '',
                 Direccion_Exacta: '',
                 Edad: '' as unknown as number,
-                Escritura_Terreno: '',
-                Planos_Terreno: '',
             };
         } else {
             return {
@@ -93,8 +81,6 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                 Numero_Telefono: '',
                 Correo: '',
                 Direccion_Exacta: '',
-                Escritura_Terreno: '',
-                Planos_Terreno: '',
             };
         }
     };
@@ -384,19 +370,31 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                     formData.append('Direccion_Exacta', value.Direccion_Exacta || '');
                     formData.append('Edad', value.Edad?.toString() || '0');
 
-                    // Agregar archivos si están disponibles
-                    if (escrituraFile) formData.append('Escritura_Terreno', escrituraFile);
-                    if (planosFile) formData.append('Planos_Terreno', planosFile);
+                    // El primer medidor se envía junto al CREATE del afiliado
+                    const primerMedidor = medidoresPendientes[0];
+                    if (primerMedidor) {
+                        formData.append('Opcion_Medidor', primerMedidor.tipo === 'asignar' ? 'asignar' : 'agregar');
+                        if (primerMedidor.tipo === 'asignar') {
+                            formData.append('Id_Medidor', String(primerMedidor.idMedidor));
+                        } else {
+                            formData.append('Numero_Medidor', String(primerMedidor.numeroMedidor));
+                        }
+                        formData.append('Escritura_Terreno', primerMedidor.escrituraFile);
+                        formData.append('Planos_Terreno', primerMedidor.planosFile);
+                    } else {
+                        formData.append('Opcion_Medidor', 'sin_medidor');
+                    }
 
                     const creadoF = await createAfiliadoFisico(formData);
                     const idCreadoF: number = creadoF?.Id_Afiliado ?? creadoF?.id ?? null;
-                    if (idCreadoF && medidoresPendientes.length > 0) {
-                        for (const mp of medidoresPendientes) {
+                    // Medidores adicionales (índice > 0) se asignan por separado con archivos
+                    if (idCreadoF && medidoresPendientes.length > 1) {
+                        for (const mp of medidoresPendientes.slice(1)) {
                             if (mp.tipo === 'asignar') {
-                                await asignarMedidorAAfiliado(mp.idMedidor, idCreadoF);
+                                await asignarMedidorConArchivos(mp.idMedidor, idCreadoF, mp.escrituraFile, mp.planosFile);
                             } else {
                                 const nuevo = await createMedidor({ Numero_Medidor: mp.numeroMedidor });
-                                await asignarMedidorAAfiliado(nuevo.Id_Medidor, idCreadoF);
+                                await asignarMedidorConArchivos(nuevo.Id_Medidor, idCreadoF, mp.escrituraFile, mp.planosFile);
                             }
                         }
                     }
@@ -409,19 +407,31 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                     formData.append('Correo', value.Correo || '');
                     formData.append('Direccion_Exacta', value.Direccion_Exacta || '');
 
-                    // Agregar archivos si están disponibles
-                    if (escrituraFile) formData.append('Escritura_Terreno', escrituraFile);
-                    if (planosFile) formData.append('Planos_Terreno', planosFile);
+                    // El primer medidor se envía junto al CREATE del afiliado
+                    const primerMedidorJ = medidoresPendientes[0];
+                    if (primerMedidorJ) {
+                        formData.append('Opcion_Medidor', primerMedidorJ.tipo === 'asignar' ? 'asignar' : 'agregar');
+                        if (primerMedidorJ.tipo === 'asignar') {
+                            formData.append('Id_Medidor', String(primerMedidorJ.idMedidor));
+                        } else {
+                            formData.append('Numero_Medidor', String(primerMedidorJ.numeroMedidor));
+                        }
+                        formData.append('Escritura_Terreno', primerMedidorJ.escrituraFile);
+                        formData.append('Planos_Terreno', primerMedidorJ.planosFile);
+                    } else {
+                        formData.append('Opcion_Medidor', 'sin_medidor');
+                    }
 
                     const creadoJ = await createAfiliadoJuridico(formData);
                     const idCreadoJ: number = creadoJ?.Id_Afiliado ?? creadoJ?.id ?? null;
-                    if (idCreadoJ && medidoresPendientes.length > 0) {
-                        for (const mp of medidoresPendientes) {
+                    // Medidores adicionales (índice > 0) se asignan por separado con archivos
+                    if (idCreadoJ && medidoresPendientes.length > 1) {
+                        for (const mp of medidoresPendientes.slice(1)) {
                             if (mp.tipo === 'asignar') {
-                                await asignarMedidorAAfiliado(mp.idMedidor, idCreadoJ);
+                                await asignarMedidorConArchivos(mp.idMedidor, idCreadoJ, mp.escrituraFile, mp.planosFile);
                             } else {
                                 const nuevo = await createMedidor({ Numero_Medidor: mp.numeroMedidor });
-                                await asignarMedidorAAfiliado(nuevo.Id_Medidor, idCreadoJ);
+                                await asignarMedidorConArchivos(nuevo.Id_Medidor, idCreadoJ, mp.escrituraFile, mp.planosFile);
                             }
                         }
                     }
@@ -431,12 +441,8 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                 // Cerrar modal y resetear formulario
                 onClose();
                 form.reset();
-                setEscrituraFile(null);
-                setPlanosFile(null);
                 setMedidoresPendientes([]);
-                setPanelMedidor('cerrado');
-                setNumeroNuevoMedidor('');
-                setSearchMedidor('');
+                setMedidorModalOpen(false);
 
             } catch (error: any) {
                 console.error('Error creando registro:', error);
@@ -465,88 +471,21 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
         });
         setValidationErrors({});
         setFormErrors({});
-        setEscrituraFile(null);
-        setPlanosFile(null);
         setMedidoresPendientes([]);
-        setPanelMedidor('cerrado');
-        setNumeroNuevoMedidor('');
-        setSearchMedidor('');
+        setMedidorModalOpen(false);
     }, [tipoActivo]);
 
     // Mover la verificación de isOpen DESPUÉS de todos los hooks
     if (!isOpen) return null;
 
     // ─── Handlers medidores ───────────────────────────────────────────────────────
-    const handleAbrirPanel = async (panel: PanelMedidor) => {
-        setPanelMedidor(panel);
-        setSearchMedidor('');
-        setNumeroNuevoMedidor('');
-        if (panel === 'asignar') {
-            setLoadingMedidores(true);
-            try {
-                const lista = await getMedidoresDisponibles();
-                setMedidoresDisponibles(lista);
-            } catch {
-                showError('Error', 'No se pudieron cargar los medidores disponibles.');
-            } finally {
-                setLoadingMedidores(false);
-            }
-        }
-    };
-
-    const handleAgregarAsignar = (m: Medidor) => {
-        if (medidoresPendientes.some(p => p.tipo === 'asignar' && p.idMedidor === m.Id_Medidor)) return;
-        setMedidoresPendientes(prev => [...prev, { uid: crypto.randomUUID(), tipo: 'asignar', idMedidor: m.Id_Medidor, numeroMedidor: m.Numero_Medidor }]);
-        setPanelMedidor('cerrado');
-    };
-
-    const handleAgregarNuevo = () => {
-        const num = parseInt(numeroNuevoMedidor);
-        if (Number.isNaN(num) || num < 100000) { setErrorNuevoMedidor('El número de medidor debe tener al menos 6 dígitos y no puede empezar con 0.'); return; }
-        if (num > 99999999) { setErrorNuevoMedidor('El número de medidor no puede tener más de 8 dígitos.'); return; }
-        setErrorNuevoMedidor('');
-        setMedidoresPendientes(prev => [...prev, { uid: crypto.randomUUID(), tipo: 'agregar', numeroMedidor: num }]);
-        setNumeroNuevoMedidor('');
-        setPanelMedidor('cerrado');
+    const handleConfirmarMedidor = (mp: MedidorPendiente) => {
+        setMedidoresPendientes(prev => [...prev, mp]);
+        setMedidorModalOpen(false);
     };
 
     const handleQuitarMedidor = (uid: string) => {
         setMedidoresPendientes(prev => prev.filter(p => p.uid !== uid));
-    };
-
-    const medidoresFiltrados = medidoresDisponibles.filter(m => {
-        if (medidoresPendientes.some(p => p.tipo === 'asignar' && p.idMedidor === m.Id_Medidor)) return false;
-        if (!searchMedidor.trim()) return true;
-        return String(m.Numero_Medidor).includes(searchMedidor.trim());
-    });
-
-    const renderMedidoresList = () => {
-        if (loadingMedidores) {
-            return (
-                <div className="flex items-center justify-center py-6 gap-2 text-sm text-gray-500">
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600" />
-                    Cargando...
-                </div>
-            );
-        }
-        if (medidoresFiltrados.length === 0) {
-            return <p className="py-6 text-center text-sm text-gray-400">No hay medidores disponibles</p>;
-        }
-        return (
-            <ul className="divide-y divide-gray-100">
-                {medidoresFiltrados.map(m => (
-                    <li key={m.Id_Medidor}>
-                        <button type="button" onClick={() => handleAgregarAsignar(m)} className="w-full text-left px-4 py-3 flex items-center justify-between hover:bg-blue-50 transition-colors text-sm">
-                            <span className="font-medium text-gray-800">Medidor #{m.Numero_Medidor}</span>
-                            <div className="flex items-center gap-2">
-                                <span className="text-xs text-gray-500">{m.Estado_Medidor?.Nombre_Estado_Medidor}</span>
-                                <CheckCircle2 className="w-4 h-4 text-blue-400" />
-                            </div>
-                        </button>
-                    </li>
-                ))}
-            </ul>
-        );
     };
 
     const renderSeccionMedidor = () => (
@@ -564,59 +503,50 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
             {medidoresPendientes.length > 0 && (
                 <ul className="space-y-2">
                     {medidoresPendientes.map(mp => (
-                        <li key={mp.uid} className="flex items-center justify-between bg-gray-50 border border-gray-200 rounded-lg px-3 py-2">
-                            <div className="flex items-center gap-2">
-                                {mp.tipo === 'asignar' ? <Link2 className="w-4 h-4 text-blue-500" /> : <PlusCircle className="w-4 h-4 text-blue-500" />}
+                        <li key={mp.uid} className="flex items-center justify-between bg-gray-50 border border-gray-200 rounded-lg px-3 py-2.5">
+                            <div className="flex items-center gap-2 min-w-0">
+                                {mp.tipo === 'asignar'
+                                    ? <Link2 className="w-4 h-4 text-blue-500 shrink-0" />
+                                    : <PlusCircle className="w-4 h-4 text-blue-500 shrink-0" />}
                                 <span className="text-sm font-medium text-gray-800">Medidor #{mp.numeroMedidor}</span>
-                                <span className="text-xs px-1.5 py-0.5 rounded-full bg-blue-100 text-blue-600">{mp.tipo === 'asignar' ? 'Asignar' : 'Nuevo'}</span>
+                                <span className="text-xs px-1.5 py-0.5 rounded-full bg-blue-100 text-blue-600">
+                                    {mp.tipo === 'asignar' ? 'Asignar' : 'Nuevo'}
+                                </span>
                             </div>
-                            <button type="button" onClick={() => handleQuitarMedidor(mp.uid)} className="text-gray-400 hover:text-red-500 transition-colors"><X className="w-4 h-4" /></button>
+                            <div className="flex items-center gap-3 shrink-0">
+                                <div className="flex items-center gap-1 text-xs text-gray-500 border border-gray-200 rounded px-1.5 py-0.5 bg-white">
+                                    <FileText className="w-3 h-3 text-blue-400" />
+                                    <span>2 docs</span>
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={() => handleQuitarMedidor(mp.uid)}
+                                    className="text-gray-400 hover:text-red-500 transition-colors"
+                                >
+                                    <X className="w-4 h-4" />
+                                </button>
+                            </div>
                         </li>
                     ))}
                 </ul>
             )}
 
-            {panelMedidor === 'cerrado' && (
-                <div className="flex gap-2">
-                    <button type="button" onClick={() => handleAbrirPanel('asignar')} className="flex items-center gap-1.5 px-3 py-2 text-sm text-blue-600 border border-blue-200 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors">
-                        <Link2 className="w-4 h-4" /> Asignar existente
-                    </button>
-                    <button type="button" onClick={() => handleAbrirPanel('agregar')} className="flex items-center gap-1.5 px-3 py-2 text-sm text-blue-600 border border-blue-200 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors">
-                        <PlusCircle className="w-4 h-4" /> Agregar nuevo
-                    </button>
-                </div>
-            )}
-
-            {panelMedidor === 'asignar' && (
-                <div className="border border-blue-200 rounded-xl p-3 space-y-3 bg-blue-50">
-                    <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium text-blue-700">Seleccionar medidor existente</span>
-                        <button type="button" onClick={() => setPanelMedidor('cerrado')} className="text-blue-400 hover:text-blue-600"><X className="w-4 h-4" /></button>
-                    </div>
-                    <div className="relative">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
-                        <input type="text" placeholder="Buscar por número..." value={searchMedidor} onChange={e => setSearchMedidor(e.target.value)} className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white" />
-                    </div>
-                    <div className="border border-gray-200 rounded-lg overflow-hidden max-h-44 overflow-y-auto bg-white">
-                        {renderMedidoresList()}
-                    </div>
-                </div>
-            )}
-
-            {panelMedidor === 'agregar' && (
-                <div className="border border-blue-200 rounded-xl p-3 space-y-3 bg-blue-50">
-                    <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium text-blue-700">Crear nuevo medidor</span>
-                        <button type="button" onClick={() => setPanelMedidor('cerrado')} className="text-blue-400 hover:text-blue-600"><X className="w-4 h-4" /></button>
-                    </div>
-                    <div className="flex gap-2">
-                        <input type="text" inputMode="numeric" value={numeroNuevoMedidor} onChange={e => { const val = e.target.value.replaceAll(/\D/g, ''); if (val.length <= 8) { setNumeroNuevoMedidor(val); if (errorNuevoMedidor) setErrorNuevoMedidor(''); } }} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); handleAgregarNuevo(); } }} placeholder="Ej: 100230" className={`flex-1 px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white ${errorNuevoMedidor ? 'border-red-400 bg-red-50' : 'border-gray-300'}`} />
-                        <button type="button" onClick={handleAgregarNuevo} disabled={!numeroNuevoMedidor.trim()} className="px-3 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">Añadir</button>
-                    </div>
-                    {errorNuevoMedidor && <p className="text-red-500 text-xs">{errorNuevoMedidor}</p>}
-                    <p className="text-xs text-blue-600">Se creará el medidor y se asignará automáticamente al afiliado.</p>
-                </div>
-            )}
+            <div className="flex gap-2">
+                <button
+                    type="button"
+                    onClick={() => { setMedidorModalModo('asignar'); setMedidorModalOpen(true); }}
+                    className="flex items-center gap-1.5 px-3 py-2 text-sm text-blue-600 border border-blue-200 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
+                >
+                    <Link2 className="w-4 h-4" /> Asignar existente
+                </button>
+                <button
+                    type="button"
+                    onClick={() => { setMedidorModalModo('agregar'); setMedidorModalOpen(true); }}
+                    className="flex items-center gap-1.5 px-3 py-2 text-sm text-blue-600 border border-blue-200 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
+                >
+                    <PlusCircle className="w-4 h-4" /> Agregar nuevo
+                </button>
+            </div>
         </div>
     );
 
@@ -987,88 +917,6 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                 )}
             </form.Field>
 
-            <form.Field
-                name="Escritura_Terreno"
-                validators={{
-                    onChange: ({ value }) => value ? undefined : 'La escritura del terreno es requerida',
-                }}
-            >
-                {(field) => (
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Escritura del Terreno <span className="text-red-500">*</span>
-                        </label>
-                        <div className="relative">
-                            <input
-                                type="file"
-                                accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-                                onChange={(e) => {
-                                    const file = e.target.files?.[0];
-                                    if (file) {
-                                        setEscrituraFile(file);
-                                        field.handleChange(file.name);
-                                    } else {
-                                        setEscrituraFile(null);
-                                        field.handleChange('');
-                                    }
-                                }}
-                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                            />
-                            <div className={`w-full px-3 py-2 border rounded-lg bg-gray-50 flex items-center justify-between cursor-pointer hover:bg-gray-100 transition-colors ${field.state.meta.errors.length > 0 ? 'border-red-300' : 'border-gray-300'}`}>
-                                <span className="text-gray-700">
-                                    {field.state.value || 'Seleccionar archivo...'}
-                                </span>
-                                <span className="bg-blue-500 text-white px-3 py-1 rounded text-sm">
-                                    Subir Archivo
-                                </span>
-                            </div>
-                        </div>
-                        {renderError('Escritura_Terreno', field.state.meta.errors)}
-                    </div>
-                )}
-            </form.Field>
-
-            <form.Field
-                name="Planos_Terreno"
-                validators={{
-                    onChange: ({ value }) => value ? undefined : 'Los planos del terreno son requeridos',
-                }}
-            >
-                {(field) => (
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Planos del Terreno <span className="text-red-500">*</span>
-                        </label>
-                        <div className="relative">
-                            <input
-                                type="file"
-                                accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-                                onChange={(e) => {
-                                    const file = e.target.files?.[0];
-                                    if (file) {
-                                        setPlanosFile(file);
-                                        field.handleChange(file.name);
-                                    } else {
-                                        setPlanosFile(null);
-                                        field.handleChange('');
-                                    }
-                                }}
-                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                            />
-                            <div className={`w-full px-3 py-2 border rounded-lg bg-gray-50 flex items-center justify-between cursor-pointer hover:bg-gray-100 transition-colors ${field.state.meta.errors.length > 0 ? 'border-red-300' : 'border-gray-300'}`}>
-                                <span className="text-gray-700">
-                                    {field.state.value || 'Seleccionar archivo...'}
-                                </span>
-                                <span className="bg-blue-500 text-white px-3 py-1 rounded text-sm">
-                                    Subir Archivo
-                                </span>
-                            </div>
-                        </div>
-                        {renderError('Planos_Terreno', field.state.meta.errors)}
-                    </div>
-                )}
-            </form.Field>
-
         </>
     );
 
@@ -1266,87 +1114,6 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                 )}
             </form.Field>
 
-            <form.Field
-                name="Escritura_Terreno"
-                validators={{
-                    onChange: ({ value }) => value ? undefined : 'La escritura del terreno es requerida',
-                }}
-            >
-                {(field) => (
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Escritura del Terreno <span className="text-red-500">*</span>
-                        </label>
-                        <div className="relative">
-                            <input
-                                type="file"
-                                accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-                                onChange={(e) => {
-                                    const file = e.target.files?.[0];
-                                    if (file) {
-                                        setEscrituraFile(file);
-                                        field.handleChange(file.name);
-                                    } else {
-                                        setEscrituraFile(null);
-                                        field.handleChange('');
-                                    }
-                                }}
-                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                            />
-                            <div className={`w-full px-3 py-2 border rounded-lg bg-gray-50 flex items-center justify-between cursor-pointer hover:bg-gray-100 transition-colors ${field.state.meta.errors.length > 0 ? 'border-red-300' : 'border-gray-300'}`}>
-                                <span className="text-gray-700">
-                                    {field.state.value || 'Seleccionar archivo...'}
-                                </span>
-                                <span className="bg-blue-500 text-white px-3 py-1 rounded text-sm">
-                                    Subir Archivo
-                                </span>
-                            </div>
-                        </div>
-                        {renderError('Escritura_Terreno', field.state.meta.errors)}
-                    </div>
-                )}
-            </form.Field>
-
-            <form.Field
-                name="Planos_Terreno"
-                validators={{
-                    onChange: ({ value }) => value ? undefined : 'Los planos del terreno son requeridos',
-                }}
-            >
-                {(field) => (
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Planos del Terreno <span className="text-red-500">*</span>
-                        </label>
-                        <div className="relative">
-                            <input
-                                type="file"
-                                accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-                                onChange={(e) => {
-                                    const file = e.target.files?.[0];
-                                    if (file) {
-                                        setPlanosFile(file);
-                                        field.handleChange(file.name);
-                                    } else {
-                                        setPlanosFile(null);
-                                        field.handleChange('');
-                                    }
-                                }}
-                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                            />
-                            <div className={`w-full px-3 py-2 border rounded-lg bg-gray-50 flex items-center justify-between cursor-pointer hover:bg-gray-100 transition-colors ${field.state.meta.errors.length > 0 ? 'border-red-300' : 'border-gray-300'}`}>
-                                <span className="text-gray-700">
-                                    {field.state.value || 'Seleccionar archivo...'}
-                                </span>
-                                <span className="bg-blue-500 text-white px-3 py-1 rounded text-sm">
-                                    Subir Archivo
-                                </span>
-                            </div>
-                        </div>
-                        {renderError('Planos_Terreno', field.state.meta.errors)}
-                    </div>
-                )}
-            </form.Field>
         </>
     );
 
@@ -1359,6 +1126,7 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
     };
 
     return (
+        <>
         <div className="fixed inset-0 bg-opacity-10 backdrop-blur-sm flex items-center justify-center z-50">
             <div className="bg-white rounded-lg shadow-2xl border border-gray-200 w-full max-w-md mx-4 max-h-[90vh] overflow-hidden">
                 {/* Header */}
@@ -1386,8 +1154,6 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                             onClick={() => {
                                 setTipoActivo('afiliado-fisico');
                                 form.reset();
-                                setEscrituraFile(null);
-                                setPlanosFile(null);
                                 setValidationErrors({});
                             }}
                             className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors flex-1 justify-center ${tipoActivo === 'afiliado-fisico'
@@ -1403,8 +1169,6 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                             onClick={() => {
                                 setTipoActivo('afiliado-juridico');
                                 form.reset();
-                                setEscrituraFile(null);
-                                setPlanosFile(null);
                                 setValidationErrors({});
                             }}
                             className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors flex-1 justify-center ${tipoActivo === 'afiliado-juridico'
@@ -1457,6 +1221,13 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                 </div>
             </div>
         </div>
+        <MedidorSelectorModal
+            isOpen={medidorModalOpen}
+            modo={medidorModalModo}
+            onClose={() => setMedidorModalOpen(false)}
+            onConfirm={handleConfirmarMedidor}
+        />
+        </>
     );
 };
 
