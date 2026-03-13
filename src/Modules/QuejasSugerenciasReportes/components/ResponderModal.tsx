@@ -38,6 +38,16 @@ const ResponderModal: React.FC<ResponderModalProps> = ({ item, isOpen, onClose }
     }
   };
 
+  const renderCaracterCount = () => {
+    const count = respuesta.length;
+    const max = 150;
+    return (
+      <div className={`text-sm flex items-center justify-end ${count > max ? 'text-red-600' : 'text-gray-500'}`}>
+        {count} / {max}
+      </div>
+    );
+  }
+
   return (
     <div className="fixed inset-0 bg-opacity-10 backdrop-blur-sm flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg shadow-2xl border border-gray-200 w-full max-w-4xl max-h-[90vh] overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100">
@@ -68,13 +78,18 @@ const ResponderModal: React.FC<ResponderModalProps> = ({ item, isOpen, onClose }
         <div className="p-6 border-t border-gray-200">
           <h3 className="text-lg font-semibold text-gray-800 mb-4">Responder</h3>
           <textarea
-            className="w-full border border-gray-300 rounded-lg p-2"
+            className="w-full border border-gray-300 rounded-lg p-2 scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100"
             rows={4}
+            minLength={10}
+            maxLength={150}
             placeholder="Escribe tu respuesta aquí..."
             value={respuesta}
             onChange={e => setRespuesta(e.target.value)}
             disabled={isPending}
-          />          {validationError && <div className="text-red-600 mt-2 text-sm">{validationError}</div>}          {error && <div className="text-red-600 mt-2 text-sm">{error.message}</div>}
+          /> 
+          {validationError && <div className="text-red-600 mt-2 text-sm">{validationError}</div>}  
+          {error && <div className="text-red-600 mt-2 text-sm">{error.message}</div>}          
+          {renderCaracterCount()}
         </div>
 
         <div className="p-6 border-t border-gray-200 flex justify-end space-x-4">

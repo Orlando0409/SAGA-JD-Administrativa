@@ -192,11 +192,11 @@ const ContactoTable = () => {
     const isArchived = item.estado === 'Archivado';
 
     if (isArchived) {
-      // 🔄 Desarchivar: Volver al estado original (Contestado)
+      //  Desarchivar: Volver al estado original (Contestado)
       // Si el estado actual es 'Archivado' -> vuelve a 'Contestado' (Id 2)
       nextIdEstado = ESTADO_IDS.CONTESTADO;
     } else {
-      // 📦 Archivar: Mover al estado de archivado correspondiente
+      //  Archivar: Mover al estado de archivado correspondiente
       // Si el estado actual es 'Contestado' -> 'Archivado' (Id 3)
       nextIdEstado = ESTADO_IDS.ARCHIVADO;
     }
