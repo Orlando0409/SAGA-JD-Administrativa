@@ -6,10 +6,12 @@ export interface Medidor {
     Id_Solicitud?: number;
     Fecha_Creacion?: string;
     Fecha_Actualizacion?: string;
-    Estado_Medidor: {
+    Estado_Medidor?: {
         Id_Estado_Medidor: number;
         Nombre_Estado_Medidor: string;
     };
+    Escritura_Terreno?: string | null;
+    Planos_Terreno?: string | null;
 }
 
 export interface AfiliadoFisico {
