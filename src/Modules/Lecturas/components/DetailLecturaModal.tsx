@@ -65,19 +65,19 @@ export default function DetailLecturaModal({ lectura, onClose }: DetailLecturaMo
                 <div>
                   <p className="text-sm text-gray-600">Nombre</p>
                   <p className="font-medium text-gray-800">
-                    {lectura.Afiliado.Nombre_Afiliado}
+                    {lectura.Afiliado.Nombre}
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600">Tipo de Afiliado</p>
+                  <p className="text-sm text-gray-600">Primer Apellido</p>
                   <p className="font-medium text-gray-800">
-                    {lectura.Afiliado.Tipo_Afiliado.Nombre_Tipo}
+                    {lectura.Afiliado.Primer_Apellido}
                   </p>
                 </div>
-                <div>
-                  <p className="text-sm text-gray-600">Estado</p>
+                  <div>
+                  <p className="text-sm text-gray-600">Segundo Apellido</p>
                   <p className="font-medium text-gray-800">
-                    {lectura.Afiliado.Estado.Nombre_Estado}
+                    {lectura.Afiliado.Segundo_Apellido}
                   </p>
                 </div>
               </div>
@@ -123,20 +123,6 @@ export default function DetailLecturaModal({ lectura, onClose }: DetailLecturaMo
               </div>
             </div>
           </div>
-
-          {/* Total a Pagar */}
-          {lectura.Total_A_Pagar !== undefined && (
-            <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg p-4 text-white">
-              <div className="flex justify-between items-center">
-                <div>
-                  <p className="text-sm opacity-90">Total a Pagar</p>
-                  <p className="text-3xl font-bold">
-                    ₡{lectura.Total_A_Pagar.toLocaleString("es-CR")}
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
 
           {/* Usuario que Registró */}
           <div className="bg-gray-50 rounded-lg p-4">

@@ -44,6 +44,14 @@ export default function LecturaTable() {
     pageIndex: 0,
   });
 
+  const getNombreAfiliado = (lectura: Lectura): string => {
+    if (!lectura.Afiliado) {
+      return "Sin asignar";
+    }
+    return `${lectura.Afiliado.Nombre} ${lectura.Afiliado.Primer_Apellido} ${lectura.Afiliado.Segundo_Apellido}`;
+  };
+
+
   const handleOpenDetailModal = (lectura: Lectura) => {
     setLecturaSeleccionada(lectura);
     setDetailModalOpen(true);
@@ -87,7 +95,7 @@ export default function LecturaTable() {
         </div>
       ),
     }),
-    columnHelper.accessor((row) => row.Afiliado?.Nombre_Afiliado ?? "Sin asignar", {
+    columnHelper.accessor((row) => getNombreAfiliado(row), {
       id: "afiliado",
       header: "Afiliado",
       cell: (info) => (

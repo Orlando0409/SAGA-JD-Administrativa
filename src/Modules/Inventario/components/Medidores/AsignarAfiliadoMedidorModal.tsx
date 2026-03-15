@@ -132,17 +132,7 @@ const AsignarAfiliadoMedidorModal = ({
 
         {/* Body */}
         <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
-          {/* Info medidor */}
-          <div className="bg-orange-50 border border-orange-200 rounded-lg p-3 text-sm text-orange-800">
-            <p>
-              <span className="font-semibold">Estado:</span>{' '}
-              {medidor.Estado_Medidor.Nombre_Estado_Medidor}
-            </p>
-            <p>
-              <span className="font-semibold">Afiliado actual:</span>{' '}
-              {medidor.Afiliado ? 'Asignado' : 'Sin afiliado asignado'}
-            </p>
-          </div>
+          
 
           {/* Buscar afiliado */}
           <div>
@@ -165,7 +155,7 @@ const AsignarAfiliadoMedidorModal = ({
           </div>
 
           {/* Lista de afiliados */}
-          <div className="border border-gray-200 rounded-lg overflow-hidden max-h-60 overflow-y-auto">
+          <div className="border border-gray-200 rounded-lg overflow-hidden max-h-60 overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100">
             {loadingAfiliados ? (
               <div className="flex items-center justify-center py-8 gap-2 text-gray-500 text-sm">
                 <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600" />
@@ -300,13 +290,7 @@ const AsignarAfiliadoMedidorModal = ({
 
         {/* Footer */}
         <div className="px-6 py-4 border-t border-gray-200 flex justify-end gap-3 bg-gray-50 rounded-b-2xl">
-          <button
-            onClick={onClose}
-            disabled={guardando}
-            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-100 transition-colors disabled:opacity-50"
-          >
-            Cancelar
-          </button>
+         
           <button
             onClick={handleConfirmar}
             disabled={!selectedAfiliado || !escrituraFile || !planosFile || guardando}
@@ -323,6 +307,13 @@ const AsignarAfiliadoMedidorModal = ({
                 Confirmar Asignación
               </>
             )}
+          </button>
+           <button
+            onClick={onClose}
+            disabled={guardando}
+            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-100 transition-colors disabled:opacity-50"
+          >
+            Cancelar
           </button>
         </div>
       </div>
