@@ -18,8 +18,8 @@ export const getLecturasByUsuario = async (idUsuario: number): Promise<Lectura[]
     return response.data;
 };
 
-export const getLecturasByMedidor = async (idMedidor: number): Promise<Lectura[]> => {
-    const response = await axiosPrivate.get(`${BASE_URL}/medidor/${idMedidor}`);
+export const getLecturasByMedidor = async (numeroMedidor: number): Promise<Lectura[]> => {
+    const response = await axiosPrivate.get(`${BASE_URL}/medidor/${numeroMedidor}`);
     return response.data;
 };
 
