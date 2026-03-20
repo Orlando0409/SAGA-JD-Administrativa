@@ -32,27 +32,6 @@ export interface Proyecto {
   Archivos?: ArchivoProyecto[]; // Opcional, si manejas archivos adicionales
 }
 
-// Estado por defecto para inicializar formularios o estados
-export const ProyectoDefault: Proyecto = {
-  Id_Proyecto: 0,
-  Titulo: '',
-  Descripcion: '',
-  Fecha_Creacion: '',
-  Fecha_Actualizacion: '',
-  Visible: false,
-  Imagen_Url: '',
-  Estado: {
-    Id_Estado_Proyecto: 0,
-    Nombre_Estado: '',
-  },
-  Usuario_Creador: {
-    Id_Usuario: 0,
-    Nombre_Usuario: '',
-    Id_Rol: 0,
-    Nombre_Rol: '',
-  },
-  Archivos: [],
-};
 
 
 export interface ProyectoFormData {
