@@ -1,6 +1,7 @@
 import React from 'react';
 import { LuX, LuTag, LuUser } from 'react-icons/lu';
 import type { CategoriaMaterial } from '../../models/Inventario';
+import { formatDate } from '../../helper/DateFormater';
 
 interface DetailCategoriaModalProps {
   isOpen: boolean;
@@ -51,7 +52,7 @@ const DetailCategoriaModal: React.FC<DetailCategoriaModalProps> = ({ isOpen, onC
                     <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
                       Nombre de la Categoría
                     </label>
-                    <p className="text-sm font-medium text-gray-900">{categoria.Nombre_Categoria}</p>
+                    <p className="text-sm font-medium text-gray-900 break-words">{categoria.Nombre_Categoria}</p>
                   </div>
 
                   <div className="bg-gray-50 p-4 rounded-lg">
@@ -67,7 +68,7 @@ const DetailCategoriaModal: React.FC<DetailCategoriaModalProps> = ({ isOpen, onC
                     <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
                       Descripción
                     </label>
-                    <p className="text-sm text-gray-900">
+                    <p className="text-sm text-gray-900 break-words">
                       {categoria.Descripcion_Categoria || 'Sin descripción'}
                     </p>
                   </div>
@@ -75,30 +76,49 @@ const DetailCategoriaModal: React.FC<DetailCategoriaModalProps> = ({ isOpen, onC
               </div>
             </div>
 
-            {/* Información del Creador */}
+            {/* Información de Registro */}
             <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
               <div className="bg-gray-50 px-5 py-3 border-b border-gray-200">
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
                     <LuUser className="w-4 h-4 text-blue-600" />
                   </div>
-                  <h3 className="text-base font-bold text-gray-900">Información del Creador</h3>
+                  <h3 className="text-base font-bold text-gray-900">Información de Registro</h3>
                 </div>
               </div>
 
               <div className="p-5">
-                <div className="grid grid-cols-1 gap-6">
+                <div className="grid grid-cols-2 gap-6">
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <label htmlFor='Fecha_Creacion' className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
+                      Fecha de Creación
+                    </label>
+                    <p className="text-sm text-gray-900">
+                      {categoria.Fecha_Creacion ? formatDate(categoria.Fecha_Creacion) : 'N/A'}
+                    </p>
+                  </div>
+
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <label htmlFor='Fecha_Actualizacion' className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
+                      Última Actualización
+                    </label>
+                    <p className="text-sm text-gray-900">
+                      {categoria.Fecha_Actualizacion ? formatDate(categoria.Fecha_Actualizacion) : 'N/A'}
+                    </p>
+                  </div>
+
                   <div className="bg-gray-50 p-4 rounded-lg">
                     <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
                       Creado por
                     </label>
                     <p className="text-sm text-gray-900">
-                      {categoria.Usuario?.Nombre_Usuario || 'Desconocido'}
+                      {categoria.Usuario?.Nombre_Usuario || 'Desconocido'} 
                     </p>
                   </div>
                 </div>
               </div>
             </div>
+
           </div>
         </div>
 

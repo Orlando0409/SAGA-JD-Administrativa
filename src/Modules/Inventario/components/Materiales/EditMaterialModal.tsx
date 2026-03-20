@@ -8,6 +8,9 @@ import {
   NOMBRE_MATERIAL_MAX_LENGTH,
   DESCRIPCION_MAX_LENGTH,
   PRECIO_MIN,
+  PRECIO_MAX,
+  NUMERO_ESTANTERIA_MIN,
+  NUMERO_ESTANTERIA_MAX,
   type EditMaterialModalProps
 } from '../../types/MaterialTypes';
 import type { UpdateMaterialData } from '../../models/Material';
@@ -45,6 +48,7 @@ const EditMaterialModal: React.FC<EditMaterialModalProps> = ({
     Descripcion: '',
     Id_Unidad_Medicion: 0,
     Precio_Unitario: 0,
+    Numero_Estanteria: 1,
     IDS_Categorias: [],
   });
 
@@ -74,6 +78,7 @@ const EditMaterialModal: React.FC<EditMaterialModalProps> = ({
         Descripcion: material.Descripcion || '',
         Id_Unidad_Medicion: material.Unidad_Medicion.Id_Unidad_Medicion,
         Precio_Unitario: material.Precio_Unitario,
+        Numero_Estanteria: material.Numero_Estanteria,
         IDS_Categorias: categoriaIds,
       });
       setSelectedCategorias(categoriaIds);
@@ -109,11 +114,20 @@ const EditMaterialModal: React.FC<EditMaterialModalProps> = ({
     };
   };
 
-  const renderCharCounter = (current: number, max: number) => (
-    <span className={`text-xs ${current > max * 0.9 ? 'text-orange-500' : 'text-gray-500'}`}>
-      {current}/{max}
-    </span>
-  );
+  const renderCharCounter = (current: number, max: number) => {
+    const remaining = max - current;
+    const isNearLimit = remaining <= 5;
+    
+    return (
+      <div className="flex justify-end items-center mt-1">
+        <span className={`text-xs font-medium ${
+          isNearLimit ? 'text-orange-600' : 'text-gray-500'
+        }`}>
+          {current}/{max}
+        </span>
+      </div>
+    );
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -184,7 +198,6 @@ const EditMaterialModal: React.FC<EditMaterialModalProps> = ({
                     Nombre del Material
                     <p className="text-red-500">*</p>
                   </label>
-                  {renderCharCounter(fieldCharCounts.nombreMaterial, NOMBRE_MATERIAL_MAX_LENGTH)}
                 </div>
                 <input
                   type="text"
@@ -197,6 +210,7 @@ const EditMaterialModal: React.FC<EditMaterialModalProps> = ({
                     }`}
                   required
                 />
+                {renderCharCounter(fieldCharCounts.nombreMaterial, NOMBRE_MATERIAL_MAX_LENGTH)}
                 {formErrors.Nombre_Material && (
                   <p className="mt-1 text-sm text-red-600">{formErrors.Nombre_Material}</p>
                 )}
@@ -251,13 +265,21 @@ const EditMaterialModal: React.FC<EditMaterialModalProps> = ({
                   type="number"
                   id="precio"
                   min={PRECIO_MIN}
-                  step="0.01"
+                  max={PRECIO_MAX}
+                  step="10"
                   value={formData.Precio_Unitario}
                   onChange={(e) => {
-                    const value = parseFloat(e.target.value) || 0;
-                    setFormData({ ...formData, Precio_Unitario: value });
-                    if (formErrors.Precio_Unitario) {
-                      setFormErrors(prev => ({ ...prev, Precio_Unitario: '' }));
+                    const value = parseFloat(e.target.value);
+                    if (!Number.isNaN(value) && value >= PRECIO_MIN && value <= PRECIO_MAX) {
+                      setFormData({ ...formData, Precio_Unitario: value });
+                      if (formErrors.Precio_Unitario) {
+                        setFormErrors(prev => ({ ...prev, Precio_Unitario: '' }));
+                      }
+                    } else if (e.target.value === '') {
+                      setFormData({ ...formData, Precio_Unitario: PRECIO_MIN });
+                      if (formErrors.Precio_Unitario) {
+                        setFormErrors(prev => ({ ...prev, Precio_Unitario: '' }));
+                      }
                     }
                   }}
                   className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${formErrors.Precio_Unitario
@@ -266,8 +288,50 @@ const EditMaterialModal: React.FC<EditMaterialModalProps> = ({
                     }`}
                   required
                 />
+                <div className="text-right text-xs text-gray-500 mt-1">
+                  Rango: ₡{PRECIO_MIN.toLocaleString()} - ₡{PRECIO_MAX.toLocaleString()}
+                </div>
                 {formErrors.Precio_Unitario && (
                   <p className="mt-1 text-sm text-red-600">{formErrors.Precio_Unitario}</p>
+                )}
+              </div>
+
+              <div>
+                <label htmlFor="numero-estanteria" className="block text-sm flex gap-2 font-medium text-gray-700 mb-1">
+                  Número de Estantería
+                  <p className="text-red-500">*</p>
+                </label>
+                <input
+                  type="number"
+                  id="numero-estanteria"
+                  min={NUMERO_ESTANTERIA_MIN}
+                  max={NUMERO_ESTANTERIA_MAX}
+                  value={formData.Numero_Estanteria}
+                  onChange={(e) => {
+                    const value = Number.parseInt(e.target.value);
+                    if (!Number.isNaN(value) && value >= NUMERO_ESTANTERIA_MIN && value <= NUMERO_ESTANTERIA_MAX) {
+                      setFormData({ ...formData, Numero_Estanteria: value });
+                      if (formErrors.Numero_Estanteria) {
+                        setFormErrors(prev => ({ ...prev, Numero_Estanteria: '' }));
+                      }
+                    } else if (e.target.value === '') {
+                      setFormData({ ...formData, Numero_Estanteria: NUMERO_ESTANTERIA_MIN });
+                      if (formErrors.Numero_Estanteria) {
+                        setFormErrors(prev => ({ ...prev, Numero_Estanteria: '' }));
+                      }
+                    }
+                  }}
+                  className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${formErrors.Numero_Estanteria
+                      ? 'border-red-500 focus:ring-red-500 focus:border-red-500'
+                      : 'border-gray-300'
+                    }`}
+                  required
+                />
+                <div className="text-right text-xs text-gray-500 mt-1">
+                  Rango: {NUMERO_ESTANTERIA_MIN} - {NUMERO_ESTANTERIA_MAX}
+                </div>
+                {formErrors.Numero_Estanteria && (
+                  <p className="mt-1 text-sm text-red-600">{formErrors.Numero_Estanteria}</p>
                 )}
               </div>
             </div>
@@ -277,7 +341,6 @@ const EditMaterialModal: React.FC<EditMaterialModalProps> = ({
                 <label htmlFor="descripcion" className="block text-sm flex gap-2 font-medium text-gray-700">
                   Descripción (Opcional)
                 </label>
-                {renderCharCounter(fieldCharCounts.descripcion, DESCRIPCION_MAX_LENGTH)}
               </div>
               <textarea
                 id="descripcion"
@@ -291,6 +354,7 @@ const EditMaterialModal: React.FC<EditMaterialModalProps> = ({
                 placeholder="Descripción del material..."
                 required
               />
+              {renderCharCounter(fieldCharCounts.descripcion, DESCRIPCION_MAX_LENGTH)}
               {formErrors.Descripcion && (
                 <p className="mt-1 text-sm text-red-600">{formErrors.Descripcion}</p>
               )}

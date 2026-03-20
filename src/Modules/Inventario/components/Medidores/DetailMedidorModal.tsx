@@ -1,4 +1,4 @@
-import { LuX, LuUser, LuCalendar } from 'react-icons/lu';
+import { LuX, LuUser, LuCalendar, LuFileText, LuMap } from 'react-icons/lu';
 import type { DetailMedidorModalProps } from '../../types/MedidorTypes';
 import { FaTachometerAlt, FaUsers } from 'react-icons/fa';
 import { formatCedulaJuridica } from '@/Modules/Afiliados/Helper/formatUtils';
@@ -139,6 +139,56 @@ const DetailMedidorModal = ({ isOpen, onClose, medidor }: DetailMedidorModalProp
               </div>
             </div>
           </div>
+
+             {/* Documentos del Terreno */}
+          {(medidor.Escritura_Terreno || medidor.Planos_Terreno) && (
+            <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
+              <div className="bg-gray-50 px-5 py-3 border-b border-gray-200">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                    <LuFileText className="w-4 h-4 text-blue-600" />
+                  </div>
+                  <h3 className="text-base font-bold text-gray-900">Documentos del Terreno</h3>
+                </div>
+              </div>
+              <div className="p-5">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {medidor.Escritura_Terreno && (
+                    <div className="bg-gray-50 p-4 rounded-lg">
+                      <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
+                        Escritura del Terreno
+                      </label>
+                      <a
+                        href={medidor.Escritura_Terreno}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-700 hover:bg-blue-100 transition-colors font-medium"
+                      >
+                        <LuFileText className="w-4 h-4" />
+                        Ver Escritura
+                      </a>
+                    </div>
+                  )}
+                  {medidor.Planos_Terreno && (
+                    <div className="bg-gray-50 p-4 rounded-lg">
+                      <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
+                        Planos del Terreno
+                      </label>
+                      <a
+                        href={medidor.Planos_Terreno}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-700 hover:bg-blue-100 transition-colors font-medium"
+                      >
+                        <LuMap className="w-4 h-4" />
+                        Ver Planos
+                      </a>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Información del Afiliado */}
           <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">

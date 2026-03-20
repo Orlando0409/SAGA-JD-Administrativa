@@ -28,7 +28,7 @@ export interface Proyecto {
   Visible: boolean;
   Imagen_Url: string;
   Estado: EstadoProyecto;
-  Usuario_Creador: UsuarioProyecto;
+  Usuario: UsuarioProyecto;
   Archivos?: ArchivoProyecto[]; // Opcional, si manejas archivos adicionales
 }
 

@@ -4,7 +4,7 @@ import type { ProveedorJuridico, CreateProveedorJuridicoData, UpdateProveedorJur
 // Función para obtener todos los proveedores jurídicos
 export const getProveedoresJuridicos = async (): Promise<ProveedorJuridico[]> => {
   try {
-    const response = await apiAuth.get('/Proveedores/juridico');
+    const response = await apiAuth.get('/Proveedores/juridico/');
     return response.data;
   } catch (error) {
     console.error('Error al obtener proveedores jurídicos:', error);

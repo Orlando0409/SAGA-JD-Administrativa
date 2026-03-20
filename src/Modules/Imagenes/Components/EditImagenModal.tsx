@@ -4,6 +4,17 @@ import { useAlerts } from "@/Modules/Global/context/AlertContext";
 import type { Imagen } from "../Models/ModelsEdiImagen";
 import { UpdateImagenSchema } from "../Schemas/SchemasEdiImagen";
 import { updateImagen } from "../Services/ServiceEdiImagen";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/Modules/Global/components/Sidebar/ui/alert-dialog";
 
 interface ImagenFormEditProps {
   onClose: () => void;
@@ -20,6 +31,7 @@ export default function ImagenFormEdit({ onClose, refetch, imagen }: ImagenFormE
   const [nombreError, setNombreError] = useState("");
   const [isValid, setIsValid] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
 
   useEffect(() => {
     setNombre(imagen.Nombre_Imagen || "");
@@ -62,8 +74,8 @@ export default function ImagenFormEdit({ onClose, refetch, imagen }: ImagenFormE
     validateAll();
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
 
     if (isSubmitting) return; // Prevenir doble submit
 
@@ -128,12 +140,12 @@ export default function ImagenFormEdit({ onClose, refetch, imagen }: ImagenFormE
                 type="text"
                 value={nombre}
                 onChange={handleNombreChange}
-                maxLength={100}
+                maxLength={50}
                 className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-sky-500 text-sm"
                 required
               />
               <div className="text-right text-xs text-gray-500 mt-1">
-                {nombre.length}/100
+                {nombre.length}/50
               </div>
               {nombreError && (
                 <p className="text-xs text-red-500 mt-1">{nombreError}</p>
@@ -157,13 +169,11 @@ export default function ImagenFormEdit({ onClose, refetch, imagen }: ImagenFormE
                     {file ? file.name : "Seleccionar nueva imagen..."}
                   </span>
                   <span className="bg-blue-500 text-white px-3 py-1 rounded text-sm">
-                    Examinar
+                    Seleccionar imagen
                   </span>
                 </div>
               </div>
-              <p className="text-xs text-gray-500 mt-1">
-                Formatos permitidos: JPG, PNG, GIF, WEBP. Deja vacío si no deseas cambiar la imagen.
-              </p>
+
             </div>
 
             {/* Preview de la imagen */}
@@ -186,33 +196,60 @@ export default function ImagenFormEdit({ onClose, refetch, imagen }: ImagenFormE
 
         {/* Botones de acción - Fuera del form */}
         <div className="flex justify-end gap-3 p-6 border-t bg-gray-50">
-          <button
-            type="submit"
-            form="edit-imagen-form"
-            disabled={!isValid || isSubmitting}
-            className={`px-4 py-2 rounded-lg shadow-sm text-sm transition-colors ${
-              isValid && !isSubmitting
-                ? "bg-blue-600 text-white hover:bg-blue-700"
-                : "bg-gray-300 text-gray-600 cursor-not-allowed"
-            }`}
-          >
-            {isSubmitting ? (
-              <span className="flex items-center gap-2">
-                Guardando...
-              </span>
-            ) : (
-              "Guardar Cambios"
-            )}
-          </button>
+          <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+            <AlertDialogTrigger asChild>
+              <button
+                type="button"
+                disabled={!isValid || isSubmitting}
+                className={`px-4 py-2 rounded-lg shadow-sm text-sm transition-colors ${
+                  isValid && !isSubmitting
+                    ? "bg-blue-600 text-white hover:bg-blue-700"
+                    : "bg-gray-300 text-gray-600 cursor-not-allowed"
+                }`}
+              >
+                {isSubmitting ? (
+                  <span className="flex items-center gap-2">
+                    Guardando...
+                  </span>
+                ) : (
+                  "Guardar Cambios"
+                )}
+              </button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>
+                  <span>¿Guardar cambios?</span>
+                </AlertDialogTitle>
+                <AlertDialogDescription>
+                  <span>¿Estás seguro de que deseas actualizar la imagen "{nombre.length > 30 ? `${nombre.slice(0, 30)}...` : nombre}"?</span>
+                  <br />
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogAction
+                  onClick={() => {
+                    setShowConfirmDialog(false);
+                    handleSubmit();
+                  }}
+                  disabled={isSubmitting}
+                >
+                  <span>{isSubmitting ? 'Guardando...' : 'Guardar'}</span>
+                </AlertDialogAction>
+                <AlertDialogCancel disabled={isSubmitting}>
+                  <span>Cancelar</span>
+                </AlertDialogCancel>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
           <button
             type="button"
             onClick={onClose}
             disabled={isSubmitting}
-            className={`px-4 py-2 rounded-lg shadow-sm text-sm transition-colors ${
-              isSubmitting
-                ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                : "bg-gray-200 text-gray-800 hover:bg-gray-300"
-            }`}
+            className={`px-4 py-2 rounded-lg shadow-sm text-sm transition-colors ${isSubmitting
+              ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+              : "bg-gray-200 text-gray-800 hover:bg-gray-300"
+              }`}
           >
             Cancelar
           </button>

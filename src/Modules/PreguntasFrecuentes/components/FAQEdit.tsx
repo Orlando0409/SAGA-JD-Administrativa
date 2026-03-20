@@ -82,47 +82,61 @@ export default function FAQEdit({ faq, onClose }: FAQEditProps) {
                 <h3 className="text-lg font-semibold text-gray-800">Editar Pregunta Frecuente</h3>
 
                 {/* Campo de Pregunta */}
-                <div>
-                    <label className="block text-sm font-medium text-gray-700">Pregunta</label>
-                    <input
-                        type="text"
-                        placeholder="Pregunta"
-                        value={pregunta}
-                        onChange={handlePreguntaChange}
-                        maxLength={200}
-                        className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-sky-500 text-sm break-words"
-                        style={{ whiteSpace: "normal", overflowWrap: "break-word" }}
-                        required
-                    />
-                    <div className="text-right text-xs text-gray-500 mt-1">
-                        {pregunta.length}/200
+                 <div>
+                        <label className="block text-sm font-medium text-gray-700">
+                            Pregunta
+                        </label>
+                        <textarea
+                            placeholder="Escribe la pregunta..."
+                            value={pregunta}
+                            onChange={(e) => {
+                                const v = e.target.value;
+                                setPregunta(v);
+                                validateField("Pregunta", v);
+                            }}
+                            maxLength={100}
+                            className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-sky-500 text-sm scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100 scrollbar-rounded"
+                            rows={2}
+                            required
+                        />
+                        <div className="text-right text-xs text-gray-500 mt-1">
+                            {pregunta.length}/100
+                        </div>
+                        {preguntaError ? (
+                            <p className="text-xs text-red-500 mt-1">{preguntaError}</p>
+                        ) : (
+                            <p className="text-xs text-gray-400 mt-1">&nbsp;</p>
+                        )}
                     </div>
-                    {preguntaError && (
-                        <p className="text-xs text-red-500 mt-1">{preguntaError}</p>
-                    )}
-                </div>
 
                 {/* Campo de Respuesta */}
-                <div>
-                    <label className="block text-sm font-medium text-gray-700">Respuesta</label>
-                    <textarea
-                        placeholder="Respuesta"
-                        value={respuesta}
-                        onChange={handleRespuestaChange}
-                        maxLength={1000}
-                        className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-sky-500 text-sm break-words"
-                        style={{ whiteSpace: "normal", overflowWrap: "break-word" }}
-                        rows={4}
-                        required
-                    />
-                    <div className="text-right text-xs text-gray-500 mt-1">
-                        {respuesta.length}/1000
+                  <div>
+                        <label className="block text-sm font-medium text-gray-700">
+                            Respuesta
+                        </label>
+                        <textarea
+                            placeholder="Escribe la respuesta a la pregunta..."
+                            value={respuesta}
+                            onChange={(e) => {
+                                const v = e.target.value;
+                                setRespuesta(v);
+                                validateField("Respuesta", v);
+                            }}
+                            maxLength={700}
+                            className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-sky-500 text-sm break-words scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100 scrollbar-rounded"
+                            style={{ whiteSpace: "normal", overflowWrap: "break-word" }}
+                            rows={5}
+                            required
+                        />
+                        <div className="text-right text-xs text-gray-500 mt-1">
+                            {respuesta.length}/700
+                        </div>
+                        {respuestaError ? (
+                            <p className="text-xs text-red-500 mt-1">{respuestaError}</p>
+                        ) : (
+                            <p className="text-xs text-gray-400 mt-1">&nbsp;</p>
+                        )}
                     </div>
-                    {respuestaError && (
-                        <p className="text-xs text-red-500 mt-1">{respuestaError}</p>
-                    )}
-                </div>
-
                 <div className="flex justify-end gap-4">
                     <AlertDialog>
                         <AlertDialogTrigger asChild>

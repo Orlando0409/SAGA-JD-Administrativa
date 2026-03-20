@@ -73,15 +73,12 @@ const CreateCategoriaModal: React.FC<CreateCategoriaModalProps> = ({ isOpen, onC
     }
   };
 
-  const renderCharCounter = (current: number, max: number, hasError: boolean) => {
+  const renderCharCounter = (current: number, max: number) => {
     const remaining = max - current;
     const isNearLimit = remaining <= 5;
     
     return (
-      <div className="flex justify-between items-center mt-1">
-        <span className="text-xs text-gray-500">
-          {hasError ? 'Corrige los errores antes de continuar' : 'Completa este campo'}
-        </span>
+      <div className="flex justify-end items-center mt-1">
         <span className={`text-xs font-medium ${
           isNearLimit ? 'text-orange-600' : 'text-gray-500'
         }`}>
@@ -121,7 +118,7 @@ const CreateCategoriaModal: React.FC<CreateCategoriaModalProps> = ({ isOpen, onC
                 placeholder="Ej: Tuberías, Herramientas, Químicos"
                 autoComplete="off"
               />
-              {renderCharCounter(charCount.name, MAX_NAME_LENGTH, !!formErrors.Nombre_Categoria)}
+              {renderCharCounter(charCount.name, MAX_NAME_LENGTH)}
               {formErrors.Nombre_Categoria && (
                 <p className="text-red-500 text-sm mt-1">{formErrors.Nombre_Categoria}</p>
               )}
@@ -142,7 +139,7 @@ const CreateCategoriaModal: React.FC<CreateCategoriaModalProps> = ({ isOpen, onC
                 }`}
                 placeholder="Describe el tipo de materiales que incluye esta categoría"
               />
-              {renderCharCounter(charCount.description, MAX_DESC_LENGTH, !!formErrors.Descripcion_Categoria)}
+              {renderCharCounter(charCount.description, MAX_DESC_LENGTH)}
               {formErrors.Descripcion_Categoria && (
                 <p className="text-red-500 text-sm mt-1">{formErrors.Descripcion_Categoria}</p>
               )}

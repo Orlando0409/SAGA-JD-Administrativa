@@ -14,10 +14,6 @@ import { User, Building } from 'lucide-react';
 import { useSolicitudesFisicas } from '../Hooks/HookSolicitudesFisicas';
 import { useSolicitudesJuridicas } from '../Hooks/HookSolicitudesJuridicas';
 
-// Importar hooks unificados para cambio de estados
-import { useMarcarEnRevision } from '../Hooks/HookEstadosSolicitudes';
-import { mapearTipoSolicitud, mapearTipoPersona } from '../Service/EstadoSolicitudes';
-
 // Importar tipos
 import type { SolicitudFisica } from '../Models/ModelosFisicas';
 import type { SolicitudJuridica } from '../Models/ModelosJuridicos';
@@ -26,7 +22,10 @@ import type { SolicitudJuridica } from '../Models/ModelosJuridicos';
 import EditSolicitudModal from './EditSolicitudModal';
 import ModalSolicitud from './ModalSolicitud';
 import { MdKeyboardArrowUp, MdKeyboardArrowDown, MdKeyboardDoubleArrowLeft, MdKeyboardArrowLeft, MdKeyboardArrowRight, MdKeyboardDoubleArrowRight } from 'react-icons/md';
-import { LuSearch } from 'react-icons/lu';
+import { LuSearch, LuFilter } from 'react-icons/lu';
+import { useUserPermissions } from '@/Modules/Auth/Hooks/PermissionHook';
+import type { FilterSolicitudesOptions } from './FilterSolicitudModal';
+import FilterSolicitudModal from './FilterSolicitudModal';
 
 // Tipo unificado para la tabla de solicitudes
 type SolicitudUnificada = {
@@ -34,7 +33,7 @@ type SolicitudUnificada = {
     Id: number;
     Nombre_Completo: string;
     Cedula_Documento: string;
-    Tipo_Solicitud: 'Afiliacion' | 'Desconexion' | 'Cambio de Medidor' | 'Asociado';
+    Tipo_Solicitud: 'Afiliacion' | 'Desconexion' | 'Cambio de Medidor' | 'Asociado' | 'Agregar Medidor';
     Estado: {
         Id_Estado: number;
         Nombre_Estado: string;
@@ -48,14 +47,33 @@ type SolicitudUnificada = {
 
 export default function SolicitudesTable() {
     // Hooks para ambos tipos de solicitudes
+    const { canEdit, canView } = useUserPermissions();
+
+    const hasEditPermission = canEdit('solicitudes');
+    const hasViewPermission = canView('solicitudes');
     const { data: solicitudesFisicas, isLoading: loadingFisicas, isError: errorFisicos } = useSolicitudesFisicas();
     const { data: solicitudesJuridicas, isLoading: loadingJuridicas, isError: errorJuridicos } = useSolicitudesJuridicas();
 
-    // Hook unificado para cambiar estado a "En Revisión" (estado 1 → 2)
-    const marcarEnRevisionMutation = useMarcarEnRevision();
-
-
     const [globalFilter, setGlobalFilter] = useState('');
+
+    const [activeFilters, setActiveFilters] = useState<FilterSolicitudesOptions>({
+        estado: '',
+        tipoPersona: '',
+        tipoSolicitud: '',
+        busquedaAvanzada: '',
+    });
+    const [isFilterOpen, setIsFilterOpen] = useState(false);
+
+    const activeFiltersCount = useMemo(() => {
+        let count = 0;
+        if (activeFilters.estado) count++;
+        if (activeFilters.tipoPersona) count++;
+        if (activeFilters.tipoSolicitud) count++;
+        if (activeFilters.busquedaAvanzada) count++;
+        if (globalFilter) count++;
+        return count;
+    }, [activeFilters, globalFilter]);
+
 
     // Estados para el modal de edición
     const [showEditModal, setShowEditModal] = useState(false);
@@ -84,11 +102,11 @@ export default function SolicitudesTable() {
     const pageSizeOptions = [5, 10, 20, 50];
     // Función para unificar los datos de solicitudes
     const datosUnificados = useMemo((): SolicitudUnificada[] => {
-        console.log('📦 Datos originales físicas:', solicitudesFisicas);
-        console.log('📦 Datos originales jurídicas:', solicitudesJuridicas);
+        console.log(' Datos originales físicas:', solicitudesFisicas);
+        console.log(' Datos originales jurídicas:', solicitudesJuridicas);
 
         // Función para normalizar el nombre del tipo de solicitud
-        const normalizarTipoSolicitud = (tipo: string): 'Afiliacion' | 'Desconexion' | 'Cambio de Medidor' | 'Asociado' => {
+        const normalizarTipoSolicitud = (tipo: string): 'Afiliacion' | 'Desconexion' | 'Cambio de Medidor' | 'Asociado' | 'Agregar Medidor' => {
             const tipoLower = tipo.toLowerCase().trim();
             let resultado: string;
 
@@ -100,35 +118,37 @@ export default function SolicitudesTable() {
                 resultado = 'Cambio de Medidor';
             } else if (tipoLower.includes('asociado')) {
                 resultado = 'Asociado';
+            } else if (tipoLower.includes('agregar') && tipoLower.includes('medidor')) {
+                resultado = 'Agregar Medidor';
             } else {
                 resultado = tipo; // Fallback al tipo original
-                console.warn('⚠️ Tipo de solicitud no reconocido:', tipo);
+                console.warn(' Tipo de solicitud no reconocido:', tipo);
             }
 
-            console.log(`🔄 Normalización: "${tipo}" → "${resultado}"`);
+            console.log(` Normalización: "${tipo}" → "${resultado}"`);
             return resultado as any;
         };
 
         // Función para aplanar la estructura agrupada por tipo de solicitud
         const aplanarSolicitudes = (datos: any): any[] => {
             if (!datos) {
-                console.log('⚠️ No hay datos para aplanar');
+                console.log(' No hay datos para aplanar');
                 return [];
             }
 
             // Si ya es un array, devolverlo directamente
             if (Array.isArray(datos)) {
-                console.log('✅ Los datos ya son un array:', datos.length, 'elementos');
+                console.log(' Los datos ya son un array:', datos.length, 'elementos');
                 return datos;
             }
 
             // Si es un objeto agrupado por tipo (Afiliacion, Desconexion, etc.)
-            console.log('📦 Datos agrupados detectados. Claves:', Object.keys(datos));
+            console.log(' Datos agrupados detectados. Claves:', Object.keys(datos));
             const solicitudesPlanas: any[] = [];
 
             Object.keys(datos).forEach(tipoSolicitud => {
                 const solicitudesDelTipo = datos[tipoSolicitud];
-                console.log(`  📂 Procesando tipo: "${tipoSolicitud}"`, {
+                console.log(`   Procesando tipo: "${tipoSolicitud}"`, {
                     esArray: Array.isArray(solicitudesDelTipo),
                     cantidad: Array.isArray(solicitudesDelTipo) ? solicitudesDelTipo.length : 0,
                     datos: solicitudesDelTipo
@@ -141,7 +161,7 @@ export default function SolicitudesTable() {
                             ...solicitud,
                             Tipo_Solicitud: solicitud.Tipo_Solicitud || tipoSolicitud
                         };
-                        console.log(`    ➕ Agregando solicitud ${idx + 1}:`, {
+                        console.log(`    Agregando solicitud ${idx + 1}:`, {
                             Id: solicitud.Id_Solicitud,
                             Tipo_Original: solicitud.Tipo_Solicitud,
                             Tipo_Asignado: solicitudConTipo.Tipo_Solicitud
@@ -159,8 +179,8 @@ export default function SolicitudesTable() {
         const solicitudesFisicasArray = aplanarSolicitudes(solicitudesFisicas);
         const solicitudesJuridicasArray = aplanarSolicitudes(solicitudesJuridicas);
 
-        console.log('📋 Solicitudes físicas aplanadas:', solicitudesFisicasArray);
-        console.log('📋 Solicitudes jurídicas aplanadas:', solicitudesJuridicasArray);
+        console.log(' Solicitudes físicas aplanadas:', solicitudesFisicasArray);
+        console.log(' Solicitudes jurídicas aplanadas:', solicitudesJuridicasArray);
 
         // Solicitudes Físicas
         const solicitudesFisicasUnificadas: SolicitudUnificada[] = solicitudesFisicasArray.map((solicitud: SolicitudFisica, index: number) => {
@@ -212,41 +232,59 @@ export default function SolicitudesTable() {
         const resultado = [
             ...solicitudesFisicasUnificadas,
             ...solicitudesJuridicasUnificadas
-        ].sort((a, b) => a.Id - b.Id);
+        ].sort((a, b) => b.Id - a.Id);
 
-        console.log('═══════════════════════════════════════');
-        console.log('📊 RESUMEN FINAL DE SOLICITUDES');
-        console.log('═══════════════════════════════════════');
-        console.log(`✅ Total físicas: ${solicitudesFisicasUnificadas.length}`);
-        console.log(`✅ Total jurídicas: ${solicitudesJuridicasUnificadas.length}`);
-        console.log(`✅ Total general: ${resultado.length}`);
-        console.log('═══════════════════════════════════════');
-        console.log('📋 Detalle de solicitudes:');
+
         resultado.forEach((s, idx) => {
             console.log(`  ${idx + 1}. ID:${s.Id} | ${s.Tipo_Solicitud} | ${s.Estado.Nombre_Estado} | ${s.Tipo_Persona} | ${s.Nombre_Completo}`);
         });
-        console.log('═══════════════════════════════════════');
 
         return resultado;
     }, [solicitudesFisicas, solicitudesJuridicas]);
 
     const filteredData = useMemo(() => {
-        if (!globalFilter) return datosUnificados;
-        const q = globalFilter.toLowerCase();
-        return datosUnificados.filter((solicitud) =>
-            [
-                solicitud.Nombre_Completo,
-                solicitud.Cedula_Documento,
-                solicitud.Tipo_Solicitud,
-                solicitud.Estado.Nombre_Estado,
-                solicitud.Tipo_Persona
-            ]
-                .filter(Boolean)
-                .join(' ')
-                .toLowerCase()
-                .includes(q)
-        );
-    }, [datosUnificados, globalFilter]);
+        let datos = datosUnificados;
+
+        // Aplicar filtros avanzados
+        if (activeFilters.estado) {
+            datos = datos.filter(s => s.Estado.Nombre_Estado === activeFilters.estado);
+        }
+        if (activeFilters.tipoPersona) {
+            datos = datos.filter(s => s.Tipo_Persona === activeFilters.tipoPersona);
+        }
+        if (activeFilters.tipoSolicitud) {
+            datos = datos.filter(s => s.Tipo_Solicitud === activeFilters.tipoSolicitud);
+        }
+        if (activeFilters.busquedaAvanzada) {
+            const busqueda = activeFilters.busquedaAvanzada.toLowerCase();
+            datos = datos.filter(s =>
+                [
+                    s.Nombre_Completo,
+                    s.Cedula_Documento,
+                ].filter(Boolean).join(' ').toLowerCase().includes(busqueda)
+            );
+        }
+
+        // Aplicar filtro global (búsqueda rápida)
+        if (globalFilter) {
+            const q = globalFilter.toLowerCase();
+            datos = datos.filter((solicitud) =>
+                [
+                    solicitud.Nombre_Completo,
+                    solicitud.Cedula_Documento,
+                    solicitud.Tipo_Solicitud,
+                    solicitud.Estado.Nombre_Estado,
+                    solicitud.Tipo_Persona
+                ]
+                    .filter(Boolean)
+                    .join(' ')
+                    .toLowerCase()
+                    .includes(q)
+            );
+        }
+
+        return datos;
+    }, [datosUnificados, globalFilter, activeFilters]);
 
     const columnHelper = createColumnHelper<SolicitudUnificada>();
     const columns: ColumnDef<SolicitudUnificada, any>[] = [
@@ -372,83 +410,45 @@ export default function SolicitudesTable() {
                 return (
                     <div className="flex items-center gap-2">
                         {/* Ver detalles */}
-                        <button
-                            onClick={async (e) => {
-                                e.stopPropagation(); // Evita que se dispare el click de la fila
+                        {hasViewPermission && (
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    const tipo = solicitud.Tipo_Persona === 'Físico' ? 'solicitud-fisica' : 'solicitud-juridica';
 
-                                const tipo = solicitud.Tipo_Persona === 'Físico' ? 'solicitud-fisica' : 'solicitud-juridica';
-
-                                // Si el estado actual es "Registro" (1), marcarlo como "En Revisión" (2)
-                                if (solicitud.Estado.Id_Estado === 1) {
-                                    try {
-                                        console.log('🔄 Cambiando estado 1 → 2 (En Revisión)...');
-                                        console.log('📋 ID en tabla:', solicitud.Id);
-                                        console.log('📋 Datos originales completos:', solicitud.datos_originales);
-                                        console.log('📋 Tipo Solicitud:', solicitud.Tipo_Solicitud);
-                                        console.log('📋 Tipo Persona:', solicitud.Tipo_Persona);
-
-                                        // Obtener el ID real del backend
-                                        const datosOriginales = solicitud.datos_originales as any;
-                                        const idReal = datosOriginales.Id_Solicitud || datosOriginales.id || datosOriginales.Id || datosOriginales.ID;
-                                        console.log('📋 ID REAL del backend:', idReal);
-
-                                        // ⚠️ IMPORTANTE: Usar Tipo_Entidad de los datos originales, no el tipo de la tabla
-                                        // Tipo_Entidad: 1 = Física, 2 = Jurídica
-                                        const tipoEntidad = datosOriginales.Tipo_Entidad || datosOriginales.Id_Tipo_Entidad;
-                                        const tipoPersonaReal = tipoEntidad === 1 ? 'Físico' : 'Jurídico';
-                                        console.log('📋 Tipo_Entidad del backend:', tipoEntidad, '→', tipoPersonaReal);
-
-                                        // Mapear los tipos para el servicio unificado
-                                        const tipoSolicitudMapeado = mapearTipoSolicitud(solicitud.Tipo_Solicitud);
-                                        const tipoPersonaMapeado = mapearTipoPersona(tipoPersonaReal); // ✅ Usar tipo real del backend
-
-                                        console.log('🔀 Tipo mapeado:', tipoSolicitudMapeado, tipoPersonaMapeado);
-
-                                        // Usar el hook unificado (params: tipoSolicitud, tipoPersona, solicitudId)
-                                        // IMPORTANTE: Usar el ID real del backend, no el ID de la tabla
-                                        await marcarEnRevisionMutation.mutateAsync(
-                                            tipoSolicitudMapeado,
-                                            tipoPersonaMapeado,
-                                            idReal  // ✅ Usar ID real del backend
-                                        );
-
-                                        console.log('✅ Estado cambiado exitosamente');
-                                    } catch (error) {
-                                        console.error('❌ Error al cambiar estado:', error);
-                                    }
-                                }
-
-                                // Abrir el modal
-                                setSelectedSolicitudForGestion({
-                                    tipo: tipo,
-                                    datos: solicitud.datos_originales
-                                });
-                                setShowGestionModal(true);
-                            }}
-                            disabled={marcarEnRevisionMutation.isPending}
-                            className="px-4 py-1 bg-gray-600 text-white text-xs rounded hover:bg-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                            title="Ver detalles"
-                        >
-                            Ver
-                        </button>
+                                    // Abrir el modal (el cambio de estado se maneja dentro del modal)
+                                    setSelectedSolicitudForGestion({
+                                        tipo: tipo,
+                                        datos: solicitud.datos_originales
+                                    });
+                                    setShowGestionModal(true);
+                                }}
+                                className="px-4 py-1 bg-gray-600 text-white text-xs rounded hover:bg-gray-700 transition-colors"
+                                title="Ver detalles"
+                            >
+                                Ver
+                            </button>
+                        )}
 
                         {/* Editar */}
-                        <button
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                setSelectedSolicitud({
-                                    tipo: solicitud.Tipo_Persona === 'Físico'
-                                        ? 'solicitud-fisica'
-                                        : 'solicitud-juridica',
-                                    datos: solicitud.datos_originales
-                                });
-                                setShowEditModal(true);
-                            }}
-                            className="px-4 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition-colors"
-                            title="Editar solicitud"
-                        >
-                            Editar
-                        </button>
+                        {hasEditPermission && (
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setSelectedSolicitud({
+                                        tipo: solicitud.Tipo_Persona === 'Físico'
+                                            ? 'solicitud-fisica'
+                                            : 'solicitud-juridica',
+                                        datos: solicitud.datos_originales
+                                    });
+                                    setShowEditModal(true);
+                                }}
+                                className="px-4 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition-colors"
+                                title="Editar solicitud"
+                            >
+                                Editar
+                            </button>
+                        )}
 
 
                     </div>
@@ -512,13 +512,31 @@ export default function SolicitudesTable() {
             <div className="flex flex-col gap-4 mb-4">
                 <div className='p-3'>
                     <div className="flex items-start gap-4 flex-col justify-start">
-                    <h2 className="text-2xl font-bold text-gray-900">Revisión de Solicitudes</h2>
-                    <p className="text-sm text-gray-600 pb-4">Gestiona las solicitudes de los usuarios</p>
-                </div>
+                        <h2 className="text-2xl font-bold text-gray-900">Revisión de Solicitudes</h2>
+                        <p className="text-sm text-gray-600 pb-4">Gestiona las solicitudes de los usuarios</p>
+                    </div>
 
                 </div>
-                <div className='flex justify-end pb-2'>
-                      <div className="relative  flex-1 max-w-md">
+                <div className='flex justify-end items-center gap-4 pb-2'>
+                    {/* Botón de filtros */}
+                    <button
+                        onClick={() => setIsFilterOpen(true)}
+                        className={`px-4 py-2 border rounded-md flex items-center gap-2 ${activeFiltersCount > 0
+                            ? 'border-blue-500 bg-blue-50 text-blue-700'
+                            : 'border-gray-300 hover:bg-gray-50'
+                            }`}
+                    >
+                        <LuFilter className="w-4 h-4" />
+                        Filtros
+                        {activeFiltersCount > 0 && (
+                            <span className="bg-blue-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                                {activeFiltersCount}
+                            </span>
+                        )}
+                    </button>
+
+                    {/* Campo de búsqueda */}
+                    <div className="relative flex-1 max-w-md">
                         <LuSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                         <input
                             value={globalFilter}
@@ -526,10 +544,9 @@ export default function SolicitudesTable() {
                             placeholder="Buscar por nombre, cédula, tipo, estado..."
                             className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         />
-
                     </div>
                 </div>
-                 
+
             </div>
 
             <div className="bg-white rounded-2xl shadow-sm border border-sky-100 overflow-hidden max-h-[calc(100vh-300px)] overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100">
@@ -701,6 +718,12 @@ export default function SolicitudesTable() {
                     solicitud={selectedSolicitudForGestion}
                 />
             )}
+            <FilterSolicitudModal
+                isOpen={isFilterOpen}
+                onClose={() => setIsFilterOpen(false)}
+                currentFilters={activeFilters}
+                onApplyFilters={setActiveFilters}
+            />
 
 
         </div>

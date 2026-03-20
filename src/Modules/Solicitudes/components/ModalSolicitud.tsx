@@ -17,6 +17,7 @@ import { useMarcarEnRevision, useAprobarYEnEspera, useCompletar, useRechazar } f
 import { mapearTipoSolicitud, mapearTipoPersona } from '../Service/EstadoSolicitudes';
 import type { TipoSolicitud, TipoPersona } from '../Types/EstadoSolicitudes';
 import { useAlerts } from '@/Modules/Global/context/AlertContext';
+import { updateEstadoMedidor } from '@/Modules/Inventario/service/MedidorServices';
 
 interface ModalSolicitudProps {
     isOpen: boolean;
@@ -24,7 +25,7 @@ interface ModalSolicitudProps {
     solicitud: {
         tipo: 'solicitud-fisica' | 'solicitud-juridica';
         datos: SolicitudFisica | SolicitudJuridica;
-        tipoSolicitud?: 'Afiliacion' | 'Cambio de Medidor' | 'Asociado' | 'Desconexion'; // Nuevo campo para identificar el subtipo
+        tipoSolicitud?: 'Afiliacion' | 'Cambio de Medidor' | 'Asociado' | 'Desconexion' | 'Agregar Medidor'; // Nuevo campo para identificar el subtipo
     };
 }
 
@@ -32,11 +33,13 @@ interface ModalSolicitudProps {
 const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solicitud }) => {
     // Estado para controlar el modal de asignación de medidor
     const [showModalMedidor, setShowModalMedidor] = useState(false);
-    
+    const [numeroMedidorAsignado, setNumeroMedidorAsignado] = useState<string | number | null>(null);
+
     // Estados para controlar los AlertDialog
     const [showAprobarDialog, setShowAprobarDialog] = useState(false);
     const [showCompletarDialog, setShowCompletarDialog] = useState(false);
     const [showRechazarDialog, setShowRechazarDialog] = useState(false);
+    const [motivoRechazo, setMotivoRechazo] = useState('');
 
     const marcarEnRevisionMutation = useMarcarEnRevision();
     const aprobarYEnEsperaMutation = useAprobarYEnEspera();
@@ -47,6 +50,7 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
     const getSolicitudInfo = () => {
         if (solicitud.tipo === 'solicitud-fisica') {
             const datos = solicitud.datos as any;
+            const numeroMedidorRaw = numeroMedidorAsignado ?? datos.Numero_Medidor_Actual ?? datos.Numero_Medidor ?? datos.Medidor?.Numero_Medidor ?? null;
 
             let solicitudId = datos.Id_Solicitud || datos.id || datos.Id || datos.ID || datos.solicitudId;
 
@@ -77,10 +81,13 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
                 Motivo_Solicitud: datos.Motivo_Solicitud || 'No especificado',
                 Escritura_Terreno: datos.Escritura_Terreno || 'No proporcionada',
                 Planos_Terreno: datos.Planos_Terreno || 'No proporcionados',
-                Numero_Medidor_Actual: datos.Numero_Medidor_Actual || 'No especificado',
+                Numero_Medidor_Actual: numeroMedidorRaw != null ? String(numeroMedidorRaw) : (datos.Numero_Medidor_Actual || 'No especificado'),
+                Numero_Medidor: datos.Numero_Medidor ?? null,
+                Id_Medidor: datos.Id_Medidor ?? null,
             };
         } else {
             const datos = solicitud.datos as any;
+            const numeroMedidorRaw = numeroMedidorAsignado ?? datos.Numero_Medidor_Actual ?? datos.Numero_Medidor ?? datos.Medidor?.Numero_Medidor ?? null;
 
             let solicitudId = datos.Id_Solicitud || datos.id || datos.Id || datos.ID || datos.solicitudId;
 
@@ -110,53 +117,54 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
                 Motivo_Solicitud: datos.Motivo_Solicitud || 'No especificado',
                 Escritura_Terreno: datos.Escritura_Terreno || 'No proporcionada',
                 Planos_Terreno: datos.Planos_Terreno || 'No proporcionados',
-                Numero_Medidor_Actual: datos.Numero_Medidor_Actual || 'No especificado',
+                Numero_Medidor_Actual: numeroMedidorRaw != null ? String(numeroMedidorRaw) : (datos.Numero_Medidor_Actual || 'No especificado'),
+                Numero_Medidor: datos.Numero_Medidor ?? null,
+                Id_Medidor: datos.Id_Medidor ?? null,
             };
         }
     };
 
     const info = getSolicitudInfo();
 
-    // useEffect para cambiar automáticamente a estado 2 (En Revisión) cuando se abre el modal
+
+
+    // Resetear el número de medidor asignado cuando el modal se abre (para traer datos frescos del backend)
     useEffect(() => {
-        const cambiarAEnRevision = async () => {
-            if (isOpen && info.estadoId === 1) {
-                try {
-                    // Mapear los tipos a los valores internos
-                    const tipoSolicitud: TipoSolicitud = mapearTipoSolicitud(info.tipoSolicitud);
-                    const tipoPersona: TipoPersona = mapearTipoPersona(info.tipo);
-
-                    await marcarEnRevisionMutation.mutateAsync(tipoSolicitud, tipoPersona, info.id);
-                } catch (error) {
-                    console.error('Error al cambiar a En Revisión:', error);
-                }
-            }
-        };
-
-        cambiarAEnRevision();
-    }, [isOpen, info.estadoId, info.id, info.tipoSolicitud, info.tipo]);
+        if (isOpen) {
+            setNumeroMedidorAsignado(null);
+        }
+    }, [isOpen]);
 
     // Función para manejar aprobación por casos usando hooks unificados
     const handleCambiarEstado = async () => {
         const estadoActual = info.estadoId;
 
-        // Verificar si requiere asignación de medidor (Afiliación o Cambio de Medidor)
-        const requiereAsignacionMedidor = info.tipoSolicitud === 'Afiliacion' || info.tipoSolicitud === 'Cambio de Medidor';
+        // Estado 1 (Registro) → Poner en revisión manualmente al hacer clic
+        if (estadoActual === 1) {
+            try {
+                const tipoSolicitud: TipoSolicitud = mapearTipoSolicitud(info.tipoSolicitud);
+                const tipoPersona: TipoPersona = mapearTipoPersona(info.tipo);
 
-        // Estado 2 (En Revisión) → Decidir flujo según tipo de solicitud
-        if (estadoActual === 2) {
-            if (requiereAsignacionMedidor) {
-                // Para Afiliación y Cambio de Medidor: Abrir diálogo de confirmación
-                setShowAprobarDialog(true);
-            } else {
-                // Para Asociado y Desconexión: Abrir diálogo de completar directamente
-                setShowCompletarDialog(true);
+                await marcarEnRevisionMutation.mutateAsync(tipoSolicitud, tipoPersona, info.id);
+                onClose();
+            } catch (error) {
+                console.error('Error al poner solicitud en revisión:', error);
             }
+            return;
         }
-        else if (estadoActual === 3) {
+
+        // Estado 2 (En Revisión) → Poner en espera directamente
+        if (estadoActual === 2) {
+            await handleConfirmAprobar();
+            return;
+        }
+
+        if (estadoActual === 3) {
             setShowModalMedidor(true);
+            return;
         }
-        else if (estadoActual === 4) {
+
+        if (estadoActual === 4) {
             showWarning('Solicitud completada', 'Esta solicitud ya está completada');
         }
     };
@@ -167,11 +175,21 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
             const tipoSolicitudInterno: TipoSolicitud = mapearTipoSolicitud(solicitud.tipoSolicitud || info.tipoSolicitud);
             const tipoPersonaInterno: TipoPersona = mapearTipoPersona(info.tipo);
 
+            if (info.tipoSolicitud === 'Cambio de Medidor' && info.Id_Medidor) {
+                try {
+                    await updateEstadoMedidor(info.Id_Medidor, 3);
+                    console.log(`Medidor #${info.Id_Medidor} marcado como Averiado`);
+                } catch (medidorError) {
+                    console.error('Error al marcar medidor como averiado:', medidorError);
+
+                }
+            }
+
             await completarMutation.mutateAsync(tipoSolicitudInterno, tipoPersonaInterno, info.id);
 
             onClose(); // Cerrar modal principal después de aprobar
         } catch (error) {
-            console.error('❌ Error al completar solicitud:', error);
+            console.error(' Error al completar solicitud:', error);
         }
     };
 
@@ -186,12 +204,12 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
         const tipoPersona: TipoPersona = mapearTipoPersona(info.tipo);
 
         try {
-            console.log(`✅ Aprobando y poniendo en espera: ${tipoSolicitud} - ${tipoPersona}`);
+            console.log(` Aprobando y poniendo en espera: ${tipoSolicitud} - ${tipoPersona}`);
             await aprobarYEnEsperaMutation.mutateAsync(tipoSolicitud, tipoPersona, info.id);
             setShowAprobarDialog(false);
             onClose();
         } catch (error) {
-            console.error('❌ Error al marcar en aprobada y en espera:', error);
+            console.error(' Error al marcar en aprobada y en espera:', error);
             setShowAprobarDialog(false);
         }
     };
@@ -202,7 +220,7 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
         const tipoPersona: TipoPersona = mapearTipoPersona(info.tipo);
 
         try {
-            console.log(`🎉 Completando solicitud ${info.tipoSolicitud} directamente desde Estado 2 (sin medidor)`);
+            console.log(` Completando solicitud ${info.tipoSolicitud} directamente desde Estado 2 (sin medidor)`);
             await completarMutation.mutateAsync(tipoSolicitud, tipoPersona, info.id);
             setShowCompletarDialog(false);
             onClose();
@@ -219,38 +237,45 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
             const tipoSolicitudInterno: TipoSolicitud = mapearTipoSolicitud(solicitud.tipoSolicitud || info.tipoSolicitud);
             const tipoPersonaInterno: TipoPersona = mapearTipoPersona(info.tipo);
 
-            console.log(`❌ Rechazando solicitud: ${tipoSolicitudInterno} - ${tipoPersonaInterno}`);
+            console.log(`Rechazando solicitud: ${tipoSolicitudInterno} - ${tipoPersonaInterno}`);
 
-            // Usar el hook unificado para rechazar (Cualquier estado → 5)
-            await rechazarMutation.mutateAsync(tipoSolicitudInterno, tipoPersonaInterno, info.id);
+            // Usar el hook unificado para rechazar (Cualquier estado → 5) con el motivo
+            await rechazarMutation.mutateAsync(tipoSolicitudInterno, tipoPersonaInterno, info.id, motivoRechazo.trim());
 
+            setMotivoRechazo(''); // Limpiar motivo después de usarlo
             setShowRechazarDialog(false);
             onClose(); // Cerrar modal después del éxito
         } catch (error) {
-            console.error('❌ Error al rechazar:', error);
+            console.error(' Error al rechazar:', error);
             setShowRechazarDialog(false);
         }
     };
 
-    // 🎯 Estado de carga unificado - Mucho más simple ahora
+
     const isLoading =
         marcarEnRevisionMutation.isPending ||
         aprobarYEnEsperaMutation.isPending ||
         completarMutation.isPending ||
         rechazarMutation.isPending;
 
+    // Solo deshabilitar el cierre durante operaciones críticas (no durante la carga inicial)
+    const canClose = !aprobarYEnEsperaMutation.isPending &&
+        !completarMutation.isPending &&
+        !rechazarMutation.isPending;
+
     if (!isOpen) return null;
 
     return (
-            <div className="fixed inset-0 backdrop-blur bg-opacity-10 flex items-center justify-center z-50 p-4">
-                <div className="bg-white rounded-lg shadow-xl border border-gray-200 w-full max-w-3xl max-h-[90vh] overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100">
+
+        <div className="fixed inset-0 backdrop-blur bg-opacity-10 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-lg shadow-xl border border-gray-200 w-full max-w-3xl max-h-[90vh] overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100">
                 {/* Header */}
                 <div className="sticky top-0 bg-white border-b border-gray-200 p-4 z-10">
                     <div className="flex items-center justify-between">
                         <h1 className="text-xl font-semibold text-gray-900">Gestionar Solicitud</h1>
                         <button
                             onClick={onClose}
-                            disabled={isLoading}
+                            disabled={!canClose}
                             className="text-gray-400 hover:text-gray-600 transition-colors disabled:opacity-50"
                         >
                             <X className="w-5 h-5" />
@@ -376,7 +401,7 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
                         </div>
 
                         {/* Detalles de la Solicitud */}
-                        {(info.Numero_Medidor_Actual || info.Motivo_Solicitud) && (
+                        {(info.Numero_Medidor_Actual || info.Motivo_Solicitud || info.Numero_Medidor != null) && (
                             <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
                                 <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-3">
                                     <div className="flex items-center gap-2">
@@ -386,7 +411,17 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
 
                                 <div className="p-4">
                                     <div className="grid grid-cols-1 gap-3">
-                                        {info.Numero_Medidor_Actual && (
+                                        {/* Número de medidor seleccionado por el usuario (sólo Cambio de Medidor) */}
+                                        {info.tipoSolicitud === 'Cambio de Medidor' && info.Numero_Medidor != null && (
+                                            <div className="bg-blue-50 border border-blue-200 p-3 rounded-lg">
+                                                <label className="block text-xs font-medium text-blue-700 uppercase tracking-wide mb-1">
+                                                    Número de Medidor Seleccionado
+                                                </label>
+                                                <p className="text-base font-bold text-blue-900">{info.Numero_Medidor}</p>
+                                            </div>
+                                        )}
+
+                                        {info.Numero_Medidor_Actual && info.Numero_Medidor_Actual !== 'No especificado' && (
                                             <div className="bg-gray-50 p-3 rounded-lg">
                                                 <label className="block text-xs font-medium text-gray-600 uppercase tracking-wide mb-1">
                                                     Número de Medidor Actual
@@ -395,7 +430,7 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
                                             </div>
                                         )}
 
-                                        {info.Motivo_Solicitud && (
+                                        {info.Motivo_Solicitud && info.Motivo_Solicitud !== 'No especificado' && (
                                             <div className="bg-gray-50 p-3 rounded-lg">
                                                 <label className="block text-xs font-medium text-gray-600 uppercase tracking-wide mb-1">
                                                     Motivo de la Solicitud
@@ -462,23 +497,21 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
                         {isLoading ? (
                             <>
                                 <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                                {info.estadoId === 2 ? 'Procesando...' : 'Aprobando...'}
+                                Procesando...
                             </>
                         ) : (
                             <>
                                 <Check className="w-4 h-4" />
-                                {info.estadoId === 2
-                                    ? (info.tipoSolicitud === 'Afiliacion' || info.tipoSolicitud === 'Cambio de Medidor'
-                                        ? 'Aprobar y poner en espera'
-                                        : 'Completar solicitud')
+                                {info.estadoId === 1
+                                    ? 'Poner en revisión'
                                     : info.estadoId === 3
                                         ? 'Completar y asignar medidor'
-                                        : 'Aprobar Solicitud'}
+                                        : 'Poner en espera'}
                             </>
                         )}
                     </button>
 
-                    <button
+                    {info.estadoId !== 1 && <button
                         onClick={handleRechazar}
                         disabled={isLoading || info.estadoId === 4 || info.estadoId === 5}
                         className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm hover:shadow-md flex items-center gap-2 text-sm font-medium"
@@ -494,11 +527,11 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
                                 Rechazar solicitud
                             </>
                         )}
-                    </button>
+                    </button>}
 
                     <button
                         onClick={onClose}
-                        disabled={isLoading}
+                        disabled={!canClose}
                         className="px-4 py-2 text-gray-600 hover:text-gray-800 bg-gray-100 hover:bg-gray-200 rounded-lg transition-all disabled:opacity-50 text-sm font-medium shadow-sm hover:shadow-md"
                     >
                         Cancelar
@@ -507,15 +540,15 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
                 </div>
             </div>
 
-            {/* Modal de Asignación de Medidor */}
+            {/* Modals fuera del contenedor principal para evitar conflictos de portales */}
             {showModalMedidor && (
                 <ModalMedidor
                     isOpen={showModalMedidor}
                     onClose={() => {
                         setShowModalMedidor(false);
-                        // No cerrar el modal de solicitud automáticamente
                     }}
                     onMedidorAsignado={aprobarSolicitudDespuesDeAsignar}
+                    tipoSolicitud={solicitud.tipoSolicitud || (info.tipoSolicitud as any)}
                     afiliado={{
                         tipo: solicitud.tipo,
                         datos: solicitud.datos
@@ -535,8 +568,8 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                        
-                        <AlertDialogAction 
+
+                        <AlertDialogAction
                             onClick={handleConfirmAprobar}
                             disabled={aprobarYEnEsperaMutation.isPending}
                         >
@@ -561,8 +594,8 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                        
-                        <AlertDialogAction 
+
+                        <AlertDialogAction
                             onClick={handleConfirmCompletar}
                             disabled={completarMutation.isPending}
                         >
@@ -577,30 +610,61 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
 
             {/* AlertDialog para rechazar */}
             <AlertDialog open={showRechazarDialog} onOpenChange={setShowRechazarDialog}>
-                <AlertDialogContent>
+                <AlertDialogContent className="max-w-md">
                     <AlertDialogHeader>
-                        <AlertDialogTitle>¿Rechazar solicitud?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                            ¿Está seguro de RECHAZAR la solicitud de <strong>{info.nombre}</strong>?
-                            <br /><br />
-                            Esta acción marcará la solicitud como rechazada y no podrá ser revertida fácilmente.
+                        <AlertDialogTitle className="text-red-600">
+                            Rechazar Solicitud
+                        </AlertDialogTitle>
+                        <AlertDialogDescription className="text-gray-600 mt-2">
+                            Por favor, indique el motivo del rechazo de la solicitud. Este será enviado al solicitante por correo.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
+
+                    {/* Campo de Motivo */}
+                    <div className="space-y-3 my-4">
+                        <label className="block text-sm font-semibold text-gray-700">
+                            Motivo del Rechazo *
+                        </label>
+                        <textarea
+                            placeholder="Describe el motivo del rechazo (mínimo 10 caracteres)..."
+                            value={motivoRechazo}
+                            onChange={(e) => setMotivoRechazo(e.target.value)}
+                            className="w-full min-h-24 resize-none border border-gray-300 rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-red-500"
+                        />
+                        <div className="flex justify-between text-xs text-gray-500">
+                            <span>
+                                {motivoRechazo.length} / 500 caracteres
+                            </span>
+                            {motivoRechazo.length < 10 && motivoRechazo.length > 0 && (
+                                <span className="text-red-500">
+                                    Mínimo 10 caracteres requeridos
+                                </span>
+                            )}
+                        </div>
+                    </div>
+
                     <AlertDialogFooter>
-                        
-                        <AlertDialogAction 
-                            onClick={handleConfirmRechazar}
+                        <AlertDialogCancel
+                            onClick={() => {
+                                setMotivoRechazo('');
+                                setShowRechazarDialog(false);
+                            }}
                             disabled={rechazarMutation.isPending}
                         >
-                            {rechazarMutation.isPending ? 'Rechazando...' : 'Rechazar'}
-                        </AlertDialogAction>
-                        <AlertDialogCancel disabled={rechazarMutation.isPending}>
                             Cancelar
                         </AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={() => handleConfirmRechazar()}
+                            disabled={motivoRechazo.trim().length < 10 || rechazarMutation.isPending}
+                            className="bg-red-600 hover:bg-red-700 disabled:bg-gray-400"
+                        >
+                            {rechazarMutation.isPending ? 'Rechazando...' : 'Confirmar Rechazo'}
+                        </AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
         </div>
+
     );
 };
 

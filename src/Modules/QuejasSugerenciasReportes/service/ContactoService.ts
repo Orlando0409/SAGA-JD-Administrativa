@@ -32,8 +32,8 @@ export const actualizarEstadoReporte = async (idReporte: number, Id_Estado_Repor
     const response = await axiosPrivate.patch(`/reportes/${idReporte}/estado`, { Id_Estado_Reporte });
     return response.data;
 }
-export const actualizarEstadoSugerencia = async (idSugerencia: number, Id_EstadoSugerencia: number) => {
-    const response = await axiosPrivate.patch(`/sugerencias/${idSugerencia}/estado`, { Id_EstadoSugerencia });
+export const actualizarEstadoSugerencia = async (idSugerencia: number, Id_Estado_Sugerencia: number) => {
+    const response = await axiosPrivate.patch(`/sugerencias/${idSugerencia}/estado`, { Id_Estado_Sugerencia });
     return response.data;
 }
 export const actualizarEstadoQueja = async (idQueja: number, Id_Estado_Queja: number) => {

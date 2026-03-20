@@ -1,18 +1,13 @@
-/**
- * Tipos compartidos para el manejo de solicitudes
- */
-
 export type TipoSolicitud =
     | 'afiliacion'
     | 'asociado'
     | 'cambio-medidor'
-    | 'desconexion';
+    | 'desconexion'
+    | 'agregar-medidor';
 
 export type TipoPersona = 'fisica' | 'juridica';
 
-/**
- * Estados de solicitud
- */
+
 export const EstadoSolicitud = {
     Registro: 1,
     EnRevision: 2,
@@ -23,12 +18,11 @@ export const EstadoSolicitud = {
 
 export type EstadoSolicitud = typeof EstadoSolicitud[keyof typeof EstadoSolicitud];
 
-/**
- * Request para cambiar el estado de una solicitud
- */
+
 export interface CambioEstadoRequest {
     tipoSolicitud: TipoSolicitud;
     tipoPersona: TipoPersona;
     solicitudId: number | string;
     nuevoEstado: EstadoSolicitud;
+    motivoRechazo?: string;
 }

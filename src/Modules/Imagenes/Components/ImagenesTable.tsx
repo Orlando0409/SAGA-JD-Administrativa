@@ -31,12 +31,19 @@ import type { Imagen } from "../Models/ModelsEdiImagen";
 import ImagenForm from "./CreateImagenModal";
 import ImagenModal from "./DetailImagenModal";
 import ImagenFormEdit from "./EditImagenModal";
+import { useUserPermissions } from '@/Modules/Auth/Hooks/PermissionHook';
 
 
 export default function ImagenesTable() {
     const { data: imagenes, isLoading, isError, refetch } = useGetImagenes();
     const deleteImagenMutation = useDeleteImagen();
     const { showSuccess, showError } = useAlerts();
+    const { canCreate, canEdit, canView } = useUserPermissions();
+
+    const hasCreatePermission = canCreate('imagenes');
+    const hasEditPermission = canEdit('imagenes');
+    const hasViewPermission = canView('imagenes');
+    const hasDeletePermission = canEdit('imagenes'); // Eliminar requiere permiso de edicion
 
     const [globalFilter, setGlobalFilter] = useState('');
     const [formVisible, setFormVisible] = useState(false);
@@ -90,21 +97,26 @@ export default function ImagenesTable() {
             header: 'Acciones',
             cell: info => (
                 <div className="flex justify-center gap-1">
-                    <button
-                        className="px-4 py-1 bg-gray-600 text-white text-xs rounded hover:bg-gray-700 transition-colors"
-                        onClick={() => handleViewDetail(info.row.original)}
-                        title="Ver detalles"
-                    >
-                        Ver
-                    </button>
-                    <button
-                        className="px-2 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition-colors"
-                        onClick={() => handleEdit(info.row.original)}
-                        title="Editar"
-                    >
-                        Editar
-                    </button>
-                    <AlertDialog>
+                    {hasViewPermission && (
+                        <button
+                            className="px-4 py-1 bg-gray-600 text-white text-xs rounded hover:bg-gray-700 transition-colors"
+                            onClick={() => handleViewDetail(info.row.original)}
+                            title="Ver detalles"
+                        >
+                            Ver
+                        </button>
+                    )}
+                    {hasEditPermission && (
+                        <button
+                            className="px-2 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition-colors"
+                            onClick={() => handleEdit(info.row.original)}
+                            title="Editar"
+                        >
+                            Editar
+                        </button>
+                    )}
+                    {hasDeletePermission && (
+                        <AlertDialog>
                         <AlertDialogTrigger asChild>
                             <button
                                 className="px-2 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-700 transition-colors"
@@ -120,7 +132,7 @@ export default function ImagenesTable() {
                                     <span>¿Eliminar imagen?</span>
                                 </AlertDialogTitle>
                                 <AlertDialogDescription>
-                                    <span>¿Estás seguro de que deseas eliminar la imagen "{info.row.original.Nombre_Imagen}"? Esta acción no se puede deshacer.</span>
+                                    <span>¿Estás seguro de que deseas eliminar la imagen "{info.row.original.Nombre_Imagen.length > 25 ? info.row.original.Nombre_Imagen.substring(0, 25) + '...' : info.row.original.Nombre_Imagen}"? Esta acción no se puede deshacer.</span>
                                 </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
@@ -136,6 +148,7 @@ export default function ImagenesTable() {
                             </AlertDialogFooter>
                         </AlertDialogContent>
                     </AlertDialog>
+                    )}
                 </div>
             ),
         }),
@@ -205,13 +218,15 @@ export default function ImagenesTable() {
                                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                             />
                         </div>
-                        <button
-                            onClick={() => setFormVisible(true)}
-                            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md flex items-center gap-2 transition-colors"
-                        >
-                            <LuPlus className="w-4 h-4" />
-                            Subir Imagen
-                        </button>
+                        {hasCreatePermission && (
+                            <button
+                                onClick={() => setFormVisible(true)}
+                                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md flex items-center gap-2 transition-colors"
+                            >
+                                <LuPlus className="w-4 h-4" />
+                                Subir Imagen
+                            </button>
+                        )}
                     </div>
                 </div>
             </div>

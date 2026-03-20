@@ -6,6 +6,12 @@ export const CalidadAguaSchema = z.object({
     .min(5, "El título debe tener al menos 5 caracteres.")
     .max(100, "El título no puede tener más de 100 caracteres.")
     .regex(/^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\s!?¿¡().,-]+$/, "El título contiene caracteres no permitidos."),
+
+  Descripcion: z
+    .string()
+    .trim()
+    .min(10, "La descripción debe tener al menos 10 caracteres.")
+    .max(200, "La descripción no puede tener más de 200 caracteres."),
     
   archivo: z
     .instanceof(File)
@@ -25,6 +31,13 @@ export const CalidadAguaUpdateSchema = z.object({
     .min(5, "El título debe tener al menos 5 caracteres.")
     .max(100, "El título no puede tener más de 100 caracteres.")
     .regex(/^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\s!?¿¡().,-]+$/, "El título contiene caracteres no permitidos.")
+    .optional(),
+
+  Descripcion: z
+    .string()
+    .trim()
+    .min(10, "La descripción debe tener al menos 10 caracteres.")
+    .max(200, "La descripción no puede tener más de 200 caracteres.")
     .optional(),
   
   archivo: z

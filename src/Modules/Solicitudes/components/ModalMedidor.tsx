@@ -14,7 +14,7 @@ import { useAlerts } from '@/Modules/Global/context/AlertContext';
 import type { SolicitudFisica } from '../Models/ModelosFisicas';
 import type { SolicitudJuridica } from '../Models/ModelosJuridicos';
 import CreateMedidorModal from '@/Modules/Inventario/components/Medidores/CreateMedidorModal';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { getMedidoresNoInstalados } from '@/Modules/Inventario/service/MedidorServices';
 import { useAsignarMedidor } from '../Hooks/HookAfiliadoMedidor';
 
@@ -22,6 +22,7 @@ interface ModalMedidorProps {
     isOpen: boolean;
     onClose: () => void;
     onMedidorAsignado?: () => void; // Callback para ejecutar después de asignar medidor
+    tipoSolicitud?: 'Afiliacion' | 'Cambio de Medidor' | 'Asociado' | 'Desconexion' | 'Agregar Medidor';
     afiliado: {
         tipo: 'solicitud-fisica' | 'solicitud-juridica';
         datos: SolicitudFisica | SolicitudJuridica;
@@ -35,8 +36,9 @@ interface Medidor {
     Fecha_Creacion?: string | Date;
 }
 
-const ModalMedidor = ({ isOpen, onClose, onMedidorAsignado, afiliado }: ModalMedidorProps) => {
+const ModalMedidor = ({ isOpen, onClose, onMedidorAsignado, tipoSolicitud, afiliado }: ModalMedidorProps) => {
     const asignarMedidorMutation = useAsignarMedidor();
+    const queryClient = useQueryClient();
     const { showError } = useAlerts();
 
     // Hook para obtener solo medidores NO instalados
@@ -111,11 +113,16 @@ const ModalMedidor = ({ isOpen, onClose, onMedidorAsignado, afiliado }: ModalMed
             await asignarMedidorMutation.mutateAsync({
                 Id_Medidor: medidorSeleccionado.Id_Medidor,
                 Id_Tipo_Entidad: afiliado.tipo === 'solicitud-fisica' ? 1 : 2,
-                Id_Solicitud: afiliadoInfo.Id_Afiliado
+                Id_Solicitud: afiliadoInfo.Id_Afiliado,
+                tipoSolicitud: tipoSolicitud
             });
-            
+
             setShowConfirmDialog(false);
             onClose();
+
+            // Refrescar queries de solicitudes para que ModalSolicitud reciba datos actualizados
+            await queryClient.refetchQueries({ queryKey: ["solicitudes-fisicas"] });
+            await queryClient.refetchQueries({ queryKey: ["solicitudes-juridicas"] });
 
             // Ejecutar callback para aprobar la solicitud después de asignar
             if (onMedidorAsignado) {
@@ -306,7 +313,7 @@ const ModalMedidor = ({ isOpen, onClose, onMedidorAsignado, afiliado }: ModalMed
 
                     {/* Footer con botones */}
                     <div className="flex items-center justify-end gap-3 p-6 border-t bg-gray-50">
-                        
+
                         <button
                             onClick={handleAsignarMedidor}
                             disabled={!medidorSeleccionado || asignarMedidorMutation.isPending}
@@ -347,7 +354,7 @@ const ModalMedidor = ({ isOpen, onClose, onMedidorAsignado, afiliado }: ModalMed
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                        <AlertDialogAction 
+                        <AlertDialogAction
                             onClick={handleConfirmAsignacion}
                             disabled={asignarMedidorMutation.isPending}
                         >

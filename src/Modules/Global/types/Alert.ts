@@ -14,6 +14,8 @@ export interface AlertProps {
     text: string;
     onClick: () => void;
   };
+  duration?: number;
+  showProgress?: boolean;
 }
 
 export interface AlertState {
@@ -35,6 +37,7 @@ export const alertConfig = {
     borderColor: 'border-green-700',
     textColor: 'text-green-100',
     titleColor: 'text-green-50',
+    progressColor: 'bg-green-600',
     icon: FiCheckCircle,
   },
   error: {
@@ -42,6 +45,7 @@ export const alertConfig = {
     borderColor: 'border-red-700',
     textColor: 'text-red-100',
     titleColor: 'text-red-50',
+    progressColor: 'bg-red-600',
     icon: FiXCircle,
   },
   warning: {
@@ -49,6 +53,7 @@ export const alertConfig = {
     borderColor: 'border-yellow-700',
     textColor: 'text-yellow-100',
     titleColor: 'text-yellow-50',
+    progressColor: 'bg-yellow-600',
     icon: HiExclamationTriangle,
   },
   info: {
@@ -56,6 +61,7 @@ export const alertConfig = {
     borderColor: 'border-blue-700',
     textColor: 'text-blue-100',
     titleColor: 'text-blue-50',
+    progressColor: 'bg-blue-600',
     icon: HiInformationCircle,
   },
 };

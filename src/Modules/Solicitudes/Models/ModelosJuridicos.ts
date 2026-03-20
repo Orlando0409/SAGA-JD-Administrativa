@@ -1,6 +1,6 @@
 export interface SolicitudJuridicaBase {
     Id_Solicitud?: number; // ID del backend
-    Tipo_Solicitud: "Afiliacion" | "Desconexion" | "Cambio de Medidor" | "Asociado";
+    Tipo_Solicitud: "Afiliacion" | "Desconexion" | "Cambio de Medidor" | "Asociado" | "Agregar Medidor";
     Razon_Social: string;
     Cedula_Juridica: string;
     Direccion_Exacta?: string;
@@ -12,6 +12,13 @@ export interface SolicitudJuridicaBase {
     };
     Fecha_Creacion: string;
     Fecha_Actualizacion: string;
+    Id_Medidor?: number;
+    Numero_Medidor?: string | number;
+    Numero_Medidor_Actual?: string | number;
+    Medidor?: {
+        Id_Medidor?: number;
+        Numero_Medidor?: string | number;
+    };
 }
 
 
@@ -33,15 +40,22 @@ export interface SolicitudCambioMedidorJuridica extends SolicitudJuridicaBase {
     Direccion_Exacta: string;
     Motivo_Solicitud: string;
     Numero_Medidor_Anterior: string;
+    Numero_Medidor?: string | number;
 }
 export interface SolicitudAsociadoJuridica extends SolicitudJuridicaBase {
     Motivo_Solicitud: string;
-    
+
 }
 
-export type SolicitudJuridica = 
-    | SolicitudAfiliacionJuridica 
-    | SolicitudDesconexionJuridica 
-    | SolicitudCambioMedidorJuridica 
-    | SolicitudAsociadoJuridica; 
-   
+export interface SolicitudAgregarMedidorJuridica extends SolicitudJuridicaBase {
+    Direccion_Exacta: string;
+    Motivo_Solicitud: string;
+    Numero_Medidor_Nuevo?: string | number;
+}
+
+export type SolicitudJuridica =
+    | SolicitudAfiliacionJuridica
+    | SolicitudDesconexionJuridica
+    | SolicitudCambioMedidorJuridica
+    | SolicitudAsociadoJuridica
+    | SolicitudAgregarMedidorJuridica;

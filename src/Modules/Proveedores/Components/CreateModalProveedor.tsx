@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { LuX, LuUser, LuBuilding2 } from 'react-icons/lu';
 import PhoneInputComponent from '@/Modules/Global/components/PhoneInputComponent';
 import { isValidPhoneNumber } from 'react-phone-number-input';
-import { useCedulaLookup } from '../Hook/useCedulaLookup';
+import { CedulaLookup } from '../Hook/CedulaLookup';
 import {
   CreateProveedorSchemaWithIdentificacionValidation,
   type CreateProveedorSchemaData,
@@ -49,7 +49,7 @@ const CreateModalProveedor = ({ onClose, setShowCreateModal }: CreateModalProvee
   const { showSuccess, showError, showWarning } = useAlerts();
 
   // Hook para autocompletar cédula
-  const { lookup, isLoading: loadingCedula } = useCedulaLookup();
+  const { lookup, isLoading: loadingCedula, lookupJuridico, isLoadingJuridico: loadingCedulaJuridica } = CedulaLookup();
 
   // Hook para crear proveedor físico
   const {
@@ -102,32 +102,45 @@ const CreateModalProveedor = ({ onClose, setShowCreateModal }: CreateModalProvee
     }
   };
 
-  // Función específica para manejar input de cédula jurídica
-  const createCedulaJuridicaHandler = (fieldHandleChange: (value: string) => void) => {
-    return (e: React.ChangeEvent<HTMLInputElement>) => {
-      let value = e.target.value;
+  // Función para manejar el cambio de cédula jurídica con búsqueda automática
+  const handleCedulaJuridicaChange = async (cedula: string) => {
+    // Permitir solo dígitos y guiones
+    const value = cedula.replace(/[^\d-]/g, '');
 
-      // Permitir solo dígitos y guiones
-      value = value.replace(/[^\d-]/g, '');
+    // Remover guiones para validar longitud (máximo 10 dígitos)
+    const digitsOnly = value.replace(/-/g, '');
+    if (digitsOnly.length > 10) return;
 
-      // Remover guiones para validar longitud (máximo 10 dígitos)
-      const digitsOnly = value.replace(/-/g, '');
-      if (digitsOnly.length > 10) {
-        return; // No permitir más de 10 dígitos
+    // Actualizar el campo del formulario
+    formJuridico.setFieldValue('Cedula_Juridica', value);
+
+    // Actualizar contador de caracteres
+    setFieldCharCounts(prev => ({
+      ...prev,
+      Cedula_Juridica: value.length
+    }));
+
+    // Limpiar error del campo
+    setFormErrors(prev => {
+      const newErrors = { ...prev };
+      delete newErrors['Cedula_Juridica'];
+      return newErrors;
+    });
+
+    // Validar en tiempo real
+    validateFieldRealTime('Cedula_Juridica', value);
+
+    // Buscar nombre cuando tenga exactamente 10 dígitos
+    if (digitsOnly.length === 10) {
+      const nombre = await lookupJuridico(digitsOnly);
+      if (nombre) {
+        formJuridico.setFieldValue('Razon_Social', nombre);
+        setFieldCharCounts(prev => ({
+          ...prev,
+          Razon_Social: nombre.length,
+        }));
       }
-
-      // Actualizar contador de caracteres
-      setFieldCharCounts(prev => ({
-        ...prev,
-        Cedula_Juridica: value.length
-      }));
-
-      // Llamar al handler del campo
-      fieldHandleChange(value);
-
-      // Validar en tiempo real
-      validateFieldRealTime('Cedula_Juridica', value);
-    };
+    }
   };
 
   // Función para validar en tiempo real
@@ -275,8 +288,6 @@ const CreateModalProveedor = ({ onClose, setShowCreateModal }: CreateModalProvee
       return;
     }
 
-    const errorMessage = error?.message || 'Error desconocido al crear el proveedor';
-    showError(`Error al crear el proveedor: ${errorMessage}`);
   };
 
   // Formulario para proveedor físico
@@ -628,17 +639,27 @@ const CreateModalProveedor = ({ onClose, setShowCreateModal }: CreateModalProvee
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         Cédula Jurídica <span className="text-red-500">*</span>
                       </label>
-                      <input
-                        type="text"
-                        value={field.state.value}
-                        onChange={createCedulaJuridicaHandler(field.handleChange)}
-                        className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-colors ${formErrors.Cedula_Juridica
-                            ? 'border-red-300 focus:ring-red-500'
-                            : 'border-gray-300 focus:ring-blue-500'
-                          }`}
-                        placeholder="Ej: 3-101-654321 (10 dígitos, inicia con 2,3,4 o 5)"
-                        maxLength={JURIDICO_VALIDATION_LIMITS.CEDULA_JURIDICA_MAX_LENGTH}
-                      />
+                      <div className="relative">
+                        <input
+                          type="text"
+                          value={field.state.value}
+                          onChange={async (e) => {
+                            await handleCedulaJuridicaChange(e.target.value);
+                          }}
+                          className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-colors ${formErrors.Cedula_Juridica
+                              ? 'border-red-300 focus:ring-red-500'
+                              : 'border-gray-300 focus:ring-blue-500'
+                            }`}
+                          placeholder="Ej: 3-101-654321 (10 dígitos, inicia con 2,3,4 o 5)"
+                          maxLength={JURIDICO_VALIDATION_LIMITS.CEDULA_JURIDICA_MAX_LENGTH}
+                          disabled={loadingCedulaJuridica}
+                        />
+                        {loadingCedulaJuridica && (
+                          <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
+                          </div>
+                        )}
+                      </div>
 
                       {renderCharCounter(
                         fieldCharCounts.Cedula_Juridica,

@@ -75,6 +75,12 @@ const Roles = () => {
 
   const handleDeactivate = async (roleId: number) => {
     try {
+      // Validar que no sea el rol Administrador
+      const role = allRoles.find(r => r.Id_Rol === roleId);
+      if (role?.Nombre_Rol.toLowerCase() === 'administrador') {
+        console.warn('No se puede desactivar el rol Administrador');
+        return;
+      }
       await deactivateRoleMutation.mutateAsync({ id: roleId });
     } catch (error) {
       console.error('Error deactivating role:', error);
@@ -158,9 +164,9 @@ const Roles = () => {
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
                         <button
-                          className="px-2 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-700 transition-colors"
-                          disabled={deactivateRoleMutation.isPending}
-                          title="Desactivar rol"
+                          className="px-2 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                          disabled={deactivateRoleMutation.isPending || info.row.original.Nombre_Rol.toLowerCase() === 'administrador'}
+                          title={info.row.original.Nombre_Rol.toLowerCase() === 'administrador' ? 'No se puede desactivar el rol Administrador' : 'Desactivar rol'}
                         >
                           Desactivar
                         </button>

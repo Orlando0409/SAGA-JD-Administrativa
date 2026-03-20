@@ -11,7 +11,7 @@ export interface UnidadMedicion {
   Estado?: EstadoUnidadMedicion; // Alias para compatibilidad
   Fecha_Creacion: Date | string;
   Fecha_Actualizacion: Date | string;
-  Usuario_Creador: {
+  Usuario: {
     Id_Usuario: number;
     Nombre_Usuario: string;
     Id_Rol: number;

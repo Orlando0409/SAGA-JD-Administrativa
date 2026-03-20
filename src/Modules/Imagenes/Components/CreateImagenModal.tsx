@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 import { useAlerts } from "@/Modules/Global/context/AlertContext";
 import { z } from "zod";
@@ -17,7 +17,8 @@ export default function ImagenForm({ onClose, refetch }: ImagenFormProps) {
   const [nombre, setNombre] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [_preview, setPreview] = useState<string | null>(null);
-  const  {mutateAsync, isPending}= useCreateImagen();
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const { mutateAsync, isPending } = useCreateImagen();
   const [nombreError, setNombreError] = useState("");
   const [isValid, setIsValid] = useState(false);
 
@@ -92,7 +93,7 @@ export default function ImagenForm({ onClose, refetch }: ImagenFormProps) {
     <div className="fixed inset-0 backdrop-blur flex items-center justify-center z-50">
       <form
         onSubmit={handleSubmit}
-        className="w-full max-w-md bg-white rounded-lg shadow-lg p-6 space-y-4"
+        className="w-full max-w-md bg-white rounded-lg shadow-lg p-6 space-y-2"
       >
         <h3 className="text-lg font-semibold text-gray-800">
           Subir nueva imagen
@@ -131,20 +132,30 @@ export default function ImagenForm({ onClose, refetch }: ImagenFormProps) {
           <label className="block text-sm font-medium text-gray-700">
             Seleccionar imagen
           </label>
-          <div className="flex flex-col sm:flex-row gap-4 items-center">
-            <div className="relative w-full sm:w-2/3">
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleFileChange}
-                className="absolute inset-0 opacity-0 cursor-pointer"
-              />
-              <div className="w-full px-3 py-2 rounded-lg border border-gray-300 bg-white text-sm text-gray-600 cursor-pointer">
-                {file ? file.name : "Seleccionar archivo de imagen"}
-              </div>
-            </div>
-
-          </div>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleFileChange}
+            className="hidden"
+            disabled={isPending}
+          />
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={isPending}
+            className="w-full px-4 py-3 rounded-lg border-2 border-dashed border-sky-300 bg-sky-50 hover:bg-sky-100 transition-colors cursor-pointer flex flex-col items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <svg className="w-8 h-8 text-sky-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+            <span className="text-sky-600 font-medium">
+              {file ? "Cambiar Archivo" : "Haz clic para seleccionar imagen"}
+            </span>
+            {file && (
+              <span className="text-xs text-gray-600 truncate max-w-full">{file.name}</span>
+            )}
+          </button>
         </div>
 
         {/* Nota informativa */}
@@ -159,11 +170,10 @@ export default function ImagenForm({ onClose, refetch }: ImagenFormProps) {
         <div className="flex justify-end gap-4">
           <button
             type="submit"
-            className={`px-4 py-2 rounded-lg shadow-sm text-sm transition-colors ${
-              isValid && file && !isPending
-                ? "bg-blue-600 text-white hover:bg-blue-700"
-                : "bg-gray-300 text-gray-600 cursor-not-allowed"
-            }`}
+            className={`px-4 py-2 rounded-lg shadow-sm text-sm transition-colors ${isValid && file && !isPending
+              ? "bg-blue-600 text-white hover:bg-blue-700"
+              : "bg-gray-300 text-gray-600 cursor-not-allowed"
+              }`}
             disabled={!isValid || !file || isPending}
           >
             {isPending ? (
@@ -178,11 +188,10 @@ export default function ImagenForm({ onClose, refetch }: ImagenFormProps) {
             type="button"
             onClick={onClose}
             disabled={isPending}
-            className={`px-4 py-2 rounded-lg shadow-sm text-sm transition-colors ${
-              isPending
-                ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                : "bg-gray-200 text-gray-800 hover:bg-gray-300"
-            }`}
+            className={`px-4 py-2 rounded-lg shadow-sm text-sm transition-colors ${isPending
+              ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+              : "bg-gray-200 text-gray-800 hover:bg-gray-300"
+              }`}
           >
             Cancelar
           </button>

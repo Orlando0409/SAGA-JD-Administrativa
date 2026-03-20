@@ -14,6 +14,10 @@ const CreateUnidadMedicionModal: React.FC<CreateUnidadMedicionModalProps> = ({
 }) => {
   const createUnidadMedicionMutation = useCreateUnidadMedicion();
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+  const [charCount, setCharCount] = useState({ name: 0, abreviatura: 0, description: 0 });
+  const MAX_NAME_LENGTH = 30;
+  const MAX_ABREV_LENGTH = 10;
+  const MAX_DESC_LENGTH = 100;
   
   const [formData, setFormData] = useState<CreateUnidadMedicionSchemaData>({
     Nombre_Unidad_Medicion: '',
@@ -23,9 +27,28 @@ const CreateUnidadMedicionModal: React.FC<CreateUnidadMedicionModalProps> = ({
 
   const handleInputChange = (field: keyof CreateUnidadMedicionSchemaData) => 
     (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-      setFormData(prev => ({ ...prev, [field]: e.target.value }));
-      if (formErrors[field]) {
-        setFormErrors(prev => ({ ...prev, [field]: '' }));
+      const { value } = e.target;
+      let maxLength = MAX_DESC_LENGTH;
+      let counterKey: 'name' | 'abreviatura' | 'description' = 'description';
+      
+      if (field === 'Nombre_Unidad_Medicion') {
+        maxLength = MAX_NAME_LENGTH;
+        counterKey = 'name';
+      } else if (field === 'Abreviatura') {
+        maxLength = MAX_ABREV_LENGTH;
+        counterKey = 'abreviatura';
+      } else if (field === 'Descripcion') {
+        maxLength = MAX_DESC_LENGTH;
+        counterKey = 'description';
+      }
+      
+      if (value.length <= maxLength) {
+        setFormData(prev => ({ ...prev, [field]: value }));
+        setCharCount(prev => ({ ...prev, [counterKey]: value.length }));
+        
+        if (formErrors[field]) {
+          setFormErrors(prev => ({ ...prev, [field]: '' }));
+        }
       }
     };
 
@@ -62,10 +85,26 @@ const CreateUnidadMedicionModal: React.FC<CreateUnidadMedicionModalProps> = ({
         Abreviatura: '',
         Descripcion: '',
       });
+      setCharCount({ name: 0, abreviatura: 0, description: 0 });
       setFormErrors({});
     } catch (error) {
       console.error('Error al crear unidad de medición:', error);
     }
+  };
+
+  const renderCharCounter = (current: number, max: number) => {
+    const remaining = max - current;
+    const isNearLimit = remaining <= 5;
+    
+    return (
+      <div className="flex justify-end items-center mt-1">
+        <span className={`text-xs font-medium ${
+          isNearLimit ? 'text-orange-600' : 'text-gray-500'
+        }`}>
+          {current}/{max}
+        </span>
+      </div>
+    );
   };
 
   if (!isOpen) return null;
@@ -92,6 +131,7 @@ const CreateUnidadMedicionModal: React.FC<CreateUnidadMedicionModalProps> = ({
               }`}
               placeholder="Ej: Kilogramo, Metro, Litro"
             />
+            {renderCharCounter(charCount.name, MAX_NAME_LENGTH)}
             {formErrors.Nombre_Unidad_Medicion && (
               <p className="text-red-500 text-xs mt-1">{formErrors.Nombre_Unidad_Medicion}</p>
             )}
@@ -111,6 +151,7 @@ const CreateUnidadMedicionModal: React.FC<CreateUnidadMedicionModalProps> = ({
               }`}
               placeholder="Ej: kg, m, L"
             />
+            {renderCharCounter(charCount.abreviatura, MAX_ABREV_LENGTH)}
             {formErrors.Abreviatura && (
               <p className="text-red-500 text-xs mt-1">{formErrors.Abreviatura}</p>
             )}
@@ -125,11 +166,12 @@ const CreateUnidadMedicionModal: React.FC<CreateUnidadMedicionModalProps> = ({
               value={formData.Descripcion}
               onChange={handleInputChange('Descripcion')}
               rows={3}
-              className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none ${
+              className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100 resize-none ${
                 formErrors.Descripcion ? 'border-red-300 bg-red-50' : 'border-gray-300'
               }`}
               placeholder="Descripción de la unidad de medición (opcional)"
             />
+            {renderCharCounter(charCount.description, MAX_DESC_LENGTH)}
             {formErrors.Descripcion && (
               <p className="text-red-500 text-xs mt-1">{formErrors.Descripcion}</p>
             )}

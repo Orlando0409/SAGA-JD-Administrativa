@@ -99,7 +99,7 @@ export const AfiliadoFisicoEditSchema = BaseAfiliadoSchema.extend({
 
   Edad: z.coerce.number()
     .min(18, 'La edad mínima es 18 años')
-    .max(120, 'La edad máxima es 120 años'),
+    .max(90, 'La edad máxima es 90 años'),
 
   // Archivos opcionales en edición
   Planos_Terreno: z.union([z.instanceof(File), z.string()]).optional(),

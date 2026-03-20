@@ -5,7 +5,8 @@ import type {
     SolicitudAfiliacionFisica,
     SolicitudDesconexionFisica,
     SolicitudCambioMedidorFisica,
-    SolicitudAsociadoFisica
+    SolicitudAsociadoFisica,
+    SolicitudAgregarMedidorFisica
 } from "../Models/ModelosFisicas";
 
 // GET - Obtener todas las solicitudes físicas
@@ -36,6 +37,7 @@ export async function getSolicitudesFisicas(): Promise<SolicitudFisica[]> {
                     case 2: tipo = 'Desconexion'; break;
                     case 3: tipo = 'Cambio de Medidor'; break;
                     case 4: tipo = 'Asociado'; break;
+                    case 5: tipo = 'Agregar Medidor'; break;
                     default: tipo = 'Afiliacion';
                 }
 
@@ -52,8 +54,9 @@ export async function getSolicitudesFisicas(): Promise<SolicitudFisica[]> {
             const tiposSolicitud = [
                 { key: 'Afiliacion', tipo: 'Afiliacion' },
                 { key: 'Asociado', tipo: 'Asociado' },
-                { key: 'Cambio De Medidor', tipo: 'Cambio de Medidor' },  // ⚠️ Key exacta del backend
-                { key: 'Desconexion', tipo: 'Desconexion' }
+                { key: 'Cambio De Medidor', tipo: 'Cambio de Medidor' },  
+                { key: 'Desconexion', tipo: 'Desconexion' },
+                { key: 'Agregar Medidor', tipo: 'Agregar Medidor' }
             ];
 
             tiposSolicitud.forEach(({ key, tipo }) => {
@@ -146,6 +149,70 @@ export async function getSolicitudesAsociado(): Promise<SolicitudAsociadoFisica[
         return response.data;
     } catch (error) {
         console.error(' Error al obtener solicitudes de asociado físicas:', error);
+        throw error;
+    }
+}
+
+export async function getSolicitudesAgregarMedidorFisicas(): Promise<SolicitudAgregarMedidorFisica[]> {
+    try {
+        const response = await apiAuth.get("/solicitudes-fisicas/agregar-medidor");
+        return response.data;
+    } catch (error) {
+        console.error(' Error al obtener solicitudes de agregar medidor físicas:', error);
+        throw error;
+    }
+}
+
+export async function getSolicitudAgregarMedidorFisicaById(id: number): Promise<SolicitudAgregarMedidorFisica> {
+    try {
+        const response = await apiAuth.get(`/solicitudes-fisicas/agregar-medidor/${id}`);
+        return response.data;
+    } catch (error) {
+        console.error(` Error al obtener solicitud de agregar medidor física #${id}:`, error);
+        throw error;
+    }
+}
+
+export async function createSolicitudAgregarMedidorFisica(
+    data: Omit<SolicitudAgregarMedidorFisica, 'Id_Solicitud' | 'Estado' | 'Fecha_Creacion' | 'Fecha_Actualizacion'>
+): Promise<SolicitudAgregarMedidorFisica> {
+    try {
+        const response = await apiAuth.post("/solicitudes-fisicas/create/agregar-medidor", data);
+        return response.data;
+    } catch (error) {
+        console.error(' Error al crear solicitud de agregar medidor física:', error);
+        throw error;
+    }
+}
+
+export async function updateSolicitudAgregarMedidorFisica(
+    id: number,
+    idUsuario: number,
+    data: Partial<SolicitudAgregarMedidorFisica>
+): Promise<SolicitudAgregarMedidorFisica> {
+    try {
+        const response = await apiAuth.put(
+            `/solicitudes-fisicas/update/agregar-medidor/${id}?idUsuario=${idUsuario}`,
+            data
+        );
+        return response.data;
+    } catch (error) {
+        console.error(` Error al actualizar solicitud de agregar medidor física #${id}:`, error);
+        throw error;
+    }
+}
+
+export async function cambiarEstadoAgregarMedidorFisica(
+    idSolicitud: number,
+    idEstado: number,
+    idUsuario: number
+): Promise<void> {
+    try {
+        await apiAuth.patch(
+            `/solicitudes-fisicas/update/estado/agregar-medidor/${idSolicitud}/${idEstado}?idUsuario=${idUsuario}`
+        );
+    } catch (error) {
+        console.error(` Error al cambiar estado de agregar medidor física #${idSolicitud}:`, error);
         throw error;
     }
 }

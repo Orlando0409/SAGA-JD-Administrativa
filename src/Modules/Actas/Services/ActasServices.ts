@@ -27,6 +27,18 @@ export const updateActa = async (id: number, formData: FormData): Promise<Acta> 
   return res.data;
 };
 
+export const deleteArchivoActa = async (idActa: number, idArchivo: number): Promise<void> => {
+  try {
+    const response = await apiAuth.delete(`/Actas/${idActa}/archivo/${idArchivo}`);
+    if (response.status !== 200) {
+      throw new Error("Error al eliminar el archivo en el backend.");
+    }
+  } catch (error) {
+    console.error("Error en el servicio al eliminar el archivo:", error);
+    throw new Error("Error al eliminar el archivo.");
+  }
+};
+
 // Eliminar un acta
 export const deleteActa = async (id: number): Promise<void> => {
   try {

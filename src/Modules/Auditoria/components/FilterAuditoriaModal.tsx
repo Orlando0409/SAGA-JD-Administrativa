@@ -32,7 +32,7 @@ const FilterAuditoriaModal = ({
   if (!isOpen) return null;
 
   return (
-    <section className="fixed inset-0 flex items-center justify-end z-50 p-4">
+    <section className="fixed inset-0 flex items-start justify-end z-50 p-4">
       <div className="bg-white rounded-lg shadow-2xl w-full max-w-md max-h-[90vh] flex flex-col overflow-hidden">
         {/* Header */}
         <div className="sticky top-0 bg-white flex items-center justify-between p-4 sm:p-6 border-b border-gray-200 z-10">

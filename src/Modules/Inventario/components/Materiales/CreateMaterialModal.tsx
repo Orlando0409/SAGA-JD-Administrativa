@@ -12,7 +12,12 @@ import CreateModalProveedor from '@/Modules/Proveedores/Components/CreateModalPr
 import { 
   NOMBRE_MATERIAL_MAX_LENGTH, 
   DESCRIPCION_MAX_LENGTH, 
-  PRECIO_MIN 
+  PRECIO_MIN,
+  PRECIO_MAX,
+  CANTIDAD_MIN,
+  CANTIDAD_MAX,
+  NUMERO_ESTANTERIA_MIN,
+  NUMERO_ESTANTERIA_MAX
 } from '../../types/MaterialTypes';
 import { useProveedoresFisicos } from '@/Modules/Proveedores/Hook/hookFisicoProveedor';
 import { useState } from 'react';
@@ -39,6 +44,7 @@ const CreateMaterialModal: React.FC<CreateMaterialModalProps> = ({ isOpen, onClo
     Id_Unidad_Medicion: 0,
     Cantidad: 1,
     Precio_Unitario: 5,
+    Numero_Estanteria: 1,
     IDS_Categorias: [],
     Id_Tipo_Proveedor: undefined,
     Id_Proveedor: undefined,
@@ -88,6 +94,7 @@ const CreateMaterialModal: React.FC<CreateMaterialModalProps> = ({ isOpen, onClo
         Id_Unidad_Medicion: formData.Id_Unidad_Medicion,
         Cantidad: formData.Cantidad,
         Precio_Unitario: formData.Precio_Unitario,
+        Numero_Estanteria: formData.Numero_Estanteria,
         IDS_Categorias: formData.IDS_Categorias ?? [],
         Id_Tipo_Proveedor: formData.Id_Tipo_Proveedor,
         Id_Proveedor: formData.Id_Proveedor,
@@ -103,6 +110,7 @@ const CreateMaterialModal: React.FC<CreateMaterialModalProps> = ({ isOpen, onClo
         Id_Unidad_Medicion: 0,
         Cantidad: 1,
         Precio_Unitario: 5,
+        Numero_Estanteria: 1,
         IDS_Categorias: [],
         Id_Tipo_Proveedor: undefined,
         Id_Proveedor: undefined,
@@ -113,15 +121,12 @@ const CreateMaterialModal: React.FC<CreateMaterialModalProps> = ({ isOpen, onClo
     }
   };
 
-  const renderCharCounter = (current: number, max: number, hasError: boolean) => {
+  const renderCharCounter = (current: number, max: number) => {
     const remaining = max - current;
     const isNearLimit = remaining <= 5;
     
     return (
-      <div className="flex justify-between items-center mt-1">
-        <span className="text-xs text-gray-500">
-          {hasError ? 'Corrige los errores antes de continuar' : 'Completa este campo'}
-        </span>
+      <div className="flex justify-end items-center mt-1">
         <span className={`text-xs font-medium ${
           isNearLimit ? 'text-orange-600' : 'text-gray-500'
         }`}>
@@ -174,7 +179,7 @@ const CreateMaterialModal: React.FC<CreateMaterialModalProps> = ({ isOpen, onClo
                 }`}
                 placeholder="Ej: Cemento Portland"
               />
-              {renderCharCounter(fieldCharCounts.nombreMaterial, NOMBRE_MATERIAL_MAX_LENGTH, !!formErrors.Nombre_Material)}
+              {renderCharCounter(fieldCharCounts.nombreMaterial, NOMBRE_MATERIAL_MAX_LENGTH)}
               {formErrors.Nombre_Material && (
                 <p className="text-red-500 text-xs mt-1">{formErrors.Nombre_Material}</p>
               )}
@@ -194,7 +199,7 @@ const CreateMaterialModal: React.FC<CreateMaterialModalProps> = ({ isOpen, onClo
                 }`}
                 placeholder="Descripción del material"
               />
-              {renderCharCounter(fieldCharCounts.descripcion, DESCRIPCION_MAX_LENGTH, !!formErrors.Descripcion)}
+              {renderCharCounter(fieldCharCounts.descripcion, DESCRIPCION_MAX_LENGTH)}
               {formErrors.Descripcion && (
                 <p className="text-red-500 text-xs mt-1">{formErrors.Descripcion}</p>
               )}
@@ -239,13 +244,24 @@ const CreateMaterialModal: React.FC<CreateMaterialModalProps> = ({ isOpen, onClo
               <input
                 id="cantidad"
                 type="number"
-                min="1"
+                min={CANTIDAD_MIN}
+                max={CANTIDAD_MAX}
                 value={formData.Cantidad}
-                onChange={(e) => setFormData(prev => ({ ...prev, Cantidad: parseInt(e.target.value) || 1 }))}
+                onChange={(e) => {
+                  const value = Number.parseInt(e.target.value);
+                  if (!Number.isNaN(value) && value >= CANTIDAD_MIN && value <= CANTIDAD_MAX) {
+                    setFormData(prev => ({ ...prev, Cantidad: value }));
+                  } else if (e.target.value === '') {
+                    setFormData(prev => ({ ...prev, Cantidad: CANTIDAD_MIN }));
+                  }
+                }}
                 className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
                   formErrors.Cantidad ? 'border-red-500' : 'border-gray-300'
                 }`}
               />
+              <div className="text-right text-xs text-gray-500 mt-1">
+                Rango: {CANTIDAD_MIN.toLocaleString()} - {CANTIDAD_MAX.toLocaleString()}
+              </div>
               {formErrors.Cantidad && (
                 <p className="text-red-500 text-xs mt-1">{formErrors.Cantidad}</p>
               )}
@@ -259,15 +275,57 @@ const CreateMaterialModal: React.FC<CreateMaterialModalProps> = ({ isOpen, onClo
                 id="precio"
                 type="number"
                 min={PRECIO_MIN}
+                max={PRECIO_MAX}
                 step="0.01"
                 value={formData.Precio_Unitario}
-                onChange={(e) => setFormData(prev => ({ ...prev, Precio_Unitario: parseFloat(e.target.value) || PRECIO_MIN }))}
+                onChange={(e) => {
+                  const value = parseFloat(e.target.value);
+                  if (!Number.isNaN(value) && value >= PRECIO_MIN && value <= PRECIO_MAX) {
+                    setFormData(prev => ({ ...prev, Precio_Unitario: value }));
+                  } else if (e.target.value === '') {
+                    setFormData(prev => ({ ...prev, Precio_Unitario: PRECIO_MIN }));
+                  }
+                }}
                 className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
                   formErrors.Precio_Unitario ? 'border-red-500' : 'border-gray-300'
                 }`}
               />
+              <div className="text-right text-xs text-gray-500 mt-1">
+                Rango: ₡{PRECIO_MIN.toLocaleString()} - ₡{PRECIO_MAX.toLocaleString()}
+              </div>
               {formErrors.Precio_Unitario && (
                 <p className="text-red-500 text-xs mt-1">{formErrors.Precio_Unitario}</p>
+              )}
+            </div>
+
+            <div>
+              <label htmlFor="numero-estanteria" className="block text-sm font-medium text-gray-700 mb-1">
+                Número de Estantería <span className="text-red-500">*</span>
+              </label>
+              <input
+                id="numero-estanteria"
+                type="number"
+                min={NUMERO_ESTANTERIA_MIN}
+                max={NUMERO_ESTANTERIA_MAX}
+                value={formData.Numero_Estanteria}
+                onChange={(e) => {
+                  const value = Number.parseInt(e.target.value);
+                  if (!Number.isNaN(value) && value >= NUMERO_ESTANTERIA_MIN && value <= NUMERO_ESTANTERIA_MAX) {
+                    setFormData(prev => ({ ...prev, Numero_Estanteria: value }));
+                  } else if (e.target.value === '') {
+                    setFormData(prev => ({ ...prev, Numero_Estanteria: NUMERO_ESTANTERIA_MIN }));
+                  }
+                }}
+                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                  formErrors.Numero_Estanteria ? 'border-red-500' : 'border-gray-300'
+                }`}
+                placeholder="Ej: 5"
+              />
+              <div className="text-right text-xs text-gray-500 mt-1">
+                Rango: {NUMERO_ESTANTERIA_MIN} - {NUMERO_ESTANTERIA_MAX}
+              </div>
+              {formErrors.Numero_Estanteria && (
+                <p className="text-red-500 text-xs mt-1">{formErrors.Numero_Estanteria}</p>
               )}
             </div>
 

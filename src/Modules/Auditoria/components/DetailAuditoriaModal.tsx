@@ -135,11 +135,11 @@ const DetailAuditoriaModal = ({
               <div className="p-2">
                 <LuDatabase className="w-5 h-5 text-blue-600" />
               </div>
-              <div className="flex-1">
+              <div className="flex-1 min-w-0">
                 <p className="text-xs font-medium text-gray-500 uppercase">
                  Registro Afectado
                 </p>
-                <p className="text-base font-medium text-gray-900 mt-1">
+                <p className="text-base font-medium text-gray-900 mt-1 break-all">
                   {auditoria.Registro_Afectado}
                 </p>
               </div>
@@ -155,7 +155,7 @@ const DetailAuditoriaModal = ({
                   <span className="w-2 h-2 bg-red-500 rounded-full"></span>
                   Datos Anteriores
                 </h3>
-                <div className="bg-white rounded p-3 max-h-64 overflow-y-auto">
+                <div className="bg-white rounded p-3 max-h-64 overflow-y-auto scrollbar-thin scrollbar-thumb-red-600 scrollbar-track-red-100">
                   <pre className="text-xs text-gray-700 whitespace-pre-wrap break-words font-mono">
                     {typeof datosAnteriores === 'object'
                       ? JSON.stringify(datosAnteriores, null, 2)
@@ -172,7 +172,7 @@ const DetailAuditoriaModal = ({
                   <span className="w-2 h-2 bg-green-500 rounded-full"></span>
                   Datos Nuevos
                 </h3>
-                <div className="bg-white rounded p-3 max-h-64 overflow-y-auto">
+                <div className="bg-white rounded p-3 max-h-64 overflow-y-auto scrollbar-thin scrollbar-thumb-green-600 scrollbar-track-green-100">
                   <pre className="text-xs text-gray-700 whitespace-pre-wrap break-words font-mono">
                     {typeof datosNuevos === 'object'
                       ? JSON.stringify(datosNuevos, null, 2)

@@ -19,6 +19,7 @@ import EditProveedorModal from './EditFisicoProveedoresModal';
 import EditProveedorJuridicoModal from './EditJuridicoProveedorModal';
 import ProveedorDetailModal from './DetailFisicoProveedor';
 import ProveedorJuridicoDetailModal from './DetailJuridicoProveedor';
+import { useUserPermissions } from '@/Modules/Auth/Hooks/PermissionHook';
 
 interface ActionButtonsProps {
     proveedor: ProveedorFisico | ProveedorJuridico;
@@ -33,6 +34,10 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({ proveedor, tipoProveedor 
     const [showEditModal, setShowEditModal] = useState(false);
     const [showDetailModal, setShowDetailModal] = useState(false);
     const { showSuccess, showError } = useAlerts();
+    const { canEdit, canView } = useUserPermissions();
+
+    const hasEditPermission = canEdit('proveedores');
+    const hasViewPermission = canView('proveedores');
 
     // Determinar estado activo del proveedor
     const isActiveProveedor = (estado: any): boolean => {
@@ -82,27 +87,32 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({ proveedor, tipoProveedor 
     return (
         <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
             {/* Botón de Ver */}
-            <button
-                type="button"
-                onClick={() => setShowDetailModal(true)}
-                className="px-2 py-1 bg-gray-600 text-white text-xs rounded hover:bg-gray-700 transition-colors"
-                title="Ver proveedor"
-            >
-                Ver
-            </button>
+            {hasViewPermission && (
+                <button
+                    type="button"
+                    onClick={() => setShowDetailModal(true)}
+                    className="px-2 py-1 bg-gray-600 text-white text-xs rounded hover:bg-gray-700 transition-colors"
+                    title="Ver proveedor"
+                >
+                    Ver
+                </button>
+            )}
 
             {/* Botón de Editar */}
-            <button
-                type="button"
-                onClick={handleEdit}
-                className="px-2 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition-colors"
-                title="Editar proveedor"
-            >
-                Editar
-            </button>
+            {hasEditPermission && (
+                <button
+                    type="button"
+                    onClick={handleEdit}
+                    className="px-2 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition-colors"
+                    title="Editar proveedor"
+                >
+                    Editar
+                </button>
+            )}
 
             {/* Botón de Cambiar Estado */}
-            <AlertDialog>
+            {hasEditPermission && (
+                <AlertDialog>
                 <AlertDialogTrigger asChild>
                     <button
                         type="button"
@@ -146,6 +156,7 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({ proveedor, tipoProveedor 
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
+            )}
 
             {/* Modales de Edición */}
             {tipoProveedor === 'Físico' ? (

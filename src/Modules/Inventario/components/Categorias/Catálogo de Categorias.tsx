@@ -153,7 +153,7 @@ const CategoriasManagement: React.FC<CategoriasManagementProps> = () => {
                       <span>¿Desactivar categoría?</span>
                     </AlertDialogTitle>
                     <AlertDialogDescription>
-                      <span>¿Estás seguro de que deseas desactivar la categoría "{info.row.original.Nombre_Categoria}"?</span>
+                      <span>¿Estás seguro de que deseas desactivar la categoría "{info.row.original.Nombre_Categoria.length > 20 ? info.row.original.Nombre_Categoria.substring(0, 20) + '...' : info.row.original.Nombre_Categoria}"?</span>
                       <br />
                       <span>Esta acción puede revertirse posteriormente.</span>
                     </AlertDialogDescription>

@@ -1,8 +1,19 @@
 import { useState, useEffect } from "react";
-import { useUpdateActa } from "../Hook/hookActas";
+import { useUpdateActa, useDeleteArchivoActa } from "../Hook/hookActas";
 import { FaFilePdf, FaTimes } from "react-icons/fa";
-import { Alert } from '@/Modules/Global/components/Alert/ui/Alert';
-import type { Acta } from "../Models/ActasModels";
+import { useAlerts } from "@/Modules/Global/context/AlertContext";
+import type { Acta , ArchivoActa } from "../Models/ActasModels";
+import {
+    AlertDialog,
+    AlertDialogTrigger,
+    AlertDialogContent,
+    AlertDialogTitle,
+    AlertDialogDescription,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogHeader,
+    AlertDialogFooter
+} from "@/Modules/Global/components/Sidebar/ui/alert-dialog";
 
 interface ActasEditProps {
     acta: Acta;
@@ -12,29 +23,39 @@ interface ActasEditProps {
 
 export default function ActasEdit({ acta, onClose, refetch }: ActasEditProps) {
     const updateActaMutation = useUpdateActa();
+    const deleteArchivoMutation = useDeleteArchivoActa();
+    const { showSuccess, showError } = useAlerts();
 
     const [titulo, setTitulo] = useState(acta.Titulo);
     const [descripcion, setDescripcion] = useState(acta.Descripcion);
     const [files, setFiles] = useState<File[]>([]);
+    const [existingFiles, setExistingFiles] = useState<ArchivoActa[]>(acta.Archivos ?? []);
+    const [deletingId, setDeletingId] = useState<number | null>(null);
     const [tituloError, setTituloError] = useState(""); // Validación de título
     const [descripcionError, setDescripcionError] = useState(""); // Validación de descripción
-    const [notification, setNotification] = useState<{
-        type: 'success' | 'error' | 'info';
-        title: string;
-        description?: string;
-    } | null>(null);
-
-    useEffect(() => {
-        if (!notification) return;
-        const t = setTimeout(() => setNotification(null), 3500);
-        return () => clearTimeout(t);
-    }, [notification]);
+    const [showConfirmDialog, setShowConfirmDialog] = useState(false);
 
     // Pre-cargar los valores del acta cuando se monta el componente
     useEffect(() => {
         setTitulo(acta.Titulo);
         setDescripcion(acta.Descripcion);
+        setExistingFiles(acta.Archivos ?? []);
     }, [acta]);
+
+    const handleDeleteArchivoExistente = (idArchivo: number) => {
+        setDeletingId(idArchivo);
+        deleteArchivoMutation.mutate({ idActa: acta.Id_Acta, idArchivo }, {
+            onSuccess: () => {
+                setExistingFiles(prev => prev.filter(f => f.Id_Archivo_Acta !== idArchivo));
+                showSuccess('Archivo eliminado correctamente.');
+                setDeletingId(null);
+            },
+            onError: () => {
+                showError('No se pudo eliminar el archivo.');
+                setDeletingId(null);
+            },
+        });
+    };
 
     const handleTituloChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
@@ -60,8 +81,10 @@ export default function ActasEdit({ acta, onClose, refetch }: ActasEditProps) {
         }
     };
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
+    const handleSubmit = async (e?: React.FormEvent) => {
+        if (e) {
+            e.preventDefault();
+        }
 
         const formData = new FormData();
         formData.append("Titulo", titulo.trim());
@@ -79,31 +102,19 @@ export default function ActasEdit({ acta, onClose, refetch }: ActasEditProps) {
             {
                 onSuccess: () => {
                     refetch(); // Refresca la tabla para mostrar los cambios
-                    setNotification({ type: 'success', title: 'Acta actualizada con éxito.' });
+                    showSuccess('¡Acta actualizada con éxito!');
                     setTimeout(() => onClose(), 500); // Oculta el modal después de actualizar el acta
                 },
                 onError: (error) => {
                     console.error("Error al actualizar el acta:", error);
-                    setNotification({ type: 'error', title: 'Hubo un problema al actualizar el acta.' });
+                    showError('Hubo un problema al actualizar el acta.');
                 },
             }
         );
     };
 
     return (
-        <>
-            {notification && (
-                <div className="fixed top-4 right-4 z-[200]">
-                    <Alert
-                        type={notification.type === 'success' ? 'success' : (notification.type === 'error' ? 'error' : 'info')}
-                        title={notification.title}
-                        description={notification.description}
-                        onClose={() => setNotification(null)}
-                    />
-                </div>
-            )}
-
-            <div className="fixed inset-0 bg-opacity-10 backdrop-blur-sm flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-opacity-10 backdrop-blur-sm flex items-center justify-center z-50">
                 <form
                     onSubmit={handleSubmit}
                     className="w-full max-w-md bg-white rounded-lg shadow-lg flex flex-col overflow-hidden max-h-[90vh]"
@@ -142,7 +153,7 @@ export default function ActasEdit({ acta, onClose, refetch }: ActasEditProps) {
                                 value={descripcion}
                                 onChange={handleDescripcionChange}
                                 maxLength={200}
-                                className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-sky-500 text-sm break-words"
+                                className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-sky-500 text-sm break-words scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100"
                                 style={{ whiteSpace: "normal", overflowWrap: "break-word" }}
                                 rows={3}
                             />
@@ -154,10 +165,60 @@ export default function ActasEdit({ acta, onClose, refetch }: ActasEditProps) {
                             )}
                         </div>
 
+                        {/* Archivos existentes del acta */}
+                        {existingFiles.length > 0 && (
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Archivos actuales
+                                </label>
+                                <div className="space-y-1">
+                                    {existingFiles.map((archivo) => {
+                                        const nombreArchivo = archivo.Url_Archivo.split('/').pop() ?? `Archivo ${archivo.Id_Archivo_Acta}`;
+                                        const eliMinando = deletingId === archivo.Id_Archivo_Acta;
+                                        return (
+                                            <div
+                                                key={archivo.Id_Archivo_Acta}
+                                                className="flex items-center justify-between text-xs bg-red-50 border border-red-200 p-2 rounded"
+                                            >
+                                                <div className="flex items-center gap-2 flex-1 min-w-0">
+                                                    <FaFilePdf className="w-4 h-4 text-red-500 flex-shrink-0" />
+                                                    <a
+                                                        href={archivo.Url_Archivo}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="truncate text-blue-600 hover:underline"
+                                                        title={nombreArchivo}
+                                                    >
+                                                        {nombreArchivo}
+                                                    </a>
+                                                </div>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleDeleteArchivoExistente(archivo.Id_Archivo_Acta)}
+                                                    disabled={eliMinando}
+                                                    className="text-red-500 hover:text-red-700 hover:bg-red-100 p-1 rounded flex-shrink-0 disabled:opacity-50"
+                                                    title="Eliminar archivo"
+                                                >
+                                                    {eliMinando ? (
+                                                        <svg className="w-3 h-3 animate-spin" fill="none" viewBox="0 0 24 24">
+                                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+                                                        </svg>
+                                                    ) : (
+                                                        <FaTimes className="w-3 h-3" />
+                                                    )}
+                                                </button>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        )}
+
                         {/* Campo de Archivos (opcional para edición) */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">
-                                Archivos PDF (opcional - reemplazar archivos existentes)
+                                Agregar nuevos archivos PDF
                             </label>
 
                             {/* Botón para seleccionar múltiples archivos */}
@@ -252,13 +313,37 @@ export default function ActasEdit({ acta, onClose, refetch }: ActasEditProps) {
                     </div>
 
                     <div className="sticky bottom-0 flex justify-end gap-4 p-6 border-t border-gray-200 bg-white z-10">
-                        <button
-                            type="submit"
-                            className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 shadow-sm text-sm"
-                            disabled={updateActaMutation.isPending}
-                        >
-                            {updateActaMutation.isPending ? "Actualizando..." : "Actualizar Acta"}
-                        </button>
+                        <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+                            <AlertDialogTrigger asChild>
+                                <button
+                                    type="button"
+                                    className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 shadow-sm text-sm"
+                                    disabled={updateActaMutation.isPending || !!tituloError || !!descripcionError}
+                                >
+                                    {updateActaMutation.isPending ? "Actualizando..." : "Actualizar Acta"}
+                                </button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                                <AlertDialogHeader>
+                                    <AlertDialogTitle>¿Confirmar actualización?</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                        ¿Estás seguro de que deseas actualizar esta acta? Esta acción modificará la información existente.
+                                    </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                   
+                                    <AlertDialogAction
+                                        onClick={() => {
+                                            setShowConfirmDialog(false);
+                                            handleSubmit();
+                                        }}
+                                    >
+                                        Confirmar
+                                    </AlertDialogAction>
+                                     <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                        </AlertDialog>
                         <button
                             type="button"
                             onClick={onClose} // Oculta el modal
@@ -268,7 +353,6 @@ export default function ActasEdit({ acta, onClose, refetch }: ActasEditProps) {
                         </button>
                     </div>
                 </form>
-            </div>
-        </>
+        </div>
     );
 }
