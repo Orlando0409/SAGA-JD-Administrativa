@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { useUpdateFAQ } from "../Hook/FAQHook";
 import type { FAQ } from "../Models/FAQModels";
+import { z } from "zod";
+import { CreateFAQSchema } from "../Schemas/FAQSchemas";
 import {
     AlertDialog,
     AlertDialogTrigger,
@@ -31,34 +33,30 @@ export default function FAQEdit({ faq, onClose }: FAQEditProps) {
     useEffect(() => {
         setPregunta(faq.Pregunta);
         setRespuesta(faq.Respuesta);
+        setPreguntaError("");
+        setRespuestaError("");
     }, [faq]);
 
-    const handlePreguntaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const value = e.target.value;
-        setPregunta(value);
-        if (value.length < 5) {
-            setPreguntaError("La pregunta debe tener al menos 5 caracteres.");
-        } else if (value.length > 200) {
-            setPreguntaError("La pregunta no puede exceder los 200 caracteres.");
-        } else {
-            setPreguntaError("");
-        }
-    };
-
-    const handleRespuestaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-        const value = e.target.value;
-        setRespuesta(value);
-        if (value.length < 10) {
-            setRespuestaError("La respuesta debe tener al menos 10 caracteres.");
-        } else if (value.length > 1000) {
-            setRespuestaError("La respuesta no puede exceder los 1000 caracteres.");
-        } else {
-            setRespuestaError("");
+    const validateField = (field: "Pregunta" | "Respuesta", value: string) => {
+        try {
+            if (field === "Pregunta") {
+                CreateFAQSchema.pick({ Pregunta: true }).parse({ Pregunta: value.trim() });
+                setPreguntaError("");
+            } else {
+                CreateFAQSchema.pick({ Respuesta: true }).parse({ Respuesta: value.trim() });
+                setRespuestaError("");
+            }
+        } catch (err) {
+            if (err instanceof z.ZodError) {
+                const message = err.errors[0]?.message || "Error de validación";
+                if (field === "Pregunta") setPreguntaError(message);
+                else setRespuestaError(message);
+            }
         }
     };
 
     const handleSubmit = async () => {
-        if (preguntaError || respuestaError || pregunta.trim().length < 5 || respuesta.trim().length < 10) {
+        if (preguntaError || respuestaError || pregunta.trim().length < 10 || respuesta.trim().length < 10) {
             return;
         }
 
@@ -146,7 +144,7 @@ export default function FAQEdit({ faq, onClose }: FAQEditProps) {
                                     updateFAQMutation.isPending || 
                                     !!preguntaError || 
                                     !!respuestaError ||
-                                    pregunta.trim().length < 5 ||
+                                    pregunta.trim().length < 10 ||
                                     respuesta.trim().length < 10
                                 }
                                 className={`px-4 py-2 rounded-lg text-white shadow-sm text-sm ${

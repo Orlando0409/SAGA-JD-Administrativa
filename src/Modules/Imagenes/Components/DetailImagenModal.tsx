@@ -9,7 +9,7 @@ interface ImagenModalProps {
 }
 
 const ImagenModal = ({ isOpen, onClose, imagen }: ImagenModalProps) => {
-    const [isEditing, setIsEditing] = useState(false);
+    const [_isEditing, setIsEditing] = useState(false);
 
     useEffect(() => {
         setIsEditing(false);

@@ -1,4 +1,10 @@
-import type { UsuarioCreador } from "@/Modules/Inventario/models/CategoriaMaterial";
+
+interface UsuarioCreador {
+  Id_Usuario: number;
+  Nombre_Usuario: string;
+  Id_Rol: number;
+  Nombre_Rol: string;
+}
 
 export interface Auditoria {
   Id_Auditoria: number;

@@ -22,11 +22,13 @@ export interface Lectura {
         Tipo_Entidad: number;
         Correo: string;
         Numero: string;
-        Tipo_Identificacion: number;
-        Identificacion: string;
-        Nombre: string;
-        Primer_Apellido: string;
-        Segundo_Apellido: string; 
+        Tipo_Identificacion?: number | string;
+        Identificacion?: string;
+        Nombre?: string;
+        Primer_Apellido?: string;
+        Segundo_Apellido?: string;
+        Cedula_Juridica?: string;
+        Razon_Social?: string;
     } | null;
   
     Usuario: {
@@ -40,7 +42,6 @@ export interface Lectura {
 export interface TipoTarifaLectura {
     Id_Tipo_Tarifa_Lectura: number;
     Nombre_Tipo_Tarifa: string;
-    Cargo_Fijo_Por_Mes: number;
 }
 
 export interface CreateLecturaDTO {
