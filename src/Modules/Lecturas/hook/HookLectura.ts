@@ -14,10 +14,11 @@ import {
 import type { Lectura, CreateLecturaDTO, UpdateLecturaDTO, TipoTarifaLectura } from "../model/Lectura";
 
 // Obtener todas las lecturas
-export const useGetLecturas = () => {
+export const useGetLecturas = (enabled = true) => {
     return useQuery<Lectura[]>({
         queryKey: ["lecturas"],
         queryFn: getAllLecturas,
+        enabled,
     });
 };
 
@@ -30,34 +31,34 @@ export const useGetTarifas = () => {
 };
 
 // Obtener lecturas por usuario
-export const useGetLecturasByUsuario = (idUsuario: number) => {
+export const useGetLecturasByUsuario = (idUsuario: number, enabled = true) => {
     return useQuery<Lectura[]>({
         queryKey: ["lecturas", "usuario", idUsuario],
         queryFn: () => getLecturasByUsuario(idUsuario),
-        enabled: !!idUsuario,
+        enabled: enabled && !!idUsuario,
     });
 };
 
 // Obtener lecturas por medidor
-export const useGetLecturasByMedidor = (idMedidor: number) => {
+export const useGetLecturasByMedidor = (numeroMedidor: number, enabled = true) => {
     return useQuery<Lectura[]>({
-        queryKey: ["lecturas", "medidor", idMedidor],
-        queryFn: () => getLecturasByMedidor(idMedidor),
-        enabled: !!idMedidor,
+        queryKey: ["lecturas", "medidor", numeroMedidor],
+        queryFn: () => getLecturasByMedidor(numeroMedidor),
+        enabled: enabled && !!numeroMedidor,
     });
 };
 
 // Obtener lecturas por afiliado
-export const useGetLecturasByAfiliado = (idAfiliado: number) => {
+export const useGetLecturasByAfiliado = (idAfiliado: number, enabled = true) => {
     return useQuery<Lectura[]>({
         queryKey: ["lecturas", "afiliado", idAfiliado],
         queryFn: () => getLecturasByAfiliado(idAfiliado),
-        enabled: !!idAfiliado,
+        enabled: enabled && !!idAfiliado,
     });
 };
 
 // Obtener lecturas entre fechas
-export const useGetLecturasEntreFechas = (fechaInicio: string, fechaFin: string, enabled = false) => {
+export const useGetLecturasEntreFechas = (fechaInicio: string, fechaFin: string, enabled = true) => {
     return useQuery<Lectura[]>({
         queryKey: ["lecturas", "fechas", fechaInicio, fechaFin],
         queryFn: () => getLecturasEntreFechas(fechaInicio, fechaFin),

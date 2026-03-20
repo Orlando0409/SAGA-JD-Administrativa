@@ -71,10 +71,10 @@ export default function ManualLecturaForm({
     Object.values(errors).every((error) => error === "");
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-4">
       {/* Número Medidor */}
       <div>
-        <label htmlFor="medidor" className="block text-sm font-medium text-gray-700 mb-2">
+        <label htmlFor="medidor" className="block text-sm font-medium text-gray-700 mb-1">
           Número del Medidor <span className="text-red-500">*</span>
         </label>
         <input
@@ -82,19 +82,23 @@ export default function ManualLecturaForm({
           id="medidor"
           value={formData.Numero_Medidor || ""}
           onChange={handleMedidorChange}
-          className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-            errors.medidor ? "border-red-500" : "border-gray-300"
+          inputMode="numeric"
+          className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${
+            errors.medidor ? "border-red-300 bg-red-50" : "border-gray-300"
           }`}
+          placeholder="Ingrese el número del medidor"
           required
         />
         {errors.medidor && (
-          <p className="mt-1 text-sm text-red-500">{errors.medidor}</p>
+          <p className="mt-1 text-sm text-red-500 break-words [overflow-wrap:anywhere]">
+            {errors.medidor}
+          </p>
         )}
       </div>
 
       {/* Tipo de Tarifa */}
       <div>
-        <label htmlFor="tarifa" className="block text-sm font-medium text-gray-700 mb-2">
+        <label htmlFor="tarifa" className="block text-sm font-medium text-gray-700 mb-1">
           Tipo de Tarifa <span className="text-red-500">*</span>
         </label>
         <select
@@ -106,7 +110,7 @@ export default function ManualLecturaForm({
               Id_Tipo_Tarifa: Number.parseInt(e.target.value),
             })
           }
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
           required
         >
           {tarifas?.map((tarifa) => (
@@ -114,8 +118,7 @@ export default function ManualLecturaForm({
               key={tarifa.Id_Tipo_Tarifa_Lectura}
               value={tarifa.Id_Tipo_Tarifa_Lectura}
             >
-              {tarifa.Nombre_Tipo_Tarifa} - Cargo Fijo: ₡
-              {tarifa.Cargo_Fijo_Por_Mes.toLocaleString("es-CR")}
+              {tarifa.Nombre_Tipo_Tarifa}
             </option>
           ))}
         </select>
@@ -125,7 +128,7 @@ export default function ManualLecturaForm({
       <div>
         <label
           htmlFor="lecturaActual"
-          className="block text-sm font-medium text-gray-700 mb-2"
+          className="block text-sm font-medium text-gray-700 mb-1"
         >
           Lectura Actual (m³) <span className="text-red-500">*</span>
         </label>
@@ -136,29 +139,32 @@ export default function ManualLecturaForm({
           onChange={handleLecturaActualChange}
           step="0.01"
           min="0"
-          className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-            errors.lecturaActual ? "border-red-500" : "border-gray-300"
+          className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${
+            errors.lecturaActual ? "border-red-300 bg-red-50" : "border-gray-300"
           }`}
           required
         />
         {errors.lecturaActual && (
-          <p className="mt-1 text-sm text-red-500">{errors.lecturaActual}</p>
+          <p className="mt-1 text-sm text-red-500 break-words [overflow-wrap:anywhere]">
+            {errors.lecturaActual}
+          </p>
         )}
       </div>
 
       {/* Botones */}
-      <div className="flex gap-3 pt-4">
+      <div className="flex flex-col-reverse sm:flex-row gap-3 pt-4 border-t border-gray-200">
+        
         <button
           type="submit"
           disabled={!isFormValid || isSubmitting}
-          className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed font-medium"
+          className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
         >
           {isSubmitting ? "Creando..." : "Crear Lectura"}
         </button>
         <button
           type="button"
           onClick={onCancel}
-          className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors"
+          className="flex-1 px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors"
         >
           Cancelar
         </button>

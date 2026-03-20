@@ -9,7 +9,7 @@ interface ProyectoModalProps {
     refetch: () => void;
 }
 
-export default function ProyectoModal({ isOpen, onClose, proyecto, refetch }: ProyectoModalProps) {
+export default function ProyectoModal({ isOpen, onClose, proyecto }: ProyectoModalProps) {
    
 
     if (!isOpen) return null;
