@@ -34,7 +34,7 @@ import FAQEdit from "./FAQEdit";
 import { useUserPermissions } from '@/Modules/Auth/Hooks/PermissionHook';
 
 export default function FAQTable() {
-    const { data: faqs = [], isLoading, error } = useFAQs(true);
+    const { data: faqs = [], error } = useFAQs(true);
     const deleteFAQMutation = useDeleteFAQ();
     const toggleVisibleMutation = useToggleFAQVisible();
     const { canCreate, canEdit, canView } = useUserPermissions();
