@@ -3,6 +3,19 @@ import type { Lectura, CreateLecturaDTO, UpdateLecturaDTO, TipoTarifaLectura } f
 
 const BASE_URL = '/lecturas';
 
+const formatDateForBackend = (date: string): string => {
+    // El backend espera DD-MM-YYYY; el input date del navegador entrega YYYY-MM-DD.
+    const isoDateRegex = /^(\d{4})-(\d{2})-(\d{2})$/;
+    const isoDateMatch = isoDateRegex.exec(date);
+
+    if (!isoDateMatch) {
+        return date;
+    }
+
+    const [, year, month, day] = isoDateMatch;
+    return `${day}-${month}-${year}`;
+};
+
 export const getAllLecturas: () => Promise<Lectura[]> = async () => {
     const response = await axiosPrivate.get(`${BASE_URL}/all`);
     return response.data;
@@ -29,7 +42,10 @@ export const getLecturasByAfiliado = async (idAfiliado: number): Promise<Lectura
 };
 
 export const getLecturasEntreFechas = async (fechaInicio: string, fechaFin: string): Promise<Lectura[]> => {
-    const response = await axiosPrivate.get(`${BASE_URL}/entre-fechas/${fechaInicio}/${fechaFin}`);
+    const fechaInicioFormatted = formatDateForBackend(fechaInicio);
+    const fechaFinFormatted = formatDateForBackend(fechaFin);
+
+    const response = await axiosPrivate.get(`${BASE_URL}/entre-fechas/${fechaInicioFormatted}/${fechaFinFormatted}`);
     return response.data;
 };
 
