@@ -229,9 +229,9 @@ const AsignarAfiliadoMedidorModal = ({
             <div className="space-y-3">
               <p className="text-sm font-medium text-gray-700">Documentos del Terreno <span className="text-red-500">*</span></p>
 
-              {/* Escritura */}
+              {/* Certificación */}
               <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1">Escritura del Terreno</label>
+                <label className="block text-xs font-medium text-gray-600 mb-1">Certificación Literal</label>
                 <div className="relative">
                   <input
                     type="file"

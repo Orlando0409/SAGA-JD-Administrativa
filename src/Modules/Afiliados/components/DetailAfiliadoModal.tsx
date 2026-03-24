@@ -71,7 +71,7 @@ const DetailAbonados: React.FC<DetailAbonadosProps> = ({ persona, isOpen, onClos
                 edad: afiliado.Edad,
                 fechaCreacion: afiliado.Fecha_Creacion,
                 fechaActualizacion: afiliado.Fecha_Actualizacion,
-                escritura: afiliado.Escritura_Terreno,
+                certificacion: afiliado.Certificacion_Literal,
                 planos: afiliado.Planos_Terreno,
                 motivo: null, // Campo no disponible en el modelo actual
                 medidores // Cargados desde el endpoint por el useEffect
@@ -93,7 +93,7 @@ const DetailAbonados: React.FC<DetailAbonadosProps> = ({ persona, isOpen, onClos
                 edad: null,
                 fechaCreacion: afiliado.Fecha_Creacion,
                 fechaActualizacion: afiliado.Fecha_Actualizacion,
-                escritura: afiliado.Escritura_Terreno,
+                certificacion: afiliado.Certificacion_Literal,
                 planos: afiliado.Planos_Terreno,
                 motivo: null, // Campo no disponible en el modelo actual
                 medidores // Cargados desde el endpoint por el useEffect
@@ -259,18 +259,18 @@ const DetailAbonados: React.FC<DetailAbonadosProps> = ({ persona, isOpen, onClos
                                     </div>
                                 </div>
 
-                                {/* Escritura del Terreno */}
-                                {personaInfo.escritura && (
+                                {/* Certificación Literal */}
+                                {personaInfo.certificacion && (
                                     <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-lg border border-gray-200">
                                         <div className="p-2 rounded-lg">
                                             <LuFileText className="w-5 h-5 text-blue-600" />
                                         </div>
                                         <div className="flex-1">
                                             <p className="text-xs font-medium text-gray-500 uppercase">
-                                                Escritura del Terreno
+                                                Certificación Literal
                                             </p>
                                             <a
-                                                href={personaInfo.escritura}
+                                                href={personaInfo.certificacion}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                                 className="text-blue-600 hover:text-blue-800 font-medium underline mt-1 inline-block"
@@ -366,19 +366,19 @@ const DetailAbonados: React.FC<DetailAbonadosProps> = ({ persona, isOpen, onClos
                                                 </div>
                                             </div>
 
-                                            {(medidor.Escritura_Terreno || medidor.Planos_Terreno) && (
+                                            {(medidor.Certificacion_Literal || medidor.Planos_Terreno) && (
                                                 <div className="mt-3 pt-3 border-t border-gray-200">
                                                     <p className="text-xs font-medium text-gray-500 uppercase mb-2">Documentos del Terreno</p>
                                                     <div className="flex flex-wrap gap-2">
-                                                        {medidor.Escritura_Terreno && (
+                                                        {medidor.Certificacion_Literal && (
                                                             <a
-                                                                href={medidor.Escritura_Terreno}
+                                                                href={medidor.Certificacion_Literal}
                                                                 target="_blank"
                                                                 rel="noopener noreferrer"
                                                                 className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-700 hover:bg-blue-100 transition-colors font-medium"
                                                             >
                                                                 <LuFileText className="w-4 h-4" />
-                                                                Ver Escritura
+                                                                Ver Certificación
                                                             </a>
                                                         )}
                                                         {medidor.Planos_Terreno && (

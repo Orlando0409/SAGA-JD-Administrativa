@@ -60,13 +60,13 @@ export const asignarMedidorAAfiliado = async (idMedidor: number, idAfiliado: num
 export const asignarMedidorConArchivos = async (
   idMedidor: number,
   idAfiliado: number,
-  escrituraFile: File,
+  certificacionFile: File,
   planosFile: File
 ): Promise<void> => {
   const formData = new FormData();
   formData.append('Id_Medidor', String(idMedidor));
   formData.append('Id_Afiliado', String(idAfiliado));
-  formData.append('Escritura_Terreno', escrituraFile);
+  formData.append('Certificacion_Literal', certificacionFile);
   formData.append('Planos_Terreno', planosFile);
   await axiosPrivate.post(`/Inventario/asignar/medidor/afiliado`, formData, {
     headers: { 'Content-Type': 'multipart/form-data' },

@@ -10,7 +10,7 @@ export interface Medidor {
         Id_Estado_Medidor: number;
         Nombre_Estado_Medidor: string;
     };
-    Escritura_Terreno?: string | null;
+    Certificacion_Literal?: string | null;
     Planos_Terreno?: string | null;
 }
 
@@ -34,7 +34,7 @@ export interface AfiliadoFisico {
     }
     Fecha_Creacion: string
     Fecha_Actualizacion: string
-    Escritura_Terreno?: string
+    Certificacion_Literal?: string
     Planos_Terreno?: string
     Tipo_Identificacion: TipoIdentificacion;
     medidores?: Medidor[];

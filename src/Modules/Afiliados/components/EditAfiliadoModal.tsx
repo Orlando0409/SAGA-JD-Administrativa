@@ -121,7 +121,7 @@ const EditModal: React.FC<EditModalProps> = ({ isOpen, onClose, persona }) => {
                 Correo: afiliado.Correo,
                 Direccion_Exacta: afiliado.Direccion_Exacta || '',
                 Edad: afiliado.Edad,
-                Escritura_Terreno: afiliado.Escritura_Terreno || '',
+                Certificacion_Literal: afiliado.Certificacion_Literal || '',
                 Planos_Terreno: afiliado.Planos_Terreno || '',
             };
         } else { // afiliado-juridico
@@ -132,7 +132,7 @@ const EditModal: React.FC<EditModalProps> = ({ isOpen, onClose, persona }) => {
                 Numero_Telefono: afiliado.Numero_Telefono,
                 Correo: afiliado.Correo,
                 Direccion_Exacta: afiliado.Direccion_Exacta || '',
-                Escritura_Terreno: afiliado.Escritura_Terreno || '',
+                Certificacion_Literal: afiliado.Certificacion_Literal || '',
                 Planos_Terreno: afiliado.Planos_Terreno || '',
             };
         }
@@ -165,7 +165,7 @@ const EditModal: React.FC<EditModalProps> = ({ isOpen, onClose, persona }) => {
                     formData.append('Edad', value.Edad?.toString() || '0');
 
                     // Agregar archivos si están disponibles
-                    if (escrituraFile) formData.append('Escritura_Terreno', escrituraFile);
+                    if (escrituraFile) formData.append('Certificacion_Literal', escrituraFile);
                     if (planosFile) formData.append('Planos_Terreno', planosFile);
 
                     // Usar la identificación como cédula para la ruta
@@ -182,7 +182,7 @@ const EditModal: React.FC<EditModalProps> = ({ isOpen, onClose, persona }) => {
                     formData.append('Direccion_Exacta', value.Direccion_Exacta || '');
 
                     // Agregar archivos si están disponibles
-                    if (escrituraFile) formData.append('Escritura_Terreno', escrituraFile);
+                    if (escrituraFile) formData.append('Certificacion_Literal', escrituraFile);
                     if (planosFile) formData.append('Planos_Terreno', planosFile);
 
                     // Usar la cédula jurídica para la ruta
@@ -582,11 +582,11 @@ const EditModal: React.FC<EditModalProps> = ({ isOpen, onClose, persona }) => {
                         {/* Campos adicionales para afiliados */}
                         {(persona.tipo === 'afiliado-fisico' || persona.tipo === 'afiliado-juridico') && (
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <form.Field name="Escritura_Terreno">
+                                <form.Field name="Certificacion_Literal">
                                     {(field) => (
                                         <div>
                                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                Escritura del Terreno
+                                                Certificación Literal
                                             </label>
                                             <div className="relative">
                                                 <input

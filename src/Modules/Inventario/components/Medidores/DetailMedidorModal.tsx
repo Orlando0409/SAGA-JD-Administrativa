@@ -141,7 +141,7 @@ const DetailMedidorModal = ({ isOpen, onClose, medidor }: DetailMedidorModalProp
           </div>
 
              {/* Documentos del Terreno */}
-          {(medidor.Escritura_Terreno || medidor.Planos_Terreno) && (
+          {(medidor.Certificacion_Literal || medidor.Planos_Terreno) && (
             <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
               <div className="bg-gray-50 px-5 py-3 border-b border-gray-200">
                 <div className="flex items-center gap-3">
@@ -153,19 +153,19 @@ const DetailMedidorModal = ({ isOpen, onClose, medidor }: DetailMedidorModalProp
               </div>
               <div className="p-5">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  {medidor.Escritura_Terreno && (
+                  {medidor.Certificacion_Literal && (
                     <div className="bg-gray-50 p-4 rounded-lg">
                       <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
-                        Escritura del Terreno
+                        Certificación Literal
                       </label>
                       <a
-                        href={medidor.Escritura_Terreno}
+                        href={medidor.Certificacion_Literal}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-700 hover:bg-blue-100 transition-colors font-medium"
                       >
                         <LuFileText className="w-4 h-4" />
-                        Ver Escritura
+                        Ver Certificación
                       </a>
                     </div>
                   )}

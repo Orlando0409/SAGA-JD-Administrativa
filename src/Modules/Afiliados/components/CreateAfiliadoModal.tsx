@@ -379,7 +379,7 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                         } else {
                             formData.append('Numero_Medidor', String(primerMedidor.numeroMedidor));
                         }
-                        formData.append('Escritura_Terreno', primerMedidor.escrituraFile);
+                        formData.append('Certificacion_Literal', primerMedidor.escrituraFile);
                         formData.append('Planos_Terreno', primerMedidor.planosFile);
                     } else {
                         formData.append('Opcion_Medidor', 'sin_medidor');
@@ -416,7 +416,7 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                         } else {
                             formData.append('Numero_Medidor', String(primerMedidorJ.numeroMedidor));
                         }
-                        formData.append('Escritura_Terreno', primerMedidorJ.escrituraFile);
+                        formData.append('Certificacion_Literal', primerMedidorJ.escrituraFile);
                         formData.append('Planos_Terreno', primerMedidorJ.planosFile);
                     } else {
                         formData.append('Opcion_Medidor', 'sin_medidor');

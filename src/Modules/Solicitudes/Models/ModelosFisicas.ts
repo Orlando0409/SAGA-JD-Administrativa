@@ -24,7 +24,7 @@ export interface SolicitudFisicaBase {
         Numero_Medidor?: string | number;
     };
     Planos_Terreno?: File | string;
-    Escritura_Terreno?: File | string;
+    Certificacion_Literal?: File | string;
     // Mantener Cedula por compatibilidad pero priorizar Identificacion
 
 }
@@ -36,14 +36,14 @@ export interface SolicitudAfiliacionFisica extends SolicitudFisicaBase {
     Direccion_Exacta: string;
     Edad: number;
     Planos_Terreno: File | string;
-    Escritura_Terreno: File | string;
+    Certificacion_Literal: File | string;
 }
 
 export interface SolicitudDesconexionFisica extends SolicitudFisicaBase {
     Motivo_Solicitud: string;
     Direccion_Exacta: string;
     Planos_Terreno: File | string;
-    Escritura_Terreno: File | string;
+    Certificacion_Literal: File | string;
 }
 
 export interface SolicitudCambioMedidorFisica extends SolicitudFisicaBase {
@@ -59,8 +59,23 @@ export interface SolicitudAsociadoFisica extends SolicitudFisicaBase {
 
 export interface SolicitudAgregarMedidorFisica extends SolicitudFisicaBase {
     Direccion_Exacta: string;
-    Motivo_Solicitud: string;
-    Numero_Medidor_Nuevo?: string | number;
+    Planos_Terreno: File | string;
+    Certificacion_Literal: File | string;
+    Id_Nuevo_Medidor?: number | string;
+}
+
+export interface CreateSolicitudAgregarMedidorFisicaDTO {
+    Tipo_Identificacion: 'Cedula Nacional' | 'DIMEX' | 'Pasaporte';
+    Identificacion: string;
+    Nombre: string;
+    Apellido1: string;
+    Apellido2?: string;
+    Correo: string;
+    Numero_Telefono: string;
+    Direccion_Exacta: string;
+    Planos_Terreno: File;
+    Certificacion_Literal: File;
+    Id_Nuevo_Medidor?: number | string;
 }
 
 export type SolicitudFisica =

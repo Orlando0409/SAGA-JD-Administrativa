@@ -63,7 +63,7 @@ const MedidorSelectorModal: React.FC<MedidorSelectorModalProps> = ({ isOpen, mod
             }
         }
 
-        if (!escrituraFile) newErrors.escritura = 'La escritura del terreno es requerida';
+        if (!escrituraFile) newErrors.escritura = 'La certificación literal del terreno es requerida';
         if (!planosFile) newErrors.planos = 'Los planos del terreno son requeridos';
 
         if (Object.keys(newErrors).length > 0) {
@@ -271,7 +271,7 @@ const MedidorSelectorModal: React.FC<MedidorSelectorModalProps> = ({ isOpen, mod
                             <FileText className="w-4 h-4 text-blue-600" />
                             <h3 className="text-sm font-semibold text-gray-700">Documentos del Terreno</h3>
                         </div>
-                        {renderFileInput('Escritura del Terreno', escrituraFile, setEscrituraFile, 'escritura')}
+                        {renderFileInput('Certificación Literal', escrituraFile, setEscrituraFile, 'escritura')}
                         {renderFileInput('Planos del Terreno', planosFile, setPlanosFile, 'planos')}
                     </div>
                 </div>

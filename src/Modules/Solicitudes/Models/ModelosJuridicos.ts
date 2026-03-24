@@ -28,13 +28,13 @@ export interface SolicitudJuridicaBase {
 export interface SolicitudAfiliacionJuridica extends SolicitudJuridicaBase {
     Direccion_Exacta: string;
     Planos_Terreno: File | string;
-    Escritura_Terreno: File | string;
+    Certificacion_Literal: File | string;
 }
 export interface SolicitudDesconexionJuridica extends SolicitudJuridicaBase {
     Motivo_Solicitud: string;
     Direccion_Exacta: string;
     Planos_Terreno: File | string;
-    Escritura_Terreno: File | string;
+    Certificacion_Literal: File | string;
 }
 export interface SolicitudCambioMedidorJuridica extends SolicitudJuridicaBase {
     Direccion_Exacta: string;
@@ -49,8 +49,20 @@ export interface SolicitudAsociadoJuridica extends SolicitudJuridicaBase {
 
 export interface SolicitudAgregarMedidorJuridica extends SolicitudJuridicaBase {
     Direccion_Exacta: string;
-    Motivo_Solicitud: string;
-    Numero_Medidor_Nuevo?: string | number;
+    Planos_Terreno: File | string;
+    Certificacion_Literal: File | string;
+    Id_Nuevo_Medidor?: number | string;
+}
+
+export interface CreateSolicitudAgregarMedidorJuridicaDTO {
+    Cedula_Juridica: string;
+    Razon_Social: string;
+    Correo: string;
+    Numero_Telefono: string;
+    Direccion_Exacta: string;
+    Planos_Terreno: File;
+    Certificacion_Literal: File;
+    Id_Nuevo_Medidor?: number | string;
 }
 
 export type SolicitudJuridica =

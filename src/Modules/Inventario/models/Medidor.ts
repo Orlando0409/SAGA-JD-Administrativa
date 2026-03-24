@@ -9,7 +9,7 @@ export interface Medidor {
   Fecha_Creacion: string | Date;
   Fecha_Actualizacion: string | Date;
   Estado_Medidor: EstadoMedidor;
-  Escritura_Terreno?: string | null;
+  Certificacion_Literal?: string | null;
   Planos_Terreno?: string | null;
   Afiliado?: {
     Id_Afiliado: number;

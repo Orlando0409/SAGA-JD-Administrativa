@@ -58,7 +58,7 @@ type MedidorBackend = {
     Numero_Medidor: number;
     Estado?: { Id_Estado: number; Nombre_Estado: string };
     Estado_Medidor?: { Id_Estado_Medidor: number; Nombre_Estado_Medidor: string };
-    Escritura_Terreno?: string | null;
+    Certificacion_Literal?: string | null;
     Planos_Terreno?: string | null;
 };
 
@@ -71,7 +71,7 @@ const mapearMedidoresDetalle = (medidores: MedidorBackend[]): Medidor[] =>
             Id_Estado_Medidor: m.Estado.Id_Estado,
             Nombre_Estado_Medidor: m.Estado.Nombre_Estado,
         } : undefined),
-        Escritura_Terreno: m.Escritura_Terreno ?? null,
+        Certificacion_Literal: m.Certificacion_Literal ?? null,
         Planos_Terreno: m.Planos_Terreno ?? null,
     }));
 

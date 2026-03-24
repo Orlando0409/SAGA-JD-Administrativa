@@ -16,14 +16,14 @@ export default function FormularioAfiliados({ isOpen, onClose, onSuccess }: Form
 
   // Estados separados para los archivos
   const [archivosFisico, setArchivosFisico] = useState<{
-    Escritura_Terreno?: File;
+    Certificacion_Literal?: File;
     Planos_Terreno?: File;
   }>({});
 
   const [archivosJuridico, setArchivosJuridico] = useState<{
-    Escritura_Terreno?: File;
+    Certificacion_Literal?: File;
     Planos_Terreno?: File;
-  }>({});
+  }>({});;
 
   // Hooks para las operaciones
   const { createAfiliadoFisico } = useAfiliadosFisicos();
@@ -43,8 +43,8 @@ export default function FormularioAfiliados({ isOpen, onClose, onSuccess }: Form
     if (!value.Edad || value.Edad < 18 || value.Edad > 120) errores.Edad = "La edad debe estar entre 18 y 120 años";
 
     // Validar archivos
-    if (!archivosFisico.Escritura_Terreno || !(archivosFisico.Escritura_Terreno instanceof File)) {
-      errores.Escritura_Terreno = "Debe subir la escritura del terreno";
+    if (!archivosFisico.Certificacion_Literal || !(archivosFisico.Certificacion_Literal instanceof File)) {
+      errores.Certificacion_Literal = "Debe subir la certificación literal del terreno";
     }
     if (!archivosFisico.Planos_Terreno || !(archivosFisico.Planos_Terreno instanceof File)) {
       errores.Planos_Terreno = "Debe subir los planos del terreno";
@@ -64,8 +64,8 @@ export default function FormularioAfiliados({ isOpen, onClose, onSuccess }: Form
     if (!value.Direccion_Exacta?.trim()) errores.Direccion_Exacta = "La dirección es requerida";
 
     // Validar archivos
-    if (!archivosJuridico.Escritura_Terreno || !(archivosJuridico.Escritura_Terreno instanceof File)) {
-      errores.Escritura_Terreno = "Debe subir la escritura del terreno";
+    if (!archivosJuridico.Certificacion_Literal || !(archivosJuridico.Certificacion_Literal instanceof File)) {
+      errores.Certificacion_Literal = "Debe subir la certificación literal del terreno";
     }
     if (!archivosJuridico.Planos_Terreno || !(archivosJuridico.Planos_Terreno instanceof File)) {
       errores.Planos_Terreno = "Debe subir los planos del terreno";
@@ -133,18 +133,18 @@ export default function FormularioAfiliados({ isOpen, onClose, onSuccess }: Form
 
         // VERIFICACIÓN CRÍTICA: SOLO AGREGAR ARCHIVOS SI SON REALMENTE ARCHIVOS
         console.log(" Verificando archivos antes de agregar:");
-        console.log("Escritura_Terreno:", archivosFisico.Escritura_Terreno);
+        console.log("Certificacion_Literal:", archivosFisico.Certificacion_Literal);
         console.log("Planos_Terreno:", archivosFisico.Planos_Terreno);
-        console.log("Es Escritura_Terreno un File?", archivosFisico.Escritura_Terreno instanceof File);
+        console.log("Es Certificacion_Literal un File?", archivosFisico.Certificacion_Literal instanceof File);
         console.log("Es Planos_Terreno un File?", archivosFisico.Planos_Terreno instanceof File);
 
         //  SOLO AGREGAR ARCHIVOS SI SON INSTANCIAS DE FILE
-        if (archivosFisico.Escritura_Terreno && archivosFisico.Escritura_Terreno instanceof File) {
-          formData.append('Escritura_Terreno', archivosFisico.Escritura_Terreno);
-          console.log("Escritura_Terreno agregado:", archivosFisico.Escritura_Terreno.name);
+        if (archivosFisico.Certificacion_Literal && archivosFisico.Certificacion_Literal instanceof File) {
+          formData.append('Certificacion_Literal', archivosFisico.Certificacion_Literal);
+          console.log("Certificacion_Literal agregado:", archivosFisico.Certificacion_Literal.name);
         } else {
-          console.error(" Escritura_Terreno no es un archivo válido:", archivosFisico.Escritura_Terreno);
-          setFormErrors({ Escritura_Terreno: "Debe seleccionar un archivo válido para la escritura" });
+          console.error(" Certificacion_Literal no es un archivo válido:", archivosFisico.Certificacion_Literal);
+          setFormErrors({ Certificacion_Literal: "Debe seleccionar un archivo válido para la certificación" });
           return;
         }
 
@@ -241,12 +241,12 @@ export default function FormularioAfiliados({ isOpen, onClose, onSuccess }: Form
 
         //  VERIFICACIÓN CRÍTICA: SOLO AGREGAR ARCHIVOS SI SON REALMENTE ARCHIVOS
 
-        if (archivosJuridico.Escritura_Terreno && archivosJuridico.Escritura_Terreno instanceof File) {
-          formData.append('Escritura_Terreno', archivosJuridico.Escritura_Terreno);
-          console.log(" Escritura_Terreno agregado:", archivosJuridico.Escritura_Terreno.name);
+        if (archivosJuridico.Certificacion_Literal && archivosJuridico.Certificacion_Literal instanceof File) {
+          formData.append('Certificacion_Literal', archivosJuridico.Certificacion_Literal);
+          console.log(" Certificacion_Literal agregado:", archivosJuridico.Certificacion_Literal.name);
         } else {
-          console.error(" Escritura_Terreno no es un archivo válido:", archivosJuridico.Escritura_Terreno);
-          setFormErrors({ Escritura_Terreno: "Debe seleccionar un archivo válido para la escritura" });
+          console.error(" Certificacion_Literal no es un archivo válido:", archivosJuridico.Certificacion_Literal);
+          setFormErrors({ Certificacion_Literal: "Debe seleccionar un archivo válido para la certificación" });
           return;
         }
 
@@ -661,25 +661,25 @@ export default function FormularioAfiliados({ isOpen, onClose, onSuccess }: Form
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Escritura del Terreno *
+                    Certificación Literal *
                   </label>
                   {tipoFormulario === 'fisico' ? (
                     <div>
                       <input
                         type="file"
                         accept=".pdf,.jpg,.jpeg,.png,.heic"
-                        disabled={!!archivosFisico.Escritura_Terreno}
+                        disabled={!!archivosFisico.Certificacion_Literal}
                         onChange={(e) => {
                           const file = e.target.files?.[0];
-                          console.log(" Archivo Escritura seleccionado (físico):", file);
+                          console.log(" Archivo Certificación seleccionado (físico):", file);
                           if (file) {
                             setArchivosFisico(prev => ({
                               ...prev,
-                              Escritura_Terreno: file
+                              Certificacion_Literal: file
                             }));
                             setFormErrors(prev => ({
                               ...prev,
-                              Escritura_Terreno: ""
+                              Certificacion_Literal: ""
                             }));
                           }
                         }}
@@ -687,23 +687,23 @@ export default function FormularioAfiliados({ isOpen, onClose, onSuccess }: Form
                         id="escritura_fisico"
                       />
                       <label
-                        htmlFor="escritura_fisico"
-                        className={`inline-block text-white bg-sky-600 px-3 py-2 rounded text-sm transition-colors ${archivosFisico.Escritura_Terreno ? 'cursor-not-allowed opacity-50' : 'hover:bg-sky-700 cursor-pointer'
+                        htmlFor="certificacion_fisico"
+                        className={`inline-block text-white bg-sky-600 px-3 py-2 rounded text-sm transition-colors ${archivosFisico.Certificacion_Literal ? 'cursor-not-allowed opacity-50' : 'hover:bg-sky-700 cursor-pointer'
                           }`}
                       >
-                        {archivosFisico.Escritura_Terreno ? 'Archivo cargado' : 'Subir archivo'}
+                        {archivosFisico.Certificacion_Literal ? 'Archivo cargado' : 'Subir archivo'}
                       </label>
-                      {archivosFisico.Escritura_Terreno && (
+                      {archivosFisico.Certificacion_Literal && (
                         <div className="border rounded-md p-3 bg-gray-50 mt-2 flex justify-between items-center">
-                          <span className="text-sm">{archivosFisico.Escritura_Terreno.name}</span>
+                          <span className="text-sm">{archivosFisico.Certificacion_Literal.name}</span>
                           <button
                             type="button"
                             onClick={() => {
                               setArchivosFisico(prev => ({
                                 ...prev,
-                                Escritura_Terreno: undefined
+                                Certificacion_Literal: undefined
                               }));
-                              const input = document.getElementById("escritura_fisico") as HTMLInputElement;
+                              const input = document.getElementById("certificacion_fisico") as HTMLInputElement;
                               if (input) input.value = "";
                             }}
                             className="text-red-500 hover:underline text-xs"
@@ -712,8 +712,8 @@ export default function FormularioAfiliados({ isOpen, onClose, onSuccess }: Form
                           </button>
                         </div>
                       )}
-                      {formErrors.Escritura_Terreno && (
-                        <span className="text-red-500 text-sm block mt-1">{formErrors.Escritura_Terreno}</span>
+                      {formErrors.Certificacion_Literal && (
+                        <span className="text-red-500 text-sm block mt-1">{formErrors.Certificacion_Literal}</span>
                       )}
                     </div>
                   ) : (
@@ -721,18 +721,18 @@ export default function FormularioAfiliados({ isOpen, onClose, onSuccess }: Form
                       <input
                         type="file"
                         accept=".pdf,.jpg,.jpeg,.png,.heic"
-                        disabled={!!archivosJuridico.Escritura_Terreno}
+                        disabled={!!archivosJuridico.Certificacion_Literal}
                         onChange={(e) => {
                           const file = e.target.files?.[0];
-                          console.log(" Archivo Escritura seleccionado (jurídico):", file);
+                          console.log(" Archivo Certificación seleccionado (jurídico):", file);
                           if (file) {
                             setArchivosJuridico(prev => ({
                               ...prev,
-                              Escritura_Terreno: file
+                              Certificacion_Literal: file
                             }));
                             setFormErrors(prev => ({
                               ...prev,
-                              Escritura_Terreno: ""
+                              Certificacion_Literal: ""
                             }));
                           }
                         }}
@@ -740,23 +740,23 @@ export default function FormularioAfiliados({ isOpen, onClose, onSuccess }: Form
                         id="escritura_juridico"
                       />
                       <label
-                        htmlFor="escritura_juridico"
-                        className={`inline-block text-white bg-purple-600 px-3 py-2 rounded text-sm transition-colors ${archivosJuridico.Escritura_Terreno ? 'cursor-not-allowed opacity-50' : 'hover:bg-purple-700 cursor-pointer'
+                        htmlFor="certificacion_juridico"
+                        className={`inline-block text-white bg-purple-600 px-3 py-2 rounded text-sm transition-colors ${archivosJuridico.Certificacion_Literal ? 'cursor-not-allowed opacity-50' : 'hover:bg-purple-700 cursor-pointer'
                           }`}
                       >
-                        {archivosJuridico.Escritura_Terreno ? 'Archivo cargado' : 'Subir archivo'}
+                        {archivosJuridico.Certificacion_Literal ? 'Archivo cargado' : 'Subir archivo'}
                       </label>
-                      {archivosJuridico.Escritura_Terreno && (
+                      {archivosJuridico.Certificacion_Literal && (
                         <div className="border rounded-md p-3 bg-gray-50 mt-2 flex justify-between items-center">
-                          <span className="text-sm">{archivosJuridico.Escritura_Terreno.name}</span>
+                          <span className="text-sm">{archivosJuridico.Certificacion_Literal.name}</span>
                           <button
                             type="button"
                             onClick={() => {
                               setArchivosJuridico(prev => ({
                                 ...prev,
-                                Escritura_Terreno: undefined
+                                Certificacion_Literal: undefined
                               }));
-                              const input = document.getElementById("escritura_juridico") as HTMLInputElement;
+                              const input = document.getElementById("certificacion_juridico") as HTMLInputElement;
                               if (input) input.value = "";
                             }}
                             className="text-red-500 hover:underline text-xs"
@@ -765,8 +765,8 @@ export default function FormularioAfiliados({ isOpen, onClose, onSuccess }: Form
                           </button>
                         </div>
                       )}
-                      {formErrors.Escritura_Terreno && (
-                        <span className="text-red-500 text-sm block mt-1">{formErrors.Escritura_Terreno}</span>
+                      {formErrors.Certificacion_Literal && (
+                        <span className="text-red-500 text-sm block mt-1">{formErrors.Certificacion_Literal}</span>
                       )}
                     </div>
                   )}

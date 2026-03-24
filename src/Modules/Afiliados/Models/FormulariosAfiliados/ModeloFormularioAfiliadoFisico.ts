@@ -10,7 +10,7 @@ export interface AfiliadoFisico {
     Direccion_Exacta?: string;
     Edad: number;
     Planos_Terreno?: File | string;
-    Escritura_Terreno?: File | string;
+    Certificacion_Literal?: File | string;
     Tipo_Identificacion: TipoIdentificacion; 
 }
 
@@ -24,7 +24,7 @@ export const AfiliadoFisicoInicialState: AfiliadoFisico = {
     Direccion_Exacta: '',
     Edad: 0,
     Planos_Terreno: undefined,
-    Escritura_Terreno: undefined,
+    Certificacion_Literal: undefined,
     Tipo_Identificacion: "Cedula Nacional"
 }
 
@@ -38,6 +38,6 @@ export interface AfiliacionFisicaFormData {
     Numero_Telefono: string;
     Edad: number;
     Planos_Terreno?: File | string;
-    Escritura_Terreno?: File | string;
+    Certificacion_Literal?: File | string;
     Tipo_Identificacion: TipoIdentificacion; // ✅ Usar el tipo unificado
 }
