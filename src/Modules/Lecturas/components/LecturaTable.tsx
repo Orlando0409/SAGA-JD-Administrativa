@@ -121,6 +121,22 @@ const getActiveFiltersCount = (filters: LecturaFilterOptions) =>
     return Boolean(value);
   }).length;
 
+const formatDateForBackend = (date?: string) => {
+  if (!date) {
+    return "";
+  }
+
+  const isoDateRegex = /^(\d{4})-(\d{2})-(\d{2})$/;
+  const isoDateMatch = isoDateRegex.exec(date);
+
+  if (!isoDateMatch) {
+    return date;
+  }
+
+  const [, year, month, day] = isoDateMatch;
+  return `${day}-${month}-${year}`;
+};
+
 const sortSelectOptions = (a: FilterSelectOption, b: FilterSelectOption) =>
   a.label.localeCompare(b.label, "es", { sensitivity: "base", numeric: true });
 
@@ -190,6 +206,8 @@ export default function LecturaTable() {
   };
 
   const activeQuerySource = getActiveQuerySource(appliedFilters);
+  const fechaInicioBackend = formatDateForBackend(appliedFilters.fechaInicio);
+  const fechaFinBackend = formatDateForBackend(appliedFilters.fechaFin);
 
   const allLecturasQuery = useGetLecturas(activeQuerySource === "all");
   const lecturasUsuarioQuery = useGetLecturasByUsuario(
@@ -205,8 +223,8 @@ export default function LecturaTable() {
     activeQuerySource === "afiliado"
   );
   const lecturasFechasQuery = useGetLecturasEntreFechas(
-    appliedFilters.fechaInicio ?? "",
-    appliedFilters.fechaFin ?? "",
+    fechaInicioBackend,
+    fechaFinBackend,
     activeQuerySource === "fechas"
   );
 
