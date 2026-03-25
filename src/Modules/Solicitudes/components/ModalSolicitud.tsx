@@ -144,7 +144,7 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
     // Función para manejar aprobación por casos usando hooks unificados
     const handleCambiarEstado = async () => {
         const estadoActual = info.estadoId;
-   debugger;
+
         // Estado 1 (Registro) → Poner en revisión manualmente al hacer clic
         if (estadoActual === 1) {
             try {
@@ -159,8 +159,15 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
             return;
         }
 
-        // Estado 2 (En Revisión) → Preguntar si el medidor fue dañado
+        // Estado 2 (En Revisión) → Flujo condicional por tipo de solicitud
         if (estadoActual === 2) {
+            const esCambioMedidor = mapearTipoSolicitud(info.tipoSolicitud) === 'cambio-medidor';
+
+            if (!esCambioMedidor) {
+                setShowAprobarDialog(true);
+                return;
+            }
+
             setMontoPago('');
             setMotivoCambio('');
             setShowDialogMedidorDanado(true);
