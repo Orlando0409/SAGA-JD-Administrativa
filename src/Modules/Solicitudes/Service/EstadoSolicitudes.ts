@@ -41,42 +41,34 @@ export class ServiceEstadoSolicitudes {
         };
         const baseEndpoint = endpointMap[tipoSolicitud][tipoPersona];
         return `${baseEndpoint}/${solicitudId}/${nuevoEstado}`;
-        // return endpointMap[tipoSolicitud][tipoPersona];
     }
 
 
     static async cambiarEstado(request: CambioEstadoRequest): Promise<void> {
-        const { tipoSolicitud, tipoPersona, solicitudId, nuevoEstado, motivoRechazo } = request;
-
+        
+        const { tipoSolicitud, tipoPersona, solicitudId, nuevoEstado, motivoRechazo, ocupaPagarMedidor } = request;
 
         const url = this.construirEndpoint(tipoSolicitud, tipoPersona, solicitudId, nuevoEstado);
-
-
-        const emoji = tipoPersona === 'fisica' ? '👤' : '🏢';
-        console.log(
-            `🔄 ${emoji} Cambiando estado de solicitud ${tipoSolicitud} (${tipoPersona}) #${solicitudId} → Estado ${nuevoEstado}`
-        );
-        console.log(` URL completa: PATCH ${url}`);
-        console.log(` Datos de la solicitud:`, {
-            tipoSolicitud,
-            tipoPersona,
-            solicitudId,
-            nuevoEstado,
-            ...(motivoRechazo && { motivoRechazo }),
-            url
-        });
-
+        let body: Record<string, any> = {};
         try {
+ 
+            // Enviar datos adicionales solo para ciertos estados
+            if (nuevoEstado === 3 && ocupaPagarMedidor) {
+                body = {
+                    ocupaPago: ocupaPagarMedidor.ocupaPago,
+                    montoCambio: ocupaPagarMedidor.montoCambio,
+                    motivoCobro: ocupaPagarMedidor.motivoCobro
+                };
+            }
 
             // Enviar motivoRechazo solo cuando es un rechazo (estado 5)
-            const body = nuevoEstado === 5 && motivoRechazo
-                ? { motivoRechazo }
-                : {};
+            if (nuevoEstado === 5 && motivoRechazo) {
+                body = { motivoRechazo };
+            }
 
             await apiAuth.patch(url, body);
-            console.log(`✅ Estado actualizado correctamente`);
         } catch (error) {
-            console.error(`❌ Error al cambiar estado:`, error);
+            console.error(`Error al cambiar estado:`, error);
             throw error;
         }
     }

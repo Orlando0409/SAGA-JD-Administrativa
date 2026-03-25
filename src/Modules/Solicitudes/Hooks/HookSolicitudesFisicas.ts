@@ -18,7 +18,6 @@ export const useRefetchAllSolicitudesFisicas = () => {
                 queryKey: ['solicitudes-juridicas']
             });
 
-            console.log('Todas las consultas de solicitudes físicas refrescadas');
         } catch (error) {
             console.error('Error al refrescar consultas de solicitudes físicas:', error);
         }

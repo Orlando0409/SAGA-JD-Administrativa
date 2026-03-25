@@ -40,12 +40,18 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
     const [showCompletarDialog, setShowCompletarDialog] = useState(false);
     const [showRechazarDialog, setShowRechazarDialog] = useState(false);
     const [motivoRechazo, setMotivoRechazo] = useState('');
+    
+    // Estados para el flujo de medidor dañado
+    const [showDialogMedidorDanado, setShowDialogMedidorDanado] = useState(false);
+    const [showDialogMontoCambio, setShowDialogMontoCambio] = useState(false);
+    const [montoPago, setMontoPago] = useState<number | string>('');
+    const [motivoCambio, setMotivoCambio] = useState('');
 
     const marcarEnRevisionMutation = useMarcarEnRevision();
     const aprobarYEnEsperaMutation = useAprobarYEnEspera();
     const completarMutation = useCompletar();
     const rechazarMutation = useRechazar();
-    const { showWarning } = useAlerts();
+    const { showWarning, showError } = useAlerts();
     // Extraer información básica de la solicitud
     const getSolicitudInfo = () => {
         if (solicitud.tipo === 'solicitud-fisica') {
@@ -138,7 +144,7 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
     // Función para manejar aprobación por casos usando hooks unificados
     const handleCambiarEstado = async () => {
         const estadoActual = info.estadoId;
-
+   debugger;
         // Estado 1 (Registro) → Poner en revisión manualmente al hacer clic
         if (estadoActual === 1) {
             try {
@@ -153,9 +159,11 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
             return;
         }
 
-        // Estado 2 (En Revisión) → Poner en espera directamente
+        // Estado 2 (En Revisión) → Preguntar si el medidor fue dañado
         if (estadoActual === 2) {
-            await handleConfirmAprobar();
+            setMontoPago('');
+            setMotivoCambio('');
+            setShowDialogMedidorDanado(true);
             return;
         }
 
@@ -178,7 +186,6 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
             if (info.tipoSolicitud === 'Cambio de Medidor' && info.Id_Medidor) {
                 try {
                     await updateEstadoMedidor(info.Id_Medidor, 3);
-                    console.log(`Medidor #${info.Id_Medidor} marcado como Averiado`);
                 } catch (medidorError) {
                     console.error('Error al marcar medidor como averiado:', medidorError);
 
@@ -193,23 +200,66 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
         }
     };
 
+    // Función para manejar si el medidor fue dañado
+    const handleMedidorDanado = (danado: boolean) => {
+        if (danado) {
+            // Si fue dañado, mostrar dialog para pedir monto y motivo
+            setShowDialogMedidorDanado(false);
+            setShowDialogMontoCambio(true);
+        } else {
+            // Si no fue dañado, proceder sin pago
+            setShowDialogMedidorDanado(false);
+            handleConfirmAprobar(false);
+        }
+    };
+
+    // Función para confirmar monto y motivo del cambio
+    const handleConfirmMontoCambio = async () => {
+        // Validar que ambos campos estén completos
+        if (!montoPago || String(montoPago).trim() === '') {
+            showError('Campo requerido', 'Por favor ingresa el monto del cambio');
+            return;
+        }
+        
+        if (!motivoCambio || motivoCambio.trim() === '') {
+            showError('Campo requerido', 'Por favor ingresa el motivo del cambio');
+            return;
+        }
+
+        // Validar que el monto sea un número válido
+        const montoNumerico = Number.parseFloat(String(montoPago));
+        if (Number.isNaN(montoNumerico) || montoNumerico <= 0) {
+            showError('Monto inválido', 'Por favor ingresa un monto válido mayor a 0');
+            return;
+        }
+
+        // Cerrar el dialog y proceder con la aprobación con pago
+        setShowDialogMontoCambio(false);
+        await handleConfirmAprobar(true, montoNumerico, motivoCambio.trim());
+    };
+
     // Función para manejar rechazo usando hooks unificados
     const handleRechazar = async () => {
         setShowRechazarDialog(true);
     };
 
     // Confirmar aprobación y poner en espera (para solicitudes con medidor)
-    const handleConfirmAprobar = async () => {
+    const handleConfirmAprobar = async (ocupaPago?: boolean, montoCambio?: number, motivoCobro?: string) => {
         const tipoSolicitud: TipoSolicitud = mapearTipoSolicitud(info.tipoSolicitud);
         const tipoPersona: TipoPersona = mapearTipoPersona(info.tipo);
-
+        const data = {
+            ocupaPago: ocupaPago || false,
+            montoCambio: ocupaPago ? montoCambio : undefined,
+            motivoCobro: ocupaPago ? motivoCobro : undefined
+        };
         try {
-            console.log(` Aprobando y poniendo en espera: ${tipoSolicitud} - ${tipoPersona}`);
-            await aprobarYEnEsperaMutation.mutateAsync(tipoSolicitud, tipoPersona, info.id);
+            await aprobarYEnEsperaMutation.mutateAsync(tipoSolicitud, tipoPersona, info.id, data);
             setShowAprobarDialog(false);
+            setMontoPago('');
+            setMotivoCambio('');
             onClose();
         } catch (error) {
-            console.error(' Error al marcar en aprobada y en espera:', error);
+            console.error('Error al marcar en aprobada y en espera:', error);
             setShowAprobarDialog(false);
         }
     };
@@ -220,7 +270,7 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
         const tipoPersona: TipoPersona = mapearTipoPersona(info.tipo);
 
         try {
-            console.log(` Completando solicitud ${info.tipoSolicitud} directamente desde Estado 2 (sin medidor)`);
+       
             await completarMutation.mutateAsync(tipoSolicitud, tipoPersona, info.id);
             setShowCompletarDialog(false);
             onClose();
@@ -236,8 +286,6 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
             // Mapear los tipos a los valores internos
             const tipoSolicitudInterno: TipoSolicitud = mapearTipoSolicitud(solicitud.tipoSolicitud || info.tipoSolicitud);
             const tipoPersonaInterno: TipoPersona = mapearTipoPersona(info.tipo);
-
-            console.log(`Rechazando solicitud: ${tipoSolicitudInterno} - ${tipoPersonaInterno}`);
 
             // Usar el hook unificado para rechazar (Cualquier estado → 5) con el motivo
             await rechazarMutation.mutateAsync(tipoSolicitudInterno, tipoPersonaInterno, info.id, motivoRechazo.trim());
@@ -567,10 +615,9 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
                             Esta acción cambiará el estado a "Aprobada en Espera" y permitirá la asignación del medidor.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
-                    <AlertDialogFooter>
-
+                    <AlertDialogFooter className="flex justify-between">
                         <AlertDialogAction
-                            onClick={handleConfirmAprobar}
+                            onClick={() => handleConfirmAprobar(false, 0, '')}
                             disabled={aprobarYEnEsperaMutation.isPending}
                         >
                             {aprobarYEnEsperaMutation.isPending ? 'Aprobando...' : 'Aprobar'}
@@ -593,8 +640,7 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
                             Esta solicitud no requiere asignación de medidor y será marcada como completada directamente.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
-                    <AlertDialogFooter>
-
+                    <AlertDialogFooter className="flex justify-between">
                         <AlertDialogAction
                             onClick={handleConfirmCompletar}
                             disabled={completarMutation.isPending}
@@ -643,7 +689,14 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
                         </div>
                     </div>
 
-                    <AlertDialogFooter>
+                    <AlertDialogFooter className="flex justify-between">
+                        <AlertDialogAction
+                            onClick={() => handleConfirmRechazar()}
+                            disabled={motivoRechazo.trim().length < 10 || rechazarMutation.isPending}
+                            className="bg-red-600 hover:bg-red-700 disabled:bg-gray-400"
+                        >
+                            {rechazarMutation.isPending ? 'Rechazando...' : 'Confirmar Rechazo'}
+                        </AlertDialogAction>
                         <AlertDialogCancel
                             onClick={() => {
                                 setMotivoRechazo('');
@@ -653,13 +706,100 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
                         >
                             Cancelar
                         </AlertDialogCancel>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+
+            {/* AlertDialog para preguntar si el medidor fue dañado */}
+            <AlertDialog open={showDialogMedidorDanado} onOpenChange={setShowDialogMedidorDanado}>
+                <AlertDialogContent className="max-w-md">
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>¿Fue dañado el medidor?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            ¿El medidor de <strong>{info.nombre}</strong> fue dañado o presenta problemas que requieran su cambio?
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter className="flex justify-between">
                         <AlertDialogAction
-                            onClick={() => handleConfirmRechazar()}
-                            disabled={motivoRechazo.trim().length < 10 || rechazarMutation.isPending}
-                            className="bg-red-600 hover:bg-red-700 disabled:bg-gray-400"
+                            onClick={() => handleMedidorDanado(true)}
+                            className="bg-blue-600 hover:bg-blue-700 hover:shadow-lg transition-all"
                         >
-                            {rechazarMutation.isPending ? 'Rechazando...' : 'Confirmar Rechazo'}
+                            Sí, fue dañado
                         </AlertDialogAction>
+                        <AlertDialogCancel 
+                            onClick={() => {
+                                setShowDialogMedidorDanado(false);
+                                handleMedidorDanado(false);
+                            }}
+                        >
+                            No, está bien
+                        </AlertDialogCancel>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+
+            {/* AlertDialog para solicitar monto y motivo del cambio */}
+            <AlertDialog open={showDialogMontoCambio} onOpenChange={setShowDialogMontoCambio}>
+                <AlertDialogContent className="max-w-md">
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Detalles del cambio de medidor</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Ingresa el monto a cobrar por el cambio y el motivo del daño.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    
+                    <div className="space-y-4 my-4">
+                        {/* Campo de Monto */}
+                        <div>
+                            <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                Monto del cambio *
+                            </label>
+                            <input
+                                type="number"
+                                placeholder="Ej: 50000"
+                                value={montoPago}
+                                onChange={(e) => setMontoPago(e.target.value)}
+                                className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                step="0.01"
+                                min="0"
+                            />
+                        </div>
+
+                        {/* Campo de Motivo */}
+                        <div>
+                            <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                Motivo del daño *
+                            </label>
+                            <textarea
+                                placeholder="Describe el motivo por el que el medidor fue dañado..."
+                                value={motivoCambio}
+                                onChange={(e) => setMotivoCambio(e.target.value)}
+                                className="w-full min-h-20 resize-none border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                maxLength={100}
+                            />
+                            <p className="text-xs text-gray-500 mt-1">
+                                {motivoCambio.length} caracteres / 100
+                            </p>
+                        </div>
+                    </div>
+
+                    <AlertDialogFooter className="flex justify-between">
+                        <AlertDialogAction
+                            onClick={handleConfirmMontoCambio}
+                            disabled={!montoPago || !motivoCambio.trim() || aprobarYEnEsperaMutation.isPending}
+                            className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400"
+                        >
+                            {aprobarYEnEsperaMutation.isPending ? 'Procesando...' : 'Confirmar'}
+                        </AlertDialogAction>
+                        <AlertDialogCancel
+                            onClick={() => {
+                                setShowDialogMontoCambio(false);
+                                setMontoPago('');
+                                setMotivoCambio('');
+                            }}
+                        >
+                            Cancelar
+                        </AlertDialogCancel>
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>

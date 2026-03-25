@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ServiceEstadoSolicitudes } from "../Service/EstadoSolicitudes";
-import type { TipoSolicitud, TipoPersona, EstadoSolicitud } from "../Types/EstadoSolicitudes";
+import type { TipoSolicitud, TipoPersona, EstadoSolicitud, OcupaPagarMedidor } from "../Types/EstadoSolicitudes";
 import { useAlerts } from "@/Modules/Global/context/AlertContext";
 
 
@@ -10,6 +10,7 @@ interface CambiarEstadoParams {
     solicitudId: number | string;
     nuevoEstado: EstadoSolicitud;
     motivoRechazo?: string;
+    ocupaPagarMedidor?: OcupaPagarMedidor;
 }
 
 
@@ -22,7 +23,7 @@ export const useCambiarEstadoSolicitud = () => {
             ServiceEstadoSolicitudes.cambiarEstado(params),
 
         onSuccess: async (_, variables) => {
-            const emoji = variables.tipoPersona === 'fisica' ? '👤' : '🏢';
+        
             const tipoPersonaTexto = variables.tipoPersona === 'fisica' ? 'Física' : 'Jurídica';
 
             // Determinar el mensaje según el estado
@@ -50,8 +51,6 @@ export const useCambiarEstadoSolicitud = () => {
                     mensaje = `Estado actualizado para solicitud ${variables.tipoSolicitud} (${tipoPersonaTexto})`;
             }
 
-            console.log(`✅ ${emoji} Hook: Estado cambiado exitosamente`, variables);
-
             // Invalidar y refrescar todas las cachés relevantes
             await Promise.all([
                 queryClient.invalidateQueries({ queryKey: ["solicitudes-fisicas"] }),
@@ -67,17 +66,13 @@ export const useCambiarEstadoSolicitud = () => {
                 }),
             ]);
 
-            console.log(`🔄 ${emoji} Cachés invalidadas y actualizadas`);
-
             // Mostrar alerta de éxito
             showSuccess(titulo, mensaje);
         },
 
         onError: (error: any, variables) => {
-            const emoji = variables.tipoPersona === 'fisica' ? '👤' : '🏢';
+          
             const tipoPersonaTexto = variables.tipoPersona === 'fisica' ? 'Física' : 'Jurídica';
-
-            console.error(`❌ ${emoji} Hook: Error al cambiar estado`, error, variables);
 
             const errorMessage = error?.response?.data?.message ||
                 `Error al actualizar el estado de la solicitud ${variables.tipoSolicitud} (${tipoPersonaTexto})`;
@@ -112,11 +107,11 @@ export const useAprobarYEnEspera = () => {
     const cambiarEstado = useCambiarEstadoSolicitud();
 
     return {
-        mutate: (tipoSolicitud: TipoSolicitud, tipoPersona: TipoPersona, solicitudId: number | string) =>
-            cambiarEstado.mutate({ tipoSolicitud, tipoPersona, solicitudId, nuevoEstado: 3 }),
+        mutate: (tipoSolicitud: TipoSolicitud, tipoPersona: TipoPersona, solicitudId: number | string, ocupaPagarMedidor?: OcupaPagarMedidor) =>
+            cambiarEstado.mutate({ tipoSolicitud, tipoPersona, solicitudId, nuevoEstado: 3, ocupaPagarMedidor }),
 
-        mutateAsync: (tipoSolicitud: TipoSolicitud, tipoPersona: TipoPersona, solicitudId: number | string) =>
-            cambiarEstado.mutateAsync({ tipoSolicitud, tipoPersona, solicitudId, nuevoEstado: 3 }),
+        mutateAsync: (tipoSolicitud: TipoSolicitud, tipoPersona: TipoPersona, solicitudId: number | string, ocupaPagarMedidor?: OcupaPagarMedidor) =>
+            cambiarEstado.mutateAsync({ tipoSolicitud, tipoPersona, solicitudId, nuevoEstado: 3, ocupaPagarMedidor }),
 
         isPending: cambiarEstado.isPending,
         isError: cambiarEstado.isError,
