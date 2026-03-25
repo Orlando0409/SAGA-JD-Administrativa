@@ -55,10 +55,13 @@ export class ServiceEstadoSolicitudes {
             // Enviar datos adicionales solo para ciertos estados
             if (nuevoEstado === 3 && ocupaPagarMedidor) {
                 body = {
-                    ocupaPago: ocupaPagarMedidor.ocupaPago,
-                    montoCambio: ocupaPagarMedidor.montoCambio,
-                    motivoCobro: ocupaPagarMedidor.motivoCobro
+                    ocupaPago: Boolean(ocupaPagarMedidor.ocupaPago)
                 };
+
+                if (body.ocupaPago) {
+                    body.montoCambio = ocupaPagarMedidor.montoCambio;
+                    body.motivoCobro = ocupaPagarMedidor.motivoCobro;
+                }
             }
 
             // Enviar motivoRechazo solo cuando es un rechazo (estado 5)

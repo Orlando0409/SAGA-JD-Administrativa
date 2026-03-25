@@ -536,6 +536,7 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
 
                                     <div className="p-4">
                                         <div className="grid grid-cols-1 gap-3">
+                                            
                                             {/* Número de medidor seleccionado por el usuario (sólo Cambio de Medidor) */}
                                             {info.tipoSolicitud === 'Cambio de Medidor' && info.Numero_Medidor != null && (
                                                 <div className="bg-blue-50 border border-blue-200 p-3 rounded-lg">
@@ -546,14 +547,7 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
                                                 </div>
                                             )}
 
-                                            {info.Numero_Medidor_Actual && info.Numero_Medidor_Actual !== 'No especificado' && (
-                                                <div className="bg-gray-50 p-3 rounded-lg">
-                                                    <label className="block text-xs font-medium text-gray-600 uppercase tracking-wide mb-1">
-                                                        Número de Medidor Actual
-                                                    </label>
-                                                    <p className="text-sm font-medium text-gray-900">{info.Numero_Medidor_Actual}</p>
-                                                </div>
-                                            )}
+                                           
 
                                             {!esAgregarMedidor && info.Motivo_Solicitud && info.Motivo_Solicitud !== 'No especificado' && (
                                                 <div className="bg-gray-50 p-3 rounded-lg">
