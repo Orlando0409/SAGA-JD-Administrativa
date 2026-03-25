@@ -25,4 +25,11 @@ export interface CambioEstadoRequest {
     solicitudId: number | string;
     nuevoEstado: EstadoSolicitud;
     motivoRechazo?: string;
+    ocupaPagarMedidor?: OcupaPagarMedidor;
+}
+
+export interface OcupaPagarMedidor{
+    ocupaPago?: boolean;
+    montoCambio?: number;
+    motivoCobro?: string;
 }

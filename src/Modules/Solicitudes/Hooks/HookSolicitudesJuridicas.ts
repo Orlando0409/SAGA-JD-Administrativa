@@ -18,9 +18,9 @@ export const useRefetchAllSolicitudesJuridicas = () => {
                 queryKey: ['solicitudes-fisicas'] 
             });
             
-            console.log('✅ Todas las consultas de solicitudes jurídicas refrescadas');
+           
         } catch (error) {
-            console.error('❌ Error al refrescar consultas de solicitudes jurídicas:', error);
+            console.error(' Error al refrescar consultas de solicitudes jurídicas:', error);
         }
     };
     
@@ -52,8 +52,6 @@ export const useSolicitudesJuridicasPendientes = () => {
 };
 
  //Hook personalizable para filtrar solicitudes jurídicas por estado
-
- 
 export const useSolicitudesJuridicasPorEstado = (estado: string, enabled: boolean = true) => {
     return useQuery<SolicitudJuridica[], Error>({
         queryKey: ['solicitudes-juridicas', 'estado', estado],
@@ -67,7 +65,6 @@ export const useSolicitudesJuridicasPorEstado = (estado: string, enabled: boolea
 };
 
   //Hook personalizable para filtrar solicitudes jurídicas por tipo
-
 export const useSolicitudesJuridicasPorTipo = (
     tipo: 'Afiliacion' | 'Desconexion' | 'Cambio de Medidor' | 'Asociado',
     enabled: boolean = true
@@ -84,21 +81,17 @@ export const useSolicitudesJuridicasPorTipo = (
 };
 
 //  Hooks específicos por tipo (para conveniencia)
-
 export const useSolicitudesJuridicasAfiliacion = () => {
     return useSolicitudesJuridicasPorTipo('Afiliacion');
 }
-
 
 export const useSolicitudesJuridicasDesconexion = () => {
     return useSolicitudesJuridicasPorTipo('Desconexion');
 };
 
-
 export const useSolicitudesJuridicasCambioMedidor = () => {
     return useSolicitudesJuridicasPorTipo('Cambio de Medidor');
 };
-
 
 export const useSolicitudesJuridicasAsociado = () => {
     return useSolicitudesJuridicasPorTipo('Asociado');

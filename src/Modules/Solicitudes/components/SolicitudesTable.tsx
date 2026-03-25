@@ -102,8 +102,6 @@ export default function SolicitudesTable() {
     const pageSizeOptions = [5, 10, 20, 50];
     // Función para unificar los datos de solicitudes
     const datosUnificados = useMemo((): SolicitudUnificada[] => {
-        console.log(' Datos originales físicas:', solicitudesFisicas);
-        console.log(' Datos originales jurídicas:', solicitudesJuridicas);
 
         // Función para normalizar el nombre del tipo de solicitud
         const normalizarTipoSolicitud = (tipo: string): 'Afiliacion' | 'Desconexion' | 'Cambio de Medidor' | 'Asociado' | 'Agregar Medidor' => {
@@ -122,69 +120,46 @@ export default function SolicitudesTable() {
                 resultado = 'Agregar Medidor';
             } else {
                 resultado = tipo; // Fallback al tipo original
-                console.warn(' Tipo de solicitud no reconocido:', tipo);
             }
 
-            console.log(` Normalización: "${tipo}" → "${resultado}"`);
             return resultado as any;
         };
 
         // Función para aplanar la estructura agrupada por tipo de solicitud
         const aplanarSolicitudes = (datos: any): any[] => {
-            if (!datos) {
-                console.log(' No hay datos para aplanar');
-                return [];
-            }
-
+            if (!datos)  return [];
+            
             // Si ya es un array, devolverlo directamente
-            if (Array.isArray(datos)) {
-                console.log(' Los datos ya son un array:', datos.length, 'elementos');
-                return datos;
-            }
+            if (Array.isArray(datos))  return datos;
+            
 
             // Si es un objeto agrupado por tipo (Afiliacion, Desconexion, etc.)
-            console.log(' Datos agrupados detectados. Claves:', Object.keys(datos));
             const solicitudesPlanas: any[] = [];
 
             Object.keys(datos).forEach(tipoSolicitud => {
                 const solicitudesDelTipo = datos[tipoSolicitud];
-                console.log(`   Procesando tipo: "${tipoSolicitud}"`, {
-                    esArray: Array.isArray(solicitudesDelTipo),
-                    cantidad: Array.isArray(solicitudesDelTipo) ? solicitudesDelTipo.length : 0,
-                    datos: solicitudesDelTipo
-                });
 
                 if (Array.isArray(solicitudesDelTipo) && solicitudesDelTipo.length > 0) {
                     // Agregar el Tipo_Solicitud a cada solicitud si no lo tiene
-                    solicitudesDelTipo.forEach((solicitud, idx) => {
+                    solicitudesDelTipo.forEach((solicitud) => {
                         const solicitudConTipo = {
                             ...solicitud,
                             Tipo_Solicitud: solicitud.Tipo_Solicitud || tipoSolicitud
                         };
-                        console.log(`    Agregando solicitud ${idx + 1}:`, {
-                            Id: solicitud.Id_Solicitud,
-                            Tipo_Original: solicitud.Tipo_Solicitud,
-                            Tipo_Asignado: solicitudConTipo.Tipo_Solicitud
-                        });
+       
                         solicitudesPlanas.push(solicitudConTipo);
                     });
                 }
             });
 
-            console.log('✅ Total de solicitudes aplanadas:', solicitudesPlanas.length);
             return solicitudesPlanas;
         };
 
         // Aplanar las solicitudes físicas y jurídicas
         const solicitudesFisicasArray = aplanarSolicitudes(solicitudesFisicas);
         const solicitudesJuridicasArray = aplanarSolicitudes(solicitudesJuridicas);
-
-        console.log(' Solicitudes físicas aplanadas:', solicitudesFisicasArray);
-        console.log(' Solicitudes jurídicas aplanadas:', solicitudesJuridicasArray);
-
         // Solicitudes Físicas
         const solicitudesFisicasUnificadas: SolicitudUnificada[] = solicitudesFisicasArray.map((solicitud: SolicitudFisica, index: number) => {
-
 
             // Buscar ID real en la solicitud (backend usa Id_Solicitud)
             const solicitudConId = solicitud as any;
@@ -233,11 +208,6 @@ export default function SolicitudesTable() {
             ...solicitudesFisicasUnificadas,
             ...solicitudesJuridicasUnificadas
         ].sort((a, b) => b.Id - a.Id);
-
-
-        resultado.forEach((s, idx) => {
-            console.log(`  ${idx + 1}. ID:${s.Id} | ${s.Tipo_Solicitud} | ${s.Estado.Nombre_Estado} | ${s.Tipo_Persona} | ${s.Nombre_Completo}`);
-        });
 
         return resultado;
     }, [solicitudesFisicas, solicitudesJuridicas]);
@@ -295,7 +265,6 @@ export default function SolicitudesTable() {
 
                 if (fila.Tipo_Persona === 'Físico') {
                     const datosOriginales = fila.datos_originales as SolicitudFisica;
-                    console.log('Datos físico en celda:', datosOriginales);
 
                     if (!datosOriginales.Nombre && !datosOriginales.Apellido1) {
                         return 'Datos no disponibles';
@@ -305,7 +274,6 @@ export default function SolicitudesTable() {
                     return nombreCompleto || 'Sin nombre';
                 } else {
                     const datosOriginales = fila.datos_originales as SolicitudJuridica;
-                    console.log('Datos jurídico en celda:', datosOriginales);
 
                     return datosOriginales.Razon_Social || 'Sin razón social';
                 }
