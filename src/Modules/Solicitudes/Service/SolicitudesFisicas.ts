@@ -7,7 +7,8 @@ import type {
     SolicitudCambioMedidorFisica,
     SolicitudAsociadoFisica,
     SolicitudAgregarMedidorFisica,
-    CreateSolicitudAgregarMedidorFisicaDTO
+    CreateSolicitudAgregarMedidorFisicaDTO,
+    CreateSolicitudAsociadoFisicaDTO
 } from "../Models/ModelosFisicas";
 
 // GET - Obtener todas las solicitudes físicas
@@ -234,6 +235,37 @@ export async function cambiarEstadoAgregarMedidorFisica(
         );
     } catch (error) {
         console.error(` Error al cambiar estado de agregar medidor física #${idSolicitud}:`, error);
+        throw error;
+    }
+}
+
+export async function createSolicitudAsociadoFisica(
+    data: CreateSolicitudAsociadoFisicaDTO
+): Promise<SolicitudAsociadoFisica> {
+    try {
+        const formData = new FormData();
+
+        formData.append('Tipo_Identificacion', data.Tipo_Identificacion);
+        formData.append('Identificacion', data.Identificacion);
+        formData.append('Nombre', data.Nombre);
+        formData.append('Apellido1', data.Apellido1);
+        if (data.Apellido2) formData.append('Apellido2', data.Apellido2);
+        formData.append('Correo', data.Correo);
+        formData.append('Numero_Telefono', data.Numero_Telefono);
+        formData.append('Direccion_Exacta', data.Direccion_Exacta);
+        if (data.Motivo_Solicitud) formData.append('Motivo_Solicitud', data.Motivo_Solicitud);
+        formData.append('Planos_Terreno', data.Planos_Terreno);
+        formData.append('Escrituras_Terreno', data.Escrituras_Terreno);
+
+        const response = await apiAuth.post('/solicitudes-fisicas/create/asociado', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
+
+        return response.data;
+    } catch (error) {
+        console.error(' Error al crear solicitud de asociado física:', error);
         throw error;
     }
 }

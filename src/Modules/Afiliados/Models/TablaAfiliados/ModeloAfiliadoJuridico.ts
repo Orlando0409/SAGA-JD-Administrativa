@@ -10,6 +10,7 @@ export interface Medidor {
     };
     Certificacion_Literal?: string | null;
     Planos_Terreno?: string | null;
+    Escrituras_Terreno?: string | null;
 }
 
 export interface AfiliadoJuridico {
@@ -35,6 +36,7 @@ export interface AfiliadoJuridico {
     Fecha_Actualizacion: string
     Certificacion_Literal?: string
     Planos_Terreno?: string
+    Escrituras_Terreno?: string
     medidores?: Medidor[];
     Medidores?: Medidor[]; // Backend puede enviar con mayúscula
 }

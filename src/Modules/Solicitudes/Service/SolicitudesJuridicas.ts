@@ -7,7 +7,8 @@ import type {
     SolicitudCambioMedidorJuridica,
     SolicitudAsociadoJuridica,
     SolicitudAgregarMedidorJuridica,
-    CreateSolicitudAgregarMedidorJuridicaDTO
+    CreateSolicitudAgregarMedidorJuridicaDTO,
+    CreateSolicitudAsociadoJuridicaDTO
 } from "../Models/ModelosJuridicos";
 
 export async function getSolicitudesJuridicas(): Promise<SolicitudJuridica[]> {
@@ -229,6 +230,34 @@ export async function cambiarEstadoAgregarMedidorJuridica(
         );
     } catch (error) {
         console.error(` Error al cambiar estado de agregar medidor jurídica #${idSolicitud}:`, error);
+        throw error;
+    }
+}
+
+export async function createSolicitudAsociadoJuridica(
+    data: CreateSolicitudAsociadoJuridicaDTO
+): Promise<SolicitudAsociadoJuridica> {
+    try {
+        const formData = new FormData();
+
+        formData.append('Cedula_Juridica', data.Cedula_Juridica);
+        formData.append('Razon_Social', data.Razon_Social);
+        formData.append('Correo', data.Correo);
+        formData.append('Numero_Telefono', data.Numero_Telefono);
+        formData.append('Direccion_Exacta', data.Direccion_Exacta);
+        if (data.Motivo_Solicitud) formData.append('Motivo_Solicitud', data.Motivo_Solicitud);
+        formData.append('Planos_Terreno', data.Planos_Terreno);
+        formData.append('Escrituras_Terreno', data.Escrituras_Terreno);
+
+        const response = await apiAuth.post('/solicitudes-juridicas/create/asociado', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
+
+        return response.data;
+    } catch (error) {
+        console.error(' Error al crear solicitud de asociado jurídica:', error);
         throw error;
     }
 }

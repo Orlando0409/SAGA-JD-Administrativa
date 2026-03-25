@@ -12,6 +12,7 @@ export interface Medidor {
     };
     Certificacion_Literal?: string | null;
     Planos_Terreno?: string | null;
+    Escrituras_Terreno?: string | null;
 }
 
 export interface AfiliadoFisico {
@@ -36,6 +37,7 @@ export interface AfiliadoFisico {
     Fecha_Actualizacion: string
     Certificacion_Literal?: string
     Planos_Terreno?: string
+    Escrituras_Terreno?: string
     Tipo_Identificacion: TipoIdentificacion;
     medidores?: Medidor[];
     Medidores?: Medidor[]; // Backend puede enviar con mayúscula

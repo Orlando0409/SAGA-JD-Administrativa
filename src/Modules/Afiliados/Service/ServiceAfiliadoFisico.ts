@@ -12,6 +12,11 @@ export async function getAfiliadoFisicoById(id: number): Promise<AfiliadoFisico>
     return response.data;
 }
 
+export async function getAfiliadoFisicoDetail(id: number): Promise<AfiliadoFisico> {
+    const response = await apiAuth.get<AfiliadoFisico>(`/afiliados/fisico/detail/${id}`);
+    return response.data;
+}
+
 // En tu Hook o Service
 export const createAfiliadoFisico = async (formData: FormData) => {
     const response = await apiAuth.post("/afiliados/fisico/create", formData, {
@@ -60,6 +65,7 @@ type MedidorBackend = {
     Estado_Medidor?: { Id_Estado_Medidor: number; Nombre_Estado_Medidor: string };
     Certificacion_Literal?: string | null;
     Planos_Terreno?: string | null;
+    Escrituras_Terreno?: string | null;
 };
 
 // Mapea la respuesta del backend al formato del frontend
@@ -73,6 +79,7 @@ const mapearMedidoresDetalle = (medidores: MedidorBackend[]): Medidor[] =>
         } : undefined),
         Certificacion_Literal: m.Certificacion_Literal ?? null,
         Planos_Terreno: m.Planos_Terreno ?? null,
+        Escrituras_Terreno: m.Escrituras_Terreno ?? null,
     }));
 
 export const getMedidoresByAfiliado = async (idAfiliado: number): Promise<Medidor[]> => {
@@ -89,4 +96,35 @@ export const getMedidoresByAfiliadoJuridico = async (idAfiliado: number): Promis
 
 export const asignarMedidorAAfiliado = async (idAfiliado: number, idMedidor: number): Promise<void> => {
     await apiAuth.patch(`/afiliados/${idAfiliado}/medidores/${idMedidor}/asignar`);
+};
+
+export const updateTipoAfiliadoFisico = async (
+    id: number,
+    nuevoTipoId: number,
+    archivos?: {
+        Planos_Terreno?: File;
+        Escrituras_Terreno?: File;
+    }
+) => {
+    const formData = new FormData();
+
+    if (archivos?.Planos_Terreno) {
+        formData.append('Planos_Terreno', archivos.Planos_Terreno);
+    }
+
+    if (archivos?.Escrituras_Terreno) {
+        formData.append('Escrituras_Terreno', archivos.Escrituras_Terreno);
+    }
+
+    const response = await apiAuth.patch(
+        `/afiliados/update/tipo/fisico/${id}/tipo/${nuevoTipoId}`,
+        formData,
+        {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        }
+    );
+
+    return response.data;
 };

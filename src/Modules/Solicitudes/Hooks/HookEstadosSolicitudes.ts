@@ -40,7 +40,9 @@ export const useCambiarEstadoSolicitud = () => {
                     break;
                 case 4:
                     titulo = 'Solicitud Completada';
-                    mensaje = `La solicitud ${variables.tipoSolicitud} (${tipoPersonaTexto}) ha sido completada exitosamente`;
+                    mensaje = variables.tipoSolicitud === 'agregar-medidor'
+                        ? `La solicitud agregar-medidor (${tipoPersonaTexto}) fue completada: medidor asignado y archivos vinculados.`
+                        : `La solicitud ${variables.tipoSolicitud} (${tipoPersonaTexto}) ha sido completada exitosamente`;
                     break;
                 case 5:
                     titulo = 'Solicitud Rechazada';

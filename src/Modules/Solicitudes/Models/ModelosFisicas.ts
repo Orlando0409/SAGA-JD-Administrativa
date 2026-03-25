@@ -24,6 +24,7 @@ export interface SolicitudFisicaBase {
         Numero_Medidor?: string | number;
     };
     Planos_Terreno?: File | string;
+    Escrituras_Terreno?: File | string;
     Certificacion_Literal?: File | string;
     // Mantener Cedula por compatibilidad pero priorizar Identificacion
 
@@ -55,6 +56,22 @@ export interface SolicitudCambioMedidorFisica extends SolicitudFisicaBase {
 
 export interface SolicitudAsociadoFisica extends SolicitudFisicaBase {
     Motivo_Solicitud: string;
+    Planos_Terreno?: File | string;
+    Escrituras_Terreno?: File | string;
+}
+
+export interface CreateSolicitudAsociadoFisicaDTO {
+    Tipo_Identificacion: 'Cedula Nacional' | 'DIMEX' | 'Pasaporte';
+    Identificacion: string;
+    Nombre: string;
+    Apellido1: string;
+    Apellido2?: string;
+    Correo: string;
+    Numero_Telefono: string;
+    Direccion_Exacta: string;
+    Motivo_Solicitud?: string;
+    Planos_Terreno: File;
+    Escrituras_Terreno: File;
 }
 
 export interface SolicitudAgregarMedidorFisica extends SolicitudFisicaBase {

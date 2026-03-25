@@ -82,6 +82,7 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
                 Motivo_Solicitud: datos.Motivo_Solicitud || 'No especificado',
                 Certificacion_Literal: datos.Certificacion_Literal || 'No proporcionada',
                 Planos_Terreno: datos.Planos_Terreno || 'No proporcionados',
+                Escrituras_Terreno: datos.Escrituras_Terreno || 'No proporcionadas',
                 Numero_Medidor_Actual: numeroMedidorRaw != null ? String(numeroMedidorRaw) : (datos.Numero_Medidor_Actual || 'No especificado'),
                 Numero_Medidor: datos.Numero_Medidor ?? null,
                 Id_Medidor: datos.Id_Medidor ?? null,
@@ -118,6 +119,7 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
                 Motivo_Solicitud: datos.Motivo_Solicitud || 'No especificado',
                 Certificacion_Literal: datos.Certificacion_Literal || 'No proporcionada',
                 Planos_Terreno: datos.Planos_Terreno || 'No proporcionados',
+                Escrituras_Terreno: datos.Escrituras_Terreno || 'No proporcionadas',
                 Numero_Medidor_Actual: numeroMedidorRaw != null ? String(numeroMedidorRaw) : (datos.Numero_Medidor_Actual || 'No especificado'),
                 Numero_Medidor: datos.Numero_Medidor ?? null,
                 Id_Medidor: datos.Id_Medidor ?? null,
@@ -224,6 +226,10 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
         }
 
         if (estadoActual === 3) {
+            if (info.tipoSolicitud === 'Asociado') {
+                setShowCompletarDialog(true);
+                return;
+            }
             setShowModalMedidor(true);
             return;
         }
@@ -516,7 +522,10 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
                                 </div>
 
                                 <div className="p-4">
-                                    <div className="grid grid-cols-2 gap-3">
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                       
+                                       {info.tipoSolicitud !== 'Asociado' && (
+
                                         <div className="bg-gray-50 p-3 rounded-lg">
                                             <label className="block text-xs font-medium text-gray-600 uppercase tracking-wide mb-1">
                                                 Certifcación Literal
@@ -530,6 +539,11 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
                                                 <p className="text-sm text-gray-500">No proporcionada</p>
                                             )}
                                         </div>
+                                       
+                                       )
+                                       
+                                       }
+                                       
 
                                         <div className="bg-gray-50 p-3 rounded-lg">
                                             <label className="block text-xs font-medium text-gray-600 uppercase tracking-wide mb-1">
@@ -542,6 +556,20 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
                                                 </a>
                                             ) : (
                                                 <p className="text-sm text-gray-500">No proporcionados</p>
+                                            )}
+                                        </div>
+
+                                        <div className="bg-gray-50 p-3 rounded-lg">
+                                            <label className="block text-xs font-medium text-gray-600 uppercase tracking-wide mb-1">
+                                                Escrituras del Terreno
+                                            </label>
+                                            {info.Escrituras_Terreno && info.Escrituras_Terreno !== 'No proporcionadas' ? (
+                                                <a href={info.Escrituras_Terreno} target="_blank" rel="noopener noreferrer"
+                                                    className="text-sm text-blue-600 hover:text-blue-800 underline font-medium">
+                                                    Ver documento
+                                                </a>
+                                            ) : (
+                                                <p className="text-sm text-gray-500">No proporcionadas</p>
                                             )}
                                         </div>
                                     </div>
@@ -567,7 +595,7 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
                                 <>
                                     <Check className="w-4 h-4" />
                                     {info.estadoId === 3
-                                        ? 'Completar y asignar medidor'
+                                        ? (info.tipoSolicitud === 'Asociado' ? 'Completar solicitud' : 'Completar y asignar medidor')
                                         : 'Poner en espera'}
                                 </>
                             )}

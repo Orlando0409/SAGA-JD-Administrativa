@@ -19,6 +19,8 @@ export interface SolicitudJuridicaBase {
         Id_Medidor?: number;
         Numero_Medidor?: string | number;
     };
+    Planos_Terreno?: File | string;
+    Escrituras_Terreno?: File | string;
 }
 
 
@@ -44,7 +46,20 @@ export interface SolicitudCambioMedidorJuridica extends SolicitudJuridicaBase {
 }
 export interface SolicitudAsociadoJuridica extends SolicitudJuridicaBase {
     Motivo_Solicitud: string;
+    Planos_Terreno?: File | string;
+    Escrituras_Terreno?: File | string;
 
+}
+
+export interface CreateSolicitudAsociadoJuridicaDTO {
+    Cedula_Juridica: string;
+    Razon_Social: string;
+    Correo: string;
+    Numero_Telefono: string;
+    Direccion_Exacta: string;
+    Motivo_Solicitud?: string;
+    Planos_Terreno: File;
+    Escrituras_Terreno: File;
 }
 
 export interface SolicitudAgregarMedidorJuridica extends SolicitudJuridicaBase {

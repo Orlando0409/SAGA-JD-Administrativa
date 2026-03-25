@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { AfiliadoJuridico } from "../Models/TablaAfiliados/ModeloAfiliadoJuridico";
-import { createAfiliadoJuridico, getAfiliadosJuridicos, updateAfiliadoJuridico, updateEstadoAfiliadoJuridico } from "../Service/ServiceAfiliadoJuridico";
+import { createAfiliadoJuridico, getAfiliadosJuridicos, updateAfiliadoJuridico, updateEstadoAfiliadoJuridico, updateTipoAfiliadoJuridico } from "../Service/ServiceAfiliadoJuridico";
 
 export const useAfiliadosJuridicos = () => {
   const queryClient = useQueryClient(); // 🔧 Agregar esta línea
@@ -49,6 +49,23 @@ export const useAfiliadosJuridicos = () => {
     onError: () => console.error("no se actualizo el estado del afiliado juridico"),
   });
 
+  const updateTipoMutation = useMutation({
+    mutationFn: ({
+      id,
+      nuevoTipoId,
+      archivos,
+    }: {
+      id: number;
+      nuevoTipoId: number;
+      archivos?: { Planos_Terreno?: File; Escrituras_Terreno?: File };
+    }) => updateTipoAfiliadoJuridico(id, nuevoTipoId, archivos),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["afiliadosJuridicos"] });
+      console.log("tipo del afiliado juridico actualizado con exito");
+    },
+    onError: () => console.error("no se actualizo el tipo del afiliado juridico"),
+  });
+
   return {
     afiliadosJuridicos,
     isLoading,
@@ -58,5 +75,6 @@ export const useAfiliadosJuridicos = () => {
     createAfiliadoJuridico: createMutation.mutateAsync,
     updateAfiliadoJuridico: updateMutation.mutateAsync,
     updateEstadoAfiliadoJuridico: updateEstadoMutation,
+    updateTipoAfiliadoJuridico: updateTipoMutation,
   };
 }
