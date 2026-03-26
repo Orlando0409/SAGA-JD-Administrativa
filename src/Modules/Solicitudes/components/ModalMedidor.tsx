@@ -23,6 +23,7 @@ interface ModalMedidorProps {
     onClose: () => void;
     onMedidorAsignado?: (estadoPago: 'Pagado' | 'Pendiente') => void | Promise<void>; // Callback para ejecutar después de asignar medidor
     tipoSolicitud?: 'Afiliacion' | 'Cambio de Medidor' | 'Asociado' | 'Desconexion' | 'Agregar Medidor';
+    solicitudId?: number | string;
     afiliado: {
         tipo: 'solicitud-fisica' | 'solicitud-juridica';
         datos: SolicitudFisica | SolicitudJuridica;
@@ -36,7 +37,7 @@ interface Medidor {
     Fecha_Creacion?: string | Date;
 }
 
-const ModalMedidor = ({ isOpen, onClose, onMedidorAsignado, tipoSolicitud, afiliado }: ModalMedidorProps) => {
+const ModalMedidor = ({ isOpen, onClose, onMedidorAsignado, tipoSolicitud, solicitudId, afiliado }: ModalMedidorProps) => {
     const asignarMedidorMutation = useAsignarMedidor();
     const queryClient = useQueryClient();
     const { showError } = useAlerts();
@@ -54,6 +55,15 @@ const ModalMedidor = ({ isOpen, onClose, onMedidorAsignado, tipoSolicitud, afili
     const [showConfirmDialog, setShowConfirmDialog] = useState(false);
     const [estadoPago, setEstadoPago] = useState<'Pagado' | 'Pendiente' | ''>('');
 
+    const resolverSolicitudId = () => {
+        if (solicitudId !== undefined && solicitudId !== null && solicitudId !== '') {
+            return solicitudId;
+        }
+
+        const datos = afiliado.datos as any;
+        return datos.Id_Solicitud || datos.id || datos.Id || datos.ID || datos.solicitudId || null;
+    };
+
     // Resetear selección cuando se abre el modal
     useEffect(() => {
         if (isOpen) {
@@ -65,6 +75,8 @@ const ModalMedidor = ({ isOpen, onClose, onMedidorAsignado, tipoSolicitud, afili
 
     // Obtener información del afiliado
     const getAfiliadoInfo = () => {
+        const solicitudIdResuelta = resolverSolicitudId();
+
         if (afiliado.tipo === 'solicitud-fisica') {
             const datos = afiliado.datos as any;
             return {
@@ -72,7 +84,7 @@ const ModalMedidor = ({ isOpen, onClose, onMedidorAsignado, tipoSolicitud, afili
                 documento: datos.Identificacion || datos.Cedula || 'Sin cédula',
                 telefono: datos.Numero_Telefono || 'No especificado',
                 tipo: 'Persona Física',
-                Id_Afiliado: datos.Id_Solicitud || datos.id
+                Id_Afiliado: solicitudIdResuelta
             };
         } else {
             const datos = afiliado.datos as any;
@@ -81,7 +93,7 @@ const ModalMedidor = ({ isOpen, onClose, onMedidorAsignado, tipoSolicitud, afili
                 documento: datos.Cedula_Juridica || 'Sin cédula jurídica',
                 telefono: datos.Numero_Telefono || 'No especificado',
                 tipo: 'Persona Jurídica',
-                Id_Afiliado: datos.Id_Solicitud || datos.id
+                Id_Afiliado: solicitudIdResuelta
             };
         }
     };
@@ -113,6 +125,14 @@ const ModalMedidor = ({ isOpen, onClose, onMedidorAsignado, tipoSolicitud, afili
             return;
         }
 
+        if (!afiliadoInfo.Id_Afiliado || String(afiliadoInfo.Id_Afiliado).startsWith('temp-')) {
+            showError(
+                'Solicitud inválida',
+                'No se encontró un Id de solicitud válido para asignar el medidor. Recarga la lista e intenta nuevamente.'
+            );
+            return;
+        }
+
         setShowConfirmDialog(true);
     };
 
@@ -125,7 +145,7 @@ const ModalMedidor = ({ isOpen, onClose, onMedidorAsignado, tipoSolicitud, afili
                 Id_Medidor: medidorSeleccionado.Id_Medidor,
                 Id_Tipo_Entidad: afiliado.tipo === 'solicitud-fisica' ? 1 : 2,
                 Id_Solicitud: afiliadoInfo.Id_Afiliado,
-                Estado_Pago: estadoPago,
+                Estado_Pago: estadoPago as 'Pagado' | 'Pendiente',
                 tipoSolicitud: tipoSolicitud
             });
 
@@ -213,50 +233,6 @@ const ModalMedidor = ({ isOpen, onClose, onMedidorAsignado, tipoSolicitud, afili
                                         </div>
                                     </div>
                                 </div>
-
-                                {/* Medidor Seleccionado */}
-                                {medidorSeleccionado && (
-                                    <div className="bg-gradient-to-br from-green-50 to-emerald-50 border border-green-200 rounded-xl p-6 shadow-sm">
-                                        <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                                            Medidor Seleccionado
-                                        </h3>
-
-                                        <div className="bg-white rounded-lg p-4 border border-green-100">
-                                            <div className="flex items-center justify-between">
-                                                <div>
-                                                    <label className="text-xs font-medium text-gray-500 block mb-1">
-                                                        Número de Medidor
-                                                    </label>
-                                                    <p className="text-2xl font-bold text-green-700">
-                                                        {medidorSeleccionado.Numero_Medidor}
-                                                    </p>
-                                                </div>
-                                                <button
-                                                    onClick={() => setMedidorSeleccionado(null)}
-                                                    className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                                                    title="Deseleccionar"
-                                                >
-                                                    <LuX className="w-5 h-5" />
-                                                </button>
-                                            </div>
-                                        </div>
-
-                                        <div className="mt-4">
-                                            <label className="text-xs font-medium text-gray-500 block mb-2">
-                                                Estado de Pago *
-                                            </label>
-                                            <select
-                                                value={estadoPago}
-                                                onChange={(e) => setEstadoPago(e.target.value as 'Pagado' | 'Pendiente' | '')}
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
-                                            >
-                                                <option value="">Seleccione estado de pago</option>
-                                                <option value="Pagado">Pagado</option>
-                                                <option value="Pendiente">Pendiente</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                )}
                             </div>
 
                             {/* Columna Derecha - Selector de Medidores */}
@@ -334,6 +310,50 @@ const ModalMedidor = ({ isOpen, onClose, onMedidorAsignado, tipoSolicitud, afili
                                         )}
                                     </div>
                                 </div>
+
+                                  {/* Medidor Seleccionado */}
+                                {medidorSeleccionado && (
+                                    <div className="bg-gradient-to-br from-green-50 to-emerald-50 border border-green-200 rounded-xl p-6 shadow-sm">
+                                        <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                                            Medidor Seleccionado
+                                        </h3>
+
+                                        <div className="bg-white rounded-lg p-4 border border-green-100">
+                                            <div className="flex items-center justify-between">
+                                                <div>
+                                                    <label className="text-xs font-medium text-gray-500 block mb-1">
+                                                        Número de Medidor
+                                                    </label>
+                                                    <p className="text-2xl font-bold text-green-700">
+                                                        {medidorSeleccionado.Numero_Medidor}
+                                                    </p>
+                                                </div>
+                                                <button
+                                                    onClick={() => setMedidorSeleccionado(null)}
+                                                    className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                                                    title="Deseleccionar"
+                                                >
+                                                    <LuX className="w-5 h-5" />
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <div className="mt-4">
+                                            <label className="text-xs font-medium text-gray-500 block mb-2">
+                                                Estado de Pago *
+                                            </label>
+                                            <select
+                                                value={estadoPago}
+                                                onChange={(e) => setEstadoPago(e.target.value as 'Pagado' | 'Pendiente' | '')}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+                                            >
+                                                <option value="">Seleccione estado de pago</option>
+                                                <option value="Pagado">Pagado</option>
+                                                <option value="Pendiente">Pendiente</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>

@@ -28,7 +28,7 @@ export class ServiceAsignarMedidor {
 
                 response = await apiAuth.put<AsignarMedidorResponse>(
                     baseUrl,
-                    { Id_Nuevo_Medidor: dto.Id_Medidor }
+                    { Id_Nuevo_Medidor: dto.Id_Medidor, Estado_Pago: dto.Estado_Pago }
                 );
             } else {
                 

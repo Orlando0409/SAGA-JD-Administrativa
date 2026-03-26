@@ -52,8 +52,13 @@ export class ServiceEstadoSolicitudes {
         let body: Record<string, any> = {};
         try {
  
-            // Enviar datos adicionales solo para ciertos estados
-            if (nuevoEstado === 3 && ocupaPagarMedidor) {
+            // Enviar datos de pago solo para tipos que soportan cobro en estado 3
+            const tipoSoportaPagoEnEspera =
+                tipoSolicitud === 'afiliacion' ||
+                tipoSolicitud === 'agregar-medidor' ||
+                tipoSolicitud === 'cambio-medidor';
+
+            if (nuevoEstado === 3 && tipoSoportaPagoEnEspera && ocupaPagarMedidor) {
                 body = {
                     ocupaPago: Boolean(ocupaPagarMedidor.ocupaPago)
                 };

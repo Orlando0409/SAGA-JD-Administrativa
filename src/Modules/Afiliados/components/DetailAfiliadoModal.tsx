@@ -219,6 +219,42 @@ const DetailAbonados: React.FC<DetailAbonadosProps> = ({ persona, isOpen, onClos
             : 'bg-blue-100 text-blue-800 border-blue-200';
     };
 
+    const getEstadoTecnicoMedidorColor = (estado: string) => {
+        const normalizado = estado.trim().toLowerCase();
+
+        if (normalizado.includes('averiado')) {
+            return 'bg-red-100 text-red-800 border-red-200';
+        }
+
+        if (normalizado.includes('instalado')) {
+            return 'bg-green-100 text-green-800 border-green-200';
+        }
+
+        if (normalizado.includes('pendiente') || normalizado.includes('espera')) {
+            return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+        }
+
+        return 'bg-gray-100 text-gray-800 border-gray-200';
+    };
+
+    const getEstadoPagoMedidorColor = (estado: string) => {
+        const normalizado = estado.trim().toLowerCase();
+
+        if (normalizado === 'pagado') {
+            return 'bg-emerald-100 text-emerald-800 border-emerald-200';
+        }
+
+        if (normalizado === 'pendiente') {
+            return 'bg-amber-100 text-amber-800 border-amber-200';
+        }
+
+        if (normalizado === 'libre') {
+            return 'bg-blue-100 text-blue-800 border-blue-200';
+        }
+
+        return 'bg-gray-100 text-gray-800 border-gray-200';
+    };
+
     const getModalTitle = () => {
         switch (persona.tipo) {
             case 'afiliado-fisico':
@@ -474,10 +510,10 @@ const DetailAbonados: React.FC<DetailAbonadosProps> = ({ persona, isOpen, onClos
 
                                                             return (
                                                                 <div className="flex flex-wrap items-center gap-2 mt-1">
-                                                                    <span className="inline-block px-3 py-1 rounded-full text-sm font-medium border bg-green-100 text-green-800 border-green-200">
+                                                                    <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium border ${getEstadoTecnicoMedidorColor(estadoTecnico)}`}>
                                                                         {estadoTecnico}
                                                                     </span>
-                                                                    <span className="inline-block px-3 py-1 rounded-full text-sm font-medium border bg-blue-100 text-blue-800 border-blue-200">
+                                                                    <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium border ${getEstadoPagoMedidorColor(estadoPago)}`}>
                                                                         {estadoPago}
                                                                     </span>
                                                                 </div>

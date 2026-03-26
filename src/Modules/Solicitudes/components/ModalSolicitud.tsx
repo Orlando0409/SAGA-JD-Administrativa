@@ -193,10 +193,8 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
             try {
                 const tipoSolicitud: TipoSolicitud = mapearTipoSolicitud(tipoSolicitudStr);
                 const tipoPersona: TipoPersona = mapearTipoPersona(tipoPersonaStr);
-
-                console.log('🔄 Cambiando estado a En Revisión...', { tipoSolicitud, tipoPersona, id: solicitudId });
+                
                 await marcarEnRevisionMutation.mutateAsync(tipoSolicitud, tipoPersona, solicitudId);
-                console.log('✅ Estado cambiado exitosamente');
             } catch (error) {
                 console.error('❌ Error al cambiar a En Revisión:', error);
                 // Si falla, permitir reintento
@@ -239,8 +237,9 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
         if (estadoActual === 2) {
             const esCambioMedidor = mapearTipoSolicitud(info.tipoSolicitud) === 'cambio-medidor';
             const esAgregarMedidorSolicitud = mapearTipoSolicitud(info.tipoSolicitud) === 'agregar-medidor';
+            const esAfiliacionSolicitud = mapearTipoSolicitud(info.tipoSolicitud) === 'afiliacion';
 
-            if (esAgregarMedidorSolicitud) {
+            if (esAgregarMedidorSolicitud || esAfiliacionSolicitud) {
                 setMontoPago('');
                 setShowDialogMontoAgregarMedidor(true);
                 return;
@@ -258,10 +257,17 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
         }
 
         if (estadoActual === 3) {
-            if (info.tipoSolicitud === 'Asociado') {
+            const tipoSolicitud = mapearTipoSolicitud(info.tipoSolicitud);
+            const requiereAsignacionMedidor =
+                tipoSolicitud === 'afiliacion' ||
+                tipoSolicitud === 'cambio-medidor' ||
+                tipoSolicitud === 'agregar-medidor';
+
+            if (!requiereAsignacionMedidor) {
                 setShowCompletarDialog(true);
                 return;
             }
+
             setShowModalMedidor(true);
             return;
         }
@@ -370,11 +376,14 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
     const handleConfirmAprobar = async (ocupaPago?: boolean, montoCambio?: number, motivoCobro?: string) => {
         const tipoSolicitud: TipoSolicitud = mapearTipoSolicitud(info.tipoSolicitud);
         const tipoPersona: TipoPersona = mapearTipoPersona(info.tipo);
-        const data = {
-            ocupaPago: ocupaPago || false,
-            montoCambio: ocupaPago ? montoCambio : undefined,
-            motivoCobro: ocupaPago ? motivoCobro : undefined
-        };
+        const requierePayloadPago = tipoSolicitud === 'afiliacion' || tipoSolicitud === 'agregar-medidor' || tipoSolicitud === 'cambio-medidor';
+        const data = requierePayloadPago
+            ? {
+                ocupaPago: Boolean(ocupaPago),
+                montoCambio: ocupaPago ? montoCambio : undefined,
+                motivoCobro: ocupaPago ? motivoCobro : undefined
+            }
+            : undefined;
         try {
             await aprobarYEnEsperaMutation.mutateAsync(tipoSolicitud, tipoPersona, info.id, data);
             setShowAprobarDialog(false);
@@ -690,7 +699,14 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
                                 <>
                                     <Check className="w-4 h-4" />
                                     {info.estadoId === 3
-                                        ? (info.tipoSolicitud === 'Asociado' ? 'Completar solicitud' : 'Completar y asignar medidor')
+                                        ? ((() => {
+                                            const tipoSolicitud = mapearTipoSolicitud(info.tipoSolicitud);
+                                            const requiereAsignacionMedidor =
+                                                tipoSolicitud === 'afiliacion' ||
+                                                tipoSolicitud === 'cambio-medidor' ||
+                                                tipoSolicitud === 'agregar-medidor';
+                                            return requiereAsignacionMedidor ? 'Completar y asignar medidor' : 'Completar solicitud';
+                                        })())
                                         : 'Poner en espera'}
                                 </>
                             )}
@@ -734,6 +750,7 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
                         }}
                         onMedidorAsignado={aprobarSolicitudDespuesDeAsignar}
                         tipoSolicitud={solicitud.tipoSolicitud || (info.tipoSolicitud as any)}
+                        solicitudId={info.id}
                         afiliado={{
                             tipo: solicitud.tipo,
                             datos: solicitud.datos
@@ -945,7 +962,11 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
             <AlertDialog open={showDialogMontoAgregarMedidor} onOpenChange={setShowDialogMontoAgregarMedidor}>
                 <AlertDialogContent className="max-w-md">
                     <AlertDialogHeader>
-                        <AlertDialogTitle>Monto para Agregar Medidor</AlertDialogTitle>
+                        <AlertDialogTitle>
+                            {mapearTipoSolicitud(info.tipoSolicitud) === 'afiliacion'
+                                ? 'Monto para Solicitud de Afiliación'
+                                : 'Monto para Agregar Medidor'}
+                        </AlertDialogTitle>
                         <AlertDialogDescription>
                             Ingresa el monto exacto a pagar para enviar el correo al solicitante y poner la solicitud en espera.
                         </AlertDialogDescription>
