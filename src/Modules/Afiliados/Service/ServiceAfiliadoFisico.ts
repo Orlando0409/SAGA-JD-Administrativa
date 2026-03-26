@@ -98,6 +98,40 @@ export const asignarMedidorAAfiliado = async (idAfiliado: number, idMedidor: num
     await apiAuth.patch(`/afiliados/${idAfiliado}/medidores/${idMedidor}/asignar`);
 };
 
+export const asignarMedidorExistenteAfiliado = async (
+    idAfiliado: number,
+    idMedidor: number,
+    certificacionLiteral: File,
+    planosTerreno: File
+): Promise<void> => {
+    const formData = new FormData();
+    formData.append('Id_Afiliado', String(idAfiliado));
+    formData.append('Id_Medidor', String(idMedidor));
+    formData.append('Certificacion_Literal', certificacionLiteral);
+    formData.append('Planos_Terreno', planosTerreno);
+
+    await apiAuth.post('/afiliados/medidores/asignar-existente', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+    });
+};
+
+export const crearYAsignarMedidorAfiliado = async (
+    idAfiliado: number,
+    numeroMedidor: number,
+    certificacionLiteral: File,
+    planosTerreno: File
+): Promise<void> => {
+    const formData = new FormData();
+    formData.append('Id_Afiliado', String(idAfiliado));
+    formData.append('Numero_Medidor', String(numeroMedidor));
+    formData.append('Certificacion_Literal', certificacionLiteral);
+    formData.append('Planos_Terreno', planosTerreno);
+
+    await apiAuth.post('/afiliados/medidores/crear-y-asignar', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+    });
+};
+
 export const updateTipoAfiliadoFisico = async (
     id: number,
     nuevoTipoId: number,

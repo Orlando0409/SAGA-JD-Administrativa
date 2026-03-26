@@ -16,7 +16,7 @@ export const getMedidoresNoInstalados = async (): Promise<Medidor[]> => {
 
 // Obtener medidores disponibles (sin asignar)
 export const getMedidoresDisponibles = async (): Promise<Medidor[]> => {
-  const response = await axiosPrivate.get(`/Inventario/medidores/no-instalados`);
+  const response = await axiosPrivate.get(`/Inventario/medidores/disponibles`);
   return response.data;
 };
 
