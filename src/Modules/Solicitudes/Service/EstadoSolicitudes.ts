@@ -46,7 +46,7 @@ export class ServiceEstadoSolicitudes {
 
     static async cambiarEstado(request: CambioEstadoRequest): Promise<void> {
         
-        const { tipoSolicitud, tipoPersona, solicitudId, nuevoEstado, motivoRechazo, ocupaPagarMedidor } = request;
+        const { tipoSolicitud, tipoPersona, solicitudId, nuevoEstado, motivoRechazo, ocupaPagarMedidor, estadoPago } = request;
 
         const url = this.construirEndpoint(tipoSolicitud, tipoPersona, solicitudId, nuevoEstado);
         let body: Record<string, any> = {};
@@ -71,6 +71,15 @@ export class ServiceEstadoSolicitudes {
             // Enviar motivoRechazo solo cuando es un rechazo (estado 5)
             if (nuevoEstado === 5 && motivoRechazo) {
                 body = { motivoRechazo };
+            }
+
+            // Para completar solicitudes de cambio/agregar medidor, incluir estado de pago seleccionado
+            if (
+                nuevoEstado === 4 &&
+                (tipoSolicitud === 'agregar-medidor' || tipoSolicitud === 'cambio-medidor') &&
+                estadoPago
+            ) {
+                body = { Estado_Pago: estadoPago };
             }
 
             await apiAuth.patch(url, body);

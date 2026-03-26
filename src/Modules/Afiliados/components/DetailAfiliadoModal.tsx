@@ -466,13 +466,23 @@ const DetailAbonados: React.FC<DetailAbonadosProps> = ({ persona, isOpen, onClos
                                                     </div>
                                                     <div className="flex-1">
                                                         <p className="text-xs font-medium text-gray-500 uppercase">Estado Actual del medidor</p>
-                                                        <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium border mt-1 ${
-                                                            medidor.Estado_Medidor?.Id_Estado_Medidor === 2
-                                                                ? 'bg-green-100 text-green-800 border-green-200'
-                                                                : 'bg-red-100 text-red-700 border border-red-300'
-                                                        }`}>
-                                                            {medidor.Estado_Medidor?.Nombre_Estado_Medidor ?? 'Sin estado'}
-                                                        </span>
+                                                        {(() => {
+                                                            const estadoTecnico = medidor.Estado_Medidor?.Nombre_Estado_Medidor ?? 'Sin estado';
+                                                            const estadoPago = typeof medidor.Estado_Pago === 'string'
+                                                                ? medidor.Estado_Pago
+                                                                : medidor.Estado_Pago?.Nombre_Estado_Pago ?? 'Libre';
+
+                                                            return (
+                                                                <div className="flex flex-wrap items-center gap-2 mt-1">
+                                                                    <span className="inline-block px-3 py-1 rounded-full text-sm font-medium border bg-green-100 text-green-800 border-green-200">
+                                                                        {estadoTecnico}
+                                                                    </span>
+                                                                    <span className="inline-block px-3 py-1 rounded-full text-sm font-medium border bg-blue-100 text-blue-800 border-blue-200">
+                                                                        {estadoPago}
+                                                                    </span>
+                                                                </div>
+                                                            );
+                                                        })()}
                                                     </div>
                                                 </div>
                                             </div>

@@ -8,6 +8,13 @@ export interface Medidor {
         Id_Estado_Medidor: number;
         Nombre_Estado_Medidor: string;
     };
+    Estado_Pago?:
+        | string
+        | {
+            Id_Estado_Pago?: number;
+            Nombre_Estado_Pago: string;
+        }
+        | null;
     Certificacion_Literal?: string | null;
     Planos_Terreno?: string | null;
     Escrituras_Terreno?: string | null;

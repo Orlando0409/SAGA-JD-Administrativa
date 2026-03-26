@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ServiceEstadoSolicitudes } from "../Service/EstadoSolicitudes";
-import type { TipoSolicitud, TipoPersona, EstadoSolicitud, OcupaPagarMedidor } from "../Types/EstadoSolicitudes";
+import type { TipoSolicitud, TipoPersona, EstadoSolicitud, OcupaPagarMedidor, EstadoPagoMedidor } from "../Types/EstadoSolicitudes";
 import { useAlerts } from "@/Modules/Global/context/AlertContext";
 
 
@@ -11,6 +11,7 @@ interface CambiarEstadoParams {
     nuevoEstado: EstadoSolicitud;
     motivoRechazo?: string;
     ocupaPagarMedidor?: OcupaPagarMedidor;
+    estadoPago?: EstadoPagoMedidor;
 }
 
 
@@ -129,11 +130,11 @@ export const useCompletar = () => {
     const cambiarEstado = useCambiarEstadoSolicitud();
 
     return {
-        mutate: (tipoSolicitud: TipoSolicitud, tipoPersona: TipoPersona, solicitudId: number | string) =>
-            cambiarEstado.mutate({ tipoSolicitud, tipoPersona, solicitudId, nuevoEstado: 4 }),
+        mutate: (tipoSolicitud: TipoSolicitud, tipoPersona: TipoPersona, solicitudId: number | string, estadoPago?: EstadoPagoMedidor) =>
+            cambiarEstado.mutate({ tipoSolicitud, tipoPersona, solicitudId, nuevoEstado: 4, estadoPago }),
 
-        mutateAsync: (tipoSolicitud: TipoSolicitud, tipoPersona: TipoPersona, solicitudId: number | string) =>
-            cambiarEstado.mutateAsync({ tipoSolicitud, tipoPersona, solicitudId, nuevoEstado: 4 }),
+        mutateAsync: (tipoSolicitud: TipoSolicitud, tipoPersona: TipoPersona, solicitudId: number | string, estadoPago?: EstadoPagoMedidor) =>
+            cambiarEstado.mutateAsync({ tipoSolicitud, tipoPersona, solicitudId, nuevoEstado: 4, estadoPago }),
 
         isPending: cambiarEstado.isPending,
         isError: cambiarEstado.isError,

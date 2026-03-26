@@ -272,7 +272,7 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
     };
 
     // Nueva función para aprobar después de asignar el medidor usando hooks unificados
-    const aprobarSolicitudDespuesDeAsignar = async () => {
+    const aprobarSolicitudDespuesDeAsignar = async (estadoPago: 'Pagado' | 'Pendiente') => {
         try {
             const tipoSolicitudInterno: TipoSolicitud = mapearTipoSolicitud(solicitud.tipoSolicitud || info.tipoSolicitud);
             const tipoPersonaInterno: TipoPersona = mapearTipoPersona(info.tipo);
@@ -286,7 +286,7 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
                 }
             }
 
-            await completarMutation.mutateAsync(tipoSolicitudInterno, tipoPersonaInterno, info.id);
+            await completarMutation.mutateAsync(tipoSolicitudInterno, tipoPersonaInterno, info.id, estadoPago);
 
             onClose(); // Cerrar modal principal después de aprobar
         } catch (error) {

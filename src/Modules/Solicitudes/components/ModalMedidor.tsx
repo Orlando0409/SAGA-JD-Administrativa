@@ -21,7 +21,7 @@ import { useAsignarMedidor } from '../Hooks/HookAfiliadoMedidor';
 interface ModalMedidorProps {
     isOpen: boolean;
     onClose: () => void;
-    onMedidorAsignado?: () => void; // Callback para ejecutar después de asignar medidor
+    onMedidorAsignado?: (estadoPago: 'Pagado' | 'Pendiente') => void | Promise<void>; // Callback para ejecutar después de asignar medidor
     tipoSolicitud?: 'Afiliacion' | 'Cambio de Medidor' | 'Asociado' | 'Desconexion' | 'Agregar Medidor';
     afiliado: {
         tipo: 'solicitud-fisica' | 'solicitud-juridica';
@@ -52,12 +52,14 @@ const ModalMedidor = ({ isOpen, onClose, onMedidorAsignado, tipoSolicitud, afili
     const [medidorSeleccionado, setMedidorSeleccionado] = useState<Medidor | null>(null);
     const [showCreateMedidor, setShowCreateMedidor] = useState(false);
     const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+    const [estadoPago, setEstadoPago] = useState<'Pagado' | 'Pendiente' | ''>('');
 
     // Resetear selección cuando se abre el modal
     useEffect(() => {
         if (isOpen) {
             setMedidorSeleccionado(null);
             setBusquedaMedidor('');
+            setEstadoPago('');
         }
     }, [isOpen]);
 
@@ -102,6 +104,15 @@ const ModalMedidor = ({ isOpen, onClose, onMedidorAsignado, tipoSolicitud, afili
             );
             return;
         }
+
+        if (!estadoPago) {
+            showError(
+                'Estado de pago requerido',
+                'Debe seleccionar si el medidor queda como Pagado o Pendiente'
+            );
+            return;
+        }
+
         setShowConfirmDialog(true);
     };
 
@@ -114,6 +125,7 @@ const ModalMedidor = ({ isOpen, onClose, onMedidorAsignado, tipoSolicitud, afili
                 Id_Medidor: medidorSeleccionado.Id_Medidor,
                 Id_Tipo_Entidad: afiliado.tipo === 'solicitud-fisica' ? 1 : 2,
                 Id_Solicitud: afiliadoInfo.Id_Afiliado,
+                Estado_Pago: estadoPago,
                 tipoSolicitud: tipoSolicitud
             });
 
@@ -126,7 +138,7 @@ const ModalMedidor = ({ isOpen, onClose, onMedidorAsignado, tipoSolicitud, afili
 
             // Ejecutar callback para aprobar la solicitud después de asignar
             if (onMedidorAsignado) {
-                await onMedidorAsignado();
+                await onMedidorAsignado(estadoPago as 'Pagado' | 'Pendiente');
             }
         } catch (error) {
             console.error('Error al asignar medidor:', error);
@@ -228,6 +240,21 @@ const ModalMedidor = ({ isOpen, onClose, onMedidorAsignado, tipoSolicitud, afili
                                                 </button>
                                             </div>
                                         </div>
+
+                                        <div className="mt-4">
+                                            <label className="text-xs font-medium text-gray-500 block mb-2">
+                                                Estado de Pago *
+                                            </label>
+                                            <select
+                                                value={estadoPago}
+                                                onChange={(e) => setEstadoPago(e.target.value as 'Pagado' | 'Pendiente' | '')}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+                                            >
+                                                <option value="">Seleccione estado de pago</option>
+                                                <option value="Pagado">Pagado</option>
+                                                <option value="Pendiente">Pendiente</option>
+                                            </select>
+                                        </div>
                                     </div>
                                 )}
                             </div>
@@ -316,7 +343,7 @@ const ModalMedidor = ({ isOpen, onClose, onMedidorAsignado, tipoSolicitud, afili
 
                         <button
                             onClick={handleAsignarMedidor}
-                            disabled={!medidorSeleccionado || asignarMedidorMutation.isPending}
+                            disabled={!medidorSeleccionado || !estadoPago || asignarMedidorMutation.isPending}
                             className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                         >
                             {asignarMedidorMutation.isPending ? 'Asignando...' : 'Asignar Medidor'}

@@ -19,6 +19,27 @@ const DetailMedidorModal = ({ isOpen, onClose, medidor }: DetailMedidorModalProp
     }
   };
 
+  const getEstadoPagoNombre = () => {
+    if (!medidor.Afiliado) return 'Libre';
+
+    const estadoPagoRaw = medidor.Estado_Pago;
+    const nombre = typeof estadoPagoRaw === 'string'
+      ? estadoPagoRaw
+      : estadoPagoRaw?.Nombre_Estado_Pago;
+
+    if (nombre === 'Pagado' || nombre === 'Pendiente' || nombre === 'Libre') {
+      return nombre;
+    }
+
+    return 'Pendiente';
+  };
+
+  const getEstadoPagoBadgeColor = (estadoPago: string) => {
+    if (estadoPago === 'Libre') return 'bg-slate-100 text-slate-800 border-slate-200';
+    if (estadoPago === 'Pagado') return 'bg-emerald-100 text-emerald-800 border-emerald-200';
+    return 'bg-amber-100 text-amber-800 border-amber-200';
+  };
+
   const formatDate = (dateString: string | Date) => {
     return new Date(dateString).toLocaleDateString('es-ES', {
       day: '2-digit',
@@ -134,6 +155,15 @@ const DetailMedidorModal = ({ isOpen, onClose, medidor }: DetailMedidorModalProp
                   </label>
                   <span className={`inline-flex items-center px-3 py-1 rounded-lg text-xs font-semibold border ${getEstadoBadgeColor(medidor.Estado_Medidor.Id_Estado_Medidor)}`}>
                     {medidor.Estado_Medidor.Nombre_Estado_Medidor}
+                  </span>
+                </div>
+
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
+                    Estado de Pago
+                  </label>
+                  <span className={`inline-flex items-center px-3 py-1 rounded-lg text-xs font-semibold border ${getEstadoPagoBadgeColor(getEstadoPagoNombre())}`}>
+                    {getEstadoPagoNombre()}
                   </span>
                 </div>
               </div>

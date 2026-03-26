@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { CreateMedidorData } from '../models/Medidor';
-import { getAllMedidores, getMedidoresNoInstalados, getMedidoresInstalados, getMedidoresAveriados, getMedidoresAfiliado, createMedidor, updateEstadoMedidor } from '../service/MedidorServices';
+import { getAllMedidores, getMedidoresNoInstalados, getMedidoresInstalados, getMedidoresAveriados, getMedidoresAfiliado, createMedidor, updateEstadoMedidor, updateEstadoPagoMedidor } from '../service/MedidorServices';
+import type { EstadoPagoMedidorNombre } from '../models/Medidor';
 import { useAlerts } from '@/Modules/Global/context/AlertContext';
 
 // Hook para obtener todos los medidores
@@ -69,6 +70,25 @@ export const useUpdateEstadoMedidor = () => {
     },
     onError: (error: any) => {
       const errorMessage = error.response?.data?.message || 'Error al actualizar el estado del medidor';
+      showError('Error', errorMessage);
+    },
+  });
+};
+
+// Hook para actualizar estado de pago del medidor
+export const useUpdateEstadoPagoMedidor = () => {
+  const queryClient = useQueryClient();
+  const { showSuccess, showError } = useAlerts();
+
+  return useMutation({
+    mutationFn: ({ idMedidor, estadoPago }: { idMedidor: number; estadoPago: EstadoPagoMedidorNombre }) =>
+      updateEstadoPagoMedidor(idMedidor, estadoPago),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['medidores'] });
+      showSuccess('Éxito', 'Estado de pago actualizado correctamente');
+    },
+    onError: (error: any) => {
+      const errorMessage = error.response?.data?.message || 'Error al actualizar el estado de pago del medidor';
       showError('Error', errorMessage);
     },
   });

@@ -33,6 +33,7 @@ const AsignarAfiliadoMedidorModal = ({
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [escrituraFile, setEscrituraFile] = useState<File | null>(null);
   const [planosFile, setPlanosFile] = useState<File | null>(null);
+  const [estadoPago, setEstadoPago] = useState<'Pagado' | 'Pendiente' | ''>('');
 
   useEffect(() => {
     if (!isOpen) return;
@@ -43,6 +44,7 @@ const AsignarAfiliadoMedidorModal = ({
     setSuccessMsg(null);
     setEscrituraFile(null);
     setPlanosFile(null);
+    setEstadoPago('');
 
     Promise.all([getAfiliadosFisicos(), getAfiliadosJuridicos()])
       .then(([fisicos, juridicos]: [AfiliadoFisico[], AfiliadoJuridico[]]) => {
@@ -78,11 +80,17 @@ const AsignarAfiliadoMedidorModal = ({
   }, [afiliados, searchTerm]);
 
   const handleConfirmar = async () => {
-    if (!selectedAfiliado || !escrituraFile || !planosFile) return;
+    if (!selectedAfiliado || !escrituraFile || !planosFile || !estadoPago) return;
     setGuardando(true);
     setErrorMsg(null);
     try {
-      await asignarMedidorConArchivos(medidor.Id_Medidor, selectedAfiliado.Id_Afiliado, escrituraFile, planosFile);
+      await asignarMedidorConArchivos(
+        medidor.Id_Medidor,
+        selectedAfiliado.Id_Afiliado,
+        escrituraFile,
+        planosFile,
+        estadoPago
+      );
       // Invalidar caches de afiliados para que el DetailAfiliadoModal muestre los medidores actualizados
       await queryClient.invalidateQueries({ queryKey: ['afiliadosFisicos'] });
       await queryClient.invalidateQueries({ queryKey: ['afiliadosJuridicos'] });
@@ -229,6 +237,19 @@ const AsignarAfiliadoMedidorModal = ({
             <div className="space-y-3">
               <p className="text-sm font-medium text-gray-700">Documentos del Terreno <span className="text-red-500">*</span></p>
 
+              <div>
+                <label className="block text-xs font-medium text-gray-600 mb-1">Estado de Pago <span className="text-red-500">*</span></label>
+                <select
+                  value={estadoPago}
+                  onChange={(e) => setEstadoPago(e.target.value as 'Pagado' | 'Pendiente' | '')}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="">Seleccione estado de pago</option>
+                  <option value="Pagado">Pagado</option>
+                  <option value="Pendiente">Pendiente</option>
+                </select>
+              </div>
+
               {/* Certificación */}
               <div>
                 <label className="block text-xs font-medium text-gray-600 mb-1">Certificación Literal</label>
@@ -293,7 +314,7 @@ const AsignarAfiliadoMedidorModal = ({
          
           <button
             onClick={handleConfirmar}
-            disabled={!selectedAfiliado || !escrituraFile || !planosFile || guardando}
+            disabled={!selectedAfiliado || !escrituraFile || !planosFile || !estadoPago || guardando}
             className="px-5 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
           >
             {guardando ? (

@@ -63,6 +63,7 @@ type MedidorBackend = {
     Numero_Medidor: number;
     Estado?: { Id_Estado: number; Nombre_Estado: string };
     Estado_Medidor?: { Id_Estado_Medidor: number; Nombre_Estado_Medidor: string };
+    Estado_Pago?: string | { Id_Estado_Pago?: number; Nombre_Estado_Pago: string } | null;
     Certificacion_Literal?: string | null;
     Planos_Terreno?: string | null;
     Escrituras_Terreno?: string | null;
@@ -77,6 +78,7 @@ const mapearMedidoresDetalle = (medidores: MedidorBackend[]): Medidor[] =>
             Id_Estado_Medidor: m.Estado.Id_Estado,
             Nombre_Estado_Medidor: m.Estado.Nombre_Estado,
         } : undefined),
+        Estado_Pago: m.Estado_Pago ?? null,
         Certificacion_Literal: m.Certificacion_Literal ?? null,
         Planos_Terreno: m.Planos_Terreno ?? null,
         Escrituras_Terreno: m.Escrituras_Terreno ?? null,
