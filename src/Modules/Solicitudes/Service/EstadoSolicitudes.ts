@@ -59,8 +59,12 @@ export class ServiceEstadoSolicitudes {
                 };
 
                 if (body.ocupaPago) {
-                    body.montoCambio = ocupaPagarMedidor.montoCambio;
-                    body.motivoCobro = ocupaPagarMedidor.motivoCobro;
+                    if (typeof ocupaPagarMedidor.montoCambio === 'number') {
+                        body.montoCambio = ocupaPagarMedidor.montoCambio;
+                    }
+                    if (ocupaPagarMedidor.motivoCobro) {
+                        body.motivoCobro = ocupaPagarMedidor.motivoCobro;
+                    }
                 }
             }
 

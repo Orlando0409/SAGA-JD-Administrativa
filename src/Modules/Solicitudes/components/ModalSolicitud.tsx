@@ -45,8 +45,18 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
     // Estados para el flujo de medidor dañado
     const [showDialogMedidorDanado, setShowDialogMedidorDanado] = useState(false);
     const [showDialogMontoCambio, setShowDialogMontoCambio] = useState(false);
+    const [showDialogMontoAgregarMedidor, setShowDialogMontoAgregarMedidor] = useState(false);
     const [montoPago, setMontoPago] = useState<number | string>('');
     const [motivoCambio, setMotivoCambio] = useState('');
+
+    const handleMontoChange = (value: string) => {
+        const soloDigitos = value.replace(/\D/g, '');
+
+        if (soloDigitos.length > 6) return;
+        if (soloDigitos.length > 0 && soloDigitos[0] === '0') return;
+
+        setMontoPago(soloDigitos);
+    };
 
     const marcarEnRevisionMutation = useMarcarEnRevision();
     const aprobarYEnEsperaMutation = useAprobarYEnEspera();
@@ -228,6 +238,13 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
         // Estado 2 (En Revisión) → Flujo condicional por tipo de solicitud
         if (estadoActual === 2) {
             const esCambioMedidor = mapearTipoSolicitud(info.tipoSolicitud) === 'cambio-medidor';
+            const esAgregarMedidorSolicitud = mapearTipoSolicitud(info.tipoSolicitud) === 'agregar-medidor';
+
+            if (esAgregarMedidorSolicitud) {
+                setMontoPago('');
+                setShowDialogMontoAgregarMedidor(true);
+                return;
+            }
 
             if (!esCambioMedidor) {
                 setShowAprobarDialog(true);
@@ -297,6 +314,12 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
             showError('Campo requerido', 'Por favor ingresa el monto del cambio');
             return;
         }
+
+        const montoTexto = String(montoPago).trim();
+        if (!/^[1-9][0-9]{0,5}$/.test(montoTexto)) {
+            showError('Monto inválido', 'El monto debe tener entre 1 y 6 dígitos y no puede iniciar con 0');
+            return;
+        }
         
         if (!motivoCambio || motivoCambio.trim() === '') {
             showError('Campo requerido', 'Por favor ingresa el motivo del cambio');
@@ -313,6 +336,29 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
         // Cerrar el dialog y proceder con la aprobación con pago
         setShowDialogMontoCambio(false);
         await handleConfirmAprobar(true, montoNumerico, motivoCambio.trim());
+    };
+
+    // Función para confirmar monto en solicitudes de agregar medidor (sin motivo)
+    const handleConfirmMontoAgregarMedidor = async () => {
+        if (!montoPago || String(montoPago).trim() === '') {
+            showError('Campo requerido', 'Por favor ingresa el monto a pagar');
+            return;
+        }
+
+        const montoTexto = String(montoPago).trim();
+        if (!/^[1-9][0-9]{0,5}$/.test(montoTexto)) {
+            showError('Monto inválido', 'El monto debe tener entre 1 y 6 dígitos y no puede iniciar con 0');
+            return;
+        }
+
+        const montoNumerico = Number.parseFloat(String(montoPago));
+        if (Number.isNaN(montoNumerico) || montoNumerico <= 0) {
+            showError('Monto inválido', 'Por favor ingresa un monto válido mayor a 0');
+            return;
+        }
+
+        setShowDialogMontoAgregarMedidor(false);
+        await handleConfirmAprobar(true, montoNumerico);
     };
 
     // Función para manejar rechazo usando hooks unificados
@@ -846,13 +892,13 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
                                 Monto del cambio *
                             </label>
                             <input
-                                type="number"
+                                type="text"
+                                inputMode="numeric"
                                 placeholder="Ej: 50000"
                                 value={montoPago}
-                                onChange={(e) => setMontoPago(e.target.value)}
+                                onChange={(e) => handleMontoChange(e.target.value)}
                                 className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                step="0.01"
-                                min="0"
+                                maxLength={6}
                             />
                         </div>
 
@@ -894,6 +940,53 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
                         </AlertDialogFooter>
                     </AlertDialogContent>
                 </AlertDialog>
+
+            {/* AlertDialog para solicitar monto en Agregar Medidor */}
+            <AlertDialog open={showDialogMontoAgregarMedidor} onOpenChange={setShowDialogMontoAgregarMedidor}>
+                <AlertDialogContent className="max-w-md">
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Monto para Agregar Medidor</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Ingresa el monto exacto a pagar para enviar el correo al solicitante y poner la solicitud en espera.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+
+                    <div className="space-y-4 my-4">
+                        <div>
+                            <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                Monto a pagar *
+                            </label>
+                            <input
+                                type="text"
+                                inputMode="numeric"
+                                placeholder="Ej: 50000"
+                                value={montoPago}
+                                onChange={(e) => handleMontoChange(e.target.value)}
+                                className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                maxLength={6}
+                            />
+                        </div>
+                    </div>
+
+                    <AlertDialogFooter className="flex justify-between">
+                        <AlertDialogAction
+                            onClick={handleConfirmMontoAgregarMedidor}
+                            disabled={!montoPago || aprobarYEnEsperaMutation.isPending}
+                            className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400"
+                        >
+                            {aprobarYEnEsperaMutation.isPending ? 'Procesando...' : 'Confirmar'}
+                        </AlertDialogAction>
+                        <AlertDialogCancel
+                            onClick={() => {
+                                setShowDialogMontoAgregarMedidor(false);
+                                setMontoPago('');
+                            }}
+                        >
+                            Cancelar
+                        </AlertDialogCancel>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
             </div>
         
     );
