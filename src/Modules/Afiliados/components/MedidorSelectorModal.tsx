@@ -3,9 +3,11 @@ import { X, Search, Link2, PlusCircle, CheckCircle2, FileText, Gauge, Upload } f
 import { getMedidoresDisponibles } from '@/Modules/Inventario/service/MedidorServices';
 import type { Medidor } from '@/Modules/Inventario/models/Inventario';
 
+export type EstadoPago = 'Pagado' | 'Pendiente';
+
 export type MedidorPendiente =
-    | { uid: string; tipo: 'asignar'; idMedidor: number; numeroMedidor: number | string; escrituraFile: File; planosFile: File }
-    | { uid: string; tipo: 'agregar'; numeroMedidor: number; escrituraFile: File; planosFile: File };
+    | { uid: string; tipo: 'asignar'; idMedidor: number; numeroMedidor: number | string; escrituraFile: File; planosFile: File; estadoPago: EstadoPago }
+    | { uid: string; tipo: 'agregar'; numeroMedidor: number; escrituraFile: File; planosFile: File; estadoPago: EstadoPago };
 
 interface MedidorSelectorModalProps {
     isOpen: boolean;
@@ -22,6 +24,7 @@ const MedidorSelectorModal: React.FC<MedidorSelectorModalProps> = ({ isOpen, mod
     const [numeroNuevo, setNumeroNuevo] = useState('');
     const [escrituraFile, setEscrituraFile] = useState<File | null>(null);
     const [planosFile, setPlanosFile] = useState<File | null>(null);
+    const [estadoPago, setEstadoPago] = useState<EstadoPago | ''>('');
     const [errors, setErrors] = useState<Record<string, string>>({});
 
     useEffect(() => {
@@ -31,6 +34,7 @@ const MedidorSelectorModal: React.FC<MedidorSelectorModalProps> = ({ isOpen, mod
         setNumeroNuevo('');
         setEscrituraFile(null);
         setPlanosFile(null);
+        setEstadoPago('');
         setErrors({});
         if (modo === 'asignar') {
             setLoadingMedidores(true);
@@ -65,6 +69,7 @@ const MedidorSelectorModal: React.FC<MedidorSelectorModalProps> = ({ isOpen, mod
 
         if (!escrituraFile) newErrors.escritura = 'La certificación literal del terreno es requerida';
         if (!planosFile) newErrors.planos = 'Los planos del terreno son requeridos';
+        if (!estadoPago) newErrors.estadoPago = 'Debe seleccionar el estado de pago';
 
         if (Object.keys(newErrors).length > 0) {
             setErrors(newErrors);
@@ -79,6 +84,7 @@ const MedidorSelectorModal: React.FC<MedidorSelectorModalProps> = ({ isOpen, mod
                 numeroMedidor: medidorSeleccionado.Numero_Medidor,
                 escrituraFile: escrituraFile!,
                 planosFile: planosFile!,
+                estadoPago: estadoPago as EstadoPago,
             });
         } else if (modo === 'agregar') {
             onConfirm({
@@ -87,6 +93,7 @@ const MedidorSelectorModal: React.FC<MedidorSelectorModalProps> = ({ isOpen, mod
                 numeroMedidor: parseInt(numeroNuevo),
                 escrituraFile: escrituraFile!,
                 planosFile: planosFile!,
+                estadoPago: estadoPago as EstadoPago,
             });
         }
     };
@@ -260,6 +267,31 @@ const MedidorSelectorModal: React.FC<MedidorSelectorModalProps> = ({ isOpen, mod
                                 </p>
                             </>
                         )}
+                    </div>
+
+                    {/* Separador */}
+                    <div className="border-t border-gray-100" />
+
+                    {/* Estado de Pago */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Estado de Pago <span className="text-red-500">*</span>
+                        </label>
+                        <select
+                            value={estadoPago}
+                            onChange={(e) => {
+                                setEstadoPago(e.target.value as EstadoPago | '');
+                                if (errors.estadoPago) setErrors(prev => ({ ...prev, estadoPago: '' }));
+                            }}
+                            className={`w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${
+                                errors.estadoPago ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                            }`}
+                        >
+                            <option value="">Seleccione estado de pago</option>
+                            <option value="Pagado">Pagado</option>
+                            <option value="Pendiente">Pendiente</option>
+                        </select>
+                        {errors.estadoPago && <p className="text-red-500 text-xs mt-1">{errors.estadoPago}</p>}
                     </div>
 
                     {/* Separador */}
