@@ -4,12 +4,17 @@ import {
     asignarMedidorExistenteAfiliado,
     crearYAsignarMedidorAfiliado,
 } from '../Service/ServiceAfiliadoFisico';
+import {
+    asignarMedidorExistenteAfiliadoJuridico,
+    crearYAsignarMedidorAfiliadoJuridico,
+} from '../Service/ServiceAfiliadoJuridico';
 import MedidorSelectorModal, { type MedidorPendiente } from './MedidorSelectorModal';
 
 interface AsignarMedidorAfiliadoModalProps {
     isOpen: boolean;
     afiliadoId: number | null;
     afiliadoNombre: string;
+    afiliadoTipo?: 'afiliado-fisico' | 'afiliado-juridico'; // Nuevo prop para identificar el tipo
     onClose: () => void;
     onSuccess: () => void;
 }
@@ -18,6 +23,7 @@ const AsignarMedidorAfiliadoModal: React.FC<AsignarMedidorAfiliadoModalProps> = 
     isOpen,
     afiliadoId,
     afiliadoNombre,
+    afiliadoTipo = 'afiliado-fisico', // Por defecto físico para compatibilidad
     onClose,
     onSuccess,
 }) => {
@@ -57,20 +63,28 @@ const AsignarMedidorAfiliadoModal: React.FC<AsignarMedidorAfiliadoModalProps> = 
         try {
             setGuardando(true);
 
+            // Seleccionar las funciones correctas según el tipo de afiliado
+            const esJuridico = afiliadoTipo === 'afiliado-juridico';
+            const funcionAsignarExistente = esJuridico ? asignarMedidorExistenteAfiliadoJuridico : asignarMedidorExistenteAfiliado;
+            const funcionCrearYAsignar = esJuridico ? crearYAsignarMedidorAfiliadoJuridico : crearYAsignarMedidorAfiliado;
+
+            // Procesar cada medidor pendiente
             for (const medidor of medidoresPendientes) {
                 if (medidor.tipo === 'asignar') {
-                    await asignarMedidorExistenteAfiliado(
+                    await funcionAsignarExistente(
                         afiliadoId,
                         medidor.idMedidor,
                         medidor.escrituraFile,
-                        medidor.planosFile
+                        medidor.planosFile,
+                        medidor.estadoPago
                     );
                 } else {
-                    await crearYAsignarMedidorAfiliado(
+                    await funcionCrearYAsignar(
                         afiliadoId,
-                        medidor.numeroMedidor,
+                        medidor.numeroMedidor as number,
                         medidor.escrituraFile,
-                        medidor.planosFile
+                        medidor.planosFile,
+                        medidor.estadoPago
                     );
                 }
             }
@@ -98,7 +112,6 @@ const AsignarMedidorAfiliadoModal: React.FC<AsignarMedidorAfiliadoModalProps> = 
                             <h2 className="text-lg font-semibold text-gray-900">Asignar Medidor</h2>
                             <p className="text-sm text-gray-500 mt-0.5">Afiliado: {afiliadoNombre}</p>
                         </div>
-                        
                     </div>
 
                     <div className="p-5 space-y-4 max-h-[70vh] overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100">
@@ -170,7 +183,6 @@ const AsignarMedidorAfiliadoModal: React.FC<AsignarMedidorAfiliadoModalProps> = 
                     </div>
 
                     <div className="px-5 py-4 bg-gray-50 border-t border-gray-200 flex justify-end gap-2">
-                       
                         <button
                             type="button"
                             onClick={handleGuardarAsignaciones}
@@ -180,11 +192,11 @@ const AsignarMedidorAfiliadoModal: React.FC<AsignarMedidorAfiliadoModalProps> = 
                             {guardando ? 'Asignando...' : 'Guardar Asignaciones'}
                         </button>
 
-                         <button
+                        <button
                             type="button"
                             onClick={handleClose}
                             disabled={guardando}
-                            className="px-4 py-2 text-sm  rounded-lg rounded border border-gray-300 text-gray-700 bg-white hover:bg-gray-100 disabled:opacity-50"
+                            className="px-4 py-2 text-sm rounded-lg rounded border border-gray-300 text-gray-700 bg-white hover:bg-gray-100 disabled:opacity-50"
                         >
                             Cancelar
                         </button>

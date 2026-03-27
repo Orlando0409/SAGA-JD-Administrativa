@@ -381,6 +381,7 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                         }
                         formData.append('Certificacion_Literal', primerMedidor.escrituraFile);
                         formData.append('Planos_Terreno', primerMedidor.planosFile);
+                        formData.append('Estado_Pago', primerMedidor.estadoPago);
                     } else {
                         formData.append('Opcion_Medidor', 'sin_medidor');
                     }
@@ -391,10 +392,10 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                     if (idCreadoF && medidoresPendientes.length > 1) {
                         for (const mp of medidoresPendientes.slice(1)) {
                             if (mp.tipo === 'asignar') {
-                                await asignarMedidorConArchivos(mp.idMedidor, idCreadoF, mp.escrituraFile, mp.planosFile);
+                                await asignarMedidorConArchivos(mp.idMedidor, idCreadoF, mp.escrituraFile, mp.planosFile, mp.estadoPago);
                             } else {
                                 const nuevo = await createMedidor({ Numero_Medidor: mp.numeroMedidor });
-                                await asignarMedidorConArchivos(nuevo.Id_Medidor, idCreadoF, mp.escrituraFile, mp.planosFile);
+                                await asignarMedidorConArchivos(nuevo.Id_Medidor, idCreadoF, mp.escrituraFile, mp.planosFile, mp.estadoPago);
                             }
                         }
                     }
@@ -428,10 +429,10 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                     if (idCreadoJ && medidoresPendientes.length > 1) {
                         for (const mp of medidoresPendientes.slice(1)) {
                             if (mp.tipo === 'asignar') {
-                                await asignarMedidorConArchivos(mp.idMedidor, idCreadoJ, mp.escrituraFile, mp.planosFile);
+                                await asignarMedidorConArchivos(mp.idMedidor, idCreadoJ, mp.escrituraFile, mp.planosFile, mp.estadoPago);
                             } else {
                                 const nuevo = await createMedidor({ Numero_Medidor: mp.numeroMedidor });
-                                await asignarMedidorConArchivos(nuevo.Id_Medidor, idCreadoJ, mp.escrituraFile, mp.planosFile);
+                                await asignarMedidorConArchivos(nuevo.Id_Medidor, idCreadoJ, mp.escrituraFile, mp.planosFile, mp.estadoPago);
                             }
                         }
                     }

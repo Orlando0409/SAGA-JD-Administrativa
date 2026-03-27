@@ -104,15 +104,19 @@ export const asignarMedidorExistenteAfiliado = async (
     idAfiliado: number,
     idMedidor: number,
     certificacionLiteral: File,
-    planosTerreno: File
+    planosTerreno: File,
+    estadoPago?: 'Pagado' | 'Pendiente'
 ): Promise<void> => {
     const formData = new FormData();
     formData.append('Id_Afiliado', String(idAfiliado));
     formData.append('Id_Medidor', String(idMedidor));
     formData.append('Certificacion_Literal', certificacionLiteral);
     formData.append('Planos_Terreno', planosTerreno);
+    if (estadoPago) {
+        formData.append('Estado_Pago', estadoPago);
+    }
 
-    await apiAuth.post('/afiliados/medidores/asignar-existente', formData, {
+    await apiAuth.post('/Inventario/asignar/medidor/afiliado', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
     });
 };
@@ -121,15 +125,28 @@ export const crearYAsignarMedidorAfiliado = async (
     idAfiliado: number,
     numeroMedidor: number,
     certificacionLiteral: File,
-    planosTerreno: File
+    planosTerreno: File,
+    estadoPago?: 'Pagado' | 'Pendiente'
 ): Promise<void> => {
+    const medidorCreado = await apiAuth.post('/Inventario/create/medidor/', {
+        Numero_Medidor: numeroMedidor,
+    });
+
+    const idMedidor = medidorCreado?.data?.Id_Medidor;
+    if (!idMedidor) {
+        throw new Error('No se pudo obtener el Id_Medidor del medidor creado.');
+    }
+
     const formData = new FormData();
     formData.append('Id_Afiliado', String(idAfiliado));
-    formData.append('Numero_Medidor', String(numeroMedidor));
+    formData.append('Id_Medidor', String(idMedidor));
     formData.append('Certificacion_Literal', certificacionLiteral);
     formData.append('Planos_Terreno', planosTerreno);
+    if (estadoPago) {
+        formData.append('Estado_Pago', estadoPago);
+    }
 
-    await apiAuth.post('/afiliados/medidores/crear-y-asignar', formData, {
+    await apiAuth.post('/Inventario/asignar/medidor/afiliado', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
     });
 };

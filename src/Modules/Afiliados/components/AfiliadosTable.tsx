@@ -67,6 +67,7 @@ export default function AbonadosTable() {
     const [showEditModal, setShowEditModal] = useState(false); // ✅ Agregar estado para EditModal
     const [showAsignarMedidorModal, setShowAsignarMedidorModal] = useState(false);
     const [afiliadoParaAsignarMedidor, setAfiliadoParaAsignarMedidor] = useState<AfiliadoUnificado | null>(null);
+    const [tipoAfiliadoAsignar, setTipoAfiliadoAsignar] = useState<'afiliado-fisico' | 'afiliado-juridico'>('afiliado-fisico');
     const [selectedPersona, setSelectedPersona] = useState<{
         tipo: 'afiliado-fisico' | 'afiliado-juridico';
         datos: AfiliadoFisico | AfiliadoJuridico;
@@ -197,6 +198,7 @@ export default function AbonadosTable() {
 
     const handleOpenAsignarMedidor = (persona: AfiliadoUnificado) => {
         setAfiliadoParaAsignarMedidor(persona);
+        setTipoAfiliadoAsignar(persona.Tipo_Persona === 'Físico' ? 'afiliado-fisico' : 'afiliado-juridico');
         setShowAsignarMedidorModal(true);
     };
 
@@ -709,6 +711,7 @@ export default function AbonadosTable() {
                 isOpen={showAsignarMedidorModal}
                 afiliadoId={afiliadoParaAsignarMedidor?.Id ?? null}
                 afiliadoNombre={afiliadoParaAsignarMedidor?.Nombre_Completo ?? ''}
+                afiliadoTipo={tipoAfiliadoAsignar}
                 onClose={() => {
                     setShowAsignarMedidorModal(false);
                     setAfiliadoParaAsignarMedidor(null);

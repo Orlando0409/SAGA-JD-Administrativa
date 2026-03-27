@@ -1,5 +1,5 @@
 import { LuX, LuUser, LuMail, LuPhone, LuMapPin, LuCalendar, LuBuilding, LuFileText, LuMap, LuInfo, LuGauge } from 'react-icons/lu';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { formatCedulaJuridica } from '../Helper/formatUtils';
 import type { AfiliadoFisico, Medidor } from '../Models/TablaAfiliados/ModeloAfiliadoFisico';
 import type { AfiliadoJuridico } from '../Models/TablaAfiliados/ModeloAfiliadoJuridico';
@@ -35,6 +35,8 @@ const DetailAbonados: React.FC<DetailAbonadosProps> = ({ persona, isOpen, onClos
     const [showCambioTipoModal, setShowCambioTipoModal] = useState(false);
     const [planosTerreno, setPlanosTerreno] = useState<File | null>(null);
     const [escriturasTerreno, setEscriturasTerreno] = useState<File | null>(null);
+    const planosInputRef = useRef<HTMLInputElement | null>(null);
+    const escriturasInputRef = useRef<HTMLInputElement | null>(null);
     const { showSuccess, showError, showWarning } = useAlerts();
     const { updateTipoAfiliadoFisico } = useAfiliadosFisicos();
     const { updateTipoAfiliadoJuridico } = useAfiliadosJuridicos();
@@ -181,6 +183,20 @@ const DetailAbonados: React.FC<DetailAbonadosProps> = ({ persona, isOpen, onClos
         } catch (error: any) {
             const mensaje = error?.response?.data?.message || 'No se pudo cambiar el tipo de afiliado.';
             showError('Error al cambiar tipo', mensaje);
+        }
+    };
+
+    const quitarPlanosTerreno = () => {
+        setPlanosTerreno(null);
+        if (planosInputRef.current) {
+            planosInputRef.current.value = '';
+        }
+    };
+
+    const quitarEscriturasTerreno = () => {
+        setEscriturasTerreno(null);
+        if (escriturasInputRef.current) {
+            escriturasInputRef.current.value = '';
         }
     };
 
@@ -740,21 +756,53 @@ const DetailAbonados: React.FC<DetailAbonadosProps> = ({ persona, isOpen, onClos
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">Planos del Terreno *</label>
                                 <input
+                                    ref={planosInputRef}
                                     type="file"
                                     onChange={(e) => setPlanosTerreno(e.target.files?.[0] || null)}
                                     className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                                     accept=".pdf,.png,.jpg,.jpeg"
                                 />
+                                {planosTerreno && (
+                                    <div className="mt-2 flex items-center justify-between rounded-lg border border-gray-200 bg-gray-50 px-3 py-2">
+                                        <span className="text-sm text-gray-700 truncate pr-3">{planosTerreno.name}</span>
+                                        <button
+                                            type="button"
+                                            onClick={quitarPlanosTerreno}
+                                            disabled={isActualizandoTipo}
+                                            className="text-gray-500 hover:text-red-600 disabled:opacity-50"
+                                            aria-label="Quitar archivo de planos"
+                                            title="Quitar archivo"
+                                        >
+                                            <LuX className="w-4 h-4" />
+                                        </button>
+                                    </div>
+                                )}
                             </div>
 
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">Escrituras del Terreno *</label>
                                 <input
+                                    ref={escriturasInputRef}
                                     type="file"
                                     onChange={(e) => setEscriturasTerreno(e.target.files?.[0] || null)}
                                     className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                                     accept=".pdf,.png,.jpg,.jpeg"
                                 />
+                                {escriturasTerreno && (
+                                    <div className="mt-2 flex items-center justify-between rounded-lg border border-gray-200 bg-gray-50 px-3 py-2">
+                                        <span className="text-sm text-gray-700 truncate pr-3">{escriturasTerreno.name}</span>
+                                        <button
+                                            type="button"
+                                            onClick={quitarEscriturasTerreno}
+                                            disabled={isActualizandoTipo}
+                                            className="text-gray-500 hover:text-red-600 disabled:opacity-50"
+                                            aria-label="Quitar archivo de escrituras"
+                                            title="Quitar archivo"
+                                        >
+                                            <LuX className="w-4 h-4" />
+                                        </button>
+                                    </div>
+                                )}
                             </div>
                         </div>
 
@@ -773,8 +821,8 @@ const DetailAbonados: React.FC<DetailAbonadosProps> = ({ persona, isOpen, onClos
                             <button
                                 onClick={() => {
                                     setShowCambioTipoModal(false);
-                                    setPlanosTerreno(null);
-                                    setEscriturasTerreno(null);
+                                    quitarPlanosTerreno();
+                                    quitarEscriturasTerreno();
                                 }}
                                 disabled={isActualizandoTipo}
                                 className="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 disabled:opacity-50"

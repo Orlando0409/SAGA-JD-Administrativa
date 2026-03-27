@@ -68,8 +68,6 @@ const validateField = (fieldName: string, value: any, tipoPersona: 'afiliado-fis
 const EditModal: React.FC<EditModalProps> = ({ isOpen, onClose, persona }) => {
     const { showSuccess, showError } = useAlerts();
     const [formErrors, setFormErrors] = useState<Record<string, string>>({});
-    const [escrituraFile, setEscrituraFile] = useState<File | null>(null);
-    const [planosFile, setPlanosFile] = useState<File | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [showConfirmDialog, setShowConfirmDialog] = useState(false);
     const { updateAfiliadoFisico } = useAfiliadosFisicos();
@@ -82,9 +80,7 @@ const EditModal: React.FC<EditModalProps> = ({ isOpen, onClose, persona }) => {
         correo: 0,
         telefono: 0,
         cedula: 0,
-        direccion: 0,
-        escritura: 0,
-        planos: 0
+        direccion: 0
     });
 
     const createInputHandler = (fieldName: string, handleChange: (value: string) => void, maxLength: number) => {
@@ -164,10 +160,6 @@ const EditModal: React.FC<EditModalProps> = ({ isOpen, onClose, persona }) => {
                     formData.append('Direccion_Exacta', value.Direccion_Exacta || '');
                     formData.append('Edad', value.Edad?.toString() || '0');
 
-                    // Agregar archivos si están disponibles
-                    if (escrituraFile) formData.append('Certificacion_Literal', escrituraFile);
-                    if (planosFile) formData.append('Planos_Terreno', planosFile);
-
                     // Usar la identificación como cédula para la ruta
                     const cedula = afiliadoFisico.Identificacion || '';
                     await updateAfiliadoFisico({ cedula, data: formData });
@@ -180,10 +172,6 @@ const EditModal: React.FC<EditModalProps> = ({ isOpen, onClose, persona }) => {
                     formData.append('Numero_Telefono', value.Numero_Telefono || '');
                     formData.append('Correo', value.Correo || '');
                     formData.append('Direccion_Exacta', value.Direccion_Exacta || '');
-
-                    // Agregar archivos si están disponibles
-                    if (escrituraFile) formData.append('Certificacion_Literal', escrituraFile);
-                    if (planosFile) formData.append('Planos_Terreno', planosFile);
 
                     // Usar la cédula jurídica para la ruta
                     const cedulaJuridica = afiliadoJuridico.Cedula_Juridica || '';
@@ -222,50 +210,6 @@ const EditModal: React.FC<EditModalProps> = ({ isOpen, onClose, persona }) => {
         );
     };
 
-    // Función para extraer el nombre del archivo de una URL
-    const extractFileNameFromUrl = (url: string): string => {
-        if (!url) return '';
-
-        try {
-            // Si es una URL de Dropbox u otro servicio
-            if (url.includes('dropbox.com') || url.includes('http')) {
-                // Buscar el parámetro que contiene el nombre del archivo
-                const urlParts = url.split('/');
-                const lastPart = urlParts[urlParts.length - 1];
-
-                // Si tiene parámetros, buscar el nombre del archivo
-                if (lastPart.includes('?')) {
-                    const params = new URLSearchParams(lastPart.split('?')[1]);
-                    // Buscar en diferentes parámetros comunes
-                    const fileName = params.get('filename') || params.get('name') || params.get('file');
-                    if (fileName) return decodeURIComponent(fileName);
-                }
-
-                // Si no hay parámetros, intentar extraer del path
-                const fileNameFromPath = urlParts.find(part =>
-                    part.includes('.pdf') ||
-                    part.includes('.doc') ||
-                    part.includes('.docx') ||
-                    part.includes('.jpg') ||
-                    part.includes('.jpeg') ||
-                    part.includes('.png')
-                );
-
-                if (fileNameFromPath) {
-                    return decodeURIComponent(fileNameFromPath.split('?')[0]);
-                }
-
-                // Como último recurso, mostrar "Archivo adjunto"
-                return 'Archivo adjunto';
-            }
-
-            // Si no es una URL, asumir que ya es un nombre de archivo
-            return url;
-        } catch (error) {
-            console.error('Error extrayendo nombre de archivo:', error);
-            return 'Archivo adjunto';
-        }
-    };
 
     const getModalTitle = () => {
         switch (persona.tipo) {
@@ -579,90 +523,7 @@ const EditModal: React.FC<EditModalProps> = ({ isOpen, onClose, persona }) => {
                             )}
                         </form.Field>
 
-                        {/* Campos adicionales para afiliados */}
-                        {(persona.tipo === 'afiliado-fisico' || persona.tipo === 'afiliado-juridico') && (
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <form.Field name="Certificacion_Literal">
-                                    {(field) => (
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                Certificación Literal
-                                            </label>
-                                            <div className="relative">
-                                                <input
-                                                    type="file"
-                                                    accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-                                                    onChange={(e) => {
-                                                        const file = e.target.files?.[0];
-                                                        if (file) {
-                                                            setEscrituraFile(file);
-                                                            field.handleChange(file.name);
-                                                        } else {
-                                                            setEscrituraFile(null);
-                                                            field.handleChange('');
-                                                        }
-                                                    }}
-                                                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                                                />
-                                                <div className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 flex items-center justify-between cursor-pointer hover:bg-gray-100 transition-colors">
-                                                    <span className="text-gray-700">
-                                                        {escrituraFile?.name ||
-                                                            (field.state.value ? extractFileNameFromUrl(field.state.value) : 'No hay archivo seleccionado')}
-                                                    </span>
-                                                    <span className="bg-blue-500 text-white px-3 py-1 rounded text-sm">
-                                                        Subir archivo
-                                                    </span>
-                                                </div>
-                                            </div>
-                                            <p className="text-xs text-gray-500 mt-1">
-                                                Formatos permitidos: PDF, DOC, DOCX, JPG, PNG
-                                            </p>
-                                        </div>
-                                    )}
-                                </form.Field>
 
-                                <form.Field name="Planos_Terreno">
-                                    {(field) => (
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                Planos del Terreno
-                                            </label>
-                                            <div className="relative">
-                                                <input
-                                                    type="file"
-                                                    accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-                                                    onChange={(e) => {
-                                                        const file = e.target.files?.[0];
-                                                        if (file) {
-                                                            setPlanosFile(file);
-                                                            field.handleChange(file.name);
-                                                        } else {
-                                                            setPlanosFile(null);
-                                                            field.handleChange('');
-                                                        }
-                                                    }}
-                                                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                                                />
-                                                <div className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 flex items-center justify-between cursor-pointer hover:bg-gray-100 transition-colors">
-                                                    <span className="text-gray-700">
-                                                        {planosFile?.name ||
-                                                            (field.state.value ? extractFileNameFromUrl(field.state.value) : 'No hay archivo seleccionado')}
-                                                    </span>
-                                                    <span className="bg-blue-500 text-white px-3 py-1 rounded text-sm">
-                                                        Subir archivo
-                                                    </span>
-                                                </div>
-                                            </div>
-                                            <p className="text-xs text-gray-500 mt-1">
-                                                Formatos permitidos: PDF, DOC, DOCX, JPG, PNG
-                                            </p>
-                                        </div>
-                                    )}
-                                </form.Field>
-                            </div>
-                        )}
-
-               
                     </form>
                 </div>
                  <div className="sticky bottom-0 flex justify-end gap-3 p-6 border-t bg-gray-50 z-10">
