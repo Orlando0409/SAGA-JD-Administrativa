@@ -255,12 +255,15 @@ const CatalogoMedidores: React.FC<CatalogoMedidoresProps> = () => {
         header: 'Estado Pago',
         cell: info => {
           const estadoPago = getEstadoPagoNombre(info.row.original);
-          const colorClass =
-            estadoPago === 'Libre'
-              ? 'bg-slate-100 text-slate-700 border border-slate-300'
-              : estadoPago === 'Pagado'
-                ? 'bg-blue-100 text-blue-700 border border-blue-300'
-                : 'bg-red-100 text-red-700 border border-red-300';
+          
+          let colorClass = '';
+          if (estadoPago === 'Libre') {
+            colorClass = 'bg-slate-100 text-slate-700 border border-slate-300';
+          } else if (estadoPago === 'Pagado') {
+            colorClass = 'bg-blue-100 text-blue-700 border border-blue-300';
+          } else {
+            colorClass = 'bg-yellow-100 text-yellow-700 border border-yellow-300';
+          }
 
           return (
             <div className="flex justify-center">

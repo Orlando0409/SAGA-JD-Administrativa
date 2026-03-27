@@ -57,7 +57,7 @@ const DetailMaterialModal: React.FC<DetailMaterialModalProps> = ({
                     <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
                       Nombre del Material
                     </label>
-                    <p className="text-sm font-medium text-gray-900">{material.Nombre_Material}</p>
+                    <p className="text-sm font-medium text-gray-900 break-words">{material.Nombre_Material}</p>
                   </div>
 
                   <div className="bg-gray-50 p-4 flex-wrap rounded-lg ">
@@ -150,7 +150,7 @@ const DetailMaterialModal: React.FC<DetailMaterialModalProps> = ({
                     <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
                       Proveedor
                     </label>
-                    <p className="text-sm text-gray-900">{getProveedorNombre(material)}</p>
+                    <p className="text-sm text-gray-900 break-words">{getProveedorNombre(material)}</p>
                   </div>
 
                   <div className="bg-gray-50 p-4 rounded-lg">
@@ -182,7 +182,7 @@ const DetailMaterialModal: React.FC<DetailMaterialModalProps> = ({
                     <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
                       Fecha de Creación
                     </label>
-                    <p className="text-sm font-medium text-gray-900">{material.Fecha_Creacion ? new Date(material.Fecha_Creacion).toLocaleString() : 'N/A'}</p>
+                    <p className="text-sm font-medium text-gray-900">{material.Fecha_Entrada ? new Date(material.Fecha_Entrada).toLocaleString() : 'N/A'}</p>
                   </div>
 
                   <div className="bg-gray-50 p-4 rounded-lg">
