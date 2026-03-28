@@ -73,6 +73,8 @@ export interface UpdateMaterialData {
   Precio_Unitario?: number;
   Numero_Estanteria?: number;
   IDS_Categorias?: number[];
+  Id_Tipo_Proveedor?: number;
+  Id_Proveedor?: number;
 }
 
 export interface EstadoMaterial {

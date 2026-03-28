@@ -13,6 +13,7 @@ import {
 import type { UpdateMaterialData } from '../../models/Material';
 import CreateCategoriaModal from '../Categorias/CreateCategoriaModal';
 import CreateUnidadMedicionModal from '../UnidadesMedicion/CreateUnidadMedicionModal';
+import CreateModalProveedor from '@/Modules/Proveedores/Components/CreateModalProveedor';
 import { LuPlus } from 'react-icons/lu';
 import {
   AlertDialog,
@@ -26,6 +27,8 @@ import {
   AlertDialogFooter
 } from "@/Modules/Global/components/Sidebar/ui/alert-dialog";
 import { Button } from '@/Modules/Global/components/Sidebar/ui/button';
+import { useProveedoresFisicos } from '@/Modules/Proveedores/Hook/hookFisicoProveedor';
+import { useProveedoresJuridicos } from '@/Modules/Proveedores/Hook/hookjuridicoproveedor';
 
 
 const EditMaterialModal: React.FC<EditMaterialModalProps> = ({
@@ -39,6 +42,9 @@ const EditMaterialModal: React.FC<EditMaterialModalProps> = ({
   const { data: unidadesMedicion = [] } = useUnidadesMedicionActivas();
   const [isCreateCategoriaModalOpen, setIsCreateCategoriaModalOpen] = useState(false);
   const [isCreateUnidadMedicionModalOpen, setIsCreateUnidadMedicionModalOpen] = useState(false);
+  const [isCreateProveedorModalOpen, setIsCreateProveedorModalOpen] = useState(false);
+  const { proveedoresFisicos = [] } = useProveedoresFisicos();
+  const { proveedoresJuridicos = [] } = useProveedoresJuridicos();
 
   const [formData, setFormData] = useState<UpdateMaterialData>({
     Nombre_Material: '',
@@ -77,6 +83,8 @@ const EditMaterialModal: React.FC<EditMaterialModalProps> = ({
         Precio_Unitario: material.Precio_Unitario,
         Numero_Estanteria: material.Numero_Estanteria,
         IDS_Categorias: categoriaIds,
+        Id_Tipo_Proveedor: material.Proveedor?.Tipo_Entidad,
+        Id_Proveedor: material.Proveedor?.Id_Proveedor,
       });
       setSelectedCategorias(categoriaIds);
       setFieldCharCounts({
@@ -138,12 +146,24 @@ const EditMaterialModal: React.FC<EditMaterialModalProps> = ({
       return;
     }
 
+    if (formData.Id_Tipo_Proveedor && !formData.Id_Proveedor) {
+      setFormErrors(prev => ({ ...prev, Id_Proveedor: 'Debe seleccionar un proveedor' }));
+      showError('Por favor, selecciona un proveedor');
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
       const updateData: UpdateMaterialData = {
-        ...formData,
+        Nombre_Material: formData.Nombre_Material,
+        Descripcion: formData.Descripcion,
+        Id_Unidad_Medicion: formData.Id_Unidad_Medicion,
+        Precio_Unitario: formData.Precio_Unitario,
+        Numero_Estanteria: formData.Numero_Estanteria,
         IDS_Categorias: selectedCategorias,
+        Id_Tipo_Proveedor: formData.Id_Tipo_Proveedor,
+        Id_Proveedor: formData.Id_Proveedor,
       };
 
       await updateMaterialMutation.mutateAsync({
@@ -328,6 +348,77 @@ const EditMaterialModal: React.FC<EditMaterialModalProps> = ({
             </div>
 
             <div>
+              <label htmlFor="tipo-proveedor" className="block text-sm font-medium text-gray-700 mb-1">
+                Tipo de Proveedor (Opcional)
+              </label>
+              <select
+                id="tipo-proveedor"
+                value={formData.Id_Tipo_Proveedor || ''}
+                onChange={(e) => {
+                  const tipoProveedor = e.target.value ? Number.parseInt(e.target.value) : undefined;
+                  setFormData(prev => ({ 
+                    ...prev, 
+                    Id_Tipo_Proveedor: tipoProveedor,
+                    Id_Proveedor: undefined // Resetear proveedor cuando cambia el tipo
+                  }));
+                }}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="">Sin proveedor</option>
+                <option value="1">Proveedor Físico</option>
+                <option value="2">Proveedor Jurídico</option>
+              </select>
+            </div>
+
+            {formData.Id_Tipo_Proveedor && (
+              <div>
+                <label htmlFor="proveedor" className="block text-sm flex justify-between font-medium text-gray-700 mb-1">
+                  <span>Proveedor <span className="text-red-500">*</span></span>
+                  <button
+                    type="button"
+                    onClick={() => setIsCreateProveedorModalOpen(true)}
+                    className="flex items-center gap-1 px-2 py-1 text-xs text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded transition-colors"
+                  >
+                    <LuPlus className="w-3 h-3" />
+                    Nuevo
+                  </button>
+                </label>
+                <select
+                  id="proveedor"
+                  value={formData.Id_Proveedor || ''}
+                  onChange={(e) => {
+                    setFormData(prev => ({ 
+                      ...prev, 
+                      Id_Proveedor: e.target.value ? Number.parseInt(e.target.value) : undefined 
+                    }));
+                    if (formErrors.Id_Proveedor) {
+                      setFormErrors(prev => ({ ...prev, Id_Proveedor: '' }));
+                    }
+                  }}
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${formErrors.Id_Proveedor
+                    ? 'border-red-500'
+                    : 'border-gray-300'
+                    }`}
+                >
+                  <option value="">Seleccionar proveedor</option>
+                  {formData.Id_Tipo_Proveedor === 1 && proveedoresFisicos.map((proveedor) => (
+                    <option key={proveedor.Id_Proveedor} value={proveedor.Id_Proveedor}>
+                      {proveedor.Nombre_Proveedor}
+                    </option>
+                  ))}
+                  {formData.Id_Tipo_Proveedor === 2 && proveedoresJuridicos.map((proveedor) => (
+                    <option key={proveedor.Id_Proveedor} value={proveedor.Id_Proveedor}>
+                      {proveedor.Razon_Social}
+                    </option>
+                  ))}
+                </select>
+                {formErrors.Id_Proveedor && (
+                  <p className="mt-1 text-sm text-red-600">{formErrors.Id_Proveedor}</p>
+                )}
+              </div>
+            )}
+
+            <div>
               <div className="block text-sm font-medium flex justify-between text-gray-700 mb-2">
                 <span>Categorías (Opcional)</span>
                 <button
@@ -416,6 +507,12 @@ const EditMaterialModal: React.FC<EditMaterialModalProps> = ({
         isOpen={isCreateUnidadMedicionModalOpen}
         onClose={() => setIsCreateUnidadMedicionModalOpen(false)}
       />
+      {isCreateProveedorModalOpen && (
+        <CreateModalProveedor
+          onClose={() => setIsCreateProveedorModalOpen(false)}
+          setShowCreateModal={setIsCreateProveedorModalOpen}
+        />
+      )}
     </div>
   );
 };
