@@ -36,9 +36,9 @@ export default function FAQForm({ onClose }: Readonly<FAQFormProps>) {
 
         // Validar formulario completo
         try {
-            CreateFAQSchema.parse({ 
-                Pregunta: field === "Pregunta" ? value.trim() : pregunta.trim(), 
-                Respuesta: field === "Respuesta" ? value.trim() : respuesta.trim() 
+            CreateFAQSchema.parse({
+                Pregunta: field === "Pregunta" ? value.trim() : pregunta.trim(),
+                Respuesta: field === "Respuesta" ? value.trim() : respuesta.trim()
             });
             setIsValid(true);
         } catch {
@@ -51,6 +51,7 @@ export default function FAQForm({ onClose }: Readonly<FAQFormProps>) {
         createFAQMutation.mutate({
             Pregunta: pregunta.trim(),
             Respuesta: respuesta.trim(),
+            Visible: false, // Se crea oculta
         }, {
             onSuccess: () => {
                 setPregunta("");
