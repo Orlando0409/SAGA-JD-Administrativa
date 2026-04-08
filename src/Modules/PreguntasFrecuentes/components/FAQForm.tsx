@@ -51,7 +51,6 @@ export default function FAQForm({ onClose }: Readonly<FAQFormProps>) {
         createFAQMutation.mutate({
             Pregunta: pregunta.trim(),
             Respuesta: respuesta.trim(),
-            Visible: false, // Se crea oculta
         }, {
             onSuccess: () => {
                 setPregunta("");
@@ -129,8 +128,7 @@ export default function FAQForm({ onClose }: Readonly<FAQFormProps>) {
                     {/* Nota informativa */}
                     <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
                         <p className="text-xs text-blue-700">
-                            <strong>Nota:</strong> Las preguntas creadas se mostrarán como
-                            visibles automáticamente en la sección pública.
+                            <strong>Nota:</strong> Las preguntas creadas se mostrarán como visibles automáticamente en la sección pública.
                         </p>
                     </div>
 
