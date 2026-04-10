@@ -18,7 +18,9 @@ import { mapearTipoSolicitud, mapearTipoPersona } from '../Service/EstadoSolicit
 import type { TipoSolicitud, TipoPersona } from '../Types/EstadoSolicitudes';
 import { useAlerts } from '@/Modules/Global/context/AlertContext';
 import { updateEstadoMedidor } from '@/Modules/Inventario/service/MedidorServices';
-
+/*import { getSolicitudFisicaById } from '../Service/SolicitudesFisicas';
+import { getSolicitudJuridicaById } from '../Service/SolicitudesJuridicas';
+*/
 interface ModalSolicitudProps {
     isOpen: boolean;
     onClose: () => void;
@@ -40,12 +42,27 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
     const [showCompletarDialog, setShowCompletarDialog] = useState(false);
     const [showRechazarDialog, setShowRechazarDialog] = useState(false);
     const [motivoRechazo, setMotivoRechazo] = useState('');
+    // Estados para el flujo de medidor dañado
+    const [showDialogMedidorDanado, setShowDialogMedidorDanado] = useState(false);
+    const [showDialogMontoCambio, setShowDialogMontoCambio] = useState(false);
+    const [showDialogMontoAgregarMedidor, setShowDialogMontoAgregarMedidor] = useState(false);
+    const [montoPago, setMontoPago] = useState<number | string>('');
+    const [motivoCambio, setMotivoCambio] = useState('');
+
+    const handleMontoChange = (value: string) => {
+        const soloDigitos = value.replace(/\D/g, '');
+
+        if (soloDigitos.length > 6) return;
+        if (soloDigitos.length > 0 && soloDigitos[0] === '0') return;
+
+        setMontoPago(soloDigitos);
+    };
 
     const marcarEnRevisionMutation = useMarcarEnRevision();
     const aprobarYEnEsperaMutation = useAprobarYEnEspera();
     const completarMutation = useCompletar();
     const rechazarMutation = useRechazar();
-    const { showWarning } = useAlerts();
+    const { showWarning, showError } = useAlerts();
     // Extraer información básica de la solicitud
     const getSolicitudInfo = () => {
         if (solicitud.tipo === 'solicitud-fisica') {
@@ -79,8 +96,9 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
                 Direccion_Exacta: datos.Direccion_Exacta || 'No especificada',
                 Edad: datos.Edad || 'No especificada',
                 Motivo_Solicitud: datos.Motivo_Solicitud || 'No especificado',
-                Escritura_Terreno: datos.Escritura_Terreno || 'No proporcionada',
+                Certificacion_Literal: datos.Certificacion_Literal || 'No proporcionada',
                 Planos_Terreno: datos.Planos_Terreno || 'No proporcionados',
+                Escrituras_Terreno: datos.Escrituras_Terreno || 'No proporcionadas',
                 Numero_Medidor_Actual: numeroMedidorRaw != null ? String(numeroMedidorRaw) : (datos.Numero_Medidor_Actual || 'No especificado'),
                 Numero_Medidor: datos.Numero_Medidor ?? null,
                 Id_Medidor: datos.Id_Medidor ?? null,
@@ -115,8 +133,9 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
                 Cedula_Representante: datos.Cedula_Representante || 'No especificada',
                 Fecha_Creacion: datos.Fecha_Creacion || datos.Created_At || 'No especificada',
                 Motivo_Solicitud: datos.Motivo_Solicitud || 'No especificado',
-                Escritura_Terreno: datos.Escritura_Terreno || 'No proporcionada',
+                Certificacion_Literal: datos.Certificacion_Literal || 'No proporcionada',
                 Planos_Terreno: datos.Planos_Terreno || 'No proporcionados',
+                Escrituras_Terreno: datos.Escrituras_Terreno || 'No proporcionadas',
                 Numero_Medidor_Actual: numeroMedidorRaw != null ? String(numeroMedidorRaw) : (datos.Numero_Medidor_Actual || 'No especificado'),
                 Numero_Medidor: datos.Numero_Medidor ?? null,
                 Id_Medidor: datos.Id_Medidor ?? null,
@@ -125,8 +144,29 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
     };
 
     const info = getSolicitudInfo();
+    const esAgregarMedidor = info.tipoSolicitud === 'Agregar Medidor';
 
+    // Estado local para reflejar el estado de la solicitud tras marcar en revisión
+    const [estadoIdLocal, setEstadoIdLocal] = useState<number | null>(null);
 
+    useEffect(() => {
+        if (isOpen) {
+            setEstadoIdLocal(info.estadoId);
+        }
+    }, [isOpen, info.estadoId]);
+
+    // Handler para marcar en revisión manualmente
+    const handleMarcarEnRevision = async () => {
+        try {
+            const tipoSolicitud: TipoSolicitud = mapearTipoSolicitud(info.tipoSolicitud);
+            const tipoPersona: TipoPersona = mapearTipoPersona(info.tipo);
+            await marcarEnRevisionMutation.mutateAsync(tipoSolicitud, tipoPersona, info.id);
+            setEstadoIdLocal(2); // Cambia a En Revisión localmente
+            onClose(); // Cierra el modal automáticamente
+        } catch (error) {
+            // Manejo de error opcional
+        }
+    };
 
     // Resetear el número de medidor asignado cuando el modal se abre (para traer datos frescos del backend)
     useEffect(() => {
@@ -139,27 +179,58 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
     const handleCambiarEstado = async () => {
         const estadoActual = info.estadoId;
 
-        // Estado 1 (Registro) → Poner en revisión manualmente al hacer clic
+        // Si aún viene como estado 1 en el objeto local, garantizar transición 1 -> 2 antes de aprobar.
+        // Esto evita que el botón no haga nada cuando el backend ya avanzó o está por avanzar a En Revisión.
         if (estadoActual === 1) {
             try {
                 const tipoSolicitud: TipoSolicitud = mapearTipoSolicitud(info.tipoSolicitud);
                 const tipoPersona: TipoPersona = mapearTipoPersona(info.tipo);
 
                 await marcarEnRevisionMutation.mutateAsync(tipoSolicitud, tipoPersona, info.id);
-                onClose();
             } catch (error) {
-                console.error('Error al poner solicitud en revisión:', error);
+                console.error('Error al mover solicitud a En Revisión antes de aprobar:', error);
+                return;
             }
-            return;
-        }
 
-        // Estado 2 (En Revisión) → Poner en espera directamente
-        if (estadoActual === 2) {
             await handleConfirmAprobar();
             return;
         }
 
+        // Estado 2 (En Revisión) → Flujo condicional por tipo de solicitud
+        if (estadoActual === 2) {
+            const esCambioMedidor = mapearTipoSolicitud(info.tipoSolicitud) === 'cambio-medidor';
+            const esAgregarMedidorSolicitud = mapearTipoSolicitud(info.tipoSolicitud) === 'agregar-medidor';
+            const esAfiliacionSolicitud = mapearTipoSolicitud(info.tipoSolicitud) === 'afiliacion';
+
+            if (esAgregarMedidorSolicitud || esAfiliacionSolicitud) {
+                setMontoPago('');
+                setShowDialogMontoAgregarMedidor(true);
+                return;
+            }
+
+            if (!esCambioMedidor) {
+                setShowAprobarDialog(true);
+                return;
+            }
+
+            setMontoPago('');
+            setMotivoCambio('');
+            setShowDialogMedidorDanado(true);
+            return;
+        }
+
         if (estadoActual === 3) {
+            const tipoSolicitud = mapearTipoSolicitud(info.tipoSolicitud);
+            const requiereAsignacionMedidor =
+                tipoSolicitud === 'afiliacion' ||
+                tipoSolicitud === 'cambio-medidor' ||
+                tipoSolicitud === 'agregar-medidor';
+
+            if (!requiereAsignacionMedidor) {
+                setShowCompletarDialog(true);
+                return;
+            }
+
             setShowModalMedidor(true);
             return;
         }
@@ -170,7 +241,7 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
     };
 
     // Nueva función para aprobar después de asignar el medidor usando hooks unificados
-    const aprobarSolicitudDespuesDeAsignar = async () => {
+    const aprobarSolicitudDespuesDeAsignar = async (estadoPago: 'Pagado' | 'Pendiente') => {
         try {
             const tipoSolicitudInterno: TipoSolicitud = mapearTipoSolicitud(solicitud.tipoSolicitud || info.tipoSolicitud);
             const tipoPersonaInterno: TipoPersona = mapearTipoPersona(info.tipo);
@@ -178,19 +249,85 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
             if (info.tipoSolicitud === 'Cambio de Medidor' && info.Id_Medidor) {
                 try {
                     await updateEstadoMedidor(info.Id_Medidor, 3);
-                    console.log(`Medidor #${info.Id_Medidor} marcado como Averiado`);
                 } catch (medidorError) {
                     console.error('Error al marcar medidor como averiado:', medidorError);
 
                 }
             }
 
-            await completarMutation.mutateAsync(tipoSolicitudInterno, tipoPersonaInterno, info.id);
+            await completarMutation.mutateAsync(tipoSolicitudInterno, tipoPersonaInterno, info.id, estadoPago);
 
             onClose(); // Cerrar modal principal después de aprobar
         } catch (error) {
             console.error(' Error al completar solicitud:', error);
         }
+    };
+
+    // Función para manejar si el medidor fue dañado
+    const handleMedidorDanado = (danado: boolean) => {
+        if (danado) {
+            // Si fue dañado, mostrar dialog para pedir monto y motivo
+            setShowDialogMedidorDanado(false);
+            setShowDialogMontoCambio(true);
+        } else {
+            // Si no fue dañado, proceder sin pago
+            setShowDialogMedidorDanado(false);
+            handleConfirmAprobar(false);
+        }
+    };
+
+    // Función para confirmar monto y motivo del cambio
+    const handleConfirmMontoCambio = async () => {
+        // Validar que ambos campos estén completos
+        if (!montoPago || String(montoPago).trim() === '') {
+            showError('Campo requerido', 'Por favor ingresa el monto del cambio');
+            return;
+        }
+
+        const montoTexto = String(montoPago).trim();
+        if (!/^[1-9][0-9]{0,5}$/.test(montoTexto)) {
+            showError('Monto inválido', 'El monto debe tener entre 1 y 6 dígitos y no puede iniciar con 0');
+            return;
+        }
+
+        if (!motivoCambio || motivoCambio.trim() === '') {
+            showError('Campo requerido', 'Por favor ingresa el motivo del cambio');
+            return;
+        }
+
+        // Validar que el monto sea un número válido
+        const montoNumerico = Number.parseFloat(String(montoPago));
+        if (Number.isNaN(montoNumerico) || montoNumerico <= 0) {
+            showError('Monto inválido', 'Por favor ingresa un monto válido mayor a 0');
+            return;
+        }
+
+        // Cerrar el dialog y proceder con la aprobación con pago
+        setShowDialogMontoCambio(false);
+        await handleConfirmAprobar(true, montoNumerico, motivoCambio.trim());
+    };
+
+    // Función para confirmar monto en solicitudes de agregar medidor (sin motivo)
+    const handleConfirmMontoAgregarMedidor = async () => {
+        if (!montoPago || String(montoPago).trim() === '') {
+            showError('Campo requerido', 'Por favor ingresa el monto a pagar');
+            return;
+        }
+
+        const montoTexto = String(montoPago).trim();
+        if (!/^[1-9][0-9]{0,5}$/.test(montoTexto)) {
+            showError('Monto inválido', 'El monto debe tener entre 1 y 6 dígitos y no puede iniciar con 0');
+            return;
+        }
+
+        const montoNumerico = Number.parseFloat(String(montoPago));
+        if (Number.isNaN(montoNumerico) || montoNumerico <= 0) {
+            showError('Monto inválido', 'Por favor ingresa un monto válido mayor a 0');
+            return;
+        }
+
+        setShowDialogMontoAgregarMedidor(false);
+        await handleConfirmAprobar(true, montoNumerico);
     };
 
     // Función para manejar rechazo usando hooks unificados
@@ -199,17 +336,25 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
     };
 
     // Confirmar aprobación y poner en espera (para solicitudes con medidor)
-    const handleConfirmAprobar = async () => {
+    const handleConfirmAprobar = async (ocupaPago?: boolean, montoCambio?: number, motivoCobro?: string) => {
         const tipoSolicitud: TipoSolicitud = mapearTipoSolicitud(info.tipoSolicitud);
         const tipoPersona: TipoPersona = mapearTipoPersona(info.tipo);
-
+        const requierePayloadPago = tipoSolicitud === 'afiliacion' || tipoSolicitud === 'agregar-medidor' || tipoSolicitud === 'cambio-medidor';
+        const data = requierePayloadPago
+            ? {
+                ocupaPago: Boolean(ocupaPago),
+                montoCambio: ocupaPago ? montoCambio : undefined,
+                motivoCobro: ocupaPago ? motivoCobro : undefined
+            }
+            : undefined;
         try {
-            console.log(` Aprobando y poniendo en espera: ${tipoSolicitud} - ${tipoPersona}`);
-            await aprobarYEnEsperaMutation.mutateAsync(tipoSolicitud, tipoPersona, info.id);
+            await aprobarYEnEsperaMutation.mutateAsync(tipoSolicitud, tipoPersona, info.id, data);
             setShowAprobarDialog(false);
+            setMontoPago('');
+            setMotivoCambio('');
             onClose();
         } catch (error) {
-            console.error(' Error al marcar en aprobada y en espera:', error);
+            console.error('Error al marcar en aprobada y en espera:', error);
             setShowAprobarDialog(false);
         }
     };
@@ -220,7 +365,7 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
         const tipoPersona: TipoPersona = mapearTipoPersona(info.tipo);
 
         try {
-            console.log(` Completando solicitud ${info.tipoSolicitud} directamente desde Estado 2 (sin medidor)`);
+
             await completarMutation.mutateAsync(tipoSolicitud, tipoPersona, info.id);
             setShowCompletarDialog(false);
             onClose();
@@ -236,8 +381,6 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
             // Mapear los tipos a los valores internos
             const tipoSolicitudInterno: TipoSolicitud = mapearTipoSolicitud(solicitud.tipoSolicitud || info.tipoSolicitud);
             const tipoPersonaInterno: TipoPersona = mapearTipoPersona(info.tipo);
-
-            console.log(`Rechazando solicitud: ${tipoSolicitudInterno} - ${tipoPersonaInterno}`);
 
             // Usar el hook unificado para rechazar (Cualquier estado → 5) con el motivo
             await rechazarMutation.mutateAsync(tipoSolicitudInterno, tipoPersonaInterno, info.id, motivoRechazo.trim());
@@ -401,7 +544,7 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
                         </div>
 
                         {/* Detalles de la Solicitud */}
-                        {(info.Numero_Medidor_Actual || info.Motivo_Solicitud || info.Numero_Medidor != null) && (
+                        {(info.Numero_Medidor_Actual || info.Numero_Medidor != null || (!esAgregarMedidor && info.Motivo_Solicitud)) && (
                             <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
                                 <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-3">
                                     <div className="flex items-center gap-2">
@@ -411,6 +554,7 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
 
                                 <div className="p-4">
                                     <div className="grid grid-cols-1 gap-3">
+
                                         {/* Número de medidor seleccionado por el usuario (sólo Cambio de Medidor) */}
                                         {info.tipoSolicitud === 'Cambio de Medidor' && info.Numero_Medidor != null && (
                                             <div className="bg-blue-50 border border-blue-200 p-3 rounded-lg">
@@ -421,16 +565,9 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
                                             </div>
                                         )}
 
-                                        {info.Numero_Medidor_Actual && info.Numero_Medidor_Actual !== 'No especificado' && (
-                                            <div className="bg-gray-50 p-3 rounded-lg">
-                                                <label className="block text-xs font-medium text-gray-600 uppercase tracking-wide mb-1">
-                                                    Número de Medidor Actual
-                                                </label>
-                                                <p className="text-sm font-medium text-gray-900">{info.Numero_Medidor_Actual}</p>
-                                            </div>
-                                        )}
 
-                                        {info.Motivo_Solicitud && info.Motivo_Solicitud !== 'No especificado' && (
+
+                                        {!esAgregarMedidor && info.Motivo_Solicitud && info.Motivo_Solicitud !== 'No especificado' && (
                                             <div className="bg-gray-50 p-3 rounded-lg">
                                                 <label className="block text-xs font-medium text-gray-600 uppercase tracking-wide mb-1">
                                                     Motivo de la Solicitud
@@ -452,20 +589,28 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
                             </div>
 
                             <div className="p-4">
-                                <div className="grid grid-cols-2 gap-3">
-                                    <div className="bg-gray-50 p-3 rounded-lg">
-                                        <label className="block text-xs font-medium text-gray-600 uppercase tracking-wide mb-1">
-                                            Escritura del Terreno
-                                        </label>
-                                        {info.Escritura_Terreno && info.Escritura_Terreno !== 'No proporcionada' ? (
-                                            <a href={info.Escritura_Terreno} target="_blank" rel="noopener noreferrer"
-                                                className="text-sm text-blue-600 hover:text-blue-800 underline font-medium">
-                                                Ver documento
-                                            </a>
-                                        ) : (
-                                            <p className="text-sm text-gray-500">No proporcionada</p>
-                                        )}
-                                    </div>
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+
+                                    {info.tipoSolicitud !== 'Asociado' && (
+
+                                        <div className="bg-gray-50 p-3 rounded-lg">
+                                            <label className="block text-xs font-medium text-gray-600 uppercase tracking-wide mb-1">
+                                                Certifcación Literal
+                                            </label>
+                                            {info.Certificacion_Literal && info.Certificacion_Literal !== 'No proporcionada' ? (
+                                                <a href={info.Certificacion_Literal} target="_blank" rel="noopener noreferrer"
+                                                    className="text-sm text-blue-600 hover:text-blue-800 underline font-medium">
+                                                    Ver documento
+                                                </a>
+                                            ) : (
+                                                <p className="text-sm text-gray-500">No proporcionada</p>
+                                            )}
+                                        </div>
+
+                                    )
+
+                                    }
+
 
                                     <div className="bg-gray-50 p-3 rounded-lg">
                                         <label className="block text-xs font-medium text-gray-600 uppercase tracking-wide mb-1">
@@ -480,6 +625,20 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
                                             <p className="text-sm text-gray-500">No proporcionados</p>
                                         )}
                                     </div>
+
+                                    <div className="bg-gray-50 p-3 rounded-lg">
+                                        <label className="block text-xs font-medium text-gray-600 uppercase tracking-wide mb-1">
+                                            Escrituras del Terreno
+                                        </label>
+                                        {info.Escrituras_Terreno && info.Escrituras_Terreno !== 'No proporcionadas' ? (
+                                            <a href={info.Escrituras_Terreno} target="_blank" rel="noopener noreferrer"
+                                                className="text-sm text-blue-600 hover:text-blue-800 underline font-medium">
+                                                Ver documento
+                                            </a>
+                                        ) : (
+                                            <p className="text-sm text-gray-500">No proporcionadas</p>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -488,46 +647,70 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
 
                 </div>
 
-                <div className="sticky bottom-0 flex justify-end gap-3 p-6 border-t bg-gray-50 z-10">
-                    <button
-                        onClick={handleCambiarEstado}
-                        disabled={isLoading || info.estadoId === 4 || info.estadoId === 5}
-                        className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm hover:shadow-md flex items-center gap-2 text-sm font-medium"
-                    >
-                        {isLoading ? (
-                            <>
-                                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                                Procesando...
-                            </>
-                        ) : (
-                            <>
-                                <Check className="w-4 h-4" />
-                                {info.estadoId === 1
-                                    ? 'Poner en revisión'
-                                    : info.estadoId === 3
-                                        ? 'Completar y asignar medidor'
-                                        : 'Poner en espera'}
-                            </>
-                        )}
-                    </button>
 
-                    {info.estadoId !== 1 && <button
+                <div className="sticky bottom-0 flex justify-end gap-3 p-6 border-t bg-gray-50 z-10">
+                    {/* Botón de acción para marcar en revisión */}
+                    {estadoIdLocal === 1 && (
+                        <button
+                            onClick={handleMarcarEnRevision}
+                            disabled={marcarEnRevisionMutation.isPending}
+                            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm hover:shadow-md flex items-center gap-2 text-sm font-medium"
+                        >
+                            {marcarEnRevisionMutation.isPending ? (
+                                <>
+                                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                    ENVIANDO...
+                                </>
+                            ) : (
+                                <>
+                                    <Check className="w-4 h-4" />
+                                    Marcar en revisión
+                                </>
+                            )}
+                        </button>
+                    )}
+                    {/* Botón de acción normal para el resto del flujo */}
+                    {estadoIdLocal !== 1 && (
+                        <button
+                            onClick={handleCambiarEstado}
+                            disabled={isLoading || info.estadoId === 4 || info.estadoId === 5}
+                            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm hover:shadow-md flex items-center gap-2 text-sm font-medium"
+                        >
+                            {isLoading ? (
+                                <>
+                                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                    Poner en espera...
+                                </>
+                            ) : (
+                                <>
+                                    <Check className="w-4 h-4" />
+                                    {info.estadoId === 3
+                                        ? ((() => {
+                                            const tipoSolicitud = mapearTipoSolicitud(info.tipoSolicitud);
+                                            const requiereAsignacionMedidor =
+                                                tipoSolicitud === 'afiliacion' ||
+                                                tipoSolicitud === 'cambio-medidor' ||
+                                                tipoSolicitud === 'agregar-medidor';
+                                            return requiereAsignacionMedidor ? 'Completar y asignar medidor' : 'Completar solicitud';
+                                        })())
+                                        : 'Poner en espera'}
+                                </>
+                            )}
+                        </button>
+                    )}
+
+                    <button
                         onClick={handleRechazar}
                         disabled={isLoading || info.estadoId === 4 || info.estadoId === 5}
                         className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm hover:shadow-md flex items-center gap-2 text-sm font-medium"
                     >
-                        {isLoading ? (
-                            <>
-                                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                                Rechazando...
-                            </>
-                        ) : (
-                            <>
-                                <XCircle className="w-4 h-4" />
-                                Rechazar solicitud
-                            </>
-                        )}
-                    </button>}
+
+                        <>
+                            <XCircle className="w-4 h-4" />
+                            Rechazar solicitud
+                        </>
+
+                    </button>
 
                     <button
                         onClick={onClose}
@@ -549,6 +732,7 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
                     }}
                     onMedidorAsignado={aprobarSolicitudDespuesDeAsignar}
                     tipoSolicitud={solicitud.tipoSolicitud || (info.tipoSolicitud as any)}
+                    solicitudId={info.id}
                     afiliado={{
                         tipo: solicitud.tipo,
                         datos: solicitud.datos
@@ -567,10 +751,9 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
                             Esta acción cambiará el estado a "Aprobada en Espera" y permitirá la asignación del medidor.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
-                    <AlertDialogFooter>
-
+                    <AlertDialogFooter className="flex justify-between">
                         <AlertDialogAction
-                            onClick={handleConfirmAprobar}
+                            onClick={() => handleConfirmAprobar(false, 0, '')}
                             disabled={aprobarYEnEsperaMutation.isPending}
                         >
                             {aprobarYEnEsperaMutation.isPending ? 'Aprobando...' : 'Aprobar'}
@@ -593,8 +776,7 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
                             Esta solicitud no requiere asignación de medidor y será marcada como completada directamente.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
-                    <AlertDialogFooter>
-
+                    <AlertDialogFooter className="flex justify-between">
                         <AlertDialogAction
                             onClick={handleConfirmCompletar}
                             disabled={completarMutation.isPending}
@@ -643,7 +825,14 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
                         </div>
                     </div>
 
-                    <AlertDialogFooter>
+                    <AlertDialogFooter className="flex justify-between">
+                        <AlertDialogAction
+                            onClick={() => handleConfirmRechazar()}
+                            disabled={motivoRechazo.trim().length < 10 || rechazarMutation.isPending}
+                            className="bg-red-600 hover:bg-red-700 disabled:bg-gray-400"
+                        >
+                            {rechazarMutation.isPending ? 'Rechazando...' : 'Confirmar Rechazo'}
+                        </AlertDialogAction>
                         <AlertDialogCancel
                             onClick={() => {
                                 setMotivoRechazo('');
@@ -653,13 +842,151 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
                         >
                             Cancelar
                         </AlertDialogCancel>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+
+            {/* AlertDialog para preguntar si el medidor fue dañado */}
+            <AlertDialog open={showDialogMedidorDanado} onOpenChange={setShowDialogMedidorDanado}>
+                <AlertDialogContent className="max-w-md">
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>¿Fue dañado el medidor?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            ¿El medidor de <strong>{info.nombre}</strong> fue dañado o presenta problemas que requieran su cambio?
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter className="flex justify-between">
                         <AlertDialogAction
-                            onClick={() => handleConfirmRechazar()}
-                            disabled={motivoRechazo.trim().length < 10 || rechazarMutation.isPending}
-                            className="bg-red-600 hover:bg-red-700 disabled:bg-gray-400"
+                            onClick={() => handleMedidorDanado(true)}
+                            className="bg-blue-600 hover:bg-blue-700 hover:shadow-lg transition-all"
                         >
-                            {rechazarMutation.isPending ? 'Rechazando...' : 'Confirmar Rechazo'}
+                            Sí, fue dañado
                         </AlertDialogAction>
+                        <AlertDialogCancel
+                            onClick={() => {
+                                setShowDialogMedidorDanado(false);
+                                handleMedidorDanado(false);
+                            }}
+                        >
+                            No, está bien
+                        </AlertDialogCancel>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+
+            {/* AlertDialog para solicitar monto y motivo del cambio */}
+            <AlertDialog open={showDialogMontoCambio} onOpenChange={setShowDialogMontoCambio}>
+                <AlertDialogContent className="max-w-md">
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Detalles del cambio de medidor</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Ingresa el monto a cobrar por el cambio y el motivo del daño.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+
+                    <div className="space-y-4 my-4">
+                        {/* Campo de Monto */}
+                        <div>
+                            <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                Monto del cambio *
+                            </label>
+                            <input
+                                type="text"
+                                inputMode="numeric"
+                                placeholder="Ej: 50000"
+                                value={montoPago}
+                                onChange={(e) => handleMontoChange(e.target.value)}
+                                className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                maxLength={6}
+                            />
+                        </div>
+
+                        {/* Campo de Motivo */}
+                        <div>
+                            <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                Motivo del daño *
+                            </label>
+                            <textarea
+                                placeholder="Describe el motivo por el que el medidor fue dañado..."
+                                value={motivoCambio}
+                                onChange={(e) => setMotivoCambio(e.target.value)}
+                                className="w-full min-h-20 resize-none border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                maxLength={100}
+                            />
+                            <p className="text-xs text-gray-500 mt-1">
+                                {motivoCambio.length} caracteres / 100
+                            </p>
+                        </div>
+                    </div>
+
+                    <AlertDialogFooter className="flex justify-between">
+                        <AlertDialogAction
+                            onClick={handleConfirmMontoCambio}
+                            disabled={!montoPago || !motivoCambio.trim() || aprobarYEnEsperaMutation.isPending}
+                            className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400"
+                        >
+                            {aprobarYEnEsperaMutation.isPending ? 'Procesando...' : 'Confirmar'}
+                        </AlertDialogAction>
+                        <AlertDialogCancel
+                            onClick={() => {
+                                setShowDialogMontoCambio(false);
+                                setMontoPago('');
+                                setMotivoCambio('');
+                            }}
+                        >
+                            Cancelar
+                        </AlertDialogCancel>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+
+            {/* AlertDialog para solicitar monto en Agregar Medidor */}
+            <AlertDialog open={showDialogMontoAgregarMedidor} onOpenChange={setShowDialogMontoAgregarMedidor}>
+                <AlertDialogContent className="max-w-md">
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>
+                            {mapearTipoSolicitud(info.tipoSolicitud) === 'afiliacion'
+                                ? 'Monto para Solicitud de Afiliación'
+                                : 'Monto para Agregar Medidor'}
+                        </AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Ingresa el monto exacto a pagar para enviar el correo al solicitante y poner la solicitud en espera.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+
+                    <div className="space-y-4 my-4">
+                        <div>
+                            <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                Monto a pagar *
+                            </label>
+                            <input
+                                type="text"
+                                inputMode="numeric"
+                                placeholder="Ej: 50000"
+                                value={montoPago}
+                                onChange={(e) => handleMontoChange(e.target.value)}
+                                className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                maxLength={6}
+                            />
+                        </div>
+                    </div>
+
+                    <AlertDialogFooter className="flex justify-between">
+                        <AlertDialogAction
+                            onClick={handleConfirmMontoAgregarMedidor}
+                            disabled={!montoPago || aprobarYEnEsperaMutation.isPending}
+                            className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400"
+                        >
+                            {aprobarYEnEsperaMutation.isPending ? 'Procesando...' : 'Confirmar'}
+                        </AlertDialogAction>
+                        <AlertDialogCancel
+                            onClick={() => {
+                                setShowDialogMontoAgregarMedidor(false);
+                                setMontoPago('');
+                            }}
+                        >
+                            Cancelar
+                        </AlertDialogCancel>
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>

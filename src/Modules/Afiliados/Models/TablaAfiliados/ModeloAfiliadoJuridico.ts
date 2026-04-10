@@ -8,8 +8,16 @@ export interface Medidor {
         Id_Estado_Medidor: number;
         Nombre_Estado_Medidor: string;
     };
-    Escritura_Terreno?: string | null;
+    Estado_Pago?:
+        | string
+        | {
+            Id_Estado_Pago?: number;
+            Nombre_Estado_Pago: string;
+        }
+        | null;
+    Certificacion_Literal?: string | null;
     Planos_Terreno?: string | null;
+    Escrituras_Terreno?: string | null;
 }
 
 export interface AfiliadoJuridico {
@@ -33,8 +41,9 @@ export interface AfiliadoJuridico {
     }
     Fecha_Creacion: string
     Fecha_Actualizacion: string
-    Escritura_Terreno?: string
+    Certificacion_Literal?: string
     Planos_Terreno?: string
+    Escrituras_Terreno?: string
     medidores?: Medidor[];
     Medidores?: Medidor[]; // Backend puede enviar con mayúscula
 }

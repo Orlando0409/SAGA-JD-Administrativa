@@ -8,14 +8,12 @@ import {
   NOMBRE_MATERIAL_MAX_LENGTH,
   DESCRIPCION_MAX_LENGTH,
   PRECIO_MIN,
-  PRECIO_MAX,
-  NUMERO_ESTANTERIA_MIN,
-  NUMERO_ESTANTERIA_MAX,
   type EditMaterialModalProps
 } from '../../types/MaterialTypes';
 import type { UpdateMaterialData } from '../../models/Material';
 import CreateCategoriaModal from '../Categorias/CreateCategoriaModal';
 import CreateUnidadMedicionModal from '../UnidadesMedicion/CreateUnidadMedicionModal';
+import CreateModalProveedor from '@/Modules/Proveedores/Components/CreateModalProveedor';
 import { LuPlus } from 'react-icons/lu';
 import {
   AlertDialog,
@@ -29,6 +27,8 @@ import {
   AlertDialogFooter
 } from "@/Modules/Global/components/Sidebar/ui/alert-dialog";
 import { Button } from '@/Modules/Global/components/Sidebar/ui/button';
+import { useProveedoresFisicos } from '@/Modules/Proveedores/Hook/hookFisicoProveedor';
+import { useProveedoresJuridicos } from '@/Modules/Proveedores/Hook/hookjuridicoproveedor';
 
 
 const EditMaterialModal: React.FC<EditMaterialModalProps> = ({
@@ -42,6 +42,9 @@ const EditMaterialModal: React.FC<EditMaterialModalProps> = ({
   const { data: unidadesMedicion = [] } = useUnidadesMedicionActivas();
   const [isCreateCategoriaModalOpen, setIsCreateCategoriaModalOpen] = useState(false);
   const [isCreateUnidadMedicionModalOpen, setIsCreateUnidadMedicionModalOpen] = useState(false);
+  const [isCreateProveedorModalOpen, setIsCreateProveedorModalOpen] = useState(false);
+  const { proveedoresFisicos = [] } = useProveedoresFisicos();
+  const { proveedoresJuridicos = [] } = useProveedoresJuridicos();
 
   const [formData, setFormData] = useState<UpdateMaterialData>({
     Nombre_Material: '',
@@ -80,6 +83,8 @@ const EditMaterialModal: React.FC<EditMaterialModalProps> = ({
         Precio_Unitario: material.Precio_Unitario,
         Numero_Estanteria: material.Numero_Estanteria,
         IDS_Categorias: categoriaIds,
+        Id_Tipo_Proveedor: material.Proveedor?.Tipo_Entidad,
+        Id_Proveedor: material.Proveedor?.Id_Proveedor,
       });
       setSelectedCategorias(categoriaIds);
       setFieldCharCounts({
@@ -114,20 +119,11 @@ const EditMaterialModal: React.FC<EditMaterialModalProps> = ({
     };
   };
 
-  const renderCharCounter = (current: number, max: number) => {
-    const remaining = max - current;
-    const isNearLimit = remaining <= 5;
-    
-    return (
-      <div className="flex justify-end items-center mt-1">
-        <span className={`text-xs font-medium ${
-          isNearLimit ? 'text-orange-600' : 'text-gray-500'
-        }`}>
-          {current}/{max}
-        </span>
-      </div>
-    );
-  };
+  const renderCharCounter = (current: number, max: number) => (
+    <span className={`text-xs ${current > max * 0.9 ? 'text-orange-500' : 'text-gray-500'}`}>
+      {current}/{max}
+    </span>
+  );
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -150,12 +146,24 @@ const EditMaterialModal: React.FC<EditMaterialModalProps> = ({
       return;
     }
 
+    if (formData.Id_Tipo_Proveedor && !formData.Id_Proveedor) {
+      setFormErrors(prev => ({ ...prev, Id_Proveedor: 'Debe seleccionar un proveedor' }));
+      showError('Por favor, selecciona un proveedor');
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
       const updateData: UpdateMaterialData = {
-        ...formData,
+        Nombre_Material: formData.Nombre_Material,
+        Descripcion: formData.Descripcion,
+        Id_Unidad_Medicion: formData.Id_Unidad_Medicion,
+        Precio_Unitario: formData.Precio_Unitario,
+        Numero_Estanteria: formData.Numero_Estanteria,
         IDS_Categorias: selectedCategorias,
+        Id_Tipo_Proveedor: formData.Id_Tipo_Proveedor,
+        Id_Proveedor: formData.Id_Proveedor,
       };
 
       await updateMaterialMutation.mutateAsync({
@@ -198,6 +206,7 @@ const EditMaterialModal: React.FC<EditMaterialModalProps> = ({
                     Nombre del Material
                     <p className="text-red-500">*</p>
                   </label>
+                  {renderCharCounter(fieldCharCounts.nombreMaterial, NOMBRE_MATERIAL_MAX_LENGTH)}
                 </div>
                 <input
                   type="text"
@@ -210,7 +219,6 @@ const EditMaterialModal: React.FC<EditMaterialModalProps> = ({
                     }`}
                   required
                 />
-                {renderCharCounter(fieldCharCounts.nombreMaterial, NOMBRE_MATERIAL_MAX_LENGTH)}
                 {formErrors.Nombre_Material && (
                   <p className="mt-1 text-sm text-red-600">{formErrors.Nombre_Material}</p>
                 )}
@@ -265,21 +273,13 @@ const EditMaterialModal: React.FC<EditMaterialModalProps> = ({
                   type="number"
                   id="precio"
                   min={PRECIO_MIN}
-                  max={PRECIO_MAX}
-                  step="10"
+                  step="0.01"
                   value={formData.Precio_Unitario}
                   onChange={(e) => {
-                    const value = parseFloat(e.target.value);
-                    if (!Number.isNaN(value) && value >= PRECIO_MIN && value <= PRECIO_MAX) {
-                      setFormData({ ...formData, Precio_Unitario: value });
-                      if (formErrors.Precio_Unitario) {
-                        setFormErrors(prev => ({ ...prev, Precio_Unitario: '' }));
-                      }
-                    } else if (e.target.value === '') {
-                      setFormData({ ...formData, Precio_Unitario: PRECIO_MIN });
-                      if (formErrors.Precio_Unitario) {
-                        setFormErrors(prev => ({ ...prev, Precio_Unitario: '' }));
-                      }
+                    const value = parseFloat(e.target.value) || 0;
+                    setFormData({ ...formData, Precio_Unitario: value });
+                    if (formErrors.Precio_Unitario) {
+                      setFormErrors(prev => ({ ...prev, Precio_Unitario: '' }));
                     }
                   }}
                   className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${formErrors.Precio_Unitario
@@ -288,9 +288,6 @@ const EditMaterialModal: React.FC<EditMaterialModalProps> = ({
                     }`}
                   required
                 />
-                <div className="text-right text-xs text-gray-500 mt-1">
-                  Rango: ₡{PRECIO_MIN.toLocaleString()} - ₡{PRECIO_MAX.toLocaleString()}
-                </div>
                 {formErrors.Precio_Unitario && (
                   <p className="mt-1 text-sm text-red-600">{formErrors.Precio_Unitario}</p>
                 )}
@@ -304,21 +301,14 @@ const EditMaterialModal: React.FC<EditMaterialModalProps> = ({
                 <input
                   type="number"
                   id="numero-estanteria"
-                  min={NUMERO_ESTANTERIA_MIN}
-                  max={NUMERO_ESTANTERIA_MAX}
+                  min="1"
+                  max="50"
                   value={formData.Numero_Estanteria}
                   onChange={(e) => {
-                    const value = Number.parseInt(e.target.value);
-                    if (!Number.isNaN(value) && value >= NUMERO_ESTANTERIA_MIN && value <= NUMERO_ESTANTERIA_MAX) {
-                      setFormData({ ...formData, Numero_Estanteria: value });
-                      if (formErrors.Numero_Estanteria) {
-                        setFormErrors(prev => ({ ...prev, Numero_Estanteria: '' }));
-                      }
-                    } else if (e.target.value === '') {
-                      setFormData({ ...formData, Numero_Estanteria: NUMERO_ESTANTERIA_MIN });
-                      if (formErrors.Numero_Estanteria) {
-                        setFormErrors(prev => ({ ...prev, Numero_Estanteria: '' }));
-                      }
+                    const value = parseInt(e.target.value) || 1;
+                    setFormData({ ...formData, Numero_Estanteria: value });
+                    if (formErrors.Numero_Estanteria) {
+                      setFormErrors(prev => ({ ...prev, Numero_Estanteria: '' }));
                     }
                   }}
                   className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${formErrors.Numero_Estanteria
@@ -327,9 +317,6 @@ const EditMaterialModal: React.FC<EditMaterialModalProps> = ({
                     }`}
                   required
                 />
-                <div className="text-right text-xs text-gray-500 mt-1">
-                  Rango: {NUMERO_ESTANTERIA_MIN} - {NUMERO_ESTANTERIA_MAX}
-                </div>
                 {formErrors.Numero_Estanteria && (
                   <p className="mt-1 text-sm text-red-600">{formErrors.Numero_Estanteria}</p>
                 )}
@@ -341,6 +328,7 @@ const EditMaterialModal: React.FC<EditMaterialModalProps> = ({
                 <label htmlFor="descripcion" className="block text-sm flex gap-2 font-medium text-gray-700">
                   Descripción (Opcional)
                 </label>
+                {renderCharCounter(fieldCharCounts.descripcion, DESCRIPCION_MAX_LENGTH)}
               </div>
               <textarea
                 id="descripcion"
@@ -354,11 +342,81 @@ const EditMaterialModal: React.FC<EditMaterialModalProps> = ({
                 placeholder="Descripción del material..."
                 required
               />
-              {renderCharCounter(fieldCharCounts.descripcion, DESCRIPCION_MAX_LENGTH)}
               {formErrors.Descripcion && (
                 <p className="mt-1 text-sm text-red-600">{formErrors.Descripcion}</p>
               )}
             </div>
+
+            <div>
+              <label htmlFor="tipo-proveedor" className="block text-sm font-medium text-gray-700 mb-1">
+                Tipo de Proveedor (Opcional)
+              </label>
+              <select
+                id="tipo-proveedor"
+                value={formData.Id_Tipo_Proveedor || ''}
+                onChange={(e) => {
+                  const tipoProveedor = e.target.value ? Number.parseInt(e.target.value) : undefined;
+                  setFormData(prev => ({ 
+                    ...prev, 
+                    Id_Tipo_Proveedor: tipoProveedor,
+                    Id_Proveedor: undefined // Resetear proveedor cuando cambia el tipo
+                  }));
+                }}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="">Sin proveedor</option>
+                <option value="1">Proveedor Físico</option>
+                <option value="2">Proveedor Jurídico</option>
+              </select>
+            </div>
+
+            {formData.Id_Tipo_Proveedor && (
+              <div>
+                <label htmlFor="proveedor" className="block text-sm flex justify-between font-medium text-gray-700 mb-1">
+                  <span>Proveedor <span className="text-red-500">*</span></span>
+                  <button
+                    type="button"
+                    onClick={() => setIsCreateProveedorModalOpen(true)}
+                    className="flex items-center gap-1 px-2 py-1 text-xs text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded transition-colors"
+                  >
+                    <LuPlus className="w-3 h-3" />
+                    Nuevo
+                  </button>
+                </label>
+                <select
+                  id="proveedor"
+                  value={formData.Id_Proveedor || ''}
+                  onChange={(e) => {
+                    setFormData(prev => ({ 
+                      ...prev, 
+                      Id_Proveedor: e.target.value ? Number.parseInt(e.target.value) : undefined 
+                    }));
+                    if (formErrors.Id_Proveedor) {
+                      setFormErrors(prev => ({ ...prev, Id_Proveedor: '' }));
+                    }
+                  }}
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${formErrors.Id_Proveedor
+                    ? 'border-red-500'
+                    : 'border-gray-300'
+                    }`}
+                >
+                  <option value="">Seleccionar proveedor</option>
+                  {formData.Id_Tipo_Proveedor === 1 && proveedoresFisicos.map((proveedor) => (
+                    <option key={proveedor.Id_Proveedor} value={proveedor.Id_Proveedor}>
+                      {proveedor.Nombre_Proveedor}
+                    </option>
+                  ))}
+                  {formData.Id_Tipo_Proveedor === 2 && proveedoresJuridicos.map((proveedor) => (
+                    <option key={proveedor.Id_Proveedor} value={proveedor.Id_Proveedor}>
+                      {proveedor.Razon_Social}
+                    </option>
+                  ))}
+                </select>
+                {formErrors.Id_Proveedor && (
+                  <p className="mt-1 text-sm text-red-600">{formErrors.Id_Proveedor}</p>
+                )}
+              </div>
+            )}
 
             <div>
               <div className="block text-sm font-medium flex justify-between text-gray-700 mb-2">
@@ -449,6 +507,12 @@ const EditMaterialModal: React.FC<EditMaterialModalProps> = ({
         isOpen={isCreateUnidadMedicionModalOpen}
         onClose={() => setIsCreateUnidadMedicionModalOpen(false)}
       />
+      {isCreateProveedorModalOpen && (
+        <CreateModalProveedor
+          onClose={() => setIsCreateProveedorModalOpen(false)}
+          setShowCreateModal={setIsCreateProveedorModalOpen}
+        />
+      )}
     </div>
   );
 };

@@ -27,8 +27,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/Modules/Global/components/Sidebar/ui/alert-dialog';
-import { useMedidores, useMedidoresPorEstado, useUpdateEstadoMedidor } from '../../hooks/useMedidores';
-import type { Medidor } from '../../models/Medidor';
+import { useMedidores, useMedidoresPorEstado, useUpdateEstadoMedidor, useUpdateEstadoPagoMedidor } from '../../hooks/useMedidores';
+import type { Medidor, EstadoPagoMedidorNombre } from '../../models/Medidor';
 import CreateMedidorModal from './CreateMedidorModal';
 import DetailMedidorModal from './DetailMedidorModal';
 import AsignarAfiliadoMedidorModal from './AsignarAfiliadoMedidorModal';
@@ -43,6 +43,8 @@ const CatalogoMedidores: React.FC<CatalogoMedidoresProps> = () => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [isAsignarModalOpen, setIsAsignarModalOpen] = useState(false);
+  const [showEstadoPagoDialog, setShowEstadoPagoDialog] = useState(false);
+  const [medidorEstadoPagoSeleccionado, setMedidorEstadoPagoSeleccionado] = useState<Medidor | null>(null);
   const [selectedMedidor, setSelectedMedidor] = useState<Medidor | null>(null);
   const [estadoFilter, setEstadoFilter] = useState<string>('Todos');
   const [notification, setNotification] = useState<{
@@ -64,6 +66,7 @@ const CatalogoMedidores: React.FC<CatalogoMedidoresProps> = () => {
   const medidoresInstalados = useMedidoresPorEstado('instalados');
   const medidoresAveriados = useMedidoresPorEstado('averiados');
   const updateEstadoMutation = useUpdateEstadoMedidor();
+  const updateEstadoPagoMutation = useUpdateEstadoPagoMedidor();
 
   // Selecciona los datos y estados según el filtro
   let medidores: Medidor[] = [];
@@ -129,6 +132,45 @@ const CatalogoMedidores: React.FC<CatalogoMedidoresProps> = () => {
       refetch();
     } catch (error) {
       console.error('Error al cambiar estado del medidor:', error);
+    }
+  };
+
+  const getEstadoPagoNombre = (medidor: Medidor): EstadoPagoMedidorNombre => {
+    if (!medidor.Afiliado) return 'Libre';
+
+    const estadoPagoRaw = medidor.Estado_Pago;
+    const nombre = typeof estadoPagoRaw === 'string'
+      ? estadoPagoRaw
+      : estadoPagoRaw?.Nombre_Estado_Pago;
+
+    if (nombre === 'Pagado' || nombre === 'Pendiente' || nombre === 'Libre') {
+      return nombre;
+    }
+
+    return 'Pendiente';
+  };
+
+  const openEstadoPagoDialog = (medidor: Medidor) => {
+    if (!medidor.Afiliado) return;
+    const actual = getEstadoPagoNombre(medidor);
+    if (actual !== 'Pendiente') return;
+    setMedidorEstadoPagoSeleccionado(medidor);
+    setShowEstadoPagoDialog(true);
+  };
+
+  const handleActualizarEstadoPago = async () => {
+    if (!medidorEstadoPagoSeleccionado) return;
+
+    try {
+      await updateEstadoPagoMutation.mutateAsync({
+        idMedidor: medidorEstadoPagoSeleccionado.Id_Medidor,
+        estadoPago: 'Pagado',
+      });
+      setShowEstadoPagoDialog(false);
+      setMedidorEstadoPagoSeleccionado(null);
+      refetch();
+    } catch (error) {
+      console.error('Error al actualizar estado de pago:', error);
     }
   };
 
@@ -209,6 +251,30 @@ const CatalogoMedidores: React.FC<CatalogoMedidoresProps> = () => {
         },
       }),
       columnHelper.display({
+        id: 'estado_pago',
+        header: 'Estado Pago',
+        cell: info => {
+          const estadoPago = getEstadoPagoNombre(info.row.original);
+          
+          let colorClass = '';
+          if (estadoPago === 'Libre') {
+            colorClass = 'bg-slate-100 text-slate-700 border border-slate-300';
+          } else if (estadoPago === 'Pagado') {
+            colorClass = 'bg-blue-100 text-blue-700 border border-blue-300';
+          } else {
+            colorClass = 'bg-yellow-100 text-yellow-700 border border-yellow-300';
+          }
+
+          return (
+            <div className="flex justify-center">
+              <span className={`px-3 py-1 text-xs font-semibold rounded-full ${colorClass}`}>
+                {estadoPago}
+              </span>
+            </div>
+          );
+        },
+      }),
+      columnHelper.display({
         id: 'acciones',
         header: 'Acciones',
         cell: info => (
@@ -222,6 +288,9 @@ const CatalogoMedidores: React.FC<CatalogoMedidoresProps> = () => {
             </button>
             {(() => {
               const estadoId = info.row.original.Estado_Medidor?.Id_Estado_Medidor;
+              const tieneAfiliado = Boolean(info.row.original.Afiliado);
+              const estadoPagoActual = getEstadoPagoNombre(info.row.original);
+              const puedeMarcarPagado = tieneAfiliado && estadoPagoActual === 'Pendiente';
 
               if (estadoId === 1) {
                 return (
@@ -243,81 +312,112 @@ const CatalogoMedidores: React.FC<CatalogoMedidoresProps> = () => {
                     >
                       Asignar
                     </button>
+                    {puedeMarcarPagado && (
+                      <button
+                        className="px-2 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition-colors"
+                        onClick={() => openEstadoPagoDialog(info.row.original)}
+                        title="Marcar como pagado"
+                      >
+                        Marcar Pagado
+                      </button>
+                    )}
                   </>
                 );
               }
 
               if (estadoId === 2) {
                 return (
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <button
-                        className="px-2 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-700 transition-colors"
-                        disabled={updateEstadoMutation.isPending}
-                        title="Marcar como averiado"
-                      >
-                        Averiado
-                      </button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>
-                          <span>¿Marcar medidor como averiado?</span>
-                        </AlertDialogTitle>
-                        <AlertDialogDescription>
-                          <span>¿Estás seguro de que deseas marcar el medidor #{info.row.original.Numero_Medidor} como averiado?</span>
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogAction
-                          onClick={() => handleToggleEstado(info.row.original, 3)}
+                  <>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <button
+                          className="px-2 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-700 transition-colors"
                           disabled={updateEstadoMutation.isPending}
+                          title="Marcar como averiado"
                         >
-                          <span>Marcar Averiado</span>
-                        </AlertDialogAction>
-                        <AlertDialogCancel>
-                          <span>Cancelar</span>
-                        </AlertDialogCancel>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
+                          Averiado
+                        </button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>
+                            <span>¿Marcar medidor como averiado?</span>
+                          </AlertDialogTitle>
+                          <AlertDialogDescription>
+                            <span>¿Estás seguro de que deseas marcar el medidor #{info.row.original.Numero_Medidor} como averiado?</span>
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogAction
+                            onClick={() => handleToggleEstado(info.row.original, 3)}
+                            disabled={updateEstadoMutation.isPending}
+                          >
+                            <span>Marcar Averiado</span>
+                          </AlertDialogAction>
+                          <AlertDialogCancel>
+                            <span>Cancelar</span>
+                          </AlertDialogCancel>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                    {puedeMarcarPagado && (
+                      <button
+                        className="px-2 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition-colors"
+                        onClick={() => openEstadoPagoDialog(info.row.original)}
+                        title="Marcar como pagado"
+                      >
+                        Marcar Pagado
+                      </button>
+                    )}
+                  </>
                 );
               }
 
               if (estadoId === 3) {
                 return (
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <button
-                        className="px-2 py-1 bg-green-600 text-white text-xs rounded hover:bg-green-700 transition-colors"
-                        disabled={updateEstadoMutation.isPending}
-                        title="Marcar como reparado"
-                      >
-                        Reparar
-                      </button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>
-                          <span>¿Marcar medidor como reparado?</span>
-                        </AlertDialogTitle>
-                        <AlertDialogDescription>
-                          <span>¿Estás seguro de que deseas marcar el medidor #{info.row.original.Numero_Medidor} como reparado? Volverá a estado "Instalado".</span>
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogAction
-                          onClick={() => handleToggleEstado(info.row.original, 2)}
+                  <>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <button
+                          className="px-2 py-1 bg-green-600 text-white text-xs rounded hover:bg-green-700 transition-colors"
                           disabled={updateEstadoMutation.isPending}
+                          title="Marcar como reparado"
                         >
-                          <span>Marcar Reparado</span>
-                        </AlertDialogAction>
-                        <AlertDialogCancel>
-                          <span>Cancelar</span>
-                        </AlertDialogCancel>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
+                          Reparar
+                        </button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>
+                            <span>¿Marcar medidor como reparado?</span>
+                          </AlertDialogTitle>
+                          <AlertDialogDescription>
+                            <span>¿Estás seguro de que deseas marcar el medidor #{info.row.original.Numero_Medidor} como reparado? Volverá a estado "Instalado".</span>
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogAction
+                            onClick={() => handleToggleEstado(info.row.original, 2)}
+                            disabled={updateEstadoMutation.isPending}
+                          >
+                            <span>Marcar Reparado</span>
+                          </AlertDialogAction>
+                          <AlertDialogCancel>
+                            <span>Cancelar</span>
+                          </AlertDialogCancel>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                    {puedeMarcarPagado && (
+                      <button
+                        className="px-2 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition-colors"
+                        onClick={() => openEstadoPagoDialog(info.row.original)}
+                        title="Marcar como pagado"
+                      >
+                        Marcar Pagado
+                      </button>
+                    )}
+                  </>
                 );
               }
 
@@ -327,7 +427,7 @@ const CatalogoMedidores: React.FC<CatalogoMedidoresProps> = () => {
         ),
       }),
     ],
-    [updateEstadoMutation.isPending]
+    [updateEstadoMutation.isPending, updateEstadoPagoMutation.isPending]
   );
 
   const table = useReactTable({
@@ -463,7 +563,7 @@ const CatalogoMedidores: React.FC<CatalogoMedidoresProps> = () => {
             <tbody className="bg-white divide-y divide-sky-50">
               {table.getRowModel().rows.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="px-2 sm:px-4 py-8 text-center text-slate-500">
+                  <td colSpan={columns.length} className="px-2 sm:px-4 py-8 text-center text-slate-500">
                     {globalFilter ? 'No se encontraron medidores que coincidan con la búsqueda' : 'No hay medidores registrados'}
                   </td>
                 </tr>
@@ -592,6 +692,27 @@ const CatalogoMedidores: React.FC<CatalogoMedidoresProps> = () => {
           }}
         />
       )}
+
+      <AlertDialog open={showEstadoPagoDialog} onOpenChange={setShowEstadoPagoDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar cambio de estado de pago</AlertDialogTitle>
+            <AlertDialogDescription>
+              Desea cambiar el estado de Pendiente a Pagado para el medidor #{medidorEstadoPagoSeleccionado?.Numero_Medidor}?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+
+          <AlertDialogFooter>
+            <AlertDialogAction
+              onClick={handleActualizarEstadoPago}
+              disabled={updateEstadoPagoMutation.isPending}
+            >
+              {updateEstadoPagoMutation.isPending ? 'Actualizando...' : 'Si, cambiar'}
+            </AlertDialogAction>
+            <AlertDialogCancel disabled={updateEstadoPagoMutation.isPending}>Cancelar</AlertDialogCancel>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

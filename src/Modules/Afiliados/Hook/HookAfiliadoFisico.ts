@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { createAfiliadoFisico, getAfiliadosFisicos, updateAfiliadoFisico, updateEstadoAfiliadoFisico } from "../Service/ServiceAfiliadoFisico";
+import { createAfiliadoFisico, getAfiliadosFisicos, updateAfiliadoFisico, updateEstadoAfiliadoFisico, updateTipoAfiliadoFisico } from "../Service/ServiceAfiliadoFisico";
 import type { AfiliadoFisico } from "../Models/TablaAfiliados/ModeloAfiliadoFisico";
 
 export const useAfiliadosFisicos = () => {
@@ -46,6 +46,23 @@ export const useAfiliadosFisicos = () => {
     onError: () => console.error("no se actualizo el estado del afiliado"),
   });
 
+  const updateTipoMutation = useMutation({
+    mutationFn: ({
+      id,
+      nuevoTipoId,
+      archivos,
+    }: {
+      id: number;
+      nuevoTipoId: number;
+      archivos?: { Planos_Terreno?: File; Escrituras_Terreno?: File };
+    }) => updateTipoAfiliadoFisico(id, nuevoTipoId, archivos),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["afiliadosFisicos"] });
+      console.log("tipo del afiliado fisico actualizado con exito");
+    },
+    onError: () => console.error("no se actualizo el tipo del afiliado fisico"),
+  });
+
   return {
     afiliadosFisicos,
     isLoading,
@@ -55,5 +72,6 @@ export const useAfiliadosFisicos = () => {
     createAfiliadoFisico: createMutation.mutateAsync,
     updateAfiliadoFisico: updateMutation.mutateAsync,
     updateEstadoAfiliadoFisico: updateEstadoMutation,
+    updateTipoAfiliadoFisico: updateTipoMutation,
   };
 }

@@ -114,7 +114,7 @@ export const breadcrumbConfig: BreadcrumbConfig = {
   },
 
   '/Inventario/Materiales/Medidores': {
-    label: 'Gestión deMedidores',
+    label: 'Gestión de Medidores',
     icon: FaTachometerAlt as LucideIcon,
   },
 

@@ -1,9 +1,17 @@
 import { LuX, LuUser, LuMail, LuPhone, LuMapPin, LuCalendar, LuBuilding, LuFileText, LuMap, LuInfo, LuGauge } from 'react-icons/lu';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { formatCedulaJuridica } from '../Helper/formatUtils';
 import type { AfiliadoFisico, Medidor } from '../Models/TablaAfiliados/ModeloAfiliadoFisico';
 import type { AfiliadoJuridico } from '../Models/TablaAfiliados/ModeloAfiliadoJuridico';
-import { getMedidoresByAfiliado, getMedidoresByAfiliadoJuridico } from '../Service/ServiceAfiliadoFisico';
+import {
+    getAfiliadoFisicoDetail,
+    getMedidoresByAfiliado,
+    getMedidoresByAfiliadoJuridico,
+} from '../Service/ServiceAfiliadoFisico';
+import { getAfiliadoJuridicoDetail } from '../Service/ServiceAfiliadoJuridico';
+import { useAfiliadosFisicos } from '../Hook/HookAfiliadoFisico';
+import { useAfiliadosJuridicos } from '../Hook/HookAfiliadoJuridico';
+import { useAlerts } from '@/Modules/Global/context/AlertContext';
 
 
 // Tipo unificado para identificar qué estamos viendo
@@ -22,6 +30,16 @@ const DetailAbonados: React.FC<DetailAbonadosProps> = ({ persona, isOpen, onClos
 
     const [medidores, setMedidores] = useState<Medidor[]>([]);
     const [loadingMedidores, setLoadingMedidores] = useState(false);
+    const [detallePersona, setDetallePersona] = useState<AfiliadoFisico | AfiliadoJuridico | null>(null);
+    const [loadingDetalle, setLoadingDetalle] = useState(false);
+    const [showCambioTipoModal, setShowCambioTipoModal] = useState(false);
+    const [planosTerreno, setPlanosTerreno] = useState<File | null>(null);
+    const [escriturasTerreno, setEscriturasTerreno] = useState<File | null>(null);
+    const planosInputRef = useRef<HTMLInputElement | null>(null);
+    const escriturasInputRef = useRef<HTMLInputElement | null>(null);
+    const { showSuccess, showError, showWarning } = useAlerts();
+    const { updateTipoAfiliadoFisico } = useAfiliadosFisicos();
+    const { updateTipoAfiliadoJuridico } = useAfiliadosJuridicos();
 
     // Cada vez que se abre el modal, cargar los medidores frescos desde el endpoint
     useEffect(() => {
@@ -51,8 +69,25 @@ const DetailAbonados: React.FC<DetailAbonadosProps> = ({ persona, isOpen, onClos
             .finally(() => setLoadingMedidores(false));
     }, [isOpen, persona]);
 
+    useEffect(() => {
+        if (!isOpen) return;
+
+        const idAfiliado = (persona.datos as AfiliadoFisico | AfiliadoJuridico).Id_Afiliado;
+        setLoadingDetalle(true);
+
+        const fetchDetalle = persona.tipo === 'afiliado-juridico'
+            ? getAfiliadoJuridicoDetail
+            : getAfiliadoFisicoDetail;
+
+        fetchDetalle(idAfiliado)
+            .then((detalle) => setDetallePersona(detalle))
+            .catch(() => setDetallePersona(null))
+            .finally(() => setLoadingDetalle(false));
+    }, [isOpen, persona]);
+
     const getPersonaInfo = () => {
-        const { tipo, datos } = persona;
+        const { tipo } = persona;
+        const datos = (detallePersona ?? persona.datos) as AfiliadoFisico | AfiliadoJuridico;
 
         if (tipo === 'afiliado-fisico') {
             const afiliado = datos as AfiliadoFisico;
@@ -71,8 +106,9 @@ const DetailAbonados: React.FC<DetailAbonadosProps> = ({ persona, isOpen, onClos
                 edad: afiliado.Edad,
                 fechaCreacion: afiliado.Fecha_Creacion,
                 fechaActualizacion: afiliado.Fecha_Actualizacion,
-                escritura: afiliado.Escritura_Terreno,
+                certificacion: afiliado.Certificacion_Literal,
                 planos: afiliado.Planos_Terreno,
+                escrituras: afiliado.Escrituras_Terreno,
                 motivo: null, // Campo no disponible en el modelo actual
                 medidores // Cargados desde el endpoint por el useEffect
             };
@@ -93,11 +129,74 @@ const DetailAbonados: React.FC<DetailAbonadosProps> = ({ persona, isOpen, onClos
                 edad: null,
                 fechaCreacion: afiliado.Fecha_Creacion,
                 fechaActualizacion: afiliado.Fecha_Actualizacion,
-                escritura: afiliado.Escritura_Terreno,
+                certificacion: afiliado.Certificacion_Literal,
                 planos: afiliado.Planos_Terreno,
+                escrituras: afiliado.Escrituras_Terreno,
                 motivo: null, // Campo no disponible en el modelo actual
                 medidores // Cargados desde el endpoint por el useEffect
             };
+        }
+    };
+
+    const handleConfirmarCambioATipoAsociado = async () => {
+        const idAfiliado = (detallePersona ?? persona.datos).Id_Afiliado;
+
+        if (!planosTerreno || !escriturasTerreno) {
+            showWarning(
+                'Documentos obligatorios',
+                'Para cambiar a asociado debe adjuntar Planos_Terreno y Escrituras_Terreno.'
+            );
+            return;
+        }
+
+        try {
+            if (persona.tipo === 'afiliado-juridico') {
+                await updateTipoAfiliadoJuridico.mutateAsync({
+                    id: idAfiliado,
+                    nuevoTipoId: 2,
+                    archivos: {
+                        Planos_Terreno: planosTerreno,
+                        Escrituras_Terreno: escriturasTerreno,
+                    },
+                });
+            } else {
+                await updateTipoAfiliadoFisico.mutateAsync({
+                    id: idAfiliado,
+                    nuevoTipoId: 2,
+                    archivos: {
+                        Planos_Terreno: planosTerreno,
+                        Escrituras_Terreno: escriturasTerreno,
+                    },
+                });
+            }
+
+            const fetchDetalle = persona.tipo === 'afiliado-juridico'
+                ? getAfiliadoJuridicoDetail
+                : getAfiliadoFisicoDetail;
+            const detalleActualizado = await fetchDetalle(idAfiliado);
+            setDetallePersona(detalleActualizado);
+
+            setShowCambioTipoModal(false);
+            setPlanosTerreno(null);
+            setEscriturasTerreno(null);
+            showSuccess('Tipo actualizado', 'El afiliado ahora es de tipo Asociado y se guardaron los documentos.');
+        } catch (error: any) {
+            const mensaje = error?.response?.data?.message || 'No se pudo cambiar el tipo de afiliado.';
+            showError('Error al cambiar tipo', mensaje);
+        }
+    };
+
+    const quitarPlanosTerreno = () => {
+        setPlanosTerreno(null);
+        if (planosInputRef.current) {
+            planosInputRef.current.value = '';
+        }
+    };
+
+    const quitarEscriturasTerreno = () => {
+        setEscriturasTerreno(null);
+        if (escriturasInputRef.current) {
+            escriturasInputRef.current.value = '';
         }
     };
 
@@ -136,6 +235,42 @@ const DetailAbonados: React.FC<DetailAbonadosProps> = ({ persona, isOpen, onClos
             : 'bg-blue-100 text-blue-800 border-blue-200';
     };
 
+    const getEstadoTecnicoMedidorColor = (estado: string) => {
+        const normalizado = estado.trim().toLowerCase();
+
+        if (normalizado.includes('averiado')) {
+            return 'bg-red-100 text-red-800 border-red-200';
+        }
+
+        if (normalizado.includes('instalado')) {
+            return 'bg-green-100 text-green-800 border-green-200';
+        }
+
+        if (normalizado.includes('pendiente') || normalizado.includes('espera')) {
+            return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+        }
+
+        return 'bg-gray-100 text-gray-800 border-gray-200';
+    };
+
+    const getEstadoPagoMedidorColor = (estado: string) => {
+        const normalizado = estado.trim().toLowerCase();
+
+        if (normalizado === 'pagado') {
+            return 'bg-emerald-100 text-emerald-800 border-emerald-200';
+        }
+
+        if (normalizado === 'pendiente') {
+            return 'bg-amber-100 text-amber-800 border-amber-200';
+        }
+
+        if (normalizado === 'libre') {
+            return 'bg-blue-100 text-blue-800 border-blue-200';
+        }
+
+        return 'bg-gray-100 text-gray-800 border-gray-200';
+    };
+
     const getModalTitle = () => {
         switch (persona.tipo) {
             case 'afiliado-fisico':
@@ -150,6 +285,8 @@ const DetailAbonados: React.FC<DetailAbonadosProps> = ({ persona, isOpen, onClos
     if (!isOpen) return null;
 
     const personaInfo = getPersonaInfo();
+    const isAsociado = personaInfo.tipoAfiliado.toLowerCase().includes('asociado');
+    const isActualizandoTipo = updateTipoAfiliadoFisico.isPending || updateTipoAfiliadoJuridico.isPending;
 
     return (
         <div className="fixed inset-0 bg-opacity-10 backdrop-blur-sm flex items-center justify-center z-50 p-4">
@@ -157,7 +294,12 @@ const DetailAbonados: React.FC<DetailAbonadosProps> = ({ persona, isOpen, onClos
                 {/* Header */}
                 <div className="sticky top-0 bg-white border-b border-gray-200 p-4 z-10">
                     <div className="flex items-center justify-between">
-                        <h1 className="text-xl font-bold text-gray-900 flex items-center gap-3">{getModalTitle()}</h1>
+                        <h1 className="text-xl font-bold text-gray-900 flex items-center gap-3">
+                            {getModalTitle()}
+                            {loadingDetalle && (
+                                <span className="ml-1 inline-block w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+                            )}
+                        </h1>
                         <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors">
                             <LuX className="w-5 h-5" />
                         </button>
@@ -259,18 +401,18 @@ const DetailAbonados: React.FC<DetailAbonadosProps> = ({ persona, isOpen, onClos
                                     </div>
                                 </div>
 
-                                {/* Escritura del Terreno */}
-                                {personaInfo.escritura && (
+                                {/* Certificación Literal */}
+                                {personaInfo.certificacion && (
                                     <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-lg border border-gray-200">
                                         <div className="p-2 rounded-lg">
                                             <LuFileText className="w-5 h-5 text-blue-600" />
                                         </div>
                                         <div className="flex-1">
                                             <p className="text-xs font-medium text-gray-500 uppercase">
-                                                Escritura del Terreno
+                                                Certificación Literal
                                             </p>
                                             <a
-                                                href={personaInfo.escritura}
+                                                href={personaInfo.certificacion}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                                 className="text-blue-600 hover:text-blue-800 font-medium underline mt-1 inline-block"
@@ -293,6 +435,27 @@ const DetailAbonados: React.FC<DetailAbonadosProps> = ({ persona, isOpen, onClos
                                             </p>
                                             <a
                                                 href={personaInfo.planos}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="text-blue-600 hover:text-blue-800 font-medium underline mt-1 inline-block"
+                                            >
+                                                Ver documento
+                                            </a>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {personaInfo.escrituras && (
+                                    <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                                        <div className="p-2 rounded-lg">
+                                            <LuFileText className="w-5 h-5 text-blue-600" />
+                                        </div>
+                                        <div className="flex-1">
+                                            <p className="text-xs font-medium text-gray-500 uppercase">
+                                                Escrituras del Terreno
+                                            </p>
+                                            <a
+                                                href={personaInfo.escrituras}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                                 className="text-blue-600 hover:text-blue-800 font-medium underline mt-1 inline-block"
@@ -355,30 +518,40 @@ const DetailAbonados: React.FC<DetailAbonadosProps> = ({ persona, isOpen, onClos
                                                     </div>
                                                     <div className="flex-1">
                                                         <p className="text-xs font-medium text-gray-500 uppercase">Estado Actual del medidor</p>
-                                                        <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium border mt-1 ${
-                                                            medidor.Estado_Medidor?.Id_Estado_Medidor === 2
-                                                                ? 'bg-green-100 text-green-800 border-green-200'
-                                                                : 'bg-red-100 text-red-700 border border-red-300'
-                                                        }`}>
-                                                            {medidor.Estado_Medidor?.Nombre_Estado_Medidor ?? 'Sin estado'}
-                                                        </span>
+                                                        {(() => {
+                                                            const estadoTecnico = medidor.Estado_Medidor?.Nombre_Estado_Medidor ?? 'Sin estado';
+                                                            const estadoPago = typeof medidor.Estado_Pago === 'string'
+                                                                ? medidor.Estado_Pago
+                                                                : medidor.Estado_Pago?.Nombre_Estado_Pago ?? 'Libre';
+
+                                                            return (
+                                                                <div className="flex flex-wrap items-center gap-2 mt-1">
+                                                                    <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium border ${getEstadoTecnicoMedidorColor(estadoTecnico)}`}>
+                                                                        {estadoTecnico}
+                                                                    </span>
+                                                                    <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium border ${getEstadoPagoMedidorColor(estadoPago)}`}>
+                                                                        {estadoPago}
+                                                                    </span>
+                                                                </div>
+                                                            );
+                                                        })()}
                                                     </div>
                                                 </div>
                                             </div>
 
-                                            {(medidor.Escritura_Terreno || medidor.Planos_Terreno) && (
+                                            {(medidor.Certificacion_Literal || medidor.Planos_Terreno || medidor.Escrituras_Terreno) && (
                                                 <div className="mt-3 pt-3 border-t border-gray-200">
                                                     <p className="text-xs font-medium text-gray-500 uppercase mb-2">Documentos del Terreno</p>
                                                     <div className="flex flex-wrap gap-2">
-                                                        {medidor.Escritura_Terreno && (
+                                                        {medidor.Certificacion_Literal && (
                                                             <a
-                                                                href={medidor.Escritura_Terreno}
+                                                                href={medidor.Certificacion_Literal}
                                                                 target="_blank"
                                                                 rel="noopener noreferrer"
                                                                 className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-700 hover:bg-blue-100 transition-colors font-medium"
                                                             >
                                                                 <LuFileText className="w-4 h-4" />
-                                                                Ver Escritura
+                                                                Ver Certificación
                                                             </a>
                                                         )}
                                                         {medidor.Planos_Terreno && (
@@ -390,6 +563,17 @@ const DetailAbonados: React.FC<DetailAbonadosProps> = ({ persona, isOpen, onClos
                                                             >
                                                                 <LuMap className="w-4 h-4" />
                                                                 Ver Planos
+                                                            </a>
+                                                        )}
+                                                        {medidor.Escrituras_Terreno && (
+                                                            <a
+                                                                href={medidor.Escrituras_Terreno}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-700 hover:bg-blue-100 transition-colors font-medium"
+                                                            >
+                                                                <LuFileText className="w-4 h-4" />
+                                                                Ver Escrituras
                                                             </a>
                                                         )}
                                                     </div>
@@ -540,6 +724,14 @@ const DetailAbonados: React.FC<DetailAbonadosProps> = ({ persona, isOpen, onClos
                 </div>
                 {/* Action Buttons */}
                 <div className="sticky bottom-0 flex justify-end gap-3 p-6 border-t bg-gray-50 z-10">
+                    {!isAsociado && (
+                        <button
+                            onClick={() => setShowCambioTipoModal(true)}
+                            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                        >
+                            Cambiar tipo a Asociado
+                        </button>
+                    )}
                     <button
                         onClick={onClose}
                         className="px-6 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium"
@@ -548,6 +740,101 @@ const DetailAbonados: React.FC<DetailAbonadosProps> = ({ persona, isOpen, onClos
                     </button>
                 </div>
             </div>
+
+            {showCambioTipoModal && (
+                <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-[60] p-4">
+                    <div className="bg-white w-full max-w-lg rounded-lg shadow-2xl border border-gray-200">
+                        <div className="p-5 border-b border-gray-200">
+                            <h2 className="text-lg font-bold text-gray-900">Cambiar tipo de afiliado</h2>
+                            <p className="text-sm text-gray-600 mt-2">
+                                Está cambiando el tipo del afiliado a <strong>Asociado</strong>. Para continuar debe adjuntar
+                                obligatoriamente <strong>Planos_Terreno</strong> y <strong>Escrituras_Terreno</strong>.
+                            </p>
+                        </div>
+
+                        <div className="p-5 space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Planos del Terreno *</label>
+                                <input
+                                    ref={planosInputRef}
+                                    type="file"
+                                    onChange={(e) => setPlanosTerreno(e.target.files?.[0] || null)}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                                    accept=".pdf,.png,.jpg,.jpeg"
+                                />
+                                {planosTerreno && (
+                                    <div className="mt-2 flex items-center justify-between rounded-lg border border-gray-200 bg-gray-50 px-3 py-2">
+                                        <span className="text-sm text-gray-700 truncate pr-3">{planosTerreno.name}</span>
+                                        <button
+                                            type="button"
+                                            onClick={quitarPlanosTerreno}
+                                            disabled={isActualizandoTipo}
+                                            className="text-gray-500 hover:text-red-600 disabled:opacity-50"
+                                            aria-label="Quitar archivo de planos"
+                                            title="Quitar archivo"
+                                        >
+                                            <LuX className="w-4 h-4" />
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Escrituras del Terreno *</label>
+                                <input
+                                    ref={escriturasInputRef}
+                                    type="file"
+                                    onChange={(e) => setEscriturasTerreno(e.target.files?.[0] || null)}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                                    accept=".pdf,.png,.jpg,.jpeg"
+                                />
+                                {escriturasTerreno && (
+                                    <div className="mt-2 flex items-center justify-between rounded-lg border border-gray-200 bg-gray-50 px-3 py-2">
+                                        <span className="text-sm text-gray-700 truncate pr-3">{escriturasTerreno.name}</span>
+                                        <button
+                                            type="button"
+                                            onClick={quitarEscriturasTerreno}
+                                            disabled={isActualizandoTipo}
+                                            className="text-gray-500 hover:text-red-600 disabled:opacity-50"
+                                            aria-label="Quitar archivo de escrituras"
+                                            title="Quitar archivo"
+                                        >
+                                            <LuX className="w-4 h-4" />
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        <div className="p-5 border-t border-gray-200 flex justify-end gap-3 bg-gray-50 rounded-b-lg">
+                           
+
+                            <button
+                                onClick={handleConfirmarCambioATipoAsociado}
+                                disabled={isActualizandoTipo}
+                                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                            >
+                                {isActualizandoTipo ? 'Guardando...' : 'Confirmar cambio'}
+                            </button>
+
+
+                            <button
+                                onClick={() => {
+                                    setShowCambioTipoModal(false);
+                                    quitarPlanosTerreno();
+                                    quitarEscriturasTerreno();
+                                }}
+                                disabled={isActualizandoTipo}
+                                className="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 disabled:opacity-50"
+                            >
+                                Cancelar
+                            </button>
+
+                            
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

@@ -1,5 +1,6 @@
 import axiosPrivate from '@/Api/apiAuth';
 import type { Medidor, CreateMedidorData } from '../models/Inventario';
+import type { EstadoPagoMedidorNombre } from '../models/Medidor';
 
 // Obtener todos los medidores
 export const getAllMedidores = async (): Promise<Medidor[]> => {
@@ -16,7 +17,7 @@ export const getMedidoresNoInstalados = async (): Promise<Medidor[]> => {
 
 // Obtener medidores disponibles (sin asignar)
 export const getMedidoresDisponibles = async (): Promise<Medidor[]> => {
-  const response = await axiosPrivate.get(`/Inventario/medidores/no-instalados`);
+  const response = await axiosPrivate.get(`/Inventario/medidores/disponibles`);
   return response.data;
 };
 
@@ -51,22 +52,41 @@ export const updateEstadoMedidor = async (idMedidor: number, nuevoEstado: number
   return response.data;
 };
 
+// Actualizar estado de pago del medidor
+export const updateEstadoPagoMedidor = async (
+  idMedidor: number,
+  estadoPago: EstadoPagoMedidorNombre
+): Promise<Medidor> => {
+  const response = await axiosPrivate.patch(`/Inventario/update/estado-pago/medidor/${idMedidor}`, {
+    Estado_Pago: estadoPago,
+  });
+  return response.data;
+};
+
 // Asignar medidor existente a un afiliado
 export const asignarMedidorAAfiliado = async (idMedidor: number, idAfiliado: number): Promise<void> => {
-  await axiosPrivate.post(`/Inventario/asignar/medidor/afiliado`, { Id_Medidor: idMedidor, Id_Afiliado: idAfiliado });
+  await axiosPrivate.post(`/Inventario/asignar/medidor/afiliado`, {
+    Id_Medidor: idMedidor,
+    Id_Afiliado: idAfiliado,
+    Estado_Pago: 'Pendiente',
+  });
 };
 
 // Asignar medidor a un afiliado con archivos de documentos del terreno
 export const asignarMedidorConArchivos = async (
   idMedidor: number,
   idAfiliado: number,
-  escrituraFile: File,
-  planosFile: File
+  certificacionFile: File,
+  planosFile: File,
+  estadoPago?: EstadoPagoMedidorNombre
 ): Promise<void> => {
   const formData = new FormData();
   formData.append('Id_Medidor', String(idMedidor));
   formData.append('Id_Afiliado', String(idAfiliado));
-  formData.append('Escritura_Terreno', escrituraFile);
+  if (estadoPago) {
+    formData.append('Estado_Pago', estadoPago);
+  }
+  formData.append('Certificacion_Literal', certificacionFile);
   formData.append('Planos_Terreno', planosFile);
   await axiosPrivate.post(`/Inventario/asignar/medidor/afiliado`, formData, {
     headers: { 'Content-Type': 'multipart/form-data' },

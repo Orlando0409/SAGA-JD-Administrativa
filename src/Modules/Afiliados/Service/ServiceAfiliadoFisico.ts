@@ -12,6 +12,11 @@ export async function getAfiliadoFisicoById(id: number): Promise<AfiliadoFisico>
     return response.data;
 }
 
+export async function getAfiliadoFisicoDetail(id: number): Promise<AfiliadoFisico> {
+    const response = await apiAuth.get<AfiliadoFisico>(`/afiliados/fisico/detail/${id}`);
+    return response.data;
+}
+
 // En tu Hook o Service
 export const createAfiliadoFisico = async (formData: FormData) => {
     const response = await apiAuth.post("/afiliados/fisico/create", formData, {
@@ -58,8 +63,10 @@ type MedidorBackend = {
     Numero_Medidor: number;
     Estado?: { Id_Estado: number; Nombre_Estado: string };
     Estado_Medidor?: { Id_Estado_Medidor: number; Nombre_Estado_Medidor: string };
-    Escritura_Terreno?: string | null;
+    Estado_Pago?: string | { Id_Estado_Pago?: number; Nombre_Estado_Pago: string } | null;
+    Certificacion_Literal?: string | null;
     Planos_Terreno?: string | null;
+    Escrituras_Terreno?: string | null;
 };
 
 // Mapea la respuesta del backend al formato del frontend
@@ -71,8 +78,10 @@ const mapearMedidoresDetalle = (medidores: MedidorBackend[]): Medidor[] =>
             Id_Estado_Medidor: m.Estado.Id_Estado,
             Nombre_Estado_Medidor: m.Estado.Nombre_Estado,
         } : undefined),
-        Escritura_Terreno: m.Escritura_Terreno ?? null,
+        Estado_Pago: m.Estado_Pago ?? null,
+        Certificacion_Literal: m.Certificacion_Literal ?? null,
         Planos_Terreno: m.Planos_Terreno ?? null,
+        Escrituras_Terreno: m.Escrituras_Terreno ?? null,
     }));
 
 export const getMedidoresByAfiliado = async (idAfiliado: number): Promise<Medidor[]> => {
@@ -89,4 +98,86 @@ export const getMedidoresByAfiliadoJuridico = async (idAfiliado: number): Promis
 
 export const asignarMedidorAAfiliado = async (idAfiliado: number, idMedidor: number): Promise<void> => {
     await apiAuth.patch(`/afiliados/${idAfiliado}/medidores/${idMedidor}/asignar`);
+};
+
+export const asignarMedidorExistenteAfiliado = async (
+    idAfiliado: number,
+    idMedidor: number,
+    certificacionLiteral: File,
+    planosTerreno: File,
+    estadoPago?: 'Pagado' | 'Pendiente'
+): Promise<void> => {
+    const formData = new FormData();
+    formData.append('Id_Afiliado', String(idAfiliado));
+    formData.append('Id_Medidor', String(idMedidor));
+    formData.append('Certificacion_Literal', certificacionLiteral);
+    formData.append('Planos_Terreno', planosTerreno);
+    if (estadoPago) {
+        formData.append('Estado_Pago', estadoPago);
+    }
+
+    await apiAuth.post('/Inventario/asignar/medidor/afiliado', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+    });
+};
+
+export const crearYAsignarMedidorAfiliado = async (
+    idAfiliado: number,
+    numeroMedidor: number,
+    certificacionLiteral: File,
+    planosTerreno: File,
+    estadoPago?: 'Pagado' | 'Pendiente'
+): Promise<void> => {
+    const medidorCreado = await apiAuth.post('/Inventario/create/medidor/', {
+        Numero_Medidor: numeroMedidor,
+    });
+
+    const idMedidor = medidorCreado?.data?.Id_Medidor;
+    if (!idMedidor) {
+        throw new Error('No se pudo obtener el Id_Medidor del medidor creado.');
+    }
+
+    const formData = new FormData();
+    formData.append('Id_Afiliado', String(idAfiliado));
+    formData.append('Id_Medidor', String(idMedidor));
+    formData.append('Certificacion_Literal', certificacionLiteral);
+    formData.append('Planos_Terreno', planosTerreno);
+    if (estadoPago) {
+        formData.append('Estado_Pago', estadoPago);
+    }
+
+    await apiAuth.post('/Inventario/asignar/medidor/afiliado', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+    });
+};
+
+export const updateTipoAfiliadoFisico = async (
+    id: number,
+    nuevoTipoId: number,
+    archivos?: {
+        Planos_Terreno?: File;
+        Escrituras_Terreno?: File;
+    }
+) => {
+    const formData = new FormData();
+
+    if (archivos?.Planos_Terreno) {
+        formData.append('Planos_Terreno', archivos.Planos_Terreno);
+    }
+
+    if (archivos?.Escrituras_Terreno) {
+        formData.append('Escrituras_Terreno', archivos.Escrituras_Terreno);
+    }
+
+    const response = await apiAuth.patch(
+        `/afiliados/update/tipo/fisico/${id}/tipo/${nuevoTipoId}`,
+        formData,
+        {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        }
+    );
+
+    return response.data;
 };

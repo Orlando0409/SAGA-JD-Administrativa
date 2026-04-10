@@ -6,6 +6,7 @@ export type TipoSolicitud =
     | 'agregar-medidor';
 
 export type TipoPersona = 'fisica' | 'juridica';
+export type EstadoPagoMedidor = 'Libre' | 'Pagado' | 'Pendiente';
 
 
 export const EstadoSolicitud = {
@@ -25,4 +26,12 @@ export interface CambioEstadoRequest {
     solicitudId: number | string;
     nuevoEstado: EstadoSolicitud;
     motivoRechazo?: string;
+    ocupaPagarMedidor?: OcupaPagarMedidor;
+    estadoPago?: EstadoPagoMedidor;
+}
+
+export interface OcupaPagarMedidor{
+    ocupaPago?: boolean;
+    montoCambio?: number;
+    motivoCobro?: string;
 }

@@ -44,8 +44,6 @@ const EstadoButtons: React.FC<EstadoButtonsProps> = ({
     // Handle para aprobar y poner en espera
     const handleConfirmAprobar = async () => {
         try {
-            console.log(` Aprobando solicitud: ${tipoPersona} - ${tipoSolicitud} - ID: ${solicitudId}`);
-            
             await aprobarMutation.mutateAsync(tipoSolicitud, tipoPersona, solicitudId);
             
             setShowAprobarDialog(false);
@@ -59,8 +57,7 @@ const EstadoButtons: React.FC<EstadoButtonsProps> = ({
     // Handle para completar solicitud
     const handleConfirmCompletar = async () => {
         try {
-            console.log(` Completando solicitud: ${tipoPersona} - ${tipoSolicitud} - ID: ${solicitudId}`);
-            
+
             await completarMutation.mutateAsync(tipoSolicitud, tipoPersona, solicitudId);
             
             setShowCompletarDialog(false);
@@ -74,8 +71,7 @@ const EstadoButtons: React.FC<EstadoButtonsProps> = ({
     // Handle para rechazar solicitud
     const handleConfirmRechazar = async () => {
         try {
-            console.log(`Rechazando solicitud: ${tipoPersona} - ${tipoSolicitud} - ID: ${solicitudId}`);
-            
+        
             await rechazarMutation.mutateAsync(tipoSolicitud, tipoPersona, solicitudId);
             
             setShowRechazarDialog(false);

@@ -12,6 +12,7 @@ import { formatCedulaJuridica } from '../Helper/formatUtils';
 import DetailAbonados from './DetailAfiliadoModal';
 import CreateModal from './CreateAfiliadoModal';
 import EditModal from './EditAfiliadoModal';
+import AsignarMedidorAfiliadoModal from './AsignarMedidorAfiliadoModal';
 import { useUserPermissions } from '@/Modules/Auth/Hooks/PermissionHook';
 import {
     AlertDialog,
@@ -44,8 +45,8 @@ type AfiliadoUnificado = {
 };
 
 export default function AbonadosTable() {
-    const { afiliadosFisicos, isLoading: loadingFisicos, isError: errorFisicos, updateEstadoAfiliadoFisico: updateEstadoMutationFisico } = useAfiliadosFisicos();
-    const { afiliadosJuridicos, isLoading: loadingJuridicos, isError: errorJuridicos, updateEstadoAfiliadoJuridico: updateEstadoMutationJuridico } = useAfiliadosJuridicos();
+    const { afiliadosFisicos, isLoading: loadingFisicos, isError: errorFisicos, refetch: refetchFisicos, updateEstadoAfiliadoFisico: updateEstadoMutationFisico } = useAfiliadosFisicos();
+    const { afiliadosJuridicos, isLoading: loadingJuridicos, isError: errorJuridicos, refetch: refetchJuridicos, updateEstadoAfiliadoJuridico: updateEstadoMutationJuridico } = useAfiliadosJuridicos();
     const navigate = useNavigate();
     const { showError } = useAlerts();
     const { canCreate, canEdit } = useUserPermissions();
@@ -64,6 +65,9 @@ export default function AbonadosTable() {
     const [showDetailModal, setShowDetailModal] = useState(false);
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false); // ✅ Agregar estado para EditModal
+    const [showAsignarMedidorModal, setShowAsignarMedidorModal] = useState(false);
+    const [afiliadoParaAsignarMedidor, setAfiliadoParaAsignarMedidor] = useState<AfiliadoUnificado | null>(null);
+    const [tipoAfiliadoAsignar, setTipoAfiliadoAsignar] = useState<'afiliado-fisico' | 'afiliado-juridico'>('afiliado-fisico');
     const [selectedPersona, setSelectedPersona] = useState<{
         tipo: 'afiliado-fisico' | 'afiliado-juridico';
         datos: AfiliadoFisico | AfiliadoJuridico;
@@ -192,6 +196,16 @@ export default function AbonadosTable() {
         }
     };
 
+    const handleOpenAsignarMedidor = (persona: AfiliadoUnificado) => {
+        setAfiliadoParaAsignarMedidor(persona);
+        setTipoAfiliadoAsignar(persona.Tipo_Persona === 'Físico' ? 'afiliado-fisico' : 'afiliado-juridico');
+        setShowAsignarMedidorModal(true);
+    };
+
+    const handleAsignacionMedidorExitosa = async () => {
+        await Promise.all([refetchFisicos(), refetchJuridicos()]);
+    };
+
     const columnHelper = createColumnHelper<AfiliadoUnificado>();
     const columns: ColumnDef<AfiliadoUnificado, any>[] = [
         columnHelper.accessor('Nombre_Completo', {
@@ -233,17 +247,25 @@ export default function AbonadosTable() {
             cell: (info) => {
                 const estado = info.getValue();
                 const estadoNombre = estado?.Nombre_Estado || 'Sin estado';
-                const base = 'px-3 py-1 rounded-full text-xs font-semibold';
+                const estadoNormalizado = estadoNombre.trim().toLowerCase();
+                const estadoVisual =
+                    estadoNormalizado === 'en espera' ||
+                    estadoNormalizado === 'pendiente' ||
+                    estadoNormalizado.includes('espera') 
+                       ? 'En espera'
+                        : estadoNombre;
 
-                if (estadoNombre.toLowerCase() === 'activo') {
+                const base = 'px-2 py-1 rounded-full text-xs font-semibold whitespace-nowrap';
+
+                if (estadoNormalizado === 'activo') {
                     return <span className={`${base} bg-emerald-100 text-emerald-700 border border-emerald-300`}>Activo</span>;
-                } else if (estadoNombre.toLowerCase() === 'inactivo') {
+                } else if (estadoNormalizado === 'inactivo') {
                     return <span className={`${base} bg-red-100 text-red-700 border border-red-300`}>Inactivo</span>;
                 }
 
                 return (
                     <div className='flex items-center justify-start'>
-                        <span className={`${base} bg-slate-100 text-slate-700 border border-slate-300`}>{estadoNombre}</span>
+                        <span className={`${base} bg-slate-100 text-slate-700 border border-slate-300`}>{estadoVisual}</span>
                     </div>);
             },
             size: 120,
@@ -287,6 +309,13 @@ export default function AbonadosTable() {
             header: 'Acciones',
             cell: ({ row }) => {
                 const persona = row.original;
+                const estadoNormalizado = (persona.Estado.Nombre_Estado || '').trim().toLowerCase();
+                const esActivo = estadoNormalizado === 'activo';
+                const esEnEspera =
+                    estadoNormalizado === 'en espera' ||
+                    estadoNormalizado === 'pendiente' ||
+                    estadoNormalizado.includes('espera');
+
                 return (
                     <div className="flex justify-center gap-1">
                         <button
@@ -311,7 +340,18 @@ export default function AbonadosTable() {
                                 Editar
                             </button>
                         )}
-                        {hasEditPermission && persona.Estado.Nombre_Estado === 'Activo' ? (
+                        {hasEditPermission && esEnEspera ? (
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleOpenAsignarMedidor(persona);
+                                }}
+                                className="px-2 py-1 bg-green-600 text-white text-xs rounded hover:bg-green-700 transition-colors"
+                                title="Asignar medidor"
+                            >
+                                Asignar
+                            </button>
+                        ) : hasEditPermission && esActivo ? (
                             <AlertDialog>
                                 <AlertDialogTrigger asChild>
                                     <button
@@ -666,6 +706,18 @@ export default function AbonadosTable() {
                     persona={selectedPersona}
                 />
             )}
+
+            <AsignarMedidorAfiliadoModal
+                isOpen={showAsignarMedidorModal}
+                afiliadoId={afiliadoParaAsignarMedidor?.Id ?? null}
+                afiliadoNombre={afiliadoParaAsignarMedidor?.Nombre_Completo ?? ''}
+                afiliadoTipo={tipoAfiliadoAsignar}
+                onClose={() => {
+                    setShowAsignarMedidorModal(false);
+                    setAfiliadoParaAsignarMedidor(null);
+                }}
+                onSuccess={handleAsignacionMedidorExitosa}
+            />
         </div>
     );
 }

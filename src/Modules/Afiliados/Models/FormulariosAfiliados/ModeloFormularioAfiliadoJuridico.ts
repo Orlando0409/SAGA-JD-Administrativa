@@ -5,7 +5,7 @@ export interface AfiliadoJuridico {
     Correo: string
     Direccion_Exacta?: string
     Planos_Terreno?: File | string;
-    Escritura_Terreno?: File | string;
+    Certificacion_Literal?: File | string;
 }
 
 export const AfiliadoJuridicoInicialState: AfiliadoJuridico = {
@@ -15,7 +15,7 @@ export const AfiliadoJuridicoInicialState: AfiliadoJuridico = {
     Correo: '',
     Direccion_Exacta: '',
     Planos_Terreno: undefined,
-    Escritura_Terreno: undefined,
+    Certificacion_Literal: undefined,
 }
 
 export interface AfiliadoJuridicoFormData {
@@ -25,5 +25,5 @@ export interface AfiliadoJuridicoFormData {
     Correo: string;
     Direccion_Exacta: string;
     Planos_Terreno?: File | string;
-    Escritura_Terreno?: File | string;
+    Certificacion_Literal?: File | string;
 }

@@ -31,13 +31,14 @@ export const useAsignarMedidor = () => {
             queryClient.invalidateQueries({ queryKey: ["medidores-no-instalados"] });
         },
 
-        onError: (error, variables) => {
+        onError: (error: any, variables) => {
             console.error("Error al asignar medidor", error);
             console.error("Variables que fallaron:", variables);
+            const backendMessage = error?.response?.data?.message || error?.message;
             
             showError(
                 'Error al asignar medidor',
-                'No se pudo completar la asignación del medidor. Por favor, intente nuevamente.'
+                backendMessage || 'No se pudo completar la asignación del medidor. Por favor, intente nuevamente.'
             );
         },
 

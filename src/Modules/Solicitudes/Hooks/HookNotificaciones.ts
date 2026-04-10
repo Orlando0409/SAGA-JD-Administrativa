@@ -28,7 +28,6 @@ export const useRefreshNotificaciones = () => {
                 queryClient.invalidateQueries({ queryKey: ['solicitud-desconexion-juridica'] })
             ]);
             
-            console.log('✅ Todas las notificaciones de solicitudes refrescadas');
         } catch (error) {
             console.error(' Error al refrescar notificaciones:', error);
         }
@@ -109,7 +108,7 @@ export const useNotificacionesSolicitudes = () => {
     notificaciones,
     totalPendientes,
     isLoading,
-    refreshNotificaciones, // ✅ Función para refrescar manualmente
+    refreshNotificaciones, // Función para refrescar manualmente
     // Helpers por tipo
     solicitudesFisicasPendientes: notificaciones.filter(n => n.tipo === 'fisica'),
     solicitudesJuridicasPendientes: notificaciones.filter(n => n.tipo === 'juridica'),

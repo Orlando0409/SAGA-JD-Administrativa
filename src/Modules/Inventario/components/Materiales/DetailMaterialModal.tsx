@@ -7,7 +7,6 @@ import {
   getProveedorTipo, 
   getProveedorTipoColorClass 
 } from '../../helper/MaterialesHelpers';
-import { formatDate } from '../../helper/DateFormater';
 
 interface DetailMaterialModalProps {
   material: Material;
@@ -151,7 +150,7 @@ const DetailMaterialModal: React.FC<DetailMaterialModalProps> = ({
                     <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
                       Proveedor
                     </label>
-                    <p className="text-sm text-gray-900 breake-words">{getProveedorNombre(material)}</p>
+                    <p className="text-sm text-gray-900 break-words">{getProveedorNombre(material)}</p>
                   </div>
 
                   <div className="bg-gray-50 p-4 rounded-lg">
@@ -183,21 +182,21 @@ const DetailMaterialModal: React.FC<DetailMaterialModalProps> = ({
                     <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
                       Fecha de Creación
                     </label>
-                    <p className="text-sm font-medium text-gray-900">{material.Fecha_Entrada ? formatDate(material.Fecha_Entrada) : 'N/A'}</p>
+                    <p className="text-sm font-medium text-gray-900">{material.Fecha_Entrada ? new Date(material.Fecha_Entrada).toLocaleString() : 'N/A'}</p>
                   </div>
 
                   <div className="bg-gray-50 p-4 rounded-lg">
                     <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
                       Fecha de Actualización
                     </label>
-                    <p className="text-sm font-medium text-gray-900">{material.Fecha_Actualizacion ? formatDate(material.Fecha_Actualizacion) : 'N/A'}</p>
+                    <p className="text-sm font-medium text-gray-900">{material.Fecha_Actualizacion ? new Date(material.Fecha_Actualizacion).toLocaleString() : 'N/A'}</p>
                   </div>
 
                   <div className="bg-gray-50 p-4 rounded-lg">
                     <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
                       Última Fecha de Baja
                     </label>
-                    <p className="text-sm font-medium text-gray-900">{material.Ultima_Fecha_Baja ? formatDate(material.Ultima_Fecha_Baja) : 'Sin baja'}</p>
+                    <p className="text-sm font-medium text-gray-900">{material.Ultima_Fecha_Baja ? new Date(material.Ultima_Fecha_Baja).toLocaleString() : 'Sin baja'}</p>
                   </div>
 
                   <div className="bg-gray-50 p-4 rounded-lg">
@@ -205,7 +204,7 @@ const DetailMaterialModal: React.FC<DetailMaterialModalProps> = ({
                       Usuario Creador
                     </label>
                     <p className="text-sm font-medium text-gray-900">
-                      {material.Usuario?.Nombre_Usuario || 'N/A'} 
+                      {material.Usuario?.Nombre_Usuario || 'N/A'} ({material.Usuario?.Nombre_Rol || 'N/A'})
                     </p>
                   </div>
                 </div>

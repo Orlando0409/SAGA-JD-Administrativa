@@ -41,42 +41,55 @@ export class ServiceEstadoSolicitudes {
         };
         const baseEndpoint = endpointMap[tipoSolicitud][tipoPersona];
         return `${baseEndpoint}/${solicitudId}/${nuevoEstado}`;
-        // return endpointMap[tipoSolicitud][tipoPersona];
     }
 
 
     static async cambiarEstado(request: CambioEstadoRequest): Promise<void> {
-        const { tipoSolicitud, tipoPersona, solicitudId, nuevoEstado, motivoRechazo } = request;
-
+        
+        const { tipoSolicitud, tipoPersona, solicitudId, nuevoEstado, motivoRechazo, ocupaPagarMedidor, estadoPago } = request;
 
         const url = this.construirEndpoint(tipoSolicitud, tipoPersona, solicitudId, nuevoEstado);
-
-
-        const emoji = tipoPersona === 'fisica' ? '👤' : '🏢';
-        console.log(
-            `🔄 ${emoji} Cambiando estado de solicitud ${tipoSolicitud} (${tipoPersona}) #${solicitudId} → Estado ${nuevoEstado}`
-        );
-        console.log(` URL completa: PATCH ${url}`);
-        console.log(` Datos de la solicitud:`, {
-            tipoSolicitud,
-            tipoPersona,
-            solicitudId,
-            nuevoEstado,
-            ...(motivoRechazo && { motivoRechazo }),
-            url
-        });
-
+        let body: Record<string, any> = {};
         try {
+ 
+            // Enviar datos de pago solo para tipos que soportan cobro en estado 3
+            const tipoSoportaPagoEnEspera =
+                tipoSolicitud === 'afiliacion' ||
+                tipoSolicitud === 'agregar-medidor' ||
+                tipoSolicitud === 'cambio-medidor';
+
+            if (nuevoEstado === 3 && tipoSoportaPagoEnEspera && ocupaPagarMedidor) {
+                body = {
+                    ocupaPago: Boolean(ocupaPagarMedidor.ocupaPago)
+                };
+
+                if (body.ocupaPago) {
+                    if (typeof ocupaPagarMedidor.montoCambio === 'number') {
+                        body.montoCambio = ocupaPagarMedidor.montoCambio;
+                    }
+                    if (ocupaPagarMedidor.motivoCobro) {
+                        body.motivoCobro = ocupaPagarMedidor.motivoCobro;
+                    }
+                }
+            }
 
             // Enviar motivoRechazo solo cuando es un rechazo (estado 5)
-            const body = nuevoEstado === 5 && motivoRechazo
-                ? { motivoRechazo }
-                : {};
+            if (nuevoEstado === 5 && motivoRechazo) {
+                body = { motivoRechazo };
+            }
+
+            // Para completar solicitudes de cambio/agregar medidor, incluir estado de pago seleccionado
+            if (
+                nuevoEstado === 4 &&
+                (tipoSolicitud === 'agregar-medidor' || tipoSolicitud === 'cambio-medidor') &&
+                estadoPago
+            ) {
+                body = { Estado_Pago: estadoPago };
+            }
 
             await apiAuth.patch(url, body);
-            console.log(`✅ Estado actualizado correctamente`);
         } catch (error) {
-            console.error(`❌ Error al cambiar estado:`, error);
+            console.error(`Error al cambiar estado:`, error);
             throw error;
         }
     }

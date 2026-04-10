@@ -52,7 +52,7 @@ export const AfiliadoFisicoSchema = BaseAfiliadoSchema.extend({
     .max(120, 'La edad máxima es 120 años'),
 
   Planos_Terreno: z.union([z.instanceof(File), z.string()]).optional(),
-  Escritura_Terreno: z.union([z.instanceof(File), z.string()]).optional(),
+  Certificacion_Literal: z.union([z.instanceof(File), z.string()]).optional(),
 }).refine((data) => {
   const { Tipo_Identificacion, Identificacion } = data;
 
@@ -103,7 +103,7 @@ export const AfiliadoFisicoEditSchema = BaseAfiliadoSchema.extend({
 
   // Archivos opcionales en edición
   Planos_Terreno: z.union([z.instanceof(File), z.string()]).optional(),
-  Escritura_Terreno: z.union([z.instanceof(File), z.string()]).optional(),
+  Certificacion_Literal: z.union([z.instanceof(File), z.string()]).optional(),
 });
 
 export type AfiliadoFisico = z.infer<typeof AfiliadoFisicoSchema>

@@ -6,7 +6,9 @@ import type {
     SolicitudDesconexionFisica,
     SolicitudCambioMedidorFisica,
     SolicitudAsociadoFisica,
-    SolicitudAgregarMedidorFisica
+    SolicitudAgregarMedidorFisica,
+    CreateSolicitudAgregarMedidorFisicaDTO,
+    CreateSolicitudAsociadoFisicaDTO
 } from "../Models/ModelosFisicas";
 
 // GET - Obtener todas las solicitudes físicas
@@ -174,10 +176,30 @@ export async function getSolicitudAgregarMedidorFisicaById(id: number): Promise<
 }
 
 export async function createSolicitudAgregarMedidorFisica(
-    data: Omit<SolicitudAgregarMedidorFisica, 'Id_Solicitud' | 'Estado' | 'Fecha_Creacion' | 'Fecha_Actualizacion'>
+    data: CreateSolicitudAgregarMedidorFisicaDTO
 ): Promise<SolicitudAgregarMedidorFisica> {
     try {
-        const response = await apiAuth.post("/solicitudes-fisicas/create/agregar-medidor", data);
+        const formData = new FormData();
+
+        formData.append('Tipo_Identificacion', data.Tipo_Identificacion);
+        formData.append('Identificacion', data.Identificacion);
+        formData.append('Nombre', data.Nombre);
+        formData.append('Apellido1', data.Apellido1);
+        if (data.Apellido2) formData.append('Apellido2', data.Apellido2);
+        formData.append('Correo', data.Correo);
+        formData.append('Numero_Telefono', data.Numero_Telefono);
+        formData.append('Direccion_Exacta', data.Direccion_Exacta);
+        formData.append('Planos_Terreno', data.Planos_Terreno);
+        formData.append('Certificacion_Literal', data.Certificacion_Literal);
+        if (data.Id_Nuevo_Medidor != null) {
+            formData.append('Id_Nuevo_Medidor', String(data.Id_Nuevo_Medidor));
+        }
+
+        const response = await apiAuth.post("/solicitudes-fisicas/create/agregar-medidor", formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        });
         return response.data;
     } catch (error) {
         console.error(' Error al crear solicitud de agregar medidor física:', error);
@@ -213,6 +235,37 @@ export async function cambiarEstadoAgregarMedidorFisica(
         );
     } catch (error) {
         console.error(` Error al cambiar estado de agregar medidor física #${idSolicitud}:`, error);
+        throw error;
+    }
+}
+
+export async function createSolicitudAsociadoFisica(
+    data: CreateSolicitudAsociadoFisicaDTO
+): Promise<SolicitudAsociadoFisica> {
+    try {
+        const formData = new FormData();
+
+        formData.append('Tipo_Identificacion', data.Tipo_Identificacion);
+        formData.append('Identificacion', data.Identificacion);
+        formData.append('Nombre', data.Nombre);
+        formData.append('Apellido1', data.Apellido1);
+        if (data.Apellido2) formData.append('Apellido2', data.Apellido2);
+        formData.append('Correo', data.Correo);
+        formData.append('Numero_Telefono', data.Numero_Telefono);
+        formData.append('Direccion_Exacta', data.Direccion_Exacta);
+        if (data.Motivo_Solicitud) formData.append('Motivo_Solicitud', data.Motivo_Solicitud);
+        formData.append('Planos_Terreno', data.Planos_Terreno);
+        formData.append('Escrituras_Terreno', data.Escrituras_Terreno);
+
+        const response = await apiAuth.post('/solicitudes-fisicas/create/asociado', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
+
+        return response.data;
+    } catch (error) {
+        console.error(' Error al crear solicitud de asociado física:', error);
         throw error;
     }
 }

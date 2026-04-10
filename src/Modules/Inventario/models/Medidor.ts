@@ -3,13 +3,21 @@ export interface EstadoMedidor {
   Nombre_Estado_Medidor: string;
 }
 
+export type EstadoPagoMedidorNombre = 'Libre' | 'Pagado' | 'Pendiente';
+
+export interface EstadoPagoMedidor {
+  Id_Estado_Pago?: number;
+  Nombre_Estado_Pago: EstadoPagoMedidorNombre;
+}
+
 export interface Medidor {
   Id_Medidor: number;
   Numero_Medidor: number;
   Fecha_Creacion: string | Date;
   Fecha_Actualizacion: string | Date;
   Estado_Medidor: EstadoMedidor;
-  Escritura_Terreno?: string | null;
+  Estado_Pago?: EstadoPagoMedidor | EstadoPagoMedidorNombre | null;
+  Certificacion_Literal?: string | null;
   Planos_Terreno?: string | null;
   Afiliado?: {
     Id_Afiliado: number;
