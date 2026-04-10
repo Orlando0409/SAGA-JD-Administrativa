@@ -36,9 +36,9 @@ export default function FAQForm({ onClose }: Readonly<FAQFormProps>) {
 
         // Validar formulario completo
         try {
-            CreateFAQSchema.parse({ 
-                Pregunta: field === "Pregunta" ? value.trim() : pregunta.trim(), 
-                Respuesta: field === "Respuesta" ? value.trim() : respuesta.trim() 
+            CreateFAQSchema.parse({
+                Pregunta: field === "Pregunta" ? value.trim() : pregunta.trim(),
+                Respuesta: field === "Respuesta" ? value.trim() : respuesta.trim()
             });
             setIsValid(true);
         } catch {
@@ -128,8 +128,7 @@ export default function FAQForm({ onClose }: Readonly<FAQFormProps>) {
                     {/* Nota informativa */}
                     <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
                         <p className="text-xs text-blue-700">
-                            <strong>Nota:</strong> Las preguntas creadas se mostrarán como
-                            visibles automáticamente en la sección pública.
+                            <strong>Nota:</strong> Las preguntas creadas se mostrarán como visibles automáticamente en la sección pública.
                         </p>
                     </div>
 
