@@ -6,8 +6,8 @@
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "module": "ESNext",
     "skipLibCheck": true,
-     "paths": {
-      "src/*": ["./src/*"]
+    "paths": {
+      "@/*": ["./src/*"]
     },
 
     /* Bundler mode */
