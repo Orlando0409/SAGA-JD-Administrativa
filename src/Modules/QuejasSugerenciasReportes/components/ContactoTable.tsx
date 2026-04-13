@@ -21,7 +21,7 @@ import {
   MdKeyboardDoubleArrowRight
 } from 'react-icons/md';
 
-import { useQuejas, useSugerencias, useReportes, useUpdateSugerenciaEstado, useUpdateQuejaEstado, useUpdateReporteEstado } from '../hook/HookContacto';
+import { useQuejas, useQuejasArchivadas, useSugerencias, useSugerenciasArchivadas, useReportes, useReportesArchivados, useUpdateSugerenciaEstado, useUpdateQuejaEstado, useUpdateReporteEstado } from '../hook/HookContacto';
 import type { Queja } from '../models/Quejas';
 import type { Sugerencia } from '../models/Sugerencias';
 import type { Reporte } from '../models/Reportes';
@@ -54,6 +54,15 @@ const ContactoTable = () => {
   const { data: quejas = [], isLoading: loadingQuejas, refetch: refetchQuejas } = useQuejas();
   const { data: sugerencias = [], isLoading: loadingSugerencias, refetch: refetchSugerencias } = useSugerencias();
   const { data: reportes = [], isLoading: loadingReportes, refetch: refetchReportes } = useReportes();
+  const shouldIncludeArchived = useMemo(() => {
+    const estadoArchivado = appliedFilters.estado === 'Archivado';
+    const busquedaArchivado = globalFilter.trim().toLowerCase().includes('archiv');
+
+    return estadoArchivado || busquedaArchivado;
+  }, [appliedFilters.estado, globalFilter]);
+  const { data: quejasArchivadas = [], isLoading: loadingQuejasArchivadas } = useQuejasArchivadas(shouldIncludeArchived);
+  const { data: sugerenciasArchivadas = [], isLoading: loadingSugerenciasArchivadas } = useSugerenciasArchivadas(shouldIncludeArchived);
+  const { data: reportesArchivados = [], isLoading: loadingReportesArchivados } = useReportesArchivados(shouldIncludeArchived);
   const actualizarEstadoQuejaMutation = useUpdateQuejaEstado();
   const actualizarEstadoSugerenciaMutation = useUpdateSugerenciaEstado();
   const actualizarEstadoReporteMutation = useUpdateReporteEstado();
@@ -64,7 +73,7 @@ const ContactoTable = () => {
   const hasEditPermission = canEdit('contacto');
   const hasViewPermission = canView('contacto');
 
-  const isLoading = loadingQuejas || loadingSugerencias || loadingReportes;
+  const isLoading = loadingQuejas || loadingSugerencias || loadingReportes || loadingQuejasArchivadas || loadingSugerenciasArchivadas || loadingReportesArchivados;
 
   useEffect(() => {
     refetchQuejas();
@@ -76,58 +85,73 @@ const ContactoTable = () => {
   const unifiedData = useMemo((): ContactoItem[] => {
     const data: ContactoItem[] = [];
 
-    // Agregar quejas
+    const mapQueja = (queja: Queja): ContactoItem => ({
+      id: queja.Id_Queja,
+      tipo: 'Queja',
+      nombre: queja.Nombre,
+      primerApellido: queja.Primer_Apellido,
+      segundoApellido: queja.Segundo_Apellido,
+      mensaje: queja.Descripcion,
+      fechaCreacion: queja.Fecha_Queja,
+      correo: queja.Correo,
+      estado: queja.Estado.Estado_Queja,
+      adjunto: queja.Adjunto || null,
+    });
+
+    const mapSugerencia = (sugerencia: Sugerencia): ContactoItem => ({
+      id: sugerencia.Id_Sugerencia,
+      tipo: 'Sugerencia',
+      mensaje: sugerencia.Mensaje,
+      fechaCreacion: sugerencia.Fecha_Sugerencia,
+      correo: sugerencia.Correo,
+      estado: sugerencia.Estado.Estado_Sugerencia,
+      adjunto: sugerencia.Adjunto || null,
+    });
+
+    const mapReporte = (reporte: Reporte): ContactoItem => ({
+      id: reporte.Id_Reporte,
+      tipo: 'Reporte',
+      nombre: reporte.Nombre,
+      primerApellido: reporte.Primer_Apellido,
+      segundoApellido: reporte.Segundo_Apellido,
+      ubicacion: reporte.Ubicacion,
+      mensaje: reporte.Descripcion || '',
+      fechaCreacion: reporte.Fecha_Reporte,
+      correo: reporte.Correo,
+      estado: reporte.Estado.Estado_Reporte,
+      adjunto: reporte.Adjunto || null,
+    });
+
     quejas?.forEach((queja: Queja) => {
-      data.push({
-        id: queja.Id_Queja,
-        tipo: 'Queja',
-        nombre: queja.Nombre,
-        primerApellido: queja.Primer_Apellido,
-        segundoApellido: queja.Segundo_Apellido,
-        mensaje: queja.Descripcion,
-        fechaCreacion: queja.Fecha_Queja,
-        correo: queja.Correo,
-        estado: queja.Estado.Estado_Queja,
-        adjunto: queja.Adjunto || null,
-      });
+      if (queja.Estado.Estado_Queja !== 'Archivado') {
+        data.push(mapQueja(queja));
+      }
     });
 
-    // Agregar sugerencias
     sugerencias?.forEach((sugerencia: Sugerencia) => {
-      data.push({
-        id: sugerencia.Id_Sugerencia,
-        tipo: 'Sugerencia',
-        mensaje: sugerencia.Mensaje,
-        fechaCreacion: sugerencia.Fecha_Sugerencia,
-        correo: sugerencia.Correo,
-        estado: sugerencia.Estado.Estado_Sugerencia,
-        adjunto: sugerencia.Adjunto || null,
-      });
+      if (sugerencia.Estado.Estado_Sugerencia !== 'Archivado') {
+        data.push(mapSugerencia(sugerencia));
+      }
     });
 
-    // Agregar reportes
     reportes?.forEach((reporte: Reporte) => {
-      data.push({
-        id: reporte.Id_Reporte,
-        tipo: 'Reporte',
-        nombre: reporte.Nombre,
-        primerApellido: reporte.Primer_Apellido,
-        segundoApellido: reporte.Segundo_Apellido,
-        ubicacion: reporte.Ubicacion,
-        mensaje: reporte.Descripcion || '',
-        fechaCreacion: reporte.Fecha_Reporte,
-        correo: reporte.Correo,
-        estado: reporte.Estado.Estado_Reporte,
-        adjunto: reporte.Adjunto || null,
-      });
+      if (reporte.Estado.Estado_Reporte !== 'Archivado') {
+        data.push(mapReporte(reporte));
+      }
     });
+
+    if (shouldIncludeArchived) {
+      quejasArchivadas?.forEach((queja: Queja) => data.push(mapQueja(queja)));
+      sugerenciasArchivadas?.forEach((sugerencia: Sugerencia) => data.push(mapSugerencia(sugerencia)));
+      reportesArchivados?.forEach((reporte: Reporte) => data.push(mapReporte(reporte)));
+    }
 
     return data.sort((a, b) => {
       const dateA = new Date(a.fechaCreacion || 0);
       const dateB = new Date(b.fechaCreacion || 0);
       return dateB.getTime() - dateA.getTime();
     });
-  }, [quejas, sugerencias, reportes]);
+  }, [quejas, sugerencias, reportes, quejasArchivadas, sugerenciasArchivadas, reportesArchivados, shouldIncludeArchived]);
 
   const handleApplyFilters = (filters: ContactoFilterOptions) => {
     setAppliedFilters(filters);
@@ -144,6 +168,27 @@ const ContactoTable = () => {
   // Aplicar filtros avanzados
   const filteredData = useMemo(() => {
     let filtered = [...unifiedData];
+    const terminoBusqueda = globalFilter.trim().toLowerCase();
+
+    if (terminoBusqueda) {
+      filtered = filtered.filter((item) => {
+        const nombreCompleto = [item.nombre, item.primerApellido, item.segundoApellido]
+          .filter(Boolean)
+          .join(' ')
+          .toLowerCase();
+
+        return [
+          item.tipo,
+          nombreCompleto,
+          item.mensaje,
+          item.correo,
+          item.estado,
+          item.ubicacion,
+        ]
+          .filter(Boolean)
+          .some((value) => value?.toString().toLowerCase().includes(terminoBusqueda));
+      });
+    }
 
     // Filtrar por tipo (desde el filtro inline)
     if (appliedFilters.tipo) {
@@ -180,7 +225,7 @@ const ContactoTable = () => {
 
 
     return filtered;
-  }, [unifiedData, appliedFilters]);
+  }, [unifiedData, appliedFilters, globalFilter]);
 
   const columnHelper = createColumnHelper<ContactoItem>();
 
