@@ -3,6 +3,8 @@ import { useState } from 'react';
 import type { SolicitudFisica } from '../Models/ModelosFisicas';
 import type { SolicitudJuridica } from '../Models/ModelosJuridicos';
 import { useAlerts } from '@/Modules/Global/context/AlertContext';
+import { updateSolicitudFisicaByTipo } from '../Service/SolicitudesFisicas';
+import { updateSolicitudJuridicaByTipo } from '../Service/SolicitudesJuridicas';
 
 // Tipo unificado para identificar qué estamos editando
 type SolicitudParaEditar = {
@@ -14,6 +16,7 @@ interface EditSolicitudModalProps {
     isOpen: boolean;
     onClose: () => void;
     solicitud: SolicitudParaEditar;
+    onSave: (solicitudActualizada: SolicitudParaEditar & { id: number | string }) => void;
 }
 
 // Constantes para límites de caracteres
@@ -24,9 +27,11 @@ const TELEFONO_MAX_LENGTH = 15;
 const CEDULA_MAX_LENGTH = 20;
 const DIRECCION_MAX_LENGTH = 200;
 
-const EditSolicitudModal: React.FC<EditSolicitudModalProps> = ({ isOpen, onClose, solicitud }) => {
+const EditSolicitudModal: React.FC<EditSolicitudModalProps> = ({ isOpen, onClose, solicitud, onSave }) => {
     const { showSuccess, showError } = useAlerts();
+    const esSolicitudAsociado = (solicitud.datos as any)?.Tipo_Solicitud === 'Asociado';
     const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+    const [isSaving, setIsSaving] = useState(false);
     const [fieldCharCounts, setFieldCharCounts] = useState({
         nombre: 0,
         apellido1: 0,
@@ -86,14 +91,73 @@ const EditSolicitudModal: React.FC<EditSolicitudModalProps> = ({ isOpen, onClose
         defaultValues: getDefaultValues(),
         onSubmit: async ({ value }) => {
             setFormErrors({});
+            setIsSaving(true);
 
             try {
-                console.log('Actualizar solicitud:', solicitud.tipo, value);
+                const datosConId = solicitud.datos as any;
+                const solicitudId = datosConId.Id_Solicitud || datosConId.id || datosConId.Id || datosConId.ID;
+
+                if (!solicitudId) {
+                    throw new Error('No se encontró el ID de la solicitud');
+                }
+
+                const response = solicitud.tipo === 'solicitud-fisica'
+                    ? await updateSolicitudFisicaByTipo(solicitudId, (solicitud.datos as any).Tipo_Solicitud, {
+                        Nombre: (value as any).Nombre,
+                        Apellido1: (value as any).Apellido1,
+                        Apellido2: (value as any).Apellido2,
+                        Numero_Telefono: (value as any).Numero_Telefono,
+                        Correo: (value as any).Correo,
+                        ...(!esSolicitudAsociado && { Direccion_Exacta: (value as any).Direccion_Exacta }),
+                    })
+                    : await updateSolicitudJuridicaByTipo(solicitudId, (solicitud.datos as any).Tipo_Solicitud, {
+                        Razon_Social: (value as any).Razon_Social,
+                        Cedula_Juridica: (value as any).Cedula_Juridica,
+                        Numero_Telefono: (value as any).Numero_Telefono,
+                        Correo: (value as any).Correo,
+                        ...(!esSolicitudAsociado && { Direccion_Exacta: (value as any).Direccion_Exacta }),
+                    });
+
+                const datosActualizados = solicitud.tipo === 'solicitud-fisica'
+                    ? {
+                        ...(solicitud.datos as SolicitudFisica),
+                        Nombre: (value as any).Nombre,
+                        Apellido1: (value as any).Apellido1,
+                        Apellido2: (value as any).Apellido2,
+                        Identificacion: (value as any).Cedula,
+                        Numero_Telefono: (value as any).Numero_Telefono,
+                        Correo: (value as any).Correo,
+                        ...(!esSolicitudAsociado && { Direccion_Exacta: (value as any).Direccion_Exacta }),
+                        ...(!esSolicitudAsociado && { Edad: (value as any).Edad }),
+                        Tipo_Solicitud: (value as any).Tipo_Solicitud,
+                    }
+                    : {
+                        ...(solicitud.datos as SolicitudJuridica),
+                        Razon_Social: (value as any).Razon_Social,
+                        Cedula_Juridica: (value as any).Cedula_Juridica,
+                        Numero_Telefono: (value as any).Numero_Telefono,
+                        Correo: (value as any).Correo,
+                        ...(!esSolicitudAsociado && { Direccion_Exacta: (value as any).Direccion_Exacta }),
+                        Tipo_Solicitud: (value as any).Tipo_Solicitud,
+                    };
+
+                const datosActualizadosCombinados = response && typeof response === 'object'
+                    ? { ...datosActualizados, ...response }
+                    : datosActualizados;
+
+                onSave({
+                    id: solicitudId,
+                    tipo: solicitud.tipo,
+                    datos: datosActualizadosCombinados,
+                });
+
                 showSuccess(`${solicitud.tipo === 'solicitud-fisica' ? 'Solicitud física' : 'Solicitud jurídica'} actualizada exitosamente`);
                 onClose();
             } catch (error) {
                 console.error('Error actualizando:', error);
                 showError('Error al actualizar la solicitud');
+            } finally {
+                setIsSaving(false);
             }
         },
     });
@@ -168,12 +232,14 @@ const EditSolicitudModal: React.FC<EditSolicitudModalProps> = ({ isOpen, onClose
                                     <select
                                         value={field.state.value}
                                         onChange={(e) => field.handleChange(e.target.value as any)}
+                                        disabled
                                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                     >
                                         <option value="Afiliacion">Afiliación</option>
                                         <option value="Desconexion">Desconexión</option>
                                         <option value="Cambio de Medidor">Cambio de Medidor</option>
                                         <option value="Asociado">Asociado</option>
+                                        <option value="Agregar Medidor">Agregar Medidor</option>
                                     </select>
                                 </div>
                             )}
@@ -241,7 +307,7 @@ const EditSolicitudModal: React.FC<EditSolicitudModalProps> = ({ isOpen, onClose
                                     </form.Field>
                                 </div>
 
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className={`grid grid-cols-1 ${esSolicitudAsociado ? 'md:grid-cols-1' : 'md:grid-cols-2'} gap-4`}>
                                     <form.Field name="Cedula">
                                         {(field) => (
                                             <div>
@@ -261,24 +327,26 @@ const EditSolicitudModal: React.FC<EditSolicitudModalProps> = ({ isOpen, onClose
                                         )}
                                     </form.Field>
 
-                                    <form.Field name="Edad">
-                                        {(field) => (
-                                            <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                    Edad *
-                                                </label>
-                                                <input
-                                                    type="number"
-                                                    value={field.state.value}
-                                                    onChange={(e) => field.handleChange(parseInt(e.target.value) || 0)}
-                                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                                    placeholder="25"
-                                                    min="0"
-                                                    max="120"
-                                                />
-                                            </div>
-                                        )}
-                                    </form.Field>
+                                    {!esSolicitudAsociado && (
+                                        <form.Field name="Edad">
+                                            {(field) => (
+                                                <div>
+                                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                        Edad *
+                                                    </label>
+                                                    <input
+                                                        type="number"
+                                                        value={field.state.value}
+                                                        onChange={(e) => field.handleChange(parseInt(e.target.value) || 0)}
+                                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                        placeholder="25"
+                                                        min="0"
+                                                        max="120"
+                                                    />
+                                                </div>
+                                            )}
+                                        </form.Field>
+                                    )}
                                 </div>
                             </>
                         )}
@@ -367,24 +435,26 @@ const EditSolicitudModal: React.FC<EditSolicitudModalProps> = ({ isOpen, onClose
                             </form.Field>
                         </div>
 
-                        <form.Field name="Direccion_Exacta">
-                            {(field) => (
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                                        Dirección Exacta
-                                    </label>
-                                    <textarea
-                                        value={field.state.value}
-                                        onChange={createInputHandler('direccion', field.handleChange, DIRECCION_MAX_LENGTH)}
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                        placeholder="Dirección exacta de la propiedad"
-                                        rows={3}
-                                        maxLength={DIRECCION_MAX_LENGTH}
-                                    />
-                                    {renderCharCounter(fieldCharCounts.direccion, DIRECCION_MAX_LENGTH, false)}
-                                </div>
-                            )}
-                        </form.Field>
+                        {!esSolicitudAsociado && (
+                            <form.Field name="Direccion_Exacta">
+                                {(field) => (
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            Dirección Exacta
+                                        </label>
+                                        <textarea
+                                            value={field.state.value}
+                                            onChange={createInputHandler('direccion', field.handleChange, DIRECCION_MAX_LENGTH)}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                            placeholder="Dirección exacta de la propiedad"
+                                            rows={3}
+                                            maxLength={DIRECCION_MAX_LENGTH}
+                                        />
+                                        {renderCharCounter(fieldCharCounts.direccion, DIRECCION_MAX_LENGTH, false)}
+                                    </div>
+                                )}
+                            </form.Field>
+                        )}
                     </form>
                 </div>
 
@@ -393,9 +463,10 @@ const EditSolicitudModal: React.FC<EditSolicitudModalProps> = ({ isOpen, onClose
                     <button
                         type="submit"
                         form="edit-solicitud-form"
-                        className="px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
+                        disabled={isSaving}
+                        className="px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                     >
-                        Actualizar Solicitud
+                        {isSaving ? 'Actualizando...' : 'Actualizar Solicitud'}
                     </button>
                     <button
                         type="button"
