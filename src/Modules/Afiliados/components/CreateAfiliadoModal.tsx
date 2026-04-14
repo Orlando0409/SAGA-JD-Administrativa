@@ -10,6 +10,7 @@ import { useCedulaLookup } from '../Hook/useCedulaLookup';
 import { User, Building2, X, Gauge, PlusCircle, Link2, FileText } from 'lucide-react';
 import { createMedidor, asignarMedidorConArchivos } from '@/Modules/Inventario/service/MedidorServices';
 import MedidorSelectorModal, { type MedidorPendiente } from './MedidorSelectorModal';
+import { AfiliadoFisicoSchema } from '../Schemas/AfiliadoFisico';
 
 interface CreateModalProps {
     isOpen: boolean;
@@ -339,7 +340,6 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                     Direccion_Exacta: value.Direccion_Exacta || '',
                     Edad: value.Edad,
                 };
-                const { AfiliadoFisicoSchema } = await import('../Schemas/AfiliadoFisico');
                 const validation = AfiliadoFisicoSchema.safeParse(fisicoData);
                 if (!validation.success) {
                     const fieldErrors: Record<string, string> = {};

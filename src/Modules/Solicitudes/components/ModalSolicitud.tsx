@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, User, Check, XCircle } from 'lucide-react';
 import {
     AlertDialog,
@@ -42,8 +42,6 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
     const [showCompletarDialog, setShowCompletarDialog] = useState(false);
     const [showRechazarDialog, setShowRechazarDialog] = useState(false);
     const [motivoRechazo, setMotivoRechazo] = useState('');
-    const hasChangedToRevision = useRef(false);
-
     // Estados para el flujo de medidor dañado
     const [showDialogMedidorDanado, setShowDialogMedidorDanado] = useState(false);
     const [showDialogMontoCambio, setShowDialogMontoCambio] = useState(false);
