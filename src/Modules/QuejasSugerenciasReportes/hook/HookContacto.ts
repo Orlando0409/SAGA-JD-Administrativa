@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { responderQueja, responderSugerencia, responderReporte, obtenerQuejas, obtenerSugerencias, obtenerReportes, actualizarEstadoReporte, actualizarEstadoSugerencia, actualizarEstadoQueja } from '../service/ContactoService';
+import { responderQueja, responderSugerencia, responderReporte, obtenerQuejas, obtenerQuejasArchivadas, obtenerSugerencias, obtenerSugerenciasArchivadas, obtenerReportes, obtenerReportesArchivados, actualizarEstadoReporte, actualizarEstadoSugerencia, actualizarEstadoQueja } from '../service/ContactoService';
 import { useAlerts } from '@/Modules/Global/context/AlertContext';
 import type { ContactoItem } from '../types/ContactoTypes';
 
@@ -12,6 +12,15 @@ export const useQuejas = () => {
   });
 };
 
+export const useQuejasArchivadas = (enabled = false) => {
+  return useQuery({
+    queryKey: ['quejas-archivadas'],
+    queryFn: () => obtenerQuejasArchivadas(),
+    staleTime: 5 * 60 * 1000,
+    enabled,
+  });
+};
+
 export const useSugerencias = () => {
   return useQuery({
     queryKey: ['sugerencias'],
@@ -20,11 +29,29 @@ export const useSugerencias = () => {
   });
 };
 
+export const useSugerenciasArchivadas = (enabled = false) => {
+  return useQuery({
+    queryKey: ['sugerencias-archivadas'],
+    queryFn: () => obtenerSugerenciasArchivadas(),
+    staleTime: 5 * 60 * 1000,
+    enabled,
+  });
+};
+
 export const useReportes = () => {
   return useQuery({
     queryKey: ['reportes'],
     queryFn: () => obtenerReportes(),
     staleTime: 5 * 60 * 1000,
+  });
+};
+
+export const useReportesArchivados = (enabled = false) => {
+  return useQuery({
+    queryKey: ['reportes-archivados'],
+    queryFn: () => obtenerReportesArchivados(),
+    staleTime: 5 * 60 * 1000,
+    enabled,
   });
 };
 
@@ -37,6 +64,7 @@ export const useUpdateReporteEstado = () => {
       actualizarEstadoReporte(id, idEstado),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['reportes'] });
+      queryClient.invalidateQueries({ queryKey: ['reportes-archivados'] });
     },
   });
 };
@@ -48,6 +76,7 @@ export const useUpdateSugerenciaEstado = () => {
       actualizarEstadoSugerencia(id, idEstado),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['sugerencias'] });
+      queryClient.invalidateQueries({ queryKey: ['sugerencias-archivadas'] });
     },
   });
 };
@@ -60,6 +89,7 @@ export const useUpdateQuejaEstado = () => {
       actualizarEstadoQueja(id, idEstado),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['quejas'] });
+      queryClient.invalidateQueries({ queryKey: ['quejas-archivadas'] });
     },
   });
 };

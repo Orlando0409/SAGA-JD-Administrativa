@@ -19,13 +19,28 @@ export const obtenerQuejas = async () => {
     return response.data;
 }
 
+export const obtenerQuejasArchivadas = async () => {
+    const response = await axiosPrivate.get('/quejas/archivados');
+    return response.data;
+}
+
 export const obtenerSugerencias = async () => {
     const response = await axiosPrivate.get('/sugerencias');
     return response.data;
 }
 
+export const obtenerSugerenciasArchivadas = async () => {
+    const response = await axiosPrivate.get('/sugerencias/archivados');
+    return response.data;
+}
+
 export const obtenerReportes = async () => {
     const response = await axiosPrivate.get('/reportes');
+    return response.data;
+}
+
+export const obtenerReportesArchivados = async () => {
+    const response = await axiosPrivate.get('/reportes/archivados');
     return response.data;
 }
 export const actualizarEstadoReporte = async (idReporte: number, Id_Estado_Reporte: number) => {

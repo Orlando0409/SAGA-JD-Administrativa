@@ -10,6 +10,7 @@ import type {
     CreateSolicitudAgregarMedidorJuridicaDTO,
     CreateSolicitudAsociadoJuridicaDTO
 } from "../Models/ModelosJuridicos";
+import { toTipoSolicitudSlug } from "../utils/tipoSolicitud";
 
 export async function getSolicitudesJuridicas(): Promise<SolicitudJuridica[]> {
     try {
@@ -54,7 +55,7 @@ export async function getSolicitudesJuridicas(): Promise<SolicitudJuridica[]> {
             const tiposSolicitud = [
                 { key: 'Afiliacion', tipo: 'Afiliacion' },
                 { key: 'Asociado', tipo: 'Asociado' },
-                { key: 'Cambio De Medidor', tipo: 'Cambio de Medidor' },  
+                { key: 'Cambio De Medidor', tipo: 'Cambio de Medidor' },
                 { key: 'Desconexion', tipo: 'Desconexion' },
                 { key: 'Agregar Medidor', tipo: 'Agregar Medidor' }
             ];
@@ -258,6 +259,25 @@ export async function createSolicitudAsociadoJuridica(
         return response.data;
     } catch (error) {
         console.error(' Error al crear solicitud de asociado jurídica:', error);
+        throw error;
+    }
+}
+
+export async function updateSolicitudJuridicaByTipo(
+    id: number,
+    tipoSolicitud: string,
+    data: Record<string, unknown>
+): Promise<SolicitudJuridica> {
+    try {
+        const tipoSolicitudSlug = toTipoSolicitudSlug(tipoSolicitud);
+
+        const response = await apiAuth.put(
+            `/solicitudes-juridicas/update/${tipoSolicitudSlug}/${id}`,
+            data
+        );
+        return response.data;
+    } catch (error) {
+        console.error(` Error al actualizar solicitud jurídica #${id}:`, error);
         throw error;
     }
 }
