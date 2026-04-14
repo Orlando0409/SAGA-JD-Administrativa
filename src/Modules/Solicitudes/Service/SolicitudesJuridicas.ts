@@ -55,7 +55,7 @@ export async function getSolicitudesJuridicas(): Promise<SolicitudJuridica[]> {
             const tiposSolicitud = [
                 { key: 'Afiliacion', tipo: 'Afiliacion' },
                 { key: 'Asociado', tipo: 'Asociado' },
-                { key: 'Cambio De Medidor', tipo: 'Cambio de Medidor' },  
+                { key: 'Cambio De Medidor', tipo: 'Cambio de Medidor' },
                 { key: 'Desconexion', tipo: 'Desconexion' },
                 { key: 'Agregar Medidor', tipo: 'Agregar Medidor' }
             ];
@@ -270,6 +270,7 @@ export async function updateSolicitudJuridicaByTipo(
 ): Promise<SolicitudJuridica> {
     try {
         const tipoSolicitudSlug = toTipoSolicitudSlug(tipoSolicitud);
+
         const response = await apiAuth.put(
             `/solicitudes-juridicas/update/${tipoSolicitudSlug}/${id}`,
             data

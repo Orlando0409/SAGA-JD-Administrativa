@@ -30,6 +30,8 @@ const DIRECCION_MAX_LENGTH = 200;
 const EditSolicitudModal: React.FC<EditSolicitudModalProps> = ({ isOpen, onClose, solicitud, onSave }) => {
     const { showSuccess, showError } = useAlerts();
     const esSolicitudAsociado = (solicitud.datos as any)?.Tipo_Solicitud === 'Asociado';
+    const esSolicitudAgregarMedidor = (solicitud.datos as any)?.Tipo_Solicitud === 'Agregar Medidor';
+    const bloquearCedulaJuridica = solicitud.tipo === 'solicitud-juridica' && (esSolicitudAsociado || esSolicitudAgregarMedidor);
     const [formErrors, setFormErrors] = useState<Record<string, string>>({});
     const [isSaving, setIsSaving] = useState(false);
     const [fieldCharCounts, setFieldCharCounts] = useState({
@@ -112,7 +114,7 @@ const EditSolicitudModal: React.FC<EditSolicitudModalProps> = ({ isOpen, onClose
                     })
                     : await updateSolicitudJuridicaByTipo(solicitudId, (solicitud.datos as any).Tipo_Solicitud, {
                         Razon_Social: (value as any).Razon_Social,
-                        Cedula_Juridica: (value as any).Cedula_Juridica,
+                        ...(!bloquearCedulaJuridica && { Cedula_Juridica: (value as any).Cedula_Juridica }),
                         Numero_Telefono: (value as any).Numero_Telefono,
                         Correo: (value as any).Correo,
                         ...(!esSolicitudAsociado && { Direccion_Exacta: (value as any).Direccion_Exacta }),
@@ -134,7 +136,7 @@ const EditSolicitudModal: React.FC<EditSolicitudModalProps> = ({ isOpen, onClose
                     : {
                         ...(solicitud.datos as SolicitudJuridica),
                         Razon_Social: (value as any).Razon_Social,
-                        Cedula_Juridica: (value as any).Cedula_Juridica,
+                        ...(!bloquearCedulaJuridica && { Cedula_Juridica: (value as any).Cedula_Juridica }),
                         Numero_Telefono: (value as any).Numero_Telefono,
                         Correo: (value as any).Correo,
                         ...(!esSolicitudAsociado && { Direccion_Exacta: (value as any).Direccion_Exacta }),
@@ -383,6 +385,7 @@ const EditSolicitudModal: React.FC<EditSolicitudModalProps> = ({ isOpen, onClose
                                                 type="text"
                                                 value={field.state.value}
                                                 onChange={createInputHandler('cedula', field.handleChange, CEDULA_MAX_LENGTH)}
+                                                disabled={bloquearCedulaJuridica}
                                                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                                 placeholder="3-101-123456"
                                                 maxLength={CEDULA_MAX_LENGTH}
