@@ -1,5 +1,5 @@
 import ResponderModal from './ResponderModal';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import {
   createColumnHelper,
   flexRender,
@@ -21,7 +21,7 @@ import {
   MdKeyboardDoubleArrowRight
 } from 'react-icons/md';
 
-import { useQuejas, useSugerencias, useReportes, useUpdateSugerenciaEstado, useUpdateQuejaEstado, useUpdateReporteEstado } from '../hook/HookContacto';
+import { useQuejas, useQuejasArchivadas, useSugerencias, useSugerenciasArchivadas, useReportes, useReportesArchivados, useUpdateSugerenciaEstado, useUpdateQuejaEstado, useUpdateReporteEstado } from '../hook/HookContacto';
 import type { Queja } from '../models/Quejas';
 import type { Sugerencia } from '../models/Sugerencias';
 import type { Reporte } from '../models/Reportes';
@@ -51,9 +51,13 @@ const ContactoTable = () => {
     pageIndex: 0,
   });
 
-  const { data: quejas = [], isLoading: loadingQuejas, refetch: refetchQuejas } = useQuejas();
-  const { data: sugerencias = [], isLoading: loadingSugerencias, refetch: refetchSugerencias } = useSugerencias();
-  const { data: reportes = [], isLoading: loadingReportes, refetch: refetchReportes } = useReportes();
+  const { data: quejas = [], isLoading: loadingQuejas } = useQuejas();
+  const { data: sugerencias = [], isLoading: loadingSugerencias } = useSugerencias();
+  const { data: reportes = [], isLoading: loadingReportes } = useReportes();
+  const shouldIncludeArchived = useMemo(() => appliedFilters.estado === 'Archivado', [appliedFilters.estado]);
+  const { data: quejasArchivadas = [], isLoading: loadingQuejasArchivadas } = useQuejasArchivadas(shouldIncludeArchived);
+  const { data: sugerenciasArchivadas = [], isLoading: loadingSugerenciasArchivadas } = useSugerenciasArchivadas(shouldIncludeArchived);
+  const { data: reportesArchivados = [], isLoading: loadingReportesArchivados } = useReportesArchivados(shouldIncludeArchived);
   const actualizarEstadoQuejaMutation = useUpdateQuejaEstado();
   const actualizarEstadoSugerenciaMutation = useUpdateSugerenciaEstado();
   const actualizarEstadoReporteMutation = useUpdateReporteEstado();
@@ -64,62 +68,110 @@ const ContactoTable = () => {
   const hasEditPermission = canEdit('contacto');
   const hasViewPermission = canView('contacto');
 
-  const isLoading = loadingQuejas || loadingSugerencias || loadingReportes;
-
-  useEffect(() => {
-    refetchQuejas();
-    refetchSugerencias();
-    refetchReportes();
-  }, [refetchQuejas, refetchSugerencias, refetchReportes]);
+  const isLoading = loadingQuejas || loadingSugerencias || loadingReportes || loadingQuejasArchivadas || loadingSugerenciasArchivadas || loadingReportesArchivados;
 
   // Unificar todos los datos en una sola estructura
   const unifiedData = useMemo((): ContactoItem[] => {
     const data: ContactoItem[] = [];
 
-    // Agregar quejas
+    if (shouldIncludeArchived) {
+      quejasArchivadas?.forEach((queja: Queja) => {
+        data.push({
+          id: queja.Id_Queja,
+          tipo: 'Queja',
+          nombre: queja.Nombre,
+          primerApellido: queja.Primer_Apellido,
+          segundoApellido: queja.Segundo_Apellido,
+          mensaje: queja.Descripcion,
+          fechaCreacion: queja.Fecha_Queja,
+          correo: queja.Correo,
+          estado: queja.Estado.Estado_Queja,
+          adjunto: queja.Adjunto || null,
+        });
+      });
+
+      sugerenciasArchivadas?.forEach((sugerencia: Sugerencia) => {
+        data.push({
+          id: sugerencia.Id_Sugerencia,
+          tipo: 'Sugerencia',
+          mensaje: sugerencia.Mensaje,
+          fechaCreacion: sugerencia.Fecha_Sugerencia,
+          correo: sugerencia.Correo,
+          estado: sugerencia.Estado.Estado_Sugerencia,
+          adjunto: sugerencia.Adjunto || null,
+        });
+      });
+
+      reportesArchivados?.forEach((reporte: Reporte) => {
+        data.push({
+          id: reporte.Id_Reporte,
+          tipo: 'Reporte',
+          nombre: reporte.Nombre,
+          primerApellido: reporte.Primer_Apellido,
+          segundoApellido: reporte.Segundo_Apellido,
+          ubicacion: reporte.Ubicacion,
+          mensaje: reporte.Descripcion || '',
+          fechaCreacion: reporte.Fecha_Reporte,
+          correo: reporte.Correo,
+          estado: reporte.Estado.Estado_Reporte,
+          adjunto: reporte.Adjunto || null,
+        });
+      });
+
+      return data.sort((a, b) => {
+        const dateA = new Date(a.fechaCreacion || 0);
+        const dateB = new Date(b.fechaCreacion || 0);
+        return dateB.getTime() - dateA.getTime();
+      });
+    }
+
     quejas?.forEach((queja: Queja) => {
-      data.push({
-        id: queja.Id_Queja,
-        tipo: 'Queja',
-        nombre: queja.Nombre,
-        primerApellido: queja.Primer_Apellido,
-        segundoApellido: queja.Segundo_Apellido,
-        mensaje: queja.Descripcion,
-        fechaCreacion: queja.Fecha_Queja,
-        correo: queja.Correo,
-        estado: queja.Estado.Estado_Queja,
-        adjunto: queja.Adjunto || null,
-      });
+      if (queja.Estado.Estado_Queja !== 'Archivado') {
+        data.push({
+          id: queja.Id_Queja,
+          tipo: 'Queja',
+          nombre: queja.Nombre,
+          primerApellido: queja.Primer_Apellido,
+          segundoApellido: queja.Segundo_Apellido,
+          mensaje: queja.Descripcion,
+          fechaCreacion: queja.Fecha_Queja,
+          correo: queja.Correo,
+          estado: queja.Estado.Estado_Queja,
+          adjunto: queja.Adjunto || null,
+        });
+      }
     });
 
-    // Agregar sugerencias
     sugerencias?.forEach((sugerencia: Sugerencia) => {
-      data.push({
-        id: sugerencia.Id_Sugerencia,
-        tipo: 'Sugerencia',
-        mensaje: sugerencia.Mensaje,
-        fechaCreacion: sugerencia.Fecha_Sugerencia,
-        correo: sugerencia.Correo,
-        estado: sugerencia.Estado.Estado_Sugerencia,
-        adjunto: sugerencia.Adjunto || null,
-      });
+      if (sugerencia.Estado.Estado_Sugerencia !== 'Archivado') {
+        data.push({
+          id: sugerencia.Id_Sugerencia,
+          tipo: 'Sugerencia',
+          mensaje: sugerencia.Mensaje,
+          fechaCreacion: sugerencia.Fecha_Sugerencia,
+          correo: sugerencia.Correo,
+          estado: sugerencia.Estado.Estado_Sugerencia,
+          adjunto: sugerencia.Adjunto || null,
+        });
+      }
     });
 
-    // Agregar reportes
     reportes?.forEach((reporte: Reporte) => {
-      data.push({
-        id: reporte.Id_Reporte,
-        tipo: 'Reporte',
-        nombre: reporte.Nombre,
-        primerApellido: reporte.Primer_Apellido,
-        segundoApellido: reporte.Segundo_Apellido,
-        ubicacion: reporte.Ubicacion,
-        mensaje: reporte.Descripcion || '',
-        fechaCreacion: reporte.Fecha_Reporte,
-        correo: reporte.Correo,
-        estado: reporte.Estado.Estado_Reporte,
-        adjunto: reporte.Adjunto || null,
-      });
+      if (reporte.Estado.Estado_Reporte !== 'Archivado') {
+        data.push({
+          id: reporte.Id_Reporte,
+          tipo: 'Reporte',
+          nombre: reporte.Nombre,
+          primerApellido: reporte.Primer_Apellido,
+          segundoApellido: reporte.Segundo_Apellido,
+          ubicacion: reporte.Ubicacion,
+          mensaje: reporte.Descripcion || '',
+          fechaCreacion: reporte.Fecha_Reporte,
+          correo: reporte.Correo,
+          estado: reporte.Estado.Estado_Reporte,
+          adjunto: reporte.Adjunto || null,
+        });
+      }
     });
 
     return data.sort((a, b) => {
@@ -127,7 +179,7 @@ const ContactoTable = () => {
       const dateB = new Date(b.fechaCreacion || 0);
       return dateB.getTime() - dateA.getTime();
     });
-  }, [quejas, sugerencias, reportes]);
+  }, [quejas, sugerencias, reportes, quejasArchivadas, sugerenciasArchivadas, reportesArchivados, shouldIncludeArchived]);
 
   const handleApplyFilters = (filters: ContactoFilterOptions) => {
     setAppliedFilters(filters);
@@ -312,7 +364,7 @@ const ContactoTable = () => {
     setIsDetailModalOpen(true);
   };
 
-  // Listen for global events dispatched by renderAccionesCell
+  // Listeners para eventos disparados desde las celdas de acciones
   useEffect(() => {
     const detailListener = (e: Event) => {
       const custom = e as CustomEvent<ContactoItem>;
@@ -320,6 +372,7 @@ const ContactoTable = () => {
         handleViewDetails(custom.detail);
       }
     };
+
     const responderListener = (e: Event) => {
       const custom = e as CustomEvent<ContactoItem>;
       if (custom?.detail) {
@@ -327,9 +380,10 @@ const ContactoTable = () => {
         setIsResponderModalOpen(true);
       }
     };
-    // NOTA: El listener 'openContactoDelete' ya no es necesario aquí, ya que el AlertDialog maneja la acción de archivar.
+
     window.addEventListener('openContactoDetail', detailListener as EventListener);
     window.addEventListener('openContactoResponder', responderListener as EventListener);
+
     return () => {
       window.removeEventListener('openContactoDetail', detailListener as EventListener);
       window.removeEventListener('openContactoResponder', responderListener as EventListener);
