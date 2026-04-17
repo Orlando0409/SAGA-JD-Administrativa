@@ -1,4 +1,4 @@
-import { LuX, LuUser, LuCalendar, LuFileText, LuMap } from 'react-icons/lu';
+import { LuX, LuUser, LuFileText, LuMap } from 'react-icons/lu';
 import type { DetailMedidorModalProps } from '../../types/MedidorTypes';
 import { FaTachometerAlt, FaUsers } from 'react-icons/fa';
 import { formatCedulaJuridica } from '@/Modules/Afiliados/Helper/formatUtils';
