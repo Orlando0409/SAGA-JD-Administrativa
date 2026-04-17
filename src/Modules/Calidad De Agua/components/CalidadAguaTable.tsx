@@ -96,8 +96,9 @@ export default function CalidadAguaTable() {
       onSuccess: () => {
         showSuccess("Visibilidad actualizada correctamente");
       },
-      onError: () => {
-        showError("Error al cambiar la visibilidad");
+      onError: (error: any) => {
+        const errorMessage = error.response?.data?.message || "Error al cambiar la visibilidad";
+        showError(errorMessage);
       },
       onSettled: () => {
         setConfirmVisibilidadOpen(false);
