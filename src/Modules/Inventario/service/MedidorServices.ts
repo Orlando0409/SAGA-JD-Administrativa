@@ -5,7 +5,6 @@ import type { EstadoPagoMedidorNombre } from '../models/Medidor';
 // Obtener todos los medidores
 export const getAllMedidores = async (): Promise<Medidor[]> => {
   const response = await axiosPrivate.get(`/Inventario/all/medidores`);
-  console.log('getAllMedidores response:', response.data);
   return response.data;
 };
 
@@ -24,7 +23,6 @@ export const getMedidoresDisponibles = async (): Promise<Medidor[]> => {
 // Obtener medidores instalados
 export const getMedidoresInstalados = async (): Promise<Medidor[]> => {
   const response = await axiosPrivate.get(`/Inventario/medidores/instalados`);
-  console.log('getMedidoresInstalados response:', response.data);
   return response.data;
 };
 

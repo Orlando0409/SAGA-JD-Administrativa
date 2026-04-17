@@ -292,42 +292,42 @@ const ContactoTable = () => {
   const columns = useMemo(() => [
     columnHelper.display({
       id: 'tipo',
-      header: 'Tipo',
-      cell: ({ row }) => renderTipoCell(row.original),
+      header: () => <><span className="hidden sm:inline">Tipo</span><span className="sm:hidden text-[8px]">Tipo</span></>,
+      cell: ({ row }) => <div className="flex items-center justify-start">{renderTipoCell(row.original)}</div>,
       size: 130,
     }),
 
     columnHelper.display({
       id: 'persona',
-      header: 'Persona',
-      cell: ({ row }) => renderPersonaCell(row.original),
+      header: () => <><span className="hidden sm:inline">Persona</span><span className="sm:hidden text-[8px]">Persona</span></>,
+      cell: ({ row }) => <div className="flex items-center justify-start">{renderPersonaCell(row.original)}</div>,
       size: 200,
     }),
 
     columnHelper.accessor('mensaje', {
       id: 'mensaje',
-      header: 'Mensaje',
-      cell: ({ getValue }) => renderMensajeCell(getValue()),
+      header: () => <><span className="hidden sm:inline">Mensaje</span><span className="sm:hidden text-[8px]">Mensaje</span></>,
+      cell: ({ getValue }) => <div className="flex items-center justify-start">{renderMensajeCell(getValue())}</div>,
       size: 250,
     }),
 
     columnHelper.display({
       id: 'estado',
-      header: 'Estado',
-      cell: ({ row }) => renderEstadoCell(row.original),
+      header: () => <><span className="hidden sm:inline">Estado</span><span className="sm:hidden text-[8px]">Estado</span></>,
+      cell: ({ row }) => <div className="flex items-center justify-start">{renderEstadoCell(row.original)}</div>,
       size: 180,
     }),
 
     columnHelper.accessor('fechaCreacion', {
       id: 'fecha',
-      header: 'Fecha',
-      cell: ({ getValue }) => renderFechaCell(getValue()),
+      header: () => <><span className="hidden sm:inline">Fecha</span><span className="sm:hidden text-[8px]">Fecha</span></>,
+      cell: ({ getValue }) => <div className="flex items-center justify-start">{renderFechaCell(getValue())}</div>,
       size: 120,
     }),
 
     columnHelper.display({
       id: 'acciones',
-      header: 'Acciones',
+      header: () => <><span className="hidden sm:inline">Acciones</span><span className="sm:hidden text-[8px]">Acciones</span></>,
       cell: ({ row }) => renderAccionesCell(row.original, {
         onArchiveClick: handleArchiveClick,
         hasViewPermission,
@@ -421,8 +421,8 @@ const ContactoTable = () => {
       </div>
       <div className="bg-white rounded-lg p-3">
         <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
-          <div className="flex items-center gap-4">
-            <label htmlFor="estado-filter" className="block text-sm font-medium text-gray-700 mb-2">
+          <div className="flex items-center gap-2">
+            <label htmlFor="estado-filter" className="block text-[10px] sm:text-xs font-medium text-gray-700 whitespace-nowrap">
               Estado:
             </label>
             <select
@@ -432,7 +432,7 @@ const ContactoTable = () => {
                 ...appliedFilters,
                 estado: e.target.value ? e.target.value as EstadoContacto : undefined
               })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-2 py-1 text-[10px] sm:text-xs border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="">Todos los estados</option>
               <option value="Pendiente">Pendiente</option>
@@ -440,30 +440,30 @@ const ContactoTable = () => {
               <option value="Archivado">Archivado</option>
             </select>
           </div>
-          <div className="flex items-center gap-4 w-full sm:w-auto">
+          <div className="flex items-center gap-3 w-full sm:w-auto">
             <button
               onClick={() => setIsFilterModalOpen(true)}
-              className={`px-4 py-2 border rounded-md flex items-center gap-2 transition-colors ${activeFiltersCount > 0
+              className={`px-3 py-1.5 text-[10px] sm:text-xs border rounded-md flex items-center gap-2 transition-colors ${activeFiltersCount > 0
                   ? 'border-blue-500 bg-blue-50 text-blue-700'
                   : 'border-gray-300 hover:bg-gray-50'
                 }`}
             >
-              <LuFilter className="w-4 h-4" />
+              <LuFilter className="w-3.5 h-3.5" />
               Filtros
               {activeFiltersCount > 0 && (
-                <span className="bg-blue-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                <span className="bg-blue-500 text-white text-[10px] rounded-full w-4 h-4 flex items-center justify-center">
                   {activeFiltersCount}
                 </span>
               )}
             </button>
             <div className="relative flex-1 max-w-md">
-              <LuSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <LuSearch className="absolute left-2.5 top-1/2 transform -translate-y-1/2 text-gray-400 w-3.5 h-3.5" />
               <input
                 type="text"
                 placeholder="Buscar por nombre, mensaje..."
                 value={globalFilter ?? ''}
                 onChange={(e) => setGlobalFilter(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full pl-8 pr-3 py-1.5 text-[10px] sm:text-xs border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
 
@@ -521,15 +521,15 @@ const ContactoTable = () => {
         </div>
 
         {/* Paginación */}
-        <div className="bg-gray-50 px-6 py-3 border-t border-gray-200 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className='text-sm text-gray-700'>Filas por página</span>
+        <div className="bg-gray-50 px-3 sm:px-6 py-2 sm:py-3 border-t border-gray-200 flex flex-row items-center justify-between gap-2 overflow-x-auto scrollbar-none">
+          <div className="flex items-center gap-1 sm:gap-2 whitespace-nowrap">
+            <span className='text-[10px] sm:text-sm text-gray-700'>Filas por página:</span>
             <select
               value={table.getState().pagination.pageSize}
               onChange={(e) => {
                 table.setPageSize(Number(e.target.value));
               }}
-              className="border border-gray-300 rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="border border-gray-300 rounded-md px-1 sm:px-2 py-0.5 sm:py-1 text-[8px] sm:text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
             >
               {pageSizeOptions.map((pageSize) => (
                 <option key={pageSize} value={pageSize}>
@@ -539,42 +539,42 @@ const ContactoTable = () => {
             </select>
           </div>
 
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 whitespace-nowrap">
             <button
               onClick={() => table.setPageIndex(0)}
               disabled={!table.getCanPreviousPage()}
-              className="p-2 border border-gray-300 rounded-md text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="p-1 sm:p-2 border border-gray-300 rounded-md text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               title="Primera página"
             >
-              <MdKeyboardDoubleArrowLeft />
+              <MdKeyboardDoubleArrowLeft className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
             </button>
             <button
               onClick={() => table.previousPage()}
               disabled={!table.getCanPreviousPage()}
-              className="p-2 border border-gray-300 rounded-md text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="p-1 sm:p-2 border border-gray-300 rounded-md text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               title="Página anterior"
             >
-              <MdKeyboardArrowLeft />
+              <MdKeyboardArrowLeft className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
             </button>
-            <span className="px-2 py-1 text-sm">
-              Página {table.getState().pagination.pageIndex + 1} de{' '}
-              {table.getPageCount()}
+            <span className="px-1.5 sm:px-2 py-1 text-[10px] sm:text-sm whitespace-nowrap">
+              Pág. {table.getState().pagination.pageIndex + 1} de{' '}
+              {table.getPageCount() || 1}
             </span>
             <button
               onClick={() => table.nextPage()}
               disabled={!table.getCanNextPage()}
-              className="p-2 border border-gray-300 rounded-md text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="p-1 sm:p-2 border border-gray-300 rounded-md text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               title="Página siguiente"
             >
-              <MdKeyboardArrowRight />
+              <MdKeyboardArrowRight className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
             </button>
             <button
               onClick={() => table.setPageIndex(table.getPageCount() - 1)}
               disabled={!table.getCanNextPage()}
-              className="p-2 border border-gray-300 rounded-md text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="p-1 sm:p-2 border border-gray-300 rounded-md text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               title="Última página"
             >
-              <MdKeyboardDoubleArrowRight />
+              <MdKeyboardDoubleArrowRight className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
             </button>
           </div>
         </div>
