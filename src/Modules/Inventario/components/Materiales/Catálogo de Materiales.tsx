@@ -598,7 +598,17 @@ const CatalogoMateriales: React.FC<CatalogoMaterialesProps> = () => {
 
 
   const handleApplyFilters = (filters: MaterialFilterOptions) => {
-    setAppliedFilters(filters);
+    const cleanFilters = { ...filters };
+    
+    // Limpiar valores residuales de stock según el tipo seleccionado
+    if (cleanFilters.tipoFiltroStock === 'encima') cleanFilters.stockMaximo = undefined;
+    if (cleanFilters.tipoFiltroStock === 'debajo') cleanFilters.stockMinimo = undefined;
+    if (!cleanFilters.tipoFiltroStock) {
+      cleanFilters.stockMinimo = undefined;
+      cleanFilters.stockMaximo = undefined;
+    }
+
+    setAppliedFilters(cleanFilters);
     setPagination(prev => ({ ...prev, pageIndex: 0 }));
   };
 
@@ -637,7 +647,7 @@ const CatalogoMateriales: React.FC<CatalogoMaterialesProps> = () => {
                 <option value="Disponible">Disponible</option>
                 <option value="Agotado">Agotado</option>
                 <option value="De baja">De baja</option>
-                <option value="Agotado y de baja">Agotado y de baja</option>
+                <option value="Agotado y De baja">Agotado y de baja</option>
               </select>
             </div>
             

@@ -202,7 +202,7 @@ const CatalogoMovimientos: React.FC<CatalogoMovimientosProps> = () => {
         const isIngreso = movimiento.Tipo_Movimiento?.includes('Entrada');
 
         return (
-          <div className="flex items-center gap-1 sm:gap-2">
+          <div className="flex items-center justify-center gap-1 sm:gap-2">
             {isIngreso ? (
               <LuTrendingUp className="text-green-600 sm:w-4 sm:h-4 w-3 h-3" />
             ) : (
@@ -223,9 +223,12 @@ const CatalogoMovimientos: React.FC<CatalogoMovimientosProps> = () => {
       cell: ({ getValue }) => {
         const nombre = getValue() || 'N/A';
         return (
-          <span className="text-[10px] sm:text-sm font-medium" title={nombre.length > 12 ? nombre : undefined}>
+          <div className="flex items-center justify-center">
+        <span className="text-[10px] sm:text-sm font-medium" title={nombre.length > 12 ? nombre : undefined}>
             {nombre.length > 12 ? `${nombre.slice(0, 12)}...` : nombre}
           </span>
+          </div>
+          
         );
       },
       size: 200,
@@ -240,9 +243,11 @@ const CatalogoMovimientos: React.FC<CatalogoMovimientosProps> = () => {
         const nombreUnidad = unidad?.Nombre_Unidad_Medicion || '';
 
         return (
-          <span className="text-[10px] sm:text-sm whitespace-nowrap">
-            {cantidad?.toLocaleString()} {nombreUnidad}
-          </span>
+          <div className="flex items-center justify-center">
+            <span className="text-[10px] sm:text-sm whitespace-nowrap">
+              {cantidad?.toLocaleString()} {nombreUnidad}
+            </span>
+          </div>
         );
       },
       size: 120,
@@ -252,7 +257,7 @@ const CatalogoMovimientos: React.FC<CatalogoMovimientosProps> = () => {
       id: 'usuario',
       header: () => <><span className="hidden sm:inline">Usuario</span><span className="sm:hidden text-[9px]">Usuario</span></>,
       cell: ({ getValue }) => (
-        <div className="flex items-center gap-1 sm:gap-2">
+        <div className="flex items-center justify-center gap-1 sm:gap-2">
           <LuUser className="text-gray-400 sm:w-4 sm:h-4 w-3 h-3 hidden sm:inline" />
           <span className="text-[10px] sm:text-sm whitespace-nowrap">{getValue() || 'N/A'}</span>
         </div>
@@ -269,7 +274,7 @@ const CatalogoMovimientos: React.FC<CatalogoMovimientosProps> = () => {
 
         const fechaObj = new Date(fecha);
         return (
-          <div className="flex items-center gap-1 sm:gap-2">
+          <div className="flex items-center justify-center gap-1 sm:gap-2">
             <LuCalendar className="text-gray-400 sm:w-4 sm:h-4 w-3 h-3 hidden sm:inline" />
             <span className="text-[10px] sm:text-sm whitespace-nowrap">
               {fechaObj.toLocaleDateString('es-ES', {
@@ -286,16 +291,18 @@ const CatalogoMovimientos: React.FC<CatalogoMovimientosProps> = () => {
 
     columnHelper.display({
       id: 'stock_anterior',
-      header: () => <><span className="hidden sm:inline">Stock Ant.</span><span className="sm:hidden text-[9px]">Ant.</span></>,
+      header: () => <><span className="hidden sm:inline">Stock Anterior</span><span className="sm:hidden text-[9px]">Ant.</span></>,
       cell: ({ row }) => {
         const movimiento = row.original;
         const unidad = movimiento.Material?.Unidad_Medicion;
         const nombreUnidad = unidad?.Nombre_Unidad_Medicion || '';
 
         return (
-          <span className="text-[10px] sm:text-sm text-gray-600 whitespace-nowrap">
-            {movimiento.Cantidad_Anterior?.toLocaleString() || '0'} {nombreUnidad}
-          </span>
+          <div className="flex items-center justify-center">
+            <span className="text-[10px] sm:text-sm text-gray-600 whitespace-nowrap">
+              {movimiento.Cantidad_Anterior?.toLocaleString() || '0'} {nombreUnidad}
+            </span>
+          </div>
         );
       },
       size: 120,
@@ -303,16 +310,18 @@ const CatalogoMovimientos: React.FC<CatalogoMovimientosProps> = () => {
 
     columnHelper.display({
       id: 'stock_nuevo',
-      header: () => <><span className="hidden sm:inline">Stock Act.</span><span className="sm:hidden text-[9px]">Act.</span></>,
+      header: () => <><span className="hidden sm:inline">Stock Actual</span><span className="sm:hidden text-[9px]">Act.</span></>,
       cell: ({ row }) => {
         const movimiento = row.original;
         const unidad = movimiento.Material?.Unidad_Medicion;
         const nombreUnidad = unidad?.Nombre_Unidad_Medicion || '';
 
         return (
-          <span className="text-[10px] sm:text-sm font-medium whitespace-nowrap">
-            {movimiento.Cantidad_Nueva?.toLocaleString() || '0'} {nombreUnidad}
-          </span>
+          <div className="flex items-center justify-center">
+            <span className="text-[10px] sm:text-sm font-medium whitespace-nowrap">
+              {movimiento.Cantidad_Nueva?.toLocaleString() || '0'} {nombreUnidad}
+            </span>
+          </div>
         );
       },
       size: 120,
@@ -324,7 +333,7 @@ const CatalogoMovimientos: React.FC<CatalogoMovimientosProps> = () => {
       cell: ({ row }) => (
         <div className="flex flex-row justify-center flex-nowrap gap-1 min-w-[50px] sm:min-w-[140px] overflow-visible">
           <button
-            className="px-1.5 py-1 sm:px-2 sm:py-1 bg-gray-600 text-white text-[9px] sm:text-xs rounded hover:bg-gray-700 transition-colors w-auto whitespace-nowrap"
+            className="px-1.5 py-1 sm:px-4 sm:py-1 bg-gray-600 text-white text-[9px] sm:text-xs rounded hover:bg-gray-700 transition-colors w-auto whitespace-nowrap"
             onClick={() => handleViewDetails(row.original)}
             title="Ver detalles"
           >
@@ -462,57 +471,56 @@ const CatalogoMovimientos: React.FC<CatalogoMovimientosProps> = () => {
         </div>
       </div>
 
-      <div className="bg-white rounded-2xl shadow-sm border border-sky-100 overflow-hidden max-h-[calc(100vh-300px)] overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100">
-        <div className="overflow-x-auto">
+      <div className="bg-white rounded-2xl shadow-sm border border-sky-100 overflow-hidden">
+        <div className="overflow-x-auto max-h-[calc(100vh-300px)] overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100">
           <table className="min-w-full table-auto">
-            <thead className="bg-sky-50">
+            <thead className="bg-sky-50 sticky top-0 z-10">
               {table.getHeaderGroups().map((headerGroup) => (
                 <tr key={headerGroup.id} className="text-left text-xs sm:text-sm text-sky-700">
                   {headerGroup.headers.map((header) => (
                     <th
                       key={header.id}
                       className="px-2 sm:px-4 py-3 font-medium border-b border-sky-100 cursor-pointer"
-                      style={{ width: header.getSize() }}
                       onClick={header.column.getToggleSortingHandler()}
                     >
-                      <div className="flex items-center space-x-1">
+                      <span className="flex items-center justify-center gap-1">
                         {header.isPlaceholder
                           ? null
-                          : flexRender(
-                              header.column.columnDef.header,
-                              header.getContext()
-                            )}
-                        {header.column.getCanSort() && (
-                          <span>
-                            {header.column.getIsSorted() === 'asc' && <MdKeyboardArrowUp className="inline" />}
-                            {header.column.getIsSorted() === 'desc' && <MdKeyboardArrowDown className="inline" />}
-                          </span>
-                        )}
-                      </div>
+                          : flexRender(header.column.columnDef.header, header.getContext())}
+                        {header.column.getIsSorted() === 'asc' && <MdKeyboardArrowUp className="inline" />}
+                        {header.column.getIsSorted() === 'desc' && <MdKeyboardArrowDown className="inline" />}
+                      </span>
                     </th>
                   ))}
                 </tr>
               ))}
             </thead>
             <tbody className="bg-white divide-y divide-sky-50">
-              {table.getRowModel().rows.map((row) => (
-                <tr key={row.id} className="hover:bg-sky-50 cursor-pointer transition-colors">
-                  {row.getVisibleCells().map((cell) => (
-                    <td key={cell.id} className="px-2 sm:px-4 py-3 text-xs sm:text-sm text-slate-700 align-top">
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </td>
-                  ))}
+              {table.getRowModel().rows.length === 0 ? (
+                <tr>
+                  <td colSpan={columns.length} className="px-2 sm:px-4 py-8 text-center text-slate-500">
+                    {globalFilter ? 'No se encontraron movimientos que coincidan con la búsqueda' : 'No hay movimientos registrados'}
+                  </td>
                 </tr>
-              ))}
+              ) : (
+                table.getRowModel().rows.map((row) => (
+                  <tr
+                    key={row.id}
+                    className="hover:bg-sky-50 cursor-pointer transition-colors"
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <td key={cell.id} className="px-2 sm:px-4 py-3 text-xs sm:text-sm text-slate-700 align-top">
+                        {typeof cell.column.columnDef.cell === 'function'
+                          ? cell.column.columnDef.cell(cell.getContext())
+                          : cell.getValue() as React.ReactNode}
+                      </td>
+                    ))}
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
-
-        {movimientos.length === 0 && (
-          <div className="text-center py-12">
-            <div className="text-gray-500 ">No hay movimientos registrados</div>
-          </div>
-        )}
 
 
          <div className="px-2 sm:px-4 md:px-6 py-2 md:py-3 bg-gray-50 border-t border-gray-200">
