@@ -1,10 +1,9 @@
 import ResponderModal from './ResponderModal';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   createColumnHelper,
   flexRender,
   getCoreRowModel,
-  getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
   useReactTable,
@@ -31,6 +30,7 @@ import ContactoDetailModal from './ContactoDetailModal';
 import { renderTipoCell, renderPersonaCell, renderMensajeCell, renderEstadoCell, renderFechaCell, renderAccionesCell } from '../helper/Render';
 import { useUserPermissions } from '@/Modules/Auth/Hooks/PermissionHook';
 import { useAlerts } from '@/Modules/Global/context/AlertContext';
+import { AlertDialog, AlertDialogFooter, AlertDialogHeader, AlertDialogContent, AlertDialogDescription, AlertDialogTitle, AlertDialogAction, AlertDialogCancel } from "@/Modules/Global/components/Sidebar/ui/alert-dialog";
 
 
 
@@ -40,6 +40,8 @@ const ContactoTable = () => {
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [globalFilter, setGlobalFilter] = useState('');
   const [selectedItem, setSelectedItem] = useState<ContactoItem | null>(null);
+  const [itemToArchive, setItemToArchive] = useState<ContactoItem | null>(null);
+  const [isArchiveModalOpen, setIsArchiveModalOpen] = useState(false);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [isResponderModalOpen, setIsResponderModalOpen] = useState(false);
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
@@ -51,14 +53,17 @@ const ContactoTable = () => {
     pageIndex: 0,
   });
 
-  const { data: quejas = [], isLoading: loadingQuejas, refetch: refetchQuejas } = useQuejas();
-  const { data: sugerencias = [], isLoading: loadingSugerencias, refetch: refetchSugerencias } = useSugerencias();
-  const { data: reportes = [], isLoading: loadingReportes, refetch: refetchReportes } = useReportes();
+  const estadoFiltro = appliedFilters.estado === 'Archivado' ? undefined : appliedFilters.estado;
+
+  const { data: quejas = [], isLoading: loadingQuejas } = useQuejas(estadoFiltro);
+  const { data: sugerencias = [], isLoading: loadingSugerencias } = useSugerencias(estadoFiltro);
+  const { data: reportes = [], isLoading: loadingReportes } = useReportes(estadoFiltro);
   const shouldIncludeArchived = useMemo(() => {
     const estadoArchivado = appliedFilters.estado === 'Archivado';
+    const todosLosEstados = !appliedFilters.estado || appliedFilters.estado === 'Todos';
     const busquedaArchivado = globalFilter.trim().toLowerCase().includes('archiv');
 
-    return estadoArchivado || busquedaArchivado;
+    return estadoArchivado || todosLosEstados || busquedaArchivado;
   }, [appliedFilters.estado, globalFilter]);
   const { data: quejasArchivadas = [], isLoading: loadingQuejasArchivadas } = useQuejasArchivadas(shouldIncludeArchived);
   const { data: sugerenciasArchivadas = [], isLoading: loadingSugerenciasArchivadas } = useSugerenciasArchivadas(shouldIncludeArchived);
@@ -75,52 +80,74 @@ const ContactoTable = () => {
 
   const isLoading = loadingQuejas || loadingSugerencias || loadingReportes || loadingQuejasArchivadas || loadingSugerenciasArchivadas || loadingReportesArchivados;
 
-  useEffect(() => {
-    refetchQuejas();
-    refetchSugerencias();
-    refetchReportes();
-  }, [refetchQuejas, refetchSugerencias, refetchReportes]);
-
   // Unificar todos los datos en una sola estructura
   const unifiedData = useMemo((): ContactoItem[] => {
     const data: ContactoItem[] = [];
 
-    const mapQueja = (queja: Queja): ContactoItem => ({
-      id: queja.Id_Queja,
-      tipo: 'Queja',
-      nombre: queja.Nombre,
-      primerApellido: queja.Primer_Apellido,
-      segundoApellido: queja.Segundo_Apellido,
-      mensaje: queja.Descripcion,
-      fechaCreacion: queja.Fecha_Queja,
-      correo: queja.Correo,
-      estado: queja.Estado.Estado_Queja,
-      adjunto: queja.Adjunto || null,
-    });
+    const mapQueja = (queja: Queja): ContactoItem => {
+      const nombreCompleto = [queja.Nombre, queja.Primer_Apellido, queja.Segundo_Apellido].filter(Boolean).join(' ');
+      const strSearch = [
+        'Queja', nombreCompleto, queja.Descripcion, queja.Correo, queja.Estado.Estado_Queja
+      ].filter(Boolean).join(' ').toLowerCase();
 
-    const mapSugerencia = (sugerencia: Sugerencia): ContactoItem => ({
-      id: sugerencia.Id_Sugerencia,
-      tipo: 'Sugerencia',
-      mensaje: sugerencia.Mensaje,
-      fechaCreacion: sugerencia.Fecha_Sugerencia,
-      correo: sugerencia.Correo,
-      estado: sugerencia.Estado.Estado_Sugerencia,
-      adjunto: sugerencia.Adjunto || null,
-    });
+      return {
+        id: queja.Id_Queja,
+        tipo: 'Queja',
+        nombre: queja.Nombre,
+        primerApellido: queja.Primer_Apellido,
+        segundoApellido: queja.Segundo_Apellido,
+        mensaje: queja.Descripcion,
+        fechaCreacion: queja.Fecha_Queja,
+        correo: queja.Correo,
+        estado: queja.Estado.Estado_Queja,
+        adjunto: queja.Adjunto || null,
+        _timestamp: queja.Fecha_Queja ? new Date(queja.Fecha_Queja).getTime() : 0,
+        _nombreCompleto: nombreCompleto,
+        _searchString: strSearch,
+      };
+    };
 
-    const mapReporte = (reporte: Reporte): ContactoItem => ({
-      id: reporte.Id_Reporte,
-      tipo: 'Reporte',
-      nombre: reporte.Nombre,
-      primerApellido: reporte.Primer_Apellido,
-      segundoApellido: reporte.Segundo_Apellido,
-      ubicacion: reporte.Ubicacion,
-      mensaje: reporte.Descripcion || '',
-      fechaCreacion: reporte.Fecha_Reporte,
-      correo: reporte.Correo,
-      estado: reporte.Estado.Estado_Reporte,
-      adjunto: reporte.Adjunto || null,
-    });
+    const mapSugerencia = (sugerencia: Sugerencia): ContactoItem => {
+      const strSearch = [
+        'Sugerencia', sugerencia.Mensaje, sugerencia.Correo, sugerencia.Estado.Estado_Sugerencia
+      ].filter(Boolean).join(' ').toLowerCase();
+
+      return {
+        id: sugerencia.Id_Sugerencia,
+        tipo: 'Sugerencia',
+        mensaje: sugerencia.Mensaje,
+        fechaCreacion: sugerencia.Fecha_Sugerencia,
+        correo: sugerencia.Correo,
+        estado: sugerencia.Estado.Estado_Sugerencia,
+        adjunto: sugerencia.Adjunto || null,
+        _timestamp: sugerencia.Fecha_Sugerencia ? new Date(sugerencia.Fecha_Sugerencia).getTime() : 0,
+        _searchString: strSearch,
+      };
+    };
+
+    const mapReporte = (reporte: Reporte): ContactoItem => {
+      const nombreCompleto = [reporte.Nombre, reporte.Primer_Apellido, reporte.Segundo_Apellido].filter(Boolean).join(' ');
+      const strSearch = [
+        'Reporte', nombreCompleto, reporte.Descripcion, reporte.Ubicacion, reporte.Correo, reporte.Estado.Estado_Reporte
+      ].filter(Boolean).join(' ').toLowerCase();
+
+      return {
+        id: reporte.Id_Reporte,
+        tipo: 'Reporte',
+        nombre: reporte.Nombre,
+        primerApellido: reporte.Primer_Apellido,
+        segundoApellido: reporte.Segundo_Apellido,
+        ubicacion: reporte.Ubicacion,
+        mensaje: reporte.Descripcion || '',
+        fechaCreacion: reporte.Fecha_Reporte,
+        correo: reporte.Correo,
+        estado: reporte.Estado.Estado_Reporte,
+        adjunto: reporte.Adjunto || null,
+        _timestamp: reporte.Fecha_Reporte ? new Date(reporte.Fecha_Reporte).getTime() : 0,
+        _nombreCompleto: nombreCompleto,
+        _searchString: strSearch,
+      };
+    };
 
     quejas?.forEach((queja: Queja) => {
       if (queja.Estado.Estado_Queja !== 'Archivado') {
@@ -146,11 +173,7 @@ const ContactoTable = () => {
       reportesArchivados?.forEach((reporte: Reporte) => data.push(mapReporte(reporte)));
     }
 
-    return data.sort((a, b) => {
-      const dateA = new Date(a.fechaCreacion || 0);
-      const dateB = new Date(b.fechaCreacion || 0);
-      return dateB.getTime() - dateA.getTime();
-    });
+    return data.sort((a, b) => (b._timestamp || 0) - (a._timestamp || 0));
   }, [quejas, sugerencias, reportes, quejasArchivadas, sugerenciasArchivadas, reportesArchivados, shouldIncludeArchived]);
 
   const handleApplyFilters = (filters: ContactoFilterOptions) => {
@@ -165,28 +188,14 @@ const ContactoTable = () => {
     return value !== undefined && value !== null;
   }).length;
 
-  // Aplicar filtros avanzados
+  // Aplicar filtros avanzados y BUSCADOR GLOBAL en el frontend para evitar lag
   const filteredData = useMemo(() => {
     let filtered = [...unifiedData];
     const terminoBusqueda = globalFilter.trim().toLowerCase();
 
     if (terminoBusqueda) {
       filtered = filtered.filter((item) => {
-        const nombreCompleto = [item.nombre, item.primerApellido, item.segundoApellido]
-          .filter(Boolean)
-          .join(' ')
-          .toLowerCase();
-
-        return [
-          item.tipo,
-          nombreCompleto,
-          item.mensaje,
-          item.correo,
-          item.estado,
-          item.ubicacion,
-        ]
-          .filter(Boolean)
-          .some((value) => value?.toString().toLowerCase().includes(terminoBusqueda));
+        return item._searchString?.includes(terminoBusqueda);
       });
     }
 
@@ -202,19 +211,20 @@ const ContactoTable = () => {
 
     // Filtrar por fecha inicio
     if (appliedFilters.fechaInicio) {
+      const fechaInicioTimeStamp = new Date(appliedFilters.fechaInicio).getTime();
       filtered = filtered.filter(item => {
-        const fechaItem = new Date(item.fechaCreacion || 0);
-        const fechaInicio = new Date(appliedFilters.fechaInicio!);
-        return fechaItem >= fechaInicio;
+        return (item._timestamp || 0) >= fechaInicioTimeStamp;
       });
     }
 
     // Filtrar por fecha fin
     if (appliedFilters.fechaFin) {
+      // Configuramos el final del día
+      const fechaFinDate = new Date(appliedFilters.fechaFin);
+      fechaFinDate.setHours(23, 59, 59, 999);
+      const fechaFinTimeStamp = fechaFinDate.getTime();
       filtered = filtered.filter(item => {
-        const fechaItem = new Date(item.fechaCreacion || 0);
-        const fechaFin = new Date(appliedFilters.fechaFin!);
-        return fechaItem <= fechaFin;
+        return (item._timestamp || 0) <= fechaFinTimeStamp;
       });
     }
 
@@ -229,55 +239,57 @@ const ContactoTable = () => {
 
   const columnHelper = createColumnHelper<ContactoItem>();
 
-  const handleArchive = async (item: ContactoItem) => {
-    setSelectedItem(item);
+  const handleArchiveClick = useCallback((item: ContactoItem) => {
+    setItemToArchive(item);
+    setIsArchiveModalOpen(true);
+  }, []);
 
+  const confirmArchive = useCallback(async () => {
+    if (!itemToArchive) return;
     let nextIdEstado: number;
-
-    const isArchived = item.estado === 'Archivado';
+    const isArchived = itemToArchive.estado === 'Archivado';
 
     if (isArchived) {
-      //  Desarchivar: Volver al estado original (Contestado)
-      // Si el estado actual es 'Archivado' -> vuelve a 'Contestado' (Id 2)
       nextIdEstado = ESTADO_IDS.CONTESTADO;
     } else {
-      //  Archivar: Mover al estado de archivado correspondiente
-      // Si el estado actual es 'Contestado' -> 'Archivado' (Id 3)
       nextIdEstado = ESTADO_IDS.ARCHIVADO;
     }
 
     try {
-      if (item.tipo === 'Queja') {
-        await actualizarEstadoQuejaMutation.mutateAsync({ id: item.id, idEstado: nextIdEstado });
-      } else if (item.tipo === 'Sugerencia') {
-        await actualizarEstadoSugerenciaMutation.mutateAsync({ id: item.id, idEstado: nextIdEstado });
-      } else if (item.tipo === 'Reporte') {
-        await actualizarEstadoReporteMutation.mutateAsync({ id: item.id, idEstado: nextIdEstado });
+      if (itemToArchive.tipo === 'Queja') {
+        await actualizarEstadoQuejaMutation.mutateAsync({ id: itemToArchive.id, idEstado: nextIdEstado });
+      } else if (itemToArchive.tipo === 'Sugerencia') {
+        await actualizarEstadoSugerenciaMutation.mutateAsync({ id: itemToArchive.id, idEstado: nextIdEstado });
+      } else if (itemToArchive.tipo === 'Reporte') {
+        await actualizarEstadoReporteMutation.mutateAsync({ id: itemToArchive.id, idEstado: nextIdEstado });
       }
 
-      const isReporte = item.tipo === 'Reporte';
+      const isReporte = itemToArchive.tipo === 'Reporte';
       const articulo = isReporte ? 'El' : 'La';
       const participio = isArchived
         ? isReporte ? 'desarchivado' : 'desarchivada'
         : isReporte ? 'archivado' : 'archivada';
 
       showSuccess(
-        `${item.tipo} ${participio}`,
-        `${articulo} ${item.tipo.toLowerCase()} se ha ${participio} exitosamente`
+        `${itemToArchive.tipo} ${participio}`,
+        `${articulo} ${itemToArchive.tipo.toLowerCase()} se ha ${participio} exitosamente`
       );
     } catch (error) {
-      console.error(`Error al ${isArchived ? 'desarchivar' : 'archivar'} ${item.tipo}:`, error);
+      console.error(`Error al ${isArchived ? 'desarchivar' : 'archivar'} ${itemToArchive.tipo}:`, error);
       const accion = isArchived ? 'desarchivar' : 'archivar';
-      const articulo = item.tipo === 'Reporte' ? 'el' : 'la';
+      const articulo = itemToArchive.tipo === 'Reporte' ? 'el' : 'la';
 
       showError(
-        `Error al ${accion} ${item.tipo.toLowerCase()}`,
-        `No se pudo ${accion} ${articulo} ${item.tipo.toLowerCase()}. Intenta nuevamente.`
+        `Error al ${accion} ${itemToArchive.tipo.toLowerCase()}`,
+        `No se pudo ${accion} ${articulo} ${itemToArchive.tipo.toLowerCase()}. Intenta nuevamente.`
       );
+    } finally {
+      setIsArchiveModalOpen(false);
+      setItemToArchive(null);
     }
-  };
+  }, [itemToArchive, actualizarEstadoQuejaMutation, actualizarEstadoReporteMutation, actualizarEstadoSugerenciaMutation, showError, showSuccess]);
 
-  const columns = [
+  const columns = useMemo(() => [
     columnHelper.display({
       id: 'tipo',
       header: 'Tipo',
@@ -317,16 +329,17 @@ const ContactoTable = () => {
       id: 'acciones',
       header: 'Acciones',
       cell: ({ row }) => renderAccionesCell(row.original, {
-        actualizarEstadoQuejaMutation,
-        actualizarEstadoSugerenciaMutation,
-        actualizarEstadoReporteMutation,
-        handleArchive,
+        onArchiveClick: handleArchiveClick,
         hasViewPermission,
         hasEditPermission,
       }),
       enableSorting: false,
     }),
-  ];
+  ], [
+    handleArchiveClick, 
+    hasEditPermission, 
+    hasViewPermission
+  ]);
 
   const table = useReactTable({
     data: filteredData,
@@ -334,17 +347,14 @@ const ContactoTable = () => {
     state: {
       sorting,
       columnFilters,
-      globalFilter,
       pagination,
     },
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
-    onGlobalFilterChange: setGlobalFilter,
     onPaginationChange: setPagination,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
     initialState: {
       pagination: {
         pageSize: 5,
@@ -592,6 +602,26 @@ const ContactoTable = () => {
           item={selectedItem}
         />
       )}
+
+      {/* Global Archive Confirmation Dialog */}
+      <AlertDialog open={isArchiveModalOpen} onOpenChange={setIsArchiveModalOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Confirmar {itemToArchive?.estado === 'Archivado' ? 'Desarchivar' : 'Archivar'}?</AlertDialogTitle>
+            <AlertDialogDescription>
+              ¿Estás seguro de que deseas {itemToArchive?.estado === 'Archivado' ? 'desarchivar' : 'archivar'} est@ {itemToArchive?.tipo.toLowerCase()}? 
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction onClick={confirmArchive}>
+              {itemToArchive?.estado === 'Archivado' ? 'Desarchivar' : 'Archivar'}
+            </AlertDialogAction>
+            <AlertDialogCancel onClick={() => { setIsArchiveModalOpen(false); setItemToArchive(null); }}>
+              Cancelar
+            </AlertDialogCancel>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
