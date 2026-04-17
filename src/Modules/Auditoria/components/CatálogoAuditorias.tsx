@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
 import { LuSearch, LuFilter } from 'react-icons/lu';
+import { useAuth } from '@/Modules/Auth/Context/AuthContext';
 import {
   createColumnHelper,
   getCoreRowModel,
@@ -28,6 +29,7 @@ const pageSizeOptions = [5, 10, 15, 25, 50];
 
 const CatálogoAuditorias = () => {
   const { data: auditorias = [], isLoading } = useGetAllAuditorias();
+  const { user: currentUser } = useAuth();
 
   const [globalFilter, setGlobalFilter] = useState('');
   const [showDetailModal, setShowDetailModal] = useState(false);
@@ -73,9 +75,22 @@ const CatálogoAuditorias = () => {
       );
     }
 
+    // Filtro por usuario específico
+    if (appliedFilters.por_usuario) {
+      filtered = filtered.filter(
+        (auditoria) => auditoria.Usuario?.Id_Usuario === appliedFilters.por_usuario
+      );
+    }
+
+    // Filtro mis auditorías
+    if (appliedFilters.mis_auditorias && currentUser) {
+      filtered = filtered.filter(
+        (auditoria) => auditoria.Usuario?.Id_Usuario === currentUser.Id_Usuario
+      );
+    }
 
     return filtered;
-  }, [auditorias, appliedFilters]);
+  }, [auditorias, appliedFilters, currentUser]);
 
   // Definición de columnas (mantenido igual)
   const columns = [
@@ -270,8 +285,8 @@ const CatálogoAuditorias = () => {
                 <tr key={headerGroup.id} className="text-left text-[9px] sm:text-xs md:text-sm text-sky-700">
                   {headerGroup.headers.map((header, index) => (
                     <th key={header.id} className={`px-0.5 sm:px-2 md:px-4 py-1 md:py-3 font-medium border-b border-sky-100 ${
-                      index === 0 ? 'text-left' : 'text-center'
-                    }`}>
+                      index === 0 ? 'text-left pl-3 sm:pl-4' : 'text-center'
+                    } ${index === headerGroup.headers.length - 1 ? 'pr-3 sm:pr-4' : ''}`}>
                       {(() => {
                         if (header.isPlaceholder) {
                           return null;
@@ -337,8 +352,8 @@ const CatálogoAuditorias = () => {
                       
                       return (
                         <td key={cell.id} className={`px-0.5 sm:px-2 md:px-4 py-1.5 md:py-3 text-[9px] sm:text-xs md:text-sm text-slate-700 align-middle ${
-                          index === 0 ? 'text-left' : 'text-center'
-                        } max-w-[60px] sm:max-w-none truncate`}>
+                          index === 0 ? 'text-left pl-3 sm:pl-4' : 'text-center'
+                        } ${index === row.getVisibleCells().length - 1 ? 'pr-3 sm:pr-4' : ''} max-w-[60px] sm:max-w-none truncate`}>
                           {cellContent}
                         </td>
                       );
@@ -352,12 +367,11 @@ const CatálogoAuditorias = () => {
 
   
         <div className="px-2 sm:px-4 md:px-6 py-2 md:py-3 bg-gray-50 border-t border-gray-200">
-          <div className="flex flex-row flex-wrap items-center justify-between gap-y-2 sm:gap-y-0 w-full">
+          <div className="flex flex-row items-center justify-between w-full gap-2">
 
-            <div className="flex items-center gap-2 sm:gap-4 w-full sm:w-auto justify-between sm:justify-start">
+            <div className="flex items-center gap-2 sm:gap-4 w-auto justify-start">
               <div className="flex items-center gap-1 sm:gap-2">
-                <span className="text-[10px] sm:text-xs md:text-sm text-gray-700 hidden sm:inline">Filas por página:</span>
-                <span className="text-[10px] text-gray-700 inline sm:hidden">Filas:</span>
+                <span className="text-[10px] sm:text-xs md:text-sm text-gray-700 sm:inline">Filas por página:</span>
                 <select
                   value={table.getState().pagination.pageSize}
                   onChange={(e) => {
@@ -373,7 +387,7 @@ const CatálogoAuditorias = () => {
                 </select>
               </div>
             </div>
-            <div className="flex items-center justify-center sm:justify-end gap-1 sm:gap-2 w-full sm:w-auto mt-1 sm:mt-0">
+            <div className="flex items-center justify-end gap-1 w-auto">
               <button
                 onClick={() => table.setPageIndex(0)}
                 disabled={!table.getCanPreviousPage()}
@@ -390,8 +404,8 @@ const CatálogoAuditorias = () => {
               >
                 <MdKeyboardArrowLeft className="w-3 h-3 sm:w-4 sm:h-4" />
               </button>
-              <span className="text-[10px] sm:text-xs md:text-sm text-gray-700 px-1 sm:px-2 whitespace-nowrap">
-                Página {table.getState().pagination.pageIndex + 1} de {table.getPageCount()}
+              <span className="text-[9px] sm:text-xs md:text-sm text-gray-700 px-0.5 sm:px-2 whitespace-nowrap">
+                {table.getState().pagination.pageIndex + 1} de {table.getPageCount() || 1}
               </span>
               <button
                 onClick={() => table.nextPage()}
