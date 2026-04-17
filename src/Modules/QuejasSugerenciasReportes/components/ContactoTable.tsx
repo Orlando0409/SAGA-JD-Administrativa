@@ -20,7 +20,7 @@ import {
   MdKeyboardDoubleArrowRight
 } from 'react-icons/md';
 
-import { useQuejas, useSugerencias, useReportes, useUpdateSugerenciaEstado, useUpdateQuejaEstado, useUpdateReporteEstado } from '../hook/HookContacto';
+import { useQuejas, useSugerencias, useReportes, useUpdateSugerenciaEstado, useUpdateQuejaEstado, useUpdateReporteEstado, useQuejasArchivadas, useSugerenciasArchivadas, useReportesArchivados } from '../hook/HookContacto';
 import type { Queja } from '../models/Quejas';
 import type { Sugerencia } from '../models/Sugerencias';
 import type { Reporte } from '../models/Reportes';
