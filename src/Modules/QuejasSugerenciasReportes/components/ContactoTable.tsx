@@ -60,7 +60,7 @@ const ContactoTable = () => {
   const { data: reportes = [], isLoading: loadingReportes } = useReportes(estadoFiltro);
   const shouldIncludeArchived = useMemo(() => {
     const estadoArchivado = appliedFilters.estado === 'Archivado';
-    const todosLosEstados = !appliedFilters.estado || appliedFilters.estado === 'Todos';
+    const todosLosEstados = !appliedFilters.estado || (appliedFilters.estado as string) === 'Todos';
     const busquedaArchivado = globalFilter.trim().toLowerCase().includes('archiv');
 
     return estadoArchivado || todosLosEstados || busquedaArchivado;
