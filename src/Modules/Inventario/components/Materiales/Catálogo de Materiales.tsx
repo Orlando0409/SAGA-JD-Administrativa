@@ -221,7 +221,7 @@ const CatalogoMateriales: React.FC<CatalogoMaterialesProps> = () => {
         ),
       }),
       columnHelper.accessor((row) => row.Unidad_Medicion?.Nombre_Unidad_Medicion, {
-        header: 'Unidad de medida',
+        header: 'Unidad de Medida',
         cell: info => {
           const unidad = info.getValue();
           return (

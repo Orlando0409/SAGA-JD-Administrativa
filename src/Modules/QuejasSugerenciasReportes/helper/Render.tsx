@@ -1,13 +1,9 @@
-import { AlertDialog, AlertDialogFooter, AlertDialogHeader, AlertDialogTrigger, AlertDialogContent, AlertDialogDescription, AlertDialogTitle, AlertDialogAction, AlertDialogCancel } from "@/Modules/Global/components/Sidebar/ui/alert-dialog";
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import type { ContactoItem } from "../types/ContactoTypes";
 
-interface ArchiveMutations {
-  actualizarEstadoQuejaMutation: { isPending: boolean; mutateAsync: (args: any) => Promise<any> };
-  actualizarEstadoSugerenciaMutation: { isPending: boolean; mutateAsync: (args: any) => Promise<any> };
-  actualizarEstadoReporteMutation: { isPending: boolean; mutateAsync: (args: any) => Promise<any> };
-  handleArchive: (item: ContactoItem) => Promise<void>;
+interface ArchiveConfig {
+  onArchiveClick: (item: ContactoItem) => void;
   hasViewPermission: boolean;
   hasEditPermission: boolean;
 }
@@ -35,7 +31,7 @@ export const renderTipoCell = (item: ContactoItem) => {
 };
 
 export const renderPersonaCell = (item: ContactoItem) => {
-  const nombreCompleto = [item.nombre, item.primerApellido, item.segundoApellido]
+  const nombreCompleto = item._nombreCompleto || [item.nombre, item.primerApellido, item.segundoApellido]
     .filter(Boolean)
     .join(' ');
 
@@ -93,22 +89,13 @@ export const renderFechaCell = (fecha?: Date | string | null) => {
 
 
 
-export const renderAccionesCell = (item: ContactoItem, mutations: ArchiveMutations) => {
+export const renderAccionesCell = (item: ContactoItem, config: ArchiveConfig) => {
   const { 
-    actualizarEstadoQuejaMutation, 
-    actualizarEstadoSugerenciaMutation, 
-    actualizarEstadoReporteMutation, 
-    handleArchive,
+    onArchiveClick,
     hasViewPermission,
     hasEditPermission
-  } = mutations;
+  } = config;
   
-  // Determinar si alguna mutación está pendiente
-  const isPendingMutation = 
-    (item.tipo === 'Queja' && actualizarEstadoQuejaMutation.isPending) ||
-    (item.tipo === 'Sugerencia' && actualizarEstadoSugerenciaMutation.isPending) ||
-    (item.tipo === 'Reporte' && actualizarEstadoReporteMutation.isPending);
-
   const isArchived = item.estado === 'Archivado';
   
   const actionText = isArchived ? 'Desarchivar' : 'Archivar';
@@ -137,38 +124,15 @@ export const renderAccionesCell = (item: ContactoItem, mutations: ArchiveMutatio
         </button>
       )}
       {hasEditPermission && (item.estado === 'Contestado' || item.estado === 'Archivado') && (
-      <AlertDialog>
-        <AlertDialogTrigger asChild>
-          <button
-            type="button"
-            disabled={isPendingMutation} 
-            className={`px-4 py-1 text-white text-xs rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${actionColor}`}
-            title={actionTitle}
-          >
-            {isPendingMutation ? (isArchived ? 'Desarchivando...' : 'Archivando...') : actionText}
-          </button>
-        </AlertDialogTrigger>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>¿Confirmar {actionText}?</AlertDialogTitle>
-            <AlertDialogDescription>
-              ¿Estás seguro de que deseas {actionText.toLowerCase()} est@ {item.tipo}? 
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogAction
-              // handleArchive ahora recibe el item y determina la acción dentro de ContactoTable
-              onClick={() => handleArchive(item)} 
-              disabled={isPendingMutation}
-            >
-              {isPendingMutation ? (isArchived ? 'Desarchivando...' : 'Archivando...') : `${actionText}`}
-            </AlertDialogAction>
-            <AlertDialogCancel disabled={isPendingMutation}>Cancelar</AlertDialogCancel>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-        )}
+        <button
+          type="button"
+          onClick={() => onArchiveClick(item)}
+          className={`px-4 py-1 text-white text-xs rounded transition-colors ${actionColor}`}
+          title={actionTitle}
+        >
+          {actionText}
+        </button>
+      )}
     </div>
-
   );
 };
