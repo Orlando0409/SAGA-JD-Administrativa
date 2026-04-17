@@ -89,12 +89,13 @@ export default function CalidadAguaEdit({ archivo, onClose, refetch }: CalidadAg
             showSuccess("¡Registro actualizado con éxito!");
             refetch();
             onClose();
-        } catch (error) {
-            if (error instanceof z.ZodError) {
-                showError(error.errors[0].message);
+        } catch (error: any) {
+            if (error?.issues) {
+                showError(error.issues[0]?.message || "Error de validación");
             } else {
                 console.error("Error inesperado:", error);
-                showError("Hubo un problema al actualizar el registro.");
+                const errorMessage = error.response?.data?.message || "Hubo un problema al actualizar el registro.";
+                showError(errorMessage);
             }
         }
     };

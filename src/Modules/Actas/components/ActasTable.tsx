@@ -188,9 +188,10 @@ export default function ActasTable() {
                 refetch();
                 setNotification({ type: 'success', title: 'Acta eliminada con éxito.' });
             },
-            onError: (error) => {
+            onError: (error: any) => {
                 console.error("Error al eliminar el acta:", error);
-                setNotification({ type: 'error', title: 'Hubo un problema al eliminar el acta.' });
+                const errorMessage = error.response?.data?.message || 'Hubo un problema al eliminar el acta.';
+                setNotification({ type: 'error', title: errorMessage });
             },
         });
     };
