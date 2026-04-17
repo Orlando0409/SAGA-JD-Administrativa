@@ -10,8 +10,7 @@ import type {
     CreateSolicitudAgregarMedidorFisicaDTO,
     CreateSolicitudAsociadoFisicaDTO
 } from "../Models/ModelosFisicas";
-
-// GET - Obtener todas las solicitudes físicas
+import { toTipoSolicitudSlug } from "../utils/tipoSolicitud";
 
 export async function getSolicitudesFisicas(): Promise<SolicitudFisica[]> {
     try {
@@ -266,6 +265,24 @@ export async function createSolicitudAsociadoFisica(
         return response.data;
     } catch (error) {
         console.error(' Error al crear solicitud de asociado física:', error);
+        throw error;
+    }
+}
+
+export async function updateSolicitudFisicaByTipo(
+    id: number,
+    tipoSolicitud: string,
+    data: Record<string, unknown>
+): Promise<SolicitudFisica> {
+    try {
+        const tipoSolicitudSlug = toTipoSolicitudSlug(tipoSolicitud);
+        const response = await apiAuth.put(
+            `/solicitudes-fisicas/update/${tipoSolicitudSlug}/${id}`,
+            data
+        );
+        return response.data;
+    } catch (error) {
+        console.error(` Error al actualizar solicitud física #${id}:`, error);
         throw error;
     }
 }

@@ -20,7 +20,7 @@ import {
   MdKeyboardDoubleArrowRight
 } from 'react-icons/md';
 
-import { useQuejas, useQuejasArchivadas, useSugerencias, useSugerenciasArchivadas, useReportes, useReportesArchivados, useUpdateSugerenciaEstado, useUpdateQuejaEstado, useUpdateReporteEstado } from '../hook/HookContacto';
+import { useQuejas, useSugerencias, useReportes, useUpdateSugerenciaEstado, useUpdateQuejaEstado, useUpdateReporteEstado } from '../hook/HookContacto';
 import type { Queja } from '../models/Quejas';
 import type { Sugerencia } from '../models/Sugerencias';
 import type { Reporte } from '../models/Reportes';
@@ -235,7 +235,7 @@ const ContactoTable = () => {
 
 
     return filtered;
-  }, [unifiedData, appliedFilters, globalFilter]);
+  }, [unifiedData, appliedFilters]);
 
   const columnHelper = createColumnHelper<ContactoItem>();
 

@@ -63,6 +63,7 @@ export default function SolicitudesTable() {
         busquedaAvanzada: '',
     });
     const [isFilterOpen, setIsFilterOpen] = useState(false);
+    const [solicitudesEditadas, setSolicitudesEditadas] = useState<Record<string, SolicitudFisica | SolicitudJuridica>>({});
 
     const activeFiltersCount = useMemo(() => {
         let count = 0;
@@ -74,17 +75,64 @@ export default function SolicitudesTable() {
         return count;
     }, [activeFilters, globalFilter]);
 
+    const isSolicitudEditable = (estadoNombre?: string) => {
+        const estadoNormalizado = (estadoNombre || '').toLowerCase();
+
+        return ![
+            'aprobada',
+            'aprobado',
+            'aprobada en espera',
+            'completada',
+            'rechazada',
+            'rechazado',
+        ].includes(estadoNormalizado);
+    };
+
 
     // Estados para el modal de edición
     const [showEditModal, setShowEditModal] = useState(false);
     const [selectedSolicitud, setSelectedSolicitud] = useState<{
+        id: number | string;
         tipo: 'solicitud-fisica' | 'solicitud-juridica';
         datos: SolicitudFisica | SolicitudJuridica;
     } | null>(null);
 
+    const buildSolicitudEditKey = (tipo: 'solicitud-fisica' | 'solicitud-juridica', id: number | string) => `${tipo}-${id}`;
+
+    const handleSolicitudGuardada = (solicitudActualizada: {
+        id: number | string;
+        tipo: 'solicitud-fisica' | 'solicitud-juridica';
+        datos: SolicitudFisica | SolicitudJuridica;
+    }) => {
+
+        setSolicitudesEditadas((prev) => ({
+            ...prev,
+            [buildSolicitudEditKey(solicitudActualizada.tipo, solicitudActualizada.id)]: solicitudActualizada.datos,
+        }));
+
+        setSelectedSolicitudForGestion((prev) => {
+            if (!prev) return prev;
+            if (prev.id !== solicitudActualizada.id || prev.tipo !== solicitudActualizada.tipo) return prev;
+            return {
+                ...prev,
+                datos: solicitudActualizada.datos,
+            };
+        });
+
+        setSelectedSolicitud((prev) => {
+            if (!prev) return prev;
+            if (prev.id !== solicitudActualizada.id || prev.tipo !== solicitudActualizada.tipo) return prev;
+            return {
+                ...prev,
+                datos: solicitudActualizada.datos,
+            };
+        });
+    };
+
     // Estados para el modal de gestión de solicitudes (aprobar/rechazar)
     const [showGestionModal, setShowGestionModal] = useState(false);
     const [selectedSolicitudForGestion, setSelectedSolicitudForGestion] = useState<{
+        id: number | string;
         tipo: 'solicitud-fisica' | 'solicitud-juridica';
         datos: SolicitudFisica | SolicitudJuridica;
     } | null>(null);
@@ -127,11 +175,11 @@ export default function SolicitudesTable() {
 
         // Función para aplanar la estructura agrupada por tipo de solicitud
         const aplanarSolicitudes = (datos: any): any[] => {
-            if (!datos)  return [];
-            
+            if (!datos) return [];
+
             // Si ya es un array, devolverlo directamente
-            if (Array.isArray(datos))  return datos;
-            
+            if (Array.isArray(datos)) return datos;
+
 
             // Si es un objeto agrupado por tipo (Afiliacion, Desconexion, etc.)
             const solicitudesPlanas: any[] = [];
@@ -146,7 +194,7 @@ export default function SolicitudesTable() {
                             ...solicitud,
                             Tipo_Solicitud: solicitud.Tipo_Solicitud || tipoSolicitud
                         };
-       
+
                         solicitudesPlanas.push(solicitudConTipo);
                     });
                 }
@@ -164,20 +212,28 @@ export default function SolicitudesTable() {
             // Buscar ID real en la solicitud (backend usa Id_Solicitud)
             const solicitudConId = solicitud as any;
             const idReal = solicitudConId.Id_Solicitud || solicitudConId.id || solicitudConId.Id || solicitudConId.ID;
+            const solicitudLocal = (idReal && solicitudesEditadas[buildSolicitudEditKey('solicitud-fisica', idReal)]) as SolicitudFisica | undefined;
+            const solicitudFinal = solicitudLocal
+                ? {
+                    ...solicitud,
+                    ...solicitudLocal,
+                    Estado: solicitud.Estado,
+                }
+                : solicitud;
 
             return {
                 id: `fisico-${index}`, // ID interno único para la tabla
                 Id: idReal || (index + 1), // Usar ID real del backend o secuencial como fallback
-                Nombre_Completo: `${solicitud.Nombre || ''} ${solicitud.Apellido1 || ''} ${solicitud.Apellido2 || ''}`.trim() || 'Sin nombre',
-                Cedula_Documento: solicitud.Identificacion || 'Sin identificación',
-                Tipo_Solicitud: normalizarTipoSolicitud(solicitud.Tipo_Solicitud || 'Afiliacion'),
+                Nombre_Completo: `${solicitudFinal.Nombre || ''} ${solicitudFinal.Apellido1 || ''} ${solicitudFinal.Apellido2 || ''}`.trim() || 'Sin nombre',
+                Cedula_Documento: solicitudFinal.Identificacion || 'Sin identificación',
+                Tipo_Solicitud: normalizarTipoSolicitud(solicitudFinal.Tipo_Solicitud || 'Afiliacion'),
                 Estado: {
-                    Id_Estado: solicitud.Estado?.Id_Estado_Solicitud || 0,
-                    Nombre_Estado: solicitud.Estado?.Nombre_Estado || 'Sin estado'
+                    Id_Estado: solicitudFinal.Estado?.Id_Estado_Solicitud || 0,
+                    Nombre_Estado: solicitudFinal.Estado?.Nombre_Estado || 'Sin estado'
                 },
                 Tipo_Persona: 'Físico' as const,
-                Fecha_Creacion: solicitud.Fecha_Creacion || '',
-                datos_originales: solicitud
+                Fecha_Creacion: solicitudFinal.Fecha_Creacion || '',
+                datos_originales: solicitudFinal
             };
         });
 
@@ -187,20 +243,28 @@ export default function SolicitudesTable() {
             // Buscar ID real en la solicitud (backend usa Id_Solicitud)
             const solicitudConId = solicitud as any;
             const idReal = solicitudConId.Id_Solicitud || solicitudConId.id || solicitudConId.Id || solicitudConId.ID;
+            const solicitudLocal = (idReal && solicitudesEditadas[buildSolicitudEditKey('solicitud-juridica', idReal)]) as SolicitudJuridica | undefined;
+            const solicitudFinal = solicitudLocal
+                ? {
+                    ...solicitud,
+                    ...solicitudLocal,
+                    Estado: solicitud.Estado,
+                }
+                : solicitud;
 
             return {
                 id: `juridico-${index}`, // ID interno único para la tabla
                 Id: idReal || (solicitudesFisicasUnificadas.length + index + 1), // Usar ID real del backend o continuar secuencia
-                Nombre_Completo: solicitud.Razon_Social || 'Sin razón social',
-                Cedula_Documento: solicitud.Cedula_Juridica || 'Sin cédula jurídica',
-                Tipo_Solicitud: normalizarTipoSolicitud(solicitud.Tipo_Solicitud || 'Afiliacion'),
+                Nombre_Completo: solicitudFinal.Razon_Social || 'Sin razón social',
+                Cedula_Documento: solicitudFinal.Cedula_Juridica || 'Sin cédula jurídica',
+                Tipo_Solicitud: normalizarTipoSolicitud(solicitudFinal.Tipo_Solicitud || 'Afiliacion'),
                 Estado: {
-                    Id_Estado: solicitud.Estado?.Id_Estado_Solicitud || 0,
-                    Nombre_Estado: solicitud.Estado?.Nombre_Estado || 'Sin estado'
+                    Id_Estado: solicitudFinal.Estado?.Id_Estado_Solicitud || 0,
+                    Nombre_Estado: solicitudFinal.Estado?.Nombre_Estado || 'Sin estado'
                 },
                 Tipo_Persona: 'Jurídico' as const,
-                Fecha_Creacion: solicitud.Fecha_Creacion || '',
-                datos_originales: solicitud
+                Fecha_Creacion: solicitudFinal.Fecha_Creacion || '',
+                datos_originales: solicitudFinal
             };
         });
 
@@ -210,7 +274,7 @@ export default function SolicitudesTable() {
         ].sort((a, b) => b.Id - a.Id);
 
         return resultado;
-    }, [solicitudesFisicas, solicitudesJuridicas]);
+    }, [solicitudesFisicas, solicitudesJuridicas, solicitudesEditadas]);
 
     const filteredData = useMemo(() => {
         let datos = datosUnificados;
@@ -421,6 +485,7 @@ export default function SolicitudesTable() {
 
                                     // Abrir el modal (el cambio de estado se maneja dentro del modal)
                                     setSelectedSolicitudForGestion({
+                                        id: solicitud.Id,
                                         tipo: tipo,
                                         datos: solicitud.datos_originales
                                     });
@@ -435,22 +500,30 @@ export default function SolicitudesTable() {
 
                         {/* Editar */}
                         {hasEditPermission && (
-                            <button
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    setSelectedSolicitud({
-                                        tipo: solicitud.Tipo_Persona === 'Físico'
-                                            ? 'solicitud-fisica'
-                                            : 'solicitud-juridica',
-                                        datos: solicitud.datos_originales
-                                    });
-                                    setShowEditModal(true);
-                                }}
-                                className="px-1 py-1 sm:px-4 sm:py-1 bg-blue-600 text-white text-[7px] sm:text-xs rounded hover:bg-blue-700 transition-colors w-full sm:w-auto"
-                                title="Editar solicitud"
-                            >
-                                Editar
-                            </button>
+                            (() => {
+                                const puedeEditar = isSolicitudEditable(solicitud.Estado.Nombre_Estado);
+
+                                return (
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            setSelectedSolicitud({
+                                                id: solicitud.Id,
+                                                tipo: solicitud.Tipo_Persona === 'Físico'
+                                                    ? 'solicitud-fisica'
+                                                    : 'solicitud-juridica',
+                                                datos: solicitud.datos_originales
+                                            });
+                                            setShowEditModal(true);
+                                        }}
+                                        disabled={!puedeEditar}
+                                        className="px-1 py-1 sm:px-4 sm:py-1 bg-blue-600 text-white text-[7px] sm:text-xs rounded hover:bg-blue-700 transition-colors w-full sm:w-auto disabled:opacity-50 disabled:cursor-not-allowed"
+                                        title={puedeEditar ? 'Editar solicitud' : 'Esta solicitud ya fue aceptada o eliminada'}
+                                    >
+                                        Editar
+                                    </button>
+                                );
+                            })()
                         )}
                     </div>
                 );
@@ -713,6 +786,7 @@ export default function SolicitudesTable() {
                 <EditSolicitudModal
                     solicitud={selectedSolicitud}
                     isOpen={showEditModal}
+                    onSave={handleSolicitudGuardada}
                     onClose={() => {
                         setShowEditModal(false);
                         setSelectedSolicitud(null);

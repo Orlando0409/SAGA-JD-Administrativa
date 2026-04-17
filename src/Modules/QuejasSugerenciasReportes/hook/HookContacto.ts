@@ -88,7 +88,6 @@ export const useUpdateReporteEstado = () => {
       actualizarEstadoReporte(id, idEstado),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['reportes'] });
-      queryClient.invalidateQueries({ queryKey: ['reportes-archivados'] });
     },
   });
 };
@@ -100,7 +99,6 @@ export const useUpdateSugerenciaEstado = () => {
       actualizarEstadoSugerencia(id, idEstado),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['sugerencias'] });
-      queryClient.invalidateQueries({ queryKey: ['sugerencias-archivadas'] });
     },
   });
 };
@@ -113,7 +111,6 @@ export const useUpdateQuejaEstado = () => {
       actualizarEstadoQueja(id, idEstado),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['quejas'] });
-      queryClient.invalidateQueries({ queryKey: ['quejas-archivadas'] });
     },
   });
 };
