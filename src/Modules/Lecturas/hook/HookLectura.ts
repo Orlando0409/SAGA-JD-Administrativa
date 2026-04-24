@@ -10,7 +10,8 @@ import {
     importarCSVLecturas,
     createLectura, 
     updateLectura, 
-    changeEstadoSello
+    changeEstadoSello,
+    getSelloCalidad
 } from "../service/LecturaService";
 import type { Lectura, CreateLecturaDTO, UpdateLecturaDTO, TipoTarifaLectura } from "../model/Lectura";
 
@@ -66,6 +67,13 @@ export const useGetLecturasEntreFechas = (fechaInicio: string, fechaFin: string,
         enabled: enabled && !!fechaInicio && !!fechaFin,
     });
 };
+
+export const useGetSelloCalidad = () => {
+    return useQuery<boolean>({
+        queryKey: ["selloCalidad"],
+        queryFn: getSelloCalidad,
+    });
+}
 
 // Importar CSV de lecturas
 export const useImportarCSVLecturas = () => {

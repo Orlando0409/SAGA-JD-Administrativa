@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import {
   useChangeEstadoSello,
   useGetLecturas,
@@ -6,6 +6,7 @@ import {
   useGetLecturasByMedidor,
   useGetLecturasByUsuario,
   useGetLecturasEntreFechas,
+  useGetSelloCalidad,
 } from "../hook/HookLectura";
 import DetailLecturaModal from "./DetailLecturaModal";
 import UpdateLecturaModal from "./UpdateLecturaModal";
@@ -188,6 +189,13 @@ export default function LecturaTable() {
   const [lecturaSeleccionada, setLecturaSeleccionada] = useState<Lectura | null>(null);
   const [globalFilter, setGlobalFilter] = useState("");
   const [appliedFilters, setAppliedFilters] = useState<LecturaFilterOptions>({});
+  const { data: selloCalidad, isLoading: isLoadingSelloCalidad } = useGetSelloCalidad();
+
+  useEffect(() => {
+    if (selloCalidad !== undefined) {
+      setIsSelloApplied(Boolean(selloCalidad));
+    }
+  }, [selloCalidad]);
 
   const { data: users = [], isLoading: isLoadingUsuarios } = useUsers();
   const { afiliadosFisicos = [], isLoading: isLoadingAfiliadosFisicos } = useAfiliadosFisicos();

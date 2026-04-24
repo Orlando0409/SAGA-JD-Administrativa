@@ -49,6 +49,11 @@ export const getLecturasEntreFechas = async (fechaInicio: string, fechaFin: stri
     return response.data;
 };
 
+export const getSelloCalidad = async (): Promise<boolean> => {
+    const response = await axiosPrivate.get(`${BASE_URL}/sello-calidad`);
+    return response.data;
+}
+
 export const importarCSVLecturas = async (file: File): Promise<any> => {
     const formData = new FormData();
     formData.append('CSV', file);
