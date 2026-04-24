@@ -189,7 +189,7 @@ export default function LecturaTable() {
   const [lecturaSeleccionada, setLecturaSeleccionada] = useState<Lectura | null>(null);
   const [globalFilter, setGlobalFilter] = useState("");
   const [appliedFilters, setAppliedFilters] = useState<LecturaFilterOptions>({});
-  const { data: selloCalidad, isLoading: isLoadingSelloCalidad } = useGetSelloCalidad();
+  const { data: selloCalidad } = useGetSelloCalidad();
 
   useEffect(() => {
     if (selloCalidad !== undefined) {
