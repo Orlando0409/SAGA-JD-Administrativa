@@ -70,3 +70,8 @@ export const updateLectura = async (idLectura: number, lectura: UpdateLecturaDTO
     const response = await axiosPrivate.put(`${BASE_URL}/update/${idLectura}`, lectura);
     return response.data;
 };
+
+export const changeEstadoSello = async () => {
+    const response = await axiosPrivate.patch(`${BASE_URL}/Aplicar-sello-calidad`);
+    return response.data;
+}
