@@ -648,13 +648,13 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
                 </div>
 
 
-                <div className="sticky bottom-0 flex justify-end gap-3 p-6 border-t bg-gray-50 z-10">
+                <div className="sticky bottom-0 flex flex-wrap justify-end gap-2 sm:gap-3 p-3 sm:p-6 border-t bg-gray-50 z-10">
                     {/* Botón de acción para marcar en revisión */}
                     {estadoIdLocal === 1 && (
                         <button
                             onClick={handleMarcarEnRevision}
                             disabled={marcarEnRevisionMutation.isPending}
-                            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm hover:shadow-md flex items-center gap-2 text-sm font-medium"
+                            className="px-2.5 py-1.5 sm:px-4 sm:py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm hover:shadow-md flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-medium"
                         >
                             {marcarEnRevisionMutation.isPending ? (
                                 <>
@@ -674,7 +674,7 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
                         <button
                             onClick={handleCambiarEstado}
                             disabled={isLoading || info.estadoId === 4 || info.estadoId === 5}
-                            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm hover:shadow-md flex items-center gap-2 text-sm font-medium"
+                            className="px-2.5 py-1.5 sm:px-4 sm:py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm hover:shadow-md flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-medium"
                         >
                             {isLoading ? (
                                 <>
@@ -702,7 +702,7 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
                     <button
                         onClick={handleRechazar}
                         disabled={isLoading || info.estadoId === 4 || info.estadoId === 5}
-                        className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm hover:shadow-md flex items-center gap-2 text-sm font-medium"
+                        className="px-2.5 py-1.5 sm:px-4 sm:py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm hover:shadow-md flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-medium"
                     >
 
                         <>
@@ -715,7 +715,7 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
                     <button
                         onClick={onClose}
                         disabled={!canClose}
-                        className="px-4 py-2 text-gray-600 hover:text-gray-800 bg-gray-100 hover:bg-gray-200 rounded-lg transition-all disabled:opacity-50 text-sm font-medium shadow-sm hover:shadow-md"
+                        className="px-2.5 py-1.5 sm:px-4 sm:py-2 text-gray-600 hover:text-gray-800 bg-gray-100 hover:bg-gray-200 rounded-lg transition-all disabled:opacity-50 flex items-center text-xs sm:text-sm font-medium shadow-sm hover:shadow-md"
                     >
                         Cancelar
                     </button>

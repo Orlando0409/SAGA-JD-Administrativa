@@ -19,13 +19,58 @@ export const obtenerQuejas = async () => {
     return response.data;
 }
 
+export const obtenerQuejasPendientes = async () => {
+    const response = await axiosPrivate.get('/quejas/pendientes');
+    return response.data;
+}
+
+export const obtenerQuejasContestadas = async () => {
+    const response = await axiosPrivate.get('/quejas/contestadas');
+    return response.data;
+}
+
+export const obtenerQuejasArchivadas = async () => {
+    const response = await axiosPrivate.get('/quejas/archivados');
+    return response.data;
+}
+
 export const obtenerSugerencias = async () => {
     const response = await axiosPrivate.get('/sugerencias');
     return response.data;
 }
 
+export const obtenerSugerenciasPendientes = async () => {
+    const response = await axiosPrivate.get('/sugerencias/pendientes');
+    return response.data;
+}
+
+export const obtenerSugerenciasContestadas = async () => {
+    const response = await axiosPrivate.get('/sugerencias/contestadas');
+    return response.data;
+}
+
+export const obtenerSugerenciasArchivadas = async () => {
+    const response = await axiosPrivate.get('/sugerencias/archivados');
+    return response.data;
+}
+
 export const obtenerReportes = async () => {
     const response = await axiosPrivate.get('/reportes');
+    return response.data;
+}
+
+export const obtenerReportesPendientes = async () => {
+    const response = await axiosPrivate.get('/reportes/pendientes');
+    return response.data;
+}
+
+export const obtenerReportesContestadas = async () => {
+    const response = await axiosPrivate.get('/reportes/contestadas');
+    return response.data;
+}
+
+export const obtenerReportesArchivados = async () => {
+    const response = await axiosPrivate.get('/reportes/archivados');
     return response.data;
 }
 export const actualizarEstadoReporte = async (idReporte: number, Id_Estado_Reporte: number) => {
