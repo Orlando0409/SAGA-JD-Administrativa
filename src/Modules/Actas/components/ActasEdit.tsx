@@ -176,7 +176,7 @@ export default function ActasEdit({ acta, onClose, refetch }: ActasEditProps) {
                             <p className="text-xs text-red-500 mt-1">{tituloError}</p>
                         )}
                         {!tituloError && titulo.length === 100 && (
-                            <p className="text-xs text-gray-600 mt-1">El título puede tener máximo 100 caracteres.</p>
+                            <p className="text-xs text-red-500 mt-1">El título puede tener máximo 100 caracteres.</p>
                         )}
                     </div>
 
@@ -199,7 +199,7 @@ export default function ActasEdit({ acta, onClose, refetch }: ActasEditProps) {
                             <p className="text-xs text-red-500 mt-1">{descripcionError}</p>
                         )}
                         {!descripcionError && descripcion.length === 200 && (
-                            <p className="text-xs text-gray-600 mt-1">La descripción puede tener máximo 200 caracteres.</p>
+                            <p className="text-xs text-red-500 mt-1">La descripción puede tener máximo 200 caracteres.</p>
                         )}
                     </div>
 
