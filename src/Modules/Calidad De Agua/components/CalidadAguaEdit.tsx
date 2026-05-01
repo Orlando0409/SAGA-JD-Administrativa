@@ -32,6 +32,7 @@ export default function CalidadAguaEdit({ archivo, onClose, refetch }: CalidadAg
     const [file, setFile] = useState<File | null>(null);
     const [tituloError, setTituloError] = useState("");
     const [descripcionError, setDescripcionError] = useState("");
+    const [fileError, setFileError] = useState("");
     const [showConfirmDialog, setShowConfirmDialog] = useState(false);
 
     useEffect(() => {
@@ -39,6 +40,7 @@ export default function CalidadAguaEdit({ archivo, onClose, refetch }: CalidadAg
         setDescripcion(archivo.Descripcion || "");
         setTituloError("");
         setDescripcionError("");
+        setFileError("");
         setFile(null);
     }, [archivo]);
 
@@ -201,10 +203,22 @@ export default function CalidadAguaEdit({ archivo, onClose, refetch }: CalidadAg
                                 accept="application/pdf"
                                 onChange={(e) => {
                                     const selectedFile = e.target.files?.[0];
-                                    setFile(selectedFile || null);
+                                    if (selectedFile) {
+                                        const MAX_SIZE_MB = 20;
+                                        const MAX_SIZE_BYTES = MAX_SIZE_MB * 1024 * 1024;
+                                        if (selectedFile.size > MAX_SIZE_BYTES) {
+                                            setFileError(`El archivo no debe superar los ${MAX_SIZE_MB} MB.`);
+                                            setFile(null);
+                                        } else {
+                                            setFileError("");
+                                            setFile(selectedFile);
+                                        }
+                                    } else {
+                                        setFile(null);
+                                    }
                                     e.target.value = '';
                                 }}
-                                className="absolute inset-0 opacity-0 w-full h-full cursor-pointer"
+                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                             />
                             <button
                                 type="button"
@@ -242,6 +256,7 @@ export default function CalidadAguaEdit({ archivo, onClose, refetch }: CalidadAg
                                             onClick={(e) => {
                                                 e.stopPropagation();
                                                 setFile(null);
+                                                setFileError("");
                                             }}
                                             className="text-red-500 hover:text-red-700 hover:bg-red-50 p-1 rounded"
                                         >
@@ -250,6 +265,9 @@ export default function CalidadAguaEdit({ archivo, onClose, refetch }: CalidadAg
                                     </div>
                                 </div>
                             </div>
+                        )}
+                        {fileError && (
+                            <p className="text-xs text-red-500 mt-2">{fileError}</p>
                         )}
                     </div>
                 </div>
