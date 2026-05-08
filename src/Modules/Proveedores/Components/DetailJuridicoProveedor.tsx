@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
 import { LuX, LuPhone, LuBuilding2, LuCalendar, LuIdCard, LuBuilding } from 'react-icons/lu';
-import { Accordion, AccordionHeader, AccordionBody } from "@material-tailwind/react";
+import * as Accordion from "@radix-ui/react-accordion";
 import { FiChevronDown, FiChevronRight } from 'react-icons/fi';
 import { formatCedulaJuridica, formatPhoneNumberDisplay } from '../Schema/SchemaProveedorJuridico';
-import { CUSTOM_ANIMATION } from '@/Modules/Global/types/Sections';
 import type { ProveedorJuridico } from '../Models/TablaProveedo/tablaJuridicoProveedor';
 
 interface ProveedorJuridicoDetailModalProps {
@@ -15,12 +14,8 @@ interface ProveedorJuridicoDetailModalProps {
 const ProveedorJuridicoDetailModal: React.FC<ProveedorJuridicoDetailModalProps> = ({ proveedor, isOpen, onClose }) => {
   const [openSections, setOpenSections] = useState<number[]>([1, 2]); // Abrir por defecto
 
-  const handleAccordion = (id: number) => {
-    setOpenSections(prev =>
-      prev.includes(id)
-        ? prev.filter(sectionId => sectionId !== id)
-        : [...prev, id]
-    );
+  const handleValueChange = (values: string[]) => {
+    setOpenSections(values.map(v => Number(v)));
   };
 
   const formatDate = (dateString: string): string => {
@@ -82,30 +77,31 @@ const ProveedorJuridicoDetailModal: React.FC<ProveedorJuridicoDetailModalProps> 
           </div>
 
           {/* Accordion Sections */}
-          <div className="space-y-4">
+          <Accordion.Root
+            type="multiple"
+            value={openSections.map(String)}
+            onValueChange={handleValueChange}
+            className="space-y-4"
+          >
             {/* Información Básica */}
-            <Accordion
-              open={openSections.includes(1)}
-              animate={CUSTOM_ANIMATION}
+            <Accordion.Item
+              value="1"
               className="border border-gray-200 rounded-lg shadow-sm bg-white"
-              {...({} as any)}
             >
-              <AccordionHeader
-                onClick={() => handleAccordion(1)}
-                className="text-base font-semibold px-6 py-4 border-b-0 hover:bg-gray-50"
-                {...({} as any)}
-              >
-                <div className="flex items-center justify-between w-full">
-                  <div className="flex items-center gap-3">
-                    <LuBuilding className="w-5 h-5 text-blue-600" />
-                    <span className="text-gray-900">Información Básica</span>
+              <Accordion.Header>
+                <Accordion.Trigger className="text-base font-semibold px-6 py-4 border-b-0 hover:bg-gray-50 w-full text-left">
+                  <div className="flex items-center justify-between w-full">
+                    <div className="flex items-center gap-3">
+                      <LuBuilding className="w-5 h-5 text-blue-600" />
+                      <span className="text-gray-900">Información Básica</span>
+                    </div>
+                    <span className="text-gray-500">
+                      {openSections.includes(1) ? <FiChevronDown size={20} /> : <FiChevronRight size={20} />}
+                    </span>
                   </div>
-                  <span className="text-gray-500">
-                    {openSections.includes(1) ? <FiChevronDown size={20} /> : <FiChevronRight size={20} />}
-                  </span>
-                </div>
-              </AccordionHeader>
-              <AccordionBody className="px-6 pb-6" placeholder="">
+                </Accordion.Trigger>
+              </Accordion.Header>
+              <Accordion.Content className="accordion-content px-6 pb-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-4">
                     <div className="flex items-center gap-2">
@@ -154,32 +150,28 @@ const ProveedorJuridicoDetailModal: React.FC<ProveedorJuridicoDetailModalProps> 
                     </div>
                   </div>
                 </div>
-              </AccordionBody>
-            </Accordion>
+              </Accordion.Content>
+            </Accordion.Item>
 
             {/* Información de Fechas */}
-            <Accordion
-              open={openSections.includes(2)}
-              animate={CUSTOM_ANIMATION}
+            <Accordion.Item
+              value="2"
               className="border border-gray-200 rounded-lg shadow-sm bg-white"
-              {...({} as any)}
             >
-              <AccordionHeader
-                onClick={() => handleAccordion(2)}
-                className="text-base font-semibold px-6 py-4 border-b-0 hover:bg-gray-50"
-                {...({} as any)}
-              >
-                <div className="flex items-center justify-between w-full">
-                  <div className="flex items-center gap-3">
-                    <LuCalendar className="w-5 h-5 text-blue-600" />
-                    <span className="text-gray-900">Información de Fechas</span>
+              <Accordion.Header>
+                <Accordion.Trigger className="text-base font-semibold px-6 py-4 border-b-0 hover:bg-gray-50 w-full text-left">
+                  <div className="flex items-center justify-between w-full">
+                    <div className="flex items-center gap-3">
+                      <LuCalendar className="w-5 h-5 text-blue-600" />
+                      <span className="text-gray-900">Información de Fechas</span>
+                    </div>
+                    <span className="text-gray-500">
+                      {openSections.includes(2) ? <FiChevronDown size={20} /> : <FiChevronRight size={20} />}
+                    </span>
                   </div>
-                  <span className="text-gray-500">
-                    {openSections.includes(2) ? <FiChevronDown size={20} /> : <FiChevronRight size={20} />}
-                  </span>
-                </div>
-              </AccordionHeader>
-              <AccordionBody className="px-6 pb-6" placeholder="">
+                </Accordion.Trigger>
+              </Accordion.Header>
+              <Accordion.Content className="accordion-content px-6 pb-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-4">
                     <div className="flex items-center gap-2">
@@ -200,9 +192,9 @@ const ProveedorJuridicoDetailModal: React.FC<ProveedorJuridicoDetailModalProps> 
                     </div>
                   </div>
                 </div>
-              </AccordionBody>
-            </Accordion>
-          </div>
+              </Accordion.Content>
+            </Accordion.Item>
+          </Accordion.Root>
 
 
         </div>
