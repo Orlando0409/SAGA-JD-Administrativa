@@ -12,11 +12,11 @@ import {
 } from "@/Modules/Global/components/Sidebar/ui/alert-dialog"
 import { Link, useLocation } from '@tanstack/react-router'
 import { useLogout } from '../../../Auth/Hooks/AuthHook'
-import { Accordion, AccordionHeader, AccordionBody } from "@material-tailwind/react"
+import * as Accordion from "@radix-ui/react-accordion"
 import { useState } from "react"
 import { HiLogout } from 'react-icons/hi'
 import { FiChevronDown, FiChevronRight } from 'react-icons/fi'
-import { CUSTOM_ANIMATION, sections, type AppSidebarProps } from "../../types/Sections"
+import { sections, type AppSidebarProps } from "../../types/Sections"
 import { Button } from "./ui/button"
 import { useAlerts } from "../../context/AlertContext"
 import { LuKey } from "react-icons/lu"
@@ -48,12 +48,8 @@ export function AppSidebar({ allowedModules }: Readonly<AppSidebarProps>) {
     showSuccess('Sesión cerrada exitosamente')
   }
 
-  const handleAccordion = (id: number) => {
-    setOpenSections(prev =>
-      prev.includes(id)
-        ? prev.filter(sectionId => sectionId !== id)
-        : [...prev, id]
-    )
+  const handleValueChange = (values: string[]) => {
+    setOpenSections(values.map(v => Number(v)))
   }
 
   const sectionsWithModules = sections.filter(section => {
@@ -96,61 +92,61 @@ export function AppSidebar({ allowedModules }: Readonly<AppSidebarProps>) {
         </SidebarHeader>
 
         <SidebarContent className="scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100 max-h-[calc(100vh-180px)]">
-          {sectionsWithModules.map(section => {
-            const isOpen = openSections.includes(section.id)
-            const sectionModules = allowedModules.filter(mod => mod.section === section.key)
+          <Accordion.Root
+            type="multiple"
+            value={openSections.map(String)}
+            onValueChange={handleValueChange}
+          >
+            {sectionsWithModules.map(section => {
+              const isOpen = openSections.includes(section.id)
+              const sectionModules = allowedModules.filter(mod => mod.section === section.key)
 
-            return (
-              <Accordion
-                key={`section-${section.id}`}
-                open={isOpen}
-                animate={CUSTOM_ANIMATION}
-                className="border-none shadow-none bg-transparent"
-                placeholder=""
-                {...({} as any)}
-              >
-                <AccordionHeader
-                  onClick={() => handleAccordion(section.id)}
-                  className="text-base font-semibold px-2 py-1 group-data-[collapsible=icon]:hidden"
-                  placeholder=""
-                  {...({} as any)}
+              return (
+                <Accordion.Item
+                  key={`section-${section.id}`}
+                  value={String(section.id)}
+                  className="border-none shadow-none bg-transparent"
                 >
-                  <div className="flex items-center justify-between pl-2 w-full">
-                    {section.title}
-                    <span>
-                      {isOpen ? <FiChevronDown size={20} /> : <FiChevronRight size={20} />}
-                    </span>
-                  </div>
-                </AccordionHeader>
+                  <Accordion.Header className="group-data-[collapsible=icon]:hidden">
+                    <Accordion.Trigger className="text-base font-semibold px-2 py-1 w-full text-left">
+                      <div className="flex items-center justify-between pl-2 w-full">
+                        {section.title}
+                        <span>
+                          {isOpen ? <FiChevronDown size={20} /> : <FiChevronRight size={20} />}
+                        </span>
+                      </div>
+                    </Accordion.Trigger>
+                  </Accordion.Header>
 
-                <AccordionBody className="p-0" placeholder="">
-                  <ul>
-                    {sectionModules.filter(mod => !mod.hidden).map((mod, index) => (
-                      <li key={`${mod.name}-${mod.path}-${index}`}>
-                        <Link
-                          to={mod.path}
-                          className={`flex items-center px-4 py-2 rounded-lg transition-colors
-                            ${isActive(mod.path)
-                              ? 'bg-blue-100 text-blue-600'
-                              : 'text-gray-700 hover:bg-blue-50 hover:text-blue-600'}
-                          `}
-                        >
-                          <span className="w-6 h-6 flex items-center justify-center">{mod.icon}</span>
-                          <span className="ml-2 group-data-[collapsible=icon]:hidden">{mod.name}</span>
+                  <Accordion.Content className="accordion-content p-0">
+                    <ul>
+                      {sectionModules.filter(mod => !mod.hidden).map((mod, index) => (
+                        <li key={`${mod.name}-${mod.path}-${index}`}>
+                          <Link
+                            to={mod.path}
+                            className={`flex items-center px-4 py-2 rounded-lg transition-colors
+                              ${isActive(mod.path)
+                                ? 'bg-blue-100 text-blue-600'
+                                : 'text-gray-700 hover:bg-blue-50 hover:text-blue-600'}
+                            `}
+                          >
+                            <span className="w-6 h-6 flex items-center justify-center">{mod.icon}</span>
+                            <span className="ml-2 group-data-[collapsible=icon]:hidden">{mod.name}</span>
 
-                          {(mod.name === 'Revisión de Solicitudes' || mod.path === '/Solicitudes') && totalPendientes > 0 && (
-                            <span className="ml-auto bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-medium group-data-[collapsible=icon]:hidden">
-                              {totalPendientes > 9 ? '9+' : totalPendientes}
-                            </span>
-                          )}
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
-                </AccordionBody>
-              </Accordion>
-            )
-          })}
+                            {(mod.name === 'Revisión de Solicitudes' || mod.path === '/Solicitudes') && totalPendientes > 0 && (
+                              <span className="ml-auto bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-medium group-data-[collapsible=icon]:hidden">
+                                {totalPendientes > 9 ? '9+' : totalPendientes}
+                              </span>
+                            )}
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  </Accordion.Content>
+                </Accordion.Item>
+              )
+            })}
+          </Accordion.Root>
         </SidebarContent>
 
         <SidebarFooter className="border-t border-sidebar-border">
