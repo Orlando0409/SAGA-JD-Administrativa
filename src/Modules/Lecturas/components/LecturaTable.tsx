@@ -1,12 +1,10 @@
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState } from "react";
 import {
-  useChangeEstadoSello,
   useGetLecturas,
   useGetLecturasByAfiliado,
   useGetLecturasByMedidor,
   useGetLecturasByUsuario,
   useGetLecturasEntreFechas,
-  useGetSelloCalidad,
 } from "../hook/HookLectura";
 import DetailLecturaModal from "./DetailLecturaModal";
 import UpdateLecturaModal from "./UpdateLecturaModal";
@@ -21,16 +19,6 @@ import {
   MdKeyboardArrowUp,
 } from "react-icons/md";
 import type { Lectura } from "../model/Lectura";
-import {
-  AlertDialog,
-  AlertDialogContent,
-  AlertDialogTitle,
-  AlertDialogDescription,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogHeader,
-  AlertDialogFooter
-} from "@/Modules/Global/components/Sidebar/ui/alert-dialog";
 import {
   useReactTable,
   getCoreRowModel,
@@ -184,23 +172,13 @@ export default function LecturaTable() {
   const [updateModalOpen, setUpdateModalOpen] = useState(false);
   const [insertModalOpen, setInsertModalOpen] = useState(false);
   const [showFilterModal, setShowFilterModal] = useState(false);
-  const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
-  const [isSelloApplied, setIsSelloApplied] = useState(false);
   const [lecturaSeleccionada, setLecturaSeleccionada] = useState<Lectura | null>(null);
   const [globalFilter, setGlobalFilter] = useState("");
   const [appliedFilters, setAppliedFilters] = useState<LecturaFilterOptions>({});
-  const { data: selloCalidad } = useGetSelloCalidad();
-
-  useEffect(() => {
-    if (selloCalidad !== undefined) {
-      setIsSelloApplied(Boolean(selloCalidad));
-    }
-  }, [selloCalidad]);
 
   const { data: users = [], isLoading: isLoadingUsuarios } = useUsers();
   const { afiliadosFisicos = [], isLoading: isLoadingAfiliadosFisicos } = useAfiliadosFisicos();
   const { afiliadosJuridicos = [], isLoading: isLoadingAfiliadosJuridicos } = useAfiliadosJuridicos();
-  const{ mutate: changeEstadoSello } = useChangeEstadoSello();
 
   const pageSizeOptions = [5, 10, 20, 50];
   const [pagination, setPagination] = useState({
@@ -345,25 +323,6 @@ export default function LecturaTable() {
     setPagination((prev) => ({ ...prev, pageIndex: 0 }));
   };
 
-  const handleApplySelloCalidadClick = (e: React.MouseEvent<HTMLInputElement>) => {
-    e.preventDefault();
-    setIsConfirmDialogOpen(true);
-  };
-
-  const handleApplySelloCalidad = () => {
-    // @ts-ignore
-    changeEstadoSello(undefined, {
-      onSuccess: () => {
-        activeQuery.refetch();
-        setIsSelloApplied(!isSelloApplied);
-        setIsConfirmDialogOpen(false);
-      },
-      onError: () => {
-        setIsConfirmDialogOpen(false);
-      }
-    });
-  }
-
 
   // Column helper
   const columnHelper = createColumnHelper<Lectura>();
@@ -499,7 +458,7 @@ export default function LecturaTable() {
         </div>
 
         <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 items-stretch sm:items-center justify-between pb-2">
-          {/* Filters and Apply Sello - Left/Top */}
+          {/* Filters - Left/Top */}
           <div className="flex flex-row items-center gap-2 sm:gap-4 w-full sm:w-auto">
             <div className="flex items-center gap-2 flex-1 sm:w-auto">
               <button
@@ -519,17 +478,6 @@ export default function LecturaTable() {
                 )}
               </button>
             </div>
-
-            <label className="flex sm:flex-none items-center justify-center sm:justify-start gap-2 cursor-pointer px-2 py-1.5 sm:px-4 sm:py-2 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors text-xs sm:text-sm">
-              <input
-                type="checkbox"
-                checked={isSelloApplied}
-                onClick={handleApplySelloCalidadClick}
-                readOnly
-                className="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
-              />
-              <span className="text-gray-700 font-medium whitespace-nowrap">Aplicar Sello de Calidad</span>
-            </label>
           </div>
 
           <div className="flex w-full flex-col sm:flex-row gap-3 sm:gap-4 items-stretch sm:items-center justify-end">
@@ -693,30 +641,6 @@ export default function LecturaTable() {
       {insertModalOpen && (
         <InsertarLecturaModal onClose={handleCloseInsertModal} />
       )}
-
-      <AlertDialog open={isConfirmDialogOpen} onOpenChange={setIsConfirmDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>¿Confirmar acción?</AlertDialogTitle>
-            <AlertDialogDescription>
-              {isSelloApplied ? (
-                "¿Está seguro que desea remover el Sello de Calidad? Los cambios se aplicarán de inmediato."
-              ) : (
-                "¿Está seguro que desea aplicar el Sello de Calidad? Los montos de las tarifas cambiarán con el sello aplicado."
-              )}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            
-            <AlertDialogAction
-              onClick={handleApplySelloCalidad}
-            >
-              Confirmar
-            </AlertDialogAction>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
 
       <FilterLecturaModal
         isOpen={showFilterModal}
