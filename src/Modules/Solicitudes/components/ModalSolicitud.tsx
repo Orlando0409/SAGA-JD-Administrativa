@@ -18,6 +18,8 @@ import { mapearTipoSolicitud, mapearTipoPersona } from '../Service/EstadoSolicit
 import type { TipoSolicitud, TipoPersona } from '../Types/EstadoSolicitudes';
 import { useAlerts } from '@/Modules/Global/context/AlertContext';
 import { updateEstadoMedidor } from '@/Modules/Inventario/service/MedidorServices';
+import { getAfiliadoFisicoByIdentificacion } from '@/Modules/Afiliados/Service/ServiceAfiliadoFisico';
+import { getAfiliadoJuridicoByIdentificacion } from '@/Modules/Afiliados/Service/ServiceAfiliadoJuridico';
 /*import { getSolicitudFisicaById } from '../Service/SolicitudesFisicas';
 import { getSolicitudJuridicaById } from '../Service/SolicitudesJuridicas';
 */
@@ -63,6 +65,90 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
     const completarMutation = useCompletar();
     const rechazarMutation = useRechazar();
     const { showWarning, showError } = useAlerts();
+
+    const datosSolicitudRaw = solicitud.datos as any;
+    const tipoSolicitudTexto = String(
+        solicitud.tipoSolicitud ||
+        datosSolicitudRaw?.Tipo_Solicitud ||
+        datosSolicitudRaw?.TipoSolicitud ||
+        ''
+    );
+    const tipoSolicitudNormalizado = tipoSolicitudTexto
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .trim();
+    const requiereInfoAfiliado =
+        !tipoSolicitudNormalizado.includes('afiliacion') &&
+        (
+            (tipoSolicitudNormalizado.includes('cambio') && tipoSolicitudNormalizado.includes('medidor')) ||
+            tipoSolicitudNormalizado.includes('desconexion') ||
+            tipoSolicitudNormalizado.includes('asociado') ||
+            (tipoSolicitudNormalizado.includes('agregar') && tipoSolicitudNormalizado.includes('medidor'))
+        );
+
+    const tipoEntidadRaw = Number(datosSolicitudRaw?.Tipo_Entidad);
+    const esEntidadJuridica = tipoEntidadRaw === 2 || (!tipoEntidadRaw && solicitud.tipo === 'solicitud-juridica');
+    const identificacionConsulta = esEntidadJuridica
+        ? String(datosSolicitudRaw?.Cedula_Juridica || '').trim()
+        : String(datosSolicitudRaw?.Identificacion || datosSolicitudRaw?.Cedula || '').trim();
+
+    type AfiliadoInfoCargado =
+        | { tipoEntidad: 1; data: Awaited<ReturnType<typeof getAfiliadoFisicoByIdentificacion>> }
+        | { tipoEntidad: 2; data: Awaited<ReturnType<typeof getAfiliadoJuridicoByIdentificacion>> };
+
+    const [afiliadoInfo, setAfiliadoInfo] = useState<AfiliadoInfoCargado | null>(null);
+    const [loadingAfiliadoInfo, setLoadingAfiliadoInfo] = useState(false);
+    const [errorAfiliadoInfo, setErrorAfiliadoInfo] = useState<string | null>(null);
+
+    useEffect(() => {
+        if (!isOpen) return;
+
+        if (!requiereInfoAfiliado) {
+            setAfiliadoInfo(null);
+            setLoadingAfiliadoInfo(false);
+            setErrorAfiliadoInfo(null);
+            return;
+        }
+
+        if (!identificacionConsulta) {
+            setAfiliadoInfo(null);
+            setLoadingAfiliadoInfo(false);
+            setErrorAfiliadoInfo('No se encontró la identificación para cargar los datos del afiliado.');
+            return;
+        }
+
+        let cancelled = false;
+        setLoadingAfiliadoInfo(true);
+        setErrorAfiliadoInfo(null);
+
+        (async () => {
+            try {
+                if (esEntidadJuridica) {
+                    const data = await getAfiliadoJuridicoByIdentificacion(identificacionConsulta);
+                    if (cancelled) return;
+                    setAfiliadoInfo({ tipoEntidad: 2, data });
+                } else {
+                    const data = await getAfiliadoFisicoByIdentificacion(identificacionConsulta);
+                    if (cancelled) return;
+                    setAfiliadoInfo({ tipoEntidad: 1, data });
+                }
+            } catch (error) {
+                if (cancelled) return;
+                console.error('Error cargando info del afiliado:', error);
+                setAfiliadoInfo(null);
+                setErrorAfiliadoInfo('No se pudo cargar la información del afiliado.');
+            } finally {
+                if (cancelled) return;
+                setLoadingAfiliadoInfo(false);
+            }
+        })();
+
+        return () => {
+            cancelled = true;
+        };
+    }, [isOpen, requiereInfoAfiliado, esEntidadJuridica, identificacionConsulta]);
+
     // Extraer información básica de la solicitud
     const getSolicitudInfo = () => {
         if (solicitud.tipo === 'solicitud-fisica') {
@@ -145,6 +231,41 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
 
     const info = getSolicitudInfo();
     const esAgregarMedidor = info.tipoSolicitud === 'Agregar Medidor';
+
+    const nombreSolicitanteMostrado = (() => {
+        if (!requiereInfoAfiliado) return info.nombre;
+        if (loadingAfiliadoInfo) return 'Cargando...';
+        if (!afiliadoInfo) return info.nombre;
+        if (afiliadoInfo.tipoEntidad === 2) return afiliadoInfo.data.Razon_Social || info.nombre;
+
+        const nombre = `${afiliadoInfo.data.Nombre || ''} ${afiliadoInfo.data.Apellido1 || ''} ${afiliadoInfo.data.Apellido2 || ''}`.trim();
+        return nombre || info.nombre;
+    })();
+
+    const tipoIdentificacionMostrado = (() => {
+        if (!requiereInfoAfiliado) return info.Tipo_Identificacion;
+        if (loadingAfiliadoInfo) return 'Cargando...';
+        if (afiliadoInfo?.tipoEntidad === 1) return afiliadoInfo.data.Tipo_Identificacion || info.Tipo_Identificacion;
+        return info.Tipo_Identificacion;
+    })();
+
+    const telefonoMostrado = (() => {
+        if (!requiereInfoAfiliado) return info.Numero_Telefono;
+        if (loadingAfiliadoInfo) return 'Cargando...';
+        return afiliadoInfo?.data?.Numero_Telefono || info.Numero_Telefono;
+    })();
+
+    const correoMostrado = (() => {
+        if (!requiereInfoAfiliado) return info.Correo;
+        if (loadingAfiliadoInfo) return 'Cargando...';
+        return afiliadoInfo?.data?.Correo || info.Correo;
+    })();
+
+    const direccionMostrada = (() => {
+        if (!requiereInfoAfiliado) return info.Direccion_Exacta;
+        if (loadingAfiliadoInfo) return 'Cargando...';
+        return afiliadoInfo?.data?.Direccion_Exacta || info.Direccion_Exacta;
+    })();
 
     // Estado local para reflejar el estado de la solicitud tras marcar en revisión
     const [estadoIdLocal, setEstadoIdLocal] = useState<number | null>(null);
@@ -460,6 +581,16 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
                             </div>
 
                             <div className="p-4">
+                                {requiereInfoAfiliado && (
+                                    <div className="mb-4">
+                                        {loadingAfiliadoInfo && (
+                                            <p className="text-sm text-gray-600">Cargando información del afiliado...</p>
+                                        )}
+                                        {errorAfiliadoInfo && (
+                                            <p className="text-sm text-red-600">{errorAfiliadoInfo}</p>
+                                        )}
+                                    </div>
+                                )}
                                 <div className="grid grid-cols-2 gap-4">
                                     {/* Columna izquierda */}
                                     <div className="space-y-3">
@@ -467,7 +598,7 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
                                             <label className="block text-xs font-medium text-gray-600 uppercase tracking-wide mb-1">
                                                 Nombre Completo
                                             </label>
-                                            <p className="text-sm font-medium text-gray-900">{info.nombre}</p>
+                                            <p className="text-sm font-medium text-gray-900">{nombreSolicitanteMostrado}</p>
                                         </div>
 
                                         {/* Mostrar tipo de identificación solo para personas físicas */}
@@ -476,7 +607,7 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
                                                 <label className="block text-xs font-medium text-gray-600 uppercase tracking-wide mb-1">
                                                     Tipo de Identificación
                                                 </label>
-                                                <p className="text-sm text-gray-900">{info.Tipo_Identificacion}</p>
+                                                <p className="text-sm text-gray-900">{tipoIdentificacionMostrado}</p>
                                             </div>
                                         )}
 
@@ -517,7 +648,7 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
                                                 <label className="block text-xs font-medium text-gray-600 uppercase tracking-wide mb-1">
                                                     Teléfono
                                                 </label>
-                                                <p className="text-sm text-gray-900">{info.Numero_Telefono}</p>
+                                                <p className="text-sm text-gray-900">{telefonoMostrado}</p>
                                             </div>
                                         )}
 
@@ -526,7 +657,7 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
                                                 <label className="block text-xs font-medium text-gray-600 uppercase tracking-wide mb-1">
                                                     Correo Electrónico
                                                 </label>
-                                                <p className="text-sm text-gray-900 break-all">{info.Correo}</p>
+                                                <p className="text-sm text-gray-900 break-all">{correoMostrado}</p>
                                             </div>
                                         )}
 
@@ -535,7 +666,7 @@ const ModalSolicitud: React.FC<ModalSolicitudProps> = ({ isOpen, onClose, solici
                                                 <label className="block text-xs font-medium text-gray-600 uppercase tracking-wide mb-1">
                                                     Dirección
                                                 </label>
-                                                <p className="text-sm text-gray-900">{info.Direccion_Exacta}</p>
+                                                <p className="text-sm text-gray-900">{direccionMostrada}</p>
                                             </div>
                                         )}
                                     </div>
