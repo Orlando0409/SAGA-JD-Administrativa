@@ -36,6 +36,12 @@ export default defineConfig({
           if (id.includes('/node_modules/zod/')) return 'validation-vendor';
           if (id.includes('/node_modules/date-fns/')) return 'date-vendor';
 
+          if (id.includes('/node_modules/framer-motion/') || id.includes('/node_modules/motion/')) {
+            return 'motion-vendor';
+          }
+          if (id.includes('/node_modules/react-hook-form/')) return 'form-vendor';
+          if (id.includes('/node_modules/axios/')) return 'http-vendor';
+
           if (
             id.includes('/node_modules/libphonenumber-js/') ||
             id.includes('/node_modules/react-phone-number-input/') ||

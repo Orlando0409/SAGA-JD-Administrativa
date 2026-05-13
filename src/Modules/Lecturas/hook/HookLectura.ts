@@ -1,15 +1,15 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAlerts } from "@/Modules/Global/context/AlertContext";
-import { 
-    getAllLecturas, 
-    getTarifasLecturas, 
+import {
+    getAllLecturas,
+    getTarifasLecturas,
     getLecturasByUsuario,
     getLecturasByMedidor,
     getLecturasByAfiliado,
     getLecturasEntreFechas,
     importarCSVLecturas,
-    createLectura, 
-    updateLectura 
+    createLectura,
+    updateLectura
 } from "../service/LecturaService";
 import type { Lectura, CreateLecturaDTO, UpdateLecturaDTO, TipoTarifaLectura } from "../model/Lectura";
 
@@ -167,3 +167,4 @@ export const useUpdateLectura = () => {
         },
     });
 };
+

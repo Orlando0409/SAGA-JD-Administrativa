@@ -82,7 +82,7 @@ export const asignarMedidorConArchivos = async (
   formData.append('Id_Medidor', String(idMedidor));
   formData.append('Id_Afiliado', String(idAfiliado));
   if (estadoPago) {
-    formData.append('Estado_Pago', estadoPago);
+    formData.append('Estado_Pago_Medidor', estadoPago);
   }
   formData.append('Certificacion_Literal', certificacionFile);
   formData.append('Planos_Terreno', planosFile);
