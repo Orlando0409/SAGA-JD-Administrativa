@@ -1,4 +1,4 @@
-import { FaUserFriends, FaBook, FaHandHoldingWater, FaClipboardList, FaHistory, FaBoxes, FaUsers, FaTruck, FaRegQuestionCircle, FaEdit, FaImage, FaShieldAlt, FaTachometerAlt } from "react-icons/fa";
+import { FaUserFriends, FaBook, FaHandHoldingWater, FaClipboardList, FaHistory, FaBoxes, FaUsers, FaTruck, FaRegQuestionCircle, FaEdit, FaImage, FaShieldAlt, FaTachometerAlt, FaFileInvoiceDollar } from "react-icons/fa";
 import { MdOutlineReportGmailerrorred } from "react-icons/md";
 import { GrHelpBook } from "react-icons/gr";
 import { IoDocumentTextOutline } from "react-icons/io5";
@@ -10,7 +10,7 @@ export const modules = [
   { name: 'Gestión de inventario', icon: <FaBoxes />, path: '/Inventario', section: 'Gestión', Permiso: 'inventario', hidden: false },
   { name: 'Gestión de usuarios', icon: <FaUsers />, path: '/Usuarios', section: 'Gestión', Permiso: 'usuarios', hidden: false },
   { name: 'Gestión de proveedores', icon: <FaTruck />, path: '/Proveedores', section: 'Gestión', Permiso: 'proveedores', hidden: false },
-  { name: 'Revisión de quejas/sugerencias/reportes', icon: <MdOutlineReportGmailerrorred />, path: '/Contacto', section: 'Gestión', Permiso: 'contacto', hidden: false },
+  { name: 'Revisión de quejas/sugerencias/reportes', icon: <MdOutlineReportGmailerrorred />, path: '/Contacto', section: 'Gestión', Permiso: 'quejasugerenciasreportes', hidden: false },
   { name: 'Gestión de calidad de agua', icon: <FaHandHoldingWater />, path: '/CalidadAgua', section: 'Gestión', Permiso: 'calidadAgua', hidden: false },
 
   // Seguridad
@@ -35,4 +35,5 @@ export const modules = [
 
   // Subrutas de Abonados (ocultas del dashboard)
   { name: 'Lecturas', icon: <IoDocumentTextOutline />, path: '/Afiliados/Lecturas', Permiso: 'abonados', hidden: true },
+  { name: 'Facturas', icon: <FaFileInvoiceDollar />, path: '/Afiliados/Facturas', Permiso: 'abonados', hidden: true },
 ]

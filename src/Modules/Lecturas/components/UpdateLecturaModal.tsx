@@ -13,7 +13,7 @@ export default function UpdateLecturaModal({ lectura, onClose }: UpdateLecturaMo
   const { data: tarifas } = useGetTarifas();
 
   const [formData, setFormData] = useState<UpdateLecturaDTO>({
-    Id_Tipo_Tarifa: lectura.Tipo_Tarifa?.Id_Tipo_Tarifa_Lectura ?? 1,
+    Id_Tipo_Tarifa: lectura.Tipo_Tarifa?.Id_Tarifa_Lectura ?? 1,
     Valor_Lectura: lectura.Valor_Lectura_Actual,
     Numero_Medidor: lectura.Medidor.Numero_Medidor,
   });
@@ -24,7 +24,7 @@ export default function UpdateLecturaModal({ lectura, onClose }: UpdateLecturaMo
 
   useEffect(() => {
     setFormData({
-      Id_Tipo_Tarifa: lectura.Tipo_Tarifa?.Id_Tipo_Tarifa_Lectura ?? 1,
+      Id_Tipo_Tarifa: lectura.Tipo_Tarifa?.Id_Tarifa_Lectura ?? 1,
       Valor_Lectura: lectura.Valor_Lectura_Actual,
       Numero_Medidor: lectura.Medidor.Numero_Medidor,
     });
@@ -147,7 +147,7 @@ export default function UpdateLecturaModal({ lectura, onClose }: UpdateLecturaMo
                 required
               >
                 {tarifas?.map((tarifa) => (
-                  <option key={tarifa.Id_Tipo_Tarifa_Lectura} value={tarifa.Id_Tipo_Tarifa_Lectura}>
+                  <option key={tarifa.Id_Tarifa_Lectura} value={tarifa.Id_Tarifa_Lectura}>
                     {tarifa.Nombre_Tipo_Tarifa}
                   </option>
                 ))}
