@@ -5,6 +5,7 @@ import {
     getFacturasByAfiliado,
     marcarFacturaPagada,
     marcarFacturasVencidas,
+    anularFactura,
 } from "../service/FacturaService";
 import type { Factura, MarcarVencidasResponse } from "../model/Factura";
 
@@ -43,6 +44,35 @@ export const useMarcarFacturaPagada = () => {
                 "error",
                 "Error al marcar como pagada",
                 error.response?.data?.message || "No se pudo actualizar la factura"
+            );
+        },
+    });
+};
+
+interface AnularArgs {
+    idFactura: number;
+    motivo?: string;
+}
+
+export const useAnularFactura = () => {
+    const queryClient = useQueryClient();
+    const { showAlert } = useAlerts();
+
+    return useMutation<Factura, any, AnularArgs>({
+        mutationFn: ({ idFactura, motivo }) => anularFactura(idFactura, motivo),
+        onSuccess: (data) => {
+            queryClient.invalidateQueries({ queryKey: ["facturas"] });
+            showAlert(
+                "success",
+                "Factura anulada",
+                `Factura ${data.Numero_Factura} anulada correctamente`
+            );
+        },
+        onError: (error: any) => {
+            showAlert(
+                "error",
+                "Error al anular factura",
+                error.response?.data?.message || "No se pudo anular la factura"
             );
         },
     });

@@ -32,6 +32,9 @@ export interface Factura {
     };
     Tipo_Tarifa_Aplicada?: string;
     Observaciones?: string;
+    Fecha_Pago?: string;
+    Fecha_Anulacion?: string;
+    Motivo_Anulacion?: string;
 }
 
 export type EstadoFacturaNombre = 'Disponible' | 'Pendiente' | 'Pagada' | 'Anulada' | string;

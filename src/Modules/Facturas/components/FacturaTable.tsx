@@ -3,6 +3,7 @@ import {
   useGetFacturas,
   useMarcarFacturaPagada,
   useMarcarFacturasVencidas,
+  useAnularFactura,
 } from "../hook/HookFactura";
 import DetailFacturaModal from "./DetailFacturaModal";
 import { LuSearch, LuRefreshCw } from "react-icons/lu";
@@ -35,6 +36,7 @@ import {
 } from "@tanstack/react-table";
 import { useUserPermissions } from "@/Modules/Auth/Hooks/PermissionHook";
 import type { Factura } from "../model/Factura";
+import { getEstadoFacturaBadgeClass } from "../utils/estadoFacturaBadge";
 
 type EstadoFilter = "todos" | "Disponible" | "Pendiente" | "Pagada" | "Anulada";
 
@@ -50,20 +52,6 @@ const getNombreAfiliado = (factura: Factura): string => {
   );
 };
 
-const getEstadoBadgeClass = (estado: string): string => {
-  switch (estado) {
-    case "Pagada":
-      return "border border-green-300 bg-green-100 text-green-700";
-    case "Pendiente":
-      return "border border-red-300 bg-red-100 text-red-700";
-    case "Anulada":
-      return "border border-gray-300 bg-gray-100 text-gray-700";
-    case "Disponible":
-    default:
-      return "border border-yellow-300 bg-yellow-100 text-yellow-700";
-  }
-};
-
 export default function FacturaTable() {
   const { canEdit, canView } = useUserPermissions();
   const hasEditPermission = canEdit("abonados");
@@ -71,16 +59,20 @@ export default function FacturaTable() {
 
   const [detailModalOpen, setDetailModalOpen] = useState(false);
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
+  const [anularDialogOpen, setAnularDialogOpen] = useState(false);
+  const [motivoAnulacion, setMotivoAnulacion] = useState("");
   const [facturaSeleccionada, setFacturaSeleccionada] = useState<Factura | null>(null);
   const [facturaAMarcar, setFacturaAMarcar] = useState<Factura | null>(null);
+  const [facturaAAnular, setFacturaAAnular] = useState<Factura | null>(null);
   const [globalFilter, setGlobalFilter] = useState("");
   const [estadoFilter, setEstadoFilter] = useState<EstadoFilter>("todos");
 
   const { data: facturas = [], isLoading, isError, refetch } = useGetFacturas();
   const { mutate: marcarPagada, isPending: isMarkingPaid } = useMarcarFacturaPagada();
   const { mutate: marcarVencidas, isPending: isCheckingVencidas } = useMarcarFacturasVencidas();
+  const { mutate: anularFacturaMut, isPending: isAnulando } = useAnularFactura();
 
-  const [pagination, setPagination] = useState({ pageSize: 10, pageIndex: 0 });
+  const [pagination, setPagination] = useState({ pageSize: 5, pageIndex: 0 });
   const pageSizeOptions = [5, 10, 20, 50];
 
   const facturasFiltradas = useMemo(() => {
@@ -121,6 +113,31 @@ export default function FacturaTable() {
     marcarVencidas(undefined, {
       onSuccess: () => refetch(),
     });
+  };
+
+  const handleSolicitarAnulacion = (factura: Factura) => {
+    setFacturaAAnular(factura);
+    setMotivoAnulacion("");
+    setAnularDialogOpen(true);
+  };
+
+  const handleConfirmarAnulacion = () => {
+    if (!facturaAAnular) return;
+    anularFacturaMut(
+      { idFactura: facturaAAnular.Id_Factura, motivo: motivoAnulacion.trim() || undefined },
+      {
+        onSuccess: () => {
+          setAnularDialogOpen(false);
+          setFacturaAAnular(null);
+          setMotivoAnulacion("");
+        },
+        onError: () => {
+          setAnularDialogOpen(false);
+          setFacturaAAnular(null);
+          setMotivoAnulacion("");
+        },
+      }
+    );
   };
 
   const columnHelper = createColumnHelper<Factura>();
@@ -174,7 +191,7 @@ export default function FacturaTable() {
       cell: (info) => {
         const estado = info.getValue();
         return (
-          <span className={`px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-medium whitespace-nowrap ${getEstadoBadgeClass(estado)}`}>
+          <span className={getEstadoFacturaBadgeClass(estado)}>
             {estado}
           </span>
         );
@@ -212,6 +229,8 @@ export default function FacturaTable() {
         const estado = factura.Estado?.Nombre_Estado;
         const puedeMarcarPagada =
           hasEditPermission && estado !== "Pagada" && estado !== "Anulada";
+        const puedeAnular =
+          hasEditPermission && estado !== "Pagada" && estado !== "Anulada";
 
         return (
           <div className="flex items-center justify-center gap-1 sm:gap-2">
@@ -232,6 +251,16 @@ export default function FacturaTable() {
                 title="Marcar como pagada"
               >
                 Pagar
+              </button>
+            )}
+            {puedeAnular && (
+              <button
+                onClick={() => handleSolicitarAnulacion(factura)}
+                disabled={isAnulando}
+                className="px-2 py-1 bg-red-600 text-white text-[10px] sm:text-xs rounded hover:bg-red-700 transition-colors whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
+                title="Anular factura"
+              >
+                Anular
               </button>
             )}
           </div>
@@ -444,6 +473,45 @@ export default function FacturaTable() {
               {isMarkingPaid ? "Procesando..." : "Confirmar pago"}
             </AlertDialogAction>
             <AlertDialogCancel disabled={isMarkingPaid}>Cancelar</AlertDialogCancel>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={anularDialogOpen} onOpenChange={setAnularDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Anular factura?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {facturaAAnular
+                ? `Está por anular la factura ${facturaAAnular.Numero_Factura} (${facturaAAnular.Total}). Esta acción registra fecha, usuario y motivo. No se puede deshacer.`
+                : ""}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="px-2 sm:px-4">
+            <label htmlFor="motivo-anulacion" className="block text-sm font-medium text-gray-700 mb-1">
+              Motivo de la anulación (opcional)
+            </label>
+            <textarea
+              id="motivo-anulacion"
+              value={motivoAnulacion}
+              onChange={(e) => setMotivoAnulacion(e.target.value.slice(0, 500))}
+              maxLength={500}
+              rows={3}
+              placeholder="Ej: Cobro duplicado, error en lectura, solicitud del afiliado..."
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent text-sm resize-none"
+              disabled={isAnulando}
+            />
+            <p className="mt-1 text-xs text-gray-500">{motivoAnulacion.length}/500</p>
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogAction
+              onClick={handleConfirmarAnulacion}
+              disabled={isAnulando}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              {isAnulando ? "Anulando..." : "Confirmar anulación"}
+            </AlertDialogAction>
+            <AlertDialogCancel disabled={isAnulando}>Cancelar</AlertDialogCancel>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

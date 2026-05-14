@@ -18,6 +18,11 @@ export const marcarFacturaPagada = async (idFactura: number): Promise<Factura> =
     return response.data;
 };
 
+export const anularFactura = async (idFactura: number, motivo?: string): Promise<Factura> => {
+    const response = await axiosPrivate.patch(`${BASE_URL}/${idFactura}/anular`, { motivo });
+    return response.data;
+};
+
 export const marcarFacturasVencidas = async (): Promise<MarcarVencidasResponse> => {
     const response = await axiosPrivate.post(`${BASE_URL}/marcar-vencidas`);
     return response.data;

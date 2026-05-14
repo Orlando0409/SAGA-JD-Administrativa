@@ -1,24 +1,11 @@
 import { FileText, User, Gauge, Calendar, X, Receipt } from "lucide-react";
 import type { Factura } from "../model/Factura";
+import { getEstadoFacturaBadgeClass } from "../utils/estadoFacturaBadge";
 
 interface DetailFacturaModalProps {
   factura: Factura;
   onClose: () => void;
 }
-
-const getEstadoBadgeClass = (estado: string): string => {
-  switch (estado) {
-    case "Pagada":
-      return "border border-green-300 bg-green-100 text-green-700";
-    case "Pendiente":
-      return "border border-red-300 bg-red-100 text-red-700";
-    case "Anulada":
-      return "border border-gray-300 bg-gray-100 text-gray-700";
-    case "Disponible":
-    default:
-      return "border border-yellow-300 bg-yellow-100 text-yellow-700";
-  }
-};
 
 const formatDate = (value: string | undefined): string => {
   if (!value) return "—";
@@ -66,9 +53,7 @@ export default function DetailFacturaModal({ factura, onClose }: DetailFacturaMo
                   Factura {factura.Numero_Factura}
                 </h2>
                 <div className="mt-1">
-                  <span
-                    className={`px-2 py-0.5 rounded-full text-xs font-medium ${getEstadoBadgeClass(estado)}`}
-                  >
+                  <span className={getEstadoFacturaBadgeClass(estado)}>
                     {estado}
                   </span>
                 </div>
@@ -230,6 +215,34 @@ export default function DetailFacturaModal({ factura, onClose }: DetailFacturaMo
                 </div>
               </div>
             </div>
+
+            {factura.Estado?.Nombre_Estado === "Anulada" && (factura.Fecha_Anulacion || factura.Motivo_Anulacion) && (
+              <div className="bg-white rounded-lg border border-red-200 overflow-hidden shadow-sm">
+                <div className="bg-red-50 px-5 py-3 border-b border-red-200">
+                  <h3 className="text-base font-bold text-red-900">Información de Anulación</h3>
+                </div>
+                <div className="p-5 grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {factura.Fecha_Anulacion && (
+                    <div className="bg-red-50 p-4 rounded-lg">
+                      <p className="text-xs font-semibold text-red-700 uppercase tracking-wider mb-2">
+                        Fecha de Anulación
+                      </p>
+                      <p className="text-sm font-medium text-red-900">
+                        {formatDate(factura.Fecha_Anulacion)}
+                      </p>
+                    </div>
+                  )}
+                  {factura.Motivo_Anulacion && (
+                    <div className="bg-red-50 p-4 rounded-lg md:col-span-2">
+                      <p className="text-xs font-semibold text-red-700 uppercase tracking-wider mb-2">Motivo</p>
+                      <p className="text-sm text-red-900 whitespace-pre-wrap break-words">
+                        {factura.Motivo_Anulacion}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
 
             {factura.Observaciones && (
               <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">

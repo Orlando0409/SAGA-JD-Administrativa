@@ -75,8 +75,8 @@ const ContactoTable = () => {
 
   const { canEdit, canView } = useUserPermissions();
 
-  const hasEditPermission = canEdit('contacto');
-  const hasViewPermission = canView('contacto');
+  const hasEditPermission = canEdit('quejasugerenciasreportes');
+  const hasViewPermission = canView('quejasugerenciasreportes');
 
   const isLoading = loadingQuejas || loadingSugerencias || loadingReportes || loadingQuejasArchivadas || loadingSugerenciasArchivadas || loadingReportesArchivados;
 

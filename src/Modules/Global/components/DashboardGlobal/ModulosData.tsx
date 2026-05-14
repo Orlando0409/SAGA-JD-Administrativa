@@ -10,7 +10,7 @@ export const modules = [
   { name: 'Gestión de inventario', icon: <FaBoxes />, path: '/Inventario', section: 'Gestión', Permiso: 'inventario', hidden: false },
   { name: 'Gestión de usuarios', icon: <FaUsers />, path: '/Usuarios', section: 'Gestión', Permiso: 'usuarios', hidden: false },
   { name: 'Gestión de proveedores', icon: <FaTruck />, path: '/Proveedores', section: 'Gestión', Permiso: 'proveedores', hidden: false },
-  { name: 'Revisión de quejas/sugerencias/reportes', icon: <MdOutlineReportGmailerrorred />, path: '/Contacto', section: 'Gestión', Permiso: 'contacto', hidden: false },
+  { name: 'Revisión de quejas/sugerencias/reportes', icon: <MdOutlineReportGmailerrorred />, path: '/Contacto', section: 'Gestión', Permiso: 'quejasugerenciasreportes', hidden: false },
   { name: 'Gestión de calidad de agua', icon: <FaHandHoldingWater />, path: '/CalidadAgua', section: 'Gestión', Permiso: 'calidadAgua', hidden: false },
 
   // Seguridad
