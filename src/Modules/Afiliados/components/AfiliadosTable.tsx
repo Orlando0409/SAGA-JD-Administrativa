@@ -578,9 +578,11 @@ export default function AbonadosTable() {
                         opciones: (() => {
                             const map = new Map<number, string>();
                             datosUnificados.forEach((a: any) => {
-                                const id = a.Estado?.Id_Estado_Afiliado;
+                                const id = a.Estado?.Id_Estado;
                                 const label = a.Estado?.Nombre_Estado;
-                                if (typeof id === 'number' && label) map.set(id, label);
+                                if (typeof id === 'number' && id > 0 && label && label !== 'Sin estado') {
+                                    map.set(id, label);
+                                }
                             });
                             return Array.from(map.entries())
                                 .map(([id, label]) => ({ id, label } as OpcionFiltro))
