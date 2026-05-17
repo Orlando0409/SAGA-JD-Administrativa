@@ -378,8 +378,12 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                         } else {
                             formData.append('Numero_Medidor', String(primerMedidor.numeroMedidor));
                         }
-                        formData.append('Certificacion_Literal', primerMedidor.escrituraFile);
-                        formData.append('Planos_Terreno', primerMedidor.planosFile);
+                        if (primerMedidor.escrituraFile) {
+                            formData.append('Certificacion_Literal', primerMedidor.escrituraFile);
+                        }
+                        if (primerMedidor.planosFile) {
+                            formData.append('Planos_Terreno', primerMedidor.planosFile);
+                        }
                         formData.append('Estado_Pago_Medidor', primerMedidor.estadoPago);
                     } else {
                         formData.append('Opcion_Medidor', 'sin_medidor');
@@ -416,8 +420,12 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                         } else {
                             formData.append('Numero_Medidor', String(primerMedidorJ.numeroMedidor));
                         }
-                        formData.append('Certificacion_Literal', primerMedidorJ.escrituraFile);
-                        formData.append('Planos_Terreno', primerMedidorJ.planosFile);
+                        if (primerMedidorJ.escrituraFile) {
+                            formData.append('Certificacion_Literal', primerMedidorJ.escrituraFile);
+                        }
+                        if (primerMedidorJ.planosFile) {
+                            formData.append('Planos_Terreno', primerMedidorJ.planosFile);
+                        }
                         formData.append('Estado_Pago_Medidor', primerMedidorJ.estadoPago);
                     } else {
                         formData.append('Opcion_Medidor', 'sin_medidor');
