@@ -527,7 +527,7 @@ const CatalogoMedidores: React.FC<CatalogoMedidoresProps> = () => {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        <div className="animate-spin rounded-full size-8 border-b-2 border-blue-600"></div>
         <span className="ml-2 text-gray-600">Cargando medidores...</span>
       </div>
     );
@@ -545,7 +545,7 @@ const CatalogoMedidores: React.FC<CatalogoMedidoresProps> = () => {
     <div className="space-y-6">
       <div className="bg-white rounded-lg p-3">
         <div className="flex items-start gap-4 flex-col justify-start">
-          <h2 className="text-2xl font-bold text-gray-900">Catálogo de Medidores</h2>
+          <h2 className="text-2xl font-semibold text-gray-900">Catálogo de Medidores</h2>
           <p className="text-sm text-gray-600 pb-4">Gestiona los medidores del inventario</p>
         </div>
         <div className="flex flex-col gap-3 sm:flex-row sm:gap-4 items-stretch sm:items-center justify-between pb-2">
@@ -565,12 +565,35 @@ const CatalogoMedidores: React.FC<CatalogoMedidoresProps> = () => {
                 <option value="Averiado">Averiado</option>
               </select>
             </div>
+            <button
+              onClick={() => setIsDownloadOpen(true)}
+              disabled={isDownloadingPdf}
+              className="px-3 py-1.5 sm:px-4 sm:py-2 border border-gray-300 rounded-lg flex items-center gap-2 hover:bg-gray-50 transition-colors text-xs sm:text-sm whitespace-nowrap disabled:opacity-50"
+              title="Descargar PDF"
+            >
+              <LuFileDown className="size-4" />
+              {isDownloadingPdf ? 'Generando…' : 'Descargar PDF'}
+            </button>
+            <div className="flex items-center gap-2 whitespace-nowrap">
+              <label htmlFor='estadoPago' className="text-xs sm:text-sm font-medium text-gray-700">Pago:</label>
+              <select
+                id='estadoPago'
+                value={estadoPagoFilter}
+                onChange={(e) => setEstadoPagoFilter(e.target.value)}
+                className="px-2 py-1.5 sm:px-3 sm:py-2 border bor                                                             der-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-xs sm:text-sm"
+              >
+                <option value="Todos">Todos</option>
+                <option value="Pendiente">Pendiente</option>
+                <option value="Pagado">Pagado</option>
+                <option value="Libre">Libre</option>
+              </select>
+            </div>
           </div>
           
           {/* Fila 2 en móvil: Búsqueda */}
           <div className="w-full flex gap-2 sm:flex-1 sm:max-w-md ">
             <div className="relative w-full">
-              <LuSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 sm:w-5 sm:h-5" />
+              <LuSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 size-4 sm:size-5" />
               <input
                 type="text"
                 placeholder="Buscar medidores..."
@@ -583,7 +606,7 @@ const CatalogoMedidores: React.FC<CatalogoMedidoresProps> = () => {
               onClick={() => setIsCreateModalOpen(true)}
               className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 sm:px-4 sm:py-2 rounded-lg flex items-center gap-2 transition-colors text-xs sm:text-sm whitespace-nowrap"
             >
-              <LuPlus className="w-4 h-4" />
+              <LuPlus className="size-4" />
               Nuevo Medidor
             </button>
           </div>
@@ -686,7 +709,7 @@ const CatalogoMedidores: React.FC<CatalogoMedidoresProps> = () => {
               className="p-1 sm:p-2 border border-gray-300 rounded-md text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               title="Primera página"
             >
-              <MdKeyboardDoubleArrowLeft className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
+              <MdKeyboardDoubleArrowLeft className="size-3.5 sm:size-5" />
             </button>
             <button
               onClick={() => table.previousPage()}
@@ -694,7 +717,7 @@ const CatalogoMedidores: React.FC<CatalogoMedidoresProps> = () => {
               className="p-1 sm:p-2 border border-gray-300 rounded-md text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               title="Página anterior"
             >
-              <MdKeyboardArrowLeft className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
+              <MdKeyboardArrowLeft className="size-3.5 sm:size-5" />
             </button>
             <span className="px-1.5 sm:px-2 py-1 text-[10px] sm:text-sm whitespace-nowrap">
               Pág. {table.getState().pagination.pageIndex + 1} de{' '}
@@ -706,7 +729,7 @@ const CatalogoMedidores: React.FC<CatalogoMedidoresProps> = () => {
               className="p-1 sm:p-2 border border-gray-300 rounded-md text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               title="Página siguiente"
             >
-              <MdKeyboardArrowRight className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
+              <MdKeyboardArrowRight className="size-3.5 sm:size-5" />
             </button>
             <button
               onClick={() => table.setPageIndex(table.getPageCount() - 1)}
@@ -714,7 +737,7 @@ const CatalogoMedidores: React.FC<CatalogoMedidoresProps> = () => {
               className="p-1 sm:p-2 border border-gray-300 rounded-md text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               title="Última página"
             >
-              <MdKeyboardDoubleArrowRight className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
+              <MdKeyboardDoubleArrowRight className="size-3.5 sm:size-5" />
             </button>
           </div>
         </div>
@@ -791,7 +814,7 @@ const CatalogoMedidores: React.FC<CatalogoMedidoresProps> = () => {
               onClick={handleActualizarEstadoPago}
               disabled={updateEstadoPagoMutation.isPending}
             >
-              {updateEstadoPagoMutation.isPending ? 'Actualizando...' : 'Si, cambiar'}
+              {updateEstadoPagoMutation.isPending ? 'Actualizando…' : 'Si, cambiar'}
             </AlertDialogAction>
             <AlertDialogCancel disabled={updateEstadoPagoMutation.isPending}>Cancelar</AlertDialogCancel>
           </AlertDialogFooter>
