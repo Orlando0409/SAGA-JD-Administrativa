@@ -150,6 +150,19 @@ export const crearYAsignarMedidorAfiliado = async (
     });
 };
 
+export const subirArchivosMedidorAfiliado = async (
+    idMedidor: number,
+    certificacionFile: File | null,
+    planosFile: File | null
+): Promise<void> => {
+    const formData = new FormData();
+    if (certificacionFile) formData.append('Certificacion_Literal', certificacionFile);
+    if (planosFile) formData.append('Planos_Terreno', planosFile);
+    await apiAuth.post(`/afiliados/medidores/${idMedidor}/archivos`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+    });
+};
+
 export async function getAfiliadoFisicoByIdentificacion(identificacion: string | number): Promise<{
     Id_Afiliado: number;
     Tipo_Identificacion: string;

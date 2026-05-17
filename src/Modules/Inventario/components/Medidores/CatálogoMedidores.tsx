@@ -32,6 +32,8 @@ import type { Medidor, EstadoPagoMedidorNombre } from '../../models/Medidor';
 import CreateMedidorModal from './CreateMedidorModal';
 import DetailMedidorModal from './DetailMedidorModal';
 import AsignarAfiliadoMedidorModal from './AsignarAfiliadoMedidorModal';
+import SubirArchivosMedidorModal from './SubirArchivosMedidorModal';
+import { subirArchivosMedidorInventario } from '../../service/MedidorServices';
 
 interface CatalogoMedidoresProps {
   onBack?: () => void;
@@ -43,6 +45,7 @@ const CatalogoMedidores: React.FC<CatalogoMedidoresProps> = () => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [isAsignarModalOpen, setIsAsignarModalOpen] = useState(false);
+  const [isSubirArchivosModalOpen, setIsSubirArchivosModalOpen] = useState(false);
   const [showEstadoPagoDialog, setShowEstadoPagoDialog] = useState(false);
   const [medidorEstadoPagoSeleccionado, setMedidorEstadoPagoSeleccionado] = useState<Medidor | null>(null);
   const [selectedMedidor, setSelectedMedidor] = useState<Medidor | null>(null);
@@ -375,8 +378,23 @@ const CatalogoMedidores: React.FC<CatalogoMedidoresProps> = () => {
               }
 
               if (estadoId === 2) {
+                const sinArchivos =
+                  !info.row.original.Certificacion_Literal && !info.row.original.Planos_Terreno;
                 return (
                   <>
+                    {sinArchivos && (
+                      <button
+                        className="px-1.5 py-1 sm:px-2 sm:py-1 bg-amber-500 text-white text-[9px] sm:text-xs rounded hover:bg-amber-600 transition-colors w-auto whitespace-nowrap"
+                        onClick={() => {
+                          setSelectedMedidor(info.row.original);
+                          setIsSubirArchivosModalOpen(true);
+                        }}
+                        title="Subir archivos del terreno"
+                      >
+                        <span className="hidden sm:inline">Subir Archivos</span>
+                        <span className="sm:hidden">Archivos</span>
+                      </button>
+                    )}
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
                         <button
@@ -741,6 +759,28 @@ const CatalogoMedidores: React.FC<CatalogoMedidoresProps> = () => {
               type: 'success',
               title: 'Medidor asignado',
               description: `El medidor #${selectedMedidor.Numero_Medidor} fue asignado correctamente.`,
+            });
+          }}
+        />
+      )}
+
+      {selectedMedidor && (
+        <SubirArchivosMedidorModal
+          isOpen={isSubirArchivosModalOpen}
+          numeroMedidor={selectedMedidor.Numero_Medidor}
+          onClose={() => {
+            setIsSubirArchivosModalOpen(false);
+            setSelectedMedidor(null);
+          }}
+          onSubir={(cert, planos) =>
+            subirArchivosMedidorInventario(selectedMedidor.Id_Medidor, cert, planos)
+          }
+          onSuccess={() => {
+            refetch();
+            setNotification({
+              type: 'success',
+              title: 'Archivos subidos',
+              description: `Los archivos del medidor #${selectedMedidor.Numero_Medidor} fueron guardados correctamente.`,
             });
           }}
         />

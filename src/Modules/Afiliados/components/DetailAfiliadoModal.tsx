@@ -7,11 +7,13 @@ import {
     getAfiliadoFisicoDetail,
     getMedidoresByAfiliado,
     getMedidoresByAfiliadoJuridico,
+    subirArchivosMedidorAfiliado,
 } from '../Service/ServiceAfiliadoFisico';
 import { getAfiliadoJuridicoDetail } from '../Service/ServiceAfiliadoJuridico';
 import { useAfiliadosFisicos } from '../Hook/HookAfiliadoFisico';
 import { useAfiliadosJuridicos } from '../Hook/HookAfiliadoJuridico';
 import { useAlerts } from '@/Modules/Global/context/AlertContext';
+import SubirArchivosMedidorModal from '@/Modules/Inventario/components/Medidores/SubirArchivosMedidorModal';
 
 
 // Tipo unificado para identificar qué estamos viendo
@@ -31,6 +33,7 @@ const DetailAbonados: React.FC<DetailAbonadosProps> = ({ persona, isOpen, onClos
     const [medidores, setMedidores] = useState<Medidor[]>([]);
     const [loadingMedidores, setLoadingMedidores] = useState(false);
     const [detallePersona, setDetallePersona] = useState<AfiliadoFisico | AfiliadoJuridico | null>(null);
+    const [medidorParaArchivos, setMedidorParaArchivos] = useState<Medidor | null>(null);
     const [loadingDetalle, setLoadingDetalle] = useState(false);
     const [showCambioTipoModal, setShowCambioTipoModal] = useState(false);
     const [planosTerreno, setPlanosTerreno] = useState<File | null>(null);
@@ -40,6 +43,18 @@ const DetailAbonados: React.FC<DetailAbonadosProps> = ({ persona, isOpen, onClos
     const { showSuccess, showError, showWarning } = useAlerts();
     const { updateTipoAfiliadoFisico } = useAfiliadosFisicos();
     const { updateTipoAfiliadoJuridico } = useAfiliadosJuridicos();
+
+    const recargarMedidores = () => {
+        const idAfiliado = (persona.datos as AfiliadoFisico | AfiliadoJuridico).Id_Afiliado;
+        const fetchFn = persona.tipo === 'afiliado-juridico'
+            ? getMedidoresByAfiliadoJuridico
+            : getMedidoresByAfiliado;
+        setLoadingMedidores(true);
+        fetchFn(idAfiliado)
+            .then(setMedidores)
+            .catch(() => {})
+            .finally(() => setLoadingMedidores(false));
+    };
 
     // Cada vez que se abre el modal, cargar los medidores frescos desde el endpoint
     useEffect(() => {
@@ -579,6 +594,24 @@ const DetailAbonados: React.FC<DetailAbonadosProps> = ({ persona, isOpen, onClos
                                                     </div>
                                                 </div>
                                             )}
+
+                                            {medidor.Estado_Medidor?.Id_Estado_Medidor === 2 &&
+                                                !medidor.Certificacion_Literal &&
+                                                !medidor.Planos_Terreno && (
+                                                <div className="mt-3 pt-3 border-t border-gray-200 flex items-center justify-between gap-3">
+                                                    <p className="text-xs text-amber-600 font-medium">
+                                                        Este medidor no tiene archivos adjuntos.
+                                                    </p>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setMedidorParaArchivos(medidor)}
+                                                        className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-500 text-white text-xs font-medium rounded-lg hover:bg-amber-600 transition-colors whitespace-nowrap"
+                                                    >
+                                                        <LuFileText className="w-3.5 h-3.5" />
+                                                        Subir Archivos
+                                                    </button>
+                                                </div>
+                                            )}
                                         </div>
                                     ))}
                                 </div>
@@ -834,6 +867,21 @@ const DetailAbonados: React.FC<DetailAbonadosProps> = ({ persona, isOpen, onClos
                         </div>
                     </div>
                 </div>
+            )}
+
+            {medidorParaArchivos && (
+                <SubirArchivosMedidorModal
+                    isOpen={true}
+                    numeroMedidor={medidorParaArchivos.Numero_Medidor}
+                    onClose={() => setMedidorParaArchivos(null)}
+                    onSubir={(cert, planos) =>
+                        subirArchivosMedidorAfiliado(medidorParaArchivos.Id_Medidor, cert, planos)
+                    }
+                    onSuccess={() => {
+                        showSuccess('Archivos subidos correctamente al medidor.');
+                        recargarMedidores();
+                    }}
+                />
             )}
         </div>
     );

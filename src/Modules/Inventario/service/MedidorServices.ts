@@ -106,8 +106,21 @@ export const asignarMedidorConArchivos = async (
 
   if(certificacionFile) formData.append('Certificacion_Literal', certificacionFile);
   if(planosFile) formData.append('Planos_Terreno', planosFile);
-  
+
   await axiosPrivate.post(`/Inventario/asignar/medidor/afiliado`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+};
+
+export const subirArchivosMedidorInventario = async (
+  idMedidor: number,
+  certificacionFile: File | null,
+  planosFile: File | null
+): Promise<void> => {
+  const formData = new FormData();
+  if (certificacionFile) formData.append('Certificacion_Literal', certificacionFile);
+  if (planosFile) formData.append('Planos_Terreno', planosFile);
+  await axiosPrivate.post(`/Inventario/medidor/${idMedidor}/archivos`, formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
   });
 };
