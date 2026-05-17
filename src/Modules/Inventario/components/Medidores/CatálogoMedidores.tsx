@@ -1,4 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
+import DescargarPdfModal, { type OpcionColumna, type GrupoFiltro } from '@/Modules/Global/components/DescargarPdfModal/DescargarPdfModal';
+import { useDownloadModulePdf } from '@/Modules/Global/hooks/useDownloadModulePdf';
+import { LuFileDown } from 'react-icons/lu';
 import { LuPlus, LuSearch } from 'react-icons/lu';
 import {
   createColumnHelper,
@@ -50,6 +53,8 @@ const CatalogoMedidores: React.FC<CatalogoMedidoresProps> = () => {
   const [medidorEstadoPagoSeleccionado, setMedidorEstadoPagoSeleccionado] = useState<Medidor | null>(null);
   const [selectedMedidor, setSelectedMedidor] = useState<Medidor | null>(null);
   const [estadoFilter, setEstadoFilter] = useState<string>('Todos');
+  const [isDownloadOpen, setIsDownloadOpen] = useState(false);
+  const { mutate: downloadPdf, isPending: isDownloadingPdf } = useDownloadModulePdf();
   const [estadoPagoFilter, setEstadoPagoFilter] = useState<string>('Todos');
   const [notification, setNotification] = useState<{
     type: 'success' | 'error' | 'info';
@@ -560,20 +565,6 @@ const CatalogoMedidores: React.FC<CatalogoMedidoresProps> = () => {
                 <option value="Averiado">Averiado</option>
               </select>
             </div>
-            <div className="flex items-center gap-2 whitespace-nowrap">
-              <label htmlFor='estadoPago' className="text-xs sm:text-sm font-medium text-gray-700">Pago:</label>
-              <select
-                id='estadoPago'
-                value={estadoPagoFilter}
-                onChange={(e) => setEstadoPagoFilter(e.target.value)}
-                className="px-2 py-1.5 sm:px-3 sm:py-2 border bor                                                             der-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-xs sm:text-sm"
-              >
-                <option value="Todos">Todos</option>
-                <option value="Pendiente">Pendiente</option>
-                <option value="Pagado">Pagado</option>
-                <option value="Libre">Libre</option>
-              </select>
-            </div>
           </div>
           
           {/* Fila 2 en móvil: Búsqueda */}
@@ -806,6 +797,50 @@ const CatalogoMedidores: React.FC<CatalogoMedidoresProps> = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <DescargarPdfModal
+        isOpen={isDownloadOpen}
+        onClose={() => setIsDownloadOpen(false)}
+        titulo="Descargar Medidores"
+        descripcion="Filtra por estado y columnas. Genera reporte PDF descargable."
+        grupos={[
+          {
+            key: 'estados',
+            titulo: 'Estados a incluir',
+            ayuda: 'Si no seleccionas ningún estado, se incluirán todos por defecto.',
+            opciones: (() => {
+              const map = new Map<number, string>();
+              (medidoresTodos.data ?? []).forEach((m: any) => {
+                const id = m.Estado_Medidor?.Id_Estado_Medidor;
+                const label = m.Estado_Medidor?.Nombre_Estado_Medidor;
+                if (typeof id === 'number' && label) map.set(id, label);
+              });
+              return Array.from(map.entries())
+                .map(([id, label]) => ({ id, label }))
+                .sort((a, b) => a.label.localeCompare(b.label, 'es'));
+            })(),
+          } as GrupoFiltro,
+        ]}
+        columnas={[
+          { key: 'numero',   label: 'N° Medidor',    obligatoria: true },
+          { key: 'estado',   label: 'Estado' },
+          { key: 'afiliado', label: 'Afiliado' },
+          { key: 'pago',     label: 'Estado Pago' },
+          { key: 'creacion', label: 'Fecha creación' },
+        ] as OpcionColumna[]}
+        isLoading={isDownloadingPdf}
+        onConfirm={(f) => {
+          const estadosSel = (f.grupos.estados ?? []).filter((v): v is number => typeof v === 'number');
+          downloadPdf({
+            url: '/Inventario/medidores/pdf',
+            filename: `Medidores_${new Date().toISOString().slice(0, 10)}`,
+            payload: {
+              estados: estadosSel.length ? estadosSel : undefined,
+              columnas: f.columnas.length ? f.columnas : undefined,
+            },
+          }, { onSuccess: () => setIsDownloadOpen(false) });
+        }}
+      />
     </div>
   );
 };

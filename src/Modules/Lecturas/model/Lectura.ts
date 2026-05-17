@@ -1,9 +1,8 @@
 export interface Lectura {
     Id_Lectura: number;
     Tipo_Tarifa: {
-        Id_Tipo_Tarifa_Lectura: number;
+        Id_Tarifa_Lectura: number;
         Nombre_Tipo_Tarifa: string;
-        Cargo_Fijo_Por_Mes: number;
     };
     Valor_Lectura_Anterior: number;
     Valor_Lectura_Actual: number;
@@ -40,7 +39,7 @@ export interface Lectura {
 }
 
 export interface TipoTarifaLectura {
-    Id_Tipo_Tarifa_Lectura: number;
+    Id_Tarifa_Lectura: number;
     Nombre_Tipo_Tarifa: string;
 }
 

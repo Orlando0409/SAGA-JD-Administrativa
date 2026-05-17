@@ -115,8 +115,8 @@ export default function ManualLecturaForm({
         >
           {tarifas?.map((tarifa) => (
             <option
-              key={tarifa.Id_Tipo_Tarifa_Lectura}
-              value={tarifa.Id_Tipo_Tarifa_Lectura}
+              key={tarifa.Id_Tarifa_Lectura}
+              value={tarifa.Id_Tarifa_Lectura}
             >
               {tarifa.Nombre_Tipo_Tarifa}
             </option>

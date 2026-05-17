@@ -33,6 +33,7 @@ import { Route as appGestionInventarioUnidadesMedicionRouteImport } from './rout
 import { Route as appGestionInventarioMovimientosRouteImport } from './routes/(app)/(Gestion)/Inventario/Movimientos'
 import { Route as appGestionInventarioCategoriasRouteImport } from './routes/(app)/(Gestion)/Inventario/Categorias'
 import { Route as appGestionAfiliadosLecturasRouteImport } from './routes/(app)/(Gestion)/Afiliados/Lecturas'
+import { Route as appGestionAfiliadosFacturasRouteImport } from './routes/(app)/(Gestion)/Afiliados/Facturas'
 import { Route as appGestionInventarioMaterialesIndexRouteImport } from './routes/(app)/(Gestion)/Inventario/Materiales/index'
 import { Route as appGestionInventarioMaterialesMedidoresRouteImport } from './routes/(app)/(Gestion)/Inventario/Materiales/Medidores'
 
@@ -40,140 +41,256 @@ const NotFoundRoute = NotFoundRouteImport.update({
   id: '/NotFound',
   path: '/NotFound',
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any).lazy(() => import('./routes/NotFound.lazy').then((d) => d.Route))
 const HomeRoute = HomeRouteImport.update({
   id: '/Home',
   path: '/Home',
   getParentRoute: () => rootRouteImport,
-} as any)
-const appSeguridadAuditoriaRoute = appSeguridadAuditoriaRouteImport.update({
-  id: '/(app)/(Seguridad)/Auditoria',
-  path: '/Auditoria',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const appGestionSolicitudesRoute = appGestionSolicitudesRouteImport.update({
-  id: '/(app)/(Gestion)/Solicitudes',
-  path: '/Solicitudes',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const appGestionProveedoresRoute = appGestionProveedoresRouteImport.update({
-  id: '/(app)/(Gestion)/Proveedores',
-  path: '/Proveedores',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const appGestionContactoRoute = appGestionContactoRouteImport.update({
-  id: '/(app)/(Gestion)/Contacto',
-  path: '/Contacto',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const appGestionCalidadAguaRoute = appGestionCalidadAguaRouteImport.update({
-  id: '/(app)/(Gestion)/CalidadAgua',
-  path: '/CalidadAgua',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const appGestionActasRoute = appGestionActasRouteImport.update({
-  id: '/(app)/(Gestion)/Actas',
-  path: '/Actas',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const appEdicionProyectosRoute = appEdicionProyectosRouteImport.update({
-  id: '/(app)/(Edicion)/Proyectos',
-  path: '/Proyectos',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const appEdicionImagenesRoute = appEdicionImagenesRouteImport.update({
-  id: '/(app)/(Edicion)/Imagenes',
-  path: '/Imagenes',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const appEdicionFAQRoute = appEdicionFAQRouteImport.update({
-  id: '/(app)/(Edicion)/FAQ',
-  path: '/FAQ',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const appAyudaManualesRoute = appAyudaManualesRouteImport.update({
-  id: '/(app)/(Ayuda)/Manuales',
-  path: '/Manuales',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const appAuthUnauthorizedRoute = appAuthUnauthorizedRouteImport.update({
-  id: '/(app)/(Auth)/Unauthorized',
-  path: '/Unauthorized',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const appAuthResetPasswordRoute = appAuthResetPasswordRouteImport.update({
-  id: '/(app)/(Auth)/ResetPassword',
-  path: '/ResetPassword',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const appAuthLoginRoute = appAuthLoginRouteImport.update({
-  id: '/(app)/(Auth)/Login',
-  path: '/Login',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const appAuthForgotPasswordRoute = appAuthForgotPasswordRouteImport.update({
-  id: '/(app)/(Auth)/ForgotPassword',
-  path: '/ForgotPassword',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const appGestionUsuariosIndexRoute = appGestionUsuariosIndexRouteImport.update({
-  id: '/(app)/(Gestion)/Usuarios/',
-  path: '/Usuarios/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const appGestionInventarioIndexRoute =
-  appGestionInventarioIndexRouteImport.update({
+} as any).lazy(() => import('./routes/Home.lazy').then((d) => d.Route))
+const appSeguridadAuditoriaRoute = appSeguridadAuditoriaRouteImport
+  .update({
+    id: '/(app)/(Seguridad)/Auditoria',
+    path: '/Auditoria',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+  .lazy(() =>
+    import('./routes/(app)/(Seguridad)/Auditoria.lazy').then((d) => d.Route),
+  )
+const appGestionSolicitudesRoute = appGestionSolicitudesRouteImport
+  .update({
+    id: '/(app)/(Gestion)/Solicitudes',
+    path: '/Solicitudes',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+  .lazy(() =>
+    import('./routes/(app)/(Gestion)/Solicitudes.lazy').then((d) => d.Route),
+  )
+const appGestionProveedoresRoute = appGestionProveedoresRouteImport
+  .update({
+    id: '/(app)/(Gestion)/Proveedores',
+    path: '/Proveedores',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+  .lazy(() =>
+    import('./routes/(app)/(Gestion)/Proveedores.lazy').then((d) => d.Route),
+  )
+const appGestionContactoRoute = appGestionContactoRouteImport
+  .update({
+    id: '/(app)/(Gestion)/Contacto',
+    path: '/Contacto',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+  .lazy(() =>
+    import('./routes/(app)/(Gestion)/Contacto.lazy').then((d) => d.Route),
+  )
+const appGestionCalidadAguaRoute = appGestionCalidadAguaRouteImport
+  .update({
+    id: '/(app)/(Gestion)/CalidadAgua',
+    path: '/CalidadAgua',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+  .lazy(() =>
+    import('./routes/(app)/(Gestion)/CalidadAgua.lazy').then((d) => d.Route),
+  )
+const appGestionActasRoute = appGestionActasRouteImport
+  .update({
+    id: '/(app)/(Gestion)/Actas',
+    path: '/Actas',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+  .lazy(() =>
+    import('./routes/(app)/(Gestion)/Actas.lazy').then((d) => d.Route),
+  )
+const appEdicionProyectosRoute = appEdicionProyectosRouteImport
+  .update({
+    id: '/(app)/(Edicion)/Proyectos',
+    path: '/Proyectos',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+  .lazy(() =>
+    import('./routes/(app)/(Edicion)/Proyectos.lazy').then((d) => d.Route),
+  )
+const appEdicionImagenesRoute = appEdicionImagenesRouteImport
+  .update({
+    id: '/(app)/(Edicion)/Imagenes',
+    path: '/Imagenes',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+  .lazy(() =>
+    import('./routes/(app)/(Edicion)/Imagenes.lazy').then((d) => d.Route),
+  )
+const appEdicionFAQRoute = appEdicionFAQRouteImport
+  .update({
+    id: '/(app)/(Edicion)/FAQ',
+    path: '/FAQ',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+  .lazy(() => import('./routes/(app)/(Edicion)/FAQ.lazy').then((d) => d.Route))
+const appAyudaManualesRoute = appAyudaManualesRouteImport
+  .update({
+    id: '/(app)/(Ayuda)/Manuales',
+    path: '/Manuales',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+  .lazy(() =>
+    import('./routes/(app)/(Ayuda)/Manuales.lazy').then((d) => d.Route),
+  )
+const appAuthUnauthorizedRoute = appAuthUnauthorizedRouteImport
+  .update({
+    id: '/(app)/(Auth)/Unauthorized',
+    path: '/Unauthorized',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+  .lazy(() =>
+    import('./routes/(app)/(Auth)/Unauthorized.lazy').then((d) => d.Route),
+  )
+const appAuthResetPasswordRoute = appAuthResetPasswordRouteImport
+  .update({
+    id: '/(app)/(Auth)/ResetPassword',
+    path: '/ResetPassword',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+  .lazy(() =>
+    import('./routes/(app)/(Auth)/ResetPassword.lazy').then((d) => d.Route),
+  )
+const appAuthLoginRoute = appAuthLoginRouteImport
+  .update({
+    id: '/(app)/(Auth)/Login',
+    path: '/Login',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+  .lazy(() => import('./routes/(app)/(Auth)/Login.lazy').then((d) => d.Route))
+const appAuthForgotPasswordRoute = appAuthForgotPasswordRouteImport
+  .update({
+    id: '/(app)/(Auth)/ForgotPassword',
+    path: '/ForgotPassword',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+  .lazy(() =>
+    import('./routes/(app)/(Auth)/ForgotPassword.lazy').then((d) => d.Route),
+  )
+const appGestionUsuariosIndexRoute = appGestionUsuariosIndexRouteImport
+  .update({
+    id: '/(app)/(Gestion)/Usuarios/',
+    path: '/Usuarios/',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+  .lazy(() =>
+    import('./routes/(app)/(Gestion)/Usuarios/index.lazy').then((d) => d.Route),
+  )
+const appGestionInventarioIndexRoute = appGestionInventarioIndexRouteImport
+  .update({
     id: '/(app)/(Gestion)/Inventario/',
     path: '/Inventario/',
     getParentRoute: () => rootRouteImport,
   } as any)
-const appGestionAfiliadosIndexRoute =
-  appGestionAfiliadosIndexRouteImport.update({
+  .lazy(() =>
+    import('./routes/(app)/(Gestion)/Inventario/index.lazy').then(
+      (d) => d.Route,
+    ),
+  )
+const appGestionAfiliadosIndexRoute = appGestionAfiliadosIndexRouteImport
+  .update({
     id: '/(app)/(Gestion)/Afiliados/',
     path: '/Afiliados/',
     getParentRoute: () => rootRouteImport,
   } as any)
-const appGestionUsuariosRolesRoute = appGestionUsuariosRolesRouteImport.update({
-  id: '/(app)/(Gestion)/Usuarios/Roles',
-  path: '/Usuarios/Roles',
-  getParentRoute: () => rootRouteImport,
-} as any)
+  .lazy(() =>
+    import('./routes/(app)/(Gestion)/Afiliados/index.lazy').then(
+      (d) => d.Route,
+    ),
+  )
+const appGestionUsuariosRolesRoute = appGestionUsuariosRolesRouteImport
+  .update({
+    id: '/(app)/(Gestion)/Usuarios/Roles',
+    path: '/Usuarios/Roles',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+  .lazy(() =>
+    import('./routes/(app)/(Gestion)/Usuarios/Roles.lazy').then((d) => d.Route),
+  )
 const appGestionInventarioUnidadesMedicionRoute =
-  appGestionInventarioUnidadesMedicionRouteImport.update({
-    id: '/(app)/(Gestion)/Inventario/UnidadesMedicion',
-    path: '/Inventario/UnidadesMedicion',
-    getParentRoute: () => rootRouteImport,
-  } as any)
+  appGestionInventarioUnidadesMedicionRouteImport
+    .update({
+      id: '/(app)/(Gestion)/Inventario/UnidadesMedicion',
+      path: '/Inventario/UnidadesMedicion',
+      getParentRoute: () => rootRouteImport,
+    } as any)
+    .lazy(() =>
+      import('./routes/(app)/(Gestion)/Inventario/UnidadesMedicion.lazy').then(
+        (d) => d.Route,
+      ),
+    )
 const appGestionInventarioMovimientosRoute =
-  appGestionInventarioMovimientosRouteImport.update({
-    id: '/(app)/(Gestion)/Inventario/Movimientos',
-    path: '/Inventario/Movimientos',
-    getParentRoute: () => rootRouteImport,
-  } as any)
+  appGestionInventarioMovimientosRouteImport
+    .update({
+      id: '/(app)/(Gestion)/Inventario/Movimientos',
+      path: '/Inventario/Movimientos',
+      getParentRoute: () => rootRouteImport,
+    } as any)
+    .lazy(() =>
+      import('./routes/(app)/(Gestion)/Inventario/Movimientos.lazy').then(
+        (d) => d.Route,
+      ),
+    )
 const appGestionInventarioCategoriasRoute =
-  appGestionInventarioCategoriasRouteImport.update({
-    id: '/(app)/(Gestion)/Inventario/Categorias',
-    path: '/Inventario/Categorias',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const appGestionAfiliadosLecturasRoute =
-  appGestionAfiliadosLecturasRouteImport.update({
+  appGestionInventarioCategoriasRouteImport
+    .update({
+      id: '/(app)/(Gestion)/Inventario/Categorias',
+      path: '/Inventario/Categorias',
+      getParentRoute: () => rootRouteImport,
+    } as any)
+    .lazy(() =>
+      import('./routes/(app)/(Gestion)/Inventario/Categorias.lazy').then(
+        (d) => d.Route,
+      ),
+    )
+const appGestionAfiliadosLecturasRoute = appGestionAfiliadosLecturasRouteImport
+  .update({
     id: '/(app)/(Gestion)/Afiliados/Lecturas',
     path: '/Afiliados/Lecturas',
     getParentRoute: () => rootRouteImport,
   } as any)
+  .lazy(() =>
+    import('./routes/(app)/(Gestion)/Afiliados/Lecturas.lazy').then(
+      (d) => d.Route,
+    ),
+  )
+const appGestionAfiliadosFacturasRoute = appGestionAfiliadosFacturasRouteImport
+  .update({
+    id: '/(app)/(Gestion)/Afiliados/Facturas',
+    path: '/Afiliados/Facturas',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+  .lazy(() =>
+    import('./routes/(app)/(Gestion)/Afiliados/Facturas.lazy').then(
+      (d) => d.Route,
+    ),
+  )
 const appGestionInventarioMaterialesIndexRoute =
-  appGestionInventarioMaterialesIndexRouteImport.update({
-    id: '/(app)/(Gestion)/Inventario/Materiales/',
-    path: '/Inventario/Materiales/',
-    getParentRoute: () => rootRouteImport,
-  } as any)
+  appGestionInventarioMaterialesIndexRouteImport
+    .update({
+      id: '/(app)/(Gestion)/Inventario/Materiales/',
+      path: '/Inventario/Materiales/',
+      getParentRoute: () => rootRouteImport,
+    } as any)
+    .lazy(() =>
+      import('./routes/(app)/(Gestion)/Inventario/Materiales/index.lazy').then(
+        (d) => d.Route,
+      ),
+    )
 const appGestionInventarioMaterialesMedidoresRoute =
-  appGestionInventarioMaterialesMedidoresRouteImport.update({
-    id: '/(app)/(Gestion)/Inventario/Materiales/Medidores',
-    path: '/Inventario/Materiales/Medidores',
-    getParentRoute: () => rootRouteImport,
-  } as any)
+  appGestionInventarioMaterialesMedidoresRouteImport
+    .update({
+      id: '/(app)/(Gestion)/Inventario/Materiales/Medidores',
+      path: '/Inventario/Materiales/Medidores',
+      getParentRoute: () => rootRouteImport,
+    } as any)
+    .lazy(() =>
+      import('./routes/(app)/(Gestion)/Inventario/Materiales/Medidores.lazy').then(
+        (d) => d.Route,
+      ),
+    )
 
 export interface FileRoutesByFullPath {
   '/Home': typeof HomeRoute
@@ -192,16 +309,17 @@ export interface FileRoutesByFullPath {
   '/Proveedores': typeof appGestionProveedoresRoute
   '/Solicitudes': typeof appGestionSolicitudesRoute
   '/Auditoria': typeof appSeguridadAuditoriaRoute
+  '/Afiliados/Facturas': typeof appGestionAfiliadosFacturasRoute
   '/Afiliados/Lecturas': typeof appGestionAfiliadosLecturasRoute
   '/Inventario/Categorias': typeof appGestionInventarioCategoriasRoute
   '/Inventario/Movimientos': typeof appGestionInventarioMovimientosRoute
   '/Inventario/UnidadesMedicion': typeof appGestionInventarioUnidadesMedicionRoute
   '/Usuarios/Roles': typeof appGestionUsuariosRolesRoute
-  '/Afiliados': typeof appGestionAfiliadosIndexRoute
-  '/Inventario': typeof appGestionInventarioIndexRoute
-  '/Usuarios': typeof appGestionUsuariosIndexRoute
+  '/Afiliados/': typeof appGestionAfiliadosIndexRoute
+  '/Inventario/': typeof appGestionInventarioIndexRoute
+  '/Usuarios/': typeof appGestionUsuariosIndexRoute
   '/Inventario/Materiales/Medidores': typeof appGestionInventarioMaterialesMedidoresRoute
-  '/Inventario/Materiales': typeof appGestionInventarioMaterialesIndexRoute
+  '/Inventario/Materiales/': typeof appGestionInventarioMaterialesIndexRoute
 }
 export interface FileRoutesByTo {
   '/Home': typeof HomeRoute
@@ -220,6 +338,7 @@ export interface FileRoutesByTo {
   '/Proveedores': typeof appGestionProveedoresRoute
   '/Solicitudes': typeof appGestionSolicitudesRoute
   '/Auditoria': typeof appSeguridadAuditoriaRoute
+  '/Afiliados/Facturas': typeof appGestionAfiliadosFacturasRoute
   '/Afiliados/Lecturas': typeof appGestionAfiliadosLecturasRoute
   '/Inventario/Categorias': typeof appGestionInventarioCategoriasRoute
   '/Inventario/Movimientos': typeof appGestionInventarioMovimientosRoute
@@ -249,6 +368,7 @@ export interface FileRoutesById {
   '/(app)/(Gestion)/Proveedores': typeof appGestionProveedoresRoute
   '/(app)/(Gestion)/Solicitudes': typeof appGestionSolicitudesRoute
   '/(app)/(Seguridad)/Auditoria': typeof appSeguridadAuditoriaRoute
+  '/(app)/(Gestion)/Afiliados/Facturas': typeof appGestionAfiliadosFacturasRoute
   '/(app)/(Gestion)/Afiliados/Lecturas': typeof appGestionAfiliadosLecturasRoute
   '/(app)/(Gestion)/Inventario/Categorias': typeof appGestionInventarioCategoriasRoute
   '/(app)/(Gestion)/Inventario/Movimientos': typeof appGestionInventarioMovimientosRoute
@@ -279,16 +399,17 @@ export interface FileRouteTypes {
     | '/Proveedores'
     | '/Solicitudes'
     | '/Auditoria'
+    | '/Afiliados/Facturas'
     | '/Afiliados/Lecturas'
     | '/Inventario/Categorias'
     | '/Inventario/Movimientos'
     | '/Inventario/UnidadesMedicion'
     | '/Usuarios/Roles'
-    | '/Afiliados'
-    | '/Inventario'
-    | '/Usuarios'
+    | '/Afiliados/'
+    | '/Inventario/'
+    | '/Usuarios/'
     | '/Inventario/Materiales/Medidores'
-    | '/Inventario/Materiales'
+    | '/Inventario/Materiales/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/Home'
@@ -307,6 +428,7 @@ export interface FileRouteTypes {
     | '/Proveedores'
     | '/Solicitudes'
     | '/Auditoria'
+    | '/Afiliados/Facturas'
     | '/Afiliados/Lecturas'
     | '/Inventario/Categorias'
     | '/Inventario/Movimientos'
@@ -335,6 +457,7 @@ export interface FileRouteTypes {
     | '/(app)/(Gestion)/Proveedores'
     | '/(app)/(Gestion)/Solicitudes'
     | '/(app)/(Seguridad)/Auditoria'
+    | '/(app)/(Gestion)/Afiliados/Facturas'
     | '/(app)/(Gestion)/Afiliados/Lecturas'
     | '/(app)/(Gestion)/Inventario/Categorias'
     | '/(app)/(Gestion)/Inventario/Movimientos'
@@ -364,6 +487,7 @@ export interface RootRouteChildren {
   appGestionProveedoresRoute: typeof appGestionProveedoresRoute
   appGestionSolicitudesRoute: typeof appGestionSolicitudesRoute
   appSeguridadAuditoriaRoute: typeof appSeguridadAuditoriaRoute
+  appGestionAfiliadosFacturasRoute: typeof appGestionAfiliadosFacturasRoute
   appGestionAfiliadosLecturasRoute: typeof appGestionAfiliadosLecturasRoute
   appGestionInventarioCategoriasRoute: typeof appGestionInventarioCategoriasRoute
   appGestionInventarioMovimientosRoute: typeof appGestionInventarioMovimientosRoute
@@ -493,21 +617,21 @@ declare module '@tanstack/react-router' {
     '/(app)/(Gestion)/Usuarios/': {
       id: '/(app)/(Gestion)/Usuarios/'
       path: '/Usuarios'
-      fullPath: '/Usuarios'
+      fullPath: '/Usuarios/'
       preLoaderRoute: typeof appGestionUsuariosIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/(app)/(Gestion)/Inventario/': {
       id: '/(app)/(Gestion)/Inventario/'
       path: '/Inventario'
-      fullPath: '/Inventario'
+      fullPath: '/Inventario/'
       preLoaderRoute: typeof appGestionInventarioIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/(app)/(Gestion)/Afiliados/': {
       id: '/(app)/(Gestion)/Afiliados/'
       path: '/Afiliados'
-      fullPath: '/Afiliados'
+      fullPath: '/Afiliados/'
       preLoaderRoute: typeof appGestionAfiliadosIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
@@ -546,10 +670,17 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof appGestionAfiliadosLecturasRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/(app)/(Gestion)/Afiliados/Facturas': {
+      id: '/(app)/(Gestion)/Afiliados/Facturas'
+      path: '/Afiliados/Facturas'
+      fullPath: '/Afiliados/Facturas'
+      preLoaderRoute: typeof appGestionAfiliadosFacturasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/(app)/(Gestion)/Inventario/Materiales/': {
       id: '/(app)/(Gestion)/Inventario/Materiales/'
       path: '/Inventario/Materiales'
-      fullPath: '/Inventario/Materiales'
+      fullPath: '/Inventario/Materiales/'
       preLoaderRoute: typeof appGestionInventarioMaterialesIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
@@ -580,6 +711,7 @@ const rootRouteChildren: RootRouteChildren = {
   appGestionProveedoresRoute: appGestionProveedoresRoute,
   appGestionSolicitudesRoute: appGestionSolicitudesRoute,
   appSeguridadAuditoriaRoute: appSeguridadAuditoriaRoute,
+  appGestionAfiliadosFacturasRoute: appGestionAfiliadosFacturasRoute,
   appGestionAfiliadosLecturasRoute: appGestionAfiliadosLecturasRoute,
   appGestionInventarioCategoriasRoute: appGestionInventarioCategoriasRoute,
   appGestionInventarioMovimientosRoute: appGestionInventarioMovimientosRoute,

@@ -5,11 +5,6 @@ export const sections = [
   { id: 4, title: "Ayuda", key: "Ayuda" }
 ]
 
-export const CUSTOM_ANIMATION = {
-  mount: { scale: 1 },
-  unmount: { scale: 0.9 },
-}
-
 export type Module = {
   name: string
   path: string
