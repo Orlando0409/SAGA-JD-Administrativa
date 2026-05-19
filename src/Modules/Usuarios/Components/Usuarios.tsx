@@ -208,6 +208,7 @@ const Usuarios = () => {
               {hasEditPermission && (
                 <button
                   className="px-1.5 py-1 sm:px-2 sm:py-1 bg-blue-600 text-white text-[9px] sm:text-xs rounded hover:bg-blue-700 transition-colors w-auto whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
+                  onClick={() => handleEdit(info.row.original)}
                    disabled={info.row.original.Nombre_Usuario.toLowerCase() === 'admin'}
                   title={info.row.original.Nombre_Usuario.toLowerCase() === 'admin' ? 'No se puede editar el usuario admin' : 'Editar usuario'}
                 >
