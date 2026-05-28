@@ -1,4 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
+import DescargarPdfModal, { type OpcionFiltro, type OpcionColumna, type GrupoFiltro } from '@/Modules/Global/components/DescargarPdfModal/DescargarPdfModal';
+import { useDownloadModulePdf } from '@/Modules/Global/hooks/useDownloadModulePdf';
+import { LuFileDown } from 'react-icons/lu';
 import {
   useReactTable,
   getCoreRowModel,
@@ -57,6 +60,8 @@ const CatalogoMateriales: React.FC<CatalogoMaterialesProps> = () => {
   const [showFilterModal, setShowFilterModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [appliedFilters, setAppliedFilters] = useState<MaterialFilterOptions>({});
+  const [isDownloadOpen, setIsDownloadOpen] = useState(false);
+  const { mutate: downloadPdf, isPending: isDownloadingPdf } = useDownloadModulePdf();
   const [estadoFilter, setEstadoFilter] = useState<string>('Todos'); // Por defecto mostrar todos
   const updateEstadoMutation = useUpdateEstadoMaterial();
   const navigate = useNavigate();
@@ -620,7 +625,7 @@ const CatalogoMateriales: React.FC<CatalogoMaterialesProps> = () => {
     if (isLoading) {
       return (
         <div className="flex items-center justify-center min-h-96">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+          <div className="animate-spin rounded-full size-32 border-b-2 border-blue-600"></div>
         </div>
       );
     }
@@ -629,7 +634,7 @@ const CatalogoMateriales: React.FC<CatalogoMaterialesProps> = () => {
     <div className="space-y-6">
       <div className="bg-white rounded-lg p-3">
           <div className="flex items-start gap-4 flex-col justify-start">
-            <h2 className="text-2xl font-bold text-gray-900">Catálogo de Materiales</h2>
+            <h2 className="text-2xl font-semibold text-gray-900">Catálogo de Materiales</h2>
             <p className="text-sm text-gray-600 pb-4">Gestiona los materiales del inventario</p>
         </div>
         <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 items-stretch sm:items-center justify-between pb-2">
@@ -659,19 +664,28 @@ const CatalogoMateriales: React.FC<CatalogoMaterialesProps> = () => {
                   : 'border-gray-300 hover:bg-gray-50'
               }`}
             >
-              <LuFilter className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              <LuFilter className="size-3.5 sm:size-4" />
               Filtros
               {activeFiltersCount > 0 && (
-                <span className="bg-blue-500 text-white text-[10px] sm:text-xs rounded-full w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center">
+                <span className="bg-blue-500 text-white text-[10px] sm:text-xs rounded-full size-4 sm:size-5 flex items-center justify-center">
                   {activeFiltersCount}
                 </span>
               )}
+            </button>
+            <button
+              onClick={() => setIsDownloadOpen(true)}
+              disabled={isDownloadingPdf}
+              className="sm:flex-none justify-center whitespace-nowrap px-2 py-1.5 sm:px-4 sm:py-2 border border-gray-300 rounded-md flex items-center gap-1 sm:gap-2 hover:bg-gray-50 transition-colors text-xs sm:text-sm disabled:opacity-50"
+              title="Descargar PDF"
+            >
+              <LuFileDown className="size-3.5 sm:size-4" />
+              {isDownloadingPdf ? 'Generando…' : 'Descargar PDF'}
             </button>
           </div>
     <div className="flex w-full flex-col sm:flex-row gap-3 sm:gap-4 items-stretch sm:items-center justify-end">
       {/* Fila 2 en móvil / Centro en desktop */}
           <div className="relative w-full sm:flex-1 sm:max-w-md">
-            <LuSearch className="absolute left-2.5 top-1/2 transform -translate-y-1/2 text-gray-400 w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            <LuSearch className="absolute left-2.5 top-1/2 transform -translate-y-1/2 text-gray-400 size-3.5 sm:size-4" />
             <input
               type="text"
               placeholder="Buscar materiales..."
@@ -687,7 +701,7 @@ const CatalogoMateriales: React.FC<CatalogoMaterialesProps> = () => {
               onClick={() => setShowCreateModal(true)}
               className="flex-1 sm:flex-none justify-center bg-blue-600 hover:bg-blue-700 text-white whitespace-nowrap px-2 py-1.5 sm:px-4 sm:py-2 rounded-md flex items-center gap-1 sm:gap-2 transition-colors text-xs sm:text-sm"
             >
-              <LuPlus className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              <LuPlus className="size-3.5 sm:size-4" />
               Nuevo
             </button>
             <button
@@ -778,7 +792,7 @@ const CatalogoMateriales: React.FC<CatalogoMaterialesProps> = () => {
               className="p-1 sm:p-2 border border-gray-300 rounded-md text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               title="Primera página"
             >
-              <MdKeyboardDoubleArrowLeft className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
+              <MdKeyboardDoubleArrowLeft className="size-3.5 sm:size-5" />
             </button>
             <button
               onClick={() => table.previousPage()}
@@ -786,7 +800,7 @@ const CatalogoMateriales: React.FC<CatalogoMaterialesProps> = () => {
               className="p-1 sm:p-2 border border-gray-300 rounded-md text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               title="Página anterior"
             >
-              <MdKeyboardArrowLeft className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
+              <MdKeyboardArrowLeft className="size-3.5 sm:size-5" />
             </button>
             <span className="px-1.5 sm:px-2 py-1 text-[10px] sm:text-sm whitespace-nowrap">
               Pág. {table.getState().pagination.pageIndex + 1} de{' '}
@@ -798,7 +812,7 @@ const CatalogoMateriales: React.FC<CatalogoMaterialesProps> = () => {
               className="p-1 sm:p-2 border border-gray-300 rounded-md text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               title="Página siguiente"
             >
-              <MdKeyboardArrowRight className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
+              <MdKeyboardArrowRight className="size-3.5 sm:size-5" />
             </button>
             <button
               onClick={() => table.setPageIndex(table.getPageCount() - 1)}
@@ -806,7 +820,7 @@ const CatalogoMateriales: React.FC<CatalogoMaterialesProps> = () => {
               className="p-1 sm:p-2 border border-gray-300 rounded-md text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               title="Última página"
             >
-              <MdKeyboardDoubleArrowRight className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
+              <MdKeyboardDoubleArrowRight className="size-3.5 sm:size-5" />
             </button>
           </div>
         </div>
@@ -845,6 +859,57 @@ const CatalogoMateriales: React.FC<CatalogoMaterialesProps> = () => {
         onClose={() => setShowFilterModal(false)}
         onApplyFilters={handleApplyFilters}
         currentFilters={appliedFilters}
+      />
+
+      <DescargarPdfModal
+        isOpen={isDownloadOpen}
+        onClose={() => setIsDownloadOpen(false)}
+        titulo="Descargar Materiales"
+        descripcion="Filtra por estado y columnas. Genera reporte PDF descargable."
+        grupos={[
+          {
+            key: 'estados',
+            titulo: 'Estados a incluir',
+            opciones: (() => {
+              const map = new Map<number, string>();
+              todosMateriales.forEach((m: any) => {
+                const id = m.Estado_Material?.Id_Estado_Material;
+                const label = m.Estado_Material?.Nombre_Estado_Material;
+                if (typeof id === 'number' && label) map.set(id, label);
+              });
+              return Array.from(map.entries())
+                .map(([id, label]) => ({ id, label } as OpcionFiltro))
+                .sort((a, b) => a.label.localeCompare(b.label, 'es'));
+            })(),
+          } as GrupoFiltro,
+        ]}
+        columnas={[
+          { key: 'nombre',      label: 'Material',          obligatoria: true },
+          { key: 'descripcion', label: 'Descripción' },
+          { key: 'cantidad',    label: 'Cantidad' },
+          { key: 'unidad',      label: 'U. Medida' },
+          { key: 'precio',      label: 'Precio Unit.' },
+          { key: 'estado',      label: 'Estado' },
+          { key: 'categorias',  label: 'Categorías' },
+          { key: 'numero',      label: 'Número estantería' },
+          { key: 'proveedor',   label: 'Proveedor' },
+          { key: 'entrada',     label: 'Fecha entrada' },
+        ] as OpcionColumna[]}
+        isLoading={isDownloadingPdf}
+        rangoFecha={{ ayuda: 'Filtra por fecha de entrada del material.' }}
+        onConfirm={(f) => {
+          const estadosSel = (f.grupos.estados ?? []).filter((v): v is number => typeof v === 'number');
+          downloadPdf({
+            url: '/Inventario/materiales/pdf',
+            filename: `Materiales_${new Date().toISOString().slice(0, 10)}`,
+            payload: {
+              estados: estadosSel.length ? estadosSel : undefined,
+              columnas: f.columnas.length ? f.columnas : undefined,
+              fechaInicio: f.fechaInicio,
+              fechaFin: f.fechaFin,
+            },
+          }, { onSuccess: () => setIsDownloadOpen(false) });
+        }}
       />
 
       </div>

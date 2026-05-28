@@ -1,10 +1,12 @@
 import { useState, useMemo, useEffect } from 'react';
+import DescargarPdfModal, { type OpcionColumna, type GrupoFiltro } from '@/Modules/Global/components/DescargarPdfModal/DescargarPdfModal';
+import { useDownloadModulePdf } from '@/Modules/Global/hooks/useDownloadModulePdf';
+import { LuFileDown } from 'react-icons/lu';
 import { LuPlus, LuSearch } from 'react-icons/lu';
 import {
   createColumnHelper,
   useReactTable,
   getCoreRowModel,
-  getFilteredRowModel,
   getSortedRowModel,
   getPaginationRowModel,
   flexRender
@@ -33,6 +35,8 @@ import type { Medidor, EstadoPagoMedidorNombre } from '../../models/Medidor';
 import CreateMedidorModal from './CreateMedidorModal';
 import DetailMedidorModal from './DetailMedidorModal';
 import AsignarAfiliadoMedidorModal from './AsignarAfiliadoMedidorModal';
+import SubirArchivosMedidorModal from './SubirArchivosMedidorModal';
+import { subirArchivosMedidorInventario } from '../../service/MedidorServices';
 
 interface CatalogoMedidoresProps {
   onBack?: () => void;
@@ -44,10 +48,14 @@ const CatalogoMedidores: React.FC<CatalogoMedidoresProps> = () => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [isAsignarModalOpen, setIsAsignarModalOpen] = useState(false);
+  const [isSubirArchivosModalOpen, setIsSubirArchivosModalOpen] = useState(false);
   const [showEstadoPagoDialog, setShowEstadoPagoDialog] = useState(false);
   const [medidorEstadoPagoSeleccionado, setMedidorEstadoPagoSeleccionado] = useState<Medidor | null>(null);
   const [selectedMedidor, setSelectedMedidor] = useState<Medidor | null>(null);
   const [estadoFilter, setEstadoFilter] = useState<string>('Todos');
+  const [isDownloadOpen, setIsDownloadOpen] = useState(false);
+  const { mutate: downloadPdf, isPending: isDownloadingPdf } = useDownloadModulePdf();
+  const [estadoPagoFilter, setEstadoPagoFilter] = useState<string>('Todos');
   const [notification, setNotification] = useState<{
     type: 'success' | 'error' | 'info';
     title: string;
@@ -66,6 +74,7 @@ const CatalogoMedidores: React.FC<CatalogoMedidoresProps> = () => {
   const medidoresNoInstalados = useMedidoresPorEstado('no-instalados');
   const medidoresInstalados = useMedidoresPorEstado('instalados');
   const medidoresAveriados = useMedidoresPorEstado('averiados');
+  const medidoresPendientes = useMedidoresPorEstado('pendientes');
   const updateEstadoMutation = useUpdateEstadoMedidor();
   const updateEstadoPagoMutation = useUpdateEstadoPagoMedidor();
 
@@ -90,6 +99,11 @@ const CatalogoMedidores: React.FC<CatalogoMedidoresProps> = () => {
     isLoading = medidoresAveriados.isLoading;
     error = medidoresAveriados.error;
     refetch = medidoresAveriados.refetch;
+  } else if (estadoFilter === 'Pendiente') {
+    medidores = medidoresPendientes.data ?? [];
+    isLoading = medidoresPendientes.isLoading;
+    error = medidoresPendientes.error;
+    refetch = medidoresPendientes.refetch;
   } else {
     medidores = medidoresTodos.data ?? [];
     isLoading = medidoresTodos.isLoading;
@@ -150,6 +164,43 @@ const CatalogoMedidores: React.FC<CatalogoMedidoresProps> = () => {
 
     return 'Pendiente';
   };
+
+  const medidoresFiltrados = useMemo(() => {
+    if (estadoPagoFilter === 'Todos') return medidores;
+    return medidores.filter(m => getEstadoPagoNombre(m) === estadoPagoFilter);
+  }, [medidores, estadoPagoFilter]);
+
+  const medidoresConBusqueda = useMemo(() => {
+    if (!globalFilter) return medidoresFiltrados;
+
+    const searchLower = globalFilter.toLowerCase();
+    return medidoresFiltrados.filter(m => {
+      const numero = m.Numero_Medidor?.toString().toLowerCase() || '';
+      const estado = m.Estado_Medidor?.Nombre_Estado_Medidor?.toLowerCase() || '';
+      const estadoPago = getEstadoPagoNombre(m).toLowerCase();
+
+      // Obtener nombre del afiliado usando la misma lógica que en la columna
+      let afiliadoNombre = '';
+      if (m.Afiliado) {
+        if (m.Afiliado.Tipo_Entidad === 1) {
+          afiliadoNombre = `${m.Afiliado.Nombre || ''} ${m.Afiliado.Primer_Apellido || ''} ${m.Afiliado.Segundo_Apellido || ''}`.trim();
+          if (!afiliadoNombre) afiliadoNombre = m.Afiliado.Nombre_Completo || '';
+        } else if (m.Afiliado.Tipo_Entidad === 2) {
+          afiliadoNombre = m.Afiliado.Razon_Social || m.Afiliado.Nombre_Completo || '';
+        } else {
+          afiliadoNombre = m.Afiliado.Nombre_Completo || m.Afiliado.Razon_Social || '';
+        }
+      }
+      afiliadoNombre = afiliadoNombre.toLowerCase();
+
+      return (
+        numero.includes(searchLower) ||
+        afiliadoNombre.includes(searchLower) ||
+        estado.includes(searchLower) ||
+        estadoPago.includes(searchLower)
+      );
+    });
+  }, [medidoresFiltrados, globalFilter]);
 
   const openEstadoPagoDialog = (medidor: Medidor) => {
     if (!medidor.Afiliado) return;
@@ -241,6 +292,9 @@ const CatalogoMedidores: React.FC<CatalogoMedidoresProps> = () => {
           } else if (estado === 'Averiado') {
             colorClass = 'bg-red-100 text-red-700 border border-red-300';
           }
+          else if (estado === 'Desconectado') {
+            colorClass = 'bg-red-100 text-red-700 border border-red-300';  //se sigue viendo gris xddd
+          }
 
           return (
             <div className="flex justify-start">
@@ -329,8 +383,23 @@ const CatalogoMedidores: React.FC<CatalogoMedidoresProps> = () => {
               }
 
               if (estadoId === 2) {
+                const sinArchivos =
+                  !info.row.original.Certificacion_Literal && !info.row.original.Planos_Terreno;
                 return (
                   <>
+                    {sinArchivos && (
+                      <button
+                        className="px-1.5 py-1 sm:px-2 sm:py-1 bg-amber-500 text-white text-[9px] sm:text-xs rounded hover:bg-amber-600 transition-colors w-auto whitespace-nowrap"
+                        onClick={() => {
+                          setSelectedMedidor(info.row.original);
+                          setIsSubirArchivosModalOpen(true);
+                        }}
+                        title="Subir archivos del terreno"
+                      >
+                        <span className="hidden sm:inline">Subir Archivos</span>
+                        <span className="sm:hidden">Archivos</span>
+                      </button>
+                    )}
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
                         <button
@@ -438,17 +507,14 @@ const CatalogoMedidores: React.FC<CatalogoMedidoresProps> = () => {
   );
 
   const table = useReactTable({
-    data: medidores,
+    data: medidoresConBusqueda,
     columns,
     getCoreRowModel: getCoreRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     state: {
-      globalFilter,
       pagination,
     },
-    onGlobalFilterChange: setGlobalFilter,
     onPaginationChange: setPagination,
     initialState: {
       pagination: {
@@ -461,7 +527,7 @@ const CatalogoMedidores: React.FC<CatalogoMedidoresProps> = () => {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        <div className="animate-spin rounded-full size-8 border-b-2 border-blue-600"></div>
         <span className="ml-2 text-gray-600">Cargando medidores...</span>
       </div>
     );
@@ -479,7 +545,7 @@ const CatalogoMedidores: React.FC<CatalogoMedidoresProps> = () => {
     <div className="space-y-6">
       <div className="bg-white rounded-lg p-3">
         <div className="flex items-start gap-4 flex-col justify-start">
-          <h2 className="text-2xl font-bold text-gray-900">Catálogo de Medidores</h2>
+          <h2 className="text-2xl font-semibold text-gray-900">Catálogo de Medidores</h2>
           <p className="text-sm text-gray-600 pb-4">Gestiona los medidores del inventario</p>
         </div>
         <div className="flex flex-col gap-3 sm:flex-row sm:gap-4 items-stretch sm:items-center justify-between pb-2">
@@ -499,12 +565,35 @@ const CatalogoMedidores: React.FC<CatalogoMedidoresProps> = () => {
                 <option value="Averiado">Averiado</option>
               </select>
             </div>
+            <button
+              onClick={() => setIsDownloadOpen(true)}
+              disabled={isDownloadingPdf}
+              className="px-3 py-1.5 sm:px-4 sm:py-2 border border-gray-300 rounded-lg flex items-center gap-2 hover:bg-gray-50 transition-colors text-xs sm:text-sm whitespace-nowrap disabled:opacity-50"
+              title="Descargar PDF"
+            >
+              <LuFileDown className="size-4" />
+              {isDownloadingPdf ? 'Generando…' : 'Descargar PDF'}
+            </button>
+            <div className="flex items-center gap-2 whitespace-nowrap">
+              <label htmlFor='estadoPago' className="text-xs sm:text-sm font-medium text-gray-700">Pago:</label>
+              <select
+                id='estadoPago'
+                value={estadoPagoFilter}
+                onChange={(e) => setEstadoPagoFilter(e.target.value)}
+                className="px-2 py-1.5 sm:px-3 sm:py-2 border bor                                                             der-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-xs sm:text-sm"
+              >
+                <option value="Todos">Todos</option>
+                <option value="Pendiente">Pendiente</option>
+                <option value="Pagado">Pagado</option>
+                <option value="Libre">Libre</option>
+              </select>
+            </div>
           </div>
           
           {/* Fila 2 en móvil: Búsqueda */}
           <div className="w-full flex gap-2 sm:flex-1 sm:max-w-md ">
             <div className="relative w-full">
-              <LuSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 sm:w-5 sm:h-5" />
+              <LuSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 size-4 sm:size-5" />
               <input
                 type="text"
                 placeholder="Buscar medidores..."
@@ -517,7 +606,7 @@ const CatalogoMedidores: React.FC<CatalogoMedidoresProps> = () => {
               onClick={() => setIsCreateModalOpen(true)}
               className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 sm:px-4 sm:py-2 rounded-lg flex items-center gap-2 transition-colors text-xs sm:text-sm whitespace-nowrap"
             >
-              <LuPlus className="w-4 h-4" />
+              <LuPlus className="size-4" />
               Nuevo Medidor
             </button>
           </div>
@@ -620,7 +709,7 @@ const CatalogoMedidores: React.FC<CatalogoMedidoresProps> = () => {
               className="p-1 sm:p-2 border border-gray-300 rounded-md text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               title="Primera página"
             >
-              <MdKeyboardDoubleArrowLeft className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
+              <MdKeyboardDoubleArrowLeft className="size-3.5 sm:size-5" />
             </button>
             <button
               onClick={() => table.previousPage()}
@@ -628,7 +717,7 @@ const CatalogoMedidores: React.FC<CatalogoMedidoresProps> = () => {
               className="p-1 sm:p-2 border border-gray-300 rounded-md text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               title="Página anterior"
             >
-              <MdKeyboardArrowLeft className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
+              <MdKeyboardArrowLeft className="size-3.5 sm:size-5" />
             </button>
             <span className="px-1.5 sm:px-2 py-1 text-[10px] sm:text-sm whitespace-nowrap">
               Pág. {table.getState().pagination.pageIndex + 1} de{' '}
@@ -640,7 +729,7 @@ const CatalogoMedidores: React.FC<CatalogoMedidoresProps> = () => {
               className="p-1 sm:p-2 border border-gray-300 rounded-md text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               title="Página siguiente"
             >
-              <MdKeyboardArrowRight className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
+              <MdKeyboardArrowRight className="size-3.5 sm:size-5" />
             </button>
             <button
               onClick={() => table.setPageIndex(table.getPageCount() - 1)}
@@ -648,7 +737,7 @@ const CatalogoMedidores: React.FC<CatalogoMedidoresProps> = () => {
               className="p-1 sm:p-2 border border-gray-300 rounded-md text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               title="Última página"
             >
-              <MdKeyboardDoubleArrowRight className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
+              <MdKeyboardDoubleArrowRight className="size-3.5 sm:size-5" />
             </button>
           </div>
         </div>
@@ -689,6 +778,28 @@ const CatalogoMedidores: React.FC<CatalogoMedidoresProps> = () => {
         />
       )}
 
+      {selectedMedidor && (
+        <SubirArchivosMedidorModal
+          isOpen={isSubirArchivosModalOpen}
+          numeroMedidor={selectedMedidor.Numero_Medidor}
+          onClose={() => {
+            setIsSubirArchivosModalOpen(false);
+            setSelectedMedidor(null);
+          }}
+          onSubir={(cert, planos) =>
+            subirArchivosMedidorInventario(selectedMedidor.Id_Medidor, cert, planos)
+          }
+          onSuccess={() => {
+            refetch();
+            setNotification({
+              type: 'success',
+              title: 'Archivos subidos',
+              description: `Los archivos del medidor #${selectedMedidor.Numero_Medidor} fueron guardados correctamente.`,
+            });
+          }}
+        />
+      )}
+
       <AlertDialog open={showEstadoPagoDialog} onOpenChange={setShowEstadoPagoDialog}>
         <AlertDialogContent className="w-[90vw] max-w-lg mx-auto p-4 sm:p-6 rounded-xl">
           <AlertDialogHeader>
@@ -703,12 +814,59 @@ const CatalogoMedidores: React.FC<CatalogoMedidoresProps> = () => {
               onClick={handleActualizarEstadoPago}
               disabled={updateEstadoPagoMutation.isPending}
             >
-              {updateEstadoPagoMutation.isPending ? 'Actualizando...' : 'Si, cambiar'}
+              {updateEstadoPagoMutation.isPending ? 'Actualizando…' : 'Si, cambiar'}
             </AlertDialogAction>
             <AlertDialogCancel disabled={updateEstadoPagoMutation.isPending}>Cancelar</AlertDialogCancel>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <DescargarPdfModal
+        isOpen={isDownloadOpen}
+        onClose={() => setIsDownloadOpen(false)}
+        titulo="Descargar Medidores"
+        descripcion="Filtra por estado y columnas. Genera reporte PDF descargable."
+        grupos={[
+          {
+            key: 'estados',
+            titulo: 'Estados a incluir',
+            ayuda: 'Si no seleccionas ningún estado, se incluirán todos por defecto.',
+            opciones: (() => {
+              const map = new Map<number, string>();
+              (medidoresTodos.data ?? []).forEach((m: any) => {
+                const id = m.Estado_Medidor?.Id_Estado_Medidor;
+                const label = m.Estado_Medidor?.Nombre_Estado_Medidor;
+                if (typeof id === 'number' && label) map.set(id, label);
+              });
+              return Array.from(map.entries())
+                .map(([id, label]) => ({ id, label }))
+                .sort((a, b) => a.label.localeCompare(b.label, 'es'));
+            })(),
+          } as GrupoFiltro,
+        ]}
+        columnas={[
+          { key: 'numero',   label: 'N° Medidor',    obligatoria: true },
+          { key: 'estado',   label: 'Estado' },
+          { key: 'afiliado', label: 'Afiliado' },
+          { key: 'pago',     label: 'Estado Pago' },
+          { key: 'creacion', label: 'Fecha creación' },
+        ] as OpcionColumna[]}
+        rangoFecha={{ ayuda: 'Filtra por fecha de creación del medidor.' }}
+        isLoading={isDownloadingPdf}
+        onConfirm={(f) => {
+          const estadosSel = (f.grupos.estados ?? []).filter((v): v is number => typeof v === 'number');
+          downloadPdf({
+            url: '/Inventario/medidores/pdf',
+            filename: `Medidores_${new Date().toISOString().slice(0, 10)}`,
+            payload: {
+              estados: estadosSel.length ? estadosSel : undefined,
+              columnas: f.columnas.length ? f.columnas : undefined,
+              fechaInicio: f.fechaInicio,
+              fechaFin: f.fechaFin,
+            },
+          }, { onSuccess: () => setIsDownloadOpen(false) });
+        }}
+      />
     </div>
   );
 };

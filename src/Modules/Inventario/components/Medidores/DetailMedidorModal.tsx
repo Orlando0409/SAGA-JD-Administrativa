@@ -2,6 +2,7 @@ import { LuX, LuUser, LuFileText, LuMap } from 'react-icons/lu';
 import type { DetailMedidorModalProps } from '../../types/MedidorTypes';
 import { FaTachometerAlt, FaUsers } from 'react-icons/fa';
 import { formatCedulaJuridica } from '@/Modules/Afiliados/Helper/formatUtils';
+import DescargarRegistroPdfButton from '@/Modules/Global/components/DescargarPdfModal/DescargarRegistroPdfButton';
 
 const DetailMedidorModal = ({ isOpen, onClose, medidor }: DetailMedidorModalProps) => {
   if (!isOpen) return null;
@@ -114,14 +115,14 @@ const DetailMedidorModal = ({ isOpen, onClose, medidor }: DetailMedidorModalProp
       <div className="bg-white rounded-lg shadow-2xl border border-gray-200 w-full max-w-3xl flex flex-col overflow-hidden max-h-[90vh]">
         <div className="sticky top-0 bg-white border-b border-gray-200 p-4 sm:p-6 z-10">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-bold text-gray-900">
+            <h2 className="text-xl font-semibold text-gray-900">
               Detalles del Medidor
             </h2>
             <button
               onClick={onClose}
               className="p-1 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100 transition-colors"
             >
-              <LuX className="w-5 h-5" />
+              <LuX className="size-5" />
             </button>
           </div>
         </div>
@@ -132,10 +133,10 @@ const DetailMedidorModal = ({ isOpen, onClose, medidor }: DetailMedidorModalProp
             <div className="bg-gray-50 px-5 py-3 border-b border-gray-200">
               <div className="flex items-center gap-3">
                 {/* Ícono estandarizado con fondo azul claro */}
-                <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                  <FaTachometerAlt className="w-4 h-4 text-blue-600" />
+                <div className="size-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                  <FaTachometerAlt className="size-4 text-blue-600" />
                 </div>
-                <h3 className="text-base font-bold text-gray-900">Información del Medidor</h3>
+                <h3 className="text-base font-semibold text-gray-900">Información del Medidor</h3>
               </div>
             </div>
             <div className="p-5">
@@ -175,10 +176,10 @@ const DetailMedidorModal = ({ isOpen, onClose, medidor }: DetailMedidorModalProp
             <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
               <div className="bg-gray-50 px-5 py-3 border-b border-gray-200">
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                    <LuFileText className="w-4 h-4 text-blue-600" />
+                  <div className="size-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                    <LuFileText className="size-4 text-blue-600" />
                   </div>
-                  <h3 className="text-base font-bold text-gray-900">Documentos del Terreno</h3>
+                  <h3 className="text-base font-semibold text-gray-900">Documentos del Terreno</h3>
                 </div>
               </div>
               <div className="p-5">
@@ -194,7 +195,7 @@ const DetailMedidorModal = ({ isOpen, onClose, medidor }: DetailMedidorModalProp
                         rel="noopener noreferrer"
                         className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-700 hover:bg-blue-100 transition-colors font-medium"
                       >
-                        <LuFileText className="w-4 h-4" />
+                        <LuFileText className="size-4" />
                         Ver Certificación
                       </a>
                     </div>
@@ -210,7 +211,7 @@ const DetailMedidorModal = ({ isOpen, onClose, medidor }: DetailMedidorModalProp
                         rel="noopener noreferrer"
                         className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-700 hover:bg-blue-100 transition-colors font-medium"
                       >
-                        <LuMap className="w-4 h-4" />
+                        <LuMap className="size-4" />
                         Ver Planos
                       </a>
                     </div>
@@ -224,10 +225,10 @@ const DetailMedidorModal = ({ isOpen, onClose, medidor }: DetailMedidorModalProp
           <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
             <div className="bg-gray-50 px-5 py-3 border-b border-gray-200">
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                  <FaUsers className="w-4 h-4 text-blue-600" />
+                <div className="size-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                  <FaUsers className="size-4 text-blue-600" />
                 </div>
-                <h3 className="text-base font-bold text-gray-900">Información del Afiliado</h3>
+                <h3 className="text-base font-semibold text-gray-900">Información del Afiliado</h3>
               </div>
             </div>
             <div className="p-5">
@@ -293,10 +294,10 @@ const DetailMedidorModal = ({ isOpen, onClose, medidor }: DetailMedidorModalProp
           <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
             <div className="bg-gray-50 px-5 py-3 border-b border-gray-200">
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                  <LuUser className="w-4 h-4 text-blue-600" />
+                <div className="size-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                  <LuUser className="size-4 text-blue-600" />
                 </div>
-                <h3 className="text-base font-bold text-gray-900">Información de Registro</h3>
+                <h3 className="text-base font-semibold text-gray-900">Información de Registro</h3>
               </div>
             </div>
              <div className="p-5">
@@ -338,7 +339,12 @@ const DetailMedidorModal = ({ isOpen, onClose, medidor }: DetailMedidorModalProp
         </div>
 
         <div className="sticky bottom-0 bg-gray-50 border-t border-gray-200 p-4 sm:p-6 z-10">
-          <div className="flex justify-end">
+          <div className="flex justify-end gap-3">
+            <DescargarRegistroPdfButton
+              endpoint="/Inventario/medidores/pdf"
+              id={medidor.Id_Medidor}
+              filenamePrefix="Medidor"
+            />
             <button
               onClick={onClose}
               className="px-6 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium"

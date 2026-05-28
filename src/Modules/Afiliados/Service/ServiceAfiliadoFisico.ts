@@ -102,15 +102,15 @@ export const asignarMedidorAAfiliado = async (idAfiliado: number, idMedidor: num
 export const asignarMedidorExistenteAfiliado = async (
     idAfiliado: number,
     idMedidor: number,
-    certificacionLiteral: File,
-    planosTerreno: File,
+    certificacionLiteral: File | null,
+    planosTerreno: File | null,
     estadoPago?: 'Pagado' | 'Pendiente'
 ): Promise<void> => {
     const formData = new FormData();
     formData.append('Id_Afiliado', String(idAfiliado));
     formData.append('Id_Medidor', String(idMedidor));
-    formData.append('Certificacion_Literal', certificacionLiteral);
-    formData.append('Planos_Terreno', planosTerreno);
+    if (certificacionLiteral) formData.append('Certificacion_Literal', certificacionLiteral);
+    if (planosTerreno) formData.append('Planos_Terreno', planosTerreno);
     if (estadoPago) {
         formData.append('Estado_Pago', estadoPago);
     }
@@ -123,8 +123,8 @@ export const asignarMedidorExistenteAfiliado = async (
 export const crearYAsignarMedidorAfiliado = async (
     idAfiliado: number,
     numeroMedidor: number,
-    certificacionLiteral: File,
-    planosTerreno: File,
+    certificacionLiteral: File | null,
+    planosTerreno: File | null,
     estadoPago?: 'Pagado' | 'Pendiente'
 ): Promise<void> => {
     const medidorCreado = await apiAuth.post('/Inventario/create/medidor/', {
@@ -139,8 +139,8 @@ export const crearYAsignarMedidorAfiliado = async (
     const formData = new FormData();
     formData.append('Id_Afiliado', String(idAfiliado));
     formData.append('Id_Medidor', String(idMedidor));
-    formData.append('Certificacion_Literal', certificacionLiteral);
-    formData.append('Planos_Terreno', planosTerreno);
+    if (certificacionLiteral) formData.append('Certificacion_Literal', certificacionLiteral);
+    if (planosTerreno) formData.append('Planos_Terreno', planosTerreno);
     if (estadoPago) {
         formData.append('Estado_Pago', estadoPago);
     }
@@ -149,6 +149,34 @@ export const crearYAsignarMedidorAfiliado = async (
         headers: { 'Content-Type': 'multipart/form-data' },
     });
 };
+
+export const subirArchivosMedidorAfiliado = async (
+    idMedidor: number,
+    certificacionFile: File | null,
+    planosFile: File | null
+): Promise<void> => {
+    const formData = new FormData();
+    if (certificacionFile) formData.append('Certificacion_Literal', certificacionFile);
+    if (planosFile) formData.append('Planos_Terreno', planosFile);
+    await apiAuth.post(`/afiliados/medidores/${idMedidor}/archivos`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+    });
+};
+
+export async function getAfiliadoFisicoByIdentificacion(identificacion: string | number): Promise<{
+    Id_Afiliado: number;
+    Tipo_Identificacion: string;
+    Identificacion: string;
+    Nombre: string;
+    Apellido1: string;
+    Apellido2: string;
+    Correo: string;
+    Numero_Telefono: string;
+    Direccion_Exacta: string;
+}> {
+    const response = await apiAuth.get(`/afiliados/fisico/info/${identificacion}`);
+    return response.data;
+}
 
 export const updateTipoAfiliadoFisico = async (
     id: number,

@@ -1,4 +1,7 @@
 import { useMemo, useState } from 'react';
+import DescargarPdfModal, { type OpcionColumna, type GrupoFiltro, type OpcionFiltro } from '@/Modules/Global/components/DescargarPdfModal/DescargarPdfModal';
+import { useDownloadModulePdf } from '@/Modules/Global/hooks/useDownloadModulePdf';
+import { LuFileDown } from 'react-icons/lu';
 import { createColumnHelper, getCoreRowModel, getFilteredRowModel, getSortedRowModel, getPaginationRowModel, useReactTable, type ColumnDef } from '@tanstack/react-table';
 import { User, Building, Plus } from 'lucide-react';
 import { MdKeyboardArrowLeft, MdKeyboardArrowRight, MdKeyboardDoubleArrowLeft, MdKeyboardDoubleArrowRight, MdKeyboardArrowDown, MdKeyboardArrowUp } from 'react-icons/md';
@@ -14,6 +17,7 @@ import CreateModal from './CreateAfiliadoModal';
 import EditModal from './EditAfiliadoModal';
 import AsignarMedidorAfiliadoModal from './AsignarMedidorAfiliadoModal';
 import { useUserPermissions } from '@/Modules/Auth/Hooks/PermissionHook';
+import { useMedidoresSinArchivos } from '@/Modules/Inventario/hooks/useMedidoresSinArchivos';
 import {
     AlertDialog,
     AlertDialogTrigger,
@@ -47,6 +51,7 @@ type AfiliadoUnificado = {
 export default function AbonadosTable() {
     const { afiliadosFisicos, isLoading: loadingFisicos, isError: errorFisicos, refetch: refetchFisicos, updateEstadoAfiliadoFisico: updateEstadoMutationFisico } = useAfiliadosFisicos();
     const { afiliadosJuridicos, isLoading: loadingJuridicos, isError: errorJuridicos, refetch: refetchJuridicos, updateEstadoAfiliadoJuridico: updateEstadoMutationJuridico } = useAfiliadosJuridicos();
+    const { conteoPorAfiliado } = useMedidoresSinArchivos();
     const navigate = useNavigate();
     const { showError } = useAlerts();
     const { canCreate, canEdit } = useUserPermissions();
@@ -62,6 +67,8 @@ export default function AbonadosTable() {
         busquedaAvanzada: ''
     });
     const [isFilterOpen, setIsFilterOpen] = useState(false);
+    const [isDownloadOpen, setIsDownloadOpen] = useState(false);
+    const { mutate: downloadPdf, isPending: isDownloadingPdf } = useDownloadModulePdf();
     const [showDetailModal, setShowDetailModal] = useState(false);
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false); // ✅ Agregar estado para EditModal
@@ -226,9 +233,21 @@ export default function AbonadosTable() {
                     nombreFinal = datosOriginales.Razon_Social || 'Sin razón social';
                 }
 
+                const sinArchivos = conteoPorAfiliado.get(fila.Id) ?? 0;
+
                 return (
-                    <div className="font-medium text-left max-w-[80px] sm:max-w-[150px] md:max-w-xs truncate" title={nombreFinal}>
-                        {nombreFinal}
+                    <div className="flex items-center gap-1.5">
+                        <span className="font-medium text-left max-w-[80px] sm:max-w-[150px] md:max-w-xs truncate" title={nombreFinal}>
+                            {nombreFinal}
+                        </span>
+                        {sinArchivos > 0 && (
+                            <span
+                                className="shrink-0 bg-red-500 text-white text-[9px] rounded-full w-4 h-4 flex items-center justify-center font-bold"
+                                title={`${sinArchivos} medidor${sinArchivos > 1 ? 'es' : ''} sin archivos`}
+                            >
+                                {sinArchivos > 9 ? '9+' : sinArchivos}
+                            </span>
+                        )}
                     </div>
                 );
             },
@@ -288,7 +307,7 @@ export default function AbonadosTable() {
                             ? 'bg-blue-100 text-blue-700'
                             : 'bg-blue-100 text-blue-700'
                             }`}>
-                            {tipo === 'Físico' ? <User className="w-2 h-2 sm:w-3.5 sm:h-3.5" /> : <Building className="w-2 h-2 sm:w-3.5 sm:h-3.5" />} <span className="hidden sm:inline">{tipo}</span><span className="sm:hidden">{tipo}</span>
+                            {tipo === 'Físico' ? <User className="size-2 sm:size-3.5" /> : <Building className="size-2 sm:size-3.5" />} <span className="hidden sm:inline">{tipo}</span><span className="sm:hidden">{tipo}</span>
                         </span>
                     </div>
                 );
@@ -459,7 +478,7 @@ export default function AbonadosTable() {
     if (isLoading) {
         return (
             <div className="flex items-center justify-center h-64">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                <div className="animate-spin rounded-full size-8 border-b-2 border-blue-600"></div>
                 <span className="ml-2 text-gray-600">Cargando afiliados...</span>
             </div>
         );
@@ -478,7 +497,7 @@ export default function AbonadosTable() {
             {/* Encabezado con filtro de estado, búsqueda y botón */}
             <div className="bg-white rounded-lg p-3">
                 <div className="flex items-start gap-4 flex-col justify-start">
-                    <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Gestión de afiliados</h2>
+                    <h2 className="text-xl sm:text-2xl font-semibold text-gray-900">Gestión de afiliados</h2>
                     <p className="text-[10px] sm:text-sm text-gray-600 pb-2 sm:pb-4">Gestiona los afiliados de la ASADA</p>
                 </div>
                 <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 items-center justify-end mt-2 sm:mt-0">
@@ -491,7 +510,7 @@ export default function AbonadosTable() {
                                     : 'border-gray-300 hover:bg-gray-50'
                             }`}
                         >
-                            <LuFilter className="w-3 h-3 sm:w-4 sm:h-4" />
+                            <LuFilter className="size-3 sm:size-4" />
                             <span className="hidden sm:inline">Filtros</span>
                             {activeFiltersCount > 0 && (
                                 <span className="bg-blue-500 text-white text-[9px] sm:text-xs rounded-full w-4 sm:w-5 h-4 sm:h-5 flex items-center justify-center">
@@ -499,8 +518,17 @@ export default function AbonadosTable() {
                                 </span>
                             )}
                         </button>
+                        <button
+                            onClick={() => setIsDownloadOpen(true)}
+                            disabled={isDownloadingPdf}
+                            className="px-2 sm:px-4 py-1.5 sm:py-2 text-[10px] sm:text-sm border border-gray-300 rounded-md sm:rounded-lg flex items-center justify-center gap-1 sm:gap-2 hover:bg-gray-50 transition-colors disabled:opacity-50"
+                            title="Descargar PDF"
+                        >
+                            <LuFileDown className="size-3 sm:size-4" />
+                            <span className="hidden sm:inline">{isDownloadingPdf ? 'Generando…' : 'Descargar PDF'}</span>
+                        </button>
                         <div className="relative flex-1 max-w-md w-full min-w-[120px]">
-                            <LuSearch className="absolute left-2 sm:left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-3 h-3 sm:w-4 sm:h-4" />
+                            <LuSearch className="absolute left-2 sm:left-3 top-1/2 transform -translate-y-1/2 text-gray-400 size-3 sm:size-4" />
                             <input
                                 type="text"
                                 placeholder="Buscar afiliados..."
@@ -514,7 +542,7 @@ export default function AbonadosTable() {
                                 onClick={() => setShowCreateModal(true)}
                                 className="bg-blue-600 hover:bg-blue-700 text-white px-2 sm:px-4 py-1.5 sm:py-2 text-[10px] sm:text-sm rounded-md sm:rounded-lg flex items-center justify-center gap-1 sm:gap-2 transition-colors whitespace-nowrap"
                             >
-                                <Plus className="w-3 h-3 sm:w-4 sm:h-4" />
+                                <Plus className="size-3 sm:size-4" />
                                 <span className="hidden sm:inline">Nuevo Afiliado</span>
                                 <span className="sm:hidden">Nuevo</span>
                             </button>
@@ -524,6 +552,12 @@ export default function AbonadosTable() {
                             className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-2 sm:px-4 py-1.5 sm:py-2 text-[10px] sm:text-sm rounded-md sm:rounded-lg flex items-center justify-center gap-1 sm:gap-2 transition-colors"
                         >
                             Lecturas
+                        </button>
+                        <button
+                            onClick={() => navigate({ to: '/Afiliados/Facturas' })}
+                            className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-2 sm:px-4 py-1.5 sm:py-2 text-[10px] sm:text-sm rounded-md sm:rounded-lg flex items-center justify-center gap-1 sm:gap-2 transition-colors"
+                        >
+                            Facturas
                         </button>
                     </div>
                 </div>
@@ -535,6 +569,68 @@ export default function AbonadosTable() {
                 onClose={() => setIsFilterOpen(false)}
                 currentFilters={activeFilters}
                 onApplyFilters={(f) => setActiveFilters(f)}
+            />
+
+            <DescargarPdfModal
+                isOpen={isDownloadOpen}
+                onClose={() => setIsDownloadOpen(false)}
+                titulo="Descargar Afiliados"
+                descripcion="Filtra por tipo, estado y columnas. Genera reporte PDF descargable."
+                grupos={[
+                    {
+                        key: 'tipo',
+                        titulo: 'Tipo de afiliado',
+                        multi: false,
+                        opciones: [
+                            { id: 1, label: 'Físico' },
+                            { id: 2, label: 'Jurídico' },
+                        ],
+                    },
+                    {
+                        key: 'estados',
+                        titulo: 'Estados a incluir',
+                        opciones: (() => {
+                            const map = new Map<number, string>();
+                            datosUnificados.forEach((a: any) => {
+                                const id = a.Estado?.Id_Estado;
+                                const label = a.Estado?.Nombre_Estado;
+                                if (typeof id === 'number' && id > 0 && label && label !== 'Sin estado') {
+                                    map.set(id, label);
+                                }
+                            });
+                            return Array.from(map.entries())
+                                .map(([id, label]) => ({ id, label } as OpcionFiltro))
+                                .sort((a, b) => a.label.localeCompare(b.label, 'es'));
+                        })(),
+                    },
+                ] as GrupoFiltro[]}
+                columnas={[
+                    { key: 'nombre',         label: 'Nombre / Razón Social', obligatoria: true },
+                    { key: 'tipo',           label: 'Tipo Persona' },
+                    { key: 'identificacion', label: 'Cédula / Documento' },
+                    { key: 'estado',         label: 'Estado' },
+                    { key: 'tipoAfiliado',   label: 'Tipo Afiliado' },
+                    { key: 'correo',         label: 'Correo' },
+                    { key: 'telefono',       label: 'Teléfono' },
+                    { key: 'creacion',       label: 'Fecha creación' },
+                ] as OpcionColumna[]}
+                isLoading={isDownloadingPdf}
+                rangoFecha={{ ayuda: 'Filtra por fecha de creación del afiliado.' }}
+                onConfirm={(f) => {
+                    const tipoSel = f.grupos.tipo?.[0];
+                    const estadosSel = (f.grupos.estados ?? []).filter((v): v is number => typeof v === 'number');
+                    downloadPdf({
+                        url: '/afiliados/pdf',
+                        filename: `Afiliados_${new Date().toISOString().slice(0, 10)}`,
+                        payload: {
+                            tipo: typeof tipoSel === 'number' ? tipoSel : undefined,
+                            estados: estadosSel.length ? estadosSel : undefined,
+                            columnas: f.columnas.length ? f.columnas : undefined,
+                            fechaInicio: f.fechaInicio,
+                            fechaFin: f.fechaFin,
+                        },
+                    }, { onSuccess: () => setIsDownloadOpen(false) });
+                }}
             />
 
             {/* Tabla con scroll vertical y horizontal */}
@@ -660,7 +756,7 @@ export default function AbonadosTable() {
                                 className="p-1 sm:p-2 rounded-md border text-gray-600 hover:text-gray-900 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
                                 title="Primera página"
                             >
-                                <MdKeyboardDoubleArrowLeft className="w-3 h-3 sm:w-4 sm:h-4" />
+                                <MdKeyboardDoubleArrowLeft className="size-3 sm:size-4" />
                             </button>
                             <button
                                 onClick={() => table.previousPage()}
@@ -668,7 +764,7 @@ export default function AbonadosTable() {
                                 className="p-1 sm:p-2 rounded-md border text-gray-600 hover:text-gray-900 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
                                 title="Página anterior"
                             >
-                                <MdKeyboardArrowLeft className="w-3 h-3 sm:w-4 sm:h-4" />
+                                <MdKeyboardArrowLeft className="size-3 sm:size-4" />
                             </button>
                             <span className="text-[10px] sm:text-sm text-gray-700 mx-1 sm:mx-2 whitespace-nowrap">
                                 <span className="hidden sm:inline">Página </span>{table.getState().pagination.pageIndex + 1} de {table.getPageCount()}
@@ -679,7 +775,7 @@ export default function AbonadosTable() {
                                 className="p-1 sm:p-2 rounded-md border text-gray-600 hover:text-gray-900 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
                                 title="Página siguiente"
                             >
-                                <MdKeyboardArrowRight className="w-3 h-3 sm:w-4 sm:h-4" />
+                                <MdKeyboardArrowRight className="size-3 sm:size-4" />
                             </button>
                             <button
                                 onClick={() => table.setPageIndex(table.getPageCount() - 1)}
@@ -687,7 +783,7 @@ export default function AbonadosTable() {
                                 className="p-1 sm:p-2 rounded-md border text-gray-600 hover:text-gray-900 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
                                 title="Última página"
                             >
-                                <MdKeyboardDoubleArrowRight className="w-3 h-3 sm:w-4 sm:h-4" />
+                                <MdKeyboardDoubleArrowRight className="size-3 sm:size-4" />
                             </button>
                         </div>
                     </div>

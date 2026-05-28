@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { LuSearch, LuFilter } from 'react-icons/lu';
+import { LuSearch, LuFilter, LuFileDown } from 'react-icons/lu';
 import { useAuth } from '@/Modules/Auth/Context/AuthContext';
 import {
   createColumnHelper,
@@ -22,6 +22,8 @@ import type { Auditoria } from '../models/Auditoria';
 import type { AuditoriaFilterOptions } from '../types/AuditoriaTypes';
 import DetailAuditoriaModal from './DetailAuditoriaModal';
 import FilterAuditoriaModal from './FilterAuditoriaModal';
+import DescargarPdfModal, { type OpcionFiltro, type OpcionColumna, type GrupoFiltro } from '@/Modules/Global/components/DescargarPdfModal/DescargarPdfModal';
+import { useDownloadModulePdf } from '@/Modules/Global/hooks/useDownloadModulePdf';
 
 const columnHelper = createColumnHelper<Auditoria>();
 
@@ -44,6 +46,53 @@ const CatálogoAuditorias = () => {
     pageIndex: 0,
     pageSize: 5,
   });
+
+  const [isDownloadOpen, setIsDownloadOpen] = useState(false);
+  const { mutate: downloadPdf, isPending: isDownloadingPdf } = useDownloadModulePdf();
+
+  const modulosOpcionesPdf = useMemo<OpcionFiltro[]>(() => {
+    const set = new Set<string>();
+    auditorias.forEach(a => { if (a.Modulo) set.add(a.Modulo); });
+    return Array.from(set).sort().map(m => ({ id: m, label: m }));
+  }, [auditorias]);
+
+  const accionesOpcionesPdf = useMemo<OpcionFiltro[]>(() => {
+    const set = new Set<string>();
+    auditorias.forEach(a => { if (a.Accion) set.add(a.Accion); });
+    return Array.from(set).sort().map(a => ({ id: a, label: a }));
+  }, [auditorias]);
+
+  const columnasOpcionesPdf: OpcionColumna[] = [
+    { key: 'fecha',    label: 'Fecha',    obligatoria: true },
+    { key: 'modulo',   label: 'Módulo' },
+    { key: 'accion',   label: 'Acción' },
+    { key: 'registro', label: 'Registro' },
+    { key: 'usuario',  label: 'Usuario' },
+    { key: 'rol',      label: 'Rol' },
+  ];
+
+  const gruposFiltrosPdf: GrupoFiltro[] = [
+    { key: 'modulos',  titulo: 'Módulos',  opciones: modulosOpcionesPdf },
+    { key: 'acciones', titulo: 'Acciones', opciones: accionesOpcionesPdf },
+  ];
+
+  const handleConfirmDownload = (f: { grupos: Record<string, (number | string)[]>; columnas: string[]; fechaInicio?: string; fechaFin?: string }) => {
+    const modulosSel = (f.grupos.modulos ?? []).filter((v): v is string => typeof v === 'string');
+    const accionesSel = (f.grupos.acciones ?? []).filter((v): v is string => typeof v === 'string');
+    downloadPdf({
+      url: '/auditoria/pdf',
+      filename: `Auditoria_${new Date().toISOString().slice(0, 10)}`,
+      payload: {
+        modulos: modulosSel.length ? modulosSel : undefined,
+        acciones: accionesSel.length ? accionesSel : undefined,
+        columnas: f.columnas.length ? f.columnas : undefined,
+        fechaInicio: f.fechaInicio,
+        fechaFin: f.fechaFin,
+      },
+    }, {
+      onSuccess: () => setIsDownloadOpen(false),
+    });
+  };
 
   const handleViewDetail = (auditoria: Auditoria) => {
     setSelectedAuditoria(auditoria);
@@ -224,7 +273,7 @@ const CatálogoAuditorias = () => {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        <div className="animate-spin rounded-full size-8 border-b-2 border-blue-600"></div>
         <span className="ml-2 text-gray-600">Cargando auditorías...</span>
       </div>
     );
@@ -234,7 +283,7 @@ const CatálogoAuditorias = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4 p-4 sm:p-6">
         <div>
-          <h1 className="text-lg sm:text-xlg md:text-2xl font-bold text-gray-900">
+          <h1 className="text-lg sm:text-xlg md:text-2xl font-semibold text-gray-900">
             Auditoría del Sistema
           </h1>
           <p className="text-[10px] sm:text-xs md:text-sm text-gray-600 mt-1">
@@ -247,7 +296,7 @@ const CatálogoAuditorias = () => {
       {/* Search & Filter Bar */}
       <div className="p-2 sm:p-4 flex flex-row items-center justify-between md:justify-end gap-2 sm:gap-4">
 
-        <div className='flex items-center'>
+        <div className='flex items-center gap-2'>
           <button
               onClick={() => setShowFilterModal(true)}
               className={`px-2 py-1 sm:px-4 sm:py-2 text-[10px] sm:text-sm border rounded-md flex items-center gap-1 sm:gap-2 transition-colors ${
@@ -256,20 +305,29 @@ const CatálogoAuditorias = () => {
                   : 'border-gray-300 hover:bg-gray-50'
               }`}
             >
-              <LuFilter className="w-3 h-3 sm:w-4 sm:h-4" />
+              <LuFilter className="size-3 sm:size-4" />
               Filtros
               {Object.values(appliedFilters).filter(Boolean).length > 0 && (
-                <span className="bg-blue-500 text-white text-[9px] sm:text-xs rounded-full w-3.5 h-3.5 sm:w-5 sm:h-5 flex items-center justify-center">
+                <span className="bg-blue-500 text-white text-[9px] sm:text-xs rounded-full size-3.5 sm:size-5 flex items-center justify-center">
                   {Object.values(appliedFilters).filter(Boolean).length}
                 </span>
               )}
             </button>
+            <button
+              onClick={() => setIsDownloadOpen(true)}
+              disabled={isDownloadingPdf}
+              className="px-2 py-1 sm:px-4 sm:py-2 text-[10px] sm:text-sm border border-gray-300 rounded-md flex items-center gap-1 sm:gap-2 hover:bg-gray-50 transition-colors disabled:opacity-50"
+              title="Descargar PDF"
+            >
+              <LuFileDown className="size-3 sm:size-4" />
+              {isDownloadingPdf ? 'Generando…' : 'Descargar PDF'}
+            </button>
         </div>
          <div className="relative flex-1 max-w-md w-full">
-          <LuSearch className="absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 w-3 h-3 sm:w-4 sm:h-4 text-gray-400" />
+          <LuSearch className="absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 size-3 sm:size-4 text-gray-400" />
           <input
             type="text"
-            placeholder="Buscar..."
+            placeholder="Buscar…"
             value={globalFilter}
             onChange={(e) => setGlobalFilter(e.target.value)}
             className="w-full pl-6 sm:pl-10 pr-2 sm:pr-4 py-1 sm:py-2 border border-gray-300 rounded-lg text-[10px] sm:text-sm focus:ring-1 focus:ring-sky-500 focus:border-sky-500"
@@ -394,7 +452,7 @@ const CatálogoAuditorias = () => {
                 className="p-0.5 sm:p-2 rounded border text-gray-600 hover:text-gray-900 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
                 title="Primera página"
               >
-                <MdKeyboardDoubleArrowLeft className="w-3 h-3 sm:w-4 sm:h-4" />
+                <MdKeyboardDoubleArrowLeft className="size-3 sm:size-4" />
               </button>
               <button
                 onClick={() => table.previousPage()}
@@ -402,7 +460,7 @@ const CatálogoAuditorias = () => {
                 className="p-0.5 sm:p-2 rounded border text-gray-600 hover:text-gray-900 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
                 title="Página anterior"
               >
-                <MdKeyboardArrowLeft className="w-3 h-3 sm:w-4 sm:h-4" />
+                <MdKeyboardArrowLeft className="size-3 sm:size-4" />
               </button>
               <span className="text-[9px] sm:text-xs md:text-sm text-gray-700 px-0.5 sm:px-2 whitespace-nowrap">
                 {table.getState().pagination.pageIndex + 1} de {table.getPageCount() || 1}
@@ -413,7 +471,7 @@ const CatálogoAuditorias = () => {
                 className="p-0.5 sm:p-2 rounded border text-gray-600 hover:text-gray-900 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
                 title="Página siguiente"
               >
-                <MdKeyboardArrowRight className="w-3 h-3 sm:w-4 sm:h-4" />
+                <MdKeyboardArrowRight className="size-3 sm:size-4" />
               </button>
               <button
                 onClick={() => table.setPageIndex(table.getPageCount() - 1)}
@@ -421,7 +479,7 @@ const CatálogoAuditorias = () => {
                 className="p-0.5 sm:p-2 rounded border text-gray-600 hover:text-gray-900 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
                 title="Última página"
               >
-                <MdKeyboardDoubleArrowRight className="w-3 h-3 sm:w-4 sm:h-4" />
+                <MdKeyboardDoubleArrowRight className="size-3 sm:size-4" />
               </button>
             </div>
           </div>
@@ -443,6 +501,18 @@ const CatálogoAuditorias = () => {
         onClose={() => setShowFilterModal(false)}
         onApplyFilters={handleApplyFilters}
         currentFilters={appliedFilters}
+      />
+
+      <DescargarPdfModal
+        isOpen={isDownloadOpen}
+        onClose={() => setIsDownloadOpen(false)}
+        titulo="Descargar Auditoría"
+        descripcion="Filtra por módulo, acción, fechas y columnas. Genera reporte PDF descargable."
+        grupos={gruposFiltrosPdf}
+        rangoFecha={{ ayuda: 'Filtra por fecha de la acción auditada.' }}
+        columnas={columnasOpcionesPdf}
+        isLoading={isDownloadingPdf}
+        onConfirm={handleConfirmDownload}
       />
     </div>
   );

@@ -5,7 +5,7 @@ import { useProveedoresJuridicos } from '../Hook/hookjuridicoproveedor';
 import { formatCedulaJuridica, formatPhoneNumberDisplay } from '../Schema/SchemaProveedorJuridico';
 import type { ProveedorFisico } from '../Models/TablaProveedo/tablaFisicoProveedor';
 import type { ProveedorJuridico } from '../Models/TablaProveedo/tablaJuridicoProveedor';
-import { LuFilter, LuSearch } from 'react-icons/lu';
+import { LuFilter, LuSearch, LuFileDown } from 'react-icons/lu';
 import { MdKeyboardArrowUp, MdKeyboardArrowDown, MdKeyboardDoubleArrowLeft, MdKeyboardArrowLeft, MdKeyboardArrowRight, MdKeyboardDoubleArrowRight } from 'react-icons/md';
 import ActionButtons from './ActionButtons';
 import FilterProveedorModal from './FilterProveedorModal';
@@ -15,6 +15,8 @@ import EditFisicoProveedoresModal from './EditFisicoProveedoresModal';
 import EditJuridicoProveedorModal from './EditJuridicoProveedorModal';
 import CreateModalProveedor from './CreateModalProveedor';
 import { useUserPermissions } from '@/Modules/Auth/Hooks/PermissionHook';
+import DescargarPdfModal, { type OpcionFiltro, type OpcionColumna, type GrupoFiltro } from '@/Modules/Global/components/DescargarPdfModal/DescargarPdfModal';
+import { useDownloadModulePdf } from '@/Modules/Global/hooks/useDownloadModulePdf';
 
 
 // Tipo unificado para la tabla (similar al patrón de AbonadosTable)
@@ -39,9 +41,13 @@ export default function ProveedoresTable() {
     // Hooks para obtener ambos tipos de proveedores
     const { proveedoresFisicos, } = useProveedoresFisicos();
     const { proveedoresJuridicos, } = useProveedoresJuridicos();
-    const { canCreate } = useUserPermissions();
+    const { canCreate, canView } = useUserPermissions();
 
     const hasCreatePermission = canCreate('proveedores');
+    const hasViewPermission = canView('proveedores');
+
+    const [isDownloadOpen, setIsDownloadOpen] = useState(false);
+    const { mutate: downloadPdf, isPending: isDownloadingPdf } = useDownloadModulePdf();
 
     const [globalFilter, setGlobalFilter] = useState('');
     // Filtros específicos solicitados: por tipo y por estado
@@ -111,6 +117,67 @@ export default function ProveedoresTable() {
         });
         return ['Todos', ...Array.from(setEstados)];
     }, [proveedoresUnificados]);
+
+    // Opciones de estados para el modal de descarga (id + label, sin duplicados)
+    const estadosOpcionesPdf = useMemo<OpcionFiltro[]>(() => {
+        const map = new Map<number, string>();
+        proveedoresUnificados.forEach(p => {
+            const id = p.Estado_Proveedor?.Id_Estado_Proveedor;
+            const label = p.Estado_Proveedor?.Estado_Proveedor;
+            if (typeof id === 'number' && label) map.set(id, label);
+        });
+        return Array.from(map.entries())
+            .map(([id, label]) => ({ id, label }))
+            .sort((a, b) => a.label.localeCompare(b.label, 'es', { sensitivity: 'base' }));
+    }, [proveedoresUnificados]);
+
+    const columnasOpcionesPdf: OpcionColumna[] = [
+        { key: 'nombre',         label: 'Nombre',          obligatoria: true },
+        { key: 'tipo',           label: 'Tipo' },
+        { key: 'identificacion', label: 'Identificación' },
+        { key: 'telefono',       label: 'Teléfono' },
+        { key: 'estado',         label: 'Estado' },
+        { key: 'creacion',       label: 'Fecha creación' },
+    ];
+
+    const gruposFiltrosPdf: GrupoFiltro[] = [
+        {
+            key: 'tipo',
+            titulo: 'Tipo',
+            multi: false,
+            opciones: [
+                { id: 1, label: 'Físico' },
+                { id: 2, label: 'Jurídico' },
+            ],
+        },
+        {
+            key: 'estados',
+            titulo: 'Estados a incluir',
+            opciones: estadosOpcionesPdf,
+        },
+    ];
+
+    const handleConfirmDownload = (f: { grupos: Record<string, (number | string)[]>; columnas: string[]; fechaInicio?: string; fechaFin?: string }) => {
+        const tipoSel = f.grupos.tipo?.[0];
+        const estadosSel = (f.grupos.estados ?? []).filter((v): v is number => typeof v === 'number');
+
+        downloadPdf(
+            {
+                url: '/Proveedores/pdf',
+                filename: `Proveedores_${new Date().toISOString().slice(0, 10)}`,
+                payload: {
+                    estados: estadosSel.length ? estadosSel : undefined,
+                    columnas: f.columnas.length ? f.columnas : undefined,
+                    tipo: typeof tipoSel === 'number' ? tipoSel : undefined,
+                    fechaInicio: f.fechaInicio,
+                    fechaFin: f.fechaFin,
+                },
+            },
+            {
+                onSuccess: () => setIsDownloadOpen(false),
+            }
+        );
+    };
 
     const activeFiltersCount = useMemo(() => {
         let c = 0;
@@ -283,13 +350,13 @@ export default function ProveedoresTable() {
             <div className="gap-4 mb-4 bg-white rounded-lg p-3 w-full">
                 <div className='p-2 sm:p-4 border-b border-gray-100'>
                     <div className="flex items-start gap-2 sm:gap-4 flex-col justify-start">
-                        <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Gestión de Proveedores</h2>
+                        <h2 className="text-xl sm:text-2xl font-semibold text-gray-900">Gestión de Proveedores</h2>
                         <p className="text-xs sm:text-sm text-gray-600 pb-2 sm:pb-4">Gestiona los proveedores del sistema</p>
                     </div>
                 </div>
                 
                 <div className="flex flex-col gap-3 sm:flex-row items-stretch sm:items-center justify-end pt-2">
-                   <div className="flex w-full sm:w-auto overflow-x-auto scrollbar-none pb-1 sm:pb-0">
+                   <div className="flex w-full sm:w-auto gap-2 overflow-x-auto scrollbar-none pb-1 sm:pb-0">
                        <button
                             onClick={() => setIsFilterOpen(true)}
                             className={`px-3 py-1.5 sm:px-4 sm:py-2 border rounded-lg flex items-center justify-center gap-2 transition-colors whitespace-nowrap text-xs sm:text-sm w-full sm:w-auto ${
@@ -298,22 +365,33 @@ export default function ProveedoresTable() {
                                 : 'border-gray-300 hover:bg-gray-50'
                             }`}
                         >
-                            <LuFilter className="w-4 h-4" />
+                            <LuFilter className="size-4" />
                             Filtros
                             {activeFiltersCount > 0 && (
-                            <span className="bg-blue-500 text-white text-[10px] sm:text-xs rounded-full w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center">
+                            <span className="bg-blue-500 text-white text-[10px] sm:text-xs rounded-full size-4 sm:size-5 flex items-center justify-center">
                                 {activeFiltersCount}
                             </span>
                             )}
                         </button>
+                        {hasViewPermission && (
+                            <button
+                                onClick={() => setIsDownloadOpen(true)}
+                                disabled={isDownloadingPdf}
+                                className="px-3 py-1.5 sm:px-4 sm:py-2 border border-gray-300 rounded-lg flex items-center justify-center gap-2 hover:bg-gray-50 transition-colors whitespace-nowrap text-xs sm:text-sm w-full sm:w-auto disabled:opacity-50"
+                                title="Descargar PDF"
+                            >
+                                <LuFileDown className="size-4" />
+                                {isDownloadingPdf ? 'Generando…' : 'Descargar PDF'}
+                            </button>
+                        )}
                    </div>
 
                     <div className="w-full flex gap-2 sm:flex-1 sm:max-w-md">
                         <div className="relative w-full">
-                            <LuSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 sm:w-5 sm:h-5" />
+                            <LuSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 size-4 sm:size-5" />
                             <input
                                 type="text"
-                                placeholder="Buscar..."
+                                placeholder="Buscar…"
                                 value={globalFilter ?? ''}
                                 onChange={(e) => setGlobalFilter(e.target.value)}
                                 className="w-full pl-9 pr-4 py-2 text-xs sm:text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -342,6 +420,18 @@ export default function ProveedoresTable() {
                     setTipoFilter(f.tipo);
                     setEstadoFilter(f.estado);
                 }}
+            />
+
+            <DescargarPdfModal
+                isOpen={isDownloadOpen}
+                onClose={() => setIsDownloadOpen(false)}
+                titulo="Descargar Proveedores"
+                descripcion="Filtra por tipo, estado, fechas y columnas. Genera reporte PDF descargable."
+                grupos={gruposFiltrosPdf}
+                rangoFecha={{ ayuda: 'Filtra por fecha de creación del proveedor.' }}
+                columnas={columnasOpcionesPdf}
+                isLoading={isDownloadingPdf}
+                onConfirm={handleConfirmDownload}
             />
 
             <div className="bg-white rounded-2xl shadow-sm border border-sky-100 overflow-hidden max-h-[calc(100vh-200px)] overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100 mb-4">
@@ -454,7 +544,7 @@ export default function ProveedoresTable() {
                             className="p-1 sm:p-2 border border-gray-300 rounded-md text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                             title="Primera página"
                         >
-                            <MdKeyboardDoubleArrowLeft className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
+                            <MdKeyboardDoubleArrowLeft className="size-3.5 sm:size-5" />
                         </button>
                         <button
                             onClick={() => table.previousPage()}
@@ -462,7 +552,7 @@ export default function ProveedoresTable() {
                             className="p-1 sm:p-2 border border-gray-300 rounded-md text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                             title="Página anterior"
                         >
-                            <MdKeyboardArrowLeft className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
+                            <MdKeyboardArrowLeft className="size-3.5 sm:size-5" />
                         </button>
                         <span className="px-1.5 sm:px-2 py-1 text-[10px] sm:text-sm whitespace-nowrap">
                             Pág. {table.getState().pagination.pageIndex + 1} de{' '}
@@ -474,7 +564,7 @@ export default function ProveedoresTable() {
                             className="p-1 sm:p-2 border border-gray-300 rounded-md text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                             title="Página siguiente"
                         >
-                            <MdKeyboardArrowRight className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
+                            <MdKeyboardArrowRight className="size-3.5 sm:size-5" />
                         </button>
                         <button
                             onClick={() => table.setPageIndex(table.getPageCount() - 1)}
@@ -482,7 +572,7 @@ export default function ProveedoresTable() {
                             className="p-1 sm:p-2 border border-gray-300 rounded-md text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                             title="Última página"
                         >
-                            <MdKeyboardDoubleArrowRight className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
+                            <MdKeyboardDoubleArrowRight className="size-3.5 sm:size-5" />
                         </button>
                     </div>
                 </div>

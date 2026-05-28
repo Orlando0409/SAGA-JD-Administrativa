@@ -17,6 +17,8 @@ import CreateMedidorModal from '@/Modules/Inventario/components/Medidores/Create
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { getMedidoresNoInstalados } from '@/Modules/Inventario/service/MedidorServices';
 import { useAsignarMedidor } from '../Hooks/HookAfiliadoMedidor';
+import { getAfiliadoFisicoByIdentificacion } from '@/Modules/Afiliados/Service/ServiceAfiliadoFisico';
+import { getAfiliadoJuridicoByIdentificacion } from '@/Modules/Afiliados/Service/ServiceAfiliadoJuridico';
 
 interface ModalMedidorProps {
     isOpen: boolean;
@@ -55,6 +57,36 @@ const ModalMedidor = ({ isOpen, onClose, onMedidorAsignado, tipoSolicitud, solic
     const [showConfirmDialog, setShowConfirmDialog] = useState(false);
     const [estadoPago, setEstadoPago] = useState<'Pagado' | 'Pendiente' | ''>('');
 
+    const datosSolicitudRaw = afiliado.datos as any;
+    const tipoSolicitudTexto = String(tipoSolicitud || datosSolicitudRaw?.Tipo_Solicitud || datosSolicitudRaw?.TipoSolicitud || '');
+    const tipoSolicitudNormalizado = tipoSolicitudTexto
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .trim();
+    const requiereInfoAfiliado =
+        !tipoSolicitudNormalizado.includes('afiliacion') &&
+        (
+            (tipoSolicitudNormalizado.includes('cambio') && tipoSolicitudNormalizado.includes('medidor')) ||
+            tipoSolicitudNormalizado.includes('desconexion') ||
+            tipoSolicitudNormalizado.includes('asociado') ||
+            (tipoSolicitudNormalizado.includes('agregar') && tipoSolicitudNormalizado.includes('medidor'))
+        );
+
+    const tipoEntidadRaw = Number(datosSolicitudRaw?.Tipo_Entidad);
+    const esEntidadJuridica = tipoEntidadRaw === 2 || (!tipoEntidadRaw && afiliado.tipo === 'solicitud-juridica');
+    const identificacionConsulta = esEntidadJuridica
+        ? String(datosSolicitudRaw?.Cedula_Juridica || '').trim()
+        : String(datosSolicitudRaw?.Identificacion || datosSolicitudRaw?.Cedula || '').trim();
+
+    type AfiliadoInfoCargado =
+        | { tipoEntidad: 1; data: Awaited<ReturnType<typeof getAfiliadoFisicoByIdentificacion>> }
+        | { tipoEntidad: 2; data: Awaited<ReturnType<typeof getAfiliadoJuridicoByIdentificacion>> };
+
+    const [afiliadoInfo, setAfiliadoInfo] = useState<AfiliadoInfoCargado | null>(null);
+    const [loadingAfiliadoInfo, setLoadingAfiliadoInfo] = useState(false);
+    const [errorAfiliadoInfo, setErrorAfiliadoInfo] = useState<string | null>(null);
+
     const resolverSolicitudId = () => {
         if (solicitudId !== undefined && solicitudId !== null && solicitudId !== '') {
             return solicitudId;
@@ -72,6 +104,54 @@ const ModalMedidor = ({ isOpen, onClose, onMedidorAsignado, tipoSolicitud, solic
             setEstadoPago('');
         }
     }, [isOpen]);
+
+    useEffect(() => {
+        if (!isOpen) return;
+
+        if (!requiereInfoAfiliado) {
+            setAfiliadoInfo(null);
+            setLoadingAfiliadoInfo(false);
+            setErrorAfiliadoInfo(null);
+            return;
+        }
+
+        if (!identificacionConsulta) {
+            setAfiliadoInfo(null);
+            setLoadingAfiliadoInfo(false);
+            setErrorAfiliadoInfo('No se encontró la identificación para cargar los datos del afiliado.');
+            return;
+        }
+
+        let cancelled = false;
+        setLoadingAfiliadoInfo(true);
+        setErrorAfiliadoInfo(null);
+
+        (async () => {
+            try {
+                if (esEntidadJuridica) {
+                    const data = await getAfiliadoJuridicoByIdentificacion(identificacionConsulta);
+                    if (cancelled) return;
+                    setAfiliadoInfo({ tipoEntidad: 2, data });
+                } else {
+                    const data = await getAfiliadoFisicoByIdentificacion(identificacionConsulta);
+                    if (cancelled) return;
+                    setAfiliadoInfo({ tipoEntidad: 1, data });
+                }
+            } catch (error) {
+                if (cancelled) return;
+                console.error('Error cargando info del afiliado:', error);
+                setAfiliadoInfo(null);
+                setErrorAfiliadoInfo('No se pudo cargar la información del afiliado.');
+            } finally {
+                if (cancelled) return;
+                setLoadingAfiliadoInfo(false);
+            }
+        })();
+
+        return () => {
+            cancelled = true;
+        };
+    }, [isOpen, requiereInfoAfiliado, esEntidadJuridica, identificacionConsulta]);
 
     // Obtener información del afiliado
     const getAfiliadoInfo = () => {
@@ -98,7 +178,22 @@ const ModalMedidor = ({ isOpen, onClose, onMedidorAsignado, tipoSolicitud, solic
         }
     };
 
-    const afiliadoInfo = getAfiliadoInfo();
+    const afiliadoInfoBase = getAfiliadoInfo();
+
+    const nombreMostrado = (() => {
+        if (!requiereInfoAfiliado) return afiliadoInfoBase.nombre;
+        if (loadingAfiliadoInfo) return 'Cargando…';
+        if (!afiliadoInfo) return afiliadoInfoBase.nombre;
+        if (afiliadoInfo.tipoEntidad === 2) return afiliadoInfo.data.Razon_Social || afiliadoInfoBase.nombre;
+        const nombre = `${afiliadoInfo.data.Nombre || ''} ${afiliadoInfo.data.Apellido1 || ''} ${afiliadoInfo.data.Apellido2 || ''}`.trim();
+        return nombre || afiliadoInfoBase.nombre;
+    })();
+
+    const telefonoMostrado = (() => {
+        if (!requiereInfoAfiliado) return afiliadoInfoBase.telefono;
+        if (loadingAfiliadoInfo) return 'Cargando…';
+        return afiliadoInfo?.data?.Numero_Telefono || afiliadoInfoBase.telefono;
+    })();
 
     // Filtrar medidores disponibles
     const medidoresFiltrados = (medidores || []).filter((medidor: Medidor) => {
@@ -125,7 +220,7 @@ const ModalMedidor = ({ isOpen, onClose, onMedidorAsignado, tipoSolicitud, solic
             return;
         }
 
-        if (!afiliadoInfo.Id_Afiliado || String(afiliadoInfo.Id_Afiliado).startsWith('temp-')) {
+        if (!afiliadoInfoBase.Id_Afiliado || String(afiliadoInfoBase.Id_Afiliado).startsWith('temp-')) {
             showError(
                 'Solicitud inválida',
                 'No se encontró un Id de solicitud válido para asignar el medidor. Recarga la lista e intenta nuevamente.'
@@ -144,7 +239,7 @@ const ModalMedidor = ({ isOpen, onClose, onMedidorAsignado, tipoSolicitud, solic
             await asignarMedidorMutation.mutateAsync({
                 Id_Medidor: medidorSeleccionado.Id_Medidor,
                 Id_Tipo_Entidad: afiliado.tipo === 'solicitud-fisica' ? 1 : 2,
-                Id_Solicitud: afiliadoInfo.Id_Afiliado,
+                Id_Solicitud: afiliadoInfoBase.Id_Afiliado,
                 Estado_Pago: estadoPago as 'Pagado' | 'Pendiente',
                 tipoSolicitud: tipoSolicitud
             });
@@ -174,14 +269,14 @@ const ModalMedidor = ({ isOpen, onClose, onMedidorAsignado, tipoSolicitud, solic
                 <div className="bg-white rounded-lg shadow-2xl border border-gray-200 w-full max-w-5xl mx-4 max-h-[90vh] overflow-hidden">
                     {/* Header */}
                     <div className="flex items-center justify-between p-6 border-b border-gray-200">
-                        <h2 className="text-xl font-bold text-gray-900">
+                        <h2 className="text-xl font-semibold text-gray-900">
                             Asignar Medidor
                         </h2>
                         <button
                             onClick={onClose}
                             className="p-1 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100 transition-colors"
                         >
-                            <LuX className="w-5 h-5" />
+                            <LuX className="size-5" />
                         </button>
                     </div>
 
@@ -195,13 +290,24 @@ const ModalMedidor = ({ isOpen, onClose, onMedidorAsignado, tipoSolicitud, solic
                                         Información del Afiliado
                                     </h3>
 
+                                    {requiereInfoAfiliado && (
+                                        <div className="mb-4">
+                                            {loadingAfiliadoInfo && (
+                                                <p className="text-sm text-gray-600">Cargando información del afiliado...</p>
+                                            )}
+                                            {errorAfiliadoInfo && (
+                                                <p className="text-sm text-red-600">{errorAfiliadoInfo}</p>
+                                            )}
+                                        </div>
+                                    )}
+
                                     <div className="space-y-3">
                                         <div className="bg-white rounded-lg p-3 border border-blue-100">
                                             <label className="text-xs font-medium text-gray-500 block mb-1">
                                                 Nombre Completo / Razón Social
                                             </label>
                                             <p className="text-sm font-semibold text-gray-900">
-                                                {afiliadoInfo.nombre}
+                                                {nombreMostrado}
                                             </p>
                                         </div>
 
@@ -210,7 +316,7 @@ const ModalMedidor = ({ isOpen, onClose, onMedidorAsignado, tipoSolicitud, solic
                                                 Número de Identificación
                                             </label>
                                             <p className="text-sm font-mono font-semibold text-gray-900">
-                                                {afiliadoInfo.documento}
+                                                {afiliadoInfoBase.documento}
                                             </p>
                                         </div>
 
@@ -219,7 +325,7 @@ const ModalMedidor = ({ isOpen, onClose, onMedidorAsignado, tipoSolicitud, solic
                                                 Número de Teléfono
                                             </label>
                                             <p className="text-sm font-semibold text-gray-900">
-                                                {afiliadoInfo.telefono}
+                                                {telefonoMostrado}
                                             </p>
                                         </div>
 
@@ -228,7 +334,7 @@ const ModalMedidor = ({ isOpen, onClose, onMedidorAsignado, tipoSolicitud, solic
                                                 Tipo de Persona
                                             </label>
                                             <p className="text-sm font-semibold text-gray-900">
-                                                {afiliadoInfo.tipo}
+                                                {afiliadoInfoBase.tipo}
                                             </p>
                                         </div>
                                     </div>
@@ -246,14 +352,14 @@ const ModalMedidor = ({ isOpen, onClose, onMedidorAsignado, tipoSolicitud, solic
                                             onClick={() => setShowCreateMedidor(true)}
                                             className="flex items-center gap-2 px-3 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors"
                                         >
-                                            <LuPlus className="w-4 h-4" />
+                                            <LuPlus className="size-4" />
                                             Nuevo Medidor
                                         </button>
                                     </div>
 
                                     {/* Buscador */}
                                     <div className="relative mb-4">
-                                        <LuSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                                        <LuSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 size-5" />
                                         <input
                                             type="text"
                                             value={busquedaMedidor}
@@ -267,7 +373,7 @@ const ModalMedidor = ({ isOpen, onClose, onMedidorAsignado, tipoSolicitud, solic
                                     <div className="space-y-2 max-h-[400px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100">
                                         {loadingMedidores ? (
                                             <div className="text-center py-8">
-                                                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
+                                                <div className="animate-spin rounded-full size-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
                                                 <p className="text-sm text-gray-500">Cargando medidores...</p>
                                             </div>
                                         ) : medidoresFiltrados.length === 0 ? (
@@ -298,8 +404,8 @@ const ModalMedidor = ({ isOpen, onClose, onMedidorAsignado, tipoSolicitud, solic
                                                             )}
                                                         </div>
                                                         {medidorSeleccionado?.Id_Medidor === medidor.Id_Medidor && (
-                                                            <div className="w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center">
-                                                                <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                                            <div className="size-6 bg-blue-600 rounded-full flex items-center justify-center">
+                                                                <svg className="size-4 text-white" fill="currentColor" viewBox="0 0 20 20">
                                                                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                                                                 </svg>
                                                             </div>
@@ -333,7 +439,7 @@ const ModalMedidor = ({ isOpen, onClose, onMedidorAsignado, tipoSolicitud, solic
                                                     className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
                                                     title="Deseleccionar"
                                                 >
-                                                    <LuX className="w-5 h-5" />
+                                                    <LuX className="size-5" />
                                                 </button>
                                             </div>
                                         </div>
@@ -366,7 +472,7 @@ const ModalMedidor = ({ isOpen, onClose, onMedidorAsignado, tipoSolicitud, solic
                             disabled={!medidorSeleccionado || !estadoPago || asignarMedidorMutation.isPending}
                             className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                         >
-                            {asignarMedidorMutation.isPending ? 'Asignando...' : 'Asignar Medidor'}
+                            {asignarMedidorMutation.isPending ? 'Asignando…' : 'Asignar Medidor'}
                         </button>
                         <button
                             onClick={onClose}
@@ -395,7 +501,7 @@ const ModalMedidor = ({ isOpen, onClose, onMedidorAsignado, tipoSolicitud, solic
                     <AlertDialogHeader>
                         <AlertDialogTitle>¿Asignar medidor a afiliado?</AlertDialogTitle>
                         <AlertDialogDescription>
-                            ¿Está seguro de asignar el medidor <strong>#{medidorSeleccionado?.Numero_Medidor}</strong> a <strong>{afiliadoInfo.nombre}</strong>?
+                            ¿Está seguro de asignar el medidor <strong>#{medidorSeleccionado?.Numero_Medidor}</strong> a <strong>{nombreMostrado}</strong>?
                             <br /><br />
                             Esta acción actualizará el estado del medidor y lo vinculará permanentemente con el afiliado.
                         </AlertDialogDescription>
@@ -405,7 +511,7 @@ const ModalMedidor = ({ isOpen, onClose, onMedidorAsignado, tipoSolicitud, solic
                             onClick={handleConfirmAsignacion}
                             disabled={asignarMedidorMutation.isPending}
                         >
-                            {asignarMedidorMutation.isPending ? 'Asignando...' : 'Confirmar asignación'}
+                            {asignarMedidorMutation.isPending ? 'Asignando…' : 'Confirmar asignación'}
                         </AlertDialogAction>
                         <AlertDialogCancel disabled={asignarMedidorMutation.isPending}>
                             Cancelar
