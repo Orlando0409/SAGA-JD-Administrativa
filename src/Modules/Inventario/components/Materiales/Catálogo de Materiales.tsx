@@ -538,8 +538,10 @@ const CatalogoMateriales: React.FC<CatalogoMaterialesProps> = () => {
       }),
     ], [updateEstadoMutation.isPending]);
 
+  const materialesOrdenados = useMemo(() => [...(filteredMaterials ?? [])].sort((a, b) => b.Id_Material - a.Id_Material), [filteredMaterials]);
+
   const table = useReactTable({
-    data: filteredMaterials,
+    data: materialesOrdenados,
     columns,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
@@ -884,15 +886,19 @@ const CatalogoMateriales: React.FC<CatalogoMaterialesProps> = () => {
           } as GrupoFiltro,
         ]}
         columnas={[
-          { key: 'nombre',    label: 'Nombre',        obligatoria: true },
-          { key: 'cantidad',  label: 'Cantidad' },
-          { key: 'unidad',    label: 'Unidad' },
-          { key: 'precio',    label: 'Precio Unit.' },
-          { key: 'estado',    label: 'Estado' },
-          { key: 'proveedor', label: 'Proveedor' },
-          { key: 'entrada',   label: 'Fecha entrada' },
+          { key: 'nombre',      label: 'Material',          obligatoria: true },
+          { key: 'descripcion', label: 'Descripción' },
+          { key: 'cantidad',    label: 'Cantidad' },
+          { key: 'unidad',      label: 'U. Medida' },
+          { key: 'precio',      label: 'Precio Unit.' },
+          { key: 'estado',      label: 'Estado' },
+          { key: 'categorias',  label: 'Categorías' },
+          { key: 'numero',      label: 'Número estantería' },
+          { key: 'proveedor',   label: 'Proveedor' },
+          { key: 'entrada',     label: 'Fecha entrada' },
         ] as OpcionColumna[]}
         isLoading={isDownloadingPdf}
+        rangoFecha={{ ayuda: 'Filtra por fecha de entrada del material.' }}
         onConfirm={(f) => {
           const estadosSel = (f.grupos.estados ?? []).filter((v): v is number => typeof v === 'number');
           downloadPdf({
@@ -901,6 +907,8 @@ const CatalogoMateriales: React.FC<CatalogoMaterialesProps> = () => {
             payload: {
               estados: estadosSel.length ? estadosSel : undefined,
               columnas: f.columnas.length ? f.columnas : undefined,
+              fechaInicio: f.fechaInicio,
+              fechaFin: f.fechaFin,
             },
           }, { onSuccess: () => setIsDownloadOpen(false) });
         }}

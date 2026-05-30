@@ -97,6 +97,7 @@ const ContactoTable = () => {
         primerApellido: queja.Primer_Apellido,
         segundoApellido: queja.Segundo_Apellido,
         mensaje: queja.Descripcion,
+        respuesta: queja.RespuestasReporte ?? null,
         fechaCreacion: queja.Fecha_Queja,
         correo: queja.Correo,
         estado: queja.Estado.Estado_Queja,
@@ -116,6 +117,7 @@ const ContactoTable = () => {
         id: sugerencia.Id_Sugerencia,
         tipo: 'Sugerencia',
         mensaje: sugerencia.Mensaje,
+        respuesta: sugerencia.RespuestasSugerencia ?? null,
         fechaCreacion: sugerencia.Fecha_Sugerencia,
         correo: sugerencia.Correo,
         estado: sugerencia.Estado.Estado_Sugerencia,
@@ -139,6 +141,7 @@ const ContactoTable = () => {
         segundoApellido: reporte.Segundo_Apellido,
         ubicacion: reporte.Ubicacion,
         mensaje: reporte.Descripcion || '',
+        respuesta: reporte.RespuestasReporte ?? null,
         fechaCreacion: reporte.Fecha_Reporte,
         correo: reporte.Correo,
         estado: reporte.Estado.Estado_Reporte,
@@ -173,7 +176,7 @@ const ContactoTable = () => {
       reportesArchivados?.forEach((reporte: Reporte) => data.push(mapReporte(reporte)));
     }
 
-    return data.sort((a, b) => (b._timestamp || 0) - (a._timestamp || 0));
+    return data.sort((a, b) => ((b._timestamp || 0) - (a._timestamp || 0)) || (b.id - a.id));
   }, [quejas, sugerencias, reportes, quejasArchivadas, sugerenciasArchivadas, reportesArchivados, shouldIncludeArchived]);
 
   const handleApplyFilters = (filters: ContactoFilterOptions) => {

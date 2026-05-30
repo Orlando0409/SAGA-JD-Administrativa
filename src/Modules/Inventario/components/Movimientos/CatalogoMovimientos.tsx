@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import DescargarPdfModal, { type OpcionColumna, type GrupoFiltro } from '@/Modules/Global/components/DescargarPdfModal/DescargarPdfModal';
 import { useDownloadModulePdf } from '@/Modules/Global/hooks/useDownloadModulePdf';
 import { LuFileDown } from 'react-icons/lu';
@@ -351,8 +351,10 @@ const CatalogoMovimientos: React.FC<CatalogoMovimientosProps> = () => {
     }),
   ];
 
+  const movimientosOrdenados = useMemo(() => [...(filteredMovimientos ?? [])].sort((a, b) => b.Id_Ingreso_Egreso - a.Id_Ingreso_Egreso), [filteredMovimientos]);
+
   const table = useReactTable({
-    data: filteredMovimientos,
+    data: movimientosOrdenados,
     columns,
     state: {
       sorting,
@@ -649,8 +651,8 @@ const CatalogoMovimientos: React.FC<CatalogoMovimientosProps> = () => {
           { key: 'anterior',      label: 'Cant. Anterior' },
           { key: 'nueva',         label: 'Cant. Nueva' },
           { key: 'usuario',       label: 'Usuario' },
-          { key: 'observaciones', label: 'Observaciones' },
         ] as OpcionColumna[]}
+        rangoFecha={{ ayuda: 'Filtra por fecha del movimiento.' }}
         isLoading={isDownloadingPdf}
         onConfirm={(f) => {
           const tiposSel = (f.grupos.tipos ?? []).filter((v): v is string => typeof v === 'string');
@@ -660,6 +662,8 @@ const CatalogoMovimientos: React.FC<CatalogoMovimientosProps> = () => {
             payload: {
               tipos: tiposSel.length ? tiposSel : undefined,
               columnas: f.columnas.length ? f.columnas : undefined,
+              fechaInicio: f.fechaInicio,
+              fechaFin: f.fechaFin,
             },
           }, { onSuccess: () => setIsDownloadOpen(false) });
         }}

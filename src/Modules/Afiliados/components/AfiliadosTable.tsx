@@ -617,14 +617,16 @@ export default function AbonadosTable() {
                 ] as GrupoFiltro[]}
                 columnas={[
                     { key: 'nombre',         label: 'Nombre / Razón Social', obligatoria: true },
-                    { key: 'tipo',           label: 'Tipo' },
-                    { key: 'identificacion', label: 'Identificación' },
+                    { key: 'tipo',           label: 'Tipo Persona' },
+                    { key: 'identificacion', label: 'Cédula / Documento' },
+                    { key: 'estado',         label: 'Estado' },
+                    { key: 'tipoAfiliado',   label: 'Tipo Afiliado' },
                     { key: 'correo',         label: 'Correo' },
                     { key: 'telefono',       label: 'Teléfono' },
-                    { key: 'estado',         label: 'Estado' },
                     { key: 'creacion',       label: 'Fecha creación' },
                 ] as OpcionColumna[]}
                 isLoading={isDownloadingPdf}
+                rangoFecha={{ ayuda: 'Filtra por fecha de creación del afiliado.' }}
                 onConfirm={(f) => {
                     const tipoSel = f.grupos.tipo?.[0];
                     const estadosSel = (f.grupos.estados ?? []).filter((v): v is number => typeof v === 'number');
@@ -635,6 +637,8 @@ export default function AbonadosTable() {
                             tipo: typeof tipoSel === 'number' ? tipoSel : undefined,
                             estados: estadosSel.length ? estadosSel : undefined,
                             columnas: f.columnas.length ? f.columnas : undefined,
+                            fechaInicio: f.fechaInicio,
+                            fechaFin: f.fechaFin,
                         },
                     }, { onSuccess: () => setIsDownloadOpen(false) });
                 }}

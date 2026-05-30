@@ -52,6 +52,7 @@ const Usuarios = () => {
 
   const hasViewPermission = canView('usuarios');
   const hasEditPermission = canEdit('usuarios');
+  const isAdmin = currentUser?.Rol?.Nombre_Rol === 'Administrador';
 
   const pageSizeOptions = [5, 10, 20, 50];
   const [pagination, setPagination] = useState({
@@ -206,14 +207,15 @@ const Usuarios = () => {
               )}
               {hasEditPermission && (
                 <button
-                  className="px-1.5 py-1 sm:px-2 sm:py-1 bg-blue-600 text-white text-[9px] sm:text-xs rounded hover:bg-blue-700 transition-colors w-auto whitespace-nowrap"
+                  className="px-1.5 py-1 sm:px-2 sm:py-1 bg-blue-600 text-white text-[9px] sm:text-xs rounded hover:bg-blue-700 transition-colors w-auto whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
                   onClick={() => handleEdit(info.row.original)}
-                  title="Editar"
+                   disabled={info.row.original.Nombre_Usuario.toLowerCase() === 'admin'}
+                  title={info.row.original.Nombre_Usuario.toLowerCase() === 'admin' ? 'No se puede editar el usuario admin' : 'Editar usuario'}
                 >
                   Editar
                 </button>
               )}
-              {hasEditPermission && (
+              {hasEditPermission && isAdmin && (
                 <>
                   {userIsActive ? (
                     <AlertDialog>
@@ -292,11 +294,13 @@ const Usuarios = () => {
         },
       }),
     ],
-    [deactivateUserMutation.isPending, activateUserMutation.isPending, hasEditPermission, currentUser?.Id_Usuario]
+    [deactivateUserMutation.isPending, activateUserMutation.isPending, hasEditPermission, isAdmin, currentUser?.Id_Usuario]
   );
 
+  const usuariosOrdenados = useMemo(() => [...(filteredUsers ?? [])].sort((a, b) => b.Id_Usuario - a.Id_Usuario), [filteredUsers]);
+
   const table = useReactTable({
-    data: filteredUsers, 
+    data: usuariosOrdenados,
     columns,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),

@@ -2,6 +2,7 @@ import { LuX, LuUser, LuFileText, LuMap } from 'react-icons/lu';
 import type { DetailMedidorModalProps } from '../../types/MedidorTypes';
 import { FaTachometerAlt, FaUsers } from 'react-icons/fa';
 import { formatCedulaJuridica } from '@/Modules/Afiliados/Helper/formatUtils';
+import DescargarRegistroPdfButton from '@/Modules/Global/components/DescargarPdfModal/DescargarRegistroPdfButton';
 
 const DetailMedidorModal = ({ isOpen, onClose, medidor }: DetailMedidorModalProps) => {
   if (!isOpen) return null;
@@ -144,7 +145,7 @@ const DetailMedidorModal = ({ isOpen, onClose, medidor }: DetailMedidorModalProp
                   <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
                     Número del Medidor
                   </label>
-                  <p className="text-md font-bold text-gray-900 font-mono">
+                  <p className="text-md font-bold text-gray-900 font-mono break-all">
                     {medidor.Numero_Medidor}
                   </p>
                 </div>
@@ -237,7 +238,7 @@ const DetailMedidorModal = ({ isOpen, onClose, medidor }: DetailMedidorModalProp
                     <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
                       {medidor.Afiliado.Tipo_Entidad === 2 ? 'Razón Social' : 'Nombre Completo'}
                     </label>
-                    <p className="text-sm text-gray-900 font-medium">
+                    <p className="text-sm text-gray-900 font-medium break-words">
                       {getNombreAfiliado()}
                     </p>
                   </div>
@@ -246,7 +247,7 @@ const DetailMedidorModal = ({ isOpen, onClose, medidor }: DetailMedidorModalProp
                     <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
                       {medidor.Afiliado.Tipo_Entidad === 2 ? 'Cédula Jurídica' : 'Identificación'}
                     </label>
-                    <p className="text-sm text-gray-900 font-mono">
+                    <p className="text-sm text-gray-900 font-mono break-all">
                       {getIdentificacion()}
                     </p>
                   </div>
@@ -255,7 +256,7 @@ const DetailMedidorModal = ({ isOpen, onClose, medidor }: DetailMedidorModalProp
                     <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
                       Correo Electrónico
                     </label>
-                    <p className="text-sm text-gray-900">
+                    <p className="text-sm text-gray-900 break-all">
                       {medidor.Afiliado.Correo || 'No especificado'}
                     </p>
                   </div>
@@ -264,7 +265,7 @@ const DetailMedidorModal = ({ isOpen, onClose, medidor }: DetailMedidorModalProp
                     <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
                       Número de Teléfono
                     </label>
-                    <p className="text-sm text-gray-900 font-mono">
+                    <p className="text-sm text-gray-900 font-mono break-all">
                       {medidor.Afiliado.Numero || 'No especificado'}
                     </p>
                   </div>
@@ -326,7 +327,7 @@ const DetailMedidorModal = ({ isOpen, onClose, medidor }: DetailMedidorModalProp
                   <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
                     Usuario Creador
                   </label>
-                  <p className="text-sm text-gray-900 font-medium">
+                  <p className="text-sm text-gray-900 font-medium break-words">
                     {medidor.Usuario.Nombre_Usuario}
                   </p>
                 </div>
@@ -338,7 +339,12 @@ const DetailMedidorModal = ({ isOpen, onClose, medidor }: DetailMedidorModalProp
         </div>
 
         <div className="sticky bottom-0 bg-gray-50 border-t border-gray-200 p-4 sm:p-6 z-10">
-          <div className="flex justify-end">
+          <div className="flex justify-end gap-3">
+            <DescargarRegistroPdfButton
+              endpoint="/Inventario/medidores/pdf"
+              id={medidor.Id_Medidor}
+              filenamePrefix="Medidor"
+            />
             <button
               onClick={onClose}
               className="px-6 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium"

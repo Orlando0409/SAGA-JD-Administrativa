@@ -177,8 +177,7 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
     const emailSchema = z.string()
         .min(1, 'El correo no puede estar vacío')
         .max(100, 'El correo no puede tener más de 100 caracteres')
-        .email('El correo electrónico debe tener un formato válido')
-        .regex(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/, 'El formato del correo electrónico no es válido');
+        .regex(/^[^\s@]+@[^\s@]+\.[^\s@]+$/, 'El formato del correo electrónico no es válido');
 
     const phoneSchema = z.string()
         .min(1, 'El número de teléfono no puede estar vacío')
@@ -379,8 +378,12 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                         } else {
                             formData.append('Numero_Medidor', String(primerMedidor.numeroMedidor));
                         }
-                        formData.append('Certificacion_Literal', primerMedidor.escrituraFile);
-                        formData.append('Planos_Terreno', primerMedidor.planosFile);
+                        if (primerMedidor.escrituraFile) {
+                            formData.append('Certificacion_Literal', primerMedidor.escrituraFile);
+                        }
+                        if (primerMedidor.planosFile) {
+                            formData.append('Planos_Terreno', primerMedidor.planosFile);
+                        }
                         formData.append('Estado_Pago_Medidor', primerMedidor.estadoPago);
                     } else {
                         formData.append('Opcion_Medidor', 'sin_medidor');
@@ -417,8 +420,12 @@ const CreateModal = ({ isOpen, onClose }: CreateModalProps) => {
                         } else {
                             formData.append('Numero_Medidor', String(primerMedidorJ.numeroMedidor));
                         }
-                        formData.append('Certificacion_Literal', primerMedidorJ.escrituraFile);
-                        formData.append('Planos_Terreno', primerMedidorJ.planosFile);
+                        if (primerMedidorJ.escrituraFile) {
+                            formData.append('Certificacion_Literal', primerMedidorJ.escrituraFile);
+                        }
+                        if (primerMedidorJ.planosFile) {
+                            formData.append('Planos_Terreno', primerMedidorJ.planosFile);
+                        }
                         formData.append('Estado_Pago_Medidor', primerMedidorJ.estadoPago);
                     } else {
                         formData.append('Opcion_Medidor', 'sin_medidor');
