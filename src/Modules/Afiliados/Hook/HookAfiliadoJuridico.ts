@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { AfiliadoJuridico } from "../Models/TablaAfiliados/ModeloAfiliadoJuridico";
-import { createAfiliadoJuridico, getAfiliadosJuridicos, updateAfiliadoJuridico, updateEstadoAfiliadoJuridico, updateTipoAfiliadoJuridico } from "../Service/ServiceAfiliadoJuridico";
+import { createAfiliadoJuridico, getAfiliadosJuridicos, updateAfiliadoJuridico, updateEstadoAfiliadoJuridico, updateTipoAfiliadoJuridico, type UpdateAfiliadoJuridicoPayload } from "../Service/ServiceAfiliadoJuridico";
 
 export const useAfiliadosJuridicos = () => {
   const queryClient = useQueryClient(); // 🔧 Agregar esta línea
@@ -32,7 +32,7 @@ export const useAfiliadosJuridicos = () => {
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ cedulaJuridica, data }: { cedulaJuridica: string; data: FormData }) => updateAfiliadoJuridico(cedulaJuridica, data),
+    mutationFn: ({ cedulaJuridica, data }: { cedulaJuridica: string; data: UpdateAfiliadoJuridicoPayload }) => updateAfiliadoJuridico(cedulaJuridica, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["afiliadosJuridicos"] });
       console.log("afiliado juridico actualizado con exito");

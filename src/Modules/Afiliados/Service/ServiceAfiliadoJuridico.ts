@@ -27,14 +27,15 @@ export const createAfiliadoJuridico = async (formData: FormData) => {
     return response.data;
 };
 
-export const updateAfiliadoJuridico = async (cedulaJuridica: string, formData: FormData) => {
+export type UpdateAfiliadoJuridicoPayload = {
+    Razon_Social?: string;
+    Numero_Telefono?: string;
+    Correo?: string;
+    Direccion_Exacta?: string;
+};
 
-    const response = await apiAuth.put(`/afiliados/update/juridico/${cedulaJuridica}`, formData, {
-        headers: {
-            'Content-Type': 'multipart/form-data',
-        },
-    });
-
+export const updateAfiliadoJuridico = async (cedulaJuridica: string, data: UpdateAfiliadoJuridicoPayload) => {
+    const response = await apiAuth.put(`/afiliados/update/juridico/${cedulaJuridica}`, data);
     return response.data;
 };
 

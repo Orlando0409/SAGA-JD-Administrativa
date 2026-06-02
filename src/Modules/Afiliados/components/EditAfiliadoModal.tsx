@@ -144,38 +144,37 @@ const EditModal: React.FC<EditModalProps> = ({ isOpen, onClose, persona }) => {
             try {
                 setIsSubmitting(true);
 
-                // Crear FormData para enviar archivos
-                const formData = new FormData();
-
+              
                 if (persona.tipo === 'afiliado-fisico') {
                     const afiliadoFisico = persona.datos as AfiliadoFisico;
 
-                    // Agregar campos editables de afiliado físico (excluir Identificacion y Tipo_Identificacion)
-                    formData.append('Nombre', value.Nombre || '');
-                    formData.append('Apellido1', value.Apellido1 || '');
-                    formData.append('Apellido2', value.Apellido2 || '');
-                    // Tipo_Identificacion no se envía en actualización
-                    formData.append('Numero_Telefono', value.Numero_Telefono || '');
-                    formData.append('Correo', value.Correo || '');
-                    formData.append('Direccion_Exacta', value.Direccion_Exacta || '');
-                    formData.append('Edad', value.Edad?.toString() || '0');
+                    const data = {
+                        Nombre: value.Nombre || '',
+                        Apellido1: value.Apellido1 || '',
+                        Apellido2: value.Apellido2 || '',
+                        Numero_Telefono: value.Numero_Telefono || '',
+                        Correo: value.Correo || '',
+                        Direccion_Exacta: value.Direccion_Exacta || '',
+                        Edad: Number(value.Edad) || 0,
+                    };
 
                     // Usar la identificación como cédula para la ruta
                     const cedula = afiliadoFisico.Identificacion || '';
-                    await updateAfiliadoFisico({ cedula, data: formData });
+                    await updateAfiliadoFisico({ cedula, data });
                     showSuccess('¡Afiliado físico actualizado exitosamente!');
                 } else {
                     const afiliadoJuridico = persona.datos as AfiliadoJuridico;
 
-                    // Agregar campos editables de afiliado jurídico (no incluir Cedula_Juridica)
-                    formData.append('Razon_Social', value.Razon_Social || '');
-                    formData.append('Numero_Telefono', value.Numero_Telefono || '');
-                    formData.append('Correo', value.Correo || '');
-                    formData.append('Direccion_Exacta', value.Direccion_Exacta || '');
+                    const data = {
+                        Razon_Social: value.Razon_Social || '',
+                        Numero_Telefono: value.Numero_Telefono || '',
+                        Correo: value.Correo || '',
+                        Direccion_Exacta: value.Direccion_Exacta || '',
+                    };
 
                     // Usar la cédula jurídica para la ruta
                     const cedulaJuridica = afiliadoJuridico.Cedula_Juridica || '';
-                    await updateAfiliadoJuridico({ cedulaJuridica, data: formData });
+                    await updateAfiliadoJuridico({ cedulaJuridica, data });
                     showSuccess('¡Afiliado jurídico actualizado exitosamente!');
                 }
                 onClose();
