@@ -59,11 +59,10 @@ const MedidorSelectorModal: React.FC<MedidorSelectorModalProps> = ({ isOpen, mod
         }
 
         if (modo === 'agregar') {
-            const num = parseInt(numeroNuevo);
-            if (Number.isNaN(num) || num < 100000) {
-                newErrors.numero = 'El número debe tener al menos 6 dígitos y no puede empezar con 0';
-            } else if (num > 99999999) {
-                newErrors.numero = 'El número no puede tener más de 8 dígitos';
+            if (!/^\d{6}$/.test(numeroNuevo)) {
+                newErrors.numero = 'El número de medidor debe tener exactamente 6 dígitos y no puede empezar con 0';
+            } else if (numeroNuevo[0] === '0') {
+                newErrors.numero = 'El número de medidor no puede empezar con 0';
             }
         }
 
@@ -248,13 +247,12 @@ const MedidorSelectorModal: React.FC<MedidorSelectorModalProps> = ({ isOpen, mod
                                     inputMode="numeric"
                                     value={numeroNuevo}
                                     onChange={e => {
-                                        const val = e.target.value.replaceAll(/\D/g, '');
-                                        if (val.length <= 8) {
-                                            setNumeroNuevo(val);
-                                            if (errors.numero) setErrors(prev => ({ ...prev, numero: '' }));
-                                        }
+                                        const val = e.target.value.replaceAll(/\D/g, '').slice(0, 6);
+                                        setNumeroNuevo(val);
+                                        if (errors.numero) setErrors(prev => ({ ...prev, numero: '' }));
                                     }}
-                                    placeholder="Ej: 100230 (mínimo 6 dígitos)"
+                                    maxLength={6}
+                                    placeholder="Ej: 100230 (exactamente 6 dígitos)"
                                     className={`w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
                                         errors.numero ? 'border-red-300 bg-red-50' : 'border-gray-300'
                                     }`}
