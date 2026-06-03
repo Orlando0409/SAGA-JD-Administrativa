@@ -27,13 +27,19 @@ export const createAfiliadoFisico = async (formData: FormData) => {
     return response.data;
 };
 
-export const updateAfiliadoFisico = async (cedula: string, formData: FormData) => {
-    const response = await apiAuth.put(`/afiliados/update/fisico/${cedula}`, formData, {
-        headers: {
-            'Content-Type': 'multipart/form-data',
-        },
-    });
 
+export type UpdateAfiliadoFisicoPayload = {
+    Nombre?: string;
+    Apellido1?: string;
+    Apellido2?: string;
+    Numero_Telefono?: string;
+    Correo?: string;
+    Direccion_Exacta?: string;
+    Edad?: number;
+};
+
+export const updateAfiliadoFisico = async (cedula: string, data: UpdateAfiliadoFisicoPayload) => {
+    const response = await apiAuth.put(`/afiliados/update/fisico/${cedula}`, data);
     return response.data;
 };
 

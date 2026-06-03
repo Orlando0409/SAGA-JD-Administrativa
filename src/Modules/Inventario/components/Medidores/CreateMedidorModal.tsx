@@ -82,7 +82,9 @@ const CreateMedidorModal = ({ isOpen, onClose }: CreateMedidorModalProps) => {
                 type="text"
                 value={formData.Numero_Medidor || ''}
                 onChange={(e) => {
-                  const value = e.target.value === '' ? 0 : Number.parseInt(e.target.value);
+                  // Solo dígitos y máximo 6 (exactamente 6 al validar)
+                  const onlyNums = e.target.value.replace(/[^0-9]/g, '').slice(0, 6);
+                  const value = onlyNums === '' ? 0 : Number.parseInt(onlyNums);
                   setFormData({ Numero_Medidor: value });
                   if (formErrors.Numero_Medidor) {
                     setFormErrors(prev => ({ ...prev, Numero_Medidor: '' }));
@@ -92,15 +94,15 @@ const CreateMedidorModal = ({ isOpen, onClose }: CreateMedidorModalProps) => {
                   formErrors.Numero_Medidor ? 'border-red-300 bg-red-50' : 'border-gray-300'
                 }`}
                 placeholder="Ej: 123456"
-                maxLength={8}
-                min="1"
+                inputMode="numeric"
+                maxLength={6}
                 autoComplete="off"
               />
               {formErrors.Numero_Medidor && (
                 <p className="text-red-500 text-sm mt-1">{formErrors.Numero_Medidor}</p>
               )}
               <p className="text-xs text-gray-500 mt-1">
-                Ingrese un número único para identificar el medidor
+                Ingrese un número único de exactamente 6 dígitos para identificar el medidor
               </p>
             </div>
           </div>
