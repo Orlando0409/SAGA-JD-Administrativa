@@ -4,6 +4,7 @@ import * as Accordion from "@radix-ui/react-accordion";
 import { FiChevronDown, FiChevronRight } from 'react-icons/fi';
 import { formatPhoneNumberDisplay } from '../Schema/SchemaFisicoProveedor';
 import type { ProveedorFisico } from '../Models/TablaProveedo/tablaFisicoProveedor';
+import DescargarRegistroPdfButton from '@/Modules/Global/components/DescargarPdfModal/DescargarRegistroPdfButton';
 
 interface ProveedorDetailModalProps {
   proveedor: ProveedorFisico | null;
@@ -53,9 +54,9 @@ const ProveedorDetailModal: React.FC<ProveedorDetailModalProps> = ({ proveedor, 
         {/* Header */}
         <div className="sticky top-0 bg-white border-b border-gray-200 p-6 z-10">
           <div className="flex items-center justify-between">
-            <h1 className="text-3xl font-bold text-gray-900">Detalle del Proveedor</h1>
+            <h1 className="text-3xl font-semibold text-gray-900">Detalle del Proveedor</h1>
             <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors">
-              <LuX className="w-6 h-6" />
+              <LuX className="size-6" />
             </button>
           </div>
         </div>
@@ -65,11 +66,11 @@ const ProveedorDetailModal: React.FC<ProveedorDetailModalProps> = ({ proveedor, 
           {/* Proveedor Header Card */}
           <div className="bg-gradient-to-r from-blue-600 to-blue-700 p-6 rounded-lg mb-6">
             <div className="flex items-center gap-4">
-              <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center">
-                <LuBuilding2 className="w-8 h-8 text-blue-600" />
+              <div className="size-16 bg-white rounded-full flex items-center justify-center">
+                <LuBuilding2 className="size-8 text-blue-600" />
               </div>
               <div>
-                <h2 className="text-2xl font-bold text-white">{proveedor.Nombre_Proveedor}</h2>
+                <h2 className="text-2xl font-semibold text-white">{proveedor.Nombre_Proveedor}</h2>
                 <p className="text-blue-100">{proveedor.Tipo_Identificacion}: {proveedor.Identificacion}</p>
               </div>
             </div>
@@ -91,7 +92,7 @@ const ProveedorDetailModal: React.FC<ProveedorDetailModalProps> = ({ proveedor, 
                 <Accordion.Trigger className="text-base font-semibold px-6 py-4 border-b-0 hover:bg-gray-50 w-full text-left">
                   <div className="flex items-center justify-between w-full">
                     <div className="flex items-center gap-3">
-                      <LuBuilding2 className="w-5 h-5 text-blue-600" />
+                      <LuBuilding2 className="size-5 text-blue-600" />
                       <span className="text-gray-900">Información Básica</span>
                     </div>
                     <span className="text-gray-500">
@@ -104,14 +105,14 @@ const ProveedorDetailModal: React.FC<ProveedorDetailModalProps> = ({ proveedor, 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-4">
                     <div className="flex items-center gap-2">
-                      <LuUserRound className="w-4 h-4 text-gray-400" />
+                      <LuUserRound className="size-4 text-gray-400" />
                       <div>
                         <label className="block text-sm font-medium text-gray-500 mb-1">Nombre del Proveedor</label>
                         <p className="text-gray-900 font-medium">{proveedor.Nombre_Proveedor || 'Sin nombre'}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
-                      <LuIdCard className="w-4 h-4 text-gray-400" />
+                      <LuIdCard className="size-4 text-gray-400" />
                       <div>
                         <label className="block text-sm font-medium text-gray-500 mb-1">Identificación</label>
                         <p className="text-gray-900 font-medium">{proveedor.Identificacion || 'Sin identificación'}</p>
@@ -123,7 +124,7 @@ const ProveedorDetailModal: React.FC<ProveedorDetailModalProps> = ({ proveedor, 
                   
                   <div className="space-y-4">
                     <div className="flex items-center gap-2">
-                      <LuPhone className="w-4 h-4 text-gray-400" />
+                      <LuPhone className="size-4 text-gray-400" />
                       <div>
                         <label className="block text-sm font-medium text-gray-500 mb-1">Teléfono</label>
                         <p className="text-gray-900 font-medium">
@@ -155,7 +156,7 @@ const ProveedorDetailModal: React.FC<ProveedorDetailModalProps> = ({ proveedor, 
                 <Accordion.Trigger className="text-base font-semibold px-6 py-4 border-b-0 hover:bg-gray-50 w-full text-left">
                   <div className="flex items-center justify-between w-full">
                     <div className="flex items-center gap-3">
-                      <LuCalendar className="w-5 h-5 text-blue-600" />
+                      <LuCalendar className="size-5 text-blue-600" />
                       <span className="text-gray-900">Información de Fechas</span>
                     </div>
                     <span className="text-gray-500">
@@ -168,7 +169,7 @@ const ProveedorDetailModal: React.FC<ProveedorDetailModalProps> = ({ proveedor, 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-4">
                     <div className="flex items-center gap-2">
-                      <LuCalendar className="w-4 h-4 text-gray-400" />
+                      <LuCalendar className="size-4 text-gray-400" />
                       <div>
                         <label className="block text-sm font-medium text-gray-500 mb-1">Fecha de Creación</label>
                         <p className="text-gray-900 font-medium">{formatDate(proveedor.Fecha_Creacion)}</p>
@@ -177,7 +178,7 @@ const ProveedorDetailModal: React.FC<ProveedorDetailModalProps> = ({ proveedor, 
                   </div>
                   <div className="space-y-4">
                     <div className="flex items-center gap-2">
-                      <LuCalendar className="w-4 h-4 text-gray-400" />
+                      <LuCalendar className="size-4 text-gray-400" />
                       <div>
                         <label className="block text-sm font-medium text-gray-500 mb-1">Última Actualización</label>
                         <p className="text-gray-900 font-medium">{formatDate(proveedor.Fecha_Actualizacion)}</p>
@@ -192,6 +193,12 @@ const ProveedorDetailModal: React.FC<ProveedorDetailModalProps> = ({ proveedor, 
 
         </div>
         <div className="sticky bottom-0 flex justify-end gap-3 p-6 border-t bg-gray-50 z-10">
+            <DescargarRegistroPdfButton
+              endpoint="/Proveedores/pdf"
+              id={proveedor.Id_Proveedor}
+              filenamePrefix="Proveedor_Fisico"
+              extraPayload={{ tipo: 1 }}
+            />
             <button
               onClick={onClose}
               className="px-6 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium"
