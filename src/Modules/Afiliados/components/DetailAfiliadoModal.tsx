@@ -765,11 +765,11 @@ const DetailAbonados: React.FC<DetailAbonadosProps> = ({ persona, isOpen, onClos
                     </div>
                 </div>
                 {/* Action Buttons */}
-                <div className="sticky bottom-0 flex justify-end gap-3 p-6 border-t bg-gray-50 z-10">
+                <div className="sticky bottom-0 flex justify-end gap-2 sm:gap-3 p-3 sm:p-6 border-t bg-gray-50 z-10">
                     {!isAsociado && (
                         <button
                             onClick={() => setShowCambioTipoModal(true)}
-                            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                            className="px-3 py-1.5 text-xs sm:text-sm sm:px-6 sm:py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium whitespace-nowrap"
                         >
                             Cambiar tipo a Asociado
                         </button>
@@ -779,11 +779,12 @@ const DetailAbonados: React.FC<DetailAbonadosProps> = ({ persona, isOpen, onClos
                             endpoint="/afiliados/pdf"
                             id={persona.datos.Id_Afiliado}
                             filenamePrefix="Afiliado"
+                            className="px-3 py-1.5 text-xs sm:text-sm sm:px-4 sm:py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center gap-1.5 sm:gap-2 disabled:opacity-50 whitespace-nowrap"
                         />
                     )}
                     <button
                         onClick={onClose}
-                        className="px-6 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium"
+                        className="px-3 py-1.5 text-xs sm:text-sm sm:px-6 sm:py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium whitespace-nowrap"
                     >
                         Cerrar
                     </button>
