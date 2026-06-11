@@ -4,12 +4,13 @@ import { Link } from "@tanstack/react-router";
 import { passwordSchema, type NewPasswordData } from "../schema/NewPasswordSchema";
 import { useResetPassword } from "../Hooks/AuthHook";
 import { useAlerts } from "@/Modules/Global/context/AlertContext";
+import { isTooManyRequests, TOO_MANY_REQUESTS_TITLE, TOO_MANY_REQUESTS_MSG } from "@/Api/httpError";
 import { FiEye, FiEyeOff } from "react-icons/fi";
 
 
 export default function ResetPassword() {
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
-  const { showSuccess, showError } = useAlerts();
+  const { showSuccess, showError, showWarning } = useAlerts();
   const resetPasswordMutation = useResetPassword();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -42,6 +43,10 @@ export default function ResetPassword() {
           3000
         );
       } catch (err: unknown) {
+        if (isTooManyRequests(err)) {
+          showWarning(TOO_MANY_REQUESTS_TITLE, TOO_MANY_REQUESTS_MSG, 5000);
+          return;
+        }
         console.error("Error updating password:", err);
                 // Mostrar alerta de error
         showError(

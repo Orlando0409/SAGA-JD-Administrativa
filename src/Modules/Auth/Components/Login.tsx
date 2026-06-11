@@ -6,6 +6,7 @@ import { useLogin } from '../Hooks/AuthHook';
 import { useAlerts } from '@/Modules/Global/context/AlertContext';
 import { FiEye, FiEyeOff } from 'react-icons/fi';
 import { AxiosError } from 'axios';
+import { isTooManyRequests, TOO_MANY_REQUESTS_TITLE, TOO_MANY_REQUESTS_MSG } from '@/Api/httpError';
 
 export default function LoginForm() {
   const mutation = useLogin();
@@ -40,6 +41,10 @@ export default function LoginForm() {
           });
           showSuccess('Inicio de sesión exitoso');
         } catch (error: unknown) {
+          if (isTooManyRequests(error)) {
+            showWarning(TOO_MANY_REQUESTS_TITLE, TOO_MANY_REQUESTS_MSG, 5000);
+            return;
+          }
           let errorMsg = '';
           if (error instanceof AxiosError) {
             errorMsg = error.response?.data?.message || error.message;
