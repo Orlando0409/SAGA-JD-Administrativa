@@ -228,7 +228,6 @@ export function AppSidebar({ allowedModules }: Readonly<AppSidebarProps>) {
       <ChangePasswordModal
         open={showChangePasswordModal}
         onClose={() => setShowChangePasswordModal(false)}
-        userId={currentUser.id!}
       />
     </section>
   )
