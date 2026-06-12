@@ -100,7 +100,8 @@ export const asignarMedidorExistenteAfiliadoJuridico = async (
     if (certificacionLiteral) formData.append('Certificacion_Literal', certificacionLiteral);
     if (planosTerreno) formData.append('Planos_Terreno', planosTerreno);
     if (estadoPago) {
-        formData.append('Estado_Pago', estadoPago);
+      
+        formData.append('Estado_Pago_Medidor', estadoPago);
     }
 
     await apiAuth.post('/Inventario/asignar/medidor/afiliado', formData, {
@@ -130,7 +131,8 @@ export const crearYAsignarMedidorAfiliadoJuridico = async (
     if (certificacionLiteral) formData.append('Certificacion_Literal', certificacionLiteral);
     if (planosTerreno) formData.append('Planos_Terreno', planosTerreno);
     if (estadoPago) {
-        formData.append('Estado_Pago', estadoPago);
+        
+        formData.append('Estado_Pago_Medidor', estadoPago);
     }
 
     await apiAuth.post('/Inventario/asignar/medidor/afiliado', formData, {

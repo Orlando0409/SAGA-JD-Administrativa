@@ -59,10 +59,10 @@ const MedidorSelectorModal: React.FC<MedidorSelectorModalProps> = ({ isOpen, mod
         }
 
         if (modo === 'agregar') {
-            if (!/^\d{6}$/.test(numeroNuevo)) {
-                newErrors.numero = 'El número de medidor debe tener exactamente 6 dígitos y no puede empezar con 0';
-            } else if (numeroNuevo[0] === '0') {
+            if (numeroNuevo.length > 1 && numeroNuevo[0] === '0') {
                 newErrors.numero = 'El número de medidor no puede empezar con 0';
+            } else if (!/^\d{1,6}$/.test(numeroNuevo)) {
+                newErrors.numero = 'El número de medidor debe tener entre 1 y 6 dígitos';
             }
         }
 
@@ -252,7 +252,7 @@ const MedidorSelectorModal: React.FC<MedidorSelectorModalProps> = ({ isOpen, mod
                                         if (errors.numero) setErrors(prev => ({ ...prev, numero: '' }));
                                     }}
                                     maxLength={6}
-                                    placeholder="Ej: 100230 (exactamente 6 dígitos)"
+                                    placeholder="Ej: 100230 (entre 1 y 6 dígitos)"
                                     className={`w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
                                         errors.numero ? 'border-red-300 bg-red-50' : 'border-gray-300'
                                     }`}

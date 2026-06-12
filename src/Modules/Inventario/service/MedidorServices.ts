@@ -80,12 +80,12 @@ export const updateEstadoPagoMedidor = async (
   return response.data;
 };
 
-// Asignar medidor existente a un afiliado
+
 export const asignarMedidorAAfiliado = async (idMedidor: number, idAfiliado: number): Promise<void> => {
   await axiosPrivate.post(`/Inventario/asignar/medidor/afiliado`, {
     Id_Medidor: idMedidor,
     Id_Afiliado: idAfiliado,
-    Estado_Pago: 'Pendiente',
+    Estado_Pago_Medidor: 'Pendiente',
   });
 };
 
