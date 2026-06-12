@@ -16,7 +16,7 @@ export default function FormularioCrearActas({ onClose, refetch }: FormularioCre
     const [descripcion, setDescripcion] = useState("");
     const [files, setFiles] = useState<File[]>([]);
     const [tituloError, setTituloError] = useState("");
-    const [descripcionError, setDescripcionError] = useState("");
+    const [_descripcionError, setDescripcionError] = useState("");
 
     const handleTituloChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
@@ -110,6 +110,8 @@ export default function FormularioCrearActas({ onClose, refetch }: FormularioCre
     return (
         <>
             <div className="fixed inset-0 bg-opacity-10 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+
+
                 <div className="w-full max-w-md bg-white rounded-lg shadow-lg overflow-hidden">
                     <div className="p-6">
                         <h3 className="text-lg font-semibold text-gray-800 mb-4">Crear Acta</h3>
@@ -156,20 +158,6 @@ export default function FormularioCrearActas({ onClose, refetch }: FormularioCre
                                     rows={3}
                                     required
                                 />
-                                <button
-                                    type="button"
-                                    className="w-full px-4 py-3 rounded-lg border-2 border-dashed border-sky-300 bg-sky-50 hover:bg-sky-100 transition-colors cursor-pointer flex flex-col items-center gap-2"
-                                >
-                                    <svg className="size-8 text-sky-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                                    </svg>
-                                    <span className="text-sky-600 font-medium">
-                                        {files.length > 0 ? "Agregar Más Archivos" : "Seleccionar Archivos PDF"}
-                                    </span>
-                                    <span className="text-xs text-gray-500">
-                                        Haz clic para elegir archivos PDF 
-                                    </span>
-                                </button>
                             </div>
 
                             {/* Campo de Archivos */}
@@ -214,35 +202,42 @@ export default function FormularioCrearActas({ onClose, refetch }: FormularioCre
                                         <span className="text-sky-600 font-medium">
                                             {files.length > 0 ? "Agregar Más Archivos" : "Seleccionar Archivos PDF"}
                                         </span>
-                                        <button
-                                            type="button"
-                                            onClick={() => setFiles([])}
-                                            className="text-xs text-red-600 hover:text-red-800"
-                                        >
-                                            Eliminar todos
-                                        </button>
-                                    </div>
-                                    <div className="space-y-1 max-h-32 overflow-y-auto">
-                                        {files.map((file, index) => (
-                                            <div key={`${file.name}-${file.size}-${index}`} className="flex items-center justify-between text-xs bg-white p-2 rounded border">
-                                                <div className="flex items-center gap-2 flex-1 min-w-0">
-                                                    <FaFilePdf className="size-4 text-red-500 flex-shrink-0" />
-                                                    <span className="truncate">{file.name}</span>
-                                                </div>
-                                                <div className="flex items-center gap-2 flex-shrink-0">
-                                                    <span className="text-gray-500">
-                                                        {(file.size / 1024 / 1024).toFixed(1)} MB
-                                                    </span>
-                                                    <button
-                                                        type="button"
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            setFiles(prevFiles => prevFiles.filter((_, i) => i !== index));
-                                                        }}
-                                                        className="text-red-500 hover:text-red-700 hover:bg-red-50 p-1 rounded"
-                                                    >
-                                                        <FaTimes className="size-3" />
-                                                    </button>
+                                    </button>
+                                </div>
+
+                                {files.length > 0 && (
+                                    <div className="mt-2">
+                                        <div className="flex justify-end mb-1">
+                                            <button
+                                                type="button"
+                                                onClick={() => setFiles([])}
+                                                className="text-xs text-red-600 hover:text-red-800"
+                                            >
+                                                Eliminar todos
+                                            </button>
+                                        </div>
+                                        <div className="space-y-1 max-h-32 overflow-y-auto">
+                                            {files.map((file, index) => (
+                                                <div key={`${file.name}-${file.size}-${index}`} className="flex items-center justify-between text-xs bg-white p-2 rounded border">
+                                                    <div className="flex items-center gap-2 flex-1 min-w-0">
+                                                        <FaFilePdf className="size-4 text-red-500 flex-shrink-0" />
+                                                        <span className="truncate">{file.name}</span>
+                                                    </div>
+                                                    <div className="flex items-center gap-2 flex-shrink-0">
+                                                        <span className="text-gray-500">
+                                                            {(file.size / 1024 / 1024).toFixed(1)} MB
+                                                        </span>
+                                                        <button
+                                                            type="button"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                setFiles(prevFiles => prevFiles.filter((_, i) => i !== index));
+                                                            }}
+                                                            className="text-red-500 hover:text-red-700 hover:bg-red-50 p-1 rounded"
+                                                        >
+                                                            <FaTimes className="size-3" />
+                                                        </button>
+                                                    </div>
                                                 </div>
                                             ))}
                                         </div>
@@ -270,6 +265,7 @@ export default function FormularioCrearActas({ onClose, refetch }: FormularioCre
                         Cancelar
                     </button>
                 </div>
+            </div>
             </div>
         </>
     );

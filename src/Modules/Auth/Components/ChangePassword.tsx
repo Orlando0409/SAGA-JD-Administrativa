@@ -3,6 +3,7 @@ import { useForm } from "@tanstack/react-form";
 import { LuEye, LuEyeOff } from "react-icons/lu";
 import { useChangePassword } from "../Hooks/AuthHook";
 import { useAlerts } from "@/Modules/Global/context/AlertContext";
+import { isTooManyRequests, TOO_MANY_REQUESTS_TITLE, TOO_MANY_REQUESTS_MSG } from "@/Api/httpError";
 import {
   AlertDialog,
   AlertDialogContent,
@@ -17,7 +18,6 @@ import {
 interface ChangePasswordModalProps {
     onClose: () => void;
     open: boolean;
-    userId: number;
 }
 
 // Constantes para validación
@@ -25,7 +25,7 @@ const PASSWORD_MIN_LENGTH = 6;
 const PASSWORD_MAX_LENGTH = 20;
 
 export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
-    onClose, open, userId
+    onClose, open
 }) => {
     const [formErrors, setFormErrors] = useState<Record<string, string>>({});
     const [fieldCharCounts, setFieldCharCounts] = useState({
@@ -45,7 +45,7 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
         confirmPassword: string;
     } | null>(null);
     const { mutateAsync } = useChangePassword();
-    const { showSuccess, showError } = useAlerts();
+    const { showSuccess, showError, showWarning } = useAlerts();
 
     // Función para crear el handler de input con validación
     const createInputHandler = (fieldName: string, handleChange: (value: string) => void, maxLength: number) => {
@@ -110,7 +110,6 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
 
         try {
             await mutateAsync({
-                UsuarioId: userId,
                 Contraseña_Actual: pendingValues.currentPassword,
                 Nueva_Contraseña: pendingValues.newPassword,
             });
@@ -120,6 +119,12 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
             onClose();
             form.reset();
         } catch (err: any) {
+            if (isTooManyRequests(err)) {
+                showWarning(TOO_MANY_REQUESTS_TITLE, TOO_MANY_REQUESTS_MSG, 5000);
+                setShowConfirmDialog(false);
+                setPendingValues(null);
+                return;
+            }
             // Verifica si el error es por usuario deshabilitado
             const errorMsg = err?.response?.data?.message || err?.message || '';
             if (errorMsg.includes('deshabilitado')) {

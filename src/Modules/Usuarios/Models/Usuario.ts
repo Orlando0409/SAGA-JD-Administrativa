@@ -24,8 +24,7 @@ export interface UpdateUserData {
 
 
 // src/Modules/Usuarios/Models/Usuario.ts
-export interface ChangePassword {
-    UsuarioId: number;     
+export interface ChangePassword {   
     Contraseña_Actual: string;    
     Nueva_Contraseña: string;    
 }

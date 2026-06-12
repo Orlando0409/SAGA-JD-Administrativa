@@ -4,11 +4,12 @@ import {  useState } from 'react';
 import { useForgotPassword } from '../Hooks/AuthHook';
 import { ForgotPasswordSchema, type ForgotPasswordData } from '../schema/ForgotPasswordSchema';
 import { useAlerts } from '@/Modules/Global/context/AlertContext';
+import { isTooManyRequests, TOO_MANY_REQUESTS_TITLE, TOO_MANY_REQUESTS_MSG } from '@/Api/httpError';
 
 export default function ForgotPassword() {
   const mutation = useForgotPassword();
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
-  const { showSuccess, showError } = useAlerts(); 
+  const { showSuccess, showError, showWarning } = useAlerts();
   const form = useForm({
     defaultValues: {
         email: ''
@@ -33,6 +34,10 @@ export default function ForgotPassword() {
         await mutation.mutateAsync({ Email: value.email });
         showSuccess('Correo enviado', 'Revisa tu correo para restablecer tu contraseña', 5000);
       } catch (err: unknown) {
+        if (isTooManyRequests(err)) {
+          showWarning(TOO_MANY_REQUESTS_TITLE, TOO_MANY_REQUESTS_MSG, 5000);
+          return;
+        }
         showError('Error en el servidor o del correo', 'Por favor, inténtelo de nuevo más tarde', 5000);
         setFormErrors({
           general: 'Ingrese un correo electrónico válido',
