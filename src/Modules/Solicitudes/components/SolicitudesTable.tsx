@@ -497,7 +497,7 @@ export default function SolicitudesTable() {
                                     });
                                     setShowGestionModal(true);
                                 }}
-                                className="px-1 py-1 sm:px-4 sm:py-1 bg-gray-600 text-white text-[7px] sm:text-xs rounded hover:bg-gray-700 transition-colors w-full sm:w-auto"
+                                className="px-1.5 py-1 sm:px-4 sm:py-1.5 text-[9px] bg-gray-600 text-white sm:text-xs rounded hover:bg-gray-700 transition-colors whitespace-nowrap"
                                 title="Ver detalles"
                             >
                                 Ver
@@ -523,7 +523,7 @@ export default function SolicitudesTable() {
                                             setShowEditModal(true);
                                         }}
                                         disabled={!puedeEditar}
-                                        className="px-1 py-1 sm:px-4 sm:py-1 bg-blue-600 text-white text-[7px] sm:text-xs rounded hover:bg-blue-700 transition-colors w-full sm:w-auto disabled:opacity-50 disabled:cursor-not-allowed"
+                                        className="px-1.5 py-1 sm:px-4 sm:py-1.5 text-[9px] bg-blue-600 text-white sm:text-xs rounded hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
                                         title={puedeEditar ? 'Editar solicitud' : 'Esta solicitud ya fue aceptada o eliminada'}
                                     >
                                         Editar
@@ -627,7 +627,7 @@ export default function SolicitudesTable() {
             </div>
 
             <div className="bg-white rounded-2xl shadow-sm border border-sky-100 overflow-hidden max-h-[calc(100vh-300px)] overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100">
-                <div className="overflow-x-auto">
+                <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100">
                     <table className="min-w-full table-auto">
                         <thead className="bg-sky-50">
                             {table.getHeaderGroups().map(headerGroup => (

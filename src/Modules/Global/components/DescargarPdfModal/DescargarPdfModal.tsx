@@ -156,7 +156,7 @@ export default function DescargarPdfModal({
                     </button>
                 </div>
 
-                <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-5">
+                <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100 p-4 sm:p-6 space-y-5">
                     {(grupos ?? []).map(grupo => {
                         const multi = grupo.multi !== false; // default true
                         const seleccion = valores[grupo.key] ?? [];

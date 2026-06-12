@@ -139,7 +139,7 @@ const AsignarAfiliadoMedidorModal = ({
         </div>
 
         {/* Body */}
-        <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
+        <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100 px-6 py-4 space-y-4">
           
 
           {/* Buscar afiliado */}

@@ -109,7 +109,7 @@ export default function ActasTable() {
                 <div className="flex justify-center items-end gap-0.5 sm:gap-2">
                     {hasViewPermission && (
                         <button
-                            className="px-1 sm:px-4 py-0.5 sm:py-1.5 bg-gray-600 text-white text-[6px] sm:text-xs rounded hover:bg-gray-700 transition-colors whitespace-nowrap"
+                            className="px-1.5 py-1 sm:px-4 sm:py-1.5 text-[9px] bg-gray-600 text-white sm:text-xs rounded hover:bg-gray-700 transition-colors whitespace-nowrap"
                             onClick={(e) => {
                                 e.stopPropagation();
                                 handleViewDetail(info.row.original);
@@ -121,7 +121,7 @@ export default function ActasTable() {
                     )}
                     {hasEditPermission && (
                         <button
-                            className="px-1 sm:px-4 py-0.5 sm:py-1.5 bg-blue-600 text-white text-[6px] sm:text-xs rounded hover:bg-blue-700 transition-colors whitespace-nowrap"
+                            className="px-1.5 py-1 sm:px-4 sm:py-1.5 text-[9px] bg-blue-600 text-white sm:text-xs rounded hover:bg-blue-700 transition-colors whitespace-nowrap"
                             onClick={(e) => {
                                 e.stopPropagation();
                                 handleEdit(info.row.original);
@@ -135,7 +135,7 @@ export default function ActasTable() {
                         <AlertDialog>
                         <AlertDialogTrigger asChild>
                             <button
-                                className="px-1 sm:px-4 py-0.5 sm:py-1.5 bg-red-600 text-white text-[6px] sm:text-xs rounded hover:bg-red-700 transition-colors whitespace-nowrap"
+                                className="px-1.5 py-1 sm:px-4 sm:py-1.5 text-[9px] bg-red-600 text-white sm:text-xs rounded hover:bg-red-700 transition-colors whitespace-nowrap"
                                 disabled={deleteActaMutation.isPending}
                                 onClick={(e) => e.stopPropagation()}
                                 title="Eliminar acta"
@@ -273,7 +273,7 @@ export default function ActasTable() {
             </div>
 
             <div className="bg-white rounded-2xl shadow-sm border border-sky-100 overflow-hidden max-h-[calc(100vh-300px)] overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100">
-                <div className="overflow-x-auto">
+                <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100">
                     <table className="min-w-full table-auto">
                         <thead className="bg-sky-50">
                             {table.getHeaderGroups().map(headerGroup => (

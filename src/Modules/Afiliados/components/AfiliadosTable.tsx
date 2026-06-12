@@ -362,7 +362,7 @@ export default function AbonadosTable() {
                                 e.stopPropagation();
                                 handleViewDetail(persona);
                             }}
-                            className="px-1 sm:px-4 py-0.5 sm:py-1.5 bg-gray-600 text-white text-[7px] sm:text-xs rounded hover:bg-gray-700 transition-colors whitespace-nowrap"
+                            className="px-1.5 py-1 sm:px-4 sm:py-1.5 text-[9px] bg-gray-600 text-white sm:text-xs rounded hover:bg-gray-700 transition-colors whitespace-nowrap"
                             title="Ver detalles"
                         >
                             Ver
@@ -373,7 +373,7 @@ export default function AbonadosTable() {
                                     e.stopPropagation();
                                     handleEdit(persona); //  Cambiar para abrir EditModal
                                 }}
-                                className="px-1 sm:px-4 py-0.5 sm:py-1.5 bg-blue-600 text-white text-[7px] sm:text-xs rounded hover:bg-blue-700 transition-colors whitespace-nowrap"
+                                className="px-1.5 py-1 sm:px-4 sm:py-1.5 text-[9px] bg-blue-600 text-white sm:text-xs rounded hover:bg-blue-700 transition-colors whitespace-nowrap"
                                 title="Editar"
                             >
                                 Editar
@@ -385,7 +385,7 @@ export default function AbonadosTable() {
                                     e.stopPropagation();
                                     handleOpenAsignarMedidor(persona);
                                 }}
-                                className="px-1 sm:px-4 py-0.5 sm:py-1.5 bg-green-600 text-white text-[7px] sm:text-xs rounded hover:bg-green-700 transition-colors whitespace-nowrap"
+                                className="px-1.5 py-1 sm:px-4 sm:py-1.5 text-[9px] bg-green-600 text-white sm:text-xs rounded hover:bg-green-700 transition-colors whitespace-nowrap"
                                 title="Asignar medidor"
                             >
                                 Asig.
@@ -394,7 +394,7 @@ export default function AbonadosTable() {
                             <AlertDialog>
                                 <AlertDialogTrigger asChild>
                                     <button
-                                        className="px-1 sm:px-4 py-0.5 sm:py-1.5 bg-red-600 text-white text-[7px] sm:text-xs rounded hover:bg-red-700 transition-colors whitespace-nowrap"
+                                        className="px-1.5 py-1 sm:px-4 sm:py-1.5 text-[9px] bg-red-600 text-white sm:text-xs rounded hover:bg-red-700 transition-colors whitespace-nowrap"
                                         disabled={updateEstadoMutationFisico.isPending || updateEstadoMutationJuridico.isPending}
                                         title="Desactivar"
                                     >
@@ -429,7 +429,7 @@ export default function AbonadosTable() {
                             <AlertDialog>
                                 <AlertDialogTrigger asChild>
                                     <button
-                                        className="px-1 sm:px-4 py-0.5 sm:py-1.5 bg-green-600 text-white text-[7px] sm:text-xs rounded hover:bg-green-700 transition-colors whitespace-nowrap"
+                                        className="px-1.5 py-1 sm:px-4 sm:py-1.5 text-[9px] bg-green-600 text-white sm:text-xs rounded hover:bg-green-700 transition-colors whitespace-nowrap"
                                         disabled={updateEstadoMutationFisico.isPending || updateEstadoMutationJuridico.isPending}
                                         title="Activar"
                                     >
@@ -646,7 +646,7 @@ export default function AbonadosTable() {
 
             {/* Tabla con scroll vertical y horizontal */}
             <div className="bg-white rounded-2xl shadow-sm border border-sky-100 overflow-hidden max-h-[calc(100vh-300px)] overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100">
-                <div className="overflow-x-auto">
+                <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100">
                     <table className="min-w-full table-auto">
                         <thead className="bg-sky-50">
                             {table.getHeaderGroups().map(headerGroup => (

@@ -333,8 +333,8 @@ export default function LecturaTable() {
       id: "medidor",
       header: () => <><span className="hidden sm:inline">Medidor</span><span className="sm:hidden text-[9px]">Medidor</span></>,
       cell: (info) => (
-        <div className="flex justify-center text-[8px] sm:text-[13px] text-gray-900 truncate max-w-[70px] sm:max-w-[150px]" title={String(info.getValue() || "N/A")}>
-          {info.getValue() || "N/A"}
+        <div className="flex justify-center" title={String(info.getValue() || "N/A")}>
+          <span className="truncate max-w-[70px] sm:max-w-[150px] text-[8px] sm:text-[13px] text-gray-900">{info.getValue() || "N/A"}</span>
         </div>
       ),
     }),
@@ -360,33 +360,33 @@ export default function LecturaTable() {
     columnHelper.accessor("Valor_Lectura_Anterior", {
       header: () => <><span className="hidden sm:inline">Lect. Anterior</span><span className="sm:hidden text-[9px]">L.Ant</span></>,
       cell: (info) => (
-        <div className="flex justify-end   truncate max-w-[50px] sm:max-w-[100px]">
-          <span className=" text-center text-[8px] sm:text-[13px] text-gray-600">{info.getValue()} m³</span>
+        <div className="flex justify-end">
+          <span className="truncate max-w-[50px] sm:max-w-[100px] text-center text-[8px] sm:text-[13px] text-gray-600">{info.getValue()} m³</span>
         </div>
       ),
     }),
     columnHelper.accessor("Valor_Lectura_Actual", {
       header: () => <><span className="hidden sm:inline">Lect. Actual</span><span className="sm:hidden text-[9px]">L.Act</span></>,
       cell: (info) => (
-        <div className="flex justify-end text-[8px] sm:text-[13px] text-gray-600 truncate max-w-[50px] sm:max-w-[100px]">
-          <span className="text-center">{info.getValue()} m³</span>
+        <div className="flex justify-end">
+          <span className="truncate max-w-[50px] sm:max-w-[100px] text-center text-[8px] sm:text-[13px] text-gray-600">{info.getValue()} m³</span>
         </div>
       ),
     }),
     columnHelper.accessor("Consumo_Calculado_M3", {
       header: () => <><span className="hidden sm:inline">Consumo</span><span className="sm:hidden text-[9px]">Consumo</span></>,
       cell: (info) => (
-        <div className="flex justify-center text-[8px] sm:text-[13px] text-blue-600 font-semibold truncate max-w-[50px] sm:max-w-[100px]">
-          {info.getValue()} m³
+        <div className="flex justify-center">
+          <span className="truncate max-w-[50px] sm:max-w-[100px] text-[8px] sm:text-[13px] text-blue-600 font-semibold">{info.getValue()} m³</span>
         </div>
       ),
     }),
     columnHelper.accessor("Fecha_Lectura", {
       header: () => <><span className="hidden sm:inline">Fecha</span><span className="sm:hidden text-[9px]">Fecha</span></>,
       cell: (info) => (
-        <div className="flex justify-center text-[8px] sm:text-[13px] text-gray-600 truncate max-w-[60px] sm:max-w-[120px]">
-          <span className="hidden sm:inline">{new Date(info.getValue()).toLocaleDateString("es-ES")}</span>
-          <span className="sm:hidden">{new Date(info.getValue()).toLocaleDateString("es-ES", { day:"2-digit", month:"2-digit", year:"2-digit" })}</span>
+        <div className="flex justify-center text-[8px] sm:text-[13px] text-gray-600">
+          <span className="hidden sm:inline truncate max-w-[120px]">{new Date(info.getValue()).toLocaleDateString("es-ES")}</span>
+          <span className="sm:hidden truncate max-w-[60px]">{new Date(info.getValue()).toLocaleDateString("es-ES", { day:"2-digit", month:"2-digit", year:"2-digit" })}</span>
         </div>
       ),
     }),
@@ -398,7 +398,7 @@ export default function LecturaTable() {
           {hasViewPermission && (
             <button
               onClick={() => handleOpenDetailModal(info.row.original)}
-              className="px-1.5 py-1 sm:px-2 sm:py-1 bg-slate-600 text-white text-[7px] sm:text-xs rounded hover:bg-slate-700 transition-colors w-auto whitespace-nowrap"
+              className="px-1.5 py-1 sm:px-4 sm:py-1.5 text-[9px] bg-slate-600 text-white sm:text-xs rounded hover:bg-slate-700 transition-colors whitespace-nowrap"
               title="Ver detalles"
             >
               Ver
@@ -407,7 +407,7 @@ export default function LecturaTable() {
           {hasEditPermission && (
             <button
               onClick={() => handleOpenUpdateModal(info.row.original)}
-              className="px-1.5 py-1 sm:px-2 sm:py-1 bg-blue-600 text-white text-[7px] sm:text-xs rounded hover:bg-blue-700 transition-colors w-auto whitespace-nowrap"
+              className="px-1.5 py-1 sm:px-4 sm:py-1.5 text-[9px] bg-blue-600 text-white sm:text-xs rounded hover:bg-blue-700 transition-colors whitespace-nowrap"
             >
               Editar
             </button>

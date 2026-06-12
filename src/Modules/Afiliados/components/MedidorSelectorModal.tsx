@@ -193,7 +193,7 @@ const MedidorSelectorModal: React.FC<MedidorSelectorModalProps> = ({ isOpen, mod
                                     />
                                 </div>
 
-                                <div className="border border-gray-200 rounded-lg overflow-hidden max-h-44 overflow-y-auto bg-white">
+                                <div className="border border-gray-200 rounded-lg overflow-hidden max-h-44 overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100 bg-white">
                                     {loadingMedidores ? (
                                         <div className="flex items-center justify-center py-6 gap-2 text-sm text-gray-500">
                                             <div className="animate-spin rounded-full size-4 border-b-2 border-blue-600" />

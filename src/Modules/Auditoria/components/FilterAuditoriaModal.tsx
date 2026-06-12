@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { LuX, LuFilter } from 'react-icons/lu';
 import type { FilterModalProps, AuditoriaFilterOptions } from '../types/AuditoriaTypes';
-import { MODULOS, ACCIONES } from '../types/AuditoriaTypes';
 import { useUsers } from '@/Modules/Usuarios/Hooks/userHook';
 
 const FilterAuditoriaModal = ({
@@ -9,6 +8,8 @@ const FilterAuditoriaModal = ({
   onClose,
   onApplyFilters,
   currentFilters,
+  modulos,
+  acciones,
 }: FilterModalProps) => {
   const [filters, setFilters] = useState<AuditoriaFilterOptions>(currentFilters);
   const { data: users = [], isLoading } = useUsers();
@@ -68,7 +69,7 @@ const FilterAuditoriaModal = ({
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
             >
               <option value="">Todos los módulos</option>
-              {MODULOS.map((modulo) => (
+              {modulos.map((modulo) => (
                 <option key={modulo} value={modulo}>
                   {modulo}
                 </option>
@@ -93,7 +94,7 @@ const FilterAuditoriaModal = ({
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
             >
               <option value="">Todas las acciones</option>
-              {ACCIONES.map((accion) => (
+              {acciones.map((accion) => (
                 <option key={accion} value={accion}>
                   {accion}
                 </option>

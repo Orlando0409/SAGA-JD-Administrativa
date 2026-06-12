@@ -43,7 +43,8 @@
   color: rgba(255, 255, 255, 0.87);
   background-color: #242424;
   scrollbar-width: thin;
-  scrollbar-color: rgba(214, 107, 107, 0.711) transparent;
+  /* Azul estandar de la app: thumb blue-600, track blue-100 (igual que scrollbar-thumb-blue-600/scrollbar-track-blue-100) */
+  scrollbar-color: #2563eb #dbeafe;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;

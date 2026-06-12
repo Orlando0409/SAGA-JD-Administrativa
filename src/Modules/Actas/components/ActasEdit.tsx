@@ -325,7 +325,7 @@ export default function ActasEdit({ acta, onClose, refetch }: ActasEditProps) {
                                         Eliminar todos los archivos
                                     </button>
                                 </div>
-                                <div className="space-y-1 max-h-32 overflow-y-auto">
+                                <div className="space-y-1 max-h-32 overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100">
                                     {files.map((file, index) => (
                                         <div key={`${file.name}-${file.size}-${index}`} className="flex items-center justify-between text-xs bg-white p-2 rounded border">
                                             <div className="flex items-center gap-2 flex-1 min-w-0">

@@ -290,7 +290,7 @@ export default function FormularioAfiliados({ isOpen, onClose, onSuccess }: Form
 
   return (
     <div className="fixed inset-0 backdrop-blur flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
+      <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100 shadow-2xl">
         <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-gradient-to-r from-sky-50 to-blue-50">
           <h2 className="text-2xl font-semibold text-sky-800">
             Nuevo Afiliado

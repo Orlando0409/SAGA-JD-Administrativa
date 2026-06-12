@@ -71,7 +71,7 @@ const CreateMedidorModal = ({ isOpen, onClose }: CreateMedidorModalProps) => {
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto">
+        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100">
           <div className="p-4 sm:p-6 space-y-4">
             <div>
               <label htmlFor="numero-medidor" className="block text-sm font-medium text-gray-700 mb-1">

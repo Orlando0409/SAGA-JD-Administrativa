@@ -113,7 +113,7 @@ export const BuzonNotificaciones: React.FC<BuzonNotificacionesProps> = ({ onVerS
             </div>
 
             {/* Lista de notificaciones */}
-            <div className="max-h-80 overflow-y-auto">
+            <div className="max-h-80 overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100">
               {(() => {
                 if (isLoading) {
                   return (

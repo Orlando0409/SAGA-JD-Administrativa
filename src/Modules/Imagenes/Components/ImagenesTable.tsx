@@ -91,7 +91,7 @@ export default function ImagenesTable() {
                     <span className="sm:hidden">F. Creación</span>
                 </>
             ),
-            cell: info => <div className="flex items-center justify-start whitespace-nowrap">{new Date(info.getValue()).toLocaleDateString("es-ES")}</div>,
+            cell: info => <div className="flex items-center justify-center whitespace-nowrap">{new Date(info.getValue()).toLocaleDateString("es-ES")}</div>,
         }),
         columnHelper.accessor('Fecha_Actualizacion', {
             header: () => (
@@ -101,7 +101,7 @@ export default function ImagenesTable() {
                 </>
             ),
             cell: info => (
-                <div className="flex items-center justify-start whitespace-nowrap">
+                <div className="flex items-center justify-center whitespace-nowrap">
                     {info.getValue()
                         ? new Date(info.getValue()).toLocaleDateString("es-ES")
                         : "Sin cambios"}
@@ -169,7 +169,7 @@ export default function ImagenesTable() {
                 <div className="flex justify-center gap-0.5 sm:gap-1">
                     {hasViewPermission && (
                         <button
-                            className="px-1.5 sm:px-2 py-0.5 sm:py-1 bg-gray-600 text-white flex-1 text-[7px] sm:text-xs rounded hover:bg-gray-700 transition-colors"
+                            className="px-1.5 py-1 sm:px-4 sm:py-1.5 text-[9px] bg-gray-600 text-white sm:text-xs rounded hover:bg-gray-700 transition-colors whitespace-nowrap"
                             onClick={() => handleViewDetail(info.row.original)}
                             title="Ver detalles"
                         >
@@ -178,7 +178,7 @@ export default function ImagenesTable() {
                     )}
                     {hasEditPermission && (
                         <button
-                            className="px-1.5 sm:px-2 py-0.5 sm:py-1 bg-blue-600 text-white flex-1 text-[7px] sm:text-xs rounded hover:bg-blue-700 transition-colors"
+                            className="px-1.5 py-1 sm:px-4 sm:py-1.5 text-[9px] bg-blue-600 text-white sm:text-xs rounded hover:bg-blue-700 transition-colors whitespace-nowrap"
                             onClick={() => handleEdit(info.row.original)}
                             title="Editar"
                         >
@@ -189,7 +189,7 @@ export default function ImagenesTable() {
                         <AlertDialog>
                         <AlertDialogTrigger asChild>
                             <button
-                                className="px-1.5 sm:px-2 py-0.5 sm:py-1 bg-red-600 text-white flex-1 text-[7px] sm:text-xs rounded hover:bg-red-700 transition-colors"
+                                className="px-1.5 py-1 sm:px-4 sm:py-1.5 text-[9px] bg-red-600 text-white sm:text-xs rounded hover:bg-red-700 transition-colors whitespace-nowrap"
                                 disabled={deleteImagenMutation.isPending}
                                 title="Eliminar imagen"
                             >
@@ -313,7 +313,7 @@ export default function ImagenesTable() {
             )}
 
             <div className="bg-white rounded-2xl shadow-sm border border-sky-100 overflow-hidden max-h-[calc(100vh-300px)] overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100">
-                <div className="overflow-x-auto">
+                <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100">
                     <table className="min-w-full table-auto">
                         <thead className="bg-sky-50">
                             {table.getHeaderGroups().map(headerGroup => (
@@ -328,7 +328,7 @@ export default function ImagenesTable() {
                                                     return (
                                                         <button
                                                             type="button"
-                                                            className={`cursor-pointer select-none flex items-center gap-1 sm:gap-2 bg-transparent border-none p-0 ${index === 0 ? 'justify-start' : 'justify-center'}`}
+                                                            className={`cursor-pointer select-none flex w-full items-center gap-1 sm:gap-2 bg-transparent border-none p-0 ${index === 0 ? 'justify-start' : 'justify-center'}`}
                                                             onClick={header.column.getToggleSortingHandler()}
                                                             onKeyDown={e => {
                                                                 if (e.key === 'Enter' || e.key === ' ') {

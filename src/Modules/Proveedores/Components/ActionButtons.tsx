@@ -91,7 +91,7 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({ proveedor, tipoProveedor 
                 <button
                     type="button"
                     onClick={() => setShowDetailModal(true)}
-                    className="px-1 sm:px-4 py-0.5 sm:py-1.5 bg-gray-600 text-white text-[7px] sm:text-xs rounded hover:bg-gray-700 transition-colors whitespace-nowrap"
+                    className="px-1.5 py-1 sm:px-4 sm:py-1.5 text-[9px] bg-gray-600 text-white sm:text-xs rounded hover:bg-gray-700 transition-colors whitespace-nowrap"
                     title="Ver proveedor"
                 >
                     Ver
@@ -103,7 +103,7 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({ proveedor, tipoProveedor 
                 <button
                     type="button"
                     onClick={handleEdit}
-                    className="px-1 sm:px-4 py-0.5 sm:py-1.5 bg-blue-600 text-white text-[7px] sm:text-xs rounded hover:bg-blue-700 transition-colors whitespace-nowrap"
+                    className="px-1.5 py-1 sm:px-4 sm:py-1.5 text-[9px] bg-blue-600 text-white sm:text-xs rounded hover:bg-blue-700 transition-colors whitespace-nowrap"
                     title="Editar proveedor"
                 >
                     Editar
@@ -117,7 +117,7 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({ proveedor, tipoProveedor 
                     <button
                         type="button"
                         onClick={(e) => e.stopPropagation()}
-                        className={`px-1 sm:px-4 py-0.5 sm:py-1.5 text-[7px] sm:text-xs rounded transition-colors whitespace-nowrap ${
+                        className={`px-1.5 py-1 sm:px-4 sm:py-1.5 text-[9px] sm:text-xs rounded transition-colors whitespace-nowrap ${
                             isActiveProveedor(proveedor.Estado_Proveedor)
                                 ? 'bg-red-600 hover:bg-red-700 text-white'
                                 : 'bg-green-600 hover:bg-green-700 text-white'

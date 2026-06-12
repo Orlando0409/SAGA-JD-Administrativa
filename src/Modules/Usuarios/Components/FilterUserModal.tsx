@@ -43,7 +43,7 @@ const FilterUserModal: React.FC<FilterModalProps> = ({ isOpen, onClose, onApplyF
           </button>
         </div>
 
-        <div className="p-6 space-y-4 overflow-y-auto max-h-[calc(90vh-140px)]">
+        <div className="p-6 space-y-4 overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100 max-h-[calc(90vh-140px)]">
           <div>
             <label htmlFor='rol' className="block text-sm font-medium text-gray-700 mb-2">
               Filtrar por Rol

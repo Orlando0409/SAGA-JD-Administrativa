@@ -39,7 +39,7 @@ export const HomeLayout = ({ children }: { children: (allowedModules: any) => Re
                   )}
                 </header>
 
-                <main className="flex-1 overflow-y-auto">
+                <main className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100">
                   <div className="p-4">
                     {children(allowedModules)}
                   </div>

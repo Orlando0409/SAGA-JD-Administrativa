@@ -194,7 +194,7 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
                 </div>
 
                 {/* Body */}
-                <div className="p-6 overflow-y-auto max-h-[calc(90vh-140px)]">
+                <div className="p-6 overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100 max-h-[calc(90vh-140px)]">
                     <form
                         onSubmit={(e) => {
                             e.preventDefault();

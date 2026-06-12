@@ -180,7 +180,7 @@ export default function CalidadAguaTable() {
         <div className="flex justify-center gap-1">
           {hasViewPermission && (
             <button
-              className="px-1.5 sm:px-4 py-0.5 sm:py-1.5 bg-gray-600 text-white text-[7px] sm:text-xs rounded hover:bg-gray-700 transition-colors"
+              className="px-1.5 py-1 sm:px-4 sm:py-1.5 text-[9px] bg-gray-600 text-white sm:text-xs rounded hover:bg-gray-700 transition-colors whitespace-nowrap"
               onClick={(e) => {
                 e.stopPropagation();
                 handleOpenModal(info.row.original);
@@ -192,7 +192,7 @@ export default function CalidadAguaTable() {
           )}
           {hasEditPermission && (
             <button
-              className="px-1.5 sm:px-4 py-0.5 sm:py-1.5 bg-blue-600 text-white text-[7px] sm:text-xs rounded hover:bg-blue-700 transition-colors whitespace-nowrap"
+              className="px-1.5 py-1 sm:px-4 sm:py-1.5 text-[9px] bg-blue-600 text-white sm:text-xs rounded hover:bg-blue-700 transition-colors whitespace-nowrap"
               onClick={(e) => {
                 e.stopPropagation();
                 handleOpenEditModal(info.row.original);
@@ -273,7 +273,7 @@ export default function CalidadAguaTable() {
       {isError && <div className="text-red-600 mb-2">Error al cargar los archivos.</div>}
 
       <div className="bg-white rounded-2xl shadow-sm border border-sky-100 overflow-hidden max-h-[calc(100vh-300px)] overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100">
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100">
           <table className="min-w-full table-auto">
             <thead className="bg-sky-50">
               {table.getHeaderGroups().map(headerGroup => (
@@ -349,7 +349,7 @@ export default function CalidadAguaTable() {
           </table>
         </div>
 
-        <div className="overflow-x-auto bg-gray-50 border-t border-gray-200">
+        <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100 bg-gray-50 border-t border-gray-200">
           <div className="min-w-max px-2 sm:px-4 py-1.5 sm:py-2 cursor-default">
             <div className="flex items-center justify-between gap-4">
               <div className="flex items-center gap-2 sm:gap-4">

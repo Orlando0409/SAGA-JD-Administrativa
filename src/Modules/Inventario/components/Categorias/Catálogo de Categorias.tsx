@@ -130,14 +130,14 @@ const CategoriasManagement: React.FC<CategoriasManagementProps> = () => {
       cell: info => (
         <div className="flex flex-row justify-center flex-nowrap gap-1 min-w-[50px] sm:min-w-[140px] overflow-visible">
           <button
-            className="px-1.5 py-1 sm:px-2 sm:py-1 bg-gray-600 text-white text-[9px] sm:text-xs rounded hover:bg-gray-700 transition-colors w-auto whitespace-nowrap"
+            className="px-1.5 py-1 sm:px-4 sm:py-1.5 text-[9px] bg-gray-600 text-white sm:text-xs rounded hover:bg-gray-700 transition-colors whitespace-nowrap"
             onClick={() => handleViewDetail(info.row.original)}
             title="Ver detalles"
           >
             Ver
           </button>
           <button
-            className="px-1.5 py-1 sm:px-2 sm:py-1 bg-blue-600 text-white text-[9px] sm:text-xs rounded hover:bg-blue-700 transition-colors w-auto whitespace-nowrap"
+            className="px-1.5 py-1 sm:px-4 sm:py-1.5 text-[9px] bg-blue-600 text-white sm:text-xs rounded hover:bg-blue-700 transition-colors whitespace-nowrap"
             onClick={() => handleEdit(info.row.original)}
             title="Editar"
           >
@@ -147,7 +147,7 @@ const CategoriasManagement: React.FC<CategoriasManagementProps> = () => {
               <AlertDialog>
                 <AlertDialogTrigger asChild>
                   <button
-                    className="px-1.5 py-1 sm:px-2 sm:py-1 bg-red-600 text-white text-[9px] sm:text-xs rounded hover:bg-red-700 transition-colors w-auto whitespace-nowrap"
+                    className="px-1.5 py-1 sm:px-4 sm:py-1.5 text-[9px] bg-red-600 text-white sm:text-xs rounded hover:bg-red-700 transition-colors whitespace-nowrap"
                     disabled={updateEstadoMutation.isPending}
                     title="Desactivar"
                   >
@@ -182,7 +182,7 @@ const CategoriasManagement: React.FC<CategoriasManagementProps> = () => {
               <AlertDialog>
                 <AlertDialogTrigger asChild>
                   <button
-                    className="px-1.5 py-1 sm:px-2 sm:py-1 bg-green-600 text-white text-[9px] sm:text-xs rounded hover:bg-green-700 transition-colors w-auto whitespace-nowrap"
+                    className="px-1.5 py-1 sm:px-4 sm:py-1.5 text-[9px] bg-green-600 text-white sm:text-xs rounded hover:bg-green-700 transition-colors whitespace-nowrap"
                     disabled={updateEstadoMutation.isPending}
                     title="Activar"
                   >
@@ -332,7 +332,7 @@ const CategoriasManagement: React.FC<CategoriasManagementProps> = () => {
 
       
 <div className="bg-white rounded-2xl shadow-sm border border-sky-100 overflow-hidden max-h-[calc(100vh-300px)] overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100">
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100">
           <table className="min-w-full table-auto">
             <thead className="bg-sky-50">
               {table.getHeaderGroups().map(headerGroup => (

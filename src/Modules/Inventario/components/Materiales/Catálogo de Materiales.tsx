@@ -198,22 +198,24 @@ const CatalogoMateriales: React.FC<CatalogoMaterialesProps> = () => {
       columnHelper.accessor('Nombre_Material', {
         header: () => <><span className="hidden sm:inline">Material</span><span className="sm:hidden text-[9px]">Material</span></>,
         cell: info => (
-          <div 
-            className="flex justify-center text-[8px] sm:text-[13px] text-gray-900  truncate max-w-[70px] sm:max-w-[150px]" 
+          <div
+            className="flex justify-center"
             title={info.getValue()}
           >
-            {info.getValue()}
+            <span className="truncate max-w-[70px] sm:max-w-[150px] text-[8px] sm:text-[13px] text-gray-900">{info.getValue()}</span>
           </div>
         ),
       }),
       columnHelper.accessor('Descripcion', {
         header: () => <><span className="hidden sm:inline">Descripción</span><span className="sm:hidden text-[9px]">Desc.</span></>,
         cell: info => (
-          <div 
-            className="flex justify-center text-[8px] sm:text-[13px] text-gray-600 truncate max-w-[80px] sm:max-w-[200px]"
+          <div
+            className="flex justify-center"
             title={info.getValue() || 'Sin descripción'}
           >
-            {info.getValue() || 'Sin descripción'}
+            <span className="truncate max-w-[80px] sm:max-w-[200px] text-[8px] sm:text-[13px] text-gray-600">
+              {info.getValue() || 'Sin descripción'}
+            </span>
           </div>
         ),
       }),
@@ -231,11 +233,11 @@ const CatalogoMateriales: React.FC<CatalogoMaterialesProps> = () => {
         cell: info => {
           const unidad = info.getValue() || 'Sin unidad';
           return (
-            <div 
-              className="flex justify-center text-[8px] sm:text-[13px] text-gray-600 truncate max-w-[50px] sm:max-w-[100px]"
+            <div
+              className="flex justify-center"
               title={unidad}
             >
-              {unidad}
+              <span className="truncate max-w-[50px] sm:max-w-[100px] text-[8px] sm:text-[13px] text-gray-600">{unidad}</span>
             </div>
           );
         },
@@ -321,14 +323,14 @@ const CatalogoMateriales: React.FC<CatalogoMaterialesProps> = () => {
         cell: info => (
           <div className="flex flex-row justify-center flex-nowrap gap-1 min-w-[50px] sm:min-w-[140px] overflow-visible">
             <button
-              className="px-1.5 py-1 sm:px-2 sm:py-1 bg-gray-600 text-white text-[7px] sm:text-xs rounded hover:bg-gray-700 transition-colors w-auto whitespace-nowrap"
+              className="px-1.5 py-1 sm:px-4 sm:py-1.5 text-[9px] bg-gray-600 text-white sm:text-xs rounded hover:bg-gray-700 transition-colors whitespace-nowrap"
               onClick={() => handleViewDetail(info.row.original)}
               title="Ver detalles"
             >
               Ver
             </button>
             <button
-              className="px-1.5 py-1 sm:px-2 sm:py-1 bg-blue-600 text-white text-[7px] sm:text-xs rounded hover:bg-blue-700 transition-colors w-auto whitespace-nowrap"
+              className="px-1.5 py-1 sm:px-4 sm:py-1.5 text-[9px] bg-blue-600 text-white sm:text-xs rounded hover:bg-blue-700 transition-colors whitespace-nowrap"
               onClick={() => handleEdit(info.row.original)}
               title="Editar"
             >
@@ -344,7 +346,7 @@ const CatalogoMateriales: React.FC<CatalogoMaterialesProps> = () => {
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
                       <button
-                        className="px-1.5 py-1 sm:px-2 sm:py-1 w-auto whitespace-nowrap bg-red-600 text-white text-[7px] sm:text-xs rounded hover:bg-red-700 transition-colors"
+                        className="px-1.5 py-1 sm:px-4 sm:py-1.5 text-[9px] whitespace-nowrap bg-red-600 text-white sm:text-xs rounded hover:bg-red-700 transition-colors"
                         disabled={updateEstadoMutation.isPending}
                         title="Dar de baja"
                       >
@@ -439,7 +441,7 @@ const CatalogoMateriales: React.FC<CatalogoMaterialesProps> = () => {
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
                       <button
-                        className="px-1.5 py-1 sm:px-2 sm:py-1 w-auto whitespace-nowrap bg-red-600 text-white text-[7px] sm:text-xs rounded hover:bg-red-700 transition-colors"
+                        className="px-1.5 py-1 sm:px-4 sm:py-1.5 text-[9px] whitespace-nowrap bg-red-600 text-white sm:text-xs rounded hover:bg-red-700 transition-colors"
                         disabled={updateEstadoMutation.isPending}
                         title="Dar de baja material agotado"
                       >
