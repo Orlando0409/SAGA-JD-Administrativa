@@ -706,7 +706,7 @@ const CatalogoMateriales: React.FC<CatalogoMaterialesProps> = () => {
               className="flex-1 sm:flex-none justify-center bg-blue-600 hover:bg-blue-700 text-white whitespace-nowrap px-2 py-1.5 sm:px-4 sm:py-2 rounded-md flex items-center gap-1 sm:gap-2 transition-colors text-xs sm:text-sm"
             >
               <LuPlus className="size-3.5 sm:size-4" />
-              Nuevo
+              Nuevo Material
             </button>
             <button
               onClick={() => navigate({ to: '/Inventario/Materiales/Medidores' })}
