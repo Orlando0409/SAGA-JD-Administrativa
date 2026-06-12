@@ -198,7 +198,7 @@ const Usuarios = () => {
             <div className="flex flex-row justify-center flex-nowrap gap-1 min-w-[50px] sm:min-w-[140px] overflow-visible">
               {canViewDetails && (
                 <button
-                  className="px-1.5 py-1 sm:px-2 sm:py-1 bg-gray-600 text-white text-[9px] sm:text-xs rounded hover:bg-gray-700 transition-colors w-auto whitespace-nowrap"
+                  className="px-1.5 py-1 sm:px-4 sm:py-1.5 text-[9px] bg-gray-600 text-white sm:text-xs rounded hover:bg-gray-700 transition-colors whitespace-nowrap"
                   onClick={() => handleViewDetail(info.row.original)}
                   title="Ver detalles"
                 >
@@ -207,7 +207,7 @@ const Usuarios = () => {
               )}
               {hasEditPermission && (
                 <button
-                  className="px-1.5 py-1 sm:px-2 sm:py-1 bg-blue-600 text-white text-[9px] sm:text-xs rounded hover:bg-blue-700 transition-colors w-auto whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-1.5 py-1 sm:px-4 sm:py-1.5 text-[9px] bg-blue-600 text-white sm:text-xs rounded hover:bg-blue-700 transition-colors whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
                   onClick={() => handleEdit(info.row.original)}
                    disabled={info.row.original.Nombre_Usuario.toLowerCase() === 'admin'}
                   title={info.row.original.Nombre_Usuario.toLowerCase() === 'admin' ? 'No se puede editar el usuario admin' : 'Editar usuario'}
@@ -221,7 +221,7 @@ const Usuarios = () => {
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
                         <button
-                          className="px-1.5 py-1 sm:px-2 sm:py-1 bg-red-600 text-white text-[9px] sm:text-xs rounded hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed w-auto whitespace-nowrap"
+                          className="px-1.5 py-1 sm:px-4 sm:py-1.5 text-[9px] bg-red-600 text-white sm:text-xs rounded hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
                           disabled={deactivateUserMutation.isPending || info.row.original.Nombre_Usuario.toLowerCase() === 'admin'}
                           title={info.row.original.Nombre_Usuario.toLowerCase() === 'admin' ? 'No se puede desactivar el usuario admin' : 'Desactivar usuario'}
                         >
@@ -257,7 +257,7 @@ const Usuarios = () => {
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
                         <button
-                          className="px-1.5 py-1 sm:px-2 sm:py-1 bg-green-600 text-white text-[9px] sm:text-xs rounded hover:bg-green-700 transition-colors w-auto whitespace-nowrap"
+                          className="px-1.5 py-1 sm:px-4 sm:py-1.5 text-[9px] bg-green-600 text-white sm:text-xs rounded hover:bg-green-700 transition-colors whitespace-nowrap"
                           disabled={activateUserMutation.isPending}
                           title="Activar usuario"
                         >

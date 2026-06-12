@@ -237,7 +237,7 @@ export default function FacturaTable() {
             {hasViewPermission && (
               <button
                 onClick={() => handleOpenDetail(factura)}
-                className="px-2 py-1 bg-slate-600 text-white text-[10px] sm:text-xs rounded hover:bg-slate-700 transition-colors whitespace-nowrap"
+                className="px-1.5 py-1 sm:px-4 sm:py-1.5 text-[9px] bg-slate-600 text-white sm:text-xs rounded hover:bg-slate-700 transition-colors whitespace-nowrap"
                 title="Ver detalles"
               >
                 Ver
@@ -247,7 +247,7 @@ export default function FacturaTable() {
               <button
                 onClick={() => handleSolicitarPago(factura)}
                 disabled={isMarkingPaid}
-                className="px-2 py-1 bg-green-600 text-white text-[10px] sm:text-xs rounded hover:bg-green-700 transition-colors whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-1.5 py-1 sm:px-4 sm:py-1.5 text-[9px] bg-green-600 text-white sm:text-xs rounded hover:bg-green-700 transition-colors whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
                 title="Marcar como pagada"
               >
                 Pagar
@@ -257,7 +257,7 @@ export default function FacturaTable() {
               <button
                 onClick={() => handleSolicitarAnulacion(factura)}
                 disabled={isAnulando}
-                className="px-2 py-1 bg-red-600 text-white text-[10px] sm:text-xs rounded hover:bg-red-700 transition-colors whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-1.5 py-1 sm:px-4 sm:py-1.5 text-[9px] bg-red-600 text-white sm:text-xs rounded hover:bg-red-700 transition-colors whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
                 title="Anular factura"
               >
                 Anular

@@ -123,20 +123,6 @@ const CatalogoMedidores: React.FC<CatalogoMedidoresProps> = () => {
     setIsDetailModalOpen(true);
   };
 
-  const handleCambiarEstado = async (medidor: Medidor) => {
-    setSelectedMedidor(medidor);
-    try {
-      await updateEstadoMutation.mutateAsync({
-        idMedidor: medidor.Id_Medidor,
-        idEstado: 2,
-      });
-      refetch();
-    } catch (error) {
-      console.error('Error al cambiar estado del medidor:', error);
-    }
-  };
-
-
   const handleToggleEstado = async (medidor: Medidor, nuevoEstadoId: number) => {
 
     try {
@@ -335,7 +321,7 @@ const CatalogoMedidores: React.FC<CatalogoMedidoresProps> = () => {
         cell: info => (
           <div className="flex flex-row justify-center flex-nowrap gap-1 min-w-[50px] sm:min-w-[140px] overflow-visible">
             <button
-              className="px-1.5 py-1 sm:px-2 sm:py-1 bg-gray-600 text-white text-[9px] sm:text-xs rounded hover:bg-gray-700 transition-colors w-auto whitespace-nowrap"
+              className="px-1.5 py-1 sm:px-4 sm:py-1.5 text-[9px] bg-gray-600 text-white sm:text-xs rounded hover:bg-gray-700 transition-colors whitespace-nowrap"
               onClick={() => handleViewDetail(info.row.original)}
               title="Ver detalles"
             >
@@ -351,15 +337,7 @@ const CatalogoMedidores: React.FC<CatalogoMedidoresProps> = () => {
                 return (
                   <>
                     <button
-                      className="px-1.5 py-1 sm:px-2 sm:py-1 bg-blue-600 text-white text-[9px] sm:text-xs rounded hover:bg-blue-700 transition-colors w-auto whitespace-nowrap"
-                      onClick={() => handleCambiarEstado(info.row.original)}
-                      title="Cambiar estado"
-                    >
-                      <span className="hidden sm:inline">Cambiar Estado</span>
-                      <span className="sm:hidden">Estado</span>
-                    </button>
-                    <button
-                      className="px-1.5 py-1 sm:px-2 sm:py-1 bg-green-600 text-white text-[9px] sm:text-xs rounded hover:bg-green-700 transition-colors w-auto whitespace-nowrap"
+                      className="px-1.5 py-1 sm:px-4 sm:py-1.5 text-[9px] bg-green-600 text-white sm:text-xs rounded hover:bg-green-700 transition-colors whitespace-nowrap"
                       onClick={() => {
                         setSelectedMedidor(info.row.original);
                         setIsAsignarModalOpen(true);
@@ -370,7 +348,7 @@ const CatalogoMedidores: React.FC<CatalogoMedidoresProps> = () => {
                     </button>
                     {puedeMarcarPagado && (
                       <button
-                        className="px-1.5 py-1 sm:px-2 sm:py-1 bg-blue-600 text-white text-[9px] sm:text-xs rounded hover:bg-blue-700 transition-colors w-auto whitespace-nowrap"
+                        className="px-1.5 py-1 sm:px-4 sm:py-1.5 text-[9px] bg-blue-600 text-white sm:text-xs rounded hover:bg-blue-700 transition-colors whitespace-nowrap"
                         onClick={() => openEstadoPagoDialog(info.row.original)}
                         title="Marcar como pagado"
                       >
@@ -389,7 +367,7 @@ const CatalogoMedidores: React.FC<CatalogoMedidoresProps> = () => {
                   <>
                     {sinArchivos && (
                       <button
-                        className="px-1.5 py-1 sm:px-2 sm:py-1 bg-amber-500 text-white text-[9px] sm:text-xs rounded hover:bg-amber-600 transition-colors w-auto whitespace-nowrap"
+                        className="px-1.5 py-1 sm:px-4 sm:py-1.5 text-[9px] bg-amber-500 text-white sm:text-xs rounded hover:bg-amber-600 transition-colors whitespace-nowrap"
                         onClick={() => {
                           setSelectedMedidor(info.row.original);
                           setIsSubirArchivosModalOpen(true);
@@ -403,7 +381,7 @@ const CatalogoMedidores: React.FC<CatalogoMedidoresProps> = () => {
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
                         <button
-                          className="px-1.5 py-1 sm:px-2 sm:py-1 bg-red-600 text-white text-[9px] sm:text-xs rounded hover:bg-red-700 transition-colors w-auto whitespace-nowrap"
+                          className="px-1.5 py-1 sm:px-4 sm:py-1.5 text-[9px] bg-red-600 text-white sm:text-xs rounded hover:bg-red-700 transition-colors whitespace-nowrap"
                           disabled={updateEstadoMutation.isPending}
                           title="Marcar como averiado"
                         >
@@ -435,7 +413,7 @@ const CatalogoMedidores: React.FC<CatalogoMedidoresProps> = () => {
                     </AlertDialog>
                     {puedeMarcarPagado && (
                       <button
-                        className="px-1.5 py-1 sm:px-2 sm:py-1 bg-blue-600 text-white text-[9px] sm:text-xs rounded hover:bg-blue-700 transition-colors w-auto whitespace-nowrap"
+                        className="px-1.5 py-1 sm:px-4 sm:py-1.5 text-[9px] bg-blue-600 text-white sm:text-xs rounded hover:bg-blue-700 transition-colors whitespace-nowrap"
                         onClick={() => openEstadoPagoDialog(info.row.original)}
                         title="Marcar como pagado"
                       >
@@ -453,7 +431,7 @@ const CatalogoMedidores: React.FC<CatalogoMedidoresProps> = () => {
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
                         <button
-                          className="px-1.5 py-1 sm:px-2 sm:py-1 bg-green-600 text-white text-[9px] sm:text-xs rounded hover:bg-green-700 transition-colors w-auto whitespace-nowrap"
+                          className="px-1.5 py-1 sm:px-4 sm:py-1.5 text-[9px] bg-green-600 text-white sm:text-xs rounded hover:bg-green-700 transition-colors whitespace-nowrap"
                           disabled={updateEstadoMutation.isPending}
                           title="Marcar como reparado"
                         >
@@ -485,7 +463,7 @@ const CatalogoMedidores: React.FC<CatalogoMedidoresProps> = () => {
                     </AlertDialog>
                     {puedeMarcarPagado && (
                       <button
-                        className="px-1.5 py-1 sm:px-2 sm:py-1 bg-blue-600 text-white text-[9px] sm:text-xs rounded hover:bg-blue-700 transition-colors w-auto whitespace-nowrap"
+                        className="px-1.5 py-1 sm:px-4 sm:py-1.5 text-[9px] bg-blue-600 text-white sm:text-xs rounded hover:bg-blue-700 transition-colors whitespace-nowrap"
                         onClick={() => openEstadoPagoDialog(info.row.original)}
                         title="Marcar como pagado"
                       >
@@ -616,7 +594,7 @@ const CatalogoMedidores: React.FC<CatalogoMedidoresProps> = () => {
       </div>
 
       <div className="bg-white rounded-2xl shadow-sm border border-sky-100 overflow-hidden max-h-[calc(100vh-300px)] overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100">
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100">
           <table className="min-w-full table-auto">
             <thead className="bg-sky-50">
               {table.getHeaderGroups().map(headerGroup => (

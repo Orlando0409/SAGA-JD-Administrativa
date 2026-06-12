@@ -50,17 +50,28 @@ const CatálogoAuditorias = () => {
   const [isDownloadOpen, setIsDownloadOpen] = useState(false);
   const { mutate: downloadPdf, isPending: isDownloadingPdf } = useDownloadModulePdf();
 
-  const modulosOpcionesPdf = useMemo<OpcionFiltro[]>(() => {
+  // Opciones de filtro derivadas de los datos reales: siempre en sincronía con lo que escribe el backend
+  const modulosDisponibles = useMemo<string[]>(() => {
     const set = new Set<string>();
     auditorias.forEach(a => { if (a.Modulo) set.add(a.Modulo); });
-    return Array.from(set).sort().map(m => ({ id: m, label: m }));
+    return Array.from(set).sort();
   }, [auditorias]);
 
-  const accionesOpcionesPdf = useMemo<OpcionFiltro[]>(() => {
+  const accionesDisponibles = useMemo<string[]>(() => {
     const set = new Set<string>();
     auditorias.forEach(a => { if (a.Accion) set.add(a.Accion); });
-    return Array.from(set).sort().map(a => ({ id: a, label: a }));
+    return Array.from(set).sort();
   }, [auditorias]);
+
+  const modulosOpcionesPdf = useMemo<OpcionFiltro[]>(
+    () => modulosDisponibles.map(m => ({ id: m, label: m })),
+    [modulosDisponibles]
+  );
+
+  const accionesOpcionesPdf = useMemo<OpcionFiltro[]>(
+    () => accionesDisponibles.map(a => ({ id: a, label: a })),
+    [accionesDisponibles]
+  );
 
   const columnasOpcionesPdf: OpcionColumna[] = [
     { key: 'fecha',    label: 'Fecha',    obligatoria: true },
@@ -202,7 +213,7 @@ const CatálogoAuditorias = () => {
       cell: (info) => {
         const usuario = info.getValue();
         return (
-          <div className="flex justify-center sm:justify-start truncate w-full">
+          <div className="flex justify-center sm:justify-start w-full">
             <span className="font-medium text-gray-900 text-[9px] sm:text-xs md:text-sm truncate" title={usuario?.Nombre_Usuario || 'Desconocido'}>
               {usuario?.Nombre_Usuario || 'Desconocido'}
             </span>
@@ -238,7 +249,7 @@ const CatálogoAuditorias = () => {
         <div className="flex justify-center">
         <button
           onClick={() => handleViewDetail(info.row.original)}
-          className="px-1.5 sm:px-4 py-0.5 sm:py-1.5 bg-gray-600 text-white text-[8px] sm:text-xs rounded hover:bg-gray-700 transition-colors whitespace-nowrap"
+          className="px-1.5 py-1 sm:px-4 sm:py-1.5 text-[9px] bg-gray-600 text-white sm:text-xs rounded hover:bg-gray-700 transition-colors whitespace-nowrap"
           title="Ver Detalle"
         >
           Ver
@@ -338,7 +349,7 @@ const CatálogoAuditorias = () => {
       </div>
 
 <div className="bg-white rounded-2xl shadow-sm border border-blue-100 overflow-hidden max-h-[calc(100vh-300px)] overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100">
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100">
           <table className="min-w-full table-auto">
             <thead className="bg-sky-50">
               {table.getHeaderGroups().map(headerGroup => (
@@ -503,6 +514,8 @@ const CatálogoAuditorias = () => {
         onClose={() => setShowFilterModal(false)}
         onApplyFilters={handleApplyFilters}
         currentFilters={appliedFilters}
+        modulos={modulosDisponibles}
+        acciones={accionesDisponibles}
       />
 
       <DescargarPdfModal

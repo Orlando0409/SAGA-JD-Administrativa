@@ -118,7 +118,8 @@ export const asignarMedidorExistenteAfiliado = async (
     if (certificacionLiteral) formData.append('Certificacion_Literal', certificacionLiteral);
     if (planosTerreno) formData.append('Planos_Terreno', planosTerreno);
     if (estadoPago) {
-        formData.append('Estado_Pago', estadoPago);
+        // El DTO AsignarMedidorExistenteAAfiliado espera 'Estado_Pago_Medidor'
+        formData.append('Estado_Pago_Medidor', estadoPago);
     }
 
     await apiAuth.post('/Inventario/asignar/medidor/afiliado', formData, {
@@ -148,7 +149,8 @@ export const crearYAsignarMedidorAfiliado = async (
     if (certificacionLiteral) formData.append('Certificacion_Literal', certificacionLiteral);
     if (planosTerreno) formData.append('Planos_Terreno', planosTerreno);
     if (estadoPago) {
-        formData.append('Estado_Pago', estadoPago);
+        // El DTO AsignarMedidorExistenteAAfiliado espera 'Estado_Pago_Medidor'
+        formData.append('Estado_Pago_Medidor', estadoPago);
     }
 
     await apiAuth.post('/Inventario/asignar/medidor/afiliado', formData, {

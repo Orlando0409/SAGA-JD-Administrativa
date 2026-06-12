@@ -52,7 +52,7 @@ const FilterModal: React.FC<FilterModalProps> = ({ isOpen, onClose, onApplyFilte
                 </div>
 
                 {/* Body */}
-                <div className="p-6 space-y-4 overflow-y-auto max-h-[calc(90vh-140px)]">
+                <div className="p-6 space-y-4 overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100 max-h-[calc(90vh-140px)]">
 
                     {/* Filtro por Tipo de Persona */}
                     <div>

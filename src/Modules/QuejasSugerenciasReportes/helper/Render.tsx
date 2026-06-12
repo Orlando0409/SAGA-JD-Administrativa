@@ -135,7 +135,7 @@ export const renderAccionesCell = (item: ContactoItem, config: ArchiveConfig) =>
     <div className="flex items-center justify-center gap-1 sm:gap-2">
       {hasViewPermission && (
         <button
-          className="px-1 sm:px-4 py-0.5 sm:py-1.5 bg-gray-600 text-white text-[7px] sm:text-xs rounded hover:bg-gray-700 transition-colors whitespace-nowrap"
+          className="px-1.5 py-1 sm:px-4 sm:py-1.5 text-[9px] bg-gray-600 text-white sm:text-xs rounded hover:bg-gray-700 transition-colors whitespace-nowrap"
           title="Ver detalles"
           onClick={() => window.dispatchEvent(new CustomEvent('openContactoDetail', { detail: item }))}
         >
@@ -145,7 +145,7 @@ export const renderAccionesCell = (item: ContactoItem, config: ArchiveConfig) =>
       {/* El botón Responder solo se muestra si NO está archivado */}
       {hasEditPermission && !isArchived && item.estado === 'Pendiente' && ( 
         <button
-          className="px-1 sm:px-4 py-0.5 sm:py-1.5 bg-blue-600 text-white text-[7px] sm:text-xs rounded hover:bg-blue-700 transition-colors whitespace-nowrap"
+          className="px-1.5 py-1 sm:px-4 sm:py-1.5 text-[9px] bg-blue-600 text-white sm:text-xs rounded hover:bg-blue-700 transition-colors whitespace-nowrap"
           title="Responder"
           onClick={() => window.dispatchEvent(new CustomEvent('openContactoResponder', { detail: item }))}
         >

@@ -443,7 +443,7 @@ const EditMaterialModal: React.FC<EditMaterialModalProps> = ({
                 </button>
               </div>
 
-              <div className={`grid grid-cols-2 md:grid-cols-3 gap-2 max-h-40 overflow-y-auto border rounded-md p-3 ${formErrors.IDS_Categorias
+              <div className={`grid grid-cols-2 md:grid-cols-3 gap-2 max-h-40 overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100 border rounded-md p-3 ${formErrors.IDS_Categorias
                   ? 'border-red-500'
                   : 'border-gray-300'
                 }`}>

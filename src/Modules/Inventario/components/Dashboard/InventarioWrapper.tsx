@@ -19,7 +19,7 @@ export const InventarioWrapper = () => {
   };
 
   return (
-    <div className="p-4 md:p-6 min-h-screen overflow-y-auto">
+    <div className="p-4 md:p-6 min-h-screen overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-100">
       <InventarioDashboard onNavigate={handleNavigate} />
     </div>
   );

@@ -338,7 +338,7 @@ const CatalogoMovimientos: React.FC<CatalogoMovimientosProps> = () => {
       cell: ({ row }) => (
         <div className="flex flex-row justify-center flex-nowrap gap-1 min-w-[50px] sm:min-w-[140px] overflow-visible">
           <button
-            className="px-1.5 py-1 sm:px-4 sm:py-1 bg-gray-600 text-white text-[9px] sm:text-xs rounded hover:bg-gray-700 transition-colors w-auto whitespace-nowrap"
+            className="px-1.5 py-1 sm:px-4 sm:py-1.5 text-[9px] bg-gray-600 text-white sm:text-xs rounded hover:bg-gray-700 transition-colors whitespace-nowrap"
             onClick={() => handleViewDetails(row.original)}
             title="Ver detalles"
           >
