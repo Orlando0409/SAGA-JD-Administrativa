@@ -138,7 +138,7 @@ export default function FormularioProyecto({
 
         // Validar que existe la imagen
         if (!imagen) {
-            setErrors(prev => ({ ...prev, Imagen_Url: "Debes subir un archivo para el proyecto." }));
+            setErrors(prev => ({ ...prev, Imagen_Url: "Debes subir una imagen para el proyecto." }));
             return;
         }
 
@@ -239,11 +239,11 @@ export default function FormularioProyecto({
 
                     {/* Campo Imagen */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700">Archivo del Proyecto</label>
+                        <label className="block text-sm font-medium text-gray-700">Imagen del Proyecto</label>
                         <input
                             ref={fileInputRef}
                             type="file"
-                            accept=".png,.jpg,.jpeg,.heic,.pdf"
+                            accept="image/png,image/jpeg,image/webp,image/heic,image/gif,.png,.jpg,.jpeg,.webp,.heic,.gif"
                             onChange={handleFileChange}
                             className="hidden"
                             required
@@ -257,7 +257,7 @@ export default function FormularioProyecto({
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                             </svg>
                             <span className="text-sky-600 font-medium">
-                                {imagen ? "Cambiar Archivo" : "Haz clic para seleccionar archivo"}
+                                {imagen ? "Cambiar Imagen" : "Haz clic para seleccionar una imagen"}
                             </span>
                             {imagen && (
                                 <span className="text-xs text-gray-600 truncate max-w-full">{imagen.name}</span>
@@ -268,7 +268,7 @@ export default function FormularioProyecto({
                     </div>
                     <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
                         <p className="text-xs text-blue-700">
-                            <strong>Nota:</strong> Los archivos se crean como ocultos por defecto. Puedes cambiar la visibilidad después de crear el archivo.
+                            <strong>Nota:</strong> Los proyectos se crean como ocultos por defecto. Puedes cambiar la visibilidad después de crearlos.
                         </p>
                     </div>
 

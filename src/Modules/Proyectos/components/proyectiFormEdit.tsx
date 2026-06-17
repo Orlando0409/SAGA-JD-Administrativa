@@ -200,40 +200,40 @@ export default function ProyectoFormEdit({ proyecto, onClose }: ProyectoFormEdit
 
                     {/* Campo Imagen */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700">Archivo del Proyecto (opcional)</label>
-                        
-                        {/* Mostrar nombre del archivo actual si existe */}
+                        <label className="block text-sm font-medium text-gray-700">Imagen del Proyecto (opcional)</label>
+
+                        {/* Mostrar nombre de la imagen actual si existe */}
                         {proyecto.Imagen_Url && !imagen && (
                             <div className="mb-2">
-                                <p className="text-xs text-gray-600 mb-1">Archivo actual:</p>
+                                <p className="text-xs text-gray-600 mb-1">Imagen actual:</p>
                                 <div className="px-3 py-2 rounded-lg border border-gray-200 bg-gray-50 text-sm text-gray-700">
-                                    {decodeURIComponent(proyecto.Imagen_Url.split('/').pop()?.split('?')[0] || 'Archivo del proyecto')}
+                                    {decodeURIComponent(proyecto.Imagen_Url.split('/').pop()?.split('?')[0] || 'Imagen del proyecto')}
                                 </div>
                             </div>
                         )}
-                        
+
                         <label className="block w-full cursor-pointer border border-gray-300 rounded-lg bg-gray-50 px-3 py-2 hover:bg-gray-100 transition-colors">
                             <span className="text-xs text-gray-500">
-                                {imagen ? imagen.name : "Cambiar archivo (PNG, JPG, JPEG, HEIC, PDF)"}
+                                {imagen ? imagen.name : "Cambiar imagen (PNG, JPG, JPEG, WEBP, HEIC)"}
                             </span>
                             <input
                                 type="file"
-                                accept=".png,.jpg,.jpeg,.heic,.pdf"
+                                accept="image/png,image/jpeg,image/webp,image/heic,image/gif,.png,.jpg,.jpeg,.webp,.heic,.gif"
                                 onChange={handleFileChange}
                                 className="hidden"
                             />
                         </label>
-                        
+
                         {imagen && (
                             <p className="text-xs text-green-600 mt-1">
-                                ✓ Nuevo archivo seleccionado: {imagen.name}
+                                ✓ Nueva imagen seleccionada: {imagen.name}
                             </p>
                         )}
-                        
+
                         {errors.Imagen_Url && <p className="text-xs text-red-500 mt-1">{errors.Imagen_Url}</p>}
-                        
+
                         <p className="text-xs text-gray-500 mt-1">
-                            Deja vacío si no deseas cambiar el archivo actual
+                            Deja vacío si no deseas cambiar la imagen actual
                         </p>
                     </div>
 
@@ -268,8 +268,8 @@ export default function ProyectoFormEdit({ proyecto, onClose }: ProyectoFormEdit
                         <AlertDialogTitle>¿Guardar cambios?</AlertDialogTitle>
                         <AlertDialogDescription>
                             Estás a punto de actualizar el proyecto "{proyecto.Titulo.length > 30 ? `${proyecto.Titulo.substring(0, 30)}...` : proyecto.Titulo}". 
-                            {imagen && " Se reemplazará el archivo actual con el nuevo archivo seleccionado."}
-                            {!imagen && " El archivo actual se mantendrá sin cambios."}
+                            {imagen && " Se reemplazará la imagen actual con la nueva imagen seleccionada."}
+                            {!imagen && " La imagen actual se mantendrá sin cambios."}
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>

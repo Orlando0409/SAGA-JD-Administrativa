@@ -25,8 +25,8 @@ export const ProyectoSchema = z.object({
     .optional()
     .refine((file) => {
       if (!file) return true; // Opcional para edición
-      return ["image/jpeg", "image/png", "image/heic", "application/pdf"].includes(file.type);
-    }, "Solo se permiten imágenes JPG, PNG, HEIC o archivos PDF"),
+      return ["image/jpeg", "image/png", "image/webp", "image/heic", "image/gif"].includes(file.type);
+    }, "Solo se permiten imágenes JPG, PNG, WEBP o HEIC"),
 
 });
 
@@ -59,8 +59,8 @@ export const ProyectoUpdateSchema = z.object({
     .optional()
     .refine((file) => {
       if (!file) return true;
-      return ["image/jpeg", "image/png", "image/heic", "application/pdf"].includes(file.type);
-    }, "Solo se permiten imágenes JPG, PNG, HEIC o archivos PDF")
+      return ["image/jpeg", "image/png", "image/webp", "image/heic", "image/gif"].includes(file.type);
+    }, "Solo se permiten imágenes JPG, PNG, WEBP o HEIC")
 });
 
 // Tipos TypeScript inferidos de los esquemas

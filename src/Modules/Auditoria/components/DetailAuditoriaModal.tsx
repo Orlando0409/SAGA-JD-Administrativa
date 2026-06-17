@@ -1,6 +1,54 @@
 import { LuX, LuFileText, LuUser, LuCalendar, LuActivity, LuDatabase } from 'react-icons/lu';
 import type { DetailAuditoriaModalProps } from '../types/AuditoriaTypes';
 import DescargarRegistroPdfButton from '@/Modules/Global/components/DescargarPdfModal/DescargarRegistroPdfButton';
+import { construirCampos, type CampoAuditoria } from '../utils/auditoriaFormat';
+
+const ACCENTS = {
+  red: {
+    card: 'bg-red-50 border-red-200',
+    title: 'text-red-900',
+    dot: 'bg-red-500',
+    scroll: 'scrollbar-thumb-red-600 scrollbar-track-red-100',
+  },
+  green: {
+    card: 'bg-green-50 border-green-200',
+    title: 'text-green-900',
+    dot: 'bg-green-500',
+    scroll: 'scrollbar-thumb-green-600 scrollbar-track-green-100',
+  },
+} as const;
+
+const DatosSection = ({
+  titulo,
+  campos,
+  accent,
+}: {
+  titulo: string;
+  campos: CampoAuditoria[];
+  accent: keyof typeof ACCENTS;
+}) => {
+  const a = ACCENTS[accent];
+  return (
+    <div className={`p-4 rounded-lg border ${a.card}`}>
+      <h3 className={`text-sm font-semibold mb-3 flex items-center gap-2 ${a.title}`}>
+        <span className={`size-2 rounded-full ${a.dot}`}></span>
+        {titulo}
+      </h3>
+      <div className={`bg-white rounded p-3 max-h-64 overflow-y-auto scrollbar-thin ${a.scroll}`}>
+        <dl className="divide-y divide-gray-100">
+          {campos.map((c, i) => (
+            <div key={i} className="py-2 first:pt-0 last:pb-0">
+              <dt className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">
+                {c.label}
+              </dt>
+              <dd className="text-sm text-gray-900 mt-0.5 break-words">{c.valor}</dd>
+            </div>
+          ))}
+        </dl>
+      </div>
+    </div>
+  );
+};
 
 const DetailAuditoriaModal = ({
   auditoria,
@@ -39,8 +87,8 @@ const DetailAuditoriaModal = ({
     }
   };
 
-  const datosAnteriores = parseJsonData(auditoria.Datos_Anteriores);
-  const datosNuevos = parseJsonData(auditoria.Datos_Nuevos);
+  const camposAnteriores = construirCampos(parseJsonData(auditoria.Datos_Anteriores));
+  const camposNuevos = construirCampos(parseJsonData(auditoria.Datos_Nuevos));
 
   return (
     <div className="fixed inset-0 bg-opacity-10 backdrop-blur-sm flex items-center justify-center z-50 p-4">
@@ -150,42 +198,26 @@ const DetailAuditoriaModal = ({
           {/* Datos Anteriores y Nuevos */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
             {/* Datos Anteriores */}
-            {datosAnteriores && (
-              <div className="p-4 bg-red-50 rounded-lg border border-red-200">
-                <h3 className="text-sm font-semibold text-red-900 mb-3 flex items-center gap-2">
-                  <span className="size-2 bg-red-500 rounded-full"></span>
-                  Datos Anteriores
-                </h3>
-                <div className="bg-white rounded p-3 max-h-64 overflow-y-auto scrollbar-thin scrollbar-thumb-red-600 scrollbar-track-red-100">
-                  <pre className="text-xs text-gray-700 whitespace-pre-wrap break-words font-mono">
-                    {typeof datosAnteriores === 'object'
-                      ? JSON.stringify(datosAnteriores, null, 2)
-                      : datosAnteriores}
-                  </pre>
-                </div>
-              </div>
+            {camposAnteriores && (
+              <DatosSection
+                titulo="Datos Anteriores"
+                campos={camposAnteriores}
+                accent="red"
+              />
             )}
 
             {/* Datos Nuevos */}
-            {datosNuevos && (
-              <div className="p-4 bg-green-50 rounded-lg border border-green-200">
-                <h3 className="text-sm font-semibold text-green-900 mb-3 flex items-center gap-2">
-                  <span className="size-2 bg-green-500 rounded-full"></span>
-                  Datos Nuevos
-                </h3>
-                <div className="bg-white rounded p-3 max-h-64 overflow-y-auto scrollbar-thin scrollbar-thumb-green-600 scrollbar-track-green-100">
-                  <pre className="text-xs text-gray-700 whitespace-pre-wrap break-words font-mono">
-                    {typeof datosNuevos === 'object'
-                      ? JSON.stringify(datosNuevos, null, 2)
-                      : datosNuevos}
-                  </pre>
-                </div>
-              </div>
+            {camposNuevos && (
+              <DatosSection
+                titulo="Datos Nuevos"
+                campos={camposNuevos}
+                accent="green"
+              />
             )}
           </div>
 
           {/* Mensaje si no hay datos */}
-          {!datosAnteriores && !datosNuevos && (
+          {!camposAnteriores && !camposNuevos && (
             <div className="p-4 bg-gray-100 rounded-lg border border-gray-200 text-center">
               <p className="text-sm text-gray-600">
                 No hay datos de cambios registrados para esta auditoría.
