@@ -361,11 +361,11 @@ const CatalogoMedidores: React.FC<CatalogoMedidoresProps> = () => {
               }
 
               if (estadoId === 2) {
-                const sinArchivos =
-                  !info.row.original.Certificacion_Literal && !info.row.original.Planos_Terreno;
+                const faltaAlgunArchivo =
+                  !info.row.original.Certificacion_Literal || !info.row.original.Planos_Terreno;
                 return (
                   <>
-                    {sinArchivos && (
+                    {faltaAlgunArchivo && (
                       <button
                         className="px-1.5 py-1 sm:px-4 sm:py-1.5 text-[9px] bg-amber-500 text-white sm:text-xs rounded hover:bg-amber-600 transition-colors whitespace-nowrap"
                         onClick={() => {
@@ -762,6 +762,8 @@ const CatalogoMedidores: React.FC<CatalogoMedidoresProps> = () => {
         <SubirArchivosMedidorModal
           isOpen={isSubirArchivosModalOpen}
           numeroMedidor={selectedMedidor.Numero_Medidor}
+          faltaCertificacion={!selectedMedidor.Certificacion_Literal}
+          faltaPlanos={!selectedMedidor.Planos_Terreno}
           onClose={() => {
             setIsSubirArchivosModalOpen(false);
             setSelectedMedidor(null);
