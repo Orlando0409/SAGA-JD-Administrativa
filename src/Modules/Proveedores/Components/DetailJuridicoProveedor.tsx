@@ -4,6 +4,7 @@ import * as Accordion from "@radix-ui/react-accordion";
 import { FiChevronDown, FiChevronRight } from 'react-icons/fi';
 import { formatCedulaJuridica, formatPhoneNumberDisplay } from '../Schema/SchemaProveedorJuridico';
 import type { ProveedorJuridico } from '../Models/TablaProveedo/tablaJuridicoProveedor';
+import DescargarRegistroPdfButton from '@/Modules/Global/components/DescargarPdfModal/DescargarRegistroPdfButton';
 
 interface ProveedorJuridicoDetailModalProps {
   proveedor: ProveedorJuridico | null;
@@ -53,9 +54,9 @@ const ProveedorJuridicoDetailModal: React.FC<ProveedorJuridicoDetailModalProps> 
         {/* Header */}
         <div className="sticky top-0 bg-white border-b border-gray-200 p-6 z-10">
           <div className="flex items-center justify-between">
-            <h1 className="text-3xl font-bold text-gray-900">Detalle del Proveedor Jurídico</h1>
+            <h1 className="text-3xl font-semibold text-gray-900">Detalle del Proveedor Jurídico</h1>
             <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors">
-              <LuX className="w-6 h-6" />
+              <LuX className="size-6" />
             </button>
           </div>
         </div>
@@ -65,11 +66,11 @@ const ProveedorJuridicoDetailModal: React.FC<ProveedorJuridicoDetailModalProps> 
           {/* Proveedor Header Card */}
           <div className="bg-gradient-to-r from-blue-600 to-blue-700 p-6 rounded-lg mb-6">
             <div className="flex items-center gap-4">
-              <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center">
-                <LuBuilding className="w-8 h-8 text-blue-600" />
+              <div className="size-16 bg-white rounded-full flex items-center justify-center">
+                <LuBuilding className="size-8 text-blue-600" />
               </div>
               <div>
-                <h2 className="text-2xl font-bold text-white">{proveedor.Nombre_Proveedor}</h2>
+                <h2 className="text-2xl font-semibold text-white">{proveedor.Nombre_Proveedor}</h2>
                 <p className="text-blue-100">Cédula Jurídica: {formatCedulaJuridica(proveedor.Cedula_Juridica || '')}</p>
                 <p className="text-blue-200 text-sm">{proveedor.Razon_Social}</p>
               </div>
@@ -92,7 +93,7 @@ const ProveedorJuridicoDetailModal: React.FC<ProveedorJuridicoDetailModalProps> 
                 <Accordion.Trigger className="text-base font-semibold px-6 py-4 border-b-0 hover:bg-gray-50 w-full text-left">
                   <div className="flex items-center justify-between w-full">
                     <div className="flex items-center gap-3">
-                      <LuBuilding className="w-5 h-5 text-blue-600" />
+                      <LuBuilding className="size-5 text-blue-600" />
                       <span className="text-gray-900">Información Básica</span>
                     </div>
                     <span className="text-gray-500">
@@ -105,21 +106,21 @@ const ProveedorJuridicoDetailModal: React.FC<ProveedorJuridicoDetailModalProps> 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-4">
                     <div className="flex items-center gap-2">
-                      <LuBuilding2 className="w-4 h-4 text-gray-400" />
+                      <LuBuilding2 className="size-4 text-gray-400" />
                       <div>
                         <label className="block text-sm font-medium text-gray-500 mb-1">Nombre del Proveedor</label>
                         <p className="text-gray-900 font-medium">{proveedor.Nombre_Proveedor || 'Sin nombre'}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
-                      <LuBuilding className="w-4 h-4 text-gray-400" />
+                      <LuBuilding className="size-4 text-gray-400" />
                       <div>
                         <label className="block text-sm font-medium text-gray-500 mb-1">Razón Social</label>
                         <p className="text-gray-900 font-medium">{proveedor.Razon_Social || 'Sin razón social'}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
-                      <LuIdCard className="w-4 h-4 text-gray-400" />
+                      <LuIdCard className="size-4 text-gray-400" />
                       <div>
                         <label className="block text-sm font-medium text-gray-500 mb-1">Cédula Jurídica</label>
                         <p className="text-gray-900 font-medium">{formatCedulaJuridica(proveedor.Cedula_Juridica || '') || 'Sin cédula jurídica'}</p>
@@ -130,7 +131,7 @@ const ProveedorJuridicoDetailModal: React.FC<ProveedorJuridicoDetailModalProps> 
                   
                   <div className="space-y-4">
                     <div className="flex items-center gap-2">
-                      <LuPhone className="w-4 h-4 text-gray-400" />
+                      <LuPhone className="size-4 text-gray-400" />
                       <div>
                         <label className="block text-sm font-medium text-gray-500 mb-1">Teléfono</label>
                         <p className="text-gray-900 font-medium">
@@ -162,7 +163,7 @@ const ProveedorJuridicoDetailModal: React.FC<ProveedorJuridicoDetailModalProps> 
                 <Accordion.Trigger className="text-base font-semibold px-6 py-4 border-b-0 hover:bg-gray-50 w-full text-left">
                   <div className="flex items-center justify-between w-full">
                     <div className="flex items-center gap-3">
-                      <LuCalendar className="w-5 h-5 text-blue-600" />
+                      <LuCalendar className="size-5 text-blue-600" />
                       <span className="text-gray-900">Información de Fechas</span>
                     </div>
                     <span className="text-gray-500">
@@ -175,7 +176,7 @@ const ProveedorJuridicoDetailModal: React.FC<ProveedorJuridicoDetailModalProps> 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-4">
                     <div className="flex items-center gap-2">
-                      <LuCalendar className="w-4 h-4 text-gray-400" />
+                      <LuCalendar className="size-4 text-gray-400" />
                       <div>
                         <label className="block text-sm font-medium text-gray-500 mb-1">Fecha de Creación</label>
                         <p className="text-gray-900 font-medium">{formatDate(proveedor.Fecha_Creacion)}</p>
@@ -184,7 +185,7 @@ const ProveedorJuridicoDetailModal: React.FC<ProveedorJuridicoDetailModalProps> 
                   </div>
                   <div className="space-y-4">
                     <div className="flex items-center gap-2">
-                      <LuCalendar className="w-4 h-4 text-gray-400" />
+                      <LuCalendar className="size-4 text-gray-400" />
                       <div>
                         <label className="block text-sm font-medium text-gray-500 mb-1">Última Actualización</label>
                         <p className="text-gray-900 font-medium">{formatDate(proveedor.Fecha_Actualizacion)}</p>
@@ -200,6 +201,12 @@ const ProveedorJuridicoDetailModal: React.FC<ProveedorJuridicoDetailModalProps> 
         </div>
 
         <div className="sticky bottom-0 flex justify-end gap-3 p-6 border-t bg-gray-50 z-10">
+          <DescargarRegistroPdfButton
+            endpoint="/Proveedores/pdf"
+            id={proveedor.Id_Proveedor}
+            filenamePrefix="Proveedor_Juridico"
+            extraPayload={{ tipo: 2 }}
+          />
           <button
             onClick={onClose}
             className="px-6 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium"

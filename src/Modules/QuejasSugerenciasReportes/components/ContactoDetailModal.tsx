@@ -1,8 +1,9 @@
-import { 
-  LuX, 
-  LuCalendar, 
-  LuMapPin, 
+import {
+  LuX,
+  LuCalendar,
+  LuMapPin,
   LuMessageSquare,
+  LuReply,
 } from 'react-icons/lu';
 import { MdReportProblem } from 'react-icons/md';
 import { FaLightbulb, FaUserFriends } from 'react-icons/fa';
@@ -73,11 +74,11 @@ const ContactoDetailModal = ({ item, isOpen, onClose }: ContactoDetailModalProps
         {/* Header */}
         <div className="sticky top-0 bg-white border-b border-gray-200 p-4 z-10">
           <div className="flex items-center justify-between">
-            <h1 className="text-xl font-bold text-gray-900 flex items-center gap-3">
+            <h1 className="text-xl font-semibold text-gray-900 flex items-center gap-3">
               {config.title}
             </h1>
             <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors">
-              <LuX className="w-5 h-5" />
+              <LuX className="size-5" />
             </button>
           </div>
         </div>
@@ -90,10 +91,10 @@ const ContactoDetailModal = ({ item, isOpen, onClose }: ContactoDetailModalProps
               <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
                 <div className="bg-gray-50 px-5 py-3 border-b border-gray-200">
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                      <FaUserFriends className="w-4 h-4 text-blue-600" />
+                    <div className="size-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                      <FaUserFriends className="size-4 text-blue-600" />
                     </div>
-                    <h3 className="text-base font-bold text-gray-900">Información Personal</h3>
+                    <h3 className="text-base font-semibold text-gray-900">Información Personal</h3>
                   </div>
                 </div>
 
@@ -104,7 +105,7 @@ const ContactoDetailModal = ({ item, isOpen, onClose }: ContactoDetailModalProps
                         <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
                           Nombre
                         </label>
-                        <p className="text-sm font-medium text-gray-900">{item.nombre}</p>
+                        <p className="text-sm font-medium text-gray-900 break-all">{item.nombre}</p>
                       </div>
                     )}
                     {item.primerApellido && (
@@ -112,7 +113,7 @@ const ContactoDetailModal = ({ item, isOpen, onClose }: ContactoDetailModalProps
                         <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
                           Primer Apellido
                         </label>
-                        <p className="text-sm font-medium text-gray-900">{item.primerApellido}</p>
+                        <p className="text-sm font-medium text-gray-900 break-all">{item.primerApellido}</p>
                       </div>
                     )}
                     {item.segundoApellido && (
@@ -120,7 +121,7 @@ const ContactoDetailModal = ({ item, isOpen, onClose }: ContactoDetailModalProps
                         <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
                           Segundo Apellido
                         </label>
-                        <p className="text-sm font-medium text-gray-900">{item.segundoApellido}</p>
+                        <p className="text-sm font-medium text-gray-900 break-all">{item.segundoApellido}</p>
                       </div>
                     )}
                   </div>
@@ -132,21 +133,21 @@ const ContactoDetailModal = ({ item, isOpen, onClose }: ContactoDetailModalProps
             <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
               <div className="bg-gray-50 px-5 py-3 border-b border-gray-200">
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                    <LuMessageSquare className="w-4 h-4 text-blue-600" />
+                  <div className="size-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                    <LuMessageSquare className="size-4 text-blue-600" />
                   </div>
-                  <h3 className="text-base font-bold text-gray-900">Contenido</h3>
+                  <h3 className="text-base font-semibold text-gray-900">Contenido</h3>
                 </div>
               </div>
 
               <div className="p-5">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                   {/* Mensaje - Columna Izquierda */}
-                  <div className="bg-gray-50 p-4 rounded-lg">
+                  <div className="bg-gray-50 p-4 rounded-lg min-w-0">
                     <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
                       Descripción
                     </label>
-                    <p className="text-sm text-gray-900 whitespace-pre-wrap leading-relaxed break-words">{item.mensaje}</p>
+                    <p className="text-sm text-gray-900 whitespace-pre-wrap leading-relaxed break-all">{item.mensaje}</p>
                   </div>
 
                   {/* Archivo Adjunto - Columna Derecha */}
@@ -204,14 +205,34 @@ const ContactoDetailModal = ({ item, isOpen, onClose }: ContactoDetailModalProps
               </div>
             </div>
 
+            {/* Respuesta Enviada (si existe) */}
+            {item.respuesta && item.respuesta.trim() && (
+              <div className="bg-white rounded-lg border border-green-200 overflow-hidden shadow-sm">
+                <div className="bg-green-50 px-5 py-3 border-b border-green-200">
+                  <div className="flex items-center gap-3">
+                    <div className="size-8 bg-green-100 rounded-lg flex items-center justify-center">
+                      <LuReply className="size-4 text-green-600" />
+                    </div>
+                    <h3 className="text-base font-semibold text-gray-900">Respuesta Enviada</h3>
+                  </div>
+                </div>
+
+                <div className="p-5">
+                  <div className="bg-green-50 p-4 rounded-lg">
+                    <p className="text-sm text-gray-900 whitespace-pre-wrap leading-relaxed break-words">{item.respuesta}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Información del Tipo y Usuario */}
             <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
               <div className="bg-gray-50 px-5 py-3 border-b border-gray-200">
                 <div className="flex items-center gap-3">
-                  <div className={`w-8 h-8 ${config.color} rounded-lg flex items-center justify-center`}>
-                    <IconComponent className="w-4 h-4" />
+                  <div className={`size-8 ${config.color} rounded-lg flex items-center justify-center`}>
+                    <IconComponent className="size-4" />
                   </div>
-                  <h3 className="text-base font-bold text-gray-900">Información General</h3>
+                  <h3 className="text-base font-semibold text-gray-900">Información General</h3>
                 </div>
               </div>
 
@@ -233,7 +254,7 @@ const ContactoDetailModal = ({ item, isOpen, onClose }: ContactoDetailModalProps
                       Fecha de Creación
                     </label>
                     <p className="text-sm text-gray-900 flex items-center gap-2">
-                      <LuCalendar className="w-4 h-4 text-gray-400" />
+                      <LuCalendar className="size-4 text-gray-400" />
                       {item.fechaCreacion ? 
                         format(new Date(item.fechaCreacion), 'dd/MM/yyyy HH:mm', { locale: es }) : 
                         'No disponible'
@@ -248,7 +269,7 @@ const ContactoDetailModal = ({ item, isOpen, onClose }: ContactoDetailModalProps
                         Ubicación
                       </label>
                       <p className="text-sm text-gray-900 flex items-start gap-2 min-w-0">
-                        <LuMapPin className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
+                        <LuMapPin className="size-4 text-gray-400 mt-0.5 flex-shrink-0" />
                         <span className="break-words whitespace-pre-wrap min-w-0">{item.ubicacion}</span>
                       </p>
                     </div>

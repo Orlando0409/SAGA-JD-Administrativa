@@ -1,5 +1,6 @@
 import { Info, RefreshCcw, User, X, Gauge } from "lucide-react";
 import type { Lectura } from "../model/Lectura";
+import DescargarRegistroPdfButton from "@/Modules/Global/components/DescargarPdfModal/DescargarRegistroPdfButton";
 
 interface DetailLecturaModalProps {
   lectura: Lectura;
@@ -33,7 +34,7 @@ export default function DetailLecturaModal({ lectura, onClose }: DetailLecturaMo
       <div className="bg-white rounded-lg shadow-2xl border border-gray-200 w-full max-w-3xl flex flex-col overflow-hidden max-h-[90vh]">
         <div className="sticky top-0 bg-white border-b border-gray-200 p-4 z-10">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-bold text-gray-900 break-words [overflow-wrap:anywhere] pr-3">
+            <h2 className="text-xl font-semibold text-gray-900 break-words [overflow-wrap:anywhere] pr-3">
               Detalle de Lectura
             </h2>
           <button
@@ -50,10 +51,10 @@ export default function DetailLecturaModal({ lectura, onClose }: DetailLecturaMo
             <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
               <div className="bg-gray-50 px-5 py-3 border-b border-gray-200">
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                    <Gauge className="w-4 h-4 text-blue-600" />
+                  <div className="size-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                    <Gauge className="size-4 text-blue-600" />
                   </div>
-                  <h3 className="text-base font-bold text-gray-900">Medidor</h3>
+                  <h3 className="text-base font-semibold text-gray-900">Medidor</h3>
                 </div>
               </div>
               <div className="p-5 grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -75,10 +76,10 @@ export default function DetailLecturaModal({ lectura, onClose }: DetailLecturaMo
             <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
               <div className="bg-gray-50 px-5 py-3 border-b border-gray-200">
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                    <User className="w-4 h-4 text-blue-600" />
+                  <div className="size-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                    <User className="size-4 text-blue-600" />
                   </div>
-                  <h3 className="text-base font-bold text-gray-900">Afiliado</h3>
+                  <h3 className="text-base font-semibold text-gray-900">Afiliado</h3>
                 </div>
               </div>
               <div className="p-5 grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -112,10 +113,10 @@ export default function DetailLecturaModal({ lectura, onClose }: DetailLecturaMo
               <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
                 <div className="bg-gray-50 px-5 py-3 border-b border-gray-200">
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                      <Info className="w-4 h-4 text-blue-600" />
+                    <div className="size-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                      <Info className="size-4 text-blue-600" />
                     </div>
-                    <h3 className="text-base font-bold text-gray-900">Tarifa Aplicada</h3>
+                    <h3 className="text-base font-semibold text-gray-900">Tarifa Aplicada</h3>
                   </div>
                 </div>
                 <div className="p-5">
@@ -132,10 +133,10 @@ export default function DetailLecturaModal({ lectura, onClose }: DetailLecturaMo
             <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
               <div className="bg-gray-50 px-5 py-3 border-b border-gray-200">
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                    <RefreshCcw className="w-4 h-4 text-blue-600" />
+                  <div className="size-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                    <RefreshCcw className="size-4 text-blue-600" />
                   </div>
-                  <h3 className="text-base font-bold text-gray-900">Detalles de Consumo</h3>
+                  <h3 className="text-base font-semibold text-gray-900">Detalles de Consumo</h3>
                 </div>
               </div>
               <div className="p-5 grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -163,10 +164,10 @@ export default function DetailLecturaModal({ lectura, onClose }: DetailLecturaMo
             <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
               <div className="bg-gray-50 px-5 py-3 border-b border-gray-200">
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                    <User className="w-4 h-4 text-blue-600" />
+                  <div className="size-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                    <User className="size-4 text-blue-600" />
                   </div>
-                  <h3 className="text-base font-bold text-gray-900">Información de Registro</h3>
+                  <h3 className="text-base font-semibold text-gray-900">Información de Registro</h3>
                 </div>
               </div>
               <div className="p-5 grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -192,6 +193,11 @@ export default function DetailLecturaModal({ lectura, onClose }: DetailLecturaMo
         </div>
 
         <div className="sticky bottom-0 flex justify-end gap-3 p-4 sm:p-6 border-t bg-gray-50 z-10">
+          <DescargarRegistroPdfButton
+            endpoint="/lecturas/pdf"
+            id={lectura.Id_Lectura}
+            filenamePrefix="Lectura"
+          />
           <button
             onClick={onClose}
             className="px-6 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium"
