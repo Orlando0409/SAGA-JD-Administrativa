@@ -8,6 +8,19 @@ const axiosPrivate = axios.create({
   withCredentials: true, 
 })
 
+// Adjunta la zona horaria/locale del cliente a cada petición para que los
+// reportes muestren la hora según la región del usuario, no la del servidor.
+axiosPrivate.interceptors.request.use((config) => {
+  try {
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone
+    if (tz) config.headers['x-time-zone'] = tz
+    if (navigator?.language) config.headers['x-locale'] = navigator.language
+  } catch {
+    // Si el entorno no soporta Intl, el backend usa su zona por defecto.
+  }
+  return config
+})
+
 let isRefreshing = false
 let failedQueue: any[] = []
 

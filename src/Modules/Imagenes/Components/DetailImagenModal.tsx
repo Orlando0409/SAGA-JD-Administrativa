@@ -1,5 +1,6 @@
 import { Calendar, RefreshCcw, Image as ImageIcon, Info } from "lucide-react";
 import type { Imagen } from "../Models/ModelsEdiImagen";
+import ProyectoImagenPreview from "@/Modules/Proyectos/components/ProyectoImagenPreview";
 
 interface ImagenModalProps {
     isOpen: boolean;
@@ -53,13 +54,7 @@ const ImagenModal = ({ isOpen, onClose, imagen }: ImagenModalProps) => {
                                         <div className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
                                             Vista Previa
                                         </div>
-                                        <div className="flex justify-center bg-white rounded-lg overflow-hidden border border-gray-300 shadow-sm">
-                                            <img
-                                                src={imagen.Imagen}
-                                                alt={imagen.Nombre_Imagen}
-                                                className="w-full h-auto object-contain max-h-[400px]"
-                                            />
-                                        </div>
+                                        <ProyectoImagenPreview url={imagen.Imagen} />
                                     </div>
                                 </div>
                             </div>
