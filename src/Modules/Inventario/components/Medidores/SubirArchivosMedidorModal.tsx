@@ -7,6 +7,8 @@ interface SubirArchivosMedidorModalProps {
   onClose: () => void;
   onSubir: (certFile: File | null, planosFile: File | null) => Promise<void>;
   onSuccess?: () => void;
+  faltaCertificacion?: boolean;
+  faltaPlanos?: boolean;
 }
 
 interface FileFieldProps {
@@ -47,11 +49,15 @@ const SubirArchivosMedidorModal = ({
   onClose,
   onSubir,
   onSuccess,
+  faltaCertificacion = true,
+  faltaPlanos = true,
 }: SubirArchivosMedidorModalProps) => {
   const [certFile, setCertFile] = useState<File | null>(null);
   const [planosFile, setPlanosFile] = useState<File | null>(null);
   const [guardando, setGuardando] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  const soloFaltaUno = faltaCertificacion !== faltaPlanos;
 
   const handleClose = () => {
     if (guardando) return;
@@ -114,22 +120,28 @@ const SubirArchivosMedidorModal = ({
         {/* Body */}
         <div className="px-6 py-5 space-y-4">
           <p className="text-sm text-gray-500">
-            Suba uno o ambos documentos del terreno. Este medidor fue asignado sin archivos.
+            {soloFaltaUno
+              ? `A este medidor le falta ${faltaCertificacion ? 'la certificación literal' : 'el plano del terreno'}. Adjunte el documento para completar su expediente.`
+              : 'Suba uno o ambos documentos del terreno. Este medidor fue asignado sin archivos.'}
           </p>
 
-          <FileField
-            label="Certificación Literal"
-            icon={<LuFileText className="w-4 h-4" />}
-            file={certFile}
-            onChange={setCertFile}
-          />
+          {faltaCertificacion && (
+            <FileField
+              label="Certificación Literal"
+              icon={<LuFileText className="w-4 h-4" />}
+              file={certFile}
+              onChange={setCertFile}
+            />
+          )}
 
-          <FileField
-            label="Planos del Terreno"
-            icon={<LuMap className="w-4 h-4" />}
-            file={planosFile}
-            onChange={setPlanosFile}
-          />
+          {faltaPlanos && (
+            <FileField
+              label="Planos del Terreno"
+              icon={<LuMap className="w-4 h-4" />}
+              file={planosFile}
+              onChange={setPlanosFile}
+            />
+          )}
 
           {errorMsg && (
             <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-sm text-red-700">
