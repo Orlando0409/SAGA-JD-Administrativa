@@ -359,7 +359,7 @@ export const BuzonNotificaciones: React.FC<BuzonNotificacionesProps> = ({ onVerS
                   </button>
                 ) : (
                   <div className="flex flex-col sm:flex-row gap-2 text-xs">
-                    {totalQuejas > 0 && (
+                    { totalContacto > 0 && (
                       <button
                         onClick={() => { window.location.href = '/Contacto'; setIsOpen(false); }}
                         className="flex-1 text-center text-blue-600 hover:text-blue-700 font-medium px-2 py-1 rounded hover:bg-blue-50"
