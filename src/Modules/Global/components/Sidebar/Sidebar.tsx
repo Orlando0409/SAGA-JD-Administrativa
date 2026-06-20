@@ -24,6 +24,7 @@ import { ChangePasswordModal } from "@/Modules/Auth/Components/ChangePassword"
 import { useAuth } from "@/Modules/Auth/Context/AuthContext"
 import { useNotificacionesSolicitudes } from '../../../Solicitudes/Hooks/HookNotificaciones'
 import { useMedidoresSinArchivos } from '../../../Inventario/hooks/useMedidoresSinArchivos'
+import { useUserPermissions } from '@/Modules/Auth/Hooks/PermissionHook'
 
 export function AppSidebar({ allowedModules }: Readonly<AppSidebarProps>) {
   const hoveredRef = useRef(false)
@@ -33,8 +34,11 @@ export function AppSidebar({ allowedModules }: Readonly<AppSidebarProps>) {
   const { setOpen: setSidebarOpen } = useSidebar()
   const { showSuccess } = useAlerts()
   const [showChangePasswordModal, setShowChangePasswordModal] = useState(false)
-  const { totalPendientes } = useNotificacionesSolicitudes()
-  const { totalMedidoresSinArchivos } = useMedidoresSinArchivos()
+  const { canView, isLoading: permisosLoading } = useUserPermissions()
+  const puedeVerSolicitudes = !permisosLoading && canView('solicitudes')
+  const puedeVerAfiliados = !permisosLoading && canView('afiliados')
+  const { totalPendientes } = useNotificacionesSolicitudes(puedeVerSolicitudes)
+  const { totalMedidoresSinArchivos } = useMedidoresSinArchivos(puedeVerAfiliados)
 
   const { user, isLoading } = useAuth()
   const currentUser = {

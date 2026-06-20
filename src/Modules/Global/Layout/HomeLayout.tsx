@@ -6,6 +6,7 @@ import { useState } from 'react'
 import type { NotificacionSolicitud } from '@/Modules/Solicitudes/Hooks/HookNotificaciones'
 import ModalSolicitud from '@/Modules/Solicitudes/components/ModalSolicitud'
 import { BuzonNotificaciones } from '@/Modules/Solicitudes/components/BuzonNotificaciones'
+import { useSolicitudesStream } from '@/Modules/Solicitudes/Hooks/HookSolicitudesStream'
 import { useUserPermissions } from '@/Modules/Auth/Hooks/PermissionHook'
 import Breadcrumbs from '../components/Breadcrumbs'
 
@@ -13,6 +14,13 @@ export const HomeLayout = ({ children }: { children: (allowedModules: any) => Re
   const [showModalSolicitud, setShowModalSolicitud] = useState(false);
   const [selectedNotificacion, setSelectedNotificacion] = useState<NotificacionSolicitud | null>(null);
   const { canView, isLoading } = useUserPermissions();
+
+  const puedeRecibirNotificaciones = !isLoading && (
+    canView('solicitudes') ||
+    canView('quejasugerenciasreportes')
+  );
+
+  useSolicitudesStream({ enabled: puedeRecibirNotificaciones });
 
   const handleVerSolicitud = (notificacion: NotificacionSolicitud) => {
     setSelectedNotificacion(notificacion);
@@ -32,7 +40,7 @@ export const HomeLayout = ({ children }: { children: (allowedModules: any) => Re
                   <div className=" flex-1">
                     <Breadcrumbs />
                   </div>
-                  {!isLoading && canView('solicitudes') && (
+                  {puedeRecibirNotificaciones && (
                     <div className="ml-auto">
                       <BuzonNotificaciones onVerSolicitud={handleVerSolicitud} />
                     </div>

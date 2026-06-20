@@ -2,8 +2,8 @@ import { useMemo } from 'react';
 import { useMedidoresPorEstado } from './useMedidores';
 
 
-export const useMedidoresSinArchivos = () => {
-    const { data: medidoresInstalados = [] } = useMedidoresPorEstado('instalados');
+export const useMedidoresSinArchivos = (enabled: boolean = true) => {
+    const { data: medidoresInstalados = [] } = useMedidoresPorEstado('instalados', enabled);
 
     return useMemo(() => {
         const conArchivosFaltantes = medidoresInstalados.filter(

@@ -27,10 +27,11 @@ export const useRefetchAllSolicitudesJuridicas = () => {
     return { refetchAll };
 };
 
-export const useSolicitudesJuridicas = () => {
+export const useSolicitudesJuridicas = (enabled: boolean = true) => {
     return useQuery<SolicitudJuridica[], Error>({
         queryKey: ['solicitudes-juridicas'],
         queryFn: () => getSolicitudesJuridicas(),
+        enabled,
         staleTime: 5 * 60 * 1000, // 5 minutos
         gcTime: 10 * 60 * 1000,   // 10 minutos (antes cacheTime)
         refetchOnWindowFocus: false,
