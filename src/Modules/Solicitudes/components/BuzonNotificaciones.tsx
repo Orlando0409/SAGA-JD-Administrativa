@@ -35,9 +35,6 @@ export const BuzonNotificaciones: React.FC<BuzonNotificacionesProps> = ({ onVerS
   const {
     notificaciones: notifContacto,
     totalPendientes: totalContacto,
-    totalQuejas,
-    totalSugerencias,
-    totalReportes,
     isLoading: loadingContacto,
   } = useNotificacionesContacto(puedeVerContacto);
 
