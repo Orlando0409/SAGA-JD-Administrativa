@@ -1,10 +1,13 @@
 import { useAllowedModules } from '../../../Auth/provider/PermisoProvider'
 import ModuleCard from './ModuleCard'
 import { useMedidoresSinArchivos } from '../../../Inventario/hooks/useMedidoresSinArchivos'
+import { useUserPermissions } from '@/Modules/Auth/Hooks/PermissionHook'
 
 const Modulos = () => {
   const { allowedModules } = useAllowedModules()
-  const { totalMedidoresSinArchivos } = useMedidoresSinArchivos()
+  const { canView, isLoading: permisosLoading } = useUserPermissions()
+  const puedeVerAfiliados = !permisosLoading && canView('afiliados')
+  const { totalMedidoresSinArchivos } = useMedidoresSinArchivos(puedeVerAfiliados)
 
   const visibleModules = allowedModules.filter(mod => !mod.hidden)
 

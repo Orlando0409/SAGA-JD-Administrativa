@@ -47,9 +47,9 @@ export interface NotificacionSolicitud {
   solicitudOriginal: SolicitudFisica | SolicitudJuridica;
 }
 
-export const useNotificacionesSolicitudes = () => {
-  const { data: solicitudesFisicas = [], isLoading: loadingFisicas } = useSolicitudesFisicas();
-  const { data: solicitudesJuridicas = [], isLoading: loadingJuridicas } = useSolicitudesJuridicas();
+export const useNotificacionesSolicitudes = (enabled: boolean = true) => {
+  const { data: solicitudesFisicas = [], isLoading: loadingFisicas } = useSolicitudesFisicas(enabled);
+  const { data: solicitudesJuridicas = [], isLoading: loadingJuridicas } = useSolicitudesJuridicas(enabled);
 
   const notificaciones = useMemo((): NotificacionSolicitud[] => {
     const notificacionesArray: NotificacionSolicitud[] = [];

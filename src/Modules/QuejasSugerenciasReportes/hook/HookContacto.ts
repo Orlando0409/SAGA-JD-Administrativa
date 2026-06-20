@@ -4,7 +4,7 @@ import { useAlerts } from '@/Modules/Global/context/AlertContext';
 import type { ContactoItem } from '../types/ContactoTypes';
 
 
-export const useQuejas = (estado?: string) => {
+export const useQuejas = (estado?: string, enabled: boolean = true) => {
   return useQuery({
     queryKey: ['quejas', estado],
     queryFn: () => {
@@ -12,6 +12,7 @@ export const useQuejas = (estado?: string) => {
       if (estado === 'Contestado') return obtenerQuejasContestadas();
       return obtenerQuejas();
     },
+    enabled,
     staleTime: 5 * 60 * 1000, // 5 minutos
     refetchOnWindowFocus: false, // <-- EVITAR REFRESHS AUTOMATICOS
     retry: 2,
@@ -29,7 +30,7 @@ export const useQuejasArchivadas = (enabled = false) => {
   });
 };
 
-export const useSugerencias = (estado?: string) => {
+export const useSugerencias = (estado?: string, enabled: boolean = true) => {
   return useQuery({
     queryKey: ['sugerencias', estado],
     queryFn: () => {
@@ -37,6 +38,7 @@ export const useSugerencias = (estado?: string) => {
       if (estado === 'Contestado') return obtenerSugerenciasContestadas();
       return obtenerSugerencias();
     },
+    enabled,
     staleTime: 5 * 60 * 1000,
     refetchOnWindowFocus: false, // <-- EVITAR REFRESHS AUTOMATICOS
     retry: 2,
@@ -54,7 +56,7 @@ export const useSugerenciasArchivadas = (enabled = false) => {
   });
 };
 
-export const useReportes = (estado?: string) => {
+export const useReportes = (estado?: string, enabled: boolean = true) => {
   return useQuery({
     queryKey: ['reportes', estado],
     queryFn: () => {
@@ -62,6 +64,7 @@ export const useReportes = (estado?: string) => {
       if (estado === 'Contestado') return obtenerReportesContestadas();
       return obtenerReportes();
     },
+    enabled,
     staleTime: 5 * 60 * 1000,
     refetchOnWindowFocus: false, // <-- EVITAR REFRESHS AUTOMATICOS
     retry: 2,

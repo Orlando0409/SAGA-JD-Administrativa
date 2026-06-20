@@ -26,10 +26,11 @@ export const useRefetchAllSolicitudesFisicas = () => {
     return { refetchAll };
 };
 
-export const useSolicitudesFisicas = () => {
+export const useSolicitudesFisicas = (enabled: boolean = true) => {
     return useQuery<SolicitudFisica[], Error>({
         queryKey: ['solicitudes-fisicas'],
         queryFn: () => getSolicitudesFisicas(),
+        enabled,
         staleTime: 5 * 60 * 1000, // 5 minutos
         gcTime: 10 * 60 * 1000,   // 10 minutos (antes cacheTime)
         refetchOnWindowFocus: false,

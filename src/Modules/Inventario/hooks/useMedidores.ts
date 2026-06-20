@@ -13,7 +13,10 @@ export const useMedidores = () => {
 };
 
 // Hook para obtener medidores por estado
-export const useMedidoresPorEstado = (estado: 'no-instalados' | 'instalados' | 'averiados' | 'pendientes' | 'pagados' | 'libres' | 'desconectados') => {
+export const useMedidoresPorEstado = (
+  estado: 'no-instalados' | 'instalados' | 'averiados' | 'pendientes' | 'pagados' | 'libres' | 'desconectados',
+  enabled: boolean = true,
+) => {
   const queryFnMap = {
     'no-instalados': getMedidoresNoInstalados,
     'instalados': getMedidoresInstalados,
@@ -27,6 +30,7 @@ export const useMedidoresPorEstado = (estado: 'no-instalados' | 'instalados' | '
   return useQuery({
     queryKey: ['medidores', estado],
     queryFn: queryFnMap[estado],
+    enabled,
   });
 };
 
