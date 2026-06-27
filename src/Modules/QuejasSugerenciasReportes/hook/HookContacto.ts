@@ -15,6 +15,8 @@ export const useQuejas = (estado?: string, enabled: boolean = true) => {
     enabled,
     staleTime: 5 * 60 * 1000, // 5 minutos
     refetchOnWindowFocus: false, // <-- EVITAR REFRESHS AUTOMATICOS
+    refetchInterval: 30000, // cada 30 segundos
+    refetchIntervalInBackground: false,
     retry: 2,
   });
 };
@@ -25,6 +27,8 @@ export const useQuejasArchivadas = (enabled = false) => {
     queryFn: () => obtenerQuejasArchivadas(),
     staleTime: 5 * 60 * 1000,
     refetchOnWindowFocus: false, // <-- EVITAR REFRESHS AUTOMATICOS
+    refetchInterval: 30000, // cada 30 segundos
+    refetchIntervalInBackground: false,
     retry: 2,
     enabled,
   });
@@ -41,6 +45,8 @@ export const useSugerencias = (estado?: string, enabled: boolean = true) => {
     enabled,
     staleTime: 5 * 60 * 1000,
     refetchOnWindowFocus: false, // <-- EVITAR REFRESHS AUTOMATICOS
+    refetchInterval: 30000, // cada 30 segundos
+    refetchIntervalInBackground: false,
     retry: 2,
   });
 };
@@ -51,6 +57,8 @@ export const useSugerenciasArchivadas = (enabled = false) => {
     queryFn: () => obtenerSugerenciasArchivadas(),
     staleTime: 5 * 60 * 1000,
     refetchOnWindowFocus: false, // <-- EVITAR REFRESHS AUTOMATICOS
+    refetchInterval: 30000, // cada 30 segundos
+    refetchIntervalInBackground: false,
     retry: 2,
     enabled,
   });
@@ -67,6 +75,8 @@ export const useReportes = (estado?: string, enabled: boolean = true) => {
     enabled,
     staleTime: 5 * 60 * 1000,
     refetchOnWindowFocus: false, // <-- EVITAR REFRESHS AUTOMATICOS
+    refetchInterval: 30000, // cada 30 segundos
+    refetchIntervalInBackground: false,
     retry: 2,
   });
 };
@@ -77,6 +87,8 @@ export const useReportesArchivados = (enabled = false) => {
     queryFn: () => obtenerReportesArchivados(),
     staleTime: 5 * 60 * 1000,
     refetchOnWindowFocus: false, // <-- EVITAR REFRESHS AUTOMATICOS
+    refetchInterval: 30000, // cada 30 segundos
+    refetchIntervalInBackground: false,
     retry: 2,
     enabled,
   });

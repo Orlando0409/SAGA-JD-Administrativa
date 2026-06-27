@@ -516,11 +516,11 @@ const DetailAbonados: React.FC<DetailAbonadosProps> = ({ persona, isOpen, onClos
                                                         Medidor #{medidor.Id_Medidor}
                                                     </h4>
                                                     {medidor.Estado_Medidor?.Id_Estado_Medidor === 2 &&
-                                                        !medidor.Certificacion_Literal &&
-                                                        !medidor.Planos_Terreno && (
+                                                        (!medidor.Certificacion_Literal ||
+                                                        !medidor.Planos_Terreno) && (
                                                         <span
                                                             className="w-3 h-3 bg-red-500 rounded-full"
-                                                            title="Este medidor no tiene archivos adjuntos"
+                                                            title="A este medidor le falta al menos un documento"
                                                         />
                                                     )}
                                                 </div>
@@ -605,11 +605,13 @@ const DetailAbonados: React.FC<DetailAbonadosProps> = ({ persona, isOpen, onClos
                                             )}
 
                                             {medidor.Estado_Medidor?.Id_Estado_Medidor === 2 &&
-                                                !medidor.Certificacion_Literal &&
-                                                !medidor.Planos_Terreno && (
+                                                (!medidor.Certificacion_Literal ||
+                                                !medidor.Planos_Terreno) && (
                                                 <div className="mt-3 pt-3 border-t border-gray-200 flex items-center justify-between gap-3">
                                                     <p className="text-xs text-amber-600 font-medium">
-                                                        Este medidor no tiene archivos adjuntos.
+                                                        {!medidor.Certificacion_Literal && !medidor.Planos_Terreno
+                                                            ? 'Este medidor no tiene archivos adjuntos.'
+                                                            : `A este medidor le falta ${!medidor.Certificacion_Literal ? 'la certificación literal' : 'el plano del terreno'}.`}
                                                     </p>
                                                     <button
                                                         type="button"
@@ -890,6 +892,8 @@ const DetailAbonados: React.FC<DetailAbonadosProps> = ({ persona, isOpen, onClos
                 <SubirArchivosMedidorModal
                     isOpen={true}
                     numeroMedidor={medidorParaArchivos.Numero_Medidor}
+                    faltaCertificacion={!medidorParaArchivos.Certificacion_Literal}
+                    faltaPlanos={!medidorParaArchivos.Planos_Terreno}
                     onClose={() => setMedidorParaArchivos(null)}
                     onSubir={(cert, planos) =>
                         subirArchivosMedidorAfiliado(medidorParaArchivos.Id_Medidor, cert, planos)

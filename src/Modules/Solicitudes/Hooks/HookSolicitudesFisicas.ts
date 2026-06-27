@@ -34,6 +34,8 @@ export const useSolicitudesFisicas = (enabled: boolean = true) => {
         staleTime: 5 * 60 * 1000, // 5 minutos
         gcTime: 10 * 60 * 1000,   // 10 minutos (antes cacheTime)
         refetchOnWindowFocus: false,
+         refetchInterval: 30000, // cada 30 segundos
+        refetchIntervalInBackground: false,
         retry: 2,
         retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
     });
@@ -46,6 +48,8 @@ export const useSolicitudesFisicasPendientes = () => {
         staleTime: 3 * 60 * 1000, // 3 minutos
         gcTime: 8 * 60 * 1000,    // 8 minutos
         refetchOnWindowFocus: false,
+         refetchInterval: 30000, // cada 30 segundos
+        refetchIntervalInBackground: false,
         retry: 2,
     });
 };
